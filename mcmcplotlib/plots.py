@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import kde
-from .stats import *
+from stats import *
 from numpy.linalg import LinAlgError
 
 __all__ = ['traceplot', 'kdeplot', 'kde2plot', 'forestplot', 'autocorrplot']
