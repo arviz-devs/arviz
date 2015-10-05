@@ -26,22 +26,30 @@ def plot_post(param_sample_vec, cred_mass=0.95, comp_val=None,
 
     post_summary['mean'] = round(np.mean(param_sample_vec), roundto)
     post_summary['median'] = round(np.median(param_sample_vec), roundto)
-    post_summary['mode'] = round(stats.mode(param_sample_vec)[0], roundto)
     post_summary['hdi_mass'] = cred_mass
     post_summary['hdi_low'] = round(HDI[0], roundto)
     post_summary['hdi_high'] = round(HDI[1], roundto)
 
+
+    # Compute a KDE for the posterior
+    density = stats.kde.gaussian_kde(param_sample_vec)
+    # get upper and lower bounds
+    l = np.min(param_sample_vec)
+    u = np.max(param_sample_vec)
+    x = np.linspace(0, 1, 100) * (u - l) + l
+    
+    # Compute the mode from the KDE
+    mode = x[np.argmax(density.evaluate(x))]
+    post_summary['mode'] = round(mode, roundto)
+
     ## Plot KDE.
     if kde_plot:
-            density = stats.kde.gaussian_kde(param_sample_vec)
-            l = np.min(param_sample_vec)
-            u = np.max(param_sample_vec)
-            x = np.linspace(0, 1, 100) * (u - l) + l
             plt.plot(x, density(x), color=blue)
     ## Plot histogram.
     else:
         plt.hist(param_sample_vec, normed=True, bins=bins, facecolor=blue, 
         edgecolor='w')
+
 
 
     ## Display mean or mode:
