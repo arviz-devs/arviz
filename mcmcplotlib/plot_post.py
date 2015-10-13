@@ -65,11 +65,10 @@ def plot_post(param_sample_vec, cred_mass=0.95, comp_val=None,
 
     ## Display the HDI.
     hdi_label = ''
+    post_summary['hdi'] = hdi
     for value in hdi:
-        post_summary['hdi'] = value #round(value, roundto)
         plt.plot(value, [0, 0], linewidth=8, color='k')
-        hdi_label = hdi_label +  '{:g} {:g}\n'.format(round(value[0], roundto), round(value[1], roundto))
-        
+        hdi_label = hdi_label +  '{:g} {:g}\n'.format(round(value[0], roundto), round(value[1], roundto)) 
     plt.plot(0, 0, linewidth=8, color='k', label='HDI {:g}%\n{}'.format(cred_mass*100, hdi_label))
 
     plt.xlabel(xlab, fontsize=fontsize)
