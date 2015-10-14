@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
 import scipy.stats.kde as kde
+import matplotlib.pyplot as plt
 
 def hdi_grid(trace, cred_mass=0.95, roundto=3):
     """Computes Highest Density Interval (HDI)"""
@@ -10,10 +11,7 @@ def hdi_grid(trace, cred_mass=0.95, roundto=3):
     u = np.max(trace)
     x = np.linspace(l, u, 2000)
     y = density.evaluate(x)
-    mode = x[np.argmax(y)]
-    diff = (u-l)/20  # differences of 5%
-    normalization_factor = np.sum(y)
-    xy = zip(x, y/normalization_factor)
+    xy = zip(x, y/np.sum(y))
     xy.sort(key=lambda x: x[1], reverse=True)
     xy_cum_sum = 0
     hdv = []
@@ -23,9 +21,10 @@ def hdi_grid(trace, cred_mass=0.95, roundto=3):
         if xy_cum_sum >= cred_mass:
             break
     hdv.sort()
+    diff = (u-l)/20  # differences of 5%
     hdi = []
     hdi.append(round(min(hdv), roundto))
-    for i in range(1, len(hdv)-1):
+    for i in range(1, len(hdv)):
         if hdv[i]-hdv[i-1] >= diff:
             hdi.append(round(hdv[i-1], roundto))
             hdi.append(round(hdv[i], roundto))
@@ -34,9 +33,7 @@ def hdi_grid(trace, cred_mass=0.95, roundto=3):
     hdi = zip(ite, ite)
     modes = []
     for value in hdi:
-        l = np.min(value[0])
-        u = np.max(value[1])
-        xi = np.linspace(l, u, 100)
-        yi = density.evaluate(xi)
-        modes.append(round(xi[np.argmax(yi)], roundto))
+         x_hdi = x[(x > value[0]) & (x < value[1])]
+         y_hdi = y[(x > value[0]) & (x < value[1])]
+         modes.append(round(x_hdi[np.argmax(y_hdi)], roundto))
     return hdi, x, y, modes
