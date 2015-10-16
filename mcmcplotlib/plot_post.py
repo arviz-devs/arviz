@@ -8,7 +8,7 @@ from hdi import hdi_grid
 def plot_post(param_sample_vec, cred_mass=0.95, comp_val=None,
               ROPE=None, ylab='', xlab='parameter', fontsize=14, labelsize=14,
               title='', framealpha=1, show_mode=True, bins=50, kde_plot=True, 
-              roundto=3):
+              roundto=2):
     """
     Write me!
     """        
@@ -28,6 +28,7 @@ def plot_post(param_sample_vec, cred_mass=0.95, comp_val=None,
 
     # Compute the HDI, KDE and mode for the posterior
     hdi, x, y, modes = hdi_grid(param_sample_vec, cred_mass, roundto)
+    post_summary['hdi'] = hdi
     post_summary['mode'] = modes
 
     ## Plot KDE.
@@ -65,7 +66,6 @@ def plot_post(param_sample_vec, cred_mass=0.95, comp_val=None,
 
     ## Display the HDI.
     hdi_label = ''
-    post_summary['hdi'] = hdi
     for value in hdi:
         plt.plot(value, [0, 0], linewidth=8, color='k')
         hdi_label = hdi_label +  '{:g} {:g}\n'.format(round(value[0], roundto), round(value[1], roundto)) 

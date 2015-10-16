@@ -1,9 +1,8 @@
 from __future__ import division
 import numpy as np
 import scipy.stats.kde as kde
-import matplotlib.pyplot as plt
 
-def hdi_grid(trace, cred_mass=0.95, roundto=3):
+def hdi_grid(trace, cred_mass=0.95, roundto=2):
     """Computes Highest Density Interval (HDI)"""
     density = kde.gaussian_kde(trace)
     # get upper and lower bounds
@@ -11,8 +10,8 @@ def hdi_grid(trace, cred_mass=0.95, roundto=3):
     u = np.max(trace)
     x = np.linspace(l, u, 2000)
     y = density.evaluate(x)
-    xy = zip(x, y/np.sum(y))
-    xy.sort(key=lambda x: x[1], reverse=True)
+    xy_zipped = zip(x, y/np.sum(y))
+    xy = sorted(xy_zipped, key=lambda x: x[1], reverse=True)
     xy_cum_sum = 0
     hdv = []
     for val in xy:
@@ -30,7 +29,7 @@ def hdi_grid(trace, cred_mass=0.95, roundto=3):
             hdi.append(round(hdv[i], roundto))
     hdi.append(round(max(hdv), roundto))
     ite = iter(hdi)
-    hdi = zip(ite, ite)
+    hdi = list(zip(ite, ite))
     modes = []
     for value in hdi:
          x_hdi = x[(x > value[0]) & (x < value[1])]
