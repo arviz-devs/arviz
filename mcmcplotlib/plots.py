@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import kde
 from stats import *
 from numpy.linalg import LinAlgError
+import matplotlib.pyplot as plt
 
 __all__ = ['traceplot', 'kdeplot', 'kde2plot', 'forestplot', 'autocorrplot']
 
@@ -37,7 +38,7 @@ def traceplot(trace, vars=None, figsize=None,
     ax : matplotlib axes
 
     """
-    import matplotlib.pyplot as plt
+
     if vars is None:
         vars = trace.varnames
 
@@ -104,7 +105,6 @@ def meanplot(trace, vars=None, figsize=None, combined=False, grid=True,
     ax : matplotlib axes
 
     """
-    import matplotlib.pyplot as plt
     if vars is None:
         vars = trace.varnames
 
@@ -126,6 +126,70 @@ def meanplot(trace, vars=None, figsize=None, combined=False, grid=True,
 
             ax[i, 0].set_ylabel("mean")
             ax[i, 0].set_xlabel("iteration")
+
+    plt.tight_layout()
+    return ax
+    
+def overlap_tail(trace, vars=None, tail=0.15, figsize=None,
+              lines=None, combined=True, grid=True, 
+              alpha=0.35, ax=None):
+    """Use a KDE to compare a sample with the last portion of the same sample
+
+    Parameters
+    ----------
+
+    trace : result of MCMC run
+    vars : list of variable names
+        Variables to be plotted, if None all variable are plotted.
+    tail : float
+        Fraction of the last portion of the trace used for comparison with the 
+        whole trace. Default 15% of the trace.
+    figsize : figure size tuple
+        If None, size is (12, num of variables * 2) inch
+    lines : dict
+        Dictionary of variable name / value  to be overplotted as vertical
+        lines to the posteriors and horizontal lines on sample values
+        e.g. mean of posteriors, true values of a simulation
+    combined : bool
+        Flag for combining multiple chains into a single chain. If False
+        (default), chains will be plotted separately.
+    grid : bool
+        Flag for adding gridlines to histogram. Defaults to True.
+    ax : axes
+        Matplotlib axes. Defaults to None.
+
+    Returns
+    -------
+
+    ax : matplotlib axes
+
+    """
+    if vars is None:
+        vars = trace.varnames
+
+    n = len(vars)
+
+    if figsize is None:
+        figsize = (6, n*2)
+
+    if ax is None:
+        fig, ax = plt.subplots(n, 1, figsize=figsize, squeeze=False)
+
+    for i, v in enumerate(vars):
+        for d in trace.get_values(v, combine=combined, squeeze=False):
+            d = np.squeeze(d)
+            d = make_2d(d)
+            kdeplot_op(ax[i, 0], d)
+            kdeplot_op(ax[i, 0], d[:round(len(d)*tail)])
+            ax[i, 0].set_title(str(v))
+            ax[i, 0].grid(grid)
+            ax[i, 0].set_ylabel("Frequency")
+
+            if lines:
+                try:
+                    ax[i, 0].axvline(x=lines[v], color="r", lw=1.5)
+                except KeyError:
+                    pass
 
     plt.tight_layout()
     return ax
@@ -224,9 +288,6 @@ def autocorrplot(trace, vars=None, max_lag=100, burn=0, ax=None):
     ax : matplotlib axes
 
     """
-    
-    import matplotlib.pyplot as plt
-
     if vars is None:
         vars = trace.varnames
     else:
@@ -332,7 +393,6 @@ def forestplot(trace_obj, vars=None, alpha=0.05, quartiles=True, rhat=True,
         gs : matplotlib GridSpec
 
     """
-    import matplotlib.pyplot as plt
     from matplotlib import gridspec
 
     # Quantiles to be calculated
@@ -352,7 +412,7 @@ def forestplot(trace_obj, vars=None, alpha=0.05, quartiles=True, rhat=True,
 
     nchains = trace_obj.nchains
     if nchains > 1:
-        from .diagnostics import gelman_rubin
+        from diagnostics import gelman_rubin
 
         R = gelman_rubin(trace_obj)
         if vars is not None:
