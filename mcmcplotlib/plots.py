@@ -78,6 +78,58 @@ def traceplot(trace, vars=None, figsize=None,
     plt.tight_layout()
     return ax
 
+def meanplot(trace, vars=None, figsize=None, combined=False, grid=True, 
+              alpha=1, ax=None):
+    """Plot running means
+
+    Parameters
+    ----------
+
+    trace : result of MCMC run
+    vars : list of variable names
+        Variables to be plotted, if None all variable are plotted
+    figsize : figure size tuple
+        If None, size is (12, num of variables * 2) inch
+    combined : bool
+        Flag for combining multiple chains into a single chain. If False
+        (default), chains will be plotted separately.
+    grid : bool
+        Flag for adding gridlines to histogram. Defaults to True.
+    ax : axes
+        Matplotlib axes. Defaults to None.
+
+    Returns
+    -------
+
+    ax : matplotlib axes
+
+    """
+    import matplotlib.pyplot as plt
+    if vars is None:
+        vars = trace.varnames
+
+    n = len(vars)
+
+    if figsize is None:
+        figsize = (6, n*2)
+
+    if ax is None:
+        fig, ax = plt.subplots(n, 1, figsize=figsize, squeeze=False)
+
+    for i, v in enumerate(vars):
+        for d in trace.get_values(v, combine=combined, squeeze=False):
+            rm = np.cumsum(d)/np.arange(1, len(d)+1)
+            ax[i, 0].plot(rm)
+            ax[i, 0].axhline(d.mean(), color="r", lw=1.5, alpha=alpha)
+            ax[i, 0].set_title(str(v))
+            ax[i, 0].grid(grid)
+
+            ax[i, 0].set_ylabel("mean")
+            ax[i, 0].set_xlabel("iteration")
+
+    plt.tight_layout()
+    return ax
+
 def histplot_op(ax, data, alpha=.35):
     for i in range(data.shape[1]):
         d = data[:, i]
