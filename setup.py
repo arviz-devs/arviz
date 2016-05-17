@@ -1,16 +1,11 @@
-from distutils.core import setup
+
+from setuptools import setup, find_packages
 
 setup(
-    name='mcmcplotlib',
-    version='0.0.1',
-    url='',
-    license='',
-    author='',
-    author_email='',
-    description='',
-    install_requires=[
-        'matplotlib',
-        'numpy',
-        'scipy'
-    ],
+    name="mcmcplotlib",
+    version="1.0.0",
+    long_description=__doc__,
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
 )
