@@ -86,7 +86,8 @@ def plot_post(sample, alpha=0.05, show_mode=True, kde_plot=True, bins=50,
         pc_lt_comp_val = 100 - pc_gt_comp_val
         plt.axvline(comp_val, ymax=.75, color='g', linewidth=4, alpha=0.75,
             label='{:.{roundto}g}% < {:.{roundto}g} < {:.{roundto}g}%'.format(pc_lt_comp_val, 
-                                                                       comp_val, pc_gt_comp_val, roundto=roundto))
+                                                                              comp_val, pc_gt_comp_val, 
+                                                                              roundto=roundto))
         post_summary['comp_val'] = comp_val
         post_summary['pc_gt_comp_val'] = pc_gt_comp_val
 
