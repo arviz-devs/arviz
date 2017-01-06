@@ -70,7 +70,7 @@ def plot_post(sample, alpha=0.05, show_mode=True, kde_plot=True, bins=50,
     hpd_label = ''
     for value in hpd:
         plt.plot(value, [0, 0], linewidth=10, color='b')
-        hpd_label = hpd_label +  '{:.{roundto}g} {:.{roundto}g}\n'.format(value[0], value[1], roundto=roundto) 
+        hpd_label = hpd_label +  '{:.{roundto}g} {:.{roundto}g}'.format(value[0], value[1], roundto=roundto) 
     plt.plot(0, 0, linewidth=4, color='b', label='hpd {:.{roundto}g}%\n{}'.format((1-alpha)*100, hpd_label, roundto=roundto))
     ## Display the ROPE.
     if ROPE is not None:
