@@ -61,8 +61,8 @@ def plot_post(sample, alpha=0.05, show_mode=True, kde_plot=True, bins=50,
 
     ## Display mode or mean:
     if show_mode:
-        string = '{:.{roundto}g} '.format(roundto=roundto) * len(post_summary['mode'])
-        plt.plot(0, label='mode =' + string.format(*post_summary['mode']).rstrip(), alpha=0)
+        string = '{:.{roundto}g} ' * len(post_summary['mode'])
+        plt.plot(0, label='mode =' + string.format(*post_summary['mode'], roundto=roundto).rstrip(), alpha=0)
     else:
         plt.plot(0, label='mean = {:.{roundto}g}'.format(post_summary['mean'], roundto=roundto), alpha=0)
 
