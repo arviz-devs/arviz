@@ -47,7 +47,7 @@ def plot_post(sample, alpha=0.05, show_mode=True, kde_plot=True, bins=50,
     post_summary['alpha'] = alpha
 
     # Compute the hpd, KDE and mode for the posterior
-    hpd, x, y, modes = hpd_grid(sample, alpha, roundto)
+    hpd, x, y, modes = hpd_grid(sample, alpha)
     post_summary['hpd'] = hpd
     post_summary['mode'] = modes
 
