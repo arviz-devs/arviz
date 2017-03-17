@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-from hpd import hpd_grid
+from .hpd import hpd_grid
 
 
 def plot_post(sample, alpha=0.05, show_mode=True, kde_plot=True, bins=50, 
