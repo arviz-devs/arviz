@@ -9,6 +9,7 @@ setup(
     install_requires=[
         'matplotlib',
         'numpy',
-        'scipy'
+        'scipy',
+        'pandas'
     ],
 )
