@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from collections import namedtuple
 
 
 def hpd(x, alpha=0.05, transform=lambda x: x):

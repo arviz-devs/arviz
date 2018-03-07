@@ -1,5 +1,6 @@
 # mcmcplotlib
-Python package to plot MCMC samples
+Python package for exploratory analysis of Bayesian models.
+Functions for posterior analysis, model checking, comparison and diagnostics.
 
 ## Installation
 
@@ -14,5 +15,4 @@ Another option is to clone the repository and install using `python setup.py ins
 
 ## Dependencies
 
-mcmcplotlib is tested on Python 2.7 and 3.3 and depends on NumPy,
-SciPy and Matplotlib (see setup.py for version information).
+mcmcplotlib is tested on 3.6 and depends on NumPy, SciPy Pandas and Matplotlib.
