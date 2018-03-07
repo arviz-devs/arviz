@@ -1,7 +1,7 @@
-import pandas as pd
-import numpy as np
 import matplotlib
 matplotlib.use('Agg', warn=False)  # noqa
+import pandas as pd
+import numpy as np
 from ..plots import densityplot
 
 
