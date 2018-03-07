@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg', warn=False)  # noqa
 from pandas import DataFrame
 import numpy as np
 from ..plots import densityplot
