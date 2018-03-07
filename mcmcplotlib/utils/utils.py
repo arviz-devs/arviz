@@ -32,7 +32,7 @@ def trace_to_dataframe(trace, combined=True):
                     var_dfs.append(pd.DataFrame(
                         flat_vals, columns=flat_names[v]))
 
-    elif isinstance == pd.DataFrame:
+    elif isinstance(trace, pd.DataFrame):
         return trace
 
     else:

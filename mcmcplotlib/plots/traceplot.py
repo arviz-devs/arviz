@@ -7,7 +7,7 @@ from ..utils.utils import expand_variable_names, trace_to_dataframe
 
 def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, lines=None,
               combined=False, grid=True, alpha=0.35, priors=None, prior_alpha=1,
-              prior_style='--', bw=4.5, ax=None, skip_first=0):
+              prior_style='--', bw=4.5, skip_first=0, ax=None):
     """Plot samples histograms and values.
 
     Parameters
@@ -42,10 +42,10 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy).
-    ax : axes
-        Matplotlib axes. Accepts an array of axes, e.g.:
     skip_first : int
         Number of first samples not shown in plots (burn-in).
+    ax : axes
+        Matplotlib axes. Accepts an array of axes, e.g.:
 
         >>> fig, axs = plt.subplots(3, 2) # 3 RVs
         >>> pymc3.traceplot(trace, ax=axs)
@@ -58,9 +58,7 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
     ax : matplotlib axes
 
     """
-    trace = trace_to_dataframe(trace, combined)
-
-    trace = trace[skip_first:]
+    trace = trace_to_dataframe(trace, combined)[skip_first:]
 
     if varnames is None:
         varnames = np.unique(trace.columns)
@@ -83,7 +81,8 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
         d = make_2d(d)
         width = len(d)
         if d.dtype.kind == 'i':
-            hist_objs = histplot_op(ax[i, 0], d, alpha=alpha)
+            hist_objs = histplot_op(
+                ax[i, 0], d, alpha, prior, prior_alpha, prior_style)
             colors = [h[-1][0].get_facecolor() for h in hist_objs]
         else:
             artists = kdeplot_op(ax[i, 0], d, bw, prior, prior_alpha, prior_style)[0]
@@ -108,8 +107,7 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
                                              " a scalar".format(v, len(colors)))
                 for c, l in zip(colors, line_values):
                     ax[i, 0].axvline(x=l, color=c, lw=1.5, alpha=0.75)
-                    ax[i, 1].axhline(y=l, color=c,
-                                     lw=1.5, alpha=alpha)
+                    ax[i, 1].axhline(y=l, color=c, lw=1.5, alpha=alpha)
             except KeyError:
                 pass
 
