@@ -1,11 +1,11 @@
 import matplotlib
 matplotlib.use('Agg', warn=False)  # noqa
-import pandas as pd
+from pandas import DataFrame
 import numpy as np
 from ..plots import densityplot
 
 
 def test_plots():
-    trace = pd.DataFrame({'a': np.random.rand(100)})
+    trace = DataFrame({'a': np.random.rand(100)})
 
     densityplot(trace)
