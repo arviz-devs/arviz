@@ -2,19 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import fast_kde
 from ..stats import hpd
+from ..utils.utils import trace_to_dataframe
 
 
-def densityplot(df, models=None, varnames=None, alpha=0.05, point_estimate='mean',
+def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
                 colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
-                textsize=12, ax=None):
+                textsize=12, skip_first=0, ax=None):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
-    Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped
-    per variable and colors assigned to models.
+    Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
+    and colors assigned to models.
 
     Parameters
     ----------
-    df : DataFrame or list of DataFrames
+    trace : Trace or list of traces
         Posterior samples
     models : list
         List with names for the models in the list of dfs. Useful when
@@ -48,6 +49,8 @@ def densityplot(df, models=None, varnames=None, alpha=0.05, point_estimate='mean
         Figure size. If None, size is (6, number of variables * 2)
     textsize : int
         Text size of the legend. Default 12.
+    skip_first : int
+        Number of first samples not shown in plots (burn-in).
     ax : axes
         Matplotlib axes.
 
@@ -57,6 +60,8 @@ def densityplot(df, models=None, varnames=None, alpha=0.05, point_estimate='mean
     ax : Matplotlib axes
 
     """
+    df = trace_to_dataframe(trace, combined=True)[skip_first:]
+
     if point_estimate not in ('mean', 'median', None):
         raise ValueError("Point estimate should be 'mean', 'median' or None")
 
@@ -71,8 +76,7 @@ def densityplot(df, models=None, varnames=None, alpha=0.05, point_estimate='mean
         else:
             models = ['']
     elif len(models) != lenght_df:
-        raise ValueError(
-            "The number of names for the models does not match the number of models")
+        raise ValueError("The number of names for the models does not match the number of models")
 
     lenght_models = len(models)
 
@@ -100,7 +104,7 @@ def densityplot(df, models=None, varnames=None, alpha=0.05, point_estimate='mean
             if vname in tr.columns:
                 vec = tr[vname]
                 _d_helper(vec, vname, colors[t_idx], bw, alpha, point_estimate,
-                           hpd_markers, outline, shade, dplot[v_idx])
+                          hpd_markers, outline, shade, dplot[v_idx])
 
     if lenght_df > 1:
         for m_idx, m in enumerate(models):
