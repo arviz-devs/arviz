@@ -1,6 +1,6 @@
 from pandas import DataFrame
 import numpy as np
-from ..plots import densityplot, traceplot, energyplot
+from ..plots import densityplot, traceplot, energyplot, posteriorplot
 
 
 def test_plots():
@@ -9,4 +9,5 @@ def test_plots():
 
     densityplot(trace)
     traceplot(trace)
+    posteriorplot(trace)
     energyplot(trace_energy)

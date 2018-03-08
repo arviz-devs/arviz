@@ -12,7 +12,8 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
     Parameters
     ----------
 
-    trace : result of MCMC run
+    trace : Pandas DataFrame or PyMC3 trace
+        Posterior samples
     kind : str
         Type of plot to display (kde or histogram)
     figsize : figure size tuple
