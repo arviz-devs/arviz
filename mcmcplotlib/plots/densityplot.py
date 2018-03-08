@@ -15,7 +15,7 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
 
     Parameters
     ----------
-    trace : Trace or list of traces
+    trace : Pandas DataFrame or PyMC3 trace or list of these objects
         Posterior samples
     models : list
         List with names for the models in the list of dfs. Useful when
