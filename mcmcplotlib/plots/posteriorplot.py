@@ -9,8 +9,8 @@ from .plot_utils import identity_transform
 
 
 def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, text_size=None,
-                  alpha=0.05, round_to=1, point_estimate='mean', rope=None,
-                  ref_val=None, kind='kde', bw=4.5, skip_first=0, ax=None, **kwargs):
+                  alpha=0.05, round_to=1, point_estimate='mean', rope=None, ref_val=None,
+                  kind='kde', bw=4.5, skip_first=0, ax=None, **kwargs):
     """Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
@@ -35,11 +35,11 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
     rope: list or numpy array
         Lower and upper values of the Region Of Practical Equivalence
     ref_val: float or list-like
-        display the percentage below and above the values in ref_val.
-        If a list is provided, its length should match the number of variables.
+        display the percentage below and above the values in ref_val. If a list is provided, its
+        length should match the number of variables.
     kind: str
-        `kde` or `hist`. The former will plot a KDE, the last one a histogram. For discrete variables a
-        this argument is ignored and a histogram is always used.
+        `kde` or `hist`. The former will plot a KDE, the last one a histogram. For discrete
+        variables a this argument is ignored and a histogram is always used.
     bw : float
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
@@ -49,8 +49,7 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
     ax : axes
         Matplotlib axes. Defaults to None.
     **kwargs
-        Passed as-is to plt.hist() or plt.plot() function, depending on the
-        value of the argument `kind`.
+        Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
@@ -81,10 +80,9 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
 
     for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
         tr_values = transform(trace[v])
-        _plot_posterior_op(tr_values, ax=a, bw=bw, kind=kind,
-                           point_estimate=point_estimate, round_to=round_to,
-                           alpha=alpha, ref_val=ref_val[idx],
-                           rope=rope[idx], text_size=_scale_text(figsize, text_size), **kwargs)
+        _plot_posterior_op(tr_values, ax=a, bw=bw, kind=kind, point_estimate=point_estimate,
+                           round_to=round_to, alpha=alpha, ref_val=ref_val[idx], rope=rope[idx],
+                           text_size=_scale_text(figsize, text_size), **kwargs)
         a.set_title(v, fontsize=_scale_text(figsize, text_size))
 
     plt.tight_layout()
@@ -101,7 +99,8 @@ def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to,
         less_than_ref_probability = (trace_values < ref_val).mean()
         greater_than_ref_probability = (trace_values >= ref_val).mean()
         ref_in_posterior = "{} <{:g}< {}".format(format_as_percent(less_than_ref_probability, 1),
-                                                 ref_val, format_as_percent(greater_than_ref_probability, 1))
+                                                 ref_val,
+                                                 format_as_percent(greater_than_ref_probability, 1))
         ax.axvline(ref_val, ymin=0.02, ymax=.75,
                    color='C1', linewidth=4, alpha=0.65)
         ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior,
