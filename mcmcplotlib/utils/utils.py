@@ -36,9 +36,40 @@ def trace_to_dataframe(trace, combined=True):
         return trace
 
     else:
-        raise ValueError('The trace object is not supported')
+        raise ValueError('The trace should be a DataFrame or a trace from PyMC3')
 
     return pd.concat(var_dfs, axis=1)
+
+
+def get_stats(trace, stat=None):
+    """
+    get sampling statistics from trace
+    
+    Parameters
+    ----------
+    trace : Posterior sample
+        Pandas DataFrame or PyMC3 trace
+    stats : string
+        Statistics
+
+    Returns
+    ----------
+    stat: array with the choosen statistic
+    """
+    if type(trace).__name__ == 'MultiTrace':
+        try:
+            return trace[stat]
+        except KeyError:
+            print('There is no {} information in the passed trace.'.format(stat))
+
+    elif isinstance(trace, pd.DataFrame):
+        try:
+            return trace[stat].values
+        except KeyError:
+            print('There is no {} information in the passed trace.'.format(stat))
+            
+    else:
+        raise ValueError('The trace should be a DataFrame or a trace from PyMC3')
 
 
 def _create_flat_names(varname, shape):
