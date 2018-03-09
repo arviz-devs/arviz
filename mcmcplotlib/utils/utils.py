@@ -9,28 +9,28 @@ def trace_to_dataframe(trace, combined=True):
     ----------
     trace : trace
         At this point it only supports PyMC3's MultiTrace Object
-    combined : lalala
+    combined : Bool
+        If True multiple chains will be combined together in the same columns. Otherwise they will
+        be assigned to separate columns.
     """
     if type(trace).__name__ == 'MultiTrace':
 
         var_shapes = trace._straces[0].var_shapes
         varnames = var_shapes.keys()
 
-        flat_names = {v: _create_flat_names(
-            v, var_shapes[v]) for v in varnames}
+        flat_names = {v: _create_flat_names(v, var_shapes[v]) for v in varnames}
 
         var_dfs = []
         for v in varnames:
-            if combined:
-                vals = trace.get_values(v, combine=combined)
-                flat_vals = vals.reshape(vals.shape[0], -1)
-                var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
-            else:
-                vals = trace.get_values(v, combine=combined)
+            vals = trace.get_values(v, combine=combined)
+            if isinstance(vals, list):
                 for va in vals:
                     flat_vals = va.reshape(va.shape[0], -1)
-                    var_dfs.append(pd.DataFrame(
-                        flat_vals, columns=flat_names[v]))
+                    var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
+            else:
+                flat_vals = vals.reshape(vals.shape[0], -1)
+                var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
+
 
     elif isinstance(trace, pd.DataFrame):
         return trace
@@ -39,6 +39,22 @@ def trace_to_dataframe(trace, combined=True):
         raise ValueError('The trace should be a DataFrame or a trace from PyMC3')
 
     return pd.concat(var_dfs, axis=1)
+
+
+def _create_flat_names(varname, shape):
+    """Return flat variable names for `varname` of `shape`.
+    Examples
+    --------
+    >>> create_flat_names('x', (5,))
+    ['x__0', 'x__1', 'x__2', 'x__3', 'x__4']
+    >>> create_flat_names('x', (2, 2))
+    ['x__0_0', 'x__0_1', 'x__1_0', 'x__1_1']
+    """
+    if not shape:
+        return [varname]
+    labels = (np.ravel(xs).tolist() for xs in np.indices(shape))
+    labels = (map(str, xs) for xs in labels)
+    return ['{}__{}'.format(varname, '_'.join(idxs)) for idxs in zip(*labels)]
 
 
 def get_stats(trace, stat=None):
