@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 from ..stats.stats import hpd
 from .kdeplot import fast_kde, kdeplot
 from .plot_utils import identity_transform, get_axis, make_2d
-from ..utils.utils import expand_variable_names, trace_to_dataframe
-
+from ..utils.utils import get_varnames, trace_to_dataframe
 
 
 def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, lines=None,
@@ -62,11 +61,7 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
 
     """
     trace = trace_to_dataframe(trace, combined)[skip_first:]
-
-    if varnames is None:
-        varnames = np.unique(trace.columns)
-    else:
-        varnames = expand_variable_names(trace, varnames)
+    varnames = get_varnames(trace, varnames)
 
     if figsize is None:
         figsize = (12, len(varnames) * 2)
