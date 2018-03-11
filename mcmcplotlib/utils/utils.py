@@ -31,7 +31,6 @@ def trace_to_dataframe(trace, combined=True):
                 flat_vals = vals.reshape(vals.shape[0], -1)
                 var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
 
-
     elif isinstance(trace, pd.DataFrame):
         return trace
 
@@ -60,7 +59,7 @@ def _create_flat_names(varname, shape):
 def get_stats(trace, stat=None):
     """
     get sampling statistics from trace
-    
+
     Parameters
     ----------
     trace : Posterior sample
@@ -83,13 +82,14 @@ def get_stats(trace, stat=None):
             return trace[stat].values
         except KeyError:
             print('There is no {} information in the passed trace.'.format(stat))
-            
+
     else:
         raise ValueError('The trace should be a DataFrame or a trace from PyMC3')
 
 
 def _create_flat_names(varname, shape):
-    """Return flat variable names for `varname` of `shape`.
+    """
+    Return flat variable names for `varname` of `shape`.
     Examples
     --------
     >>> create_flat_names('x', (5,))
@@ -106,7 +106,7 @@ def _create_flat_names(varname, shape):
 
 def expand_variable_names(trace, varnames):
     """
-    expand the name of variables to include multidimensional variables
+    Expand the name of variables to include multidimensional variables
     """
     tmp = []
     for vtrace in pd.unique(trace.columns):
@@ -114,3 +114,10 @@ def expand_variable_names(trace, varnames):
             if '{}__'.format(v) in vtrace or v in vtrace:
                 tmp.append(vtrace)
     return np.unique(tmp)
+
+
+def get_varnames(trace, varnames):
+    if varnames is None:
+        return np.unique(trace.columns)
+    else:
+        return expand_variable_names(trace, varnames)
