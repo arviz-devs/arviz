@@ -16,7 +16,7 @@ def trace_to_dataframe(trace, combined=True):
     if type(trace).__name__ == 'MultiTrace':
 
         var_shapes = trace._straces[0].var_shapes
-        varnames = var_shapes.keys()
+        varnames = [var for var in var_shapes.keys() if not _is_transformed_name(str(var))]
 
         flat_names = {v: _create_flat_names(v, var_shapes[v]) for v in varnames}
 
@@ -54,6 +54,21 @@ def _create_flat_names(varname, shape):
     labels = (np.ravel(xs).tolist() for xs in np.indices(shape))
     labels = (map(str, xs) for xs in labels)
     return ['{}__{}'.format(varname, '_'.join(idxs)) for idxs in zip(*labels)]
+
+
+def _is_transformed_name(name):
+    """
+    Quickly check if a name was transformed with `get_transormed_name`
+    Parameters
+    ----------
+    name : str
+        Name to check
+    Returns
+    -------
+    bool
+        Boolean, whether the string could have been produced by `get_transormed_name`
+    """
+    return name.endswith('__') and name.count('_') >= 3
 
 
 def get_stats(trace, stat=None):

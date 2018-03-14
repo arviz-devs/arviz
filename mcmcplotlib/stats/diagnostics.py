@@ -1,5 +1,5 @@
 import numpy as np
-from ..utils import trace_to_dataframe
+from ..utils import trace_to_dataframe, get_varnames
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
@@ -40,11 +40,7 @@ def effective_n(trace, varnames=None):
     """
 
     trace = trace_to_dataframe(trace, combined=False)
-
-    if varnames is None:
-        varnames = pd.unique(trace.columns)
-    else:
-        varnames = expand_variable_names(trace, varnames)
+    varnames = get_varnames(trace, varnames)
 
     if not np.all(trace.columns.duplicated(keep=False)):
         raise ValueError(
@@ -184,11 +180,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     """
 
     trace = trace_to_dataframe(trace, combined=False)
-
-    if varnames is None:
-        varnames = pd.unique(trace.columns)
-    else:
-        varnames = expand_variable_names(trace, varnames)
+    varnames = get_varnames(trace, varnames)
 
     if not np.all(trace.columns.duplicated(keep=False)):
         raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
@@ -254,11 +246,7 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     """
 
     trace = trace_to_dataframe(trace, combined=False)
-
-    if varnames is None:
-        varnames = pd.unique(trace.columns)
-    else:
-        varnames = expand_variable_names(trace, varnames)
+    varnames = get_varnames(trace, varnames)
 
     gewekes = {}
 

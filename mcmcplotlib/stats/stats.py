@@ -53,7 +53,7 @@ def hpd(x, alpha=0.05, transform=lambda x: x):
         # Sort univariate node
         sx = np.sort(x)
 
-        return np.array(_calc_min_interval(sx, alpha))
+        return _calc_min_interval(sx, alpha)
 
 
 def _make_indices(dimensions):
