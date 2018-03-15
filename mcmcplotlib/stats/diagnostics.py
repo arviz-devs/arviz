@@ -1,20 +1,25 @@
 import numpy as np
+import pandas as pd
 from ..utils import trace_to_dataframe, get_varnames
+from scipy.signal import fftconvolve
+
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
 
-def effective_n(trace, varnames=None):
+def effective_n(trace, varnames=None, round_to=2):
     R"""
     Returns estimate of the effective sample size of a set of traces.
 
     Parameters
     ----------
     trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. at least 2 chains are needed to compute this diagnostic 
+      Posterior samples. At least 2 chains are needed to compute this diagnostic 
       of one or more stochastic parameters.
     varnames : list
       Names of variables to include in the effective_n report
+    round_to : int
+        Controls formatting for floating point numbers. Default 2.
 
     Returns
     -------
@@ -46,16 +51,17 @@ def effective_n(trace, varnames=None):
         raise ValueError(
             'Calculation of effective sample size requires multiple chains of the same length.')
     else:
-        n_eff = {}
+        n_eff = pd.Series(name='n_eff')
 
         for var in varnames:
-            n_eff[var] = _get_neff(trace[var].values.T)
+            n_eff[var] = round(_get_neff(trace[var].values.T), round_to)
 
         return n_eff
 
 
 def _get_neff(trace_value):
-    """Compute the effective sample size for a 2D array
+    """
+    Compute the effective sample size for a 2D array
     """
     nchain, n_samples = trace_value.shape
 
@@ -120,7 +126,8 @@ def _autocorr(x):
 
 
 def _autocov(x):
-    """Compute autocovariance estimates for every lag for the input array
+    """
+    Compute autocovariance estimates for every lag for the input array
 
     Parameters
     ----------
@@ -138,7 +145,8 @@ def _autocov(x):
 
 
 def gelman_rubin(trace, varnames=None, round_to=2):
-    R"""Returns estimate of R for a set of traces.
+    R"""
+    Returns estimate of R for a set of traces.
 
     The Gelman-Rubin diagnostic tests for lack of convergence by comparing the variance between
     multiple chains to the variance within each chain. If convergence has been achieved, the
@@ -185,7 +193,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     if not np.all(trace.columns.duplicated(keep=False)):
         raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
     else:
-        Rhat = {}
+        Rhat = pd.Series(name='Rhat')
 
         for var in varnames:
             x = trace[var].values.T
@@ -260,15 +268,10 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
     # Filter out invalid intervals
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
-            raise ValueError(
-                "Invalid intervals for Geweke convergence analysis",
-                (first,
-                 last))
+            raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
     if first + last >= 1:
         raise ValueError(
-            "Invalid intervals for Geweke convergence analysis",
-            (first,
-             last))
+            "Invalid intervals for Geweke convergence analysis", (first, last))
 
     # Initialize list of z-scores
     zscores = []

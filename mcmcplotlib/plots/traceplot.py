@@ -13,7 +13,6 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
 
     Parameters
     ----------
-
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
     varnames : list of variable names
