@@ -6,10 +6,9 @@ from ..plots.plot_utils import identity_transform
 from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 
-def forestplot(trace, models=None, varnames=None, transform=identity_transform,
-               alpha=0.05, quartiles=True, rhat=True, main=None, xtitle=None,
-               xlim=None, ylabels=None, colors='C0', chain_spacing=0.1, vline=0,
-               plot_kwargs=None, skip_first=0, gs=None):
+def forestplot(trace, models=None, varnames=None, transform=identity_transform, alpha=0.05,
+               quartiles=True, rhat=True, main=None, xtitle=None, xlim=None, ylabels=None,
+               colors='C0', chain_spacing=0.1, vline=0, plot_kwargs=None, skip_first=0, gs=None):
     """
     Forest plot (model summary plot).
 
