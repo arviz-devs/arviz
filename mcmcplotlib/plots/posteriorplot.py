@@ -11,11 +11,11 @@ from .plot_utils import identity_transform
 def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, text_size=None,
                   alpha=0.05, round_to=1, point_estimate='mean', rope=None, ref_val=None,
                   kind='kde', bw=4.5, skip_first=0, ax=None, **kwargs):
-    """Plot Posterior densities in the style of John K. Kruschke's book.
+    """
+    Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
     ----------
-
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
     varnames : list of variable names
@@ -53,7 +53,6 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
 
     Returns
     -------
-
     ax : matplotlib axes
 
     """
@@ -89,9 +88,11 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
     return ax
 
 
-def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to,
-                       alpha, ref_val, rope, text_size=16, **kwargs):
-    """Artist to draw posterior."""
+def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to, alpha, ref_val, rope,
+                       text_size=16, **kwargs):
+    """
+    Artist to draw posterior.
+    """
     def format_as_percent(x, round_to=0):
         return '{0:.{1:d}f}%'.format(100 * x, round_to)
 
@@ -101,10 +102,9 @@ def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to,
         ref_in_posterior = "{} <{:g}< {}".format(format_as_percent(less_than_ref_probability, 1),
                                                  ref_val,
                                                  format_as_percent(greater_than_ref_probability, 1))
-        ax.axvline(ref_val, ymin=0.02, ymax=.75,
-                   color='C1', linewidth=4, alpha=0.65)
-        ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior,
-                size=text_size, horizontalalignment='center')
+        ax.axvline(ref_val, ymin=0.02, ymax=.75, color='C1', linewidth=4, alpha=0.65)
+        ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=text_size,
+                horizontalalignment='center')
 
     def display_rope(rope):
         ax.plot(rope, (plot_height * 0.02, plot_height * 0.02),
@@ -139,8 +139,7 @@ def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to,
 
     def display_hpd():
         hpd_intervals = hpd(trace_values, alpha=alpha)
-        ax.plot(hpd_intervals, (plot_height * 0.02,
-                                plot_height * 0.02), linewidth=4, color='k')
+        ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), linewidth=4, color='k')
         ax.text(hpd_intervals[0], plot_height * 0.07,
                 hpd_intervals[0].round(round_to),
                 size=text_size, horizontalalignment='right')
