@@ -1,15 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from mcmcplotlib.stats import hpd, gelman_rubin
-from mcmcplotlib.plots.plot_utils import identity_transform
-from mcmcplotlib.utils import trace_to_dataframe, expand_variable_names
+from ..stats import hpd, gelman_rubin
+from ..plots.plot_utils import identity_transform
+from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 
 def forestplot(trace, models=None, varnames=None, transform=identity_transform,
                alpha=0.05, quartiles=True, rhat=True, main=None, xtitle=None,
                xlim=None, ylabels=None, colors='C0', chain_spacing=0.1, vline=0,
-               gs=None, plot_kwargs=None):
+               plot_kwargs=None, skip_first=0, gs=None):
     """
     Forest plot (model summary plot).
 
@@ -57,12 +57,13 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform,
         Plot spacing between chains (defaults to 0.1).
     vline : numeric, optional
         Location of vertical reference line (defaults to 0).
-    gs : GridSpec
-        Matplotlib GridSpec object. Defaults to None.
     plot_kwargs : dict
         Optional arguments for plot elements. Currently accepts 'fontsize',
         'linewidth', 'marker', and 'markersize'.
-
+    skip_first : int
+        Number of first samples not shown in plots (burn-in).
+    gs : GridSpec
+        Matplotlib GridSpec object. Defaults to None.
     Returns
     -------
 
@@ -101,7 +102,7 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform,
 
     if varnames is None:
         varnames = []
-        for idx, tr in enumerate(trace):
+        for tr in trace:
             varnames_tmp = tr.columns
             for v in varnames_tmp:
                 if v not in varnames:
@@ -191,7 +192,6 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform,
             if np.any(plot_rhat):
                 gr_plot.axhspan(var_old, var_new,
                                 facecolor='k', alpha=bands[v_idx])
-            print(var_old, var_new, bands[v_idx])
             var_old = var_new
 
     if ylabels is not None:
@@ -213,7 +213,8 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform,
 
     # Add variable labels
     interval_plot.set_yticks([- l for l in range(len(labels))])
-    interval_plot.set_yticklabels(labels, fontsize=plot_kwargs.get('fontsize', None))
+    interval_plot.set_yticklabels(
+        labels, fontsize=plot_kwargs.get('fontsize', None))
 
     # Add title
     if main is None:
