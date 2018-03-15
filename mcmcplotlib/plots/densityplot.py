@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import fast_kde
 from ..stats import hpd
-from ..utils.utils import trace_to_dataframe
+from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 
-def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
-                colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
+def densityplot(trace, models=None, varnames=None, alpha=0.05,
+                point_estimate='mean', colors='cycle', outline=True,
+                hpd_markers='', shade=0., bw=4.5, figsize=None,
                 textsize=12, skip_first=0, ax=None):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
@@ -18,8 +19,8 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     trace : Pandas DataFrame or PyMC3 trace or list of these objects
         Posterior samples
     models : list
-        List with names for the models in the list of dfs. Useful when
-        plotting more that one df. 
+        List with names for the models in the list of traces. Useful when
+        plotting more that one trace. 
     varnames: list
         List of variables to plot (defaults to None, which results in all
         variables plotted).
@@ -60,23 +61,24 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     ax : Matplotlib axes
 
     """
-    df = trace_to_dataframe(trace, combined=True)[skip_first:]
+    if not isinstance(trace, (list, tuple)):
+        trace = [trace_to_dataframe(trace, combined=True)][skip_first:]
+    else:
+        trace = [trace_to_dataframe(tr, combined=True) for tr in trace][skip_first:]
 
     if point_estimate not in ('mean', 'median', None):
         raise ValueError("Point estimate should be 'mean', 'median' or None")
 
-    if not isinstance(df, (list, tuple)):
-        df = [df]
-
-    lenght_df = len(df)
+    lenght_trace = len(trace)
 
     if models is None:
-        if lenght_df > 1:
-            models = ['m_{}'.format(i) for i in range(lenght_df)]
+        if lenght_trace > 1:
+            models = ['m_{}'.format(i) for i in range(lenght_trace)]
         else:
             models = ['']
-    elif len(models) != lenght_df:
-        raise ValueError("The number of names for the models does not match the number of models")
+    elif len(models) != lenght_trace:
+        raise ValueError(
+            "The number of names for the models does not match the number of models")
 
     lenght_models = len(models)
 
@@ -87,26 +89,28 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
 
     if varnames is None:
         varnames = []
-        for tr in df:
+        for tr in trace:
             varnames_tmp = tr.columns
             for v in varnames_tmp:
-                if v not in varnames or v.endswith('__') in varnames:
+                if v not in varnames:
                     varnames.append(v)
-
-    if figsize is None:
-        figsize = (6, len(varnames) * 2)
+    else:
+        v_tmp = []
+        for tr in trace:
+            v_tmp.extend(expand_variable_names(tr, varnames))
+        varnames = np.unique(v_tmp)
 
     fig, dplot = plt.subplots(len(varnames), 1, squeeze=False, figsize=figsize)
     dplot = dplot.flatten()
 
     for v_idx, vname in enumerate(varnames):
-        for t_idx, tr in enumerate(df):
+        for t_idx, tr in enumerate(trace):
             if vname in tr.columns:
                 vec = tr[vname]
                 _d_helper(vec, vname, colors[t_idx], bw, alpha, point_estimate,
                           hpd_markers, outline, shade, dplot[v_idx])
 
-    if lenght_df > 1:
+    if lenght_trace > 1:
         for m_idx, m in enumerate(models):
             dplot[0].plot([], label=m, c=colors[m_idx])
         dplot[0].legend(fontsize=textsize)
@@ -119,7 +123,7 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
 def _d_helper(vec, vname, c, bw, alpha, point_estimate, hpd_markers, outline, shade, ax):
     """
     vec : array
-        1D array from df
+        1D array from trace
     vname : str
         variable name
     c : str
