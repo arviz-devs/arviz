@@ -1,17 +1,16 @@
 import numpy as np
 import pandas as pd
 from collections import namedtuple
-from ..utils import trace_to_dataframe, get_varnames, _create_flat_names
+from ..utils import get_stats, get_varnames, trace_to_dataframe
 from .diagnostics import effective_n, gelman_rubin
 
-
-__all__ = ['hpd', 'r2_score', 'summary']
+__all__ = ['hpd', 'r2_score', 'summary', 'bfmi']
 
 
 def hpd(x, alpha=0.05, transform=lambda x: x):
     """
-    Calculate highest posterior density (HPD) of array for given alpha. 
-    The HPD is the minimum width Bayesian credible interval (BCI).
+    Calculate highest posterior density (HPD) of array for given alpha. The HPD is the minimum width
+    Bayesian credible interval (BCI).
 
     Parameters
     ----------
@@ -80,8 +79,8 @@ def _make_indices(dimensions):
 
 def _calc_min_interval(x, alpha):
     """
-    Internal method to determine the minimum interval of a given width. 
-    Assumes that x is a sorted numpy array.
+    Internal method to determine the minimum interval of a given width. Assumes that x is a sorted
+    numpy array.
     """
     n = len(x)
     cred_mass = 1.0 - alpha
@@ -157,45 +156,37 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
     transform : callable
         Function to transform data (defaults to identity)
     stat_funcs : None or list
-        A list of functions used to calculate statistics. By default,
-        the mean, standard deviation, simulation standard error, and
-        highest posterior density intervals are included.
+        A list of functions used to calculate statistics. By default, the mean, standard deviation,
+        simulation standard error, and highest posterior density intervals are included.
 
-        The functions will be given one argument, the samples for a
-        variable as a 2 dimensional array, where the first axis
-        corresponds to sampling iterations and the second axis
-        represents the flattened variable (e.g., x__0, x__1,...). Each
-        function should return either
+        The functions will be given one argument, the samples for a variable as a 2 dimensional
+        array, where the first axis corresponds to sampling iterations and the second axis
+        represents the flattened variable (e.g., x__0, x__1,...). Each function should return either
 
-        1) A `pandas.Series` instance containing the result of
-           calculating the statistic along the first axis. The name
-           attribute will be taken as the name of the statistic.
-        2) A `pandas.DataFrame` where each column contains the
-           result of calculating the statistic along the first axis.
-           The column names will be taken as the names of the
-           statistics.
+        1) A `pandas.Series` instance containing the result of calculating the statistic along the
+           first axis. The name attribute will be taken as the name of the statistic.
+        2) A `pandas.DataFrame` where each column contains the result of calculating the statistic
+           along the first axis. The column names will be taken as the names of the statistics.
     extend : boolean
-        If True, use the statistics returned by `stat_funcs` in
-        addition to, rather than in place of, the default statistics.
-        This is only meaningful when `stat_funcs` is not None.
+        If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
+        of, the default statistics. This is only meaningful when `stat_funcs` is not None.
     include_transformed : bool
-        Flag for reporting automatically transformed variables in addition
-        to original variables (defaults to False).
+        Flag for reporting automatically transformed variables in addition to original variables
+        (defaults to False).
     alpha : float
-        The alpha level for generating posterior intervals. Defaults
-        to 0.05. This is only meaningful when `stat_funcs` is None.
+        The alpha level for generating posterior intervals. Defaults to 0.05. This is only
+        meaningful when `stat_funcs` is None.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     batches : None or int
-        Batch size for calculating standard deviation for non-independent
-        samples. Defaults to the smaller of 100 or the number of samples.
-        This is only meaningful when `stat_funcs` is None.
+        Batch size for calculating standard deviation for non-independent samples. Defaults to the
+        smaller of 100 or the number of samples. This is only meaningful when `stat_funcs` is None.
 
     Returns
     -------
-    `pandas.DataFrame` with summary statistics for each variable Defaults one
-    are: `mean`, `sd`, `mc_error`, `hpd_2.5`, `hpd_97.5`, `n_eff` and `Rhat`.
-    Last two are only computed for traces with 2 or more chains.
+    `pandas.DataFrame` with summary statistics for each variable Defaults one are: `mean`, `sd`,
+    `mc_error`, `hpd_2.5`, `hpd_97.5`, `n_eff` and `Rhat`. Last two are only computed for traces
+    with 2 or more chains.
 
     Examples
     --------
@@ -264,9 +255,9 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
 
 
 def _mc_error(x, batches=5):
-    R"""Calculates the simulation standard error, accounting for non-independent
-        samples. The trace is divided into batches, and the standard deviation of
-        the batch means is calculated.
+    R"""
+    Calculates the simulation standard error, accounting for non-independent samples. The trace is
+    divided into batches, and the standard deviation of the batch means is calculated.
 
     Parameters
     ----------
@@ -302,3 +293,26 @@ def _mc_error(x, batches=5):
         means = np.mean(batched_traces, 1)
 
         return np.std(means) / np.sqrt(batches)
+
+
+def bfmi(trace):
+    R"""Calculate the estimated Bayesian fraction of missing information (BFMI).
+
+    BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
+    information on BFMI, see https://arxiv.org/pdf/1604.00695.pdf.  The current advice is that
+    values smaller than 0.2 indicate poor sampling.  However, this threshold is provisional and may
+    change.  See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
+    information.
+
+    Parameters
+    ----------
+    trace : result of an HMC/NUTS run, must contain energy information
+
+    Returns
+    -------
+    z : float
+        The Bayesian fraction of missing information of the model and trace.
+    """
+    energy = get_stats(trace, 'energy')
+
+    return np.square(np.diff(energy)).mean() / np.var(energy)
