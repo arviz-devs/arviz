@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ..stats.stats import hpd
+from ..stats import hpd
 from .kdeplot import fast_kde, kdeplot
 from .plot_utils import identity_transform, get_axis, make_2d
-from ..utils.utils import get_varnames, trace_to_dataframe
+from ..utils import get_varnames, trace_to_dataframe
 
 
 def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, lines=None,
