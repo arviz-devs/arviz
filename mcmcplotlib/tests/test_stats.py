@@ -17,8 +17,3 @@ def test_r2_score():
     assert_almost_equal(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2_median, 2)
 
 
-def test_r2_score():
-    x = np.linspace(0, 1, 100)
-    y = np.random.normal(x, 1)
-    res = stats.linregress(x, y)
-    assert_almost_equal(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2_median, 2)
