@@ -12,8 +12,9 @@ install:
   - conda update -q conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pymc3 pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest
   - source activate test-environment
+  - pip install git+https://github.com/pymc-devs/pymc3
 
 before_script:
 - "export DISPLAY=:99.0"
