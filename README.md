@@ -1,5 +1,5 @@
-# mcmcplotlib
-Python package for exploratory analysis of Bayesian models.
+# ArviZ
+ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
 Functions for posterior analysis, model checking, comparison and diagnostics.
 
 ## Installation
@@ -15,4 +15,4 @@ Another option is to clone the repository and install using `python setup.py ins
 
 ## Dependencies
 
-mcmcplotlib is tested on 3.6 and depends on NumPy, SciPy Pandas and Matplotlib.
+Arviz is tested on 3.6 and depends on NumPy, SciPy, Pandas and Matplotlib.
