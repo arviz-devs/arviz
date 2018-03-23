@@ -22,8 +22,8 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         Variables to be plotted, if None all variable are plotted
     transform : callable
         Function to transform data (defaults to identity)
-    figsize : figure size tuple
-        If None, size is (12, num of variables * 2) inch
+    figsize : tuple
+        Figure size. If None, size is (12, num of variables * 2)
     text_size : int
         Text size of the point_estimates, axis ticks, and HPD (Default:16)
     alpha : float

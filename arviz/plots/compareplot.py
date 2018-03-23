@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def compareplot(comp_df, insample_dev=True, se=True, dse=True, ax=None,
-                plot_kwargs=None):
+def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, plot_kwargs=None,
+                ax=None):
     """
-    Model comparison summary plot in the style of the one used in the book
-    Statistical Rethinking by Richard McElreath.
+    Model comparison summary plot in the style of the one used in the book Statistical Rethinking
+    by Richard McElreath.
     Parameters
     ----------
     comp_df: DataFrame
@@ -20,6 +20,8 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, ax=None,
     dse : bool
         plot standard error of the difference in IC between each model and the
         top-ranked model. Defaults to True
+    figsize : tuple
+        Figure size, None by default
     plot_kwargs : dict
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
@@ -31,7 +33,7 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, ax=None,
     ax : matplotlib axes
     """
     if ax is None:
-        _, ax = plt.subplots()
+        _, ax = plt.subplots(figsize=figsize)
 
     if plot_kwargs is None:
         plot_kwargs = {}
