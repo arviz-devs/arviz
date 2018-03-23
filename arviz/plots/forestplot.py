@@ -8,7 +8,8 @@ from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 def forestplot(trace, models=None, varnames=None, transform=identity_transform, alpha=0.05,
                quartiles=True, rhat=True, main=None, xtitle=None, xlim=None, ylabels=None,
-               colors='C0', chain_spacing=0.1, vline=0, plot_kwargs=None, skip_first=0, gs=None):
+               colors='C0', chain_spacing=0.1, vline=0, figsize=None, plot_kwargs=None,
+               skip_first=0, gs=None):
     """
     Forest plot (model summary plot).
 
@@ -56,6 +57,8 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
         Plot spacing between chains (defaults to 0.1).
     vline : numeric, optional
         Location of vertical reference line (defaults to 0).
+    figsize : tuple
+        Figure size, None by default
     plot_kwargs : dict
         Optional arguments for plot elements. Currently accepts 'fontsize',
         'linewidth', 'marker', and 'markersize'.
@@ -113,7 +116,9 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
         varnames = np.unique(v_tmp)
 
     plot_rhat = [rhat and nch > 1 for nch in nchains]
-    # Empty list for y-axis labels
+
+    fig = plt.figure(figsize=figsize)
+
     if gs is None:
         # Initialize plot
         if np.any(plot_rhat):

@@ -5,9 +5,8 @@ from ..stats import hpd
 from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 
-def densityplot(trace, models=None, varnames=None, alpha=0.05,
-                point_estimate='mean', colors='cycle', outline=True,
-                hpd_markers='', shade=0., bw=4.5, figsize=None,
+def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
+                colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
                 textsize=12, skip_first=0, ax=None):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
