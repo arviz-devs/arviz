@@ -2,9 +2,9 @@
 from setuptools import setup
 
 setup(
-    name="mcmcplotlib",
+    name="arviz",
     version="0.1.0",
-    packages=['mcmcplotlib'],
+    packages=['arviz'],
     include_package_data=True,
     install_requires=[
         'matplotlib',
