@@ -7,7 +7,7 @@ Functions for posterior analysis, model checking, comparison and diagnostics.
 The latest version can be installed from the master branch using pip:
 
 ```
-pip install git+git://github.com/mcmcplotlib/mcmcplotlib.git
+pip install git+git://github.com/arviz-devs/arviz.git
 ```
 
 Another option is to clone the repository and install using `python setup.py install` or `python setup.py develop`.
