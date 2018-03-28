@@ -117,7 +117,7 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
     """Add a histogram for each column of the data to the provided axes."""
     hs = []
     for column in data.T:
-        bins = range(column.min(), column.max())
+        bins = range(column.min(), column.max() + 1)
         hs.append(ax.hist(column, bins=bins, alpha=shade, align='left',
                           density=True))
         if prior is not None:

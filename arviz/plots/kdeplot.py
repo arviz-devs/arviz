@@ -72,7 +72,7 @@ def fast_kde(x, bw=4.5):
     xmin, xmax = np.min(x), np.max(x)
 
     dx = (xmax - xmin) / (nx - 1)
-    std_x = entropy((x - xmin) / dx) * bw
+    std_x = entropy(x - xmin) * bw
     if ~np.isfinite(std_x):
         std_x = 0.
     grid, _ = np.histogram(x, bins=nx)
