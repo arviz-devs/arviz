@@ -8,9 +8,9 @@ from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import identity_transform
 
 
-def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, text_size=None,
+def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, text_size=14,
                   alpha=0.05, round_to=1, point_estimate='mean', rope=None, ref_val=None,
-                  kind='kde', bw=4.5, skip_first=0, ax=None, **kwargs):
+                  kind='kde', bw=4.5, bins=None, skip_first=0, ax=None, **kwargs):
     """
     Plot Posterior densities in the style of John K. Kruschke's book.
 
@@ -25,7 +25,7 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
     figsize : tuple
         Figure size. If None, size is (12, num of variables * 2)
     text_size : int
-        Text size of the point_estimates, axis ticks, and HPD (Default:16)
+        Text size of the point_estimates, axis ticks, and HPD (Default:14)
     alpha : float
         Defines range for High Posterior Density
     round_to : int
@@ -44,6 +44,10 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy). Only works if `kind == kde` is True.
+    bins : integer or sequence or 'auto', optional
+        Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
+        if `kind == hist` is True. If None (default) it will use `auto` for continuous variables and
+        `range(xmin, xmax + 1)` for discrete variables.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     ax : axes
@@ -79,7 +83,7 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
 
     for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
         tr_values = transform(trace[v])
-        _plot_posterior_op(tr_values, ax=a, bw=bw, kind=kind, point_estimate=point_estimate,
+        _plot_posterior_op(tr_values, ax=a, bw=bw, bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, alpha=alpha, ref_val=ref_val[idx], rope=rope[idx],
                            text_size=_scale_text(figsize, text_size), **kwargs)
         a.set_title(v, fontsize=_scale_text(figsize, text_size))
@@ -88,7 +92,7 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
     return ax
 
 
-def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to, alpha, ref_val, rope,
+def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_to, alpha, ref_val, rope,
                        text_size=16, **kwargs):
     """
     Artist to draw posterior.
@@ -171,10 +175,14 @@ def _plot_posterior_op(trace_values, ax, bw, kind, point_estimate, round_to, alp
             'alpha', 1), bw=bw, ax=ax, **kwargs)
 
     else:
-        set_key_if_doesnt_exist(kwargs, 'bins', 30)
-        set_key_if_doesnt_exist(kwargs, 'edgecolor', 'w')
+        if bins is None:
+            if trace_values.dtype.kind == 'i':
+                bins = range(xmin, xmax + 1)
+            else:
+                bins = 'auto'
         set_key_if_doesnt_exist(kwargs, 'align', 'right')
-        ax.hist(trace_values, **kwargs)
+        set_key_if_doesnt_exist(kwargs, 'color', '#87ceeb')
+        ax.hist(trace_values, bins=bins, **kwargs)
 
     plot_height = ax.get_ylim()[1]
 
