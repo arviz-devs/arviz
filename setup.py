@@ -1,10 +1,10 @@
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="arviz",
     version="0.1.0",
-    packages=['arviz'],
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'matplotlib',
