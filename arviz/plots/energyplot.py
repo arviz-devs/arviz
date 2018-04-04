@@ -40,9 +40,6 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
     """
 
     energy = get_stats(trace, 'energy')
-    
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
 
     series = [('Marginal energy distribution', energy - energy.mean()),
               ('Energy transition distribution', np.diff(energy))]
@@ -77,3 +74,5 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
 
     if legend:
         ax.legend()
+
+    return ax
