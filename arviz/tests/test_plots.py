@@ -1,15 +1,46 @@
 from pandas import DataFrame
 import numpy as np
-from ..plots import densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot
+import pymc3 as pm
+from pytest import raises
+from ..plots import densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot, parallelplot
+
+
+def eight_schools():
+    J = 8
+    y = np.asarray([28.,  8., -3.,  7., -1.,  1., 18., 12.])
+    sigma = np.asarray([15., 10., 16., 11.,  9., 11., 10., 18.])
+    with pm.Model() as centered_eight:
+        mu = pm.Normal('mu', mu=0, sd=5)
+        tau = pm.HalfCauchy('tau', beta=5)
+        theta = pm.Normal('theta', mu=mu, sd=tau, shape=J)
+        obs = pm.Normal('obs', mu=theta, sd=sigma, observed=y)
+        short_trace = pm.sample(600, chains=2)
+    return short_trace
 
 
 def test_plots():
-    trace = DataFrame({'a': np.random.rand(100)})
-    trace_energy = DataFrame({'energy': np.random.rand(100)})
+    trace0 = DataFrame({'a': np.random.rand(100)})
+    trace1 = eight_schools()
 
-    densityplot(trace)
-    traceplot(trace)
-    posteriorplot(trace)
-    autocorrplot(trace)
-    forestplot(trace)
-    energyplot(trace_energy)
+    assert densityplot(trace0).shape == (1,)
+    assert densityplot(trace1).shape == (10,)
+
+    assert traceplot(trace0).shape == (1, 2)
+    assert traceplot(trace1).shape == (10, 2)
+
+    # posteriorplot(trace0).shape == (1,)
+    assert posteriorplot(trace1).shape == (10,)
+
+    assert autocorrplot(trace0).shape == (1, 1)
+    assert autocorrplot(trace1).shape == (10, 2)
+
+    assert forestplot(trace0).get_geometry() == (1, 1)
+    assert forestplot(trace1).get_geometry() == (1, 2)
+
+    with raises(AttributeError):
+        energyplot(trace0)
+    assert energyplot(trace1)
+
+    with raises(ValueError):
+        parallelplot(trace0)
+    assert parallelplot(trace1)

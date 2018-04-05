@@ -8,7 +8,7 @@ from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import identity_transform
 
 
-def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, text_size=14,
+def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, textsize=14,
                   alpha=0.05, round_to=1, point_estimate='mean', rope=None, ref_val=None,
                   kind='kde', bw=4.5, bins=None, skip_first=0, ax=None, **kwargs):
     """
@@ -24,7 +24,7 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         Function to transform data (defaults to identity)
     figsize : tuple
         Figure size. If None, size is (12, num of variables * 2)
-    text_size : int
+    textsize : int
         Text size of the point_estimates, axis ticks, and HPD (Default:14)
     alpha : float
         Defines range for High Posterior Density
@@ -85,15 +85,15 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         tr_values = transform(trace[v])
         _plot_posterior_op(tr_values, ax=a, bw=bw, bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, alpha=alpha, ref_val=ref_val[idx], rope=rope[idx],
-                           text_size=_scale_text(figsize, text_size), **kwargs)
-        a.set_title(v, fontsize=_scale_text(figsize, text_size))
+                           textsize=_scale_text(figsize, textsize), **kwargs)
+        a.set_title(v, fontsize=_scale_text(figsize, textsize))
 
     plt.tight_layout()
     return ax
 
 
 def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_to, alpha, ref_val, rope,
-                       text_size=16, **kwargs):
+                       textsize=16, **kwargs):
     """
     Artist to draw posterior.
     """
@@ -107,14 +107,14 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
                                                  ref_val,
                                                  format_as_percent(greater_than_ref_probability, 1))
         ax.axvline(ref_val, ymin=0.02, ymax=.75, color='C1', linewidth=4, alpha=0.65)
-        ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=text_size,
+        ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
                 horizontalalignment='center')
 
     def display_rope(rope):
         ax.plot(rope, (plot_height * 0.02, plot_height * 0.02),
                 linewidth=20, color='C2', alpha=0.75)
         text_props = dict(
-            size=text_size, horizontalalignment='center', color='C2')
+            size=textsize, horizontalalignment='center', color='C2')
         ax.text(rope[0], plot_height * 0.14, rope[0], **text_props)
         ax.text(rope[1], plot_height * 0.14, rope[1], **text_props)
 
@@ -139,20 +139,20 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
                                                                           point_value=point_value, round_to=round_to)
 
         ax.text(point_value, plot_height * 0.8, point_text,
-                size=text_size, horizontalalignment='center')
+                size=textsize, horizontalalignment='center')
 
     def display_hpd():
         hpd_intervals = hpd(trace_values, alpha=alpha)
         ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), linewidth=4, color='k')
         ax.text(hpd_intervals[0], plot_height * 0.07,
                 hpd_intervals[0].round(round_to),
-                size=text_size, horizontalalignment='right')
+                size=textsize, horizontalalignment='right')
         ax.text(hpd_intervals[1], plot_height * 0.07,
                 hpd_intervals[1].round(round_to),
-                size=text_size, horizontalalignment='left')
+                size=textsize, horizontalalignment='left')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.2,
                 format_as_percent(1 - alpha) + ' HPD',
-                size=text_size, horizontalalignment='center')
+                size=textsize, horizontalalignment='center')
 
     def format_axes():
         ax.yaxis.set_ticklabels([])
@@ -163,7 +163,7 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
         ax.yaxis.set_ticks_position('none')
         ax.xaxis.set_ticks_position('bottom')
         ax.tick_params(axis='x', direction='out', width=1, length=3,
-                       color='0.5', labelsize=text_size)
+                       color='0.5', labelsize=textsize)
         ax.spines['bottom'].set_color('0.5')
 
     def set_key_if_doesnt_exist(d, key, value):
@@ -195,16 +195,16 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
         display_rope(rope)
 
 
-def _scale_text(figsize, text_size):
+def _scale_text(figsize, textsize):
     """Scale text to figsize."""
 
-    if text_size is None and figsize is not None:
+    if textsize is None and figsize is not None:
         if figsize[0] <= 11:
             return 12
         else:
             return figsize[0]
     else:
-        return text_size
+        return textsize
 
 
 def _create_axes_grid(figsize, trace):

@@ -4,5 +4,6 @@ from .densityplot import densityplot
 from .energyplot import energyplot
 from .forestplot import forestplot
 from .kdeplot import kdeplot
+from .parallelplot import parallelplot
 from .posteriorplot import posteriorplot
 from .traceplot import traceplot
