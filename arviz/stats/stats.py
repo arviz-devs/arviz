@@ -4,9 +4,8 @@ import warnings
 from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
 from .diagnostics import effective_n, gelman_rubin
 from scipy.special import logsumexp
-from scipy.stats import dirichlet
+from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
-from scipy.stats import circmean, circstd
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'r2_score', 'summary', 'waic']
 
