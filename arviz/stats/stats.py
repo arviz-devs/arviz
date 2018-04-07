@@ -4,7 +4,7 @@ import warnings
 from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
 from .diagnostics import effective_n, gelman_rubin
 from scipy.special import logsumexp
-from scipy.stats import dirichlet
+from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'r2_score', 'summary', 'waic']
@@ -231,10 +231,11 @@ def _ic_matrix(ics, ic_i):
     return N, K, ic_i_val
 
 
-def hpd(x, alpha=0.05, transform=lambda x: x):
+def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     """
-    Calculate highest posterior density (HPD) of array for given alpha. The HPD is the minimum width
-    Bayesian credible interval (BCI).
+    Calculate highest posterior density (HPD) of array for given alpha. 
+    Works only for unimodal distributions.
+    The HPD is the minimum width Bayesian credible interval (BCI).
 
     Parameters
     ----------
@@ -244,71 +245,21 @@ def hpd(x, alpha=0.05, transform=lambda x: x):
         Desired probability of type I error (defaults to 0.05)
     transform : callable
         Function to transform data (defaults to identity)
+    circular : bool
+        Whether to compute the error taking into account `x` is a circular variable 
+        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     """
     # Make a copy of trace
     x = transform(x.copy())
-
-    # For multivariate node
-    if x.ndim > 1:
-
-        # Transpose first, then sort
-        tx = np.transpose(x, list(range(x.ndim))[1:] + [0])
-        dims = np.shape(tx)
-
-        # Container list for intervals
-        intervals = np.resize(0.0, dims[:-1] + (2,))
-
-        for index in _make_indices(dims[:-1]):
-
-            try:
-                index = tuple(index)
-            except TypeError:
-                pass
-
-            # Sort trace
-            sx = np.sort(tx[index])
-
-            # Append to list
-            intervals[index] = _calc_min_interval(sx, alpha)
-
-        # Transpose back before returning
-        return np.array(intervals)
-
-    else:
-        # Sort univariate node
-        sx = np.sort(x)
-
-        return _calc_min_interval(sx, alpha)
-
-
-def _make_indices(dimensions):
-    """ 
-    Generates complete set of indices for given dimensions
-    """
-    level = len(dimensions)
-    if level == 1:
-        return list(range(dimensions[0]))
-    indices = [[]]
-    while level:
-        _indices = []
-        for j in range(dimensions[level - 1]):
-            _indices += [[j] + i for i in indices]
-        indices = _indices
-        level -= 1
-    try:
-        return [tuple(i) for i in indices]
-    except TypeError:
-        return indices
-
-
-def _calc_min_interval(x, alpha):
-    """
-    Internal method to determine the minimum interval of a given width. Assumes that x is a sorted
-    numpy array.
-    """
     n = len(x)
     cred_mass = 1.0 - alpha
 
+    if circular:
+        mean = circmean(x, high=np.pi, low=-np.pi)
+        x = x - mean
+        x = np.arctan2(np.sin(x), np.cos(x))
+
+    x = np.sort(x)
     interval_idx_inc = int(np.floor(cred_mass * n))
     n_intervals = n - interval_idx_inc
     interval_width = x[interval_idx_inc:] - x[:n_intervals]
@@ -319,6 +270,13 @@ def _calc_min_interval(x, alpha):
     min_idx = np.argmin(interval_width)
     hdi_min = x[min_idx]
     hdi_max = x[min_idx + interval_idx_inc]
+
+    if circular:
+        hdi_min = hdi_min + mean
+        hdi_max = hdi_max + mean
+        hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
+        hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+
     return hdi_min, hdi_max
 
 
@@ -573,7 +531,7 @@ def r2_score(y_true, y_pred, round_to=2):
                      index=['r2_median', 'r2_mean', 'r2_std'])
 
 
-def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
+def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
             stat_funcs=None, extend=False, alpha=0.05, skip_first=0, batches=None):
     R"""
     Create a data frame with summary statistics.
@@ -588,6 +546,8 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
         Controls formatting for floating point numbers. Default 2.
     transform : callable
         Function to transform data (defaults to identity)
+    circ_varnames : list
+        Names of circular variables to include in summary
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
@@ -655,6 +615,11 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
     if batches is None:
         batches = min([100, len(trace)])
 
+    if circ_varnames is None:
+        circ_varnames = []
+    else:
+        circ_varnames = get_varnames(trace, circ_varnames)
+
     cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
               'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
 
@@ -662,6 +627,13 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
              lambda x: pd.Series(np.std(x, 0), name='sd').round(round_to),
              lambda x: pd.Series(_mc_error(x, batches).round(round_to), name='mc_error'),
              lambda x: pd.DataFrame([hpd(x, alpha)], columns=cnames).round(round_to)]
+
+    circ_funcs = [lambda x: pd.Series(circmean(x, high=np.pi, low=-np.pi, axis=0), name='mean').round(round_to),
+                  lambda x: pd.Series(circstd(x, high=np.pi, low=-np.pi, axis=0),
+                                      name='sd').round(round_to),
+                  lambda x: pd.Series(_mc_error(x, batches, circular=True).round(
+                      round_to), name='mc_error'),
+                  lambda x: pd.DataFrame([hpd(x, alpha, circular=True)], columns=cnames).round(round_to)]
 
     if stat_funcs is not None:
         if extend:
@@ -672,7 +644,10 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
     var_dfs = []
     for var in varnames:
         vals = np.ravel(trace[var].values)
-        var_df = pd.concat([f(vals) for f in funcs], axis=1)
+        if var in circ_varnames:
+            var_df = pd.concat([f(vals) for f in circ_funcs], axis=1)
+        else:
+            var_df = pd.concat([f(vals) for f in funcs], axis=1)
         var_df.index = [var]
         var_dfs.append(var_df)
     dforg = pd.concat(var_dfs, axis=0)
@@ -687,10 +662,11 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x,
         return pd.concat([dforg, n_eff, rhat], axis=1, join_axes=[dforg.index])
 
 
-def _mc_error(x, batches=5):
-    R"""
-    Calculates the simulation standard error, accounting for non-independent samples. The trace is
-    divided into batches, and the standard deviation of the batch means is calculated.
+def _mc_error(x, batches=5, circular=False):
+    """
+    Calculates the simulation standard error, accounting for non-independent
+    samples. The trace is divided into batches, and the standard deviation of
+    the batch means is calculated.
 
     Parameters
     ----------
@@ -698,22 +674,29 @@ def _mc_error(x, batches=5):
         An array containing MCMC samples
     batches : integer
         Number of batches
+    circular : bool
+        Whether to compute the error taking into account `x` is a circular variable 
+        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
 
     Returns
     -------
-    `float` representing the error
+    mc_error : float
+        Simulation standard error
     """
     if x.ndim > 1:
 
         dims = np.shape(x)
-        #ttrace = np.transpose(np.reshape(trace, (dims[0], sum(dims[1:]))))
         trace = np.transpose([t.ravel() for t in x])
 
-        return np.reshape([_mc_error(t, batches) for t in trace], dims[1:])
+        return np.reshape([mc_error(t, batches) for t in trace], dims[1:])
 
     else:
         if batches == 1:
-            return np.std(x) / np.sqrt(len(x))
+            if circular:
+                std = circstd(x, high=np.pi, low=-np.pi)
+            else:
+                std = np.std(x)
+            return std / np.sqrt(len(x))
 
         try:
             batched_traces = np.resize(x, (batches, int(len(x) / batches)))
@@ -723,9 +706,14 @@ def _mc_error(x, batches=5):
             new_shape = (batches, (len(x) - resid) / batches)
             batched_traces = np.resize(x[:-resid], new_shape)
 
-        means = np.mean(batched_traces, 1)
+        if circular:
+            means = circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
+            std = circstd(means, high=np.pi, low=-np.pi)
+        else:
+            means = np.mean(batched_traces, 1)
+            std = np.std(means)
 
-        return np.std(means) / np.sqrt(batches)
+        return std / np.sqrt(batches)
 
 
 def waic(trace, model, pointwise=False):
