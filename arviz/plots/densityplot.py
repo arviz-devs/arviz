@@ -68,23 +68,23 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     if point_estimate not in ('mean', 'median', None):
         raise ValueError("Point estimate should be 'mean', 'median' or None")
 
-    lenght_trace = len(trace)
+    length_trace = len(trace)
 
     if models is None:
-        if lenght_trace > 1:
-            models = ['m_{}'.format(i) for i in range(lenght_trace)]
+        if length_trace > 1:
+            models = ['m_{}'.format(i) for i in range(length_trace)]
         else:
             models = ['']
-    elif len(models) != lenght_trace:
+    elif len(models) != length_trace:
         raise ValueError(
             "The number of names for the models does not match the number of models")
 
-    lenght_models = len(models)
+    length_models = len(models)
 
     if colors == 'cycle':
-        colors = ['C{}'.format(i % 10) for i in range(lenght_models)]
+        colors = ['C{}'.format(i % 10) for i in range(length_models)]
     elif isinstance(colors, str):
-        colors = [colors for i in range(lenght_models)]
+        colors = [colors for i in range(length_models)]
 
     if varnames is None:
         varnames = []
@@ -105,11 +105,11 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     for v_idx, vname in enumerate(varnames):
         for t_idx, tr in enumerate(trace):
             if vname in tr.columns:
-                vec = tr[vname]
+                vec = tr[vname].values
                 _d_helper(vec, vname, colors[t_idx], bw, alpha, point_estimate,
                           hpd_markers, outline, shade, dplot[v_idx])
 
-    if lenght_trace > 1:
+    if length_trace > 1:
         for m_idx, m in enumerate(models):
             dplot[0].plot([], label=m, c=colors[m_idx])
         dplot[0].legend(fontsize=textsize)
@@ -161,10 +161,11 @@ def _d_helper(vec, vname, c, bw, alpha, point_estimate, hpd_markers, outline, sh
 
     else:
         xmin, xmax = hpd(vec, alpha)
-        bins = range(xmin, xmax+1)
+        bins = range(xmin, xmax + 2)
         if outline:
-            ax.hist(vec, bins=bins, color=c, histtype='step')
-        ax.hist(vec, bins=bins, color=c, alpha=shade)
+            ax.hist(vec, bins=bins, color=c, histtype='step', align='left')
+        if shade:
+            ax.hist(vec, bins=bins, color=c, alpha=shade)
 
     if hpd_markers:
         ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k')
