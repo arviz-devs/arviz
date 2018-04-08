@@ -177,10 +177,13 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
     else:
         if bins is None:
             if trace_values.dtype.kind == 'i':
-                bins = range(xmin, xmax + 1)
+                xmin = trace_values.min()
+                xmax = trace_values.max()
+                bins = range(xmin, xmax + 2)
+                ax.set_xlim(xmin - 0.5, xmax + 0.5)
             else:
                 bins = 'auto'
-        set_key_if_doesnt_exist(kwargs, 'align', 'right')
+        set_key_if_doesnt_exist(kwargs, 'align', 'left')
         set_key_if_doesnt_exist(kwargs, 'color', '#87ceeb')
         ax.hist(trace_values, bins=bins, **kwargs)
 
