@@ -12,9 +12,10 @@ install:
   - conda update -q conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest sphinx
   - source activate test-environment
   - pip install git+https://github.com/pymc-devs/pymc3
+  - pip install travis-sphinx==2.0.0
 
 before_script:
 - "export DISPLAY=:99.0"
@@ -24,3 +25,7 @@ before_script:
 
 script:
   - pytest
+  - travis-sphinx build
+
+after_success:
+  - travis-sphinx deploy
