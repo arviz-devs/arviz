@@ -15,4 +15,4 @@ Another option is to clone the repository and install using `python setup.py ins
 
 ## Dependencies
 
-Arviz is tested on 3.6 and depends on NumPy, SciPy, Pandas and Matplotlib.
+Arviz is tested on Python 3.6 and depends on NumPy, SciPy, Pandas and Matplotlib.
