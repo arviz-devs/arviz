@@ -40,7 +40,6 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
-    'numpydoc',
     'IPython.sphinxext.ipython_console_highlighting']
 
 
