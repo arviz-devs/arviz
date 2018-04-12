@@ -36,12 +36,11 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages'
+    'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
     'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     'numpydoc',
-    'nbsphinx',
     'IPython.sphinxext.ipython_console_highlighting']
 
 
