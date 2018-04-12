@@ -19,7 +19,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 
 # -- General configuration ------------------------------------------------
@@ -34,10 +34,16 @@ sys.path.insert(0, os.path.abspath('.'))
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages'
+    'sphinx.ext.napoleon',
+    'matplotlib.sphinxext.only_directives',
+    'matplotlib.sphinxext.plot_directive',
+    'numpydoc',
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
