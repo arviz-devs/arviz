@@ -35,10 +35,13 @@ def bfmi(trace):
 
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
             alpha=1, seed=None, round_to=2):
-    R"""Compare models based on the widely available information criterion (WAIC)
+    R"""
+    Compare models based on the widely applicable information criterion (WAIC)
     or leave-one-out (LOO) cross-validation.
+
     Read more theory here - in a paper by some of the leading authorities on
     model selection - dx.doi.org/10.1111/1467-9868.00353
+
     Parameters
     ----------
     model_dict : dictionary of PyMC3 traces indexed by corresponding model
@@ -46,13 +49,14 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
         Information Criterion (WAIC or LOO) used to compare models.
         Default WAIC.
     method : str
-        Method used to estimate the weights for each model. Available options
-        are:
-            - 'stacking' : (default) stacking of predictive distributions.
-            - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
-               weighting. The weights are stabilized using the Bayesian bootstrap
-            - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
-               weighting, without Bootstrap stabilization (not recommended)
+        Method used to estimate the weights for each model. Available options are:
+
+        - 'stacking' : (default) stacking of predictive distributions.
+        - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
+           weighting. The weights are stabilized using the Bayesian bootstrap
+        - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
+           weighting, without Bootstrap stabilization (not recommended)
+
         For more information read https://arxiv.org/abs/1704.02030
     b_samples: int
         Number of samples taken by the Bayesian bootstrap estimation. Only
@@ -68,6 +72,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
            np.random state is used.
     round_to : int
         Number of decimals used to round results (default 2).
+
     Returns
     -------
     A DataFrame, ordered from lowest to highest IC. The index reflects
@@ -234,20 +239,26 @@ def _ic_matrix(ics, ic_i):
 def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     """
     Calculate highest posterior density (HPD) of array for given alpha. 
-    Works only for unimodal distributions.
-    The HPD is the minimum width Bayesian credible interval (BCI).
+
+    The HPD is the minimum width Bayesian credible interval (BCI). This implementation works only
+    for unimodal distributions.
 
     Parameters
     ----------
     x : Numpy array
         An array containing posterior samples
-    alpha : float
+    alpha : float, optional
         Desired probability of type I error (defaults to 0.05)
     transform : callable
         Function to transform data (defaults to identity)
-    circular : bool
+    circular : bool, optional
         Whether to compute the error taking into account `x` is a circular variable 
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
+
+    Returns
+    -------
+    tuple
+        lower and upper value of the interval.
     """
     # Make a copy of trace
     x = transform(x.copy())
@@ -287,18 +298,22 @@ def _hpd_df(x, alpha):
 
 
 def loo(trace, model, pointwise=False, reff=None):
-    """Calculates leave-one-out (LOO) cross-validation for out of sample
+    """
+    Pareto-smoothed importance sampling leave-one-out cross-validation
+    
+    Calculates leave-one-out (LOO) cross-validation for out of sample
     predictive model fit, following Vehtari et al. (2015). Cross-validation is
     computed using Pareto-smoothed importance sampling (PSIS).
+
     Parameters
     ----------
     trace : result of MCMC run
     model : PyMC Model
         Optional model. Default None, taken from context.
-    pointwise: bool
+    pointwise: bool, optional
         if True the pointwise predictive accuracy will be returned.
-        Default False
-    reff : float
+        Defaults to False
+    reff : float, optional
         relative MCMC efficiency, `effective_n / n` i.e. number of effective
         samples divided by the number of actual samples. Computed from trace by
         default.
@@ -583,15 +598,13 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
 
     Examples
     --------
-    .. code:: ipython
-        >>> pm.summary(trace, ['mu'])
-                   mean        sd  mc_error     hpd_5    hpd_95
-        mu__0  0.106897  0.066473  0.001818 -0.020612  0.231626
-        mu__1 -0.046597  0.067513  0.002048 -0.174753  0.081924
 
-                  n_eff      Rhat
-        mu__0     487.0   1.00001
-        mu__1     379.0   1.00203
+    .. code:: ipython
+
+        >>> az.summary(trace, ['mu'])
+                   mean        sd  mc_error     hpd_5    hpd_95  n_eff      Rhat
+        mu__0  0.106897  0.066473  0.001818 -0.020612  0.231626  487.0   1.00001
+        mu__1 -0.046597  0.067513  0.002048 -0.174753  0.081924  379.0   1.00203
 
     Other statistics can be calculated by passing a list of functions.
 
@@ -604,7 +617,7 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         >>> def trace_quantiles(x):
         ...     return pd.DataFrame(pm.quantiles(x, [5, 50, 95]))
         ...
-        >>> pm.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
+        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
                      sd         5        50        95
         mu__0  0.066473  0.000312  0.105039  0.214242
         mu__1  0.067513 -0.159097 -0.045637  0.062912
