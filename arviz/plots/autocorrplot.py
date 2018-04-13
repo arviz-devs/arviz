@@ -13,21 +13,20 @@ def autocorrplot(trace, varnames=None, max_lag=100, skip_first=0, symmetric_plot
     ----------
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
-    varnames : list of variable names
+    varnames : list of variable names, optional
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.
-    max_lag : int
+    max_lag : int, optional
         Maximum lag to calculate autocorrelation. Defaults to 100.
-    skip_first : int
+    skip_first : int, optional
         Number of first samples not shown in plots (burn-in).
-    symmetric_plot : boolean
+    symmetric_plot : boolean, optional
         Plot from either [0, +lag] or [-lag, lag]. Defaults to False, [-, +lag].
     figsize : figure size tuple
         If None, size is (12, num of variables * 2) inches.
         Note this is not used if ax is supplied.
-    ax : axes
-        Matplotlib axes. Defaults to None.
-
+    ax : axes, optional
+        Matplotlib axes.
 
     Returns
     -------

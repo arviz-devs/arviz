@@ -11,64 +11,60 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
                colors='C0', chain_spacing=0.1, vline=0, figsize=None, plot_kwargs=None,
                skip_first=0, gs=None):
     """
-    Forest plot (model summary plot).
+    Forest plot
 
-    Generates a "forest plot" of 100*(1-alpha)% credible intervals from a trace
-    or list of traces.
+    Generates a forest plot of 100*(1-alpha)% credible intervals from a trace or list of traces.
 
     Parameters
     ----------
-
     trace : trace or list of traces
-        Trace(s) from an MCMC sample.
+        Trace(s) from an MCMC sample
     models : list (optional)
         List with names for the models in the list of traces. Useful when
-        plotting more that one trace.
-    varnames: list
+        plotting more that one trace
+    varnames: list, optional
         List of variables to plot (defaults to None, which results in all
-        variables plotted).
-    transform : callable
-        Function to transform data (defaults to identity)
+        variables plotted)
+    transform : callable, optional
+        Function to transform data. Defaults to identity
     alpha : float, optional
-        Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).
+        Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the
-        (1-alpha)*100% intervals (defaults to True).
+        (1-alpha)*100% intervals. Defaults to True
     rhat : bool, optional
-        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains
-        (defaults to True).
+        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to True
     main : string, optional
-        Title for main plot. Passing False results in titles being suppressed;
-        passing None (default) results in default titles.
+        Title for main plot. Passing False results in titles being suppressed. Defaults to None
     xtitle : string, optional
-        Label for x-axis. Defaults to no label
+        Label for x-axis. Defaults to None, i.e. no label
     xlim : list or tuple, optional
-        Range for x-axis. Defaults to matplotlib's best guess.
+        Range for x-axis. Defaults to None, i.e. matplotlib's best guess.
     ylabels : list or array, optional
         User-defined labels for each variable. If not provided, the node
-        __name__ attributes are used.
+        __name__ attributes are used
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a
-        string can be passed. If the string is `cycle `, it will automatically
-        chose a color per model from the matyplolib's cycle. If a single color
+        string can be passed. If the string is `cycle`, it will automatically
+        chose a color per model from the matyplolibs cycle. If a single color
         is passed, eg 'k', 'C2', 'red' this color will be used for all models.
         Defauls to 'C0' (blueish in most matplotlib styles)
     chain_spacing : float, optional
-        Plot spacing between chains (defaults to 0.1).
+        Plot spacing between chains. Defaults to 0.1
     vline : numeric, optional
-        Location of vertical reference line (defaults to 0).
-    figsize : tuple
-        Figure size, None by default
-    plot_kwargs : dict
-        Optional arguments for plot elements. Currently accepts 'fontsize',
-        'linewidth', 'marker', and 'markersize'.
+        Location of vertical reference line. Defaults to 0
+    figsize : tuple, optional
+        Figure size. Defaults to None
+    plot_kwargs : dict, optional
+        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`,
+        `marker`, and `markersize`.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     gs : GridSpec
         Matplotlib GridSpec object. Defaults to None.
+
     Returns
     -------
-
     gs : matplotlib GridSpec
 
     """

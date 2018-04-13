@@ -5,29 +5,32 @@ import matplotlib.pyplot as plt
 def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, plot_kwargs=None,
                 ax=None):
     """
-    Model comparison summary plot in the style of the one used in the book Statistical Rethinking
+    Summary plot for model comparison.
+
+    This plot is in the style of the one used in the book Statistical Rethinking
     by Richard McElreath.
+
     Parameters
     ----------
     comp_df: DataFrame
         the result of the `compare()` function
-    insample_dev : bool
-        plot the in-sample deviance, that is the value of the IC without the
-        penalization given by the effective number of parameters (pIC).
-        Defaults to True
-    se : bool
+    insample_dev : bool, optional
+        plot the in-sample deviance, that is the value of the IC without the penalization given by
+        the effective number of parameters (pIC). Defaults to True
+    se : bool, optional
         plot the standard error of the IC estimate. Defaults to True
-    dse : bool
-        plot standard error of the difference in IC between each model and the
-        top-ranked model. Defaults to True
-    figsize : tuple
-        Figure size, None by default
-    plot_kwargs : dict
+    dse : bool, optional
+        plot standard error of the difference in IC between each model and the top-ranked model.
+        Defaults to True
+    figsize : tuple, optional
+        Figure size
+    plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
-    ax : axes
-        Matplotlib axes. Defaults to None
+    ax : axes, optional
+        Matplotlib axes
+
     Returns
     -------
     ax : matplotlib axes
