@@ -214,10 +214,9 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     R"""
     Return z-scores for convergence diagnostics.
 
-    Compare the mean of the first % of series with the mean of the last % of
-    series. x is divided into a number of segments for which this difference is
-    computed. If the series is converged, this score should oscillate between
-    -1 and 1.
+    Compare the mean of the first % of series with the mean of the last % of series. x is divided
+    into a number of segments for which this difference is computed. If the series is converged,
+    this score should oscillate between -1 and 1.
 
     Parameters
     ----------

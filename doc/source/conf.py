@@ -39,7 +39,10 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon',
     'matplotlib.sphinxext.only_directives',
-    'matplotlib.sphinxext.plot_directive']
+    'matplotlib.sphinxext.plot_directive',
+    'numpydoc',
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting']
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -204,4 +207,4 @@ epub_exclude_files = ['search.html']
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+#intersphinx_mapping = {'https://docs.python.org/': None}
