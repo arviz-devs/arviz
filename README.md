@@ -11,7 +11,6 @@ pip install git+git://github.com/arviz-devs/arviz.git
 ```
 
 Another option is to clone the repository and install using `python setup.py install`.
-(Looking for a volunteer to register package on pypi/conda)
 
 ## Dependencies
 
