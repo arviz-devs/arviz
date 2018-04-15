@@ -17,6 +17,7 @@ install:
   - pip install git+https://github.com/pymc-devs/pymc3
   - pip install travis-sphinx==2.0.0
   - pip install nbsphinx
+  - pip install sphinx_rtd_theme
 
 before_script:
 - "export DISPLAY=:99.0"
