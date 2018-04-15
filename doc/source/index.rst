@@ -1,12 +1,7 @@
-Welcome to ArviZ's documentation!
-=================================
+Exploratory analysis of Bayesian models
+=======================================
 
-.. image:: logo_placeholder.png
-    :height: 150px
-    :alt: ArviZ logo
-    :align: center
-
-ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, model checking, comparison and diagnostics.
+ArviZ includes functions for posterior analysis, sample diagnostics, model checking and comparison.
 
 |Build Status|
 
