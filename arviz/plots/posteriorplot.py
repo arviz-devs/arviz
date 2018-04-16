@@ -83,7 +83,6 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
 
     for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
         tr_values = transform(trace[v])
-
         _plot_posterior_op(tr_values, ax=a, bw=bw, bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, alpha=alpha, ref_val=ref_val[idx], rope=rope[idx],
                            textsize=_scale_text(figsize, textsize), **kwargs)
@@ -156,11 +155,12 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
                 size=textsize, horizontalalignment='center')
 
     def format_axes():
-        ax.yaxis.set_ticks([])
+        ax.yaxis.set_ticklabels([])
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.spines['left'].set_visible(False)
         ax.spines['bottom'].set_visible(True)
+        ax.yaxis.set_ticks_position('none')
         ax.xaxis.set_ticks_position('bottom')
         ax.tick_params(axis='x', direction='out', width=1, length=3,
                        color='0.5', labelsize=textsize)
@@ -184,8 +184,8 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
             else:
                 bins = 'auto'
         set_key_if_doesnt_exist(kwargs, 'align', 'left')
-        set_key_if_doesnt_exist(kwargs, 'color', 'C0')
-        ax.hist(trace_values, bins=bins, alpha=0.35, **kwargs)
+        set_key_if_doesnt_exist(kwargs, 'color', '#87ceeb')
+        ax.hist(trace_values, bins=bins, **kwargs)
 
     plot_height = ax.get_ylim()[1]
 
