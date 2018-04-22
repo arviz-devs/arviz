@@ -9,8 +9,8 @@ class InstallStyles(install):
         import os
         from matplotlib import get_configdir
 
-        sd = os.path.join(get_configdir(), "stylelib")
-        lsd = './arviz/plots/styles'
+        sd = os.path.dirname(os.path.realpath(__file__))
+        lsd = os.path.join(sd, 'arviz', 'plots', 'styles')
         styles = [f for f in os.listdir(lsd)]
         if not os.path.isdir(sd):
             os.makedirs(sd)
