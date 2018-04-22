@@ -90,7 +90,6 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
         ax[i, 1].plot(range(width), d, alpha=shade)
 
         ax[i, 0].set_yticks([])
-        ax[i, 1].set_ylabel("Sample value")
 
         if lines:
             try:
