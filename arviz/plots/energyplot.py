@@ -4,7 +4,7 @@ from .kdeplot import kdeplot
 from ..utils.utils import get_stats
 
 
-def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
+def energyplot(trace, kind='kde', figsize=None, legend=True, shade=None, color_shade=None, bw=4.5,
                frame=True, kwargs_shade=None, ax=None, **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
@@ -20,15 +20,18 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
         If None, size is (8 x 6)
     legend : bool
         Flag for plotting legend (defaults to True)
-    shade : float
+    shade : tuple of floats
         Alpha blending value for the shaded area under the curve, between 0
-        (no shade) and 1 (opaque). Defaults to 0.35
+        (no shade) and 1 (opaque). Defaults to (1, .75)
+    color_shade : tuple of valid matplotlib color
+        Color for Marginal energy distribution and Energy transition distribution.
+        Defaults to ('C0', 'C7')
     bw : float
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy). Only works if `kind='kde'`.
+        of thumb (the default rule used by SciPy). Only works if `kind='kde'`
     frame : bool
-        Flag for plotting frame around figure.
+        Flag for plotting frame around figure
     ax : axes
         Matplotlib axes.
     kwargs_shade : dicts, optional
@@ -41,8 +44,11 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
 
     energy = get_stats(trace, 'energy')
 
-    series = [('Marginal energy distribution', energy - energy.mean()),
-              ('Energy transition distribution', np.diff(energy))]
+    if color_shade is None:
+        color_shade = ('C0', 'C7')
+
+    if shade is None:
+        shade = (1, .75)
 
     if figsize is None:
         figsize = (8, 6)
@@ -53,14 +59,18 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=0.35, bw=4.5,
     if kwargs_shade is None:
         kwargs_shade = {}
 
+    series = [(shade[0], color_shade[0], 'Marginal energy distribution', energy - energy.mean()),
+              (shade[1], color_shade[1], 'Energy transition distribution', np.diff(energy))]
+
     if kind == 'kde':
-        for label, value in series:
-            kdeplot(value, label=label, shade=shade, bw=bw, ax=ax, kwargs_shade=kwargs_shade,
-                    **kwargs)
+        for shade, color, label, value in series:
+            kdeplot(value, shade=shade, bw=bw, alpha=0, color_shade=color, ax=ax,
+                    kwargs_shade=kwargs_shade, **kwargs)
+            plt.plot([], label=label, color=color)
 
     elif kind == 'hist':
-        for label, value in series:
-            ax.hist(value, alpha=shade, label=label, **kwargs)
+        for shade, color, label, value in series:
+            ax.hist(value, alpha=shade, label=label, color=color, **kwargs)
 
     else:
         raise ValueError('Plot type {} not recognized.'.format(kind))
