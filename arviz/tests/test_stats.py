@@ -98,14 +98,14 @@ def test_waic():
     """Test widely available information criterion calculation"""
     x_obs = np.arange(6)
 
-    with pm.Model():
+    with pm.Model() as model:
         p = pm.Beta('p', 1., 1., transform=None)
         pm.Binomial('x', 5, p, observed=x_obs)
 
         step = pm.Metropolis()
         trace = pm.sample(100, step)
-        calculated_waic = waic(trace)
 
+    calculated_waic = waic(trace, model)
     log_py = stats.binom.logpmf(np.atleast_2d(x_obs).T, 5, trace['p']).T
 
     lppd_i = np.log(np.mean(np.exp(log_py), axis=0))
@@ -118,7 +118,7 @@ def test_waic():
     assert_almost_equal(calculated_waic.WAIC, actual_waic, decimal=2)
     assert_almost_equal(calculated_waic.WAIC_se, actual_waic_se, decimal=2)
 
-def test_psis(self):
+def test_psis():
     lw = np.random.randn(20000, 10)
     _, ks = psislw(lw)
     assert_array_less(ks, .5)
