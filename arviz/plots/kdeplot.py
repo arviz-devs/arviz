@@ -4,7 +4,7 @@ from scipy.signal import gaussian, convolve
 from scipy.stats import entropy
 
 
-def kdeplot(values, label=None, shade=0, bw=4.5, ax=None, kwargs_shade=None, **kwargs):
+def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, ax=None, kwargs_shade=None, **kwargs):
     """
     1D KDE plot taking into account boundary conditions
 
@@ -17,6 +17,8 @@ def kdeplot(values, label=None, shade=0, bw=4.5, ax=None, kwargs_shade=None, **k
     shade : float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
+    color_shade : valid matplotlib color
+        Color used for the shaed are under the curve. Defaults to None
     bw : float
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
@@ -41,7 +43,7 @@ def kdeplot(values, label=None, shade=0, bw=4.5, ax=None, kwargs_shade=None, **k
     ax.plot(x, density, label=label, **kwargs)
     ax.set_ylim(0, auto=True)
     if shade:
-        ax.fill_between(x, density, alpha=shade, **kwargs_shade)
+        ax.fill_between(x, density, alpha=shade, color=color_shade, **kwargs_shade)
     return ax
 
 
