@@ -3,8 +3,8 @@ import pandas as pd
 import pymc3 as pm
 from scipy import stats
 import copy
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
-from ..stats import bfmi, compare, hpd, r2_score, summary, waic
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
+from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 
 def fake_trace(n_samples):
@@ -57,9 +57,9 @@ def test_compare():
 
     model_dict = dict(zip(models, traces))
 
-    w_st = pm.compare(model_dict, method='stacking')['weight']
-    w_bb_bma = pm.compare(model_dict, method='BB-pseudo-BMA')['weight']
-    w_bma = pm.compare(model_dict, method='pseudo-BMA')['weight']
+    w_st = compare(model_dict, method='stacking')['weight']
+    w_bb_bma = compare(model_dict, method='BB-pseudo-BMA')['weight']
+    w_bma = compare(model_dict, method='pseudo-BMA')['weight']
 
     assert_almost_equal(w_st[0], w_st[1])
     assert_almost_equal(w_bb_bma[0], w_bb_bma[1])
@@ -104,7 +104,7 @@ def test_waic():
 
         step = pm.Metropolis()
         trace = pm.sample(100, step)
-        calculated_waic = pm.waic(trace)
+        calculated_waic = waic(trace)
 
     log_py = stats.binom.logpmf(np.atleast_2d(x_obs).T, 5, trace['p']).T
 
@@ -117,3 +117,8 @@ def test_waic():
 
     assert_almost_equal(calculated_waic.WAIC, actual_waic, decimal=2)
     assert_almost_equal(calculated_waic.WAIC_se, actual_waic_se, decimal=2)
+
+def test_psis(self):
+    lw = np.random.randn(20000, 10)
+    _, ks = psislw(lw)
+    assert_array_less(ks, .5)
