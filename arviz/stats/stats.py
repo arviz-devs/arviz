@@ -7,7 +7,7 @@ from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
-__all__ = ['bfmi', 'compare', 'hpd', 'loo', 'r2_score', 'summary', 'waic']
+__all__ = ['bfmi', 'compare', 'hpd', 'loo', 'r2_score', 'summary', 'waic', 'psislw']
 
 
 def bfmi(trace):
@@ -341,7 +341,7 @@ def loo(trace, model, pointwise=False, reff=None):
 
     log_py = log_post_trace(trace, model)
 
-    lw, ks = _psislw(-log_py, reff)
+    lw, ks = psislw(-log_py, reff)
     lw += log_py
 
     warn_mg = 0
@@ -373,7 +373,7 @@ def loo(trace, model, pointwise=False, reff=None):
                             columns=['loo', 'loo_se', 'p_loo', 'warning', 'loo_i'])
 
 
-def _psislw(lw, reff):
+def psislw(lw, reff=1.):
     """Pareto smoothed importance sampling (PSIS).
     Parameters
     ----------
@@ -394,7 +394,7 @@ def _psislw(lw, reff):
     kss = np.empty(m)
 
     # precalculate constants
-    cutoff_ind = - int(np.ceil(min(n / 0.5, 3 * (n / reff) ** 0.5))) - 1
+    cutoff_ind = - int(np.ceil(min(n / 5., 3 * (n / reff) ** 0.5))) - 1
     cutoffmin = np.log(np.finfo(float).tiny)
     k_min = 1. / 3
 
