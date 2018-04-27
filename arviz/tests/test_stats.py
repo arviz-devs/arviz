@@ -115,8 +115,10 @@ def test_waic():
     actual_waic_se = np.sqrt(len(waic_i) * np.var(waic_i))
     actual_waic = np.sum(waic_i)
 
-    assert_almost_equal(calculated_waic.WAIC, actual_waic, decimal=2)
-    assert_almost_equal(calculated_waic.WAIC_se, actual_waic_se, decimal=2)
+    assert_almost_equal(np.asarray(calculated_waic.waic),
+                        actual_waic, decimal=2)
+    assert_almost_equal(np.asarray(calculated_waic.waic_se),
+                        actual_waic_se, decimal=2)
 
 def test_psis():
     lw = np.random.randn(20000, 10)
