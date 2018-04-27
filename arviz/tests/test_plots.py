@@ -58,4 +58,4 @@ def test_pairplot():
              marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
     pairplot(trace, divergences=True, marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
     pairplot(trace, hexbin=True, varnames=['a__0', 'a__1'],
-             cmap='viridis', text_size=20, skip_first=250)
+             cmap='viridis', text_size=20)

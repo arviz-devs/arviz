@@ -1,7 +1,8 @@
 import warnings
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from ..utils.utils import scale_text, trace_to_dataframe, get_stats
+from ..utils.utils import trace_to_dataframe, get_stats
+from .plot_utils import _scale_text
 
 
 def pairplot(trace, varnames=None, figsize=None, text_size=None,
@@ -49,7 +50,7 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None,
         varnames = trace.columns
 
     if text_size is None:
-        text_size = scale_text(figsize, text_size=text_size)
+        text_size = _scale_text(figsize, text_size=text_size)
 
     if kwargs_divergences is None:
         kwargs_divergences = {}
