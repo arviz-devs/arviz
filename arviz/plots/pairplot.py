@@ -1,4 +1,3 @@
-import warnings
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from ..utils.utils import trace_to_dataframe, get_stats
