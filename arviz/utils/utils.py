@@ -182,3 +182,15 @@ def _create_flat_names(varname, shape):
     labels = (np.ravel(xs).tolist() for xs in np.indices(shape))
     labels = (map(str, xs) for xs in labels)
     return ['{}__{}'.format(varname, '_'.join(idxs)) for idxs in zip(*labels)]
+
+
+def scale_text(figsize, text_size):
+    """Scale text to figsize."""
+
+    if text_size is None and figsize is not None:
+        if figsize[0] <= 11:
+            return 12
+        else:
+            return figsize[0]
+    else:
+        return text_size

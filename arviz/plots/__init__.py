@@ -7,3 +7,4 @@ from .kdeplot import kdeplot
 from .parallelplot import parallelplot
 from .posteriorplot import posteriorplot
 from .traceplot import traceplot
+from .pairplot import pairplot

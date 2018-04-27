@@ -2,7 +2,7 @@ from pandas import DataFrame
 import numpy as np
 import pymc3 as pm
 from pytest import raises
-from ..plots import densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot, parallelplot
+from ..plots import densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot, parallelplot, pairplot
 
 
 def eight_schools():
@@ -44,3 +44,18 @@ def test_plots():
     with raises(ValueError):
         parallelplot(trace0)
     assert parallelplot(trace1)
+
+
+def test_pairplot():
+    with pm.Model() as model:
+        a = pm.Normal('a', shape=2)
+        c = pm.HalfNormal('c', shape=2)
+        b = pm.Normal('b', a, c, shape=2)
+        d = pm.Normal('d', 100, 1)
+        trace = pm.sample(1000)
+
+    pairplot(trace, varnames=['a__0', 'a__1'], divergences=True,
+             marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
+    pairplot(trace, divergences=True, marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
+    pairplot(trace, hexbin=True, varnames=['a__0', 'a__1'],
+             cmap='viridis', text_size=20, skip_first=250)
