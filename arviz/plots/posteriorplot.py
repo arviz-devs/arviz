@@ -5,7 +5,7 @@ from . import kdeplot
 from .kdeplot import fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
-from .plot_utils import identity_transform
+from .plot_utils import identity_transform, _scale_text
 
 
 def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, textsize=14,
@@ -196,18 +196,6 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
         display_ref_val(ref_val)
     if rope is not None:
         display_rope(rope)
-
-
-def _scale_text(figsize, textsize):
-    """Scale text to figsize."""
-
-    if textsize is None and figsize is not None:
-        if figsize[0] <= 11:
-            return 12
-        else:
-            return figsize[0]
-    else:
-        return textsize
 
 
 def _create_axes_grid(figsize, trace):

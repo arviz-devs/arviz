@@ -36,3 +36,15 @@ def make_2d(a):
     newshape = np.product(a.shape[1:]).astype(int)
     a = a.reshape((n, newshape), order='F')
     return a
+
+
+def _scale_text(figsize, text_size):
+    """Scale text to figsize."""
+
+    if text_size is None and figsize is not None:
+        if figsize[0] <= 11:
+            return 12
+        else:
+            return figsize[0]
+    else:
+        return text_size
