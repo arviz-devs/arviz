@@ -32,7 +32,9 @@ def test_plots():
     assert autocorrplot(short_trace).shape == (10, 2)
 
     assert forestplot(trace0).get_geometry() == (1, 1)
-    assert forestplot(short_trace).get_geometry() == (1, 2)
+    assert forestplot(short_trace).get_geometry() == (1, 3)
+    assert forestplot(short_trace, rhat=False).get_geometry() == (1, 2)
+    assert forestplot(short_trace, neff=False).get_geometry() == (1, 2)
 
     with raises(AttributeError):
         energyplot(trace0)

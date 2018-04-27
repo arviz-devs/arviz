@@ -1,15 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from ..stats import hpd, gelman_rubin
+from ..stats import hpd, gelman_rubin, effective_n
 from ..plots.plot_utils import identity_transform
 from ..utils.utils import trace_to_dataframe, expand_variable_names
 
 
 def forestplot(trace, models=None, varnames=None, transform=identity_transform, alpha=0.05,
-               quartiles=True, rhat=True, main=None, xtitle=None, xlim=None, ylabels=None,
-               colors='C0', chain_spacing=0.1, vline=0, figsize=None, plot_kwargs=None,
-               skip_first=0, gs=None):
+               quartiles=True, rhat=True, neff=True, main=None, xtitle=None, xlim=None,
+               ylabels=None, colors='C0', chain_spacing=0.1, vline=0, figsize=None,
+               plot_kwargs=None, skip_first=0, gs=None):
     """
     Forest plot
 
@@ -19,21 +19,22 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
     ----------
     trace : trace or list of traces
         Trace(s) from an MCMC sample
-    models : list (optional)
-        List with names for the models in the list of traces. Useful when
-        plotting more that one trace
+    models : list of strings (optional)
+        List with names for the models in the list of traces. Useful when plotting more that one
+        trace
     varnames: list, optional
-        List of variables to plot (defaults to None, which results in all
-        variables plotted)
+        List of variables to plot (defaults to None, which results in all variables plotted)
     transform : callable, optional
         Function to transform data. Defaults to identity
     alpha : float, optional
         Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
     quartiles : bool, optional
-        Flag for plotting the interquartile range, in addition to the
-        (1-alpha)*100% intervals. Defaults to True
+        Flag for plotting the interquartile range, in addition to the (1-alpha)*100% intervals.
+        Defaults to True
     rhat : bool, optional
         Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to True
+    neff : bool, optional
+        Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to True
     main : string, optional
         Title for main plot. Passing False results in titles being suppressed. Defaults to None
     xtitle : string, optional
@@ -44,11 +45,10 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
         User-defined labels for each variable. If not provided, the node
         __name__ attributes are used
     colors : list or string, optional
-        list with valid matplotlib colors, one color per model. Alternative a
-        string can be passed. If the string is `cycle`, it will automatically
-        chose a color per model from the matyplolibs cycle. If a single color
-        is passed, eg 'k', 'C2', 'red' this color will be used for all models.
-        Defauls to 'C0' (blueish in most matplotlib styles)
+        list with valid matplotlib colors, one color per model. Alternative a string can be passed.
+        If the string is `cycle`, it will automatically chose a color per model from the
+        matyplolibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
+        for all models. Defauls to 'C0' (blueish in most matplotlib styles)
     chain_spacing : float, optional
         Plot spacing between chains. Defaults to 0.1
     vline : numeric, optional
@@ -56,8 +56,8 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
     figsize : tuple, optional
         Figure size. Defaults to None
     plot_kwargs : dict, optional
-        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`,
-        `marker`, and `markersize`.
+        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`, `marker`,
+        and `markersize`.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     gs : GridSpec
@@ -82,8 +82,7 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
         else:
             models = ['']
     elif len(models) != len(trace):
-        raise ValueError("The number of names for the models does not match "
-                         "the number of models")
+        raise ValueError("The number of names for the models does not match the number of models")
 
     if colors == 'cycle':
         colors = ['C{}'.format(i % 10) for i in range(len(models))]
@@ -112,20 +111,34 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
         varnames = np.unique(v_tmp)
 
     plot_rhat = [rhat and nch > 1 for nch in nchains]
+    plot_neff = [neff and nch > 1 for nch in nchains]
 
     fig = plt.figure(figsize=figsize)
 
     if gs is None:
-        # Initialize plot
+        nsp = 1
         if np.any(plot_rhat):
-            gs = gridspec.GridSpec(1, 2, width_ratios=[3, 1])
-            gr_plot = plt.subplot(gs[1])
-            gr_plot.set_xticks((1.0, 1.5, 2.0), ("1", "1.5", "2+"))
-            gr_plot.set_xlim(0.9, 2.1)
-            gr_plot.set_yticks([])
-            gr_plot.set_title('R-hat')
-        else:
-            gs = gridspec.GridSpec(1, 1)
+            nsp += 1
+        if np.any(plot_neff):
+            nsp += 1
+
+        gs = gridspec.GridSpec(1, nsp, width_ratios=[3] + [1] * (nsp - 1))
+
+        if np.any(plot_rhat):
+            gr_rhat = plt.subplot(gs[1])
+            gr_rhat.set_xticks((1.0, 2.0))
+            gr_rhat.set_xlim(0.9, 2.1)
+            gr_rhat.set_yticks([])
+            gr_rhat.set_title('R-hat')
+        if np.any(plot_neff):
+            neffs = []
+            for tr in trace:
+                neffs.extend(effective_n(tr).values)
+            mins, maxs = round(min(neffs), -1),  round(max(neffs), -1)
+            gr_neff = plt.subplot(gs[nsp-1])
+            gr_neff.set_xticks((mins, maxs))
+            gr_neff.set_yticks([])
+            gr_neff.set_title('n_eff')
 
     # Subplot for confidence intervals
     interval_plot = plt.subplot(gs[0])
@@ -143,6 +156,10 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
     var_old = 0.5
     for v_idx, v in enumerate(varnames):
         for h, tr in enumerate(trace):
+            if plot_rhat[h]:
+                R = gelman_rubin(tr)
+            if plot_neff[h]:
+                n_e = effective_n(tr)
             if v not in tr.columns:
                 labels.append(models[h] + ' ' + v)
                 y = - var
@@ -180,18 +197,21 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
 
                 # Genenerate Gelman-Rubin plot
                 if plot_rhat[h] and v in tr.columns:
-                    R = gelman_rubin(tr, [v])
-                    gr_plot.plot(min(R[v], 2), -var, 'o', color=colors[h],
-                                 markersize=4)
+                    gr_rhat.plot(min(R[v], 2), -var, 'o', color=colors[h], markersize=4)
+                # Genenerate effective sample size plot
+                if plot_neff[h] and v in tr.columns:
+                    gr_neff.plot(n_e[v], -var, 'o', color=colors[h], markersize=4)
+
                 var += 1
 
         if len(trace) > 1:
             var_new = y - chain_spacing - 0.5
-            interval_plot.axhspan(var_old, var_new,
-                                  facecolor='k', alpha=bands[v_idx])
+            interval_plot.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
             if np.any(plot_rhat):
-                gr_plot.axhspan(var_old, var_new,
-                                facecolor='k', alpha=bands[v_idx])
+                gr_rhat.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
+            if np.any(plot_neff):
+                gr_neff.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
+
             var_old = var_new
 
     if ylabels is not None:
@@ -204,12 +224,14 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
     # Define range of y-axis for forestplot and R-hat
     interval_plot.set_ylim(- var + 0.5, 0.5)
     if np.any(plot_rhat):
-        gr_plot.set_ylim(- var + 0.5, 0.5)
+        gr_rhat.set_ylim(- var + 0.5, 0.5)
+
+    if np.any(plot_neff):
+        gr_neff.set_ylim(- var + 0.5, 0.5)
 
     plotrange = [np.min(all_quants), np.max(all_quants)]
     datarange = plotrange[1] - plotrange[0]
-    interval_plot.set_xlim(plotrange[0] - 0.05 * datarange,
-                           plotrange[1] + 0.05 * datarange)
+    interval_plot.set_xlim(plotrange[0] - 0.05 * datarange, plotrange[1] + 0.05 * datarange)
 
     # Add variable labels
     interval_plot.set_yticks([- l for l in range(len(labels))])
@@ -224,8 +246,7 @@ def forestplot(trace, models=None, varnames=None, transform=identity_transform, 
     else:
         plot_title = ""
 
-    interval_plot.set_title(plot_title,
-                            fontsize=plot_kwargs.get('fontsize', None))
+    interval_plot.set_title(plot_title, fontsize=plot_kwargs.get('fontsize', None))
 
     # Add x-axis label
     if xtitle is not None:
@@ -272,12 +293,10 @@ def _plot_tree(ax, y, ntiles, show_quartiles, c, plot_kwargs):
     """
     if show_quartiles:
         # Plot median
-        ax.plot(ntiles[2], y, color=c,
-                marker=plot_kwargs.get('marker', 'o'),
+        ax.plot(ntiles[2], y, color=c, marker=plot_kwargs.get('marker', 'o'),
                 markersize=plot_kwargs.get('markersize', 4))
         # Plot quartile interval
-        ax.errorbar(x=(ntiles[1], ntiles[3]), y=(y, y),
-                    linewidth=plot_kwargs.get('linewidth', 2),
+        ax.errorbar(x=(ntiles[1], ntiles[3]), y=(y, y), linewidth=plot_kwargs.get('linewidth', 2),
                     color=c)
 
     else:
@@ -287,7 +306,6 @@ def _plot_tree(ax, y, ntiles, show_quartiles, c, plot_kwargs):
 
     # Plot outer interval
     ax.errorbar(x=(ntiles[0], ntiles[-1]), y=(y, y),
-                linewidth=int(plot_kwargs.get('linewidth', 2)/2),
-                color=c)
+                linewidth=int(plot_kwargs.get('linewidth', 2)/2), color=c)
 
     return ax
