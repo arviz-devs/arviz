@@ -9,9 +9,10 @@ ArviZ includes functions for posterior analysis, sample diagnostics, model check
    :target: https://travis-ci.org/arviz-devs/arviz
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    installation
+   examples
    api
    about
 

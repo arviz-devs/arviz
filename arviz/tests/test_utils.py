@@ -1,6 +1,7 @@
 import pymc3 as pm
 from numpy.testing import assert_equal
-from ..utils import trace_to_dataframe
+from pandas.testing import assert_frame_equal
+from ..utils import trace_to_dataframe, save_trace, load_trace
 
 
 with pm.Model() as model:
@@ -27,3 +28,15 @@ def test_trace_to_dataframe():
 
     assert_equal(trace['b'][:1000], df_fc['b'].iloc[:, 0])
     assert_equal(trace['b'][1000:], df_fc['b'].iloc[:, 1])
+
+
+def test_save_and_load():
+    save_trace(trace)
+    trl0 = load_trace('trace.gzip')
+    tr = trace_to_dataframe(trace, combined=False)
+    save_trace(tr)
+    trl1 = load_trace('trace.gzip')
+
+    assert_frame_equal(tr, trl0)
+    assert_frame_equal(tr, trl1)
+    assert_frame_equal(trl0, trl1)
