@@ -5,7 +5,7 @@ from ..utils.utils import get_varnames, trace_to_dataframe
 
 
 def autocorrplot(trace, varnames=None, max_lag=100, skip_first=0, symmetric_plot=False,
-                 figsize=None, ax=None):
+                 combined=False, figsize=None, ax=None):
     """
     Bar plot of the autocorrelation function for a trace.
 
@@ -22,6 +22,9 @@ def autocorrplot(trace, varnames=None, max_lag=100, skip_first=0, symmetric_plot
         Number of first samples not shown in plots (burn-in).
     symmetric_plot : boolean, optional
         Plot from either [0, +lag] or [-lag, lag]. Defaults to False, [-, +lag].
+    combined : bool
+        Flag for combining multiple chains into a single chain. If False (default), chains will be
+        plotted separately.
     figsize : figure size tuple
         If None, size is (12, num of variables * 2) inches.
         Note this is not used if ax is supplied.
@@ -32,15 +35,15 @@ def autocorrplot(trace, varnames=None, max_lag=100, skip_first=0, symmetric_plot
     -------
     ax : matplotlib axes
     """
-    trace = trace_to_dataframe(trace, combined=False)[skip_first:]
+    trace = trace_to_dataframe(trace, combined=combined)[skip_first:]
     varnames = get_varnames(trace, varnames)
 
     if figsize is None:
         figsize = (12, len(varnames) * 2)
 
     nchains = trace.columns.value_counts()[0]
-    ax = get_axis(ax, len(varnames), nchains,
-                  squeeze=False, sharex=True, sharey=True, figsize=figsize)
+    ax = get_axis(ax, len(varnames), nchains, squeeze=False, sharex=True, sharey=True,
+                  figsize=figsize)
 
     max_lag = min(len(trace) - 1, max_lag)
 
