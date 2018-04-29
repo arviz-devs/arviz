@@ -5,38 +5,40 @@ from ..utils.utils import trace_to_dataframe, get_stats
 from .plot_utils import _scale_text
 
 
-def pairplot(trace, varnames=None, figsize=None, text_size=None, gs=None, ax=None, hexbin=False,
-             gridsize='auto', divergences=False, kwargs_divergences=None, skip_first=0, **kwargs):
+def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, gridsize='auto',
+             divergences=False, skip_first=0, gs=None, ax=None, kwargs_divergences=None, **kwargs):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
     Parameters
     ----------
 
-    trace : result of MCMC run
+    trace : Pandas DataFrame or PyMC3 trace
+        Posterior samples
     varnames : list of variable names
         Variables to be plotted, if None all variable are plotted
     figsize : figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     text_size: int
         Text size for labels
-    gs : Grid spec
-        Matplotlib Grid spec.
-    ax: axes
-        Matplotlib axes
     hexbin : Boolean
         If True draws an hexbin plot
-    gridsize : int or (int, int), optional, default is 1% of the number of samples
-        The number of hexagons in the x-direction, default is 100. The corresponding number of
-        hexagons in the y-direction is chosen such that the hexagons are approximately regular.
+    gridsize : int or (int, int), optional, default is 1% of the number of samples.
+        Only works when hexbin is True.
+        The number of hexagons in the x-direction. The corresponding number of hexagons in the
+        y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
     divergences : Boolean
         If True divergences will be plotted in a diferent color
-    kwargs_divergences : dicts, optional
-        Aditional keywords passed to ax.scatter for divergences
     skip_first : int
         Number of first samples not shown in plots (burn-in).
+    gs : Grid spec
+        Matplotlib Grid spec.
+    ax: axes
+        Matplotlib axes
+    kwargs_divergences : dicts, optional
+        Aditional keywords passed to ax.scatter for divergences
     Returns
     -------
 
