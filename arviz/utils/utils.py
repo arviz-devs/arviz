@@ -1,9 +1,13 @@
 import numpy as np
 import pandas as pd
+import gzip
+import lzma
+import bz2
+import os
 
 
 __all__ = ['expand_variable_names', 'get_stats', 'get_varnames', 'log_post_trace',
-           'trace_to_dataframe']
+           'trace_to_dataframe', 'save_trace', 'load_trace']
 
 
 def expand_variable_names(trace, varnames):
@@ -104,7 +108,7 @@ def trace_to_dataframe(trace, combined=True):
     Parameters
     ----------
     trace : trace
-        At this point it only supports PyMC3's MultiTrace Object
+        PyMC3's trace or Pandas DataFrame
     combined : Bool
         If True multiple chains will be combined together in the same columns. Otherwise they will
         be assigned to separate columns.
@@ -128,6 +132,9 @@ def trace_to_dataframe(trace, combined=True):
                 var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
 
     elif isinstance(trace, pd.DataFrame):
+        if combined:
+            varnames = get_varnames(trace, trace.columns)
+            trace = pd.DataFrame({v: trace[v].values.ravel() for v in varnames})
         return trace
 
     else:
@@ -182,3 +189,55 @@ def _create_flat_names(varname, shape):
     labels = (np.ravel(xs).tolist() for xs in np.indices(shape))
     labels = (map(str, xs) for xs in labels)
     return ['{}__{}'.format(varname, '_'.join(idxs)) for idxs in zip(*labels)]
+
+
+def save_trace(trace, file_name='trace', compression='gzip', combined=False):
+    """
+    Save trace to a csv file. Duplicated columns names will be preserved, if any.
+
+    Parameters
+    ----------
+    trace : trace
+        PyMC3's trace or Pandas DataFrame
+    filepath : str
+        name or path of the file to save trace
+    compression : str, optional
+        String representing the compression to use in the output file,
+        allowed values are 'gzip' (default), 'bz2', 'xz',
+    combined : Bool
+        If True multiple chains will be combined together in the same columns. Otherwise they will
+        be assigned to separate columns. Defaults to False
+    """
+    trace = trace_to_dataframe(trace, combined=False)
+    trace.to_csv('{}.{}'.format(file_name, compression), compression=compression)
+
+
+def load_trace(filepath, combined=False):
+    """
+    Load csv file into a DataFrame. Duplicated columns names will be preserved, if any.
+
+    Parameters
+    ----------
+    filepath : str
+        name or path of the file to save trace
+    combined : Bool
+        If True multiple chains will be combined together in the same columns. Otherwise they will
+        be assigned to separate columns. Defaults to False
+    """
+    ext = os.path.splitext(filepath)[1][1:]
+    df = pd.read_csv(filepath, index_col=0, compression=ext)
+    if ext == 'gzip':
+        fd = gzip.open(filepath, 'rt')
+    elif ext == 'bz2':
+        fd = bz2.open(filepath, 'rt')
+    elif ext == 'xz':
+        fd = lzma.open(filepath, 'rt')
+    else:
+        fd = open(filepath)
+    line = fd.readline().strip()
+    fd.close()
+    df.columns = [i for i in line.split(',') if i]
+    if combined:
+        df = trace_to_dataframe(df, combined)
+
+    return df
