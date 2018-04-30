@@ -1,37 +1,44 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from matplotlib.ticker import NullFormatter
 from ..utils.utils import trace_to_dataframe, get_stats
 from .plot_utils import _scale_text
 
 
-def pairplot(trace, varnames=None, figsize=None, text_size=None,
-             gs=None, ax=None, hexbin=False, divergences=False, kwargs_divergences=None,
-             skip_first=0, **kwargs):
+def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, gridsize='auto',
+             divergences=False, skip_first=0, gs=None, ax=None, kwargs_divergences=None, **kwargs):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
     Parameters
     ----------
 
-    trace : result of MCMC run
+    trace : Pandas DataFrame or PyMC3 trace
+        Posterior samples
     varnames : list of variable names
         Variables to be plotted, if None all variable are plotted
     figsize : figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     text_size: int
         Text size for labels
+    hexbin : Boolean
+        If True draws an hexbin plot
+    gridsize : int or (int, int), optional, default is 1% of the number of samples.
+        Only works when hexbin is True.
+        The number of hexagons in the x-direction. The corresponding number of hexagons in the
+        y-direction is chosen such that the hexagons are approximately regular.
+        Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
+        in the x-direction and the y-direction.
+    divergences : Boolean
+        If True divergences will be plotted in a diferent color
+    skip_first : int
+        Number of first samples not shown in plots (burn-in).
     gs : Grid spec
         Matplotlib Grid spec.
     ax: axes
         Matplotlib axes
-    hexbin : Boolean
-        If True draws an hexbin plot
-    divergences : Boolean
-        If True divergences will be plotted in a diferent color
     kwargs_divergences : dicts, optional
         Aditional keywords passed to ax.scatter for divergences
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
     Returns
     -------
 
@@ -48,37 +55,38 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None,
     if varnames is None:
         varnames = trace.columns
 
-    if text_size is None:
-        text_size = _scale_text(figsize, text_size=text_size)
-
     if kwargs_divergences is None:
         kwargs_divergences = {}
+
+    if gridsize == 'auto':
+        gridsize = int(len(trace)*0.01)
 
     numvars = len(varnames)
 
     if figsize is None:
         figsize = (8 + numvars, 8 + numvars)
 
+    if text_size is None:
+        text_size = _scale_text(figsize, text_size=text_size)
+
     if numvars < 2:
-        raise Exception(
-            'Number of variables to be plotted must be 2 or greater.')
+        raise Exception('Number of variables to be plotted must be 2 or greater.')
 
     if numvars == 2 and ax is not None:
         if hexbin:
-            ax.hexbin(trace[varnames[0]],
-                      trace[varnames[1]], mincnt=1, **kwargs)
+            ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
+                      **kwargs)
+            ax.grid(False)
+            ax.patch.set_facecolor('white')
         else:
-            ax.scatter(trace[varnames[0]],
-                       trace[varnames[1]], **kwargs)
+            ax.scatter(trace[varnames[0]], trace[varnames[1]], **kwargs)
 
         if divergences:
-            ax.scatter(trace[varnames[0]][divergent],
-                       trace[varnames[1]][divergent], **kwargs_divergences)
+            ax.scatter(trace[varnames[0]][divergent], trace[varnames[1]][divergent],
+                       **kwargs_divergences)
 
-        ax.set_xlabel('{}'.format(varnames[0]),
-                      fontsize=text_size)
-        ax.set_ylabel('{}'.format(
-            varnames[1]), fontsize=text_size)
+        ax.set_xlabel('{}'.format(varnames[0]), fontsize=text_size)
+        ax.set_ylabel('{}'.format(varnames[1]), fontsize=text_size)
         ax.tick_params(labelsize=text_size)
 
     if gs is None and ax is None:
@@ -94,25 +102,23 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None,
                 ax = plt.subplot(gs[j, i])
 
                 if hexbin:
-                    ax.hexbin(var1, var2, mincnt=1, **kwargs)
+                    ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                    ax.grid(False)
+
                 else:
                     ax.scatter(var1, var2, **kwargs)
 
                 if divergences:
-                    ax.scatter(var1[divergent],
-                               var2[divergent],
-                               **kwargs_divergences)
+                    ax.scatter(var1[divergent], var2[divergent], **kwargs_divergences)
 
                 if j + 1 != numvars - 1:
-                    ax.set_xticks([])
+                    ax.axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_xlabel('{}'.format(varnames[i]),
-                                  fontsize=text_size)
+                    ax.set_xlabel('{}'.format(varnames[i]), fontsize=text_size)
                 if i != 0:
-                    ax.set_yticks([])
+                    ax.axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_ylabel('{}'.format(
-                        varnames[j + 1]), fontsize=text_size)
+                    ax.set_ylabel('{}'.format(varnames[j + 1]), fontsize=text_size)
 
                 ax.tick_params(labelsize=text_size)
 

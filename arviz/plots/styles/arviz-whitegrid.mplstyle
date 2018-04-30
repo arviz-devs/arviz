@@ -15,7 +15,6 @@ ytick.direction: out
 xtick.color: .15
 ytick.color: .15
 axes.axisbelow: True
-image.cmap: Greys
 grid.linestyle: -
 lines.solid_capstyle: round
 
