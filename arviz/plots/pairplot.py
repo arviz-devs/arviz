@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter
-from ..utils.utils import trace_to_dataframe, get_stats
+from ..utils.utils import trace_to_dataframe, get_stats, get_varnames
 from .plot_utils import _scale_text
 
 
@@ -23,7 +23,7 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, g
         Text size for labels
     hexbin : Boolean
         If True draws an hexbin plot
-    gridsize : int or (int, int), optional, default is 1% of the number of samples.
+    gridsize : int or (int, int), optional
         Only works when hexbin is True.
         The number of hexagons in the x-direction. The corresponding number of hexagons in the
         y-direction is chosen such that the hexagons are approximately regular.
@@ -51,9 +51,7 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, g
         divergent = get_stats(trace, 'diverging')
 
     trace = trace_to_dataframe(trace, combined=True)[skip_first:]
-
-    if varnames is None:
-        varnames = trace.columns
+    varnames = get_varnames(trace, varnames)
 
     if kwargs_divergences is None:
         kwargs_divergences = {}
@@ -77,7 +75,6 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, g
             ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
                       **kwargs)
             ax.grid(False)
-            ax.patch.set_facecolor('white')
         else:
             ax.scatter(trace[varnames[0]], trace[varnames[1]], **kwargs)
 
@@ -104,7 +101,6 @@ def pairplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, g
                 if hexbin:
                     ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
                     ax.grid(False)
-
                 else:
                     ax.scatter(var1, var2, **kwargs)
 
