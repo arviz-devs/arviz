@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 from .kdeplot import kdeplot
 from ..utils import trace_to_dataframe
-from .plot_utils import _scale_text
+from .plot_utils import _scale_text, get_bins
 
 
-def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, gridsize='auto', skip_first=0,
-              joint_kwargs=None, marginal_kwargs=None):
+def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, gridsize='auto',
+              skip_first=0, joint_kwargs=None, marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -17,7 +17,7 @@ def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, 
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
     varnames : list of variable names
-        Variables to be plotted, if None all variable are plotted
+        Variables to be plotted, two variables are required.
     figsize : figure size tuple
         If None, size is (8, 8)
     text_size: int
@@ -32,6 +32,12 @@ def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, 
         in the x-direction and the y-direction.
     skip_first : int
         Number of first samples not shown in plots (burn-in)
+
+    Returns
+    -------
+    axjoin : matplotlib axes, join (central) distribution
+    axHistx : matplotlib axes, x (top) distribution
+    axHisty : matplotlib axes, y (right) distribution
     """
     trace = trace_to_dataframe(trace, combined=True)[skip_first:]
 
@@ -41,7 +47,7 @@ def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, 
     if text_size is None:
         text_size = _scale_text(figsize, text_size=text_size)
 
-    if len(varnames) > 2:
+    if len(varnames) != 2:
         raise Exception('Number of variables to be plotted must 2')
 
     if joint_kwargs is None:
@@ -66,26 +72,28 @@ def jointplot(trace, varnames=None, figsize=None, text_size=None, hexbin=False, 
     if hexbin:
         if gridsize == 'auto':
             gridsize = int(len(trace)**0.35)
-            print(gridsize)
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
     else:
         axjoin.scatter(x, y, **joint_kwargs)
 
     if x.dtype.kind == 'i':
-        bins = range(x.min(), x.max() + 2)
-        axHistx.hist(x, bins=bins, **marginal_kwargs)
+        bins = get_bins(x)
+        axHistx.hist(x, bins=bins, align='left', density=True,
+                     **marginal_kwargs)
     else:
         kdeplot(x, ax=axHistx, **marginal_kwargs)
     if y.dtype.kind == 'i':
-        bins = range(y.min(), y.max() + 2)
-        axHisty.hist(y, bins=bins, orientation='horizontal', **marginal_kwargs)
+        bins = get_bins(y)
+        axHisty.hist(y, bins=bins, align='left', density=True, orientation='horizontal',
+                     **marginal_kwargs)
     else:
         kdeplot(y, ax=axHisty, rotated=True, **marginal_kwargs)
 
     axHistx.set_xlim(axjoin.get_xlim())
     axHisty.set_ylim(axjoin.get_ylim())
 
+    return axjoin, axHistx, axHisty
 
 def _define_axes():
     left, width = 0.1, 0.65
