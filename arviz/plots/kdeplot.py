@@ -4,7 +4,8 @@ from scipy.signal import gaussian, convolve
 from scipy.stats import entropy
 
 
-def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, ax=None, kwargs_shade=None, **kwargs):
+def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, rotated=False,
+            ax=None, kwargs_shade=None, **kwargs):
     """
     1D KDE plot taking into account boundary conditions
 
@@ -40,10 +41,18 @@ def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, ax=None, kwar
 
     density, l, u = fast_kde(values, bw)
     x = np.linspace(l, u, len(density))
+    if rotated:
+        x, density = density, x
+
     ax.plot(x, density, label=label, **kwargs)
-    ax.set_ylim(0, auto=True)
     if shade:
         ax.fill_between(x, density, alpha=shade, color=color_shade, **kwargs_shade)
+
+    if rotated:
+        ax.set_xlim(0, auto=True)
+    else:
+        ax.set_ylim(0, auto=True)
+
     return ax
 
 

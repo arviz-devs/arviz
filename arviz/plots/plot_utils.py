@@ -48,3 +48,24 @@ def _scale_text(figsize, text_size):
             return figsize[0]
     else:
         return text_size
+
+def get_bins(x, max_bins=50, n=2):
+    """
+    Compute number of bins (or ticks)
+
+    Parameters
+    ----------
+    x : array
+        array to be binned
+    max_bins : int
+        maximum number of bins
+    n : int
+        when computing bins, this should be 2, when computing ticks this should be 1.
+    """
+    x_max, x_min = x.max(), x.min()
+    x_range = x_max - x_min
+    if  x_range > cutoff:
+        bins = range(x_min, x_max + n, int(x_range / 10))
+    else:
+        bins = range(x_min, x_max + n)
+    return bins

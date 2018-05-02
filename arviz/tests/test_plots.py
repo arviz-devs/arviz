@@ -2,7 +2,8 @@ from pandas import DataFrame
 import numpy as np
 import pymc3 as pm
 from pytest import raises
-from ..plots import densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot, parallelplot, pairplot
+from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
+                     parallelplot, pairplot, jointplot)
 
 
 J = 8
@@ -43,6 +44,8 @@ def test_plots():
     with raises(ValueError):
         parallelplot(trace0)
     assert parallelplot(short_trace)
+
+    jointplot(short_trace, varnames=['mu', 'tau'])
 
 
 def test_pairplot():

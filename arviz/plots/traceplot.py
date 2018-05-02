@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..stats import hpd
 from .kdeplot import fast_kde, kdeplot
-from .plot_utils import identity_transform, get_axis, make_2d
+from .plot_utils import identity_transform, get_axis, make_2d, get_bins
 from ..utils import get_varnames, trace_to_dataframe
 
 
@@ -116,7 +116,7 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
     """Add a histogram for each column of the data to the provided axes."""
     hs = []
     for column in data.T:
-        bins = range(column.min(), column.max() + 2)
+        bins = get_bins(column)
         hs.append(ax.hist(column, bins=bins, alpha=shade, align='left',
                           density=True))
         if prior is not None:
@@ -124,7 +124,8 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
             x = np.arange(x_sample.min(), x_sample.max())
             p = prior.pmf(x)
             ax.step(x, p, where='mid', alpha=prior_shade, ls=prior_style)
-    ax.set_xticks(range(np.min(data), np.max(data) + 1))
+    xticks = get_bins(data, cutoff=10, n=1)
+    ax.set_xticks(xticks)
 
     return hs
 
