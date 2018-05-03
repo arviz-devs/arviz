@@ -64,7 +64,7 @@ def get_bins(x, max_bins=50, n=2):
     """
     x_max, x_min = x.max(), x.min()
     x_range = x_max - x_min
-    if  x_range > cutoff:
+    if  x_range > max_bins:
         bins = range(x_min, x_max + n, int(x_range / 10))
     else:
         bins = range(x_min, x_max + n)

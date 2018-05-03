@@ -124,7 +124,7 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
             x = np.arange(x_sample.min(), x_sample.max())
             p = prior.pmf(x)
             ax.step(x, p, where='mid', alpha=prior_shade, ls=prior_style)
-    xticks = get_bins(data, cutoff=10, n=1)
+    xticks = get_bins(data, max_bins=10, n=1)
     ax.set_xticks(xticks)
 
     return hs

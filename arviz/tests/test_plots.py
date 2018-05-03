@@ -18,7 +18,7 @@ with pm.Model() as centered_eight:
 
 
 def test_plots():
-    trace0 = DataFrame({'a': np.random.rand(100)})
+    trace0 = DataFrame({'a': np.random.poisson(2.3, 100)})
 
     assert densityplot(trace0).shape == (1,)
     assert densityplot(short_trace).shape == (10,)
