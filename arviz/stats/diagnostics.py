@@ -14,8 +14,8 @@ def effective_n(trace, varnames=None, round_to=2):
     Parameters
     ----------
     trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. At least 2 chains are needed to compute this diagnostic 
-      of one or more stochastic parameters.
+      Posterior samples. At least 2 chains are needed to compute this diagnostic of one or more
+      stochastic parameters.
     varnames : list
       Names of variables to include in the effective_n report
     round_to : int
@@ -36,8 +36,8 @@ def effective_n(trace, varnames=None, round_to=2):
     is the first odd positive integer for which the sum
     :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
 
-    The current implementation is similar to Stan, which uses Geyer's initial
-    monotone sequence criterion (Geyer, 1992; Geyer, 2011).
+    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
+    criterion (Geyer, 1992; Geyer, 2011).
 
     References
     ----------
@@ -166,8 +166,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     Returns
     -------
     Rhat : dict of floats (MultiTrace) or float (trace object)
-      Returns dictionary of the potential scale reduction
-      factors, :math:`\hat{R}`
+      Returns dictionary of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
     -----
@@ -233,8 +232,8 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     Returns
     -------
     scores : list [[]]
-      Return a list of [i, score], where i is the starting index for each
-      interval and score the Geweke score on the interval.
+      Return a list of [i, score], where i is the starting index for each interval and score the
+      Geweke score on the interval.
 
     Notes
     -----
@@ -269,8 +268,7 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
         if interval <= 0 or interval >= 1:
             raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
     if first + last >= 1:
-        raise ValueError(
-            "Invalid intervals for Geweke convergence analysis", (first, last))
+        raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
 
     # Initialize list of z-scores
     zscores = []
