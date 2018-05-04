@@ -15,22 +15,24 @@ def bfmi(trace):
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.2 indicate poor sampling. However, this threshold is provisional and may
+    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
     change.  See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
 
     Parameters
     ----------
-    trace : result of an HMC/NUTS run, must contain energy information
+    trace : Pandas DataFrame or PyMC3 trace
+        Result of an HMC/NUTS run, must contain energy information
 
     Returns
     -------
-    z : float
-        The Bayesian fraction of missing information of the model and trace.
+    z : array
+        The Bayesian fraction of missing information of the model and trace. One element per
+        chain in the trace.
     """
-    energy = get_stats(trace, 'energy')
+    energy = np.atleast_2d(get_stats(trace, 'energy', combined=False))
 
-    return np.square(np.diff(energy)).mean() / np.var(energy)
+    return np.square(np.diff(energy, 1)).mean(1) / np.var(energy, 1)
 
 
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000,

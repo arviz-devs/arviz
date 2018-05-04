@@ -22,7 +22,7 @@ def expand_variable_names(trace, varnames):
     return np.unique(tmp)
 
 
-def get_stats(trace, stat=None):
+def get_stats(trace, stat=None, combined=True):
     """
     get sampling statistics from trace
 
@@ -32,14 +32,15 @@ def get_stats(trace, stat=None):
         Pandas DataFrame or PyMC3 trace
     stats : string
         Statistics
-
+    combined : Bool
+        If True multiple statistics from different chains will be combined together.
     Returns
     ----------
     stat: array with the choosen statistic
     """
     if type(trace).__name__ == 'MultiTrace':
         try:
-            return trace[stat]
+            return trace.get_sampler_stats(stat, combine=combined)
         except KeyError:
             print('There is no {} information in the passed trace.'.format(stat))
 
