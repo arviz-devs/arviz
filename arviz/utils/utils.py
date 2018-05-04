@@ -162,10 +162,12 @@ def _create_flat_names(varname, shape):
 def _is_transformed_name(name):
     """
     Quickly check if a name was transformed with `get_transormed_name`
+
     Parameters
     ----------
     name : str
         Name to check
+
     Returns
     -------
     bool
@@ -177,6 +179,7 @@ def _is_transformed_name(name):
 def _create_flat_names(varname, shape):
     """
     Return flat variable names for `varname` of `shape`.
+
     Examples
     --------
     >>> create_flat_names('x', (5,))
@@ -202,8 +205,8 @@ def save_trace(trace, file_name='trace', compression='gzip', combined=False):
     filepath : str
         name or path of the file to save trace
     compression : str, optional
-        String representing the compression to use in the output file,
-        allowed values are 'gzip' (default), 'bz2', 'xz',
+        String representing the compression to use in the output file, allowed values are
+        'gzip' (default), 'bz2' and 'xz'.
     combined : Bool
         If True multiple chains will be combined together in the same columns. Otherwise they will
         be assigned to separate columns. Defaults to False

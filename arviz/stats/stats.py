@@ -7,14 +7,14 @@ from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
-__all__ = ['bfmi', 'compare', 'hpd', 'loo', 'r2_score', 'summary', 'waic', 'psislw']
+__all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
 
 
 def bfmi(trace):
     R"""Calculate the estimated Bayesian fraction of missing information (BFMI).
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
-    information on BFMI, see https://arxiv.org/pdf/1604.00695.pdf.  The current advice is that
+    information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
     values smaller than 0.2 indicate poor sampling. However, this threshold is provisional and may
     change.  See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
@@ -36,18 +36,17 @@ def bfmi(trace):
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
             alpha=1, seed=None, round_to=2):
     R"""
-    Compare models based on the widely applicable information criterion (WAIC)
-    or leave-one-out (LOO) cross-validation.
+    Compare models based on the widely applicable information criterion (WAIC) or leave-one-out
+    (LOO) cross-validation.
 
-    Read more theory here - in a paper by some of the leading authorities on
-    model selection - dx.doi.org/10.1111/1467-9868.00353
+    Read more theory here - in a paper by some of the leading authorities on model selection
+    - dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
     model_dict : dictionary of PyMC3 traces indexed by corresponding model
     ic : string
-        Information Criterion (WAIC or LOO) used to compare models.
-        Default WAIC.
+        Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
     method : str
         Method used to estimate the weights for each model. Available options are:
 
@@ -59,13 +58,12 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
 
         For more information read https://arxiv.org/abs/1704.02030
     b_samples: int
-        Number of samples taken by the Bayesian bootstrap estimation. Only
-        useful when method = 'BB-pseudo-BMA'.
+        Number of samples taken by the Bayesian bootstrap estimation.
+        Only useful when method = 'BB-pseudo-BMA'.
     alpha : float
-        The shape parameter in the Dirichlet distribution used for the
-        Bayesian bootstrap. Only useful when method = 'BB-pseudo-BMA'. When
-        alpha=1 (default), the distribution is uniform on the simplex. A
-        smaller alpha will keeps the final weights more away from 0 and 1.
+        The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
+        useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
+        on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
     seed : int or np.random.RandomState instance
            If int or RandomState, use it for seeding Bayesian bootstrap. Only
            useful when method = 'BB-pseudo-BMA'. Default None the global
@@ -75,27 +73,25 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
 
     Returns
     -------
-    A DataFrame, ordered from lowest to highest IC. The index reflects
-    the order in which the models are passed to this function. The columns are:
+    A DataFrame, ordered from lowest to highest IC. The index reflects the order in which the
+    models are passed to this function. The columns are:
     IC : Information Criteria (WAIC or LOO).
-        Smaller IC indicates higher out-of-sample predictive fit ("better" model).
-        Default WAIC.
+        Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
     pIC : Estimated effective number of parameters.
     dIC : Relative difference between each IC (WAIC or LOO)
     and the lowest IC (WAIC or LOO).
         It's always 0 for the top-ranked model.
     weight: Relative weight for each model.
-        This can be loosely interpreted as the probability of each model
-        (among the compared model) given the data. By default the uncertainty
-        in the weights estimation is considered using Bayesian bootstrap.
+        This can be loosely interpreted as the probability of each model (among the compared model)
+        given the data. By default the uncertainty in the weights estimation is considered using
+        Bayesian bootstrap.
     SE : Standard error of the IC estimate.
-        If method = BB-pseudo-BMA these values are estimated using Bayesian
-        bootstrap.
+        If method = BB-pseudo-BMA these values are estimated using Bayesian bootstrap.
     dSE : Standard error of the difference in IC between each model and
     the top-ranked model.
         It's always 0 for the top-ranked model.
-    warning : A value of 1 indicates that the computation of the IC may not be
-        reliable. Details see the related warning message in pm.waic and pm.loo
+    warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
+        be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
     """
 
     names = [model.name for model in model_dict if model.name]
@@ -105,26 +101,21 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
     if ic == 'waic':
         ic_func = waic
         df_comp = pd.DataFrame(index=names,
-                               columns=['waic', 'pwaic', 'dwaic', 'weight',
-                                        'se', 'dse', 'warning'])
+                               columns=['waic', 'pwaic', 'dwaic', 'weight','se', 'dse', 'warning'])
 
     elif ic == 'loo':
         ic_func = loo
         df_comp = pd.DataFrame(index=names,
-                               columns=['loo', 'ploo', 'dloo', 'weight',
-                                        'se', 'dse', 'warning'])
+                               columns=['loo', 'ploo', 'dloo', 'weight', 'se', 'dse', 'warning'])
 
     else:
-        raise NotImplementedError(
-            'The information criterion {} is not supported.'.format(ic))
+        raise NotImplementedError('The information criterion {} is not supported.'.format(ic))
 
     if len(set([len(m.observed_RVs) for m in model_dict])) != 1:
-        raise ValueError(
-            'The number of observed RVs should be the same across all models')
+        raise ValueError('The number of observed RVs should be the same across all models')
 
     if method not in ['stacking', 'BB-pseudo-BMA', 'pseudo-BMA']:
-        raise ValueError('The method {}, to compute weights,'
-                         'is not supported.'.format(method))
+        raise ValueError('The method {}, to compute weights, is not supported.'.format(method))
 
     ic_se = '{}_se'.format(ic)
     p_ic = 'p_{}'.format(ic)
@@ -218,8 +209,8 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
 
 
 def _ic_matrix(ics, ic_i):
-    """Store the previously computed pointwise predictive accuracy values (ics)
-    in a 2D matrix array.
+    """
+    Store the previously computed pointwise predictive accuracy values (ics) in a 2D matrix array.
     """
     N = len(ics[ic_i].iloc[0])
     K = len(ics)
@@ -301,9 +292,9 @@ def loo(trace, model, pointwise=False, reff=None):
     """
     Pareto-smoothed importance sampling leave-one-out cross-validation
     
-    Calculates leave-one-out (LOO) cross-validation for out of sample
-    predictive model fit, following Vehtari et al. (2015). Cross-validation is
-    computed using Pareto-smoothed importance sampling (PSIS).
+    Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
+    following Vehtari et al. (2015). Cross-validation is computed using Pareto-smoothed
+    importance sampling (PSIS).
 
     Parameters
     ----------
@@ -311,12 +302,10 @@ def loo(trace, model, pointwise=False, reff=None):
     model : PyMC Model
         Optional model. Default None, taken from context.
     pointwise: bool, optional
-        if True the pointwise predictive accuracy will be returned.
-        Defaults to False
+        if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
-        relative MCMC efficiency, `effective_n / n` i.e. number of effective
-        samples divided by the number of actual samples. Computed from trace by
-        default.
+        relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
+        the number of actual samples. Computed from trace by default.
 
     Returns
     -------
@@ -346,12 +335,11 @@ def loo(trace, model, pointwise=False, reff=None):
 
     warn_mg = 0
     if np.any(ks > 0.7):
-        warnings.warn("""Estimated shape parameter of Pareto distribution is
-        greater than 0.7 for one or more samples.
-        You should consider using a more robust model, this is because
-        importance sampling is less likely to work well if the marginal
-        posterior and LOO posterior are very different. This is more likely to
-        happen with a non-robust model and highly influential observations.""")
+        warnings.warn("""Estimated shape parameter of Pareto distribution is greater than 0.7 for
+        one or more samples. You should consider using a more robust model, this is because
+        importance sampling is less likely to work well if the marginal posterior and LOO posterior
+        are very different. This is more likely to happen with a non-robust model and highly
+        influential observations.""")
         warn_mg = 1
 
     loo_lppd_i = - 2 * logsumexp(lw, axis=0)
@@ -362,9 +350,8 @@ def loo(trace, model, pointwise=False, reff=None):
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
-            warnings.warn("""The point-wise LOO is the same with the sum LOO,
-            please double check the Observed RV in your model to make sure it
-            returns element-wise logp.
+            warnings.warn("""The point-wise LOO is the same with the sum LOO, please double check
+            the Observed RV in your model to make sure it returns element-wise logp.
             """)
         return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
                             columns=['loo', 'loo_se', 'p_loo', 'warning', 'loo_i'])
@@ -374,13 +361,16 @@ def loo(trace, model, pointwise=False, reff=None):
 
 
 def psislw(lw, reff=1.):
-    """Pareto smoothed importance sampling (PSIS).
+    """
+    Pareto smoothed importance sampling (PSIS).
+
     Parameters
     ----------
     lw : array
         Array of size (n_samples, n_observations)
     reff : float
         relative MCMC efficiency, `effective_n / n`
+
     Returns
     -------
     lw_out : array
@@ -440,13 +430,16 @@ def psislw(lw, reff=1.):
 
 
 def _gpdfit(x):
-    """Estimate the parameters for the Generalized Pareto Distribution (GPD)
+    """
+    Estimate the parameters for the Generalized Pareto Distribution (GPD)
     Empirical Bayes estimate for the parameters of the generalized Pareto
     distribution given the data.
+
     Parameters
     ----------
     x : array
         sorted 1D data array
+
     Returns
     -------
     k : float
@@ -567,9 +560,9 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
 
-        The functions will be given one argument, the samples for a variable as a 2 dimensional
-        array, where the first axis corresponds to sampling iterations and the second axis
-        represents the flattened variable (e.g., x__0, x__1,...). Each function should return either
+        The functions will be given one argument, the samples for a variable as a 2-D array,
+        where the first axis corresponds to sampling iterations and the second axis represents the
+        flattened variable (e.g., x__0, x__1,...). Each function should return either
 
         1) A `pandas.Series` instance containing the result of calculating the statistic along the
            first axis. The name attribute will be taken as the name of the statistic.
@@ -615,7 +608,7 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         ...     return pd.Series(np.std(x, 0), name='sd')
         ...
         >>> def trace_quantiles(x):
-        ...     return pd.DataFrame(pm.quantiles(x, [5, 50, 95]))
+        ...     return pd.DataFrame(pd.quantiles(x, [5, 50, 95]))
         ...
         >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
                      sd         5        50        95
@@ -641,12 +634,14 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
              lambda x: pd.Series(_mc_error(x, batches).round(round_to), name='mc_error'),
              lambda x: pd.DataFrame([hpd(x, alpha)], columns=cnames).round(round_to)]
 
-    circ_funcs = [lambda x: pd.Series(circmean(x, high=np.pi, low=-np.pi, axis=0), name='mean').round(round_to),
+    circ_funcs = [lambda x: pd.Series(circmean(x, high=np.pi, low=-np.pi, axis=0),
+                                      name='mean').round(round_to),
                   lambda x: pd.Series(circstd(x, high=np.pi, low=-np.pi, axis=0),
                                       name='sd').round(round_to),
                   lambda x: pd.Series(_mc_error(x, batches, circular=True).round(
                       round_to), name='mc_error'),
-                  lambda x: pd.DataFrame([hpd(x, alpha, circular=True)], columns=cnames).round(round_to)]
+                  lambda x: pd.DataFrame([hpd(x, alpha, circular=True)],
+                                         columns=cnames).round(round_to)]
 
     if stat_funcs is not None:
         if extend:
@@ -730,10 +725,11 @@ def _mc_error(x, batches=5, circular=False):
 
 
 def waic(trace, model, pointwise=False):
-    """Calculate the widely available information criterion, its standard error
-    and the effective number of parameters of the samples in trace from model.
-    Read more theory here - in a paper by some of the leading authorities on
-    model selection - dx.doi.org/10.1111/1467-9868.00353
+    """
+    Calculate the widely available information criterion, its standard error and the effective
+    number of parameters of the samples in trace from model.
+    Read more theory here - in a paper by some of the leading authorities on model selection
+    dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
@@ -761,9 +757,9 @@ def waic(trace, model, pointwise=False):
     vars_lpd = np.var(log_py, axis=0)
     warn_mg = 0
     if np.any(vars_lpd > 0.4):
-        warnings.warn("""For one or more samples the posterior variance of the
-        log predictive densities exceeds 0.4. This could be indication of
-        WAIC starting to fail see http://arxiv.org/abs/1507.04544 for details
+        warnings.warn("""For one or more samples the posterior variance of the log predictive
+        densities exceeds 0.4. This could be indication of WAIC starting to fail see
+        http://arxiv.org/abs/1507.04544 for details
         """)
         warn_mg = 1
 
@@ -774,9 +770,8 @@ def waic(trace, model, pointwise=False):
 
     if pointwise:
         if np.equal(waic, waic_i).all():
-            warnings.warn("""The point-wise WAIC is the same with the sum WAIC,
-            please double check the Observed RV in your model to make sure it
-            returns element-wise logp.
+            warnings.warn("""The point-wise WAIC is the same with the sum WAIC, please double check
+            the Observed RV in your model to make sure it returns element-wise logp.
             """)
         return pd.DataFrame([[waic, waic_se, p_waic, warn_mg, waic_i]],
                             columns=['waic', 'waic_se', 'p_waic', 'warning', 'waic_i'])
