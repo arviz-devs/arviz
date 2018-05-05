@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
-from arviz.utils import trace_to_dataframe, get_varnames, get_stats
+import numpy as np
+from ..utils import trace_to_dataframe, get_varnames, get_stats
+from .plot_utils import _scale_text
 
 
-def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, colornd='k',
-                 colord='C1', shadend=.025, ax=None):
+def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True, colornd='k',
+                 colord='C1', shadend=.025, skip_first=0, ax=None):
     """
     A parallel coordinates plot showing posterior points with and without divergences
 
@@ -16,8 +18,8 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, c
         of the plotted variables
     figsize : figure size tuple
         If None, size is (12 x 6)
-    textsize : int
-        Text size of the axis ticks (Default:14)
+    textsize: int
+        Text size for labels. If None it will be autoscaled based on figsize.
     legend : bool
         Flag for plotting legend (defaults to True)
     colornd : valid matplotlib color
@@ -27,7 +29,8 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, c
     shadend : float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
-        
+    skip_first : int, optional
+        Number of first samples not shown in plots (burn-in).
     ax : axes
         Matplotlib axes.
 
@@ -35,8 +38,8 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, c
     -------
     ax : matplotlib axes
     """
-    divergent = get_stats(trace, 'diverging')
-    trace = trace_to_dataframe(trace)
+    divergent = get_stats(trace[skip_first:], 'diverging')
+    trace = trace_to_dataframe(trace[skip_first:])
     varnames = get_varnames(trace, varnames)
 
     if len(varnames) < 2:
@@ -47,11 +50,15 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, c
     if figsize is None:
         figsize = (12, 6)
 
+    if textsize is None:
+        textsize, _, _ = _scale_text(figsize, textsize=textsize, f=1)
+
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
     ax.plot(trace.values[divergent == 0].T, color=colornd, alpha=shadend)
-    ax.plot(trace.values[divergent == 1].T, color=colord, lw=1)
+    if np.any(divergent):
+        ax.plot(trace.values[divergent == 1].T, color=colord, lw=1)
 
     ax.tick_params(labelsize=textsize)
     ax.set_xticks(range(trace.shape[1]))
@@ -59,7 +66,8 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=14, legend=True, c
 
     if legend:
         ax.plot([], color=colornd, label='non-divergent')
-        ax.plot([], color=colord, label='divergent')
+        if np.any(divergent):
+            ax.plot([], color=colord, label='divergent')
         ax.legend(fontsize=textsize)
 
     return ax

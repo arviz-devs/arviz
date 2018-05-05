@@ -53,5 +53,5 @@ def test_pairplot():
              marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
     pairplot(short_trace, divergences=True, marker='x',
              kwargs_divergences={'marker': '*', 'c': 'C'})
-    pairplot(short_trace, hexbin=True, varnames=['theta__0', 'theta__1'],
-             cmap='viridis', text_size=20)
+    pairplot(short_trace, kind='hexbin', varnames=['theta__0', 'theta__1'],
+             cmap='viridis', textsize=20)

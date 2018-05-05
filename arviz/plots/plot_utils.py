@@ -2,11 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def identity_transform(x):
-    """f(x) = x"""
-    return x
-
-
 def get_axis(ax, default_rows, default_columns, **default_kwargs):
     """Verifies the provided axis is of the correct shape, and creates one if needed.
 
@@ -37,17 +32,15 @@ def make_2d(a):
     a = a.reshape((n, newshape), order='F')
     return a
 
+def _scale_text(figsize, textsize, f=2):
+    """Scale text and linewidth to figsize."""
 
-def _scale_text(figsize, text_size):
-    """Scale text to figsize."""
+    if textsize is None and figsize is not None:
+        textsize = figsize[0] * f
 
-    if text_size is None and figsize is not None:
-        if figsize[0] <= 11:
-            return 12
-        else:
-            return figsize[0]
-    else:
-        return text_size
+    lw = textsize / 8
+    ms = textsize / 2
+    return textsize, lw, ms
 
 def get_bins(x, max_bins=50, n=2):
     """

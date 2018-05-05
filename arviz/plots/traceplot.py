@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..stats import hpd
 from .kdeplot import fast_kde, kdeplot
-from .plot_utils import identity_transform, get_axis, make_2d, get_bins
+from .plot_utils import get_axis, make_2d, get_bins, _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 
 
-def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, lines=None,
-              combined=False, grid=True, shade=0.35, priors=None, prior_shade=1,
-              prior_style='--', bw=4.5, skip_first=0, ax=None):
+def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, combined=False,
+              grid=True, shade=0.35, priors=None, prior_shade=1, prior_style='--', bw=4.5,
+              skip_first=0, ax=None):
     """Plot samples histograms and values.
 
     Parameters
@@ -17,10 +17,10 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
         Posterior samples
     varnames : list of variable names
         Variables to be plotted, if None all variable are plotted
-    transform : callable
-        Function to transform data (defaults to identity)
     figsize : figure size tuple
         If None, size is (12, num of variables * 2) inch
+    textsize: int
+        Text size for labels, titles and lines. If None it will be autoscaled based on figsize.
     lines : dict
         Dictionary of variable name / value  to be overplotted as vertical lines to the posteriors
         and horizontal lines on sample values e.g. mean of posteriors, true values of a simulation.
@@ -59,11 +59,13 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
     ax : matplotlib axes
 
     """
-    trace = trace_to_dataframe(trace, combined)[skip_first:]
+    trace = trace_to_dataframe(trace[skip_first:], combined)
     varnames = get_varnames(trace, varnames)
 
     if figsize is None:
         figsize = (12, len(varnames) * 2)
+
+    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, f=1)
 
     ax = get_axis(ax, len(varnames), 2, squeeze=False, figsize=figsize)
 
@@ -74,22 +76,23 @@ def traceplot(trace, varnames=None, transform=identity_transform, figsize=None, 
             prior = None
 
         d = trace[v].values
-        d = np.squeeze(transform(d))
+        d = np.squeeze(d)
         d = make_2d(d)
         width = len(d)
         if d.dtype.kind == 'i':
-            hist_objs = _histplot_op(
-                ax[i, 0], d, shade, prior, prior_shade, prior_style)
+            hist_objs = _histplot_op(ax[i, 0], d, shade, prior, prior_shade, prior_style)
             colors = [h[-1][0].get_facecolor() for h in hist_objs]
         else:
-            artists = _kdeplot_op(ax[i, 0], d, bw, prior, prior_shade, prior_style)[0]
+            artists = _kdeplot_op(ax[i, 0], d, bw, linewidth, prior, prior_shade, prior_style)[0]
             colors = [a[0].get_color() for a in artists]
-        ax[i, 0].set_title(v)
+        ax[i, 0].set_title(v, fontsize=textsize)
         ax[i, 0].grid(grid)
-        ax[i, 1].set_title(v)
-        ax[i, 1].plot(range(width), d, alpha=shade)
+        ax[i, 1].set_title(v, fontsize=textsize)
+        ax[i, 1].plot(range(width), d, lw=linewidth, alpha=shade)
 
         ax[i, 0].set_yticks([])
+        ax[i, 0].tick_params(labelsize=textsize)
+        ax[i, 1].tick_params(labelsize=textsize)
 
         if lines:
             try:
@@ -130,7 +133,7 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
     return hs
 
 
-def _kdeplot_op(ax, data, bw, prior=None, prior_shade=1, prior_style='--'):
+def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style='--'):
     """Get a list of density and likelihood plots, if a prior is provided."""
     ls = []
     pls = []
@@ -139,7 +142,7 @@ def _kdeplot_op(ax, data, bw, prior=None, prior_shade=1, prior_style='--'):
         try:
             density, l, u = fast_kde(d, bw)
             x = np.linspace(l, u, len(density))
-            ls.append(ax.plot(x, density))
+            ls.append(ax.plot(x, density, lw=linewidth))
             if prior is not None:
                 x_sample = prior.rvs(10000)
                 x = np.linspace(x_sample.min(), x_sample.max(), 1000)
