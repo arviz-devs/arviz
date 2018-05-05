@@ -56,8 +56,8 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    series = [(shade[0], color_shade[0], 'Marginal energy distribution', energy - energy.mean()),
-              (shade[1], color_shade[1], 'Energy transition distribution', np.diff(energy))]
+    series = [(shade[0], color_shade[0], 'Marginal energy', energy - energy.mean()),
+              (shade[1], color_shade[1], 'Energy transition', np.diff(energy))]
 
     if kind == 'kde':
         for shade, color, label, value in series:
