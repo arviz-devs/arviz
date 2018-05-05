@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import kdeplot
+from ..stats.stats import bfmi as e_bfmi
 from ..utils.utils import get_stats
 
 
-def energyplot(trace, kind='kde', figsize=None, legend=True, shade=(1, .75),
+def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1, .75),
                color_shade=('C0', 'C7'), bw=4.5, kwargs_shade=None, ax=None, **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
@@ -16,6 +17,8 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=(1, .75),
         Posterior samples
     kind : str
         Type of plot to display (kde or histogram)
+    bfmi : bool
+        If True add to the plot the value of the estimated Bayesian fraction of missing information
     figsize : figure size tuple
         If None, size is (8 x 6)
     legend : bool
@@ -66,6 +69,10 @@ def energyplot(trace, kind='kde', figsize=None, legend=True, shade=(1, .75),
 
     else:
         raise ValueError('Plot type {} not recognized.'.format(kind))
+
+    if bfmi:
+        for idx, v in enumerate(e_bfmi(trace)):
+            plt.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, v), alpha=0)
 
     ax.set_xticks([])
     ax.set_yticks([])
