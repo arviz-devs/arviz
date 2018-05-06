@@ -5,12 +5,12 @@ from . import kdeplot
 from .kdeplot import fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
-from .plot_utils import identity_transform, _scale_text
+from .plot_utils import  _scale_text
 
 
-def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=None, textsize=14,
-                  alpha=0.05, round_to=1, point_estimate='mean', rope=None, ref_val=None,
-                  kind='kde', bw=4.5, bins=None, skip_first=0, ax=None, **kwargs):
+def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05, round_to=1,
+                  point_estimate='mean', rope=None, ref_val=None, kind='kde', bw=4.5, bins=None,
+                  skip_first=0, ax=None, **kwargs):
     """
     Plot Posterior densities in the style of John K. Kruschke's book.
 
@@ -20,14 +20,13 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         Posterior samples
     varnames : list of variable names
         Variables to be plotted, if None all variable are plotted
-    transform : callable
-        Function to transform data (defaults to identity)
     figsize : tuple
         Figure size. If None, size is (12, num of variables * 2)
-    textsize : int
-        Text size of the point_estimates, axis ticks, and HPD (Default:14)
-    alpha : float
-        Defines range for High Posterior Density
+    textsize: int
+        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled 
+        based on figsize.
+    alpha : float, optional
+        Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
     round_to : int
         Controls formatting for floating point numbers
     point_estimate: str
@@ -38,15 +37,15 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         display the percentage below and above the values in ref_val. If a list is provided, its
         length should match the number of variables.
     kind: str
-        `kde` or `hist`. The former will plot a KDE, the last one a histogram. For discrete
-        variables a this argument is ignored and a histogram is always used.
+        Type of plot to display (kde or hist) For discrete variables this argument is ignored and
+        a histogram is always used.
     bw : float
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy). Only works if `kind == kde` is True.
+        of thumb (the default rule used by SciPy). Only works if `kind == kde`.
     bins : integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
-        if `kind == hist` is True. If None (default) it will use `auto` for continuous variables and
+        if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
@@ -61,14 +60,19 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
 
     """
 
-    trace = trace_to_dataframe(trace, combined=True)[skip_first:]
+    trace = trace_to_dataframe(trace[skip_first:], combined=True)
 
     if varnames is not None:
         varnames = expand_variable_names(trace, varnames)
         trace = trace[varnames]
 
+    if figsize is None:
+        figsize = (8, 8)
+
     if ax is None:
         fig, ax = _create_axes_grid(figsize, trace)
+
+    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
     var_num = trace.shape[1]
     if ref_val is None:
@@ -82,19 +86,17 @@ def posteriorplot(trace, varnames=None, transform=identity_transform, figsize=No
         rope = [rope] * var_num
 
     for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
-        tr_values = transform(trace[v])
-
-        _plot_posterior_op(tr_values, ax=a, bw=bw, bins=bins, kind=kind, point_estimate=point_estimate,
-                           round_to=round_to, alpha=alpha, ref_val=ref_val[idx], rope=rope[idx],
-                           textsize=_scale_text(figsize, textsize), **kwargs)
-        a.set_title(v, fontsize=_scale_text(figsize, textsize))
+        _plot_posterior_op(trace[v], ax=a, bw=bw, linewidth=linewidth, bins=bins, kind=kind,
+                           point_estimate=point_estimate, round_to=round_to, alpha=alpha,
+                           ref_val=ref_val[idx], rope=rope[idx], textsize=textsize, **kwargs)
+        a.set_title(v, fontsize=textsize)
 
     plt.tight_layout()
     return ax
 
 
-def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_to, alpha, ref_val, rope,
-                       textsize=16, **kwargs):
+def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estimate, round_to,
+                       alpha, ref_val, rope, textsize, **kwargs):
     """
     Artist to draw posterior.
     """
@@ -107,15 +109,14 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
         ref_in_posterior = "{} <{:g}< {}".format(format_as_percent(less_than_ref_probability, 1),
                                                  ref_val,
                                                  format_as_percent(greater_than_ref_probability, 1))
-        ax.axvline(ref_val, ymin=0.02, ymax=.75, color='C1', linewidth=4, alpha=0.65)
+        ax.axvline(ref_val, ymin=0.02, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
         ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
-                horizontalalignment='center')
+                color='C1', horizontalalignment='center')
 
     def display_rope(rope):
-        ax.plot(rope, (plot_height * 0.02, plot_height * 0.02),
-                linewidth=20, color='C2', alpha=0.75)
-        text_props = dict(
-            size=textsize, horizontalalignment='center', color='C2')
+        ax.plot(rope, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*5, color='C2',
+                alpha=0.75)
+        text_props = dict(size=textsize, horizontalalignment='center', color='C2')
         ax.text(rope[0], plot_height * 0.14, rope[0], **text_props)
         ax.text(rope[1], plot_height * 0.14, rope[1], **text_props)
 
@@ -136,21 +137,20 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
                 point_value = mode(trace_values.round(round_to))[0][0]
         elif point_estimate == 'median':
             point_value = np.median(trace_values)
-        point_text = '{point_estimate}={point_value:.{round_to}f}'.format(point_estimate=point_estimate,
-                                                                          point_value=point_value, round_to=round_to)
+        point_text = '{}={:.{}f}'.format(point_estimate, point_value, round_to)
 
-        ax.text(point_value, plot_height * 0.8, point_text,
-                size=textsize, horizontalalignment='center')
+        ax.text(point_value, plot_height * 0.8, point_text, size=textsize,
+                horizontalalignment='center')
 
     def display_hpd():
         hpd_intervals = hpd(trace_values, alpha=alpha)
-        ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), linewidth=4, color='k')
+        ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth, color='k')
         ax.text(hpd_intervals[0], plot_height * 0.07,
                 hpd_intervals[0].round(round_to),
-                size=textsize, horizontalalignment='right')
+                size=textsize, horizontalalignment='center')
         ax.text(hpd_intervals[1], plot_height * 0.07,
                 hpd_intervals[1].round(round_to),
-                size=textsize, horizontalalignment='left')
+                size=textsize, horizontalalignment='center')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.2,
                 format_as_percent(1 - alpha) + ' HPD',
                 size=textsize, horizontalalignment='center')
@@ -171,8 +171,7 @@ def _plot_posterior_op(trace_values, ax, bw, bins, kind, point_estimate, round_t
             d[key] = value
 
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
-        kdeplot(trace_values, alpha=kwargs.pop(
-            'alpha', 1), bw=bw, ax=ax, **kwargs)
+        kdeplot(trace_values, alpha=kwargs.pop('alpha', 1), bw=bw, ax=ax, lw=linewidth, **kwargs)
 
     else:
         if bins is None:

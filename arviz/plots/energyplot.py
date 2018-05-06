@@ -1,18 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import kdeplot
-from ..stats.stats import bfmi as e_bfmi
-from ..utils.utils import get_stats
+from ..stats import bfmi as e_bfmi
+from ..utils import get_stats
 
 
 def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1, .75),
-               color_shade=('C0', 'C7'), bw=4.5, kwargs_shade=None, ax=None, **kwargs):
+               color_shade=('C0', 'C7'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
+               **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
 
     Parameters
     ----------
-
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
     kind : str
@@ -33,20 +33,22 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy). Only works if `kind='kde'`
-    ax : axes
-        Matplotlib axes.
+    skip_first : int
+        Number of first samples not shown in plots (burn-in).
     kwargs_shade : dicts, optional
         Additional keywords passed to `fill_between` (to control the shade)
+    ax : axes
+        Matplotlib axes.
+
     Returns
     -------
-
     ax : matplotlib axes
     """
 
-    energy = get_stats(trace, 'energy')
+    energy = get_stats(trace[skip_first:], 'energy')
 
     if figsize is None:
-        figsize = (8, 6)
+        figsize = (6, 6)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -54,8 +56,8 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    series = [(shade[0], color_shade[0], 'Marginal energy distribution', energy - energy.mean()),
-              (shade[1], color_shade[1], 'Energy transition distribution', np.diff(energy))]
+    series = [(shade[0], color_shade[0], 'Marginal energy', energy - energy.mean()),
+              (shade[1], color_shade[1], 'Energy transition', np.diff(energy))]
 
     if kind == 'kde':
         for shade, color, label, value in series:

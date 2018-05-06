@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import fast_kde
 from ..stats import hpd
-from ..utils.utils import trace_to_dataframe, expand_variable_names
-
+from ..utils import trace_to_dataframe, expand_variable_names
+from .plot_utils import _scale_text
 
 def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
                 colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
-                textsize=12, skip_first=0, ax=None):
+                textsize=None, skip_first=0, ax=None):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -47,8 +47,8 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         of thumb (the default rule used by SciPy).
     figsize : tuple
         Figure size. If None, size is (6, number of variables * 2)
-    textsize : int
-        Text size of the legend. Default 12.
+    textsize: int
+        Text size for labels and legend. If None it will be autoscaled based on figsize.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     ax : axes
@@ -61,9 +61,9 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
 
     """
     if not isinstance(trace, (list, tuple)):
-        trace = [trace_to_dataframe(trace, combined=True)][skip_first:]
+        trace = [trace_to_dataframe(trace[skip_first:], combined=True)]
     else:
-        trace = [trace_to_dataframe(tr, combined=True) for tr in trace][skip_first:]
+        trace = [trace_to_dataframe(tr[skip_first:], combined=True) for tr in trace]
 
     if point_estimate not in ('mean', 'median', None):
         raise ValueError("Point estimate should be 'mean', 'median' or None")
@@ -99,6 +99,11 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
             v_tmp.extend(expand_variable_names(tr, varnames))
         varnames = np.unique(v_tmp)
 
+    if figsize is None:
+        figsize = (6, len(varnames) * 2)
+
+    textsize, lw, ms = _scale_text(figsize, textsize=textsize)
+
     fig, dplot = plt.subplots(len(varnames), 1, squeeze=False, figsize=figsize)
     dplot = dplot.flatten()
 
@@ -106,12 +111,12 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         for t_idx, tr in enumerate(trace):
             if vname in tr.columns:
                 vec = tr[vname].values
-                _d_helper(vec, vname, colors[t_idx], bw, alpha, point_estimate,
+                _d_helper(vec, vname, colors[t_idx], bw, textsize, lw, ms, alpha, point_estimate,
                           hpd_markers, outline, shade, dplot[v_idx])
 
     if length_trace > 1:
         for m_idx, m in enumerate(models):
-            dplot[0].plot([], label=m, c=colors[m_idx])
+            dplot[0].plot([], label=m, c=colors[m_idx], markersize=ms)
         dplot[0].legend(fontsize=textsize)
 
     fig.tight_layout()
@@ -119,7 +124,8 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     return dplot
 
 
-def _d_helper(vec, vname, c, bw, alpha, point_estimate, hpd_markers, outline, shade, ax):
+def _d_helper(vec, vname, c, bw, textsize, lw, ms, alpha, point_estimate, hpd_markers, outline,
+              shade, ax):
     """
     vec : array
         1D array from trace
@@ -152,9 +158,9 @@ def _d_helper(vec, vname, c, bw, alpha, point_estimate, hpd_markers, outline, sh
         ymax = density[cut][-1]
 
         if outline:
-            ax.plot(x[cut], density[cut], color=c)
-            ax.plot([xmin, xmin], [-ymin/100, ymin], color=c, ls='-')
-            ax.plot([xmax, xmax], [-ymax/100, ymax], color=c, ls='-')
+            ax.plot(x[cut], density[cut], color=c, lw=lw)
+            ax.plot([xmin, xmin], [-ymin/100, ymin], color=c, ls='-', lw=lw)
+            ax.plot([xmax, xmax], [-ymax/100, ymax], color=c, ls='-', lw=lw)
 
         if shade:
             ax.fill_between(x, density, where=cut, color=c, alpha=shade)
@@ -168,17 +174,18 @@ def _d_helper(vec, vname, c, bw, alpha, point_estimate, hpd_markers, outline, sh
             ax.hist(vec, bins=bins, color=c, alpha=shade)
 
     if hpd_markers:
-        ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k')
-        ax.plot(xmax, 0, 'v', color=c, markeredgecolor='k')
+        ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k', markersize=ms)
+        ax.plot(xmax, 0, 'v', color=c, markeredgecolor='k', markersize=ms)
 
     if point_estimate is not None:
         if point_estimate == 'mean':
             ps = np.mean(vec)
         elif point_estimate == 'median':
             ps = np.median(vec)
-        ax.plot(ps, -0.001, 'o', color=c, markeredgecolor='k')
+        ax.plot(ps, -0.001, 'o', color=c, markeredgecolor='k', markersize=ms)
 
     ax.set_yticks([])
     ax.set_title(vname)
     for pos in ['left', 'right', 'top']:
         ax.spines[pos].set_visible(0)
+    ax.tick_params(labelsize=textsize)
