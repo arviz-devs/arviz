@@ -57,7 +57,8 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     plot_kwargs : dict, optional
-        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`, `marker`.
+        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`, `marker`
+        and `markersize`.
     gs : GridSpec
         Matplotlib GridSpec object. Defaults to None.
 
@@ -115,7 +116,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
     if figsize is None:
         figsize = (6, len(varnames) * 2)
 
-    textsize, linewidth, mew = _scale_text(figsize, textsize=textsize)
+    textsize, linewidth, ms = _scale_text(figsize, textsize=textsize)
 
     fig = plt.figure(figsize=figsize)
 
@@ -199,15 +200,15 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
                     interval_plot = _plot_tree(interval_plot, y, quants,
                                                quartiles, colors[h],
                                                linewidth,
-                                               mew,
+                                               ms,
                                                plot_kwargs)
 
                 # Genenerate Gelman-Rubin plot
                 if plot_rhat[h] and v in tr.columns:
-                    gr_rhat.plot(min(R[v], 2), -var, 'o', color=colors[h], markersize=mew)
+                    gr_rhat.plot(min(R[v], 2), -var, 'o', color=colors[h], markersize=ms)
                 # Genenerate effective sample size plot
                 if plot_neff[h] and v in tr.columns:
-                    gr_neff.plot(n_e[v], -var, 'o', color=colors[h], markersize=mew)
+                    gr_neff.plot(n_e[v], -var, 'o', color=colors[h], markersize=ms)
 
                 var += 1
 
@@ -242,7 +243,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
 
     # Add variable labels
     interval_plot.set_yticks([- l for l in range(len(labels))])
-    interval_plot.set_yticklabels(labels, fontsize=plot_kwargs.get('fontsize', None))
+    interval_plot.set_yticklabels(labels, fontsize=plot_kwargs.get('fontsize', textsize))
 
     # Add title
     if main is None:
@@ -252,7 +253,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
     else:
         plot_title = ""
 
-    interval_plot.set_title(plot_title, fontsize=textsize)
+    interval_plot.set_title(plot_title, fontsize=plot_kwargs.get('fontsize', textsize))
 
     # Add x-axis label
     if xtitle is not None:
@@ -278,7 +279,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
     return gs
 
 
-def _plot_tree(ax, y, ntiles, show_quartiles, c, linewidth, mew, plot_kwargs):
+def _plot_tree(ax, y, ntiles, show_quartiles, c, linewidth, ms, plot_kwargs):
     """Helper to plot errorbars for the forestplot.
 
     Parameters
@@ -303,12 +304,15 @@ def _plot_tree(ax, y, ntiles, show_quartiles, c, linewidth, mew, plot_kwargs):
 
     if show_quartiles:
         # Plot quartile interval
-        ax.errorbar(x=(ntiles[1], ntiles[3]), y=(y, y), lw=linewidth * 2, color=c, zorder=1)
+        ax.errorbar(x=(ntiles[1], ntiles[3]), y=(y, y),
+                    lw=plot_kwargs.get('linewidth', linewidth * 2), color=c, zorder=1)
         # Plot median
-        ax.plot(ntiles[2], y, color='k', marker=plot_kwargs.get('marker', '.'), markersize=mew, zorder=2)
+        ax.plot(ntiles[2], y, color='w', mec=c, marker=plot_kwargs.get('marker', 'o'),
+                ms=plot_kwargs.get('markersize', ms), zorder=2)
 
     else:
         # Plot median
-        ax.plot(ntiles[1], y, color='k', marker=plot_kwargs.get('marker', '.'), markersize=mew, zorder=2)
+        ax.plot(ntiles[1], y, color='w', mec=c, marker=plot_kwargs.get('marker', 'o'),
+                ms=plot_kwargs.get('markersize', ms), zorder=2)
 
     return ax
