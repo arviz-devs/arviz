@@ -35,4 +35,4 @@ xtick.minor.size: 0
 ytick.minor.size: 0
 
 # color-blind friendly cycle designed using https://colorcyclepicker.mpetroff.net/
-axes.prop_cycle: cycler('color', ['1f77b4', 'fa7c17', '16951a', '902279', 'e6e135', 'ab100a', 'f42ebd', '58d4e1', '5acd7a', 'c06369'])
+axes.prop_cycle: cycler('color', ['2a2eec', 'fa7c17', '328c06', 'c10c90', '933708', '65e5f3', 'e6e135', '1ccd6a', 'bd8ad5', 'b16b57'])

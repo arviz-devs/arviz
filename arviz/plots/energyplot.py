@@ -6,7 +6,7 @@ from ..utils import get_stats
 
 
 def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1, .75),
-               color_shade=('C0', 'C7'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
+               color_shade=('C0', 'C5'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
                **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
@@ -28,7 +28,7 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
         (no shade) and 1 (opaque). Defaults to (1, .75)
     color_shade : tuple of valid matplotlib color
         Color for Marginal energy distribution and Energy transition distribution.
-        Defaults to ('C0', 'C7')
+        Defaults to ('C0', 'C5')
     bw : float
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
