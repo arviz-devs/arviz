@@ -9,3 +9,4 @@ from .posteriorplot import posteriorplot
 from .traceplot import traceplot
 from .pairplot import pairplot
 from .jointplot import jointplot
+from .khatplot import khatplot

@@ -298,3 +298,35 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
         return np.array(zscores[0])
     else:
         return np.array(zscores)
+
+
+def ks_summary(ks):
+    """
+    Display a summary of Paretto tail indices.
+
+    Parameters
+    ----------
+    ks : array
+      Paretto tail indices.
+
+    Returns
+    -------
+    df_k : dataframe
+      Dataframe containing k diagnostic values.
+    """
+    kcounts, _ = np.histogram(ks, bins=[-np.Inf, .5, .7, 1, np.Inf])
+    kprop = kcounts/len(ks)*100
+    df_k = (pd.DataFrame(dict(_=['(good)', '(ok)', '(bad)', '(very bad)'],
+                              Count=kcounts,
+                              Pct=kprop))
+            .rename(index={0: '(-Inf, 0.5]',
+                           1: ' (0.5, 0.7]',
+                           2: '   (0.7, 1]',
+                           3: '   (1, Inf)'}))
+
+    if np.sum(kcounts[1:]) == 0:
+        print("All Pareto k estimates are good (k < 0.5)")
+    elif np.sum(kcounts[2:]) == 0:
+        print("All Pareto k estimates are ok (k < 0.7)")
+
+    return df_k
