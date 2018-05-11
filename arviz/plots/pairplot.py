@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ..utils import trace_to_dataframe, get_stats, get_varnames
 from .plot_utils import _scale_text
 
 
 def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', gridsize='auto',
-             divergences=False, skip_first=0, gs=None, ax=None, kwargs_divergences=None, **kwargs):
+             colorbar=False, divergences=False, skip_first=0, gs=None, ax=None,
+             kwargs_divergences=None, **kwargs):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
@@ -28,6 +30,9 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
+    colorbar : bool
+        If True a colorbar will be included as part of the plot (Defaults to False).
+        Only works when kind=hexbin
     divergences : Boolean
         If True divergences will be plotted in a diferent color
     skip_first : int
@@ -75,9 +80,12 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         if kind == 'scatter':
             ax.scatter(trace[varnames[0]], trace[varnames[1]], s=ms, **kwargs)
         else:
-            ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
-                      **kwargs)
+            hb = ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
+                           **kwargs)
             ax.grid(False)
+            if colorbar:
+                cbar = plt.colorbar(hb, ticks=[hb.norm.vmin, hb.norm.vmax], ax=ax)
+                cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
 
         if divergences:
             ax.scatter(trace[varnames[0]][divergent], trace[varnames[1]][divergent],
@@ -91,6 +99,7 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         plt.figure(figsize=figsize)
         gs = gridspec.GridSpec(numvars - 1, numvars - 1)
 
+        axs = []
         for i in range(0, numvars - 1):
             var1 = trace[varnames[i]]
 
@@ -102,8 +111,20 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
                 if kind == 'scatter':
                     ax.scatter(var1, var2, s=ms, **kwargs)
                 else:
-                    ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
                     ax.grid(False)
+                    if i == j == 0 and colorbar:
+                        hb = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                        divider = make_axes_locatable(ax)
+                        cax = divider.append_axes('right', size='7%', pad=0.1)
+                        cbar = plt.colorbar(hb, ticks=[hb.norm.vmin, hb.norm.vmax], cax=cax)
+                        cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
+                        divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
+
+                    else:
+                        ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                        divider = make_axes_locatable(ax)
+                        divider.append_axes('right', size='7%', pad=0.1).set_axis_off()
+                        divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
 
                 if divergences:
                     ax.scatter(var1[divergent], var2[divergent], s=ms, **kwargs_divergences)
@@ -113,11 +134,12 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
                 else:
                     ax.set_xlabel('{}'.format(varnames[i]), fontsize=textsize)
                 if i != 0:
-                    ax.axes.get_xaxis().set_major_formatter(NullFormatter())
+                    ax.axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
                     ax.set_ylabel('{}'.format(varnames[j + 1]), fontsize=textsize)
 
                 ax.tick_params(labelsize=textsize)
+                axs.append(ax)
 
     plt.tight_layout()
     return ax, gs
