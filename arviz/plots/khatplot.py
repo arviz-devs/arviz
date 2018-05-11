@@ -12,7 +12,7 @@ def khatplot(ks, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwa
     ks : array
       Paretto tail indices.
     figsize : figure size tuple
-      If None, size is (10, 6)
+      If None, size is (8, 4)
     textsize: int
       Text size for labels. If None it will be autoscaled based on figsize.
     ax: axes
@@ -27,12 +27,12 @@ def khatplot(ks, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwa
     """
 
     if figsize is None:
-        figsize = (10, 6)
+        figsize = (8, 5)
 
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
+    textsize, linewidth, ms = _scale_text(figsize, textsize=textsize)
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize)
@@ -44,7 +44,8 @@ def khatplot(ks, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwa
     rgba_c = np.zeros((len(ks), 4))
     rgba_c[:, 2] = .8
     rgba_c[:, 3] = alphas
-    ax.scatter(np.arange(len(ks)), ks, c=rgba_c, marker='+')
-    ax.set_xlabel('Data point')
-    ax.set_ylabel(r'Shape parameter $\kappa$')
+    ax.scatter(np.arange(len(ks)), ks, c=rgba_c, marker='+', linewidth=ms)
+    ax.set_xlabel('Data point', fontsize=textsize)
+    ax.set_ylabel(r'Shape parameter $\kappa$', fontsize=textsize)
+    ax.tick_params(labelsize=textsize)
     return ax
