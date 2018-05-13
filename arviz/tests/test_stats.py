@@ -1,9 +1,11 @@
+import copy
+
 import numpy as np
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
 import pandas as pd
 import pymc3 as pm
 from scipy import stats
-import copy
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
+
 from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 

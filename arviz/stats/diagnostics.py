@@ -157,7 +157,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     Parameters
     ----------
     trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. at least 2 chains are needed to compute this diagnostic 
+      Posterior samples. at least 2 chains are needed to compute this diagnostic
     varnames : list
       Names of variables to include in the rhat report
     round_to : int
@@ -257,7 +257,7 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     gewekes = {}
 
     for var in varnames:
-        gewekes[var] = _get_geweke(trace[var].values)
+        gewekes[var] = _get_geweke(trace[var].values, first, last, intervals)
 
     return gewekes
 

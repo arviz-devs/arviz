@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+
 from .plot_utils import get_axis, _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 

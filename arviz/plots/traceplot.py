@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ..stats import hpd
-from .kdeplot import fast_kde, kdeplot
+
+from .kdeplot import fast_kde
 from .plot_utils import get_axis, make_2d, get_bins, _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 

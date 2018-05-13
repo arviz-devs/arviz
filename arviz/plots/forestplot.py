@@ -118,7 +118,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
 
     textsize, linewidth, ms = _scale_text(figsize, textsize=textsize)
 
-    fig = plt.figure(figsize=figsize)
+    plt.figure(figsize=figsize)
 
     if gs is None:
         nsp = 1

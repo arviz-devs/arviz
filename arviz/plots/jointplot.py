@@ -1,6 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
+
 from .kdeplot import kdeplot
 from ..utils import trace_to_dataframe
 from .plot_utils import _scale_text, get_bins

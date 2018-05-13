@@ -23,7 +23,7 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
     figsize : tuple
         Figure size. If None, size is (12, num of variables * 2)
     textsize: int
-        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled 
+        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
         based on figsize.
     alpha : float, optional
         Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
@@ -70,7 +70,7 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
         figsize = (8, 8)
 
     if ax is None:
-        fig, ax = _create_axes_grid(figsize, trace)
+        _, ax = _create_axes_grid(figsize, trace)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 

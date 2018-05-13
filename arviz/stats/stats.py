@@ -1,11 +1,13 @@
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
-from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
-from .diagnostics import effective_n, gelman_rubin
 from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
+
+from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
+from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
 
@@ -155,8 +157,8 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
 
         theta = np.full(Km, 1. / K)
         bounds = [(0., 1.) for i in range(Km)]
-        constraints = [{'type': 'ineq', 'fun': lambda x: -np.sum(x) + 1.},
-                       {'type': 'ineq', 'fun': lambda x: np.sum(x)}]
+        constraints = [{'type': 'ineq', 'fun': lambda x: 1. - np.sum(x)},
+                       {'type': 'ineq', 'fun': np.sum}]
 
         w = minimize(fun=log_score,
                      x0=theta,
@@ -231,7 +233,7 @@ def _ic_matrix(ics, ic_i):
 
 def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     """
-    Calculate highest posterior density (HPD) of array for given alpha. 
+    Calculate highest posterior density (HPD) of array for given alpha.
 
     The HPD is the minimum width Bayesian credible interval (BCI). This implementation works only
     for unimodal distributions.
@@ -245,7 +247,7 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     transform : callable
         Function to transform data (defaults to identity)
     circular : bool, optional
-        Whether to compute the error taking into account `x` is a circular variable 
+        Whether to compute the error taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
 
     Returns
@@ -293,7 +295,7 @@ def _hpd_df(x, alpha):
 def loo(trace, model, pointwise=False, reff=None):
     """
     Pareto-smoothed importance sampling leave-one-out cross-validation
-    
+
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
     following Vehtari et al. (2015). Cross-validation is computed using Pareto-smoothed
     importance sampling (PSIS).
@@ -315,7 +317,7 @@ def loo(trace, model, pointwise=False, reff=None):
     loo: approximated Leave-one-out cross-validation
     loo_se: standard error of loo
     p_loo: effective number of parameters
-    shape_warn: 1 if the estimated shape parameter of 
+    shape_warn: 1 if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
     """
@@ -387,7 +389,7 @@ def psislw(lw, reff=1.):
 
     # precalculate constants
     cutoff_ind = - int(np.ceil(min(n / 5., 3 * (n / reff) ** 0.5))) - 1
-    cutoffmin = np.log(np.finfo(float).tiny)
+    cutoffmin = np.log(np.finfo(float).tiny)  #pylint: disable=no-member
     k_min = 1. / 3
 
     # loop over sets of log weights
@@ -473,7 +475,7 @@ def _gpdfit(x):
     # posterior mean for b
     b = np.sum(bs * w)
     # estimate for k
-    k = np.log1p(- b * x).mean()
+    k = np.log1p(-b * x).mean()
     # add prior for k
     k = (n * k + prior_k * 0.5) / (n + prior_k)
     sigma = - k / b
@@ -538,7 +540,7 @@ def r2_score(y_true, y_pred, round_to=2):
 
     r2 = var_y_est / (var_y_est + var_e)
     return pd.Series([np.median(r2), np.mean(r2), np.std(r2)],
-                     index=['r2_median', 'r2_mean', 'r2_std'])
+                     index=['r2_median', 'r2_mean', 'r2_std']).round(decimals=round_to)
 
 
 def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
@@ -653,7 +655,7 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
 
     var_dfs = []
     for var in varnames:
-        vals = np.ravel(trace[var].values)
+        vals = transform(np.ravel(trace[var].values))
         if var in circ_varnames:
             var_df = pd.concat([f(vals) for f in circ_funcs], axis=1)
         else:
@@ -685,7 +687,7 @@ def _mc_error(x, batches=5, circular=False):
     batches : integer
         Number of batches
     circular : bool
-        Whether to compute the error taking into account `x` is a circular variable 
+        Whether to compute the error taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
 
     Returns
@@ -747,7 +749,7 @@ def waic(trace, model, pointwise=False):
     waic: widely available information criterion
     waic_se: standard error of waic
     p_waic: effective number parameters
-    var_warn: 1 if posterior variance of the log predictive 
+    var_warn: 1 if posterior variance of the log predictive
          densities exceeds 0.4
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
     """
@@ -767,16 +769,16 @@ def waic(trace, model, pointwise=False):
 
     waic_i = - 2 * (lppd_i - vars_lpd)
     waic_se = (len(waic_i) * np.var(waic_i))**0.5
-    waic = np.sum(waic_i)
+    waic_sum = np.sum(waic_i)
     p_waic = np.sum(vars_lpd)
 
     if pointwise:
-        if np.equal(waic, waic_i).all():
+        if np.equal(waic_sum, waic_i).all():
             warnings.warn("""The point-wise WAIC is the same with the sum WAIC, please double check
             the Observed RV in your model to make sure it returns element-wise logp.
             """)
-        return pd.DataFrame([[waic, waic_se, p_waic, warn_mg, waic_i]],
+        return pd.DataFrame([[waic_sum, waic_se, p_waic, warn_mg, waic_i]],
                             columns=['waic', 'waic_se', 'p_waic', 'warning', 'waic_i'])
     else:
-        return pd.DataFrame([[waic, waic_se, p_waic, warn_mg, ]],
+        return pd.DataFrame([[waic_sum, waic_se, p_waic, warn_mg, ]],
                             columns=['waic', 'waic_se', 'p_waic', 'warning'])

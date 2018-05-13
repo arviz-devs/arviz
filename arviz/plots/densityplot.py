@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from .kdeplot import fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
@@ -7,7 +8,7 @@ from .plot_utils import _scale_text
 
 def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
                 colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
-                textsize=None, skip_first=0, ax=None):
+                textsize=None, skip_first=0):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -19,7 +20,7 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         Posterior samples
     models : list
         List with names for the models in the list of traces. Useful when
-        plotting more that one trace. 
+        plotting more that one trace.
     varnames: list
         List of variables to plot (defaults to None, which results in all
         variables plotted).
@@ -51,8 +52,6 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         Text size for labels and legend. If None it will be autoscaled based on figsize.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
-    ax : axes
-        Matplotlib axes.
 
     Returns
     -------
@@ -147,7 +146,7 @@ def _d_helper(vec, vname, c, bw, textsize, lw, ms, alpha, point_estimate, hpd_ma
     ax : matplotlib axes
     """
     if vec.dtype.kind == 'f':
-        density, l, u = fast_kde(vec)
+        density, l, u = fast_kde(vec, bw=bw)
         x = np.linspace(l, u, len(density))
         hpd_ = hpd(vec, alpha)
         cut = (x >= hpd_[0]) & (x <= hpd_[1])

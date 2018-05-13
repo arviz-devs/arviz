@@ -1,10 +1,10 @@
-import numpy as np
-import pandas as pd
+import bz2
 import gzip
 import lzma
-import bz2
 import os
 
+import numpy as np
+import pandas as pd
 
 __all__ = ['expand_variable_names', 'get_stats', 'get_varnames', 'log_post_trace',
            'trace_to_dataframe', 'save_trace', 'load_trace']
@@ -16,8 +16,8 @@ def expand_variable_names(trace, varnames):
     """
     tmp = []
     for vtrace in pd.unique(trace.columns):
-        for v in varnames:
-            if '{}__'.format(v) in vtrace or v in vtrace:
+        for varname in varnames:
+            if '{}__'.format(varname) in vtrace or varname in vtrace:
                 tmp.append(vtrace)
     return np.unique(tmp)
 
@@ -83,13 +83,13 @@ def log_post_trace(trace, model):
     if tr_t == 'MultiTrace' and mo_t == 'Model':
         cached = [(var, var.logp_elemwise) for var in model.observed_RVs]
 
-        def logp_vals_point(pt):
+        def logp_vals_point(point):
             if len(model.observed_RVs) == 0:
                 raise ValueError('The model does not contain observed values.')
 
             logp_vals = []
             for var, logp in cached:
-                logp = logp(pt)
+                logp = logp(point)
                 if var.missing_values:
                     logp = logp[~var.observations.mask]
                 logp_vals.append(logp.ravel())
@@ -97,7 +97,7 @@ def log_post_trace(trace, model):
             return np.concatenate(logp_vals)
 
         points = trace.points()
-        logp = (logp_vals_point(pt) for pt in points)
+        logp = (logp_vals_point(point) for point in points)
         return np.stack(logp)
     else:
         raise ValueError('Currently only supports trace and models from PyMC3.')
@@ -115,22 +115,21 @@ def trace_to_dataframe(trace, combined=True):
         be assigned to separate columns.
     """
     if type(trace).__name__ == 'MultiTrace':
-
-        var_shapes = trace._straces[0].var_shapes
+        var_shapes = trace._straces[0].var_shapes  # pylint: disable=protected-access
         varnames = [var for var in var_shapes.keys() if not _is_transformed_name(str(var))]
 
         flat_names = {v: _create_flat_names(v, var_shapes[v]) for v in varnames}
 
         var_dfs = []
-        for v in varnames:
-            vals = trace.get_values(v, combine=combined)
+        for varname in varnames:
+            vals = trace.get_values(varname, combine=combined)
             if isinstance(vals, list):
-                for va in vals:
-                    flat_vals = va.reshape(va.shape[0], -1)
-                    var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
+                for val in vals:
+                    flat_vals = val.reshape(val.shape[0], -1)
+                    var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[varname]))
             else:
                 flat_vals = vals.reshape(vals.shape[0], -1)
-                var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[v]))
+                var_dfs.append(pd.DataFrame(flat_vals, columns=flat_names[varname]))
 
     elif isinstance(trace, pd.DataFrame):
         if combined:
@@ -212,7 +211,7 @@ def save_trace(trace, file_name='trace', compression='gzip', combined=False):
         If True multiple chains will be combined together in the same columns. Otherwise they will
         be assigned to separate columns. Defaults to False
     """
-    trace = trace_to_dataframe(trace, combined=False)
+    trace = trace_to_dataframe(trace, combined=combined)
     trace.to_csv('{}.{}'.format(file_name, compression), compression=compression)
 
 
@@ -230,16 +229,18 @@ def load_trace(filepath, combined=False):
     """
     ext = os.path.splitext(filepath)[1][1:]
     df = pd.read_csv(filepath, index_col=0, compression=ext)
-    if ext == 'gzip':
-        fd = gzip.open(filepath, 'rt')
-    elif ext == 'bz2':
-        fd = bz2.open(filepath, 'rt')
-    elif ext == 'xz':
-        fd = lzma.open(filepath, 'rt')
-    else:
-        fd = open(filepath)
-    line = fd.readline().strip()
-    fd.close()
+    try:
+        if ext == 'gzip':
+            file_descriptor = gzip.open(filepath, 'rt')
+        elif ext == 'bz2':
+            file_descriptor = bz2.open(filepath, 'rt')
+        elif ext == 'xz':
+            file_descriptor = lzma.open(filepath, 'rt')
+        else:
+            file_descriptor = open(filepath)
+        line = file_descriptor.readline().strip()
+    finally:
+        file_descriptor.close()
     df.columns = [i for i in line.split(',') if i]
     if combined:
         df = trace_to_dataframe(df, combined)
