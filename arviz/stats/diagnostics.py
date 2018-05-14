@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import warnings
 from ..utils import trace_to_dataframe, get_varnames
 from scipy.signal import fftconvolve
 
@@ -325,8 +326,8 @@ def ks_summary(ks):
                            3: '   (1, Inf)'}))
 
     if np.sum(kcounts[1:]) == 0:
-        print("All Pareto k estimates are good (k < 0.5)")
+        warnings.warn("All Pareto k estimates are good (k < 0.5)")
     elif np.sum(kcounts[2:]) == 0:
-        print("All Pareto k estimates are ok (k < 0.7)")
+        warnings.warn("All Pareto k estimates are ok (k < 0.7)")
 
     return df_k
