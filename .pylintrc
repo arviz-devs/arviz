@@ -230,6 +230,12 @@ good-names=i,
            k,
            df,
            ax,
+           x,
+           y,
+           bw,
+           dx,
+           mu,
+           tr,
            ex,
            Run,
            _
@@ -434,7 +440,7 @@ known-third-party=enchant
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+max-args=10
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=7

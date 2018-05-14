@@ -194,7 +194,7 @@ def _create_flat_names(varname, shape):
     return ['{}__{}'.format(varname, '_'.join(idxs)) for idxs in zip(*labels)]
 
 
-def save_trace(trace, file_name='trace', compression='gzip', combined=False):
+def save_trace(trace, filename='trace.gzip', compression='gzip', combined=False):
     """
     Save trace to a csv file. Duplicated columns names will be preserved, if any.
 
@@ -212,7 +212,7 @@ def save_trace(trace, file_name='trace', compression='gzip', combined=False):
         be assigned to separate columns. Defaults to False
     """
     trace = trace_to_dataframe(trace, combined=combined)
-    trace.to_csv('{}.{}'.format(file_name, compression), compression=compression)
+    trace.to_csv(filename, compression=compression)
 
 
 def load_trace(filepath, combined=False):

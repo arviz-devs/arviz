@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from .plot_utils import _scale_text
 
 
-def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, textsize=None,
-                plot_kwargs=None, ax=None):
+def compareplot(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_diff=True,
+                figsize=None, textsize=None, plot_kwargs=None, ax=None):
     """
     Summary plot for model comparison.
 
@@ -18,9 +18,9 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, tex
     insample_dev : bool, optional
         plot the in-sample deviance, that is the value of the IC without the penalization given by
         the effective number of parameters (pIC). Defaults to True
-    se : bool, optional
+    plot_standard_error : bool, optional
         plot the standard error of the IC estimate. Defaults to True
-    dse : bool, optional
+    plot_ic_diff : bool, optional
         plot standard error of the difference in IC between each model and the top-ranked model.
         Defaults to True
     figsize : tuple, optional
@@ -54,15 +54,15 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, tex
 
     yticks_labels = [''] * len(yticks_pos)
 
-    ic = 'waic'
-    if ic not in comp_df.columns:
-        ic = 'loo'
+    information_criterion = 'waic'
+    if information_criterion not in comp_df.columns:
+        information_criterion = 'loo'
 
-    if dse:
+    if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]
         yticks_labels[2::2] = comp_df.index[1:]
         ax.set_yticks(yticks_pos)
-        ax.errorbar(x=comp_df[ic].iloc[1:],
+        ax.errorbar(x=comp_df[information_criterion].iloc[1:],
                     y=yticks_pos[1::2],
                     xerr=comp_df.dse[1:],
                     color=plot_kwargs.get('color_dse', 'grey'),
@@ -74,8 +74,8 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, tex
         yticks_labels = comp_df.index
         ax.set_yticks(yticks_pos[::2])
 
-    if se:
-        ax.errorbar(x=comp_df[ic],
+    if plot_standard_error:
+        ax.errorbar(x=comp_df[information_criterion],
                     y=yticks_pos[::2],
                     xerr=comp_df.se,
                     color=plot_kwargs.get('color_ic', 'k'),
@@ -84,7 +84,7 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, tex
                     mew=linewidth,
                     lw=linewidth)
     else:
-        ax.plot(comp_df[ic],
+        ax.plot(comp_df[information_criterion],
                 yticks_pos[::2],
                 color=plot_kwargs.get('color_ic', 'k'),
                 marker=plot_kwargs.get('marker_ic', 'o'),
@@ -93,14 +93,14 @@ def compareplot(comp_df, insample_dev=True, se=True, dse=True, figsize=None, tex
                 lw=0)
 
     if insample_dev:
-        ax.plot(comp_df[ic] - (2 * comp_df['p'+ic]),
+        ax.plot(comp_df[information_criterion] - (2 * comp_df['p'+information_criterion]),
                 yticks_pos[::2],
                 color=plot_kwargs.get('color_insample_dev', 'k'),
                 marker=plot_kwargs.get('marker_insample_dev', 'o'),
                 mew=linewidth,
                 lw=0)
 
-    ax.axvline(comp_df[ic].iloc[0],
+    ax.axvline(comp_df[information_criterion].iloc[0],
                ls=plot_kwargs.get('ls_min_ic', '--'),
                color=plot_kwargs.get('color_ls_min_ic', 'grey'), lw=linewidth)
 

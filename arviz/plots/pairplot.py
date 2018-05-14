@@ -54,9 +54,9 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         raise ValueError('Plot type {} not recognized.'.format(kind))
 
     if divergences:
-        divergent = get_stats(trace[skip_first:] , 'diverging')
+        divergent = get_stats(trace[skip_first:], 'diverging')
 
-    trace = trace_to_dataframe(trace[skip_first:] , combined=True)
+    trace = trace_to_dataframe(trace[skip_first:], combined=True)
     varnames = get_varnames(trace, varnames)
 
     if kwargs_divergences is None:
@@ -71,14 +71,14 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         figsize = (8 + numvars, 8 + numvars)
 
     if textsize is None:
-        textsize, _, ms = _scale_text(figsize, textsize=textsize, f=1.5)
+        textsize, _, markersize = _scale_text(figsize, textsize=textsize, scale_ratio=1.5)
 
     if numvars < 2:
         raise Exception('Number of variables to be plotted must be 2 or greater.')
 
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
-            ax.scatter(trace[varnames[0]], trace[varnames[1]], s=ms, **kwargs)
+            ax.scatter(trace[varnames[0]], trace[varnames[1]], s=markersize, **kwargs)
         else:
             hb = ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
                            **kwargs)
@@ -89,7 +89,7 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
 
         if divergences:
             ax.scatter(trace[varnames[0]][divergent], trace[varnames[1]][divergent],
-                       s=ms, **kwargs_divergences)
+                       s=markersize, **kwargs_divergences)
 
         ax.set_xlabel('{}'.format(varnames[0]), fontsize=textsize)
         ax.set_ylabel('{}'.format(varnames[1]), fontsize=textsize)
@@ -109,7 +109,7 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
                 ax = plt.subplot(gs[j, i])
 
                 if kind == 'scatter':
-                    ax.scatter(var1, var2, s=ms, **kwargs)
+                    ax.scatter(var1, var2, s=markersize, **kwargs)
                 else:
                     ax.grid(False)
                     if i == j == 0 and colorbar:
@@ -127,7 +127,7 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
                         divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
 
                 if divergences:
-                    ax.scatter(var1[divergent], var2[divergent], s=ms, **kwargs_divergences)
+                    ax.scatter(var1[divergent], var2[divergent], s=markersize, **kwargs_divergences)
 
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())

@@ -171,7 +171,12 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
             d[key] = value
 
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
-        kdeplot(trace_values, alpha=kwargs.pop('alpha', 1), bw=bw, ax=ax, lw=linewidth, **kwargs)
+        kdeplot(trace_values,
+                fill_alpha=kwargs.pop('alpha', 1),
+                bw=bw,
+                ax=ax,
+                lw=linewidth,
+                **kwargs)
 
     else:
         if bins is None:

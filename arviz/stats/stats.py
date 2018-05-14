@@ -105,7 +105,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
     if ic == 'waic':
         ic_func = waic
         df_comp = pd.DataFrame(index=names,
-                               columns=['waic', 'pwaic', 'dwaic', 'weight','se', 'dse', 'warning'])
+                               columns=['waic', 'pwaic', 'dwaic', 'weight', 'se', 'dse', 'warning'])
 
     elif ic == 'loo':
         ic_func = loo
@@ -209,7 +209,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
                              round(d_se, round_to),
                              res['warning'])
 
-        return df_comp.sort_values(by=ic)
+    return df_comp.sort_values(by=ic)
 
 
 def _ic_matrix(ics, ic_i):
@@ -700,7 +700,7 @@ def _mc_error(x, batches=5, circular=False):
         dims = np.shape(x)
         trace = np.transpose([t.ravel() for t in x])
 
-        return np.reshape([mc_error(t, batches) for t in trace], dims[1:])
+        return np.reshape([_mc_error(t, batches) for t in trace], dims[1:])
 
     else:
         if batches == 1:

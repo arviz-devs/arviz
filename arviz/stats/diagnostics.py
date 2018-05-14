@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from ..utils import trace_to_dataframe, get_varnames
 from scipy.signal import fftconvolve
+
+from ..utils import trace_to_dataframe, get_varnames
 
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
