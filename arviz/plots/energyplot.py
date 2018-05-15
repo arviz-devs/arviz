@@ -5,8 +5,8 @@ from ..stats import bfmi as e_bfmi
 from ..utils import get_stats
 
 
-def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1, .75),
-               color_shade=('C0', 'C5'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
+def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
+               fill_color=('C0', 'C5'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
                **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
@@ -23,10 +23,10 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
         If None, size is (8 x 6)
     legend : bool
         Flag for plotting legend (defaults to True)
-    shade : tuple of floats
+    fill_alpha : tuple of floats
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to (1, .75)
-    color_shade : tuple of valid matplotlib color
+    fill_color : tuple of valid matplotlib color
         Color for Marginal energy distribution and Energy transition distribution.
         Defaults to ('C0', 'C5')
     bw : float
@@ -56,18 +56,22 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, shade=(1
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    series = [(shade[0], color_shade[0], 'Marginal energy', energy - energy.mean()),
-              (shade[1], color_shade[1], 'Energy transition', np.diff(energy))]
+    series = zip(
+        fill_alpha,
+        fill_color,
+        ('Marginal Energy', 'Energy transition'),
+        (energy - energy.mean(), np.diff(energy))
+    )
 
     if kind == 'kde':
-        for shade, color, label, value in series:
-            kdeplot(value, shade=shade, bw=bw, alpha=0, color_shade=color, ax=ax,
+        for alpha, color, label, value in series:
+            kdeplot(value, fill_alpha=alpha, bw=bw, alpha=0, fill_color=color, ax=ax,
                     kwargs_shade=kwargs_shade, **kwargs)
             plt.plot([], label=label, color=color)
 
     elif kind == 'hist':
-        for shade, color, label, value in series:
-            ax.hist(value, alpha=shade, label=label, color=color, **kwargs)
+        for alpha, color, label, value in series:
+            ax.hist(value, alpha=alpha, label=label, color=color, **kwargs)
 
     else:
         raise ValueError('Plot type {} not recognized.'.format(kind))

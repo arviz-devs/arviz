@@ -1,6 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
+
 from .kdeplot import kdeplot
 from ..utils import trace_to_dataframe
 from .plot_utils import _scale_text, get_bins
@@ -42,10 +42,10 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
     Returns
     -------
     axjoin : matplotlib axes, join (central) distribution
-    axHistx : matplotlib axes, x (top) distribution
-    axHisty : matplotlib axes, y (right) distribution
+    ax_hist_x : matplotlib axes, x (top) distribution
+    ax_hist_y : matplotlib axes, y (right) distribution
     """
-    trace = trace_to_dataframe(trace[skip_first:] , combined=True)
+    trace = trace_to_dataframe(trace[skip_first:], combined=True)
 
     if figsize is None:
         figsize = (6, 6)
@@ -63,7 +63,7 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
 
     plt.figure(figsize=figsize)
 
-    axjoin, axHistx, axHisty = _define_axes()
+    axjoin, ax_hist_x, ax_hist_y = _define_axes()
 
     x_var_name = varnames[0]
     y_var_name = varnames[1]
@@ -87,21 +87,21 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
 
     if x.dtype.kind == 'i':
         bins = get_bins(x)
-        axHistx.hist(x, bins=bins, align='left', density=True,
-                     **marginal_kwargs)
+        ax_hist_x.hist(x, bins=bins, align='left', density=True,
+                       **marginal_kwargs)
     else:
-        kdeplot(x, ax=axHistx, **marginal_kwargs)
+        kdeplot(x, ax=ax_hist_x, **marginal_kwargs)
     if y.dtype.kind == 'i':
         bins = get_bins(y)
-        axHisty.hist(y, bins=bins, align='left', density=True, orientation='horizontal',
-                     **marginal_kwargs)
+        ax_hist_y.hist(y, bins=bins, align='left', density=True, orientation='horizontal',
+                       **marginal_kwargs)
     else:
-        kdeplot(y, ax=axHisty, rotated=True, lw=linewidth, **marginal_kwargs)
+        kdeplot(y, ax=ax_hist_y, rotated=True, lw=linewidth, **marginal_kwargs)
 
-    axHistx.set_xlim(axjoin.get_xlim())
-    axHisty.set_ylim(axjoin.get_ylim())
+    ax_hist_x.set_xlim(axjoin.get_xlim())
+    ax_hist_y.set_ylim(axjoin.get_ylim())
 
-    return axjoin, axHistx, axHisty
+    return axjoin, ax_hist_x, ax_hist_y
 
 def _define_axes():
     left, width = 0.1, 0.65
@@ -113,12 +113,12 @@ def _define_axes():
     rect_histy = [left_h, bottom, 0.2, height]
 
     axjoin = plt.axes(rect_join)
-    axHistx = plt.axes(rect_histx)
-    axHisty = plt.axes(rect_histy)
+    ax_hist_x = plt.axes(rect_histx)
+    ax_hist_y = plt.axes(rect_histy)
 
-    axHistx.xaxis.set_major_formatter(NullFormatter())
-    axHisty.yaxis.set_major_formatter(NullFormatter())
-    axHistx.set_yticks([])
-    axHisty.set_xticks([])
+    ax_hist_x.xaxis.set_major_formatter(NullFormatter())
+    ax_hist_y.yaxis.set_major_formatter(NullFormatter())
+    ax_hist_x.set_yticks([])
+    ax_hist_y.set_xticks([])
 
-    return axjoin, axHistx, axHisty
+    return axjoin, ax_hist_x, ax_hist_y

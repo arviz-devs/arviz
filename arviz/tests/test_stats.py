@@ -1,9 +1,11 @@
+import copy
+
 import numpy as np
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
 import pandas as pd
 import pymc3 as pm
 from scipy import stats
-import copy
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
+
 from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 
@@ -33,58 +35,48 @@ def test_r2_score():
     assert_almost_equal(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2_median, 2)
 
 
-def test_compare():
-    np.random.seed(42)
-    x_obs = np.random.normal(0, 1, size=100)
+class TestCompare(object):
+    @classmethod
+    def setup_class(cls):
+        np.random.seed(42)
+        x_obs = np.random.normal(0, 1, size=100)
 
-    with pm.Model() as model0:
-        mu = pm.Normal('mu', 0, 1)
-        x = pm.Normal('x', mu=mu, sd=1, observed=x_obs)
-        trace0 = pm.sample(1000)
+        with pm.Model() as cls.model0:
+            mu = pm.Normal('mu', 0, 1)
+            pm.Normal('x', mu=mu, sd=1, observed=x_obs)
+            cls.trace0 = pm.sample(1000)
 
-    with pm.Model() as model1:
-        mu = pm.Normal('mu', 0, 1)
-        x = pm.Normal('x', mu=mu, sd=0.8, observed=x_obs)
-        trace1 = pm.sample(1000)
+        with pm.Model() as cls.model1:
+            mu = pm.Normal('mu', 0, 1)
+            pm.Normal('x', mu=mu, sd=0.8, observed=x_obs)
+            cls.trace1 = pm.sample(1000)
 
-    with pm.Model() as model2:
-        mu = pm.Normal('mu', 0, 1)
-        x = pm.StudentT('x', nu=1, mu=mu, lam=1, observed=x_obs)
-        trace2 = pm.sample(1000)
+        with pm.Model() as cls.model2:
+            mu = pm.Normal('mu', 0, 1)
+            pm.StudentT('x', nu=1, mu=mu, lam=1, observed=x_obs)
+            cls.trace2 = pm.sample(1000)
 
-    traces = [trace0, copy.copy(trace0)]
-    models = [model0, copy.copy(model0)]
+    def test_compare_same(self):
+        traces = [self.trace0, copy.copy(self.trace0)]
+        models = [self.model0, copy.copy(self.model0)]
 
-    model_dict = dict(zip(models, traces))
+        model_dict = dict(zip(models, traces))
 
-    w_st = compare(model_dict, method='stacking')['weight']
-    w_bb_bma = compare(model_dict, method='BB-pseudo-BMA')['weight']
-    w_bma = compare(model_dict, method='pseudo-BMA')['weight']
+        for method in ('stacking', 'BB-pseudo-BMA', 'pseudo-BMA'):
+            weight = compare(model_dict, method=method)['weight']
+            assert_almost_equal(weight[0], weight[1])
+            assert_almost_equal(np.sum(weight), 1.)
 
-    assert_almost_equal(w_st[0], w_st[1])
-    assert_almost_equal(w_bb_bma[0], w_bb_bma[1])
-    assert_almost_equal(w_bma[0], w_bma[1])
-
-    assert_almost_equal(np.sum(w_st), 1.)
-    assert_almost_equal(np.sum(w_bb_bma), 1.)
-    assert_almost_equal(np.sum(w_bma), 1.)
-
-    traces = [trace0, trace1, trace2]
-    models = [model0, model1, model2]
-
-    model_dict = dict(zip(models, traces))
-
-    w_st = pm.compare(model_dict, method='stacking')['weight']
-    w_bb_bma = pm.compare(model_dict, method='BB-pseudo-BMA')['weight']
-    w_bma = pm.compare(model_dict, method='pseudo-BMA')['weight']
-
-    assert(w_st[0] > w_st[1] > w_st[2])
-    assert(w_bb_bma[0] > w_bb_bma[1] > w_bb_bma[2])
-    assert(w_bma[0] > w_bma[1] > w_bma[2])
-
-    assert_almost_equal(np.sum(w_st), 1.)
-    assert_almost_equal(np.sum(w_st), 1.)
-    assert_almost_equal(np.sum(w_st), 1.)
+    def test_compare_different(self):
+        model_dict = {
+            self.model0: self.trace0,
+            self.model1: self.trace1,
+            self.model2: self.trace2,
+        }
+        for method in ('stacking', 'BB-pseudo-BMA', 'pseudo-BMA'):
+            weight = compare(model_dict, method=method)['weight']
+            assert weight[0] > weight[1] > weight[2]
+            assert_almost_equal(np.sum(weight), 1.)
 
 
 def test_summary():

@@ -51,7 +51,7 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True,
         figsize = (12, 6)
 
     if textsize is None:
-        textsize, _, _ = _scale_text(figsize, textsize=textsize, f=1)
+        textsize, _, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)

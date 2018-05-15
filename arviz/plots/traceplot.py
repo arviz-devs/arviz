@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ..stats import hpd
-from .kdeplot import fast_kde, kdeplot
+
+from .kdeplot import fast_kde
 from .plot_utils import get_axis, make_2d, get_bins, _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 
@@ -65,30 +65,30 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
     if figsize is None:
         figsize = (12, len(varnames) * 2)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, f=1)
+    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
 
     ax = get_axis(ax, len(varnames), 2, squeeze=False, figsize=figsize)
 
-    for i, v in enumerate(varnames):
+    for i, varname in enumerate(varnames):
         if priors is not None:
             prior = priors[i]
         else:
             prior = None
 
-        d = trace[v].values
-        d = np.squeeze(d)
-        d = make_2d(d)
-        width = len(d)
-        if d.dtype.kind == 'i':
-            hist_objs = _histplot_op(ax[i, 0], d, shade, prior, prior_shade, prior_style)
+        data = trace[varname].values
+        data = np.squeeze(data)
+        data = make_2d(data)
+        width = len(data)
+        if data.dtype.kind == 'i':
+            hist_objs = _histplot_op(ax[i, 0], data, shade, prior, prior_shade, prior_style)
             colors = [h[-1][0].get_facecolor() for h in hist_objs]
         else:
-            artists = _kdeplot_op(ax[i, 0], d, bw, linewidth, prior, prior_shade, prior_style)[0]
+            artists = _kdeplot_op(ax[i, 0], data, bw, linewidth, prior, prior_shade, prior_style)[0]
             colors = [a[0].get_color() for a in artists]
-        ax[i, 0].set_title(v, fontsize=textsize)
+        ax[i, 0].set_title(varname, fontsize=textsize)
         ax[i, 0].grid(grid)
-        ax[i, 1].set_title(v, fontsize=textsize)
-        ax[i, 1].plot(range(width), d, lw=linewidth, alpha=shade)
+        ax[i, 1].set_title(varname, fontsize=textsize)
+        ax[i, 1].plot(range(width), data, lw=linewidth, alpha=shade)
 
         ax[i, 0].set_yticks([])
         ax[i, 0].tick_params(labelsize=textsize)
@@ -96,17 +96,17 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
 
         if lines:
             try:
-                if isinstance(lines[v], (float, int)):
-                    line_values, colors = [lines[v]], ['C3']
+                if isinstance(lines[varname], (float, int)):
+                    line_values, colors = [lines[varname]], ['C3']
                 else:
-                    line_values = np.atleast_1d(lines[v]).ravel()
+                    line_values = np.atleast_1d(lines[varname]).ravel()
                     if len(colors) != len(line_values):
                         raise AssertionError("An incorrect number of lines was specified for "
                                              "'{}'. Expected an iterable of length {} or to "
-                                             " a scalar".format(v, len(colors)))
-                for c, l in zip(colors, line_values):
-                    ax[i, 0].axvline(x=l, color=c, lw=1.5, alpha=0.75)
-                    ax[i, 1].axhline(y=l, color=c, lw=1.5, alpha=shade)
+                                             " a scalar".format(varname, len(colors)))
+                for color, line_value in zip(colors, line_values):
+                    ax[i, 0].axvline(x=line_value, color=color, lw=1.5, alpha=0.75)
+                    ax[i, 1].axhline(y=line_value, color=color, lw=1.5, alpha=shade)
             except KeyError:
                 pass
 
@@ -127,7 +127,7 @@ def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--
             x = np.arange(x_sample.min(), x_sample.max())
             p = prior.pmf(x)
             ax.step(x, p, where='mid', alpha=prior_shade, ls=prior_style)
-    xticks = get_bins(data, max_bins=10, n=1)
+    xticks = get_bins(data, max_bins=10, fenceposts=1)
     ax.set_xticks(xticks)
 
     return hs
@@ -138,9 +138,9 @@ def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style=
     ls = []
     pls = []
     errored = []
-    for i, d in enumerate(data.T):
+    for i, col in enumerate(data.T):
         try:
-            density, l, u = fast_kde(d, bw)
+            density, l, u = fast_kde(col, bw)
             x = np.linspace(l, u, len(density))
             ls.append(ax.plot(x, density, lw=linewidth))
             if prior is not None:
