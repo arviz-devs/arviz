@@ -46,6 +46,6 @@ def khatplot(ks, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwa
     rgba_c[:, 3] = alphas
     ax.scatter(np.arange(len(ks)), ks, c=rgba_c, marker='+', linewidth=ms)
     ax.set_xlabel('Data point', fontsize=textsize)
-    ax.set_ylabel(r'Shape parameter $\kappa$', fontsize=textsize)
+    ax.set_ylabel(r'Shape parameter κ', fontsize=textsize)
     ax.tick_params(labelsize=textsize)
     return ax
