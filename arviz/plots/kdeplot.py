@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import gaussian, convolve
+from scipy.signal import gaussian, convolve  #pylint: disable=no-name-in-module
 from scipy.stats import entropy
 
 
-def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, rotated=False,
+def kdeplot(values, label=None, fill_alpha=0, fill_color=None, bw=4.5, rotated=False,
             ax=None, kwargs_shade=None, **kwargs):
     """
     1D KDE plot taking into account boundary conditions
@@ -15,11 +15,11 @@ def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, rotated=False
         Values to plot
     label : string
         Text to include as part of the legend
-    shade : float
+    fill_alpha : float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
-    color_shade : valid matplotlib color
-        Color used for the shaed are under the curve. Defaults to None
+    fill_color : valid matplotlib color
+        Color used for the shaded are under the curve. Defaults to None
     bw : float
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
@@ -39,14 +39,14 @@ def kdeplot(values, label=None, shade=0, color_shade=None, bw=4.5, rotated=False
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    density, l, u = fast_kde(values, bw)
-    x = np.linspace(l, u, len(density))
+    density, lower, upper = fast_kde(values, bw)
+    x = np.linspace(lower, upper, len(density))
     if rotated:
         x, density = density, x
 
     ax.plot(x, density, label=label, **kwargs)
-    if shade:
-        ax.fill_between(x, density, alpha=shade, color=color_shade, **kwargs_shade)
+    if fill_alpha:
+        ax.fill_between(x, density, alpha=fill_alpha, color=fill_color, **kwargs_shade)
 
     if rotated:
         ax.set_xlim(0, auto=True)
@@ -77,26 +77,26 @@ def fast_kde(x, bw=4.5):
     """
     x = np.asarray(x, dtype=float)
     x = x[np.isfinite(x)]
-    n = len(x)
-    nx = 200
+    len_x = len(x)
+    n_bins = 200
 
     xmin, xmax = np.min(x), np.max(x)
 
-    dx = (xmax - xmin) / (nx - 1)
+    dx = (xmax - xmin) / (n_bins - 1)
     std_x = entropy(x - xmin) * bw
     if ~np.isfinite(std_x):
         std_x = 0.
-    grid, _ = np.histogram(x, bins=nx)
+    grid, _ = np.histogram(x, bins=n_bins)
 
-    scotts_factor = n ** (-0.2)
+    scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
     kernel = gaussian(kern_nx, scotts_factor * std_x)
 
-    npad = min(nx, 2 * kern_nx)
-    grid = np.concatenate([grid[npad: 0: -1], grid, grid[nx: nx - npad: -1]])
-    density = convolve(grid, kernel, mode='same')[npad: npad + nx]
+    npad = min(n_bins, 2 * kern_nx)
+    grid = np.concatenate([grid[npad: 0: -1], grid, grid[n_bins: n_bins - npad: -1]])
+    density = convolve(grid, kernel, mode='same')[npad: npad + n_bins]
 
-    norm_factor = n * dx * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
+    norm_factor = len_x * dx * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
 
     density = density / norm_factor
 

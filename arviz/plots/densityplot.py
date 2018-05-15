@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from .kdeplot import fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import _scale_text
 
+
 def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='mean',
                 colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
-                textsize=None, skip_first=0, ax=None):
+                textsize=None, skip_first=0):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -19,7 +21,7 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         Posterior samples
     models : list
         List with names for the models in the list of traces. Useful when
-        plotting more that one trace. 
+        plotting more that one trace.
     varnames: list
         List of variables to plot (defaults to None, which results in all
         variables plotted).
@@ -51,8 +53,6 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         Text size for labels and legend. If None it will be autoscaled based on figsize.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
-    ax : axes
-        Matplotlib axes.
 
     Returns
     -------
@@ -102,7 +102,7 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     if figsize is None:
         figsize = (6, len(varnames) * 2)
 
-    textsize, lw, ms = _scale_text(figsize, textsize=textsize)
+    textsize, lw, markersize = _scale_text(figsize, textsize=textsize)
 
     fig, dplot = plt.subplots(len(varnames), 1, squeeze=False, figsize=figsize)
     dplot = dplot.flatten()
@@ -111,12 +111,12 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         for t_idx, tr in enumerate(trace):
             if vname in tr.columns:
                 vec = tr[vname].values
-                _d_helper(vec, vname, colors[t_idx], bw, textsize, lw, ms, alpha, point_estimate,
-                          hpd_markers, outline, shade, dplot[v_idx])
+                _d_helper(vec, vname, colors[t_idx], bw, textsize, lw, markersize, alpha,
+                          point_estimate, hpd_markers, outline, shade, dplot[v_idx])
 
     if length_trace > 1:
         for m_idx, m in enumerate(models):
-            dplot[0].plot([], label=m, c=colors[m_idx], markersize=ms)
+            dplot[0].plot([], label=m, c=colors[m_idx], markersize=markersize)
         dplot[0].legend(fontsize=textsize)
 
     fig.tight_layout()
@@ -124,8 +124,8 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     return dplot
 
 
-def _d_helper(vec, vname, c, bw, textsize, lw, ms, alpha, point_estimate, hpd_markers, outline,
-              shade, ax):
+def _d_helper(vec, vname, c, bw, textsize, lw, markersize, alpha,
+              point_estimate, hpd_markers, outline, shade, ax):
     """
     vec : array
         1D array from trace
@@ -147,7 +147,7 @@ def _d_helper(vec, vname, c, bw, textsize, lw, ms, alpha, point_estimate, hpd_ma
     ax : matplotlib axes
     """
     if vec.dtype.kind == 'f':
-        density, l, u = fast_kde(vec)
+        density, l, u = fast_kde(vec, bw=bw)
         x = np.linspace(l, u, len(density))
         hpd_ = hpd(vec, alpha)
         cut = (x >= hpd_[0]) & (x <= hpd_[1])
@@ -174,15 +174,15 @@ def _d_helper(vec, vname, c, bw, textsize, lw, ms, alpha, point_estimate, hpd_ma
             ax.hist(vec, bins=bins, color=c, alpha=shade)
 
     if hpd_markers:
-        ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k', markersize=ms)
-        ax.plot(xmax, 0, 'v', color=c, markeredgecolor='k', markersize=ms)
+        ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k', markersize=markersize)
+        ax.plot(xmax, 0, 'v', color=c, markeredgecolor='k', markersize=markersize)
 
     if point_estimate is not None:
         if point_estimate == 'mean':
             ps = np.mean(vec)
         elif point_estimate == 'median':
             ps = np.median(vec)
-        ax.plot(ps, -0.001, 'o', color=c, markeredgecolor='k', markersize=ms)
+        ax.plot(ps, -0.001, 'o', color=c, markeredgecolor='k', markersize=markersize)
 
     ax.set_yticks([])
     ax.set_title(vname)
