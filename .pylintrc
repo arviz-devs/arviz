@@ -56,7 +56,12 @@ confidence=
 # --disable=W"
 disable=missing-docstring,
         no-else-return,
-        len-as-condition
+        len-as-condition,
+        too-many-arguments,
+        too-many-locals,
+        too-many-branches,
+        too-many-statements,
+        no-self-use
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -232,7 +237,9 @@ good-names=i,
            ax,
            x,
            y,
+           gs,
            bw,
+           ic,
            dx,
            mu,
            tr,

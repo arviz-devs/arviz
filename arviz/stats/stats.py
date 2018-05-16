@@ -34,7 +34,7 @@ def bfmi(trace):
     """
     energy = np.atleast_2d(get_stats(trace, 'energy', combined=False))
 
-    return np.square(np.diff(energy, 1)).mean(1) / np.var(energy, 1)
+    return np.square(np.diff(energy, axis=1)).mean(axis=1) / np.var(energy, axis=1)
 
 
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
@@ -126,8 +126,8 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
     ic_i = '{}_i'.format(ic)
 
     ics = pd.DataFrame()
-    for m, t in model_dict.items():
-        ics = ics.append(ic_func(t, m, pointwise=True))
+    for model, trace in model_dict.items():
+        ics = ics.append(ic_func(trace, model, pointwise=True))
     ics.index = names
     ics.sort_values(by=ic, inplace=True)
 

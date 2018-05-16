@@ -80,11 +80,11 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
         if kind == 'scatter':
             ax.scatter(trace[varnames[0]], trace[varnames[1]], s=markersize, **kwargs)
         else:
-            hb = ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
-                           **kwargs)
+            hexbin = ax.hexbin(trace[varnames[0]], trace[varnames[1]], mincnt=1, gridsize=gridsize,
+                               **kwargs)
             ax.grid(False)
             if colorbar:
-                cbar = plt.colorbar(hb, ticks=[hb.norm.vmin, hb.norm.vmax], ax=ax)
+                cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
                 cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
 
         if divergences:
@@ -113,10 +113,12 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
                 else:
                     ax.grid(False)
                     if i == j == 0 and colorbar:
-                        hb = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                        hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
                         divider = make_axes_locatable(ax)
                         cax = divider.append_axes('right', size='7%', pad=0.1)
-                        cbar = plt.colorbar(hb, ticks=[hb.norm.vmin, hb.norm.vmax], cax=cax)
+                        cbar = plt.colorbar(hexbin,
+                                            ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
+                                            cax=cax)
                         cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
                         divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
 
