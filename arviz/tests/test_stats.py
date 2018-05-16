@@ -10,9 +10,9 @@ from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 
 def fake_trace(n_samples):
-    a = np.repeat((1, 5, 10), n_samples)
-    b = np.repeat((1, 5, 1), n_samples)
-    data = np.random.beta(a, b).reshape(-1, n_samples//2)
+    alpha = np.repeat((1, 5, 10), n_samples)
+    beta = np.repeat((1, 5, 1), n_samples)
+    data = np.random.beta(alpha, beta).reshape(-1, n_samples//2)
     trace = pd.DataFrame(data.T, columns=['a', 'a', 'b', 'b', 'c', 'c'])
     return trace
 
@@ -91,8 +91,8 @@ def test_waic():
     x_obs = np.arange(6)
 
     with pm.Model() as model:
-        p = pm.Beta('p', 1., 1., transform=None)
-        pm.Binomial('x', 5, p, observed=x_obs)
+        prob = pm.Beta('p', 1., 1., transform=None)
+        pm.Binomial('x', 5, prob, observed=x_obs)
 
         step = pm.Metropolis()
         trace = pm.sample(100, step)
@@ -113,6 +113,6 @@ def test_waic():
                         actual_waic_se, decimal=2)
 
 def test_psis():
-    lw = np.random.randn(20000, 10)
-    _, ks = psislw(lw)
-    assert_array_less(ks, .5)
+    linewidth = np.random.randn(20000, 10)
+    _, khats = psislw(linewidth)
+    assert_array_less(khats, .5)

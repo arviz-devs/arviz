@@ -87,22 +87,14 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         colors = [colors for i in range(length_models)]
 
     if varnames is None:
-        varnames = []
-        for tr in trace:
-            varnames_tmp = tr.columns
-            for v in varnames_tmp:
-                if v not in varnames:
-                    varnames.append(v)
+        varnames = set.union(*[set(tr.columns) for tr in trace])
     else:
-        v_tmp = []
-        for tr in trace:
-            v_tmp.extend(expand_variable_names(tr, varnames))
-        varnames = np.unique(v_tmp)
+        varnames = set.union(*[set(expand_variable_names(tr, varnames)) for tr in trace])
 
     if figsize is None:
         figsize = (6, len(varnames) * 2)
 
-    textsize, lw, markersize = _scale_text(figsize, textsize=textsize)
+    textsize, linewidth, markersize = _scale_text(figsize, textsize=textsize)
 
     fig, dplot = plt.subplots(len(varnames), 1, squeeze=False, figsize=figsize)
     dplot = dplot.flatten()
@@ -111,12 +103,12 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
         for t_idx, tr in enumerate(trace):
             if vname in tr.columns:
                 vec = tr[vname].values
-                _d_helper(vec, vname, colors[t_idx], bw, textsize, lw, markersize, alpha,
+                _d_helper(vec, vname, colors[t_idx], bw, textsize, linewidth, markersize, alpha,
                           point_estimate, hpd_markers, outline, shade, dplot[v_idx])
 
     if length_trace > 1:
-        for m_idx, m in enumerate(models):
-            dplot[0].plot([], label=m, c=colors[m_idx], markersize=markersize)
+        for m_idx, model in enumerate(models):
+            dplot[0].plot([], label=model, c=colors[m_idx], markersize=markersize)
         dplot[0].legend(fontsize=textsize)
 
     fig.tight_layout()
@@ -124,19 +116,25 @@ def densityplot(trace, models=None, varnames=None, alpha=0.05, point_estimate='m
     return dplot
 
 
-def _d_helper(vec, vname, c, bw, textsize, lw, markersize, alpha,
+def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, alpha,
               point_estimate, hpd_markers, outline, shade, ax):
     """
     vec : array
         1D array from trace
     vname : str
         variable name
-    c : str
+    color : str
         matplotlib color
     bw : float
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default used rule by SciPy).
+    textsize : float
+        Fontsize of text
+    linewidth : float
+        Thickness of lines
+    markersize : float
+        Size of markers
     alpha : float
         Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).
     point_estimate : str or None
@@ -147,8 +145,8 @@ def _d_helper(vec, vname, c, bw, textsize, lw, markersize, alpha,
     ax : matplotlib axes
     """
     if vec.dtype.kind == 'f':
-        density, l, u = fast_kde(vec, bw=bw)
-        x = np.linspace(l, u, len(density))
+        density, lower, upper = fast_kde(vec, bw=bw)
+        x = np.linspace(lower, upper, len(density))
         hpd_ = hpd(vec, alpha)
         cut = (x >= hpd_[0]) & (x <= hpd_[1])
 
@@ -158,31 +156,31 @@ def _d_helper(vec, vname, c, bw, textsize, lw, markersize, alpha,
         ymax = density[cut][-1]
 
         if outline:
-            ax.plot(x[cut], density[cut], color=c, lw=lw)
-            ax.plot([xmin, xmin], [-ymin/100, ymin], color=c, ls='-', lw=lw)
-            ax.plot([xmax, xmax], [-ymax/100, ymax], color=c, ls='-', lw=lw)
+            ax.plot(x[cut], density[cut], color=color, lw=linewidth)
+            ax.plot([xmin, xmin], [-ymin/100, ymin], color=color, ls='-', lw=linewidth)
+            ax.plot([xmax, xmax], [-ymax/100, ymax], color=color, ls='-', lw=linewidth)
 
         if shade:
-            ax.fill_between(x, density, where=cut, color=c, alpha=shade)
+            ax.fill_between(x, density, where=cut, color=color, alpha=shade)
 
     else:
         xmin, xmax = hpd(vec, alpha)
         bins = range(xmin, xmax + 2)
         if outline:
-            ax.hist(vec, bins=bins, color=c, histtype='step', align='left')
+            ax.hist(vec, bins=bins, color=color, histtype='step', align='left')
         if shade:
-            ax.hist(vec, bins=bins, color=c, alpha=shade)
+            ax.hist(vec, bins=bins, color=color, alpha=shade)
 
     if hpd_markers:
-        ax.plot(xmin, 0, 'v', color=c, markeredgecolor='k', markersize=markersize)
-        ax.plot(xmax, 0, 'v', color=c, markeredgecolor='k', markersize=markersize)
+        ax.plot(xmin, 0, 'v', color=color, markeredgecolor='k', markersize=markersize)
+        ax.plot(xmax, 0, 'v', color=color, markeredgecolor='k', markersize=markersize)
 
     if point_estimate is not None:
         if point_estimate == 'mean':
-            ps = np.mean(vec)
+            est = np.mean(vec)
         elif point_estimate == 'median':
-            ps = np.median(vec)
-        ax.plot(ps, -0.001, 'o', color=c, markeredgecolor='k', markersize=markersize)
+            est = np.median(vec)
+        ax.plot(est, -0.001, 'o', color=color, markeredgecolor='k', markersize=markersize)
 
     ax.set_yticks([])
     ax.set_title(vname)

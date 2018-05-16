@@ -85,11 +85,11 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
     elif np.ndim(rope) == 1:
         rope = [rope] * var_num
 
-    for idx, (a, v) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
-        _plot_posterior_op(trace[v], ax=a, bw=bw, linewidth=linewidth, bins=bins, kind=kind,
+    for idx, (ax_, col) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
+        _plot_posterior_op(trace[col], ax=ax_, bw=bw, linewidth=linewidth, bins=bins, kind=kind,
                            point_estimate=point_estimate, round_to=round_to, alpha=alpha,
                            ref_val=ref_val[idx], rope=rope[idx], textsize=textsize, **kwargs)
-        a.set_title(v, fontsize=textsize)
+        ax_.set_title(col, fontsize=textsize)
 
     plt.tight_layout()
     return ax
@@ -130,8 +130,8 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
             point_value = trace_values.mean()
         elif point_estimate == 'mode':
             if isinstance(trace_values.iloc[0], float):
-                density, l, u = fast_kde(trace_values, bw)
-                x = np.linspace(l, u, len(density))
+                density, lower, upper = fast_kde(trace_values, bw)
+                x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
             else:
                 point_value = mode(trace_values.round(round_to))[0][0]
@@ -166,10 +166,6 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
                        color='0.5', labelsize=textsize)
         ax.spines['bottom'].set_color('0.5')
 
-    def set_key_if_doesnt_exist(d, key, value):
-        if key not in d:
-            d[key] = value
-
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
         kdeplot(trace_values,
                 fill_alpha=kwargs.pop('alpha', 1),
@@ -187,8 +183,8 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
                 ax.set_xlim(xmin - 0.5, xmax + 0.5)
             else:
                 bins = 'auto'
-        set_key_if_doesnt_exist(kwargs, 'align', 'left')
-        set_key_if_doesnt_exist(kwargs, 'color', 'C0')
+        kwargs.setdefault('align', 'left')
+        kwargs.setdefault('color', 'C0')
         ax.hist(trace_values, bins=bins, alpha=0.35, **kwargs)
 
     plot_height = ax.get_ylim()[1]
@@ -207,11 +203,11 @@ def _create_axes_grid(figsize, trace):
     if l_trace == 1:
         fig, ax = plt.subplots(figsize=figsize)
     else:
-        n = np.ceil(l_trace / 2.0).astype(int)
+        n_rows = np.ceil(l_trace / 2.0).astype(int)
         if figsize is None:
-            figsize = (12, n * 2.5)
-        fig, ax = plt.subplots(n, 2, figsize=figsize)
-        ax = ax.reshape(2 * n)
+            figsize = (12, n_rows * 2.5)
+        fig, ax = plt.subplots(n_rows, 2, figsize=figsize)
+        ax = ax.reshape(2 * n_rows)
         if l_trace % 2 == 1:
             ax[-1].set_axis_off()
             ax = ax[:-1]

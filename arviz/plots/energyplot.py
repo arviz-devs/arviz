@@ -77,8 +77,8 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         raise ValueError('Plot type {} not recognized.'.format(kind))
 
     if bfmi:
-        for idx, v in enumerate(e_bfmi(trace)):
-            plt.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, v), alpha=0)
+        for idx, val in enumerate(e_bfmi(trace)):
+            plt.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, val), alpha=0)
 
     ax.set_xticks([])
     ax.set_yticks([])

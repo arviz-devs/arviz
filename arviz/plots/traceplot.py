@@ -117,37 +117,37 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
 
 def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--'):
     """Add a histogram for each column of the data to the provided axes."""
-    hs = []
+    hists = []
     for column in data.T:
         bins = get_bins(column)
-        hs.append(ax.hist(column, bins=bins, alpha=shade, align='left',
-                          density=True))
+        hists.append(ax.hist(column, bins=bins, alpha=shade, align='left',
+                             density=True))
         if prior is not None:
             x_sample = prior.rvs(1000)
             x = np.arange(x_sample.min(), x_sample.max())
-            p = prior.pmf(x)
-            ax.step(x, p, where='mid', alpha=prior_shade, ls=prior_style)
+            pmf = prior.pmf(x)
+            ax.step(x, pmf, where='mid', alpha=prior_shade, ls=prior_style)
     xticks = get_bins(data, max_bins=10, fenceposts=1)
     ax.set_xticks(xticks)
 
-    return hs
+    return hists
 
 
 def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style='--'):
     """Get a list of density and likelihood plots, if a prior is provided."""
-    ls = []
-    pls = []
+    densities = []
+    priors = []
     errored = []
     for i, col in enumerate(data.T):
         try:
-            density, l, u = fast_kde(col, bw)
-            x = np.linspace(l, u, len(density))
-            ls.append(ax.plot(x, density, lw=linewidth))
+            density, lower, upper = fast_kde(col, bw)
+            x = np.linspace(lower, upper, len(density))
+            densities.append(ax.plot(x, density, lw=linewidth))
             if prior is not None:
                 x_sample = prior.rvs(10000)
                 x = np.linspace(x_sample.min(), x_sample.max(), 1000)
-                p = prior.pdf(x)
-                pls.append(ax.plot(x, p, alpha=prior_shade, ls=prior_style))
+                pdf = prior.pdf(x)
+                priors.append(ax.plot(x, pdf, alpha=prior_shade, ls=prior_style))
 
         except ValueError:
             errored.append(str(i))
@@ -157,4 +157,4 @@ def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style=
                 bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10},
                 style='italic')
 
-    return ls, pls
+    return densities, priors

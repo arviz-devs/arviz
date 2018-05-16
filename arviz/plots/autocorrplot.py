@@ -51,13 +51,13 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
 
     max_lag = min(len(trace) - 1, max_lag)
 
-    for i, v in enumerate(varnames):
+    for i, varname in enumerate(varnames):
         for j in range(nchains):
             if nchains == 1:
-                d = trace[v].values
+                data = trace[varname].values
             else:
-                d = trace[v].values[:, j]
-            ax[i, j].acorr(d, detrend=plt.mlab.detrend_mean, maxlags=max_lag, lw=linewidth)
+                data = trace[varname].values[:, j]
+            ax[i, j].acorr(data, detrend=plt.mlab.detrend_mean, maxlags=max_lag, lw=linewidth)
 
             if j == 0:
                 ax[i, j].set_ylabel("correlation", fontsize=textsize)
@@ -69,8 +69,8 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
                 ax[i, j].set_xlim(0, max_lag)
 
             if nchains > 1:
-                ax[i, j].set_title("{0} (chain {1})".format(v, j), fontsize=textsize)
+                ax[i, j].set_title("{0} (chain {1})".format(varname, j), fontsize=textsize)
             else:
-                ax[i, j].set_title(v, fontsize=textsize)
+                ax[i, j].set_title(varname, fontsize=textsize)
             ax[i, j].tick_params(labelsize=textsize)
     return ax
