@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from .kdeplot import kdeplot
 from .plot_utils import _scale_text, _create_axes_grid
 
