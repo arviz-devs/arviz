@@ -20,10 +20,9 @@ install:
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest pylint sphinx numpydoc ipython
   - source activate test-environment
-  - pip install git+https://github.com/pymc-devs/pymc3
-  - pip install travis-sphinx==2.0.0
-  - pip install nbsphinx
-  - pip install sphinx_rtd_theme
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
 
 before_script:
 - "export DISPLAY=:99.0"
@@ -33,8 +32,9 @@ before_script:
 
 script:
   - pylint arviz/
-  - pytest
+  - pytest -xv arviz/tests/ --cov=arviz/
   - travis-sphinx build -n
 
 after_success:
   - travis-sphinx deploy
+  - coveralls
