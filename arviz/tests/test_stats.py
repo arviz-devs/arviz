@@ -9,13 +9,6 @@ from scipy import stats
 from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 
-def fake_trace(n_samples):
-    alpha = np.repeat((1, 5, 10), n_samples)
-    beta = np.repeat((1, 5, 1), n_samples)
-    data = np.random.beta(alpha, beta).reshape(-1, n_samples//2)
-    trace = pd.DataFrame(data.T, columns=['a', 'a', 'b', 'b', 'c', 'c'])
-    return trace
-
 
 def test_bfmi():
     trace = pd.DataFrame([1, 2, 3, 4], columns=['energy'])
@@ -80,7 +73,11 @@ class TestCompare(object):
 
 
 def test_summary():
-    trace = fake_trace(100)
+    alpha = np.repeat((1, 5, 10), 100)
+    beta = np.repeat((1, 5, 1), 100)
+    data = np.random.beta(alpha, beta).reshape(-1, 50)
+    trace = pd.DataFrame(data.T, columns=['a', 'a', 'b', 'b', 'c', 'c'])
+
     df_s = summary(trace)
     assert df_s.shape == (3, 7)
     assert np.all(df_s.index == ['a', 'b', 'c'])
