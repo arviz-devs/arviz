@@ -39,7 +39,7 @@ class TestUtils(object):
         save_trace(self.trace, filename=filename)
         trl0 = load_trace(filename)
         tr = trace_to_dataframe(self.trace, combined=False)
-        save_trace(tr)
+        save_trace(tr, filename=filename)
         trl1 = load_trace(filename)
 
         assert_frame_equal(tr, trl0)

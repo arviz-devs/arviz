@@ -37,8 +37,8 @@ def bfmi(trace):
     return np.square(np.diff(energy, axis=1)).mean(axis=1) / np.var(energy, axis=1)
 
 
-def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
-            alpha=1, seed=None, round_to=2):
+def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
+            seed=None, round_to=2):
     R"""
     Compare models based on the widely applicable information criterion (WAIC) or leave-one-out
     (LOO) cross-validation.
@@ -132,50 +132,50 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
     ics.sort_values(by=ic, inplace=True)
 
     if method == 'stacking':
-        N, K, ic_i_val = _ic_matrix(ics, ic_i)
+        rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         exp_ic_i = np.exp(-0.5 * ic_i_val)
-        Km = K - 1
+        last_col = cols - 1
 
-        def w_fuller(w):
-            return np.concatenate((w, [max(1. - np.sum(w), 0.)]))
+        def w_fuller(weights):
+            return np.concatenate((weights, [max(1. - np.sum(weights), 0.)]))
 
-        def log_score(w):
-            w_full = w_fuller(w)
+        def log_score(weights):
+            w_full = w_fuller(weights)
             score = 0.
-            for i in range(N):
+            for i in range(rows):
                 score += np.log(np.dot(exp_ic_i[i], w_full))
             return -score
 
-        def gradient(w):
-            w_full = w_fuller(w)
-            grad = np.zeros(Km)
-            for k in range(Km):
-                for i in range(N):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, Km]) / \
+        def gradient(weights):
+            w_full = w_fuller(weights)
+            grad = np.zeros(last_col)
+            for k in range(last_col):
+                for i in range(rows):
+                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / \
                         np.dot(exp_ic_i[i], w_full)
             return -grad
 
-        theta = np.full(Km, 1. / K)
-        bounds = [(0., 1.) for i in range(Km)]
+        theta = np.full(last_col, 1. / cols)
+        bounds = [(0., 1.) for i in range(last_col)]
         constraints = [{'type': 'ineq', 'fun': lambda x: 1. - np.sum(x)},
                        {'type': 'ineq', 'fun': np.sum}]
 
-        w = minimize(fun=log_score,
-                     x0=theta,
-                     jac=gradient,
-                     bounds=bounds,
-                     constraints=constraints)
+        weights = minimize(fun=log_score,
+                           x0=theta,
+                           jac=gradient,
+                           bounds=bounds,
+                           constraints=constraints)
 
-        weights = w_fuller(w['x'])
+        weights = w_fuller(weights['x'])
         ses = ics[ic_se]
 
     elif method == 'BB-pseudo-BMA':
-        N, K, ic_i_val = _ic_matrix(ics, ic_i)
-        ic_i_val = ic_i_val * N
+        rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
+        ic_i_val = ic_i_val * rows
 
-        b_weighting = dirichlet.rvs(alpha=[alpha] * N, size=b_samples,
+        b_weighting = dirichlet.rvs(alpha=[alpha] * rows, size=b_samples,
                                     random_state=seed)
-        weights = np.zeros((b_samples, K))
+        weights = np.zeros((b_samples, cols))
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
@@ -188,8 +188,8 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
 
     elif method == 'pseudo-BMA':
         min_ic = ics.iloc[0][ic]
-        Z = np.exp(-0.5 * (ics[ic] - min_ic))
-        weights = Z / np.sum(Z)
+        z_rv = np.exp(-0.5 * (ics[ic] - min_ic))
+        weights = z_rv / np.sum(z_rv)
         ses = ics[ic_se]
 
     if np.any(weights):
@@ -198,15 +198,15 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000,
             res = ics.loc[i]
             diff = res[ic_i] - min_ic_i_val
             d_ic = np.sum(diff)
-            d_se = np.sqrt(len(diff) * np.var(diff))
-            se = ses.loc[i]
+            d_std_err = np.sqrt(len(diff) * np.var(diff))
+            std_err = ses.loc[i]
             weight = weights[i]
             df_comp.at[i] = (round(res[ic], round_to),
                              round(res[p_ic], round_to),
                              round(d_ic, round_to),
                              round(weight, round_to),
-                             round(se, round_to),
-                             round(d_se, round_to),
+                             round(std_err, round_to),
+                             round(d_std_err, round_to),
                              res['warning'])
 
     return df_comp.sort_values(by=ic)
@@ -216,19 +216,19 @@ def _ic_matrix(ics, ic_i):
     """
     Store the previously computed pointwise predictive accuracy values (ics) in a 2D matrix array.
     """
-    N = len(ics[ic_i].iloc[0])
-    K = len(ics)
-    ic_i_val = np.zeros((N, K))
+    cols, _ = ics.shape
+    rows = len(ics[ic_i].iloc[0])
+    ic_i_val = np.zeros((rows, cols))
 
     for i in ics.index:
         ic = ics.loc[i][ic_i]
-        if len(ic) != N:
+        if len(ic) != rows:
             raise ValueError('The number of observations should be the same '
                              'across all models')
         else:
             ic_i_val[:, i] = ic
 
-    return N, K, ic_i_val
+    return rows, cols, ic_i_val
 
 
 def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
@@ -257,7 +257,7 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     """
     # Make a copy of trace
     x = transform(x.copy())
-    n = len(x)
+    len_x = len(x)
     cred_mass = 1.0 - alpha
 
     if circular:
@@ -266,8 +266,8 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
         x = np.arctan2(np.sin(x), np.cos(x))
 
     x = np.sort(x)
-    interval_idx_inc = int(np.floor(cred_mass * n))
-    n_intervals = n - interval_idx_inc
+    interval_idx_inc = int(np.floor(cred_mass * len_x))
+    n_intervals = len_x - interval_idx_inc
     interval_width = x[interval_idx_inc:] - x[:n_intervals]
 
     if len(interval_width) == 0:
@@ -334,11 +334,11 @@ def loo(trace, model, pointwise=False, reff=None):
 
     log_py = log_post_trace(trace, model)
 
-    lw, ks = psislw(-log_py, reff)
-    lw += log_py
+    log_weights, pareto_shape = psislw(-log_py, reff)
+    log_weights += log_py
 
     warn_mg = 0
-    if np.any(ks > 0.7):
+    if np.any(pareto_shape > 0.7):
         warnings.warn("""Estimated shape parameter of Pareto distribution is greater than 0.7 for
         one or more samples. You should consider using a more robust model, this is because
         importance sampling is less likely to work well if the marginal posterior and LOO posterior
@@ -346,7 +346,7 @@ def loo(trace, model, pointwise=False, reff=None):
         influential observations.""")
         warn_mg = 1
 
-    loo_lppd_i = - 2 * logsumexp(lw, axis=0)
+    loo_lppd_i = - 2 * logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
     lppd = np.sum(logsumexp(log_py, axis=0, b=1. / log_py.shape[0]))
@@ -364,13 +364,13 @@ def loo(trace, model, pointwise=False, reff=None):
                             columns=['loo', 'loo_se', 'p_loo', 'warning', 'loo_i'])
 
 
-def psislw(lw, reff=1.):
+def psislw(log_weights, reff=1.):
     """
     Pareto smoothed importance sampling (PSIS).
 
     Parameters
     ----------
-    lw : array
+    log_weights : array
         Array of size (n_samples, n_observations)
     reff : float
         relative MCMC efficiency, `effective_n / n`
@@ -382,18 +382,18 @@ def psislw(lw, reff=1.):
     kss : array
         Pareto tail indices
     """
-    n, m = lw.shape
+    rows, cols = log_weights.shape
 
-    lw_out = np.copy(lw, order='F')
-    kss = np.empty(m)
+    log_weights_out = np.copy(log_weights, order='F')
+    kss = np.empty(cols)
 
     # precalculate constants
-    cutoff_ind = - int(np.ceil(min(n / 5., 3 * (n / reff) ** 0.5))) - 1
+    cutoff_ind = - int(np.ceil(min(rows / 5., 3 * (rows / reff) ** 0.5))) - 1
     cutoffmin = np.log(np.finfo(float).tiny)  #pylint: disable=no-member
     k_min = 1. / 3
 
     # loop over sets of log weights
-    for i, x in enumerate(lw_out.T):
+    for i, x in enumerate(log_weights_out.T):
         # improve numerical accuracy
         x -= np.max(x)
         # sort the array
@@ -403,34 +403,34 @@ def psislw(lw, reff=1.):
 
         expxcutoff = np.exp(xcutoff)
         tailinds, = np.where(x > xcutoff)
-        x2 = x[tailinds]
-        n2 = len(x2)
-        if n2 <= 4:
+        x_tail = x[tailinds]
+        tail_len = len(x_tail)
+        if tail_len <= 4:
             # not enough tail samples for gpdfit
             k = np.inf
         else:
             # order of tail samples
-            x2si = np.argsort(x2)
+            x_tail_si = np.argsort(x_tail)
             # fit generalized Pareto distribution to the right tail samples
-            x2 = np.exp(x2) - expxcutoff
-            k, sigma = _gpdfit(x2[x2si])
+            x_tail = np.exp(x_tail) - expxcutoff
+            k, sigma = _gpdfit(x_tail[x_tail_si])
 
-        if k >= k_min and not np.isinf(k):
-            # no smoothing if short tail or GPD fit failed
-            # compute ordered statistic for the fit
-            sti = np.arange(0.5, n2) / n2
-            qq = _gpinv(sti, k, sigma)
-            qq = np.log(qq + expxcutoff)
-            # place the smoothed tail into the output array
-            x[tailinds[x2si]] = qq
-            # truncate smoothed values to the largest raw weight 0
-            x[x > 0] = 0
+            if k >= k_min:
+                # no smoothing if short tail or GPD fit failed
+                # compute ordered statistic for the fit
+                sti = np.arange(0.5, tail_len) / tail_len
+                smoothed_tail = _gpinv(sti, k, sigma)
+                smoothed_tail = np.log(smoothed_tail + expxcutoff)
+                # place the smoothed tail into the output array
+                x[tailinds[x_tail_si]] = smoothed_tail
+                # truncate smoothed values to the largest raw weight 0
+                x[x > 0] = 0
         # renormalize weights
         x -= logsumexp(x)
         # store tail index k
         kss[i] = k
 
-    return lw_out, kss
+    return log_weights_out, kss
 
 
 def _gpdfit(x):
@@ -453,59 +453,59 @@ def _gpdfit(x):
     """
     prior_bs = 3
     prior_k = 10
-    n = len(x)
-    m = 30 + int(n**0.5)
+    len_x = len(x)
+    m_est = 30 + int(len_x**0.5)
 
-    bs = 1 - np.sqrt(m / (np.arange(1, m + 1, dtype=float) - 0.5))
-    bs /= prior_bs * x[int(n/4 + 0.5) - 1]
-    bs += 1 / x[-1]
+    b_ary = 1 - np.sqrt(m_est / (np.arange(1, m_est + 1, dtype=float) - 0.5))
+    b_ary /= prior_bs * x[int(len_x/4 + 0.5) - 1]
+    b_ary += 1 / x[-1]
 
-    ks = np.log1p(-bs[:, None] * x).mean(axis=1)
-    L = n * (np.log(-(bs / ks)) - ks - 1)
-    w = 1 / np.exp(L - L[:, None]).sum(axis=1)
+    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)
+    len_scale = len_x * (np.log(-(b_ary / k_ary)) - k_ary - 1)
+    weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
 
     # remove negligible weights
-    dii = w >= 10 * np.finfo(float).eps
-    if not np.all(dii):
-        w = w[dii]
-        bs = bs[dii]
-    # normalise w
-    w /= w.sum()
+    real_idxs = weights >= 10 * np.finfo(float).eps
+    if not np.all(real_idxs):
+        weights = weights[real_idxs]
+        b_ary = b_ary[real_idxs]
+    # normalise weights
+    weights /= weights.sum()
 
     # posterior mean for b
-    b = np.sum(bs * w)
+    b_post = np.sum(b_ary * weights)
     # estimate for k
-    k = np.log1p(-b * x).mean()
-    # add prior for k
-    k = (n * k + prior_k * 0.5) / (n + prior_k)
-    sigma = - k / b
+    k_post = np.log1p(-b_post * x).mean()  #pylint: disable=invalid-unary-operand-type
+    # add prior for k_post
+    k_post = (len_x * k_post + prior_k * 0.5) / (len_x + prior_k)
+    sigma = - k_post / b_post
 
-    return k, sigma
+    return k_post, sigma
 
 
-def _gpinv(p, k, sigma):
+def _gpinv(probs, kappa, sigma):
     """Inverse Generalized Pareto distribution function"""
-    x = np.full_like(p, np.nan)
+    x = np.full_like(probs, np.nan)
     if sigma <= 0:
         return x
-    ok = (p > 0) & (p < 1)
+    ok = (probs > 0) & (probs < 1)
     if np.all(ok):
-        if np.abs(k) < np.finfo(float).eps:
-            x = - np.log1p(-p)
+        if np.abs(kappa) < np.finfo(float).eps:
+            x = -np.log1p(-probs)
         else:
-            x = np.expm1(-k * np.log1p(-p)) / k
+            x = np.expm1(-kappa * np.log1p(-probs)) / kappa
         x *= sigma
     else:
-        if np.abs(k) < np.finfo(float).eps:
-            x[ok] = - np.log1p(-p[ok])
+        if np.abs(kappa) < np.finfo(float).eps:
+            x[ok] = -np.log1p(-probs[ok])
         else:
-            x[ok] = np.expm1(-k * np.log1p(-p[ok])) / k
+            x[ok] = np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
         x *= sigma
-        x[p == 0] = 0
-        if k >= 0:
-            x[p == 1] = np.inf
+        x[probs == 0] = 0
+        if kappa >= 0:
+            x[probs == 1] = np.inf
         else:
-            x[p == 1] = - sigma / k
+            x[probs == 1] = - sigma / kappa
 
     return x
 
@@ -538,8 +538,8 @@ def r2_score(y_true, y_pred, round_to=2):
     var_y_est = np.var(y_pred, axis=dimension)
     var_e = np.var(y_true - y_pred, axis=dimension)
 
-    r2 = var_y_est / (var_y_est + var_e)
-    return pd.Series([np.median(r2), np.mean(r2), np.std(r2)],
+    r_squared = var_y_est / (var_y_est + var_e)
+    return pd.Series([np.median(r_squared), np.mean(r_squared), np.std(r_squared)],
                      index=['r2_median', 'r2_mean', 'r2_std']).round(decimals=round_to)
 
 
@@ -767,7 +767,7 @@ def waic(trace, model, pointwise=False):
         """)
         warn_mg = 1
 
-    waic_i = - 2 * (lppd_i - vars_lpd)
+    waic_i = -2 * (lppd_i - vars_lpd)
     waic_se = (len(waic_i) * np.var(waic_i))**0.5
     waic_sum = np.sum(waic_i)
     p_waic = np.sum(vars_lpd)

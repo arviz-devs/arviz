@@ -1,7 +1,7 @@
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
-from ..utils import trace_to_dataframe, get_varnames
 from scipy.signal import fftconvolve
 
 
@@ -121,10 +121,10 @@ def _autocorr(x):
     acorr: Numpy array same size as the input array
     """
     y = x - x.mean()
-    n = len(y)
+    len_y = len(y)
     result = fftconvolve(y, y[::-1])
     acorr = result[len(result) // 2:]
-    acorr /= np.arange(n, 0, -1)
+    acorr /= np.arange(len_y, 0, -1)
     acorr /= acorr[0]
     return acorr
 
@@ -169,7 +169,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
     Returns
     -------
-    Rhat : dict of floats (MultiTrace) or float (trace object)
+    r_hat : dict of floats (MultiTrace) or float (trace object)
       Returns dictionary of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
@@ -196,21 +196,22 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     if not np.all(trace.columns.duplicated(keep=False)):
         raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
     else:
-        Rhat = pd.Series(name='Rhat')
+        r_hat = pd.Series(name='Rhat')
 
         for var in varnames:
             x = trace[var].values.T
             num_samples = x.shape[1]
             # Calculate between-chain variance
-            B = num_samples * np.var(np.mean(x, axis=1), axis=0, ddof=1)
+            between_chain_variance = num_samples * np.var(np.mean(x, axis=1), axis=0, ddof=1)
             # Calculate within-chain variance
-            W = np.mean(np.var(x, axis=1, ddof=1), axis=0)
+            within_chain_variance = np.mean(np.var(x, axis=1, ddof=1), axis=0)
             # Estimate of marginal posterior variance
-            Vhat = W * (num_samples - 1) / num_samples + B / num_samples
+            v_hat = (within_chain_variance * (num_samples - 1) / num_samples +
+                     between_chain_variance / num_samples)
 
-            Rhat[var] = round((Vhat / W)**0.5, round_to)
+            r_hat[var] = round((v_hat / within_chain_variance)**0.5, round_to)
 
-        return Rhat
+        return r_hat
 
 
 def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
@@ -293,10 +294,10 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
         first_slice = x[start: start + int(first * (end - start))]
         last_slice = x[int(end - last * (end - start)):]
 
-        z = first_slice.mean() - last_slice.mean()
-        z /= np.sqrt(first_slice.var() + last_slice.var())
+        z_score = first_slice.mean() - last_slice.mean()
+        z_score /= np.sqrt(first_slice.var() + last_slice.var())
 
-        zscores.append([start, z])
+        zscores.append([start, z_score])
 
     if intervals is None:
         return np.array(zscores[0])
@@ -304,22 +305,22 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
         return np.array(zscores)
 
 
-def ks_summary(ks):
+def ks_summary(pareto_tail_indices):
     """
-    Display a summary of Paretto tail indices.
+    Display a summary of Pareto tail indices.
 
     Parameters
     ----------
-    ks : array
-      Paretto tail indices.
+    pareto_tail_indices : array
+      Pareto tail indices.
 
     Returns
     -------
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
-    kcounts, _ = np.histogram(ks, bins=[-np.Inf, .5, .7, 1, np.Inf])
-    kprop = kcounts/len(ks)*100
+    kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, .5, .7, 1, np.Inf])
+    kprop = kcounts/len(pareto_tail_indices)*100
     df_k = (pd.DataFrame(dict(_=['(good)', '(ok)', '(bad)', '(very bad)'],
                               Count=kcounts,
                               Pct=kprop))
