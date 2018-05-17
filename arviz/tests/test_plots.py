@@ -4,22 +4,24 @@ import pymc3 as pm
 from pytest import raises
 
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
-                     parallelplot, pairplot, jointplot)
+                     parallelplot, pairplot, jointplot, ppcplot)
 
 
 class TestPlots(object):
     @classmethod
     def setup_class(cls):
         num_schools = 8
-        y = np.asarray([28., 8., -3., 7., -1., 1., 18., 12.])
+        cls.y = np.asarray([28., 8., -3., 7., -1., 1., 18., 12.])
         sigma = np.asarray([15., 10., 16., 11., 9., 11., 10., 18.])
         with pm.Model():
             mu = pm.Normal('mu', mu=0, sd=5)
             tau = pm.HalfCauchy('tau', beta=5)
             theta = pm.Normal('theta', mu=mu, sd=tau, shape=num_schools)
-            pm.Normal('obs', mu=theta, sd=sigma, observed=y)
+            pm.Normal('obs', mu=theta, sd=sigma, observed=cls.y)
             cls.short_trace = pm.sample(600, chains=2)
+            cls.sample_ppc = pm.sample_ppc(cls.short_trace, 100)
         cls.df_trace = DataFrame({'a': np.random.poisson(2.3, 100)})
+
 
     def test_density_plot(self):
         assert densityplot(self.df_trace).shape == (1,)
@@ -63,3 +65,6 @@ class TestPlots(object):
                  kwargs_divergences={'marker': '*', 'c': 'C'})
         pairplot(self.short_trace, kind='hexbin', varnames=['theta__0', 'theta__1'],
                  cmap='viridis', textsize=20)
+
+    def test_ppcplot(self):
+        ppcplot(self.y, self.sample_ppc)

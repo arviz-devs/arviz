@@ -10,3 +10,4 @@ from .traceplot import traceplot
 from .pairplot import pairplot
 from .jointplot import jointplot
 from .khatplot import khatplot
+from .ppcplot import ppcplot
