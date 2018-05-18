@@ -1,0 +1,10 @@
+git+https://github.com/pymc-devs/pymc3
+ipython
+nbsphinx
+numpydoc
+pylint
+pytest
+pytest-cov
+sphinx
+sphinx_rtd_theme
+travis-sphinx==2.0.0

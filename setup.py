@@ -1,10 +1,17 @@
+import shutil
+import os
+
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-import sys
-import shutil
-import os
 from matplotlib import get_configdir
+
+
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, 'requirements.txt')
+
+with open(REQUIREMENTS_FILE) as buff:
+    install_reqs = buff.read.splitlines()
 
 
 def copy_styles():
@@ -35,10 +42,7 @@ setup(
     author='ArviZ Developers',
     url="http://github.com/arviz-devs/arviz",
     packages=find_packages(),
-    install_requires=['matplotlib',
-                      'numpy',
-                      'scipy',
-                      'pandas'],
+    install_requires=install_reqs,
     include_package_data=True,
     cmdclass={
         'develop': DevelopStyles,
