@@ -1,3 +1,7 @@
+<img src="doc/source/_static/logo.png" height=100></img>
+
+[![Build Status](https://travis-ci.org/arviz-devs/arviz.svg?branch=master)](https://travis-ci.org/arviz-devs/arviz) [![Coverage Status](https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master)](https://coveralls.io/github/arviz-devs/arviz?branch=master)
+
 # ArviZ
 ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
 Includes functions for posterior analysis, model checking, comparison and diagnostics.
