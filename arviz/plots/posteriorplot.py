@@ -5,7 +5,7 @@ from . import kdeplot
 from .kdeplot import fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
-from .plot_utils import  _scale_text
+from .plot_utils import _scale_text, _create_axes_grid
 
 
 def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05, round_to=1,
@@ -196,19 +196,3 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
         display_ref_val(ref_val)
     if rope is not None:
         display_rope(rope)
-
-
-def _create_axes_grid(figsize, trace):
-    l_trace = trace.shape[1]
-    if l_trace == 1:
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        n_rows = np.ceil(l_trace / 2.0).astype(int)
-        if figsize is None:
-            figsize = (12, n_rows * 2.5)
-        fig, ax = plt.subplots(n_rows, 2, figsize=figsize)
-        ax = ax.reshape(2 * n_rows)
-        if l_trace % 2 == 1:
-            ax[-1].set_axis_off()
-            ax = ax[:-1]
-    return fig, ax

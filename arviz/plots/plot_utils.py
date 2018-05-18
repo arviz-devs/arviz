@@ -73,8 +73,39 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     """
     x_max, x_min = ary.max(), ary.min()
     x_range = x_max - x_min
-    if  x_range > max_bins:
+    if x_range > max_bins:
         bins = range(x_min, x_max + fenceposts, int(x_range / 10))
     else:
         bins = range(x_min, x_max + fenceposts)
     return bins
+
+
+def _create_axes_grid(figsize, trace):
+    """
+    Parameters
+    ----------
+    figsize : tuple
+        Figure size.
+    trace : dict or DataFrame
+        dictionary with ppc samples of DataFrame with posterior samples
+    Returns
+    -------
+    fig : matplotlib figure
+    ax : matplotlib axes
+    """
+    if isinstance(trace, dict):
+        l_trace = len(trace)
+    else:
+        l_trace = trace.shape[1]
+    if l_trace == 1:
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        n_rows = np.ceil(l_trace / 2.0).astype(int)
+        if figsize is None:
+            figsize = (12, n_rows * 2.5)
+        fig, ax = plt.subplots(n_rows, 2, figsize=figsize)
+        ax = ax.reshape(2 * n_rows)
+        if l_trace % 2 == 1:
+            ax[-1].set_axis_off()
+            ax = ax[:-1]
+    return fig, ax
