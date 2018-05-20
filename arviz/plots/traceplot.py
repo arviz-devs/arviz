@@ -140,7 +140,7 @@ def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style=
     errored = []
     for i, col in enumerate(data.T):
         try:
-            density, lower, upper = fast_kde(col, bw)
+            density, lower, upper = fast_kde(col, bw=bw)
             x = np.linspace(lower, upper, len(density))
             densities.append(ax.plot(x, density, lw=linewidth))
             if prior is not None:

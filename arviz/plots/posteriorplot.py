@@ -130,7 +130,7 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
             point_value = trace_values.mean()
         elif point_estimate == 'mode':
             if isinstance(trace_values.iloc[0], float):
-                density, lower, upper = fast_kde(trace_values, bw)
+                density, lower, upper = fast_kde(trace_values, bw=bw)
                 x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
             else:
