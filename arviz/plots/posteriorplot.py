@@ -31,8 +31,9 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
         Controls formatting for floating point numbers
     point_estimate: str
         Must be in ('mode', 'mean', 'median')
-    rope: list or numpy array
-        Lower and upper values of the Region Of Practical Equivalence
+    rope: tuple of list of tuples
+        Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
+        length should match the number of variables.
     ref_val: float or list-like
         display the percentage below and above the values in ref_val. If a list is provided, its
         length should match the number of variables.
@@ -66,11 +67,7 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
         varnames = expand_variable_names(trace, varnames)
         trace = trace[varnames]
 
-    if figsize is None:
-        figsize = (8, 8)
-
-    if ax is None:
-        _, ax = _create_axes_grid(figsize, trace)
+    ax, figsize = _create_axes_grid(trace, figsize, ax)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
@@ -109,16 +106,16 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
         ref_in_posterior = "{} <{:g}< {}".format(format_as_percent(less_than_ref_probability, 1),
                                                  ref_val,
                                                  format_as_percent(greater_than_ref_probability, 1))
-        ax.axvline(ref_val, ymin=0.02, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
+        ax.axvline(ref_val, ymin=0.05, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
         ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
-                color='C1', horizontalalignment='center')
+                color='C1', weight='semibold', horizontalalignment='center')
 
     def display_rope(rope):
         ax.plot(rope, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*5, color='C2',
-                alpha=0.75)
+                solid_capstyle='round')
         text_props = dict(size=textsize, horizontalalignment='center', color='C2')
-        ax.text(rope[0], plot_height * 0.14, rope[0], **text_props)
-        ax.text(rope[1], plot_height * 0.14, rope[1], **text_props)
+        ax.text(rope[0], plot_height * 0.2, rope[0], weight='semibold', **text_props)
+        ax.text(rope[1], plot_height * 0.2, rope[1], weight='semibold', **text_props)
 
     def display_point_estimate():
         if not point_estimate:
@@ -144,14 +141,15 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
 
     def display_hpd():
         hpd_intervals = hpd(trace_values, alpha=alpha)
-        ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth, color='k')
+        ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*2, color='k',
+                solid_capstyle='round')
         ax.text(hpd_intervals[0], plot_height * 0.07,
                 hpd_intervals[0].round(round_to),
                 size=textsize, horizontalalignment='center')
         ax.text(hpd_intervals[1], plot_height * 0.07,
                 hpd_intervals[1].round(round_to),
                 size=textsize, horizontalalignment='center')
-        ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.2,
+        ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.3,
                 format_as_percent(1 - alpha) + ' HPD',
                 size=textsize, horizontalalignment='center')
 
@@ -168,7 +166,7 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
 
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
         kdeplot(trace_values,
-                fill_alpha=kwargs.pop('alpha', 1),
+                fill_alpha=kwargs.pop('fill_alpha', 0.35),
                 bw=bw,
                 ax=ax,
                 lw=linewidth,
