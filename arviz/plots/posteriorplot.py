@@ -8,7 +8,6 @@ from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import _scale_text, _create_axes_grid
 
 
-
 def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05, round_to=1,
                   point_estimate='mean', rope=None, ref_val=None, kind='kde', bw=4.5, bins=None,
                   skip_first=0, ax=None, **kwargs):
