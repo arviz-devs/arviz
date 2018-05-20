@@ -68,10 +68,11 @@ def pairplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', 
     numvars = len(varnames)
 
     if figsize is None:
-        figsize = (8 + numvars, 8 + numvars)
+        figsize = (2 * numvars, 2 * numvars)
 
     if textsize is None:
-        textsize, _, markersize = _scale_text(figsize, textsize=textsize, scale_ratio=1.5)
+        scale_ratio = (6 / numvars) ** 0.75
+        textsize, _, markersize = _scale_text(figsize, textsize=textsize, scale_ratio=scale_ratio)
 
     if numvars < 2:
         raise Exception('Number of variables to be plotted must be 2 or greater.')

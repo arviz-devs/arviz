@@ -28,13 +28,9 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
     -------
     ax : matplotlib axes
     """
-    if figsize is None:
-        figsize = (6, 5)
+    ax, figsize = _create_axes_grid(ppc_sample, figsize, ax)
 
-    if ax is None:
-        _, ax = _create_axes_grid(figsize, ppc_sample)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize)
+    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
     for ax_, (var, ppss) in zip(np.atleast_1d(ax), ppc_sample.items()):
         if kind == 'kde':

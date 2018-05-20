@@ -80,14 +80,16 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     return bins
 
 
-def _create_axes_grid(figsize, trace):
+def _create_axes_grid(trace, figsize, ax):
     """
     Parameters
     ----------
-    figsize : tuple
-        Figure size.
     trace : dict or DataFrame
         dictionary with ppc samples of DataFrame with posterior samples
+    figsize : tuple
+        figure size
+    ax : matplotlib axes
+
     Returns
     -------
     fig : matplotlib figure
@@ -97,15 +99,16 @@ def _create_axes_grid(figsize, trace):
         l_trace = len(trace)
     else:
         l_trace = trace.shape[1]
-    if l_trace == 1:
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        n_rows = np.ceil(l_trace / 2.0).astype(int)
-        if figsize is None:
-            figsize = (12, n_rows * 2.5)
-        fig, ax = plt.subplots(n_rows, 2, figsize=figsize)
-        ax = ax.reshape(2 * n_rows)
-        if l_trace % 2 == 1:
-            ax[-1].set_axis_off()
-            ax = ax[:-1]
-    return fig, ax
+    if figsize is None:
+        figsize = (8, 2 + l_trace + (l_trace % 2))
+    if ax is None:
+        if l_trace == 1:
+            _, ax = plt.subplots(figsize=figsize)
+        else:
+            n_rows = np.ceil(l_trace / 2.0).astype(int)
+            _, ax = plt.subplots(n_rows, 2, figsize=figsize)
+            ax = ax.reshape(2 * n_rows)
+            if l_trace % 2 == 1:
+                ax[-1].set_axis_off()
+                ax = ax[:-1]
+    return ax, figsize
