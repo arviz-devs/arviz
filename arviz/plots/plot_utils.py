@@ -2,27 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_axis(ax, default_rows, default_columns, **default_kwargs):
-    """Verifies the provided axis is of the correct shape, and creates one if needed.
-
-    Args:
-        ax: matplotlib axis or None
-        default_rows: int, expected rows in axis
-        default_columns: int, expected columns in axis
-        **default_kwargs: keyword arguments to pass to plt.subplot
-
-    Returns:
-        axis, or raises an error
-    """
-
-    default_shape = (default_rows, default_columns)
-    if ax is None:
-        _, ax = plt.subplots(*default_shape, **default_kwargs)
-    elif ax.shape != default_shape:
-        raise ValueError('Subplots with shape %r required' % (default_shape,))
-    return ax
-
-
 def make_2d(ary):
     """Convert any array into a 2d numpy array.
 

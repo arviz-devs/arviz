@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_axis, _scale_text
+from .plot_utils import _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 
 
@@ -41,13 +41,13 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
     varnames = get_varnames(trace, varnames)
 
     if figsize is None:
-        figsize = (6, len(varnames) * 2)
+        figsize = (12, len(varnames) * 2)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
+    textsize, linewidth, _ = _scale_text(figsize, textsize, 1)
 
     nchains = trace.columns.value_counts()[0]
-    ax = get_axis(ax, len(varnames), nchains, squeeze=False, sharex=True, sharey=True,
-                  figsize=figsize)
+    fig, ax = plt.subplots(len(varnames), nchains, squeeze=False, sharex=True, sharey=True,
+                           figsize=figsize)
 
     max_lag = min(len(trace) - 1, max_lag)
 
@@ -59,12 +59,6 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
                 data = trace[varname].values[:, j]
             ax[i, j].acorr(data, detrend=plt.mlab.detrend_mean, maxlags=max_lag, lw=linewidth)
 
-            if j == 0:
-                ax[i, j].set_ylabel("correlation", fontsize=textsize)
-
-            if i == len(varnames) - 1:
-                ax[i, j].set_xlabel("lag", fontsize=textsize)
-
             if not symmetric_plot:
                 ax[i, j].set_xlim(0, max_lag)
 
@@ -73,4 +67,10 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
             else:
                 ax[i, j].set_title(varname, fontsize=textsize)
             ax[i, j].tick_params(labelsize=textsize)
+
+    fig.add_subplot(111, frameon=False)
+    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
+    plt.grid(False)
+    plt.xlabel("Lag", fontsize=textsize)
+    plt.ylabel("Correlation", fontsize=textsize)
     return ax

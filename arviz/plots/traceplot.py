@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
-from .plot_utils import get_axis, make_2d, get_bins, _scale_text
+from .plot_utils import make_2d, get_bins, _scale_text
 from ..utils import get_varnames, trace_to_dataframe
 
 
@@ -67,7 +67,7 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
 
     textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
 
-    ax = get_axis(ax, len(varnames), 2, squeeze=False, figsize=figsize)
+    _, ax = plt.subplots(len(varnames), 2, squeeze=False, figsize=figsize)
 
     for i, varname in enumerate(varnames):
         if priors is not None:
