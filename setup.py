@@ -4,7 +4,6 @@ import os
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-from matplotlib import get_configdir
 
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -15,6 +14,7 @@ with open(REQUIREMENTS_FILE) as buff:
 
 
 def copy_styles():
+    from matplotlib import get_configdir
     sd = os.path.join(get_configdir(), "stylelib")
     source = os.path.dirname(os.path.realpath(__file__))
     lsd = os.path.join(source, 'arviz', 'plots', 'styles')
