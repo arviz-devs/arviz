@@ -3,12 +3,56 @@ import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
 from .plot_utils import make_2d, get_bins, _scale_text
-from ..utils import get_varnames, trace_to_dataframe
+from ..utils import get_varnames, trace_to_dataframe, untransform_varnames
+from ..compat import altair as alt
+
+
+def _var_to_traceplot(dataframe, varname, brush):
+    df = dataframe.reset_index().melt(id_vars='index')
+
+    trace = alt.Chart().mark_line().encode(
+        alt.X('index:Q', title='Sample'),
+        alt.Y('value:Q', title=varname),
+        color=alt.Color('variable:N'),
+        opacity=alt.value(0.4 + 0.6 / len(df.variable.unique())),
+    ).properties(
+        selection=brush,
+        width=600,
+        height=200
+    )
+
+    if all(np.issubdtype(dtype, np.dtype('int')) for dtype in dataframe.dtypes.values):
+        base = alt.Chart().mark_bar()
+    else:
+        base = alt.Chart().mark_line()
+
+    kde = base.encode(
+        x=alt.X('value:Q', bin=alt.Bin(maxbins=100), title=varname),
+        y=alt.Y('count():Q', title='Number of Samples'),
+        color=alt.Color('variable:N'),
+    ).transform_filter(
+        brush.ref()
+    ).properties(
+        height=200
+    )
+
+    return alt.hconcat(kde, trace, data=df)
+
+
+def traceplot_altair(dataframe):
+    """Interactive traceplot using Altair
+    """
+    all_vars, _ = untransform_varnames(dataframe.columns)
+    brush = alt.selection_interval(encodings=['x'])
+    charts = []
+    for base_name, varnames in all_vars.items():
+        charts.append(_var_to_traceplot(dataframe.loc[:, varnames], base_name, brush))
+    return alt.vconcat(*charts)
 
 
 def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, combined=False,
               grid=True, shade=0.35, priors=None, prior_shade=1, prior_style='--', bw=4.5,
-              skip_first=0, ax=None):
+              skip_first=0, ax=None, altair=False):
     """Plot samples histograms and values.
 
     Parameters
@@ -52,6 +96,8 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
         >>> pymc3.traceplot(trace, ax=axs)
 
         Creates own axes by default.
+    altair : bool
+        Should returned plot be an altair chart.
 
     Returns
     -------
@@ -59,8 +105,11 @@ def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, com
     ax : matplotlib axes
 
     """
-    trace = trace_to_dataframe(trace[skip_first:], combined)
+    trace = trace_to_dataframe(trace[skip_first:], combined=combined)
     varnames = get_varnames(trace, varnames)
+
+    if altair:
+        return traceplot_altair(trace.loc[:, varnames])
 
     if figsize is None:
         figsize = (12, len(varnames) * 2)
