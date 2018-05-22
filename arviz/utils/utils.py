@@ -2,12 +2,55 @@ import bz2
 import gzip
 import lzma
 import os
+import re
 
 import numpy as np
 import pandas as pd
 
-__all__ = ['expand_variable_names', 'get_stats', 'get_varnames', 'log_post_trace',
-           'trace_to_dataframe', 'save_trace', 'load_trace']
+
+def untransform_varnames(varnames):
+    """Map transformed variable names back to their originals.
+
+    Mainly useful for dealing with PyMC3 traces.
+
+    Example
+    -------
+    untransform_varnames(['eta__0', 'eta__1', 'theta', 'theta_log__'])
+
+    {'eta': {'eta__0', 'eta_1'}, 'theta': {'theta'}}, {'theta': {'theta_log__'}}
+
+    Parameters
+    ----------
+    varnames : iterable of strings
+        All the varnames from a trace
+
+    Returns
+    -------
+    (dict, dict)
+        A dictionary of names to vector names, and names to transformed names
+    """
+    # Captures tau_log____0 or tau_log__, but not tau__0
+    transformed_vec_ptrn = re.compile(r'^(.*)__(?:__\d+)$')
+    # Captures tau__0 and tau_log____0, so use after the above
+    vec_ptrn = re.compile(r'^(.*)__\d+$')
+
+    varname_map = {}
+    transformed = {}
+    for varname in varnames:
+        has_match = False
+        for ptrn, mapper in ((transformed_vec_ptrn, transformed), (vec_ptrn, varname_map)):
+            match = ptrn.match(varname)
+            if match:
+                base_name = match.group(1)
+                if base_name not in mapper:
+                    mapper[base_name] = set()
+                mapper[base_name].add(varname)
+                has_match = True
+        if not has_match:
+            if varname not in varname_map:
+                varname_map[varname] = set()
+            varname_map[varname].add(varname)
+    return varname_map, transformed
 
 
 def expand_variable_names(trace, varnames):
@@ -17,7 +60,7 @@ def expand_variable_names(trace, varnames):
     tmp = []
     for vtrace in pd.unique(trace.columns):
         for varname in varnames:
-            if '{}__'.format(varname) in vtrace or varname in vtrace:
+            if vtrace == varname or vtrace.startswith('{}__'.format(varname)):
                 tmp.append(vtrace)
     return np.unique(tmp)
 
@@ -161,7 +204,7 @@ def _create_flat_names(varname, shape):
 
 def _is_transformed_name(name):
     """
-    Quickly check if a name was transformed with `get_transormed_name`
+    Quickly check if a name was transformed with `get_transformed_name`
 
     Parameters
     ----------
@@ -171,7 +214,7 @@ def _is_transformed_name(name):
     Returns
     -------
     bool
-        Boolean, whether the string could have been produced by `get_transormed_name`
+        Boolean, whether the string could have been produced by `get_transformed_name`
     """
     return name.endswith('__') and name.count('_') >= 3
 

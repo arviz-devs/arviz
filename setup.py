@@ -11,7 +11,7 @@ PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, 'requirements.txt')
 
 with open(REQUIREMENTS_FILE) as buff:
-    install_reqs = buff.read.splitlines()
+    install_reqs = buff.read().splitlines()
 
 
 def copy_styles():
