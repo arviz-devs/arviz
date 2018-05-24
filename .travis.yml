@@ -33,7 +33,7 @@ before_script:
 script:
   - pylint arviz/
   - pytest -xv arviz/tests/ --cov=arviz/
-  - travis-sphinx build -n
+  - travis-sphinx build --nowarn --source=docs
 
 after_success:
   - travis-sphinx deploy
