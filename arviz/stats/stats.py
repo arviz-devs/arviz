@@ -194,20 +194,20 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
 
     if np.any(weights):
         min_ic_i_val = ics[ic_i].iloc[0]
-        for i in ics.index:
-            res = ics.loc[i]
+        for idx, val in enumerate(ics.index):
+            res = ics.loc[val]
             diff = res[ic_i] - min_ic_i_val
             d_ic = np.sum(diff)
             d_std_err = np.sqrt(len(diff) * np.var(diff))
-            std_err = ses.loc[i]
-            weight = weights[i]
-            df_comp.at[i] = (round(res[ic], round_to),
-                             round(res[p_ic], round_to),
-                             round(d_ic, round_to),
-                             round(weight, round_to),
-                             round(std_err, round_to),
-                             round(d_std_err, round_to),
-                             res['warning'])
+            std_err = ses.loc[val]
+            weight = weights[idx]
+            df_comp.at[val] = (round(res[ic], round_to),
+                               round(res[p_ic], round_to),
+                               round(d_ic, round_to),
+                               round(weight, round_to),
+                               round(std_err, round_to),
+                               round(d_std_err, round_to),
+                               res['warning'])
 
     return df_comp.sort_values(by=ic)
 
@@ -220,13 +220,13 @@ def _ic_matrix(ics, ic_i):
     rows = len(ics[ic_i].iloc[0])
     ic_i_val = np.zeros((rows, cols))
 
-    for i in ics.index:
-        ic = ics.loc[i][ic_i]
+    for idx, val in enumerate(ics.index):
+        ic = ics.loc[val][ic_i]
         if len(ic) != rows:
             raise ValueError('The number of observations should be the same '
                              'across all models')
         else:
-            ic_i_val[:, i] = ic
+            ic_i_val[:, idx] = ic
 
     return rows, cols, ic_i_val
 
