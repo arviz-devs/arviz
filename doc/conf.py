@@ -111,7 +111,10 @@ html_theme = 'bootstrap'
 #
 html_theme_options = {
     'source_link_position': 'footer',
+    'navbar_title': ' ',
+    'globaltoc_depth': 0,
     'bootswatch_theme': 'paper',
+    'navbar_pagenav': False,
     'navbar_sidebarrel': False,
     'navbar_links': [
         ('Gallery', 'examples/index'),
@@ -130,9 +133,6 @@ html_static_path = ['_static', 'example_thumbs']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
-#
-# This is required for the alabaster theme
-# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 #html_sidebars = {}
 
 # -- Options for HTMLHelp output ------------------------------------------

@@ -1,7 +1,11 @@
-div.wy-side-nav-search {
-  background: #fcfcfc;
+dt:target {
+  background-color: #E0FFFF;
 }
 
-div.wy-side-nay {
-  background: #3f3f3f:
+a {
+  color: #12698A;
+}
+
+.navbar-brand img {
+  height: 150%;
 }

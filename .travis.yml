@@ -20,7 +20,7 @@ install:
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest pylint sphinx numpydoc ipython
   - source activate test-environment
-  - pip install -r requirements.txt
+  - pip install .
   - pip install -r requirements-dev.txt
   - pip install coveralls
 

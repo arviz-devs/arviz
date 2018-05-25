@@ -38,7 +38,7 @@ Contributions and issue reports are very welcome at `the github repository
 
     </div>
     <div class="col-md-6">
-        <div class="container-fluid">
+        <div class="container-fluid hidden-xs hidden-sm">
             <a href="examples/energyplot.html">
             <div class="col-md-3 thumbnail">
                 <img src="_static/energyplot_thumb.png">

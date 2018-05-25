@@ -125,10 +125,15 @@ def create_thumbnail(infile, thumbfile,
 
     im = image.imread(infile)
     rows, cols = im.shape[:2]
-    x0 = int(cx * cols - .5 * width)
-    y0 = int(cy * rows - .5 * height)
-    xslice = slice(x0, x0 + width)
-    yslice = slice(y0, y0 + height)
+    size = min(rows, cols)
+    if size == cols:
+        xslice = slice(0, size)
+        ymin = min(max(0, int(cx * rows - size // 2)), rows - size)
+        yslice = slice(ymin, ymin + size)
+    else:
+        yslice = slice(0, size)
+        xmin = min(max(0, int(cx * cols - size // 2)), cols - size)
+        xslice = slice(xmin, xmin + size)
     thumb = im[yslice, xslice]
     thumb[:border, :, :3] = thumb[-border:, :, :3] = 0
     thumb[:, :border, :3] = thumb[:, -border:, :3] = 0
