@@ -39,28 +39,32 @@ Contributions and issue reports are very welcome at `the github repository
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/energyplot.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/energyplot_thumb.png">
+            <a href="examples/parallelplot.html">
+            <div class="col-md-4 thumbnail">
+                <img src="_static/parallelplot_thumb.png">
             </div>
             </a>
             <a href="examples/traceplot.html">
-            <div class="col-md-3 thumbnail">
+            <div class="col-md-4 thumbnail">
                 <img src="_static/traceplot_thumb.png">
             </div>
             </a>
-            <a href="examples/densityplot.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/densityplot_thumb.png">
+            <a href="examples/energyplot.html">
+            <div class="col-md-4 thumbnail">
+                <img src="_static/energyplot_thumb.png">
+            </div>
+            <a href="examples/jointplot.html">
+            <div class="col-md-4 thumbnail">
+                <img src="_static/jointplot_thumb.png">
             </div>
             </a>
-            <a href="examples/compareplot.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/compareplot_thumb.png">
+            <a href="examples/ppcplot.html">
+            <div class="col-md-4 thumbnail">
+                <img src="_static/ppcplot_thumb.png">
             </div>
             </a>
             <a href="examples/autocorrplot.html">
-            <div class="col-md-3 thumbnail">
+            <div class="col-md-4 thumbnail">
                 <img src="_static/autocorrplot_thumb.png">
             </div>
             </a>
