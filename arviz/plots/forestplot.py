@@ -150,7 +150,7 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
     all_quants = []
     bands = [(0.05, 0)[i % 2] for i in range(len(varnames))]
     var_old = 0.5
-    for v_idx, varname in enumerate(varnames):
+    for v_idx, varname in enumerate(sorted(varnames)):
         for h_idx, tr in enumerate(traces):
             if plot_rhat[h_idx]:
                 gr_stat = gelman_rubin(tr)
