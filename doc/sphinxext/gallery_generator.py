@@ -312,6 +312,8 @@ class ExampleGenerator(object):
 
 
 def main(app):
+    working_dir = os.getcwd()
+    os.chdir(app.builder.srcdir)
     static_dir = op.join(app.builder.srcdir, '_static')
     target_dir = op.join(app.builder.srcdir, 'examples')
     image_dir = op.join(app.builder.srcdir, 'examples/_images')
@@ -370,6 +372,7 @@ def main(app):
                                           toctree=toctree,
                                           contents=contents))
 
+    os.chdir(working_dir)
 
 def setup(app):
     app.connect('builder-inited', main)
