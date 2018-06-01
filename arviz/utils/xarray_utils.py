@@ -127,6 +127,7 @@ def verify_coords_dims(varnames, trace, coords, dims):
                     inferred_coords[key] = f'np.arange({shape})'
     if throw:
         inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-        return False, 'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'.format(
+        msg = 'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'.format(
             inferred_coords=inferred_coords, inferred_dims=inferred_dims)
+        return False, msg
     return True, ''
