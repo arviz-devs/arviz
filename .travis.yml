@@ -32,7 +32,7 @@ before_script:
 
 script:
   - pylint arviz/
-  - pytest -xv arviz/tests/ --cov=arviz/
+  - pytest -v arviz/tests/ --cov=arviz/
   - travis-sphinx build --nowarn --source=doc
 
 after_success:
