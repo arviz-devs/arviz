@@ -69,7 +69,7 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
 
     ax, figsize = _create_axes_grid(trace, figsize, ax)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
+    textsize, linewidth, _ = _scale_text(figsize, textsize)
 
     var_num = trace.shape[1]
     if ref_val is None:
@@ -166,7 +166,7 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
 
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
         kdeplot(trace_values,
-                fill_alpha=kwargs.pop('fill_alpha', 0.35),
+                fill_alpha=kwargs.pop('fill_alpha', 0),
                 bw=bw,
                 ax=ax,
                 lw=linewidth,

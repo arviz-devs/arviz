@@ -4,7 +4,7 @@ from scipy.signal import gaussian, convolve  # pylint: disable=no-name-in-module
 from scipy.stats import entropy
 
 
-def kdeplot(values, cumulative=False, label=None, fill_alpha=0, fill_color=None, bw=4.5,
+def kdeplot(values, cumulative=False, rug=False, label=None, fill_alpha=0, fill_color=None, bw=4.5,
             rotated=False, ax=None, kwargs_shade=None, **kwargs):
     """
     1D KDE plot taking into account boundary conditions
@@ -14,7 +14,9 @@ def kdeplot(values, cumulative=False, label=None, fill_alpha=0, fill_color=None,
     values : array-like
         Values to plot
     cumulative : bool
-        If true plot the estimated cumulative distribution function
+        If true plot the estimated cumulative distribution function. Defaults to False
+    rug : bool
+        If True adds a rugplot. Defaults to False
     label : string
         Text to include as part of the legend
     fill_alpha : float
@@ -49,12 +51,19 @@ def kdeplot(values, cumulative=False, label=None, fill_alpha=0, fill_color=None,
     ax.plot(x, density, label=label, **kwargs)
     if rotated:
         ax.set_xlim(0, auto=True)
-        if fill_alpha:
-            ax.fill_betweenx(density, x, alpha=fill_alpha, color=fill_color, **kwargs_shade)
+        rug_marker = '_'
+        rug_x, rug_y = np.zeros_like(values), values
+        fill_x, fill_y = density, x
     else:
         ax.set_ylim(0, auto=True)
-        if fill_alpha:
-            ax.fill_between(x, density, alpha=fill_alpha, color=fill_color, **kwargs_shade)
+        rug_marker = '|'
+        rug_x, rug_y = values, np.zeros_like(values)
+        fill_x, fill_y = x, density
+    if rug:
+        ax.plot(rug_x, rug_y, kwargs.pop('color', 'C0'), marker=rug_marker, linestyle='None',
+                **kwargs)
+    if fill_alpha:
+        ax.fill_between(fill_x, fill_y, alpha=fill_alpha, color=fill_color, **kwargs_shade)
 
     return ax
 

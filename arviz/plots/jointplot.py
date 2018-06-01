@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
 from .kdeplot import kdeplot
-from ..utils import trace_to_dataframe
+from ..utils import trace_to_dataframe, get_varnames
 from .plot_utils import _scale_text, get_bins
 
 
@@ -46,6 +46,7 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
     ax_hist_y : matplotlib axes, y (right) distribution
     """
     trace = trace_to_dataframe(trace[skip_first:], combined=True)
+    varnames = get_varnames(trace, varnames)
 
     if figsize is None:
         figsize = (6, 6)
@@ -102,6 +103,7 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
     ax_hist_y.set_ylim(axjoin.get_ylim())
 
     return axjoin, ax_hist_x, ax_hist_y
+
 
 def _define_axes():
     left, width = 0.1, 0.65
