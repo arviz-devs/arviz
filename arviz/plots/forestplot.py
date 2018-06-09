@@ -6,9 +6,10 @@ from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import _scale_text
 
 
-def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rhat=True, neff=True,
-               main=None, xtitle=None, xlim=None, ylabels=None, colors='C0', chain_spacing=0.1,
-               vline=0, figsize=None, textsize=None, skip_first=0, plot_kwargs=None, gridspec=None):
+def forestplot(trace, models=None, varnames=None, combined=False, alpha=0.05, quartiles=True,
+               rhat=True, neff=True, main=None, xtitle=None, xlim=None, ylabels=None, colors='C0',
+               chain_spacing=0.1, vline=None, vcolors=None, figsize=None, textsize=None,
+               skip_first=0, plot_kwargs=None, gridspec=None):
     """
     Forest plot
 
@@ -23,6 +24,9 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
         trace
     varnames: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
+    combined : bool
+        Flag for combining multiple chains into a single chain. If False (default), chains will be
+        plotted separately.
     alpha : float, optional
         Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
     quartiles : bool, optional
@@ -48,8 +52,11 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
         for all models. Defauls to 'C0' (blueish in most matplotlib styles)
     chain_spacing : float, optional
         Plot spacing between chains. Defaults to 0.1
-    vline : numeric, optional
-        Location of vertical reference line. Defaults to 0
+    vline : list, optional
+        Location of vertical references lines. Defaults to None}
+    vcolors : list or string, optional
+        list with valid matplotlib colors, one color per value in vline. If None (Defaults)
+        `vcolors` is the same as `colors`.
     figsize : tuple, optional
         Figure size. Defaults to None
     textsize: int
@@ -71,9 +78,9 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
         plot_kwargs = {}
 
     if not isinstance(trace, (list, tuple)):
-        traces = [trace_to_dataframe(trace[skip_first:], combined=False)]
+        traces = [trace_to_dataframe(trace[skip_first:], combined=combined)]
     else:
-        traces = [trace_to_dataframe(tr[skip_first:], combined=False) for tr in trace]
+        traces = [trace_to_dataframe(tr[skip_first:], combined=combined) for tr in trace]
 
     if models is None:
         if len(traces) > 1:
@@ -265,7 +272,12 @@ def forestplot(trace, models=None, varnames=None, alpha=0.05, quartiles=True, rh
             spine.set_color('none')  # don't draw spine
 
     # Reference line
-    interval_plot.axvline(vline, color='k', linestyle=':')
+    if vline is not None:
+        if vcolors is None:
+            vcolors = colors
+        for idx, line in enumerate(vline):
+            interval_plot.axvline(line, color=vcolors[idx], linestyle=':',
+                                  lw=plot_kwargs.get('linewidth', linewidth))
     interval_plot.tick_params(labelsize=textsize)
 
     return gridspec
