@@ -4,7 +4,7 @@ import pymc3 as pm
 from pytest import raises
 
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
-                     parallelplot, pairplot, jointplot, ppcplot)
+                     parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
 
 class TestPlots(object):
@@ -68,3 +68,7 @@ class TestPlots(object):
 
     def test_ppcplot(self):
         ppcplot(self.y, self.sample_ppc)
+
+    def test_violintraceplot(self):
+        violintraceplot(self.df_trace)
+        violintraceplot(self.short_trace)
