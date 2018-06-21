@@ -2,6 +2,7 @@ import re
 import numpy as np
 import xarray as xr
 
+from copy import deepcopy as copy
 from arviz.compat import pymc3 as pm
 
 
@@ -105,8 +106,8 @@ def verify_coords_dims(varnames, trace, coords, dims):
     str
         Warning string in case it does not pass
     """
-    inferred_coords = coords.copy()
-    inferred_dims = dims.copy()
+    inferred_coords = copy(coords)
+    inferred_dims = copy(dims)
     for key in ('draw', 'chain'):
         inferred_coords.pop(key)
     global_coords = {}
@@ -153,7 +154,7 @@ def pystan_to_xarray(fit, coords=None, dims=None):
     xarray.Dataset
         The coordinates are those passed in and ('chain', 'draw')
     """
-
+    fit._verify_has_samples()
     if fit.mode == 1:
         return "Stan model '{}' is of mode 'test_grad';\n"\
                "sampling is not conducted.".format(fit.model_name)
@@ -161,26 +162,29 @@ def pystan_to_xarray(fit, coords=None, dims=None):
         return "Stan model '{}' does not contain samples.".format(fit.model_name)
 
     varnames, coords, dims = pystan_varnames_coords_dims(fit, coords, dims)
-
+    
     verified, warning = pystan_verify_coords_dims(varnames, fit, coords, dims)
 
     #infer dtypes
     pattern = r"int(?:\[.*\])*\s*(.)(?:\s*[=;]|(?:\s*<-))"
+    # assume "generated_quantities" appears only once
     generated_quantities = fit.get_stancode().split("generated quantities")[-1]
     dtypes = re.findall(pattern, generated_quantities)
     dtypes = {item : 'int' for item in dtypes if item in varnames}
 
     data = xr.Dataset(coords=coords)
     base_dims = ['chain', 'draw']
+
     for key in varnames:
         var_dtype = {key : 'int'} if key in dtypes else {}
         vals = fit.extract(key, dtypes=var_dtype, permuted=False)[key]
-        if fit.sim['chains'] == 1:
+        if len(vals.shape) == 1:
             vals = np.expand_dims(vals, axis=1)
+        vals = np.swapaxes(vals, 0, 1)
         dims_str = base_dims + dims[key]
         try:
             data[key] = xr.DataArray(vals, coords={v: coords[v] for v in dims_str}, dims=dims_str)
-        except KeyError as exc:
+        except (KeyError, ValueError) as exc:
             if not verified:
                 raise TypeError(warning) from exc
             else:
@@ -213,7 +217,7 @@ def pystan_varnames_coords_dims(fit, coords, dims):
     if coords is None:
         coords = {}
 
-    coords['draw'] = np.arange(len(fit))
+    coords['draw'] = np.arange(fit.sim['n_save'][0]-fit.sim['warmup']) # assume no thinning
     coords['chain'] = np.arange(fit.sim['chains'])
     coords = {key: xr.IndexVariable((key,), data=vals) for key, vals in coords.items()}
 
@@ -246,17 +250,34 @@ def pystan_verify_coords_dims(varnames, fit, coords, dims):
     str
         Warning string in case it does not pass
     """
-    inferred_coords = coords.copy()
-    inferred_dims = dims.copy()
+    fit._verify_has_samples()
+    if fit.mode == 1:
+        return "Stan model '{}' is of mode 'test_grad';\n"\
+               "sampling is not conducted.".format(fit.model_name)
+    elif fit.mode == 2:
+        return "Stan model '{}' does not contain samples.".format(fit.model_name)
+
+    inferred_coords = copy(coords)
+    inferred_dims = copy(dims)
     for key in ('draw', 'chain'):
         inferred_coords.pop(key)
     global_coords = {}
     throw = False
 
+    #infer dtypes
+    pattern = r"int(?:\[.*\])*\s*(.)(?:\s*[=;]|(?:\s*<-))"
+    # assume "generated_quantities" appears only once
+    generated_quantities = fit.get_stancode().split("generated quantities")[-1]
+    dtypes = re.findall(pattern, generated_quantities)
+    dtypes = {item : 'int' for item in dtypes if item in varnames}
+
     for varname in varnames:
-        vals = fit.extract(key, dtypes=var_dtype, permuted=False)[key]
-        if fit.sim['chains'] == 1:
+        var_dtype = {varname : 'int'} if varname in dtypes else {}
+        # no support for pystan <= 2.17.1
+        vals = fit.extract(varname, dtypes=var_dtype, permuted=False)[varname]
+        if len(vals.shape) == 1:
             vals = np.expand_dims(vals, axis=1)
+        vals = np.swapaxes(vals, 0, 1)
         shapes = [d for shape in coords.values() for d in shape.shape]
         for idx, shape in enumerate(vals[0].shape[1:], 1):
             try:
