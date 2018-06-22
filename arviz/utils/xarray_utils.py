@@ -1,8 +1,9 @@
 import re
+from copy import deepcopy as copy
+
 import numpy as np
 import xarray as xr
 
-from copy import deepcopy as copy
 from arviz.compat import pymc3 as pm
 
 
@@ -37,7 +38,9 @@ def pymc3_to_xarray(trace, coords=None, dims=None):
         vals = np.array(vals)
         dims_str = base_dims + dims[key]
         try:
-            data[key] = xr.DataArray(vals, coords={v: coords[v] for v in dims_str}, dims=dims_str)
+            data[key] = xr.DataArray(vals,
+                                     coords={v: coords[v] for v in dims_str if v in coords},
+                                     dims=dims_str)
         except KeyError as exc:
             if not verified:
                 raise TypeError(warning) from exc
@@ -80,7 +83,14 @@ def default_varnames_coords_dims(trace, coords, dims):
         dims = {}
 
     for varname in varnames:
-        dims.setdefault(varname, [])
+        if varname not in dims:
+            vals = trace.get_values(varname, combine=False, squeeze=False)
+            vals = np.array(vals)
+            shape_len = len(vals.shape)
+            if shape_len == 2:
+                dims[varname] = []
+            else:
+                dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
 
     return varnames, coords, dims
 
@@ -154,7 +164,7 @@ def pystan_to_xarray(fit, coords=None, dims=None):
     xarray.Dataset
         The coordinates are those passed in and ('chain', 'draw')
     """
-    fit._verify_has_samples()
+    #fit._verify_has_samples()
     if fit.mode == 1:
         return "Stan model '{}' is of mode 'test_grad';\n"\
                "sampling is not conducted.".format(fit.model_name)
@@ -162,7 +172,7 @@ def pystan_to_xarray(fit, coords=None, dims=None):
         return "Stan model '{}' does not contain samples.".format(fit.model_name)
 
     varnames, coords, dims = pystan_varnames_coords_dims(fit, coords, dims)
-    
+
     verified, warning = pystan_verify_coords_dims(varnames, fit, coords, dims)
 
     #infer dtypes
@@ -183,7 +193,9 @@ def pystan_to_xarray(fit, coords=None, dims=None):
         vals = np.swapaxes(vals, 0, 1)
         dims_str = base_dims + dims[key]
         try:
-            data[key] = xr.DataArray(vals, coords={v: coords[v] for v in dims_str}, dims=dims_str)
+            data[key] = xr.DataArray(vals,
+                                     coords={v: coords[v] for v in dims_str if v in coords},
+                                     dims=dims_str)
         except (KeyError, ValueError) as exc:
             if not verified:
                 raise TypeError(warning) from exc
@@ -225,12 +237,21 @@ def pystan_varnames_coords_dims(fit, coords, dims):
         dims = {}
 
     for varname in varnames:
-        dims.setdefault(varname, [])
+        if varname not in dims:
+            vals = fit.extract(varname, permuted=False)[varname]
+            if len(vals.shape) == 1:
+                vals = np.expand_dims(vals, axis=1)
+            vals = np.swapaxes(vals, 0, 1)
+            shape_len = len(vals.shape)
+            if shape_len == 2:
+                dims[varname] = []
+            else:
+                dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
 
     return varnames, coords, dims
 
 def pystan_verify_coords_dims(varnames, fit, coords, dims):
-    """Light checking and guessing on the structure of an xarray for a PyMC3 trace
+    """Light checking and guessing on the structure of an xarray for a PyStan fit
 
     Parameters
     ----------
@@ -250,7 +271,7 @@ def pystan_verify_coords_dims(varnames, fit, coords, dims):
     str
         Warning string in case it does not pass
     """
-    fit._verify_has_samples()
+    #fit._verify_has_samples()
     if fit.mode == 1:
         return "Stan model '{}' is of mode 'test_grad';\n"\
                "sampling is not conducted.".format(fit.model_name)
