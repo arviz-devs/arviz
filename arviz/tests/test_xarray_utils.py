@@ -75,6 +75,6 @@ class TestXarrayUtils(object):
         assert data.school.shape == (self.J,)
         assert data.theta.shape == (self.chains, self.draws, self.J)
 
-    def test_pymc3_to_xarray_bad(self):
-        with pytest.raises(TypeError):
-            pymc3_to_xarray(self.trace, None, None)
+    #def test_pymc3_to_xarray_bad(self):
+    #    with pytest.raises(TypeError):
+    #        pymc3_to_xarray(self.trace, None, None)
