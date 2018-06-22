@@ -1,5 +1,5 @@
 import numpy as np
-import pytest
+#import pytest
 
 from ..compat import pymc3 as pm
 from ..utils.xarray_utils import pymc3_to_xarray, default_varnames_coords_dims, verify_coords_dims
