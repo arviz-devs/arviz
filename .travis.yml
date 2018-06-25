@@ -14,18 +14,10 @@ cache:
 
 install:
   - sudo apt-get update
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
+  - . ./scripts/install_miniconda.sh
   - conda info -a
+  - . ./scripts/create_testenv.sh
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy mkl scipy pandas matplotlib pytest pylint sphinx numpydoc ipython
-  - source activate test-environment
-  - pip install .
-  - pip install -r requirements-dev.txt
   - pip install coveralls
 
 before_script:
