@@ -2,65 +2,8 @@
 import numpy as np
 #import pytest
 
-import pymc3 as pm
-import pystan
-
+from .helpers import eight_schools_params, load_cached_models
 from ..utils.xarray_utils import convert_to_xarray, PyMC3ToXarray, PyStanToXarray
-
-def eight_schools_params():
-    """Share setup for eight schools"""
-
-    data = {
-        'J': 8,
-        'y': np.array([28., 8., -3., 7., -1., 1., 18., 12.]),
-        'sigma': np.array([15., 10., 16., 11., 9., 11., 10., 18.]),
-    }
-    draws = 500
-    chains = 2
-    return data, draws, chains
-
-
-def pystan_noncentered_schools(data, draws, chains):
-    schools_code = '''
-        data {
-            int<lower=0> J;
-            real y[J];
-            real<lower=0> sigma[J];
-            }
-
-            parameters {
-            real mu;
-            real<lower=0> tau;
-            real theta_tilde[J];
-            }
-
-            transformed parameters {
-            real theta[J];
-            for (j in 1:J)
-                theta[j] = mu + tau * theta_tilde[j];
-            }
-
-            model {
-            mu ~ normal(0, 5);
-            tau ~ cauchy(0, 5);
-            theta_tilde ~ normal(0, 1);
-            y ~ normal(theta, sigma);
-        }'''
-    stan_model = pystan.StanModel(model_code=schools_code)
-    return stan_model.sampling(data=data,
-                               iter=draws,
-                               warmup=0,
-                               chains=chains)
-
-
-def pymc3_noncentered_schools(data, draws, chains):
-    with pm.Model():
-        mu = pm.Normal('mu', mu=0, sd=5)
-        tau = pm.HalfCauchy('tau', beta=5)
-        theta_tilde = pm.Normal('theta_tilde', mu=0, sd=1, shape=data['J'])
-        theta = pm.Deterministic('theta', mu + tau * theta_tilde)
-        pm.Normal('obs', mu=theta, sd=data['sigma'], observed=data['y'])
-        return pm.sample(draws, chains=chains)
 
 
 class CheckXarrayUtils(object):
@@ -142,8 +85,9 @@ class TestPyMC3XarrayUtils(CheckXarrayUtils):
     @classmethod
     def setup_class(cls):
         # Data of the Eight Schools Model
-        cls.data, cls.draws, cls.chains = eight_schools_params()
-        cls.obj = pymc3_noncentered_schools(cls.data, cls.draws, cls.chains)
+        cls.data = eight_schools_params()
+        cls.draws, cls.chains = 500, 2
+        cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pymc3']
         cls.cls = PyMC3ToXarray
 
 
@@ -152,6 +96,7 @@ class TestPyStanXarrayUtils(CheckXarrayUtils):
     @classmethod
     def setup_class(cls):
         # Data of the Eight Schools Model
-        cls.data, cls.draws, cls.chains = eight_schools_params()
-        cls.obj = pystan_noncentered_schools(cls.data, cls.draws, cls.chains)
+        cls.data = eight_schools_params()
+        cls.draws, cls.chains = 500, 2
+        cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']
         cls.cls = PyStanToXarray

@@ -1,19 +1,20 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .plot_utils import _scale_text
-from ..utils import get_varnames, trace_to_dataframe
+from .plot_utils import _scale_text, default_grid, selection_to_string, xarray_var_iter
+from ..utils import convert_to_xarray
 
 
-def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combined=False,
-                 figsize=None, textsize=None, skip_first=0, ax=None):
+def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, combined=False,
+                 figsize=None, textsize=None, skip_first=0):
     """
-    Bar plot of the autocorrelation function for a trace.
+    Bar plot of the autocorrelation function for a posterior.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    posterior : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames : list of variable names, optional
+    var_names : list of variable names, optional
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.
     max_lag : int, optional
@@ -30,47 +31,46 @@ def autocorrplot(trace, varnames=None, max_lag=100, symmetric_plot=False, combin
         Text size for labels, titles and lines. If None it will be autoscaled based on figsize.
     skip_first : int, optional
         Number of first samples not shown in plots (burn-in).
-    ax : axes, optional
-        Matplotlib axes.
 
     Returns
     -------
     ax : matplotlib axes
     """
-    trace = trace_to_dataframe(trace[skip_first:], combined=combined)
-    varnames = get_varnames(trace, varnames)
+    data = convert_to_xarray(posterior)
+    data = data.where(data.draw >= skip_first).dropna('draw')
+
+    if symmetric_plot:
+        min_lag = -max_lag
+    else:
+        min_lag = 0
+
+    plotters = list(xarray_var_iter(data, var_names, combined))
+    rows, cols = default_grid(len(plotters))
 
     if figsize is None:
-        figsize = (12, len(varnames) * 2)
-
+        figsize = (3 * cols, 2.5 * rows)
     textsize, linewidth, _ = _scale_text(figsize, textsize, 1)
 
-    nchains = trace.columns.value_counts()[0]
-    fig, ax = plt.subplots(len(varnames), nchains, squeeze=False, sharex=True, sharey=True,
-                           figsize=figsize)
+    _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
 
-    max_lag = min(len(trace) - 1, max_lag)
+    axes = np.atleast_2d(axes)  # in case of only 1 plot
+    y_min = 0
+    ax = None
+    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+        y = x - x.mean()
+        y = np.correlate(y, y, mode=2)
+        y = y / np.abs(y).max()
+        midpoint = len(y) // 2
+        ax.vlines(x=np.arange(min_lag, max_lag),
+                  ymin=np.zeros(max_lag - min_lag),
+                  ymax=y[midpoint + min_lag:midpoint + max_lag],
+                  lw=linewidth)
+        ax.hlines(0, min_lag, max_lag, 'steelblue')
+        ax.set_title('{} ({})'.format(var_name, selection_to_string(selection)), fontsize=textsize)
+        ax.tick_params(labelsize=textsize)
+        y_min = min(y_min, y.min())
 
-    for i, varname in enumerate(varnames):
-        for j in range(nchains):
-            if nchains == 1:
-                data = trace[varname].values
-            else:
-                data = trace[varname].values[:, j]
-            ax[i, j].acorr(data, detrend=plt.mlab.detrend_mean, maxlags=max_lag, lw=linewidth)
-
-            if not symmetric_plot:
-                ax[i, j].set_xlim(0, max_lag)
-
-            if nchains > 1:
-                ax[i, j].set_title("{0} (chain {1})".format(varname, j), fontsize=textsize)
-            else:
-                ax[i, j].set_title(varname, fontsize=textsize)
-            ax[i, j].tick_params(labelsize=textsize)
-
-    fig.add_subplot(111, frameon=False)
-    plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
-    plt.grid(False)
-    plt.xlabel("Lag", fontsize=textsize)
-    plt.ylabel("Correlation", fontsize=textsize)
+    if ax is not None:
+        ax.set_xlim(min_lag, max_lag)
+        ax.set_ylim(y_min, 1)
     return ax
