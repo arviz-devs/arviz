@@ -1,4 +1,5 @@
 git+https://github.com/pymc-devs/pymc3
+git+https://github.com/stan-dev/pystan
 ipython
 nbsphinx
 numpydoc
