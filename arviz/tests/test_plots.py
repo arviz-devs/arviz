@@ -3,6 +3,7 @@ import numpy as np
 import pymc3 as pm
 from pytest import raises
 
+from .helpers import eight_schools_params, load_cached_models
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
@@ -10,34 +11,30 @@ from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorr
 class TestPlots(object):
     @classmethod
     def setup_class(cls):
-        num_schools = 8
-        cls.y = np.asarray([28., 8., -3., 7., -1., 1., 18., 12.])
-        sigma = np.asarray([15., 10., 16., 11., 9., 11., 10., 18.])
-        with pm.Model():
-            mu = pm.Normal('mu', mu=0, sd=5)
-            tau = pm.HalfCauchy('tau', beta=5)
-            theta = pm.Normal('theta', mu=mu, sd=tau, shape=num_schools)
-            pm.Normal('obs', mu=theta, sd=sigma, observed=cls.y)
-            cls.short_trace = pm.sample(600, chains=2)
+        cls.data = eight_schools_params()
+        models = load_cached_models(draws=500, chains=2)
+        model, cls.short_trace = models['pymc3']
+        with model:
             cls.sample_ppc = pm.sample_ppc(cls.short_trace, 100)
+        cls.stan_model, cls.fit = models['pystan']
         cls.df_trace = DataFrame({'a': np.random.poisson(2.3, 100)})
 
 
     def test_density_plot(self):
         assert densityplot(self.df_trace).shape == (1,)
-        assert densityplot(self.short_trace).shape == (10,)
+        assert densityplot(self.short_trace).shape == (18,)
 
     def test_traceplot(self):
         assert traceplot(self.df_trace).shape == (1, 2)
-        assert traceplot(self.short_trace).shape == (10, 2)
+        assert traceplot(self.short_trace).shape == (18, 2)
 
     def test_posteriorplot(self):
         # posteriorplot(self.df_trace).shape == (1,)
-        assert posteriorplot(self.short_trace).shape == (10,)
+        assert posteriorplot(self.short_trace).shape == (18,)
 
     def test_autocorrplot(self):
-        assert autocorrplot(self.df_trace).shape == (1, 1)
-        assert autocorrplot(self.short_trace).shape == (10, 2)
+        for obj in (self.short_trace, self.fit):
+            assert autocorrplot(obj).get_geometry() == (6, 6, 36)
 
     def test_forestplot(self):
         assert forestplot(self.df_trace).get_geometry() == (1, 1)
@@ -67,7 +64,7 @@ class TestPlots(object):
                  cmap='viridis', textsize=20)
 
     def test_ppcplot(self):
-        ppcplot(self.y, self.sample_ppc)
+        ppcplot(self.data['y'], self.sample_ppc)
 
     def test_violintraceplot(self):
         violintraceplot(self.df_trace)
