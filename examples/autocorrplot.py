@@ -8,5 +8,5 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-trace = az.load_trace('data/centered_eight_trace.gzip')
-az.autocorrplot(trace, varnames=('tau', 'theta__0', 'mu'))
+data = az.load_data('data/centered_eight.nc')
+az.autocorrplot(data, var_names=('tau', 'mu'))

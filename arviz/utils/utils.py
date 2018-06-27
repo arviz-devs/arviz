@@ -6,6 +6,7 @@ import re
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 
 def untransform_varnames(varnames):
@@ -289,3 +290,30 @@ def load_trace(filepath, combined=False):
         df = trace_to_dataframe(df, combined)
 
     return df
+
+
+def save_data(data, filename='posterior.nc'):
+    """
+    Save posterior samples to a netcdf file.
+
+    Parameters
+    ----------
+    data : xarray.Dataset
+        Posterior samples. Use arviz.convert_to_xarray to turn samples from
+        other libraries into xarray.
+    filename : str
+        name or path of the file to save data
+    """
+    return data.to_netcdf(filename)
+
+
+def load_data(filename):
+    """
+    Load netcdf file back into an xarray.Dataset
+
+    Parameters
+    ----------
+    filename : str
+        name or path of the file to load trace
+    """
+    return xr.open_dataset(filename)
