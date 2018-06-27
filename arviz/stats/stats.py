@@ -512,8 +512,7 @@ def _gpinv(probs, kappa, sigma):
 
 def r2_score(y_true, y_pred, round_to=2):
     """
-    R-squared for Bayesian regression models. Only valid for linear models.
-    http://www.stat.columbia.edu/%7Egelman/research/unpublished/bayes_R2.pdf
+    R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
     ----------
@@ -522,25 +521,32 @@ def r2_score(y_true, y_pred, round_to=2):
     y_pred : array-like of shape = (n_samples) or (n_samples, n_outputs)
         Estimated target values.
     round_to : int
-        Number of decimals used to round results (default 2).
-
+        Number of decimals used to round results. Defaults to 2.
     Returns
     -------
     Pandas Series with the following indices:
-    R2_median: median of the Bayesian R2
-    R2_mean: mean of the Bayesian R2
-    R2_std: standard deviation of the Bayesian R2
+    r2: Bayesian R²
+    r2_std: standard deviation of the Bayesian R². Computed using bootstrapping
     """
-    dimension = None
-    if y_true.ndim > 1:
-        dimension = 1
+    y_pred = np.atleast_2d(y_pred).mean(0)
 
-    var_y_est = np.var(y_pred, axis=dimension)
-    var_e = np.var(y_true - y_pred, axis=dimension)
+    y_pred_ = []
+    for _ in range(1000):
+        idx = np.random.randint(0, len(y_true), size=len(y_true))
+        y_pred_.append(_r_square(y_true, y_pred, idx))
+
+    idx = range(len(y_true))
+    r_squared = _r_square(y_true, y_pred, idx)
+    return pd.Series([r_squared, np.std(y_pred_)],
+                     index=['r2', 'r2_std']).round(decimals=round_to)
+
+def _r_square(y_true, y_pred, idx):
+    """Computes Bayesian R²"""
+    var_y_est = np.var(y_pred[idx])
+    var_e = np.var(y_pred[idx] - y_true)
 
     r_squared = var_y_est / (var_y_est + var_e)
-    return pd.Series([np.median(r_squared), np.mean(r_squared), np.std(r_squared)],
-                     index=['r2_median', 'r2_mean', 'r2_std']).round(decimals=round_to)
+    return r_squared
 
 
 def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
