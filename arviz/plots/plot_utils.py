@@ -145,6 +145,24 @@ def selection_to_string(selection):
     return ', '.join(['{}: {}'.format(k, v) for k, v in selection.items()])
 
 
+def make_label(var_name, selection):
+    """Consistent labelling for plots
+
+    Parameters
+    ----------
+    var_name : str
+       Name of the variable
+
+    selection : dict[Any] -> Any
+        Coordinates of the variable
+
+    Returns
+    -------
+    str
+        A text representation of the label
+    """
+    return f'{var_name} ({selection_to_string(selection)})'
+
 
 def xarray_var_iter(data, var_names=None, combined=False):
     """Converts xarray data to an iterator over vectors

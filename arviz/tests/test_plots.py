@@ -21,8 +21,8 @@ class TestPlots(object):
 
 
     def test_density_plot(self):
-        assert densityplot(self.df_trace).shape == (1,)
-        assert densityplot(self.short_trace).shape == (18,)
+        for obj in (self.short_trace, self.fit):
+            assert densityplot(obj).shape == (18, 1)
 
     def test_traceplot(self):
         assert traceplot(self.df_trace).shape == (1, 2)
