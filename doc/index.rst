@@ -49,9 +49,9 @@ Contributions and issue reports are very welcome at `the github repository
                 <img src="_static/traceplot_thumb.png">
             </div>
             </a>
-            <a href="examples/energyplot.html">
+            <a href="examples/densityplot.html">
             <div class="col-md-4 thumbnail">
-                <img src="_static/energyplot_thumb.png">
+                <img src="_static/densityplot_thumb.png">
             </div>
             <a href="examples/jointplot.html">
             <div class="col-md-4 thumbnail">

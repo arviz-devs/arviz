@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .plot_utils import _scale_text, default_grid, selection_to_string, xarray_var_iter
+from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter
 from ..utils import convert_to_xarray
 
 
@@ -66,7 +66,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
                   ymax=y[midpoint + min_lag:midpoint + max_lag],
                   lw=linewidth)
         ax.hlines(0, min_lag, max_lag, 'steelblue')
-        ax.set_title('{} ({})'.format(var_name, selection_to_string(selection)), fontsize=textsize)
+        ax.set_title(make_label(var_name, selection), fontsize=textsize)
         ax.tick_params(labelsize=textsize)
         y_min = min(y_min, y.min())
 
