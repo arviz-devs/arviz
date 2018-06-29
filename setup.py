@@ -1,5 +1,6 @@
 import shutil
 import os
+import re
 
 from setuptools import setup, find_packages
 from setuptools.command.install import install
@@ -34,10 +35,19 @@ class InstallStyles(install):
         copy_styles()
         install.run(self)
 
+def get_version():
+    VERSIONFILE = join('arviz', '__init__.py')
+    lines = open(VERSIONFILE, 'rt').readlines()
+    version_regex = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    for line in lines:
+        mo = re.search(version_regex, line, re.M)
+        if mo:
+            return mo.group(1)
+    raise RuntimeError('Unable to find version in %s.' % (VERSIONFILE,))
 
 setup(
     name='arviz',
-    version='0.1.0',
+    version=get_version(),
     description='Exploratory analysis of Bayesian models',
     author='ArviZ Developers',
     url="http://github.com/arviz-devs/arviz",
