@@ -1,5 +1,5 @@
 # pylint: disable=wildcard-import
-
+__version__ = '0.1.0'
 from matplotlib.pyplot import style
 
 from .plots import *
