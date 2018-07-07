@@ -198,16 +198,11 @@ class PlotHandler(object):
         return np.concatenate(labels), np.concatenate(idxs)
 
     def joyplot(self, textsize, linewidth, alpha, ax):
-        if self.combined:
-            mult = 1.8
-        else:
-            mult = 1.
-
         if alpha is None:
             alpha = 1.
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, color in plotter.joyplot(mult):
+            for x, y_min, y_max, color in plotter.joyplot():
                 if alpha == 0:
                     border = color
                 else:
@@ -368,7 +363,7 @@ class VarHandler(object):
             ntiles[0], ntiles[-1] = hpd(values.flatten(), alpha=1-credible_interval)
             yield y, ntiles, color
 
-    def joyplot(self, mult):
+    def joyplot(self):
         xvals, yvals, pdfs, colors = [], [], [], []
         for y, _, values, color in self.iterator():
             yvals.append(y)
@@ -381,7 +376,7 @@ class VarHandler(object):
         scaling = max(j.max() for j in pdfs)
         for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
             y = y * np.ones_like(x)
-            yield x, y, mult * pdf / scaling + y, color
+            yield x, y, 1.8 * pdf / scaling + y, color
 
     def n_eff(self):
         _, y_vals, values, colors = self.labels_ticks_and_vals()
