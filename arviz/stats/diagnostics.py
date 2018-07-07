@@ -195,23 +195,27 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
     if not np.all(trace.columns.duplicated(keep=False)):
         raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
-    else:
-        r_hat = pd.Series(name='Rhat')
 
-        for var in varnames:
-            x = trace[var].values.T
-            num_samples = x.shape[1]
-            # Calculate between-chain variance
-            between_chain_variance = num_samples * np.var(np.mean(x, axis=1), axis=0, ddof=1)
-            # Calculate within-chain variance
-            within_chain_variance = np.mean(np.var(x, axis=1, ddof=1), axis=0)
-            # Estimate of marginal posterior variance
-            v_hat = (within_chain_variance * (num_samples - 1) / num_samples +
-                     between_chain_variance / num_samples)
+    r_hat = pd.Series(name='Rhat')
 
-            r_hat[var] = round((v_hat / within_chain_variance)**0.5, round_to)
+    for var in varnames:
+        r_hat[var] = _get_rhat(trace[var].values.T, round_to)
+    return r_hat
 
-        return r_hat
+
+def _get_rhat(values, round_to=2):
+    """Compute the rhat for a 2d array
+    """
+    num_samples = values.shape[1]
+    # Calculate between-chain variance
+    between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
+    # Calculate within-chain variance
+    within_chain_variance = np.mean(np.var(values, axis=1, ddof=1), axis=0)
+    # Estimate of marginal posterior variance
+    v_hat = (within_chain_variance * (num_samples - 1) / num_samples +
+             between_chain_variance / num_samples)
+
+    return round((v_hat / within_chain_variance)**0.5, round_to)
 
 
 def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):

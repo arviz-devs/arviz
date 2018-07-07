@@ -161,10 +161,12 @@ def make_label(var_name, selection):
     str
         A text representation of the label
     """
-    return f'{var_name} ({selection_to_string(selection)})'
+    if selection:
+        return f'{var_name} ({selection_to_string(selection)})'
+    return f'{var_name}'
 
 
-def xarray_var_iter(data, var_names=None, combined=False):
+def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
     """Converts xarray data to an iterator over vectors
 
     Iterates over each var_name and all of its coordinates, returning the 1d
@@ -181,23 +183,30 @@ def xarray_var_iter(data, var_names=None, combined=False):
     combined : bool
         Whether to combine chains or leave them separate
 
+    skip_dims : set
+        dimensions to not iterate over
+
     Returns
     -------
     Iterator of (str, dict(str, any), np.array)
         The string is the variable name, the dictionary are coordinate names to values,
         and the array are the values of the variable at those coordinates.
     """
+    if skip_dims is None:
+        skip_dims = set()
+
     if combined:
-        skip_dims = {'chain', 'draw'}
+        skip_dims = skip_dims.union({'chain', 'draw'})
     else:
-        skip_dims = {'draw'}
+        skip_dims.add('draw')
 
     if var_names is None:
         var_names = list(data.data_vars)
 
     for var_name in var_names:
-        new_dims = set(data[var_name].dims) - skip_dims
-        vals = [data[var_name][dim].values for dim in new_dims]
-        dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
-        for selection in dims:
-            yield var_name, selection, data[var_name].sel(**selection).values.flatten()
+        if var_name in data:
+            new_dims = set(data[var_name].dims) - skip_dims
+            vals = [data[var_name][dim].values for dim in new_dims]
+            dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
+            for selection in dims:
+                yield var_name, selection, data[var_name].sel(**selection).values
