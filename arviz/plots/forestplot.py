@@ -18,9 +18,9 @@ def pairwise(iterable):
     return zip(first, second)
 
 
-def forestplot(data, model_names=None, var_names=None, combined=False, credible_interval=0.95,
-               quartiles=True, joyplot=False, r_hat=True, n_eff=True, colors='cycle', textsize=None,
-               linewidth=None, markersize=None, joyplot_alpha=None, figsize=None):
+def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
+               credible_interval=0.95, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
+               textsize=None, linewidth=None, markersize=None, joyplot_alpha=None, figsize=None):
     """
     Forest plot
 
@@ -31,6 +31,8 @@ def forestplot(data, model_names=None, var_names=None, combined=False, credible_
     ----------
     data : xarray.Dataset or list of compatible
         Samples from a model posterior
+    kind : str
+        Choose kind of plot for main axis. Supports "forestplot" or "joyplot"
     model_names : list[str], optional
         List with names for the models in the list of data. Useful when
         plotting more that one dataset
@@ -103,12 +105,14 @@ def forestplot(data, model_names=None, var_names=None, combined=False, credible_
                             )
 
     axes = np.atleast_1d(axes)
-    if joyplot:
-        plot_handler.joyplot(textsize, linewidth, joyplot_alpha, axes[0])
-
-    else:
+    if kind == 'forestplot':
         plot_handler.forestplot(credible_interval, quartiles, textsize,
                                 linewidth, markersize, axes[0])
+    elif kind == 'joyplot':
+        plot_handler.joyplot(textsize, linewidth, joyplot_alpha, axes[0])
+    else:
+        raise TypeError(f"Argument 'kind' must be one of 'forestplot' or "
+                        f"'joyplot' (you provided {kind})")
 
     idx = 1
     if r_hat:
@@ -138,7 +142,7 @@ def forestplot(data, model_names=None, var_names=None, combined=False, credible_
     axes[0].set_yticklabels(labels)
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
-    if joyplot:
+    if kind == 'joyplot':  # space at the top
         y_max += 1
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
 
