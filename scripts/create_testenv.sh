@@ -7,16 +7,20 @@ command -v conda >/dev/null 2>&1 || {
   exit 1;
 }
 
-ENVNAME="testenv"
 PYTHON_VERSION=${PYTHON_VERSION:-3.6} # if no python specified, use 3.6
 
-if conda env list | grep -q ${ENVNAME}
-then
-    echo "Environment ${ENVNAME} already exists, keeping up to date"
-else
-    conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
-    source activate ${ENVNAME}
+if [[ $* != *--global* ]]; then
+    ENVNAME="testenv"
+
+    if conda env list | grep -q ${ENVNAME}
+    then
+        echo "Environment ${ENVNAME} already exists, keeping up to date"
+    else
+        conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
+        source activate ${ENVNAME}
+    fi
 fi
+
 conda install --yes numpy scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray mkl-service
 
 pip install --upgrade pip
