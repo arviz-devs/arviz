@@ -39,6 +39,11 @@ Contributions and issue reports are very welcome at `the github repository
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
+            <a href="examples/joyplot.html">
+            <div class="col-md-4 thumbnail">
+                <img src="_static/joyplot_thumb.png">
+            </div>
+            </a>
             <a href="examples/parallelplot.html">
             <div class="col-md-4 thumbnail">
                 <img src="_static/parallelplot_thumb.png">
@@ -49,10 +54,6 @@ Contributions and issue reports are very welcome at `the github repository
                 <img src="_static/traceplot_thumb.png">
             </div>
             </a>
-            <a href="examples/densityplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/densityplot_thumb.png">
-            </div>
             <a href="examples/jointplot.html">
             <div class="col-md-4 thumbnail">
                 <img src="_static/jointplot_thumb.png">

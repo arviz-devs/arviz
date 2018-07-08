@@ -20,7 +20,8 @@ def pairwise(iterable):
 
 def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
                credible_interval=0.95, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
-               textsize=None, linewidth=None, markersize=None, joyplot_alpha=None, figsize=None):
+               textsize=None, linewidth=None, markersize=None, joyplot_alpha=None,
+               joyplot_overlap=2, figsize=None):
     """
     Forest plot
 
@@ -65,6 +66,8 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     joyplot_alpha : float
         Transparency for joyplot fill.  If 0, border is colored by model, otherwise
         a black outline is used.
+    joyplot_overlap : float
+        Overlap height for joyplots.
     figsize : tuple, optional
         Figure size. Defaults to None
 
@@ -109,7 +112,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
         plot_handler.forestplot(credible_interval, quartiles, textsize,
                                 linewidth, markersize, axes[0])
     elif kind == 'joyplot':
-        plot_handler.joyplot(textsize, linewidth, joyplot_alpha, axes[0])
+        plot_handler.joyplot(joyplot_overlap, textsize, linewidth, joyplot_alpha, axes[0])
     else:
         raise TypeError(f"Argument 'kind' must be one of 'forestplot' or "
                         f"'joyplot' (you provided {kind})")
@@ -143,7 +146,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
     if kind == 'joyplot':  # space at the top
-        y_max += 1
+        y_max += joyplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
 
     return fig, axes
@@ -201,12 +204,12 @@ class PlotHandler(object):
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def joyplot(self, textsize, linewidth, alpha, ax):
+    def joyplot(self, mult, textsize, linewidth, alpha, ax):
         if alpha is None:
             alpha = 1.
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, color in plotter.joyplot():
+            for x, y_min, y_max, color in plotter.joyplot(mult):
                 if alpha == 0:
                     border = color
                 else:
@@ -226,7 +229,6 @@ class PlotHandler(object):
             qlist = [endpoint, 25, 50, 75, 100 - endpoint]
         else:
             qlist = [endpoint, 50, 100 - endpoint]
-
 
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
@@ -367,7 +369,7 @@ class VarHandler(object):
             ntiles[0], ntiles[-1] = hpd(values.flatten(), alpha=1-credible_interval)
             yield y, ntiles, color
 
-    def joyplot(self):
+    def joyplot(self, mult):
         xvals, yvals, pdfs, colors = [], [], [], []
         for y, _, values, color in self.iterator():
             yvals.append(y)
@@ -380,7 +382,7 @@ class VarHandler(object):
         scaling = max(j.max() for j in pdfs)
         for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
             y = y * np.ones_like(x)
-            yield x, y, 1.8 * pdf / scaling + y, color
+            yield x, y, mult * pdf / scaling + y, color
 
     def n_eff(self):
         _, y_vals, values, colors = self.labels_ticks_and_vals()
