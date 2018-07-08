@@ -14,6 +14,7 @@ docker build \
     $SRC_DIR \
     && docker run -d \
         -p $PORT:8888 \
+        -v $SRC_DIR:/home/jovyan/ \
         -v $NOTEBOOK_DIR:/home/jovyan/work/ \
         --name arviz arviz \
         start-notebook.sh --NotebookApp.token=${TOKEN}
