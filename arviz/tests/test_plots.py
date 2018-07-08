@@ -37,10 +37,15 @@ class TestPlots(object):
             assert autocorrplot(obj).get_geometry() == (6, 6, 36)
 
     def test_forestplot(self):
-        assert forestplot(self.df_trace).get_geometry() == (1, 1)
-        assert forestplot(self.short_trace).get_geometry() == (1, 3)
-        assert forestplot(self.short_trace, rhat=False).get_geometry() == (1, 2)
-        assert forestplot(self.short_trace, neff=False).get_geometry() == (1, 2)
+        for obj in (self.short_trace, self.fit, [self.short_trace, self.fit]):
+            _, axes = forestplot(obj)
+            assert axes.shape == (3,)
+            _, axes = forestplot(obj, r_hat=False, quartiles=False)
+            assert axes.shape == (2,)
+            _, axes = forestplot(obj, var_names=['mu'], colors='C0', n_eff=False, combined=True)
+            assert axes.shape == (2,)
+            _, axes = forestplot(obj, kind='joyplot', r_hat=False, n_eff=False)
+            assert axes.shape == (1,)
 
     def test_energyplot(self):
         with raises(AttributeError):

@@ -102,7 +102,7 @@ def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estima
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
-            _d_helper(values, label, colors[m_idx], bw, textsize, linewidth, markersize,
+            _d_helper(values.flatten(), label, colors[m_idx], bw, textsize, linewidth, markersize,
                       alpha, point_estimate, hpd_markers, outline, shade, axis_map[label])
 
     if n_data > 1:

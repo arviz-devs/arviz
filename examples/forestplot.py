@@ -8,5 +8,9 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-trace = az.utils.load_trace('data/centered_eight_trace.gzip')
-az.forestplot(trace, varnames=('theta__0', 'theta__1', 'theta__2'))
+centered_data = az.load_data('data/centered_eight.nc')
+non_centered_data = az.load_data('data/non_centered_eight.nc')
+fig, axes = az.forestplot([centered_data, non_centered_data],
+                          model_names=['Centered', 'Non Centered'],
+                          var_names=['mu'])
+axes[0].set_title('Estimated theta for eight schools model')

@@ -1,328 +1,409 @@
+from collections import defaultdict
+from itertools import tee
+
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-from ..stats import hpd, gelman_rubin, effective_n
-from ..utils import trace_to_dataframe, expand_variable_names
-from .plot_utils import _scale_text
+
+from ..stats.diagnostics import _get_neff, _get_rhat
+from ..stats import hpd
+from .plot_utils import _scale_text, xarray_var_iter, make_label
+from ..utils import convert_to_xarray
+from .kdeplot import fast_kde
 
 
-def forestplot(trace, models=None, varnames=None, combined=False, alpha=0.05, quartiles=True,
-               rhat=True, neff=True, main=None, xtitle=None, xlim=None, ylabels=None, colors='C0',
-               chain_spacing=0.1, vline=None, vcolors=None, figsize=None, textsize=None,
-               skip_first=0, plot_kwargs=None, gridspec=None):
+def pairwise(iterable):
+    """From itertools cookbook. [a, b, c, ...] -> (a, b), (b, c), ..."""
+    first, second = tee(iterable)
+    next(second, None)
+    return zip(first, second)
+
+
+def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
+               credible_interval=0.95, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
+               textsize=None, linewidth=None, markersize=None, joyplot_alpha=None,
+               joyplot_overlap=2, figsize=None):
     """
     Forest plot
 
-    Generates a forest plot of 100*(1-alpha)% credible intervals from a trace or list of traces.
+    Generates a forest plot of 100*(credible_interval)% credible intervals from
+    a trace or list of traces.
 
     Parameters
     ----------
-    trace : trace or list of traces
-        Trace(s) from an MCMC sample
-    models : list of strings (optional)
-        List with names for the models in the list of traces. Useful when plotting more that one
-        trace
-    varnames: list, optional
-        List of variables to plot (defaults to None, which results in all variables plotted)
+    data : xarray.Dataset or list of compatible
+        Samples from a model posterior
+    kind : str
+        Choose kind of plot for main axis. Supports "forestplot" or "joyplot"
+    model_names : list[str], optional
+        List with names for the models in the list of data. Useful when
+        plotting more that one dataset
+    var_names: list[str], optional
+        List of variables to plot (defaults to None, which results in all
+        variables plotted)
     combined : bool
-        Flag for combining multiple chains into a single chain. If False (default), chains will be
-        plotted separately.
-    alpha : float, optional
-        Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
+        Flag for combining multiple chains into a single chain. If False (default),
+        chains will be plotted separately.
+    credible_interval : float, optional
+        Credible interval to plot. Defaults to 0.95.
     quartiles : bool, optional
-        Flag for plotting the interquartile range, in addition to the (1-alpha)*100% intervals.
+        Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
-    rhat : bool, optional
+    r_hat : bool, optional
         Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to True
-    neff : bool, optional
+    n_eff : bool, optional
         Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to True
-    main : string, optional
-        Title for main plot. Passing False results in titles being suppressed. Defaults to None
-    xtitle : string, optional
-        Label for x-axis. Defaults to None, i.e. no label
-    xlim : list or tuple, optional
-        Range for x-axis. Defaults to None, i.e. matplotlib's best guess.
-    ylabels : list or array, optional
-        User-defined labels for each variable. If not provided, the node
-        __name__ attributes are used
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the
         matyplolibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
-        for all models. Defauls to 'C0' (blueish in most matplotlib styles)
-    chain_spacing : float, optional
-        Plot spacing between chains. Defaults to 0.1
-    vline : list, optional
-        Location of vertical references lines. Defaults to None}
-    vcolors : list or string, optional
-        list with valid matplotlib colors, one color per value in vline. If None (Defaults)
-        `vcolors` is the same as `colors`.
-    figsize : tuple, optional
-        Figure size. Defaults to None
+        for all models. Defauls to 'cycle'.
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
-    plot_kwargs : dict, optional
-        Optional arguments for plot elements. Currently accepts `fontsize`, `linewidth`, `marker`
-        and `markersize`.
-    gridspec : GridSpec
-        Matplotlib GridSpec object. Defaults to None.
+    linewidth : int
+        Line width throughout. If None it will be autoscaled based on figsize.
+    markersize : int
+        Markersize throughout. If None it will be autoscaled based on figsize.
+    joyplot_alpha : float
+        Transparency for joyplot fill.  If 0, border is colored by model, otherwise
+        a black outline is used.
+    joyplot_overlap : float
+        Overlap height for joyplots.
+    figsize : tuple, optional
+        Figure size. Defaults to None
 
     Returns
     -------
     gridspec : matplotlib GridSpec
 
     """
-    if plot_kwargs is None:
-        plot_kwargs = {}
 
-    if not isinstance(trace, (list, tuple)):
-        traces = [trace_to_dataframe(trace[skip_first:], combined=combined)]
-    else:
-        traces = [trace_to_dataframe(tr[skip_first:], combined=combined) for tr in trace]
+    ncols, width_ratios = 1, [3]
 
-    if models is None:
-        if len(traces) > 1:
-            models = ['m_{}'.format(i) for i, _ in enumerate(traces)]
-        else:
-            models = ['']
-    elif len(models) != len(traces):
-        raise ValueError("The number of names for the models does not match the number of models")
+    if n_eff:
+        ncols += 1
+        width_ratios.append(1)
 
-    if colors == 'cycle':
-        colors = ['C{}'.format(i % 10) for i in range(len(models))]
-    elif isinstance(colors, str):
-        colors = [colors for i in range(len(models))]
+    if r_hat:
+        ncols += 1
+        width_ratios.append(1)
 
-    # Quantiles to be calculated
-    if quartiles:
-        qlist = [alpha / 2, 0.25, 0.50, 0.75, (1 - alpha / 2)]
-    else:
-        qlist = [alpha / 2, 0.50, (1 - alpha / 2)]
-
-    nchains = [tr.columns.value_counts()[0] for tr in traces]
-
-    if varnames is None:
-        varnames = set.union(*[set(tr.columns) for tr in traces])
-    else:
-        varnames = set.union(*[set(expand_variable_names(tr, varnames)) for tr in traces])
-
-    plot_rhat = [rhat and nch > 1 for nch in nchains]
-    plot_neff = [neff and nch > 1 for nch in nchains]
-
+    plot_handler = PlotHandler(data, var_names=var_names, model_names=model_names,
+                               combined=combined, colors=colors)
 
     if figsize is None:
-        figsize = (6, len(varnames) * 2)
+        figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    textsize, linewidth, markersize = _scale_text(figsize, textsize=textsize)
+    textsize, auto_linewidth, auto_markersize = _scale_text(figsize, textsize=textsize)
+    if linewidth is None:
+        linewidth = auto_linewidth
 
-    plt.figure(figsize=figsize)
+    if markersize is None:
+        markersize = auto_markersize
 
-    if gridspec is None:
-        num_subplots = 1
-        if np.any(plot_rhat):
-            num_subplots += 1
-        if np.any(plot_neff):
-            num_subplots += 1
+    fig, axes = plt.subplots(nrows=1,
+                             ncols=ncols,
+                             figsize=figsize,
+                             gridspec_kw={'width_ratios': width_ratios},
+                             sharey=True
+                            )
 
-        gridspec = GridSpec(1, num_subplots, width_ratios=[3] + [1] * (num_subplots - 1))
+    axes = np.atleast_1d(axes)
+    if kind == 'forestplot':
+        plot_handler.forestplot(credible_interval, quartiles, textsize,
+                                linewidth, markersize, axes[0])
+    elif kind == 'joyplot':
+        plot_handler.joyplot(joyplot_overlap, textsize, linewidth, joyplot_alpha, axes[0])
+    else:
+        raise TypeError(f"Argument 'kind' must be one of 'forestplot' or "
+                        f"'joyplot' (you provided {kind})")
 
-        if np.any(plot_rhat):
-            gr_rhat = plt.subplot(gridspec[1])
-            gr_rhat.set_xticks((1.0, 2.0))
-            gr_rhat.set_xlim(0.9, 2.1)
-            gr_rhat.set_yticks([])
-            gr_rhat.set_title('R-hat', fontsize=textsize)
-            gr_rhat.tick_params(labelsize=textsize)
-        if np.any(plot_neff):
-            neffs = [v for tr in traces for v in effective_n(tr).values]
-            mins, maxs = round(min(neffs), -1), round(max(neffs), -1)
-            gr_neff = plt.subplot(gridspec[num_subplots-1])
-            gr_neff.set_xticks((mins, maxs))
-            gr_neff.set_yticks([])
-            gr_neff.set_title('n_eff', fontsize=textsize)
-            gr_neff.tick_params(labelsize=textsize)
-    # Subplot for confidence intervals
-    interval_plot = plt.subplot(gridspec[0])
+    idx = 1
+    if r_hat:
+        plot_handler.plot_rhat(axes[idx], textsize, markersize)
+        idx += 1
 
-    trace_quantiles = []
-    hpd_intervals = []
-    for tr in traces:
-        trace_quantiles.append(tr.quantile(qlist))
-        hpd_intervals.append(tr.apply(lambda x: hpd(x, alpha)))
+    if n_eff:
+        plot_handler.plot_neff(axes[idx], textsize, markersize)
+        idx += 1
 
-    labels = []
-    var = 0
-    all_quants = []
-    bands = [(0.05, 0)[i % 2] for i in range(len(varnames))]
-    var_old = 0.5
-    for v_idx, varname in enumerate(sorted(varnames)):
-        for h_idx, tr in enumerate(traces):
-            if plot_rhat[h_idx]:
-                gr_stat = gelman_rubin(tr)
-            if plot_neff[h_idx]:
-                n_e = effective_n(tr)
-            if varname not in tr.columns:
-                labels.append(models[h_idx] + ' ' + varname)
-                y = -var
-                var += 1
+    for ax in axes:
+        ax.grid(False)
+        # Remove ticklines on y-axes
+        for ticks in ax.yaxis.get_major_ticks():
+            ticks.tick1On = False
+            ticks.tick2On = False
+
+        for loc, spine in ax.spines.items():
+            if loc in ['left', 'right']:
+                spine.set_color('none')  # don't draw spine
+
+        if len(plot_handler.data) > 1:
+            plot_handler.make_bands(ax)
+
+    labels, ticks = plot_handler.labels_and_ticks()
+    axes[0].set_yticks(ticks)
+    axes[0].set_yticklabels(labels)
+    all_plotters = list(plot_handler.plotters.values())
+    y_max = plot_handler.y_max() - all_plotters[-1].group_offset
+    if kind == 'joyplot':  # space at the top
+        y_max += joyplot_overlap
+    axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
+
+    return fig, axes
+
+
+class PlotHandler(object):
+    def __init__(self, data, var_names, model_names, combined, colors):
+        if not isinstance(data, (list, tuple)):
+            data = [data]
+
+        self.data = [convert_to_xarray(datum) for datum in reversed(data)]  # y-values upside down
+
+        if model_names is None:
+            if len(self.data) > 1:
+                model_names = [f'Model {idx}' for idx, _ in enumerate(self.data)]
             else:
-                # Add spacing for each chain, if more than one
-                offset = [0] + [(chain_spacing * ((i + 2) / 2)) * (-1)
-                                ** i for i in range(nchains[h_idx] - 1)]
-                for j in range(nchains[h_idx]):
-                    if nchains[h_idx] > 1:
-                        var_quantiles = trace_quantiles[h_idx][varname].iloc[:, j]
-                        var_hpd = hpd_intervals[h_idx][varname].iloc[j]
-                    else:
-                        var_quantiles = trace_quantiles[h_idx][varname]
-                        var_hpd = hpd_intervals[h_idx][varname]
+                model_names = ['']
+        elif len(model_names) != len(self.data):
+            raise ValueError("The number of model names does not match the number of models")
 
-                    quants = var_quantiles.loc[np.unique(qlist)].values
+        self.model_names = list(reversed(model_names))  # y-values are upside down
 
-                    # Substitute HPD interval for quantile
-                    quants[0] = var_hpd[0]
-                    quants[-1] = var_hpd[1]
+        if var_names is None:
+            self.var_names = list(set.union(*[set(datum.data_vars) for datum in self.data]))
+        else:
+            self.var_names = list(reversed(var_names))  # y-values are upside down
 
-                    # Ensure x-axis contains range of current interval
-                    all_quants.extend(quants)
+        self.combined = combined
 
-                    if j == 0:
-                        labels.append(models[h_idx] + ' ' + varname)
+        if colors == 'cycle':
+            colors = [f'C{idx % 10}' for idx, _ in enumerate(self.data)]
+        elif isinstance(colors, str):
+            colors = [colors for _ in self.data]
 
-                    # Y coordinate with offset
-                    y = -var + offset[j]
+        self.colors = list(reversed(colors))  # y-values are upside down
 
-                    interval_plot = _plot_tree(interval_plot, y, quants,
-                                               quartiles, colors[h_idx],
-                                               linewidth,
-                                               markersize,
-                                               plot_kwargs)
+        self.plotters = self.make_plotters()
 
-                # Genenerate Gelman-Rubin plot
-                if plot_rhat[h_idx] and varname in tr.columns:
-                    gr_rhat.plot(min(gr_stat[varname], 2), -var, 'o',
-                                 color=colors[h_idx], markersize=markersize)
-                # Genenerate effective sample size plot
-                if plot_neff[h_idx] and varname in tr.columns:
-                    gr_neff.plot(n_e[varname], -var, 'o',
-                                 color=colors[h_idx], markersize=markersize)
+    def make_plotters(self):
+        plotters, y = {}, 0
+        for var_name in self.var_names:
+            plotters[var_name] = VarHandler(var_name, self.data, y,
+                                            model_names=self.model_names,
+                                            combined=self.combined,
+                                            colors=self.colors,
+                                           )
+            y = plotters[var_name].y_max()
+        return plotters
 
-                var += 1
+    def labels_and_ticks(self):
+        labels, idxs = [], []
+        for plotter in self.plotters.values():
+            sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
+            labels.append(sub_labels)
+            idxs.append(sub_idxs)
+        return np.concatenate(labels), np.concatenate(idxs)
 
-        if len(traces) > 1:
-            var_new = y - chain_spacing - 0.5
-            interval_plot.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
-            if np.any(plot_rhat):
-                gr_rhat.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
-            if np.any(plot_neff):
-                gr_neff.axhspan(var_old, var_new, facecolor='k', alpha=bands[v_idx])
+    def joyplot(self, mult, textsize, linewidth, alpha, ax):
+        if alpha is None:
+            alpha = 1.
+        zorder = 0
+        for plotter in self.plotters.values():
+            for x, y_min, y_max, color in plotter.joyplot(mult):
+                if alpha == 0:
+                    border = color
+                else:
+                    border = 'k'
+                ax.plot(x, y_max, '-', linewidth=linewidth, color=border, zorder=zorder)
+                ax.plot(x, y_min, '-', linewidth=linewidth, color=border, zorder=zorder)
+                ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
+                zorder -= 1
 
-            var_old = var_new
+        ax.tick_params(labelsize=textsize)
 
-    if ylabels is not None:
-        labels = ylabels
+        return ax
+    def forestplot(self, credible_interval, quartiles, textsize, linewidth, markersize, ax):
+        # Quantiles to be calculated
+        endpoint = 100 * (1 - credible_interval) / 2
+        if quartiles:
+            qlist = [endpoint, 25, 50, 75, 100 - endpoint]
+        else:
+            qlist = [endpoint, 50, 100 - endpoint]
 
-    # Update margins
-    left_margin = np.max([len(x) for x in labels]) * 0.015
-    gridspec.update(left=left_margin, right=0.95, top=0.9, bottom=0.05)
+        for plotter in self.plotters.values():
+            for y, values, color in plotter.treeplot(qlist, credible_interval):
+                mid = len(values) // 2
+                param_iter = zip(
+                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1],
+                    range(mid))
+                for width, j in param_iter:
+                    ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
+                ax.plot(values[mid], y, 'o',
+                        mfc=ax.get_facecolor(),
+                        markersize=markersize * 0.75,
+                        color=color)
+        ax.tick_params(labelsize=textsize)
+        ax.set_title(f'{credible_interval:.1%} Credible Interval', fontsize=textsize)
 
-    # Define range of y-axis for forestplot and R-hat
-    interval_plot.set_ylim(- var + 0.5, 0.5)
-    if np.any(plot_rhat):
-        gr_rhat.set_ylim(- var + 0.5, 0.5)
+        return ax
 
-    if np.any(plot_neff):
-        gr_neff.set_ylim(- var + 0.5, 0.5)
+    def plot_neff(self, ax, textsize, markersize):
+        for plotter in self.plotters.values():
+            for y, n_eff, color in plotter.n_eff():
+                if n_eff is not None:
+                    ax.plot(n_eff, y, 'o', color=color, markersize=markersize)
+        ax.set_xlim(left=0)
+        ax.set_title('Effective n', fontsize=textsize)
+        ax.tick_params(labelsize=textsize)
+        return ax
 
-    plotrange = [np.min(all_quants), np.max(all_quants)]
-    datarange = plotrange[1] - plotrange[0]
-    interval_plot.set_xlim(plotrange[0] - 0.05 * datarange, plotrange[1] + 0.05 * datarange)
+    def plot_rhat(self, ax, textsize, markersize):
+        for plotter in self.plotters.values():
+            for y, r_hat, color in plotter.r_hat():
+                if r_hat is not None:
+                    ax.plot(r_hat, y, 'o', color=color, markersize=markersize)
+        ax.set_xlim(left=0.9, right=2.1)
+        ax.set_xticks([1, 2])
+        ax.tick_params(labelsize=textsize)
+        ax.set_title('R-hat', fontsize=textsize)
+        return ax
 
-    # Add variable labels
-    interval_plot.set_yticks([- l for l in range(len(labels))])
-    interval_plot.set_yticklabels(labels, fontsize=plot_kwargs.get('fontsize', textsize))
+    def make_bands(self, ax):
+        y_vals, y_prev, is_zero = [0], None, False
+        prev_color_index = 0
+        plotter = None  # To make sure it is defined
+        for plotter in self.plotters.values():
+            for y, _, _, color in plotter.iterator():
+                if self.colors.index(color) < prev_color_index:
+                    if not is_zero and y_prev is not None:
+                        y_vals.append((y + y_prev) * 0.5)
+                        is_zero = True
+                else:
+                    is_zero = False
+                prev_color_index = self.colors.index(color)
+                y_prev = y
 
-    # Add title
-    if main is None:
-        plot_title = "{:.0f}% Credible Intervals".format((1 - alpha) * 100)
-    elif main:
-        plot_title = main
-    else:
-        plot_title = ""
+        if plotter is None:
+            offset = 1
+        else:
+            offset = plotter.group_offset
 
-    interval_plot.set_title(plot_title, fontsize=plot_kwargs.get('fontsize', textsize))
+        y_vals.append(y_prev + offset)
+        for idx, (y_start, y_stop) in enumerate(pairwise(y_vals)):
+            ax.axhspan(y_start, y_stop, color='k', alpha=0.1 * (idx % 2))
+        return ax
 
-    # Add x-axis label
-    if xtitle is not None:
-        interval_plot.set_xlabel(xtitle)
+    def fig_height(self):
+        # hand-tuned
+        return (len(self.data) * len(self.var_names) - 1 +
+                0.25 * sum(1 for j in self.plotters.values() for _ in j.iterator())
+               )
 
-    # Constrain to specified range
-    if xlim is not None:
-        interval_plot.set_xlim(*xlim)
-
-    # Remove ticklines on y-axes
-    for ticks in interval_plot.yaxis.get_major_ticks():
-        ticks.tick1On = False
-        ticks.tick2On = False
-
-    for loc, spine in interval_plot.spines.items():
-        if loc in ['left', 'right']:
-            spine.set_color('none')  # don't draw spine
-
-    # Reference line
-    if vline is not None:
-        if vcolors is None:
-            vcolors = colors
-        for idx, line in enumerate(vline):
-            interval_plot.axvline(line, color=vcolors[idx], linestyle=':',
-                                  lw=plot_kwargs.get('linewidth', linewidth))
-    interval_plot.tick_params(labelsize=textsize)
-
-    return gridspec
+    def y_max(self):
+        return max(p.y_max() for p in self.plotters.values())
 
 
-def _plot_tree(ax, y, ntiles, show_quartiles, color, linewidth, markersize, plot_kwargs):
-    """Helper to plot errorbars for the forestplot.
+class VarHandler(object):
+    def __init__(self, var_name, data, y_start, model_names, combined, colors):
+        self.var_name = var_name
+        self.data = data
+        self.y_start = y_start
+        self.model_names = model_names
+        self.combined = combined
+        self.colors = colors
+        self.model_color = dict(zip(self.model_names, self.colors))
+        self.chain_offset = len(data) * 0.45 / max(datum.chain.max().values for datum in data)
+        self.var_offset = 1.5 * self.chain_offset
+        self.group_offset = 2 * self.var_offset
 
-    Parameters
-    ----------
-    ax: Matplotlib.Axes
-    y: float
-        y value to add error bar to
-    ntiles: iterable
-        A list or array of length 5 or 3
-    show_quartiles: boolean
-        Whether to plot the interquartile range
-    color : string
-        color
-    linewidth : float
-        Width of lines
-    markersize : float
-        Size of marker
-    plot_kwargs : dict
-        Further arguments to pass to plots
+    def iterator(self):
+        if self.combined:
+            grouped_data = [[(0, datum)] for datum in self.data]
+            skip_dims = {'chain'}
+        else:
+            grouped_data = [datum.groupby('chain') for datum in self.data]
+            skip_dims = set()
 
-    Returns
-    -------
-    Matplotlib.Axes with a single error bar added
+        label_dict = {}
+        for name, grouped_datum in zip(self.model_names, grouped_data):
+            for _, sub_data in grouped_datum:
+                datum_iter = xarray_var_iter(sub_data,
+                                             var_names=[self.var_name],
+                                             skip_dims=skip_dims)
+                for _, selection, values in datum_iter:
+                    label = make_label(self.var_name, selection)
+                    if label not in label_dict:
+                        label_dict[label] = {}
+                    if name not in label_dict[label]:
+                        label_dict[label][name] = []
+                    label_dict[label][name].append(values)
 
-    """
-    # Plot outer interval
-    ax.errorbar(x=(ntiles[0], ntiles[-1]), y=(y, y), lw=linewidth, color=color, zorder=1)
+        y = self.y_start
+        for label, model_data in label_dict.items():
+            for model_name, value_list in model_data.items():
+                if model_name:
+                    row_label = f'{model_name}: {label}'
+                else:
+                    row_label = label
+                for values in value_list:
+                    yield y, row_label, values, self.model_color[model_name]
+                    y += self.chain_offset
+                y += self.var_offset
+            y += self.group_offset
 
-    if show_quartiles:
-        # Plot quartile interval
-        ax.errorbar(x=(ntiles[1], ntiles[3]), y=(y, y),
-                    lw=plot_kwargs.get('linewidth', linewidth * 2), color=color, zorder=1)
-        # Plot median
-        ax.plot(ntiles[2], y, color='w', mec=color, marker=plot_kwargs.get('marker', 'o'),
-                ms=plot_kwargs.get('markersize', markersize), zorder=2)
+    def labels_ticks_and_vals(self):
+        y_ticks = defaultdict(list)
+        for y, label, vals, color in self.iterator():
+            y_ticks[label].append((y, vals, color))
+        labels, ticks, vals, colors = [], [], [], []
+        for label, data in y_ticks.items():
+            labels.append(label)
+            ticks.append(np.mean([j[0] for j in data]))
+            vals.append(np.vstack([j[1] for j in data]))
+            colors.append(data[0][2])  # the colors are all the same
+        return labels, ticks, vals, colors
 
-    else:
-        # Plot median
-        ax.plot(ntiles[1], y, color='w', mec=color, marker=plot_kwargs.get('marker', 'o'),
-                ms=plot_kwargs.get('markersize', markersize), zorder=2)
+    def treeplot(self, qlist, credible_interval):
+        for y, _, values, color in self.iterator():
+            ntiles = np.percentile(values.flatten(), qlist)
+            ntiles[0], ntiles[-1] = hpd(values.flatten(), alpha=1-credible_interval)
+            yield y, ntiles, color
 
-    return ax
+    def joyplot(self, mult):
+        xvals, yvals, pdfs, colors = [], [], [], []
+        for y, _, values, color in self.iterator():
+            yvals.append(y)
+            colors.append(color)
+            values = values.flatten()
+            density, lower, upper = fast_kde(values)
+            xvals.append(np.linspace(lower, upper, len(density)))
+            pdfs.append(density)
+
+        scaling = max(j.max() for j in pdfs)
+        for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
+            y = y * np.ones_like(x)
+            yield x, y, mult * pdf / scaling + y, color
+
+    def n_eff(self):
+        _, y_vals, values, colors = self.labels_ticks_and_vals()
+        for y, value, color in zip(y_vals, values, colors):
+            if value.ndim != 2 or value.shape[0] < 2:
+                yield y, None, color
+            else:
+                yield y, _get_neff(value), color
+
+    def r_hat(self):
+        _, y_vals, values, colors = self.labels_ticks_and_vals()
+        for y, value, color in zip(y_vals, values, colors):
+            if value.ndim != 2 or value.shape[0] < 2:
+                yield y, None, color
+            else:
+                yield y, _get_rhat(value), color
+
+    def y_max(self):
+        end_y = max(y for y, *_ in self.iterator())
+
+        if self.combined:
+            end_y += self.group_offset
+
+        return end_y + 2 * self.group_offset
