@@ -19,3 +19,7 @@ Another option is to clone the repository and install using `python setup.py ins
 ## Dependencies
 
 Arviz is tested on Python 3.6 and depends on NumPy, SciPy, Pandas and Matplotlib.
+
+## Developing
+
+There is a Dockerfile which helps for isolating build problems and local development. Install Docker for your operating system, clone this repo, then run ./scripts/start_container.sh. This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
