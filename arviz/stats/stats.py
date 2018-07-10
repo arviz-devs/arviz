@@ -535,20 +535,10 @@ def r2_score(y_true, y_pred, round_to=2):
         var_y_est = np.var(y_pred.mean(0))
         var_e = np.var(y_true - y_pred, 0)
 
-    r2 = var_y_est / (var_y_est + var_e)
-
-    return pd.Series([np.mean(r2), np.std(r2)],
-                     index=['r2', 'r2_std']).round(decimals=round_to)
-
-
-
-def _r_square(y_true, y_pred, idx):
-    """Computes Bayesian R²"""
-    var_y_est = np.var(y_pred[idx])
-    var_e = np.var(y_pred[idx] - y_true)
-
     r_squared = var_y_est / (var_y_est + var_e)
-    return r_squared
+
+    return pd.Series([np.mean(r_squared), np.std(r_squared)],
+                     index=['r2', 'r2_std']).round(decimals=round_to)
 
 
 def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
