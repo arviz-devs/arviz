@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from pandas import DataFrame
 import numpy as np
 import pymc3 as pm
@@ -19,6 +20,8 @@ class TestPlots(object):
         cls.stan_model, cls.fit = models['pystan']
         cls.df_trace = DataFrame({'a': np.random.poisson(2.3, 100)})
 
+    def teardown_method(self):
+        plt.close('all')
 
     def test_density_plot(self):
         for obj in (self.short_trace, self.fit):

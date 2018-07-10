@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import mode
-from . import kdeplot
-from .kdeplot import fast_kde
+from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
 from ..utils import trace_to_dataframe, expand_variable_names
 from .plot_utils import _scale_text, _create_axes_grid
@@ -166,11 +165,10 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
 
     if kind == 'kde' and isinstance(trace_values.iloc[0], float):
         kdeplot(trace_values,
-                fill_alpha=kwargs.pop('fill_alpha', 0),
                 bw=bw,
-                ax=ax,
-                lw=linewidth,
-                **kwargs)
+                fill_kwargs={'alpha': kwargs.pop('fill_alpha', 0)},
+                plot_kwargs={'linewidth': linewidth},
+                ax=ax)
 
     else:
         if bins is None:
