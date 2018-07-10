@@ -526,19 +526,21 @@ def r2_score(y_true, y_pred, round_to=2):
     -------
     Pandas Series with the following indices:
     r2: Bayesian R²
-    r2_std: standard deviation of the Bayesian R². Computed using bootstrapping
+    r2_std: standard deviation of the Bayesian R².
     """
-    y_pred = np.atleast_2d(y_pred).mean(0)
+    if y_pred.ndim == 1:
+        var_y_est = np.var(y_pred)
+        var_e = np.var(y_true - y_pred)
+    else:
+        var_y_est = np.var(y_pred.mean(0))
+        var_e = np.var(y_true - y_pred, 0)
 
-    y_pred_ = []
-    for _ in range(1000):
-        idx = np.random.randint(0, len(y_true), size=len(y_true))
-        y_pred_.append(_r_square(y_true, y_pred, idx))
+    r2 = var_y_est / (var_y_est + var_e)
 
-    idx = range(len(y_true))
-    r_squared = _r_square(y_true, y_pred, idx)
-    return pd.Series([r_squared, np.std(y_pred_)],
+    return pd.Series([np.mean(r2), np.std(r2)],
                      index=['r2', 'r2_std']).round(decimals=round_to)
+
+
 
 def _r_square(y_true, y_pred, idx):
     """Computes Bayesian R²"""
