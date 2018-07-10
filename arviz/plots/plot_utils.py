@@ -2,6 +2,7 @@ import itertools
 
 import numpy as np
 import matplotlib.pyplot as plt
+import xarray as xr
 
 
 def make_2d(ary):
@@ -201,7 +202,11 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
         skip_dims.add('draw')
 
     if var_names is None:
-        var_names = list(data.data_vars)
+        if isinstance(data, xr.Dataset):
+            var_names = list(data.data_vars)
+        elif isinstance(data, xr.DataArray):
+            var_names = [data.name]
+            data = {data.name: data}
 
     for var_name in var_names:
         if var_name in data:

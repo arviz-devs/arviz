@@ -6,10 +6,10 @@ _thumb: .2, .8
 """
 import arviz as az
 import matplotlib.pyplot as plt
+import numpy as np
 
 az.style.use('arviz-darkgrid')
 
-trace = az.utils.load_trace('data/non_centered_eight_trace.gzip')
-
-fig, ax = plt.subplots(figsize=(12, 8))
-az.kdeplot(trace.tau, fill_alpha=0.1, ax=ax)
+ax = az.kdeplot(np.random.gumbel(size=100), label='100 gumbel samples', rug=True,
+                plot_kwargs={'linewidth': 5, 'color': 'black'},
+                rug_kwargs={'color': 'black'})
