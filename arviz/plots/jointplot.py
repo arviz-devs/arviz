@@ -97,7 +97,9 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
         ax_hist_y.hist(y, bins=bins, align='left', density=True, orientation='horizontal',
                        **marginal_kwargs)
     else:
-        kdeplot(y, ax=ax_hist_y, rotated=True, lw=linewidth, **marginal_kwargs)
+        marginal_kwargs.setdefault('plot_kwargs', {})
+        marginal_kwargs['plot_kwargs']['linewidth'] = linewidth
+        kdeplot(y, ax=ax_hist_y, rotated=True, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())

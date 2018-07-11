@@ -6,7 +6,7 @@ from ..utils import get_stats
 
 
 def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
-               fill_color=('C0', 'C5'), bw=4.5, skip_first=0, kwargs_shade=None, ax=None,
+               fill_color=('C0', 'C5'), bw=4.5, skip_first=0, fill_kwargs=None, ax=None,
                **kwargs):
     """Plot energy transition distribution and marginal energy distribution in
     order to diagnose poor exploration by HMC algorithms.
@@ -35,7 +35,7 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         of thumb (the default rule used by SciPy). Only works if `kind='kde'`
     skip_first : int
         Number of first samples not shown in plots (burn-in).
-    kwargs_shade : dicts, optional
+    fill_kwargs : dicts, optional
         Additional keywords passed to `fill_between` (to control the shade)
     ax : axes
         Matplotlib axes.
@@ -53,8 +53,8 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
-    if kwargs_shade is None:
-        kwargs_shade = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
 
     series = zip(
         fill_alpha,
@@ -65,9 +65,15 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
 
     if kind == 'kde':
         for alpha, color, label, value in series:
-            kdeplot(value, fill_alpha=alpha, bw=bw, alpha=0, fill_color=color, ax=ax,
-                    kwargs_shade=kwargs_shade, **kwargs)
-            plt.plot([], label=label, color=color)
+            fill_kwargs['alpha'] = alpha
+            fill_kwargs['color'] = color
+            plot_kwargs = {
+                'color': color,
+                'alpha': 0
+            }
+            plot_kwargs.update(kwargs)
+            kdeplot(value, bw=bw, label=label,
+                    plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
 
     elif kind == 'hist':
         for alpha, color, label, value in series:

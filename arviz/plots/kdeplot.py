@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve  # pylint: disable=no-name-in-module
 from scipy.stats import entropy
 
+from .plot_utils import _scale_text
 
-def kdeplot(values, cumulative=False, rug=False, label=None, fill_alpha=0, fill_color=None, bw=4.5,
-            rotated=False, ax=None, kwargs_shade=None, **kwargs):
+
+def kdeplot(values, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
+            figsize=None, textsize=None, plot_kwargs=None, fill_kwargs=None,
+            rug_kwargs=None, ax=None):
     """
     1D KDE plot taking into account boundary conditions
 
@@ -19,51 +22,76 @@ def kdeplot(values, cumulative=False, rug=False, label=None, fill_alpha=0, fill_
         If True adds a rugplot. Defaults to False
     label : string
         Text to include as part of the legend
-    fill_alpha : float
-        Alpha blending value for the shaded area under the curve, between 0
-        (no shade) and 1 (opaque). Defaults to 0
-    fill_color : valid matplotlib color
-        Color used for the shaded are under the curve. Defaults to None
     bw : float
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default rule used by SciPy).
+    rotated : bool
+        Whether to rotate the plot 90 degrees
+    figsize : tuple
+        Size of figure in inches. Defaults to (12, 8)
+    textsize : float
+        Size of text on figure.
+    plot_kwargs : dict
+        Keywords passed to the pdf line
+    fill_kwargs : dict
+        Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill)
+    rug_kwargs : dict
+        Keywords passed to the rug plot. Ignored if rug=False
     ax : matplotlib axes
-    kwargs_shade : dicts, optional
-        Additional keywords passed to `matplotlib.axes.Axes.fill_between`
-        (to control the shade)
     Returns
     ----------
     ax : matplotlib axes
 
     """
-    if ax is None:
-        _, ax = plt.subplots()
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    plot_kwargs.setdefault('color', 'C0')
 
-    if kwargs_shade is None:
-        kwargs_shade = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
+
+    fill_kwargs.setdefault('alpha', 0.2)
+    fill_kwargs.setdefault('color', 'C0')
+
+    if rug_kwargs is None:
+        rug_kwargs = {}
+    rug_kwargs.setdefault('marker', '_' if rotated else '|')
+    rug_kwargs.setdefault('linestyle', 'None')
+    rug_kwargs.setdefault('color', 'C0')
+
+    if figsize is None:
+        if ax:
+            figsize = ax.get_figure().get_size_inches()
+        else:
+            figsize = (12, 8)
+    textsize, linewidth, markersize = _scale_text(figsize, textsize, 1)
+    plot_kwargs.setdefault('linewidth', linewidth)
+    rug_kwargs.setdefault('markersize', 2 * markersize)
+    if ax is None:
+        _, ax = plt.subplots(figsize=figsize)
 
     density, lower, upper = fast_kde(values, cumulative, bw)
     x = np.linspace(lower, upper, len(density))
+    fill_func = ax.fill_between
+    fill_x, fill_y = x, density
     if rotated:
         x, density = density, x
+        fill_func = ax.fill_betweenx
 
-    ax.plot(x, density, label=label, **kwargs)
+    ax.plot(x, density, label=label, **plot_kwargs)
     if rotated:
         ax.set_xlim(0, auto=True)
-        rug_marker = '_'
         rug_x, rug_y = np.zeros_like(values), values
-        fill_x, fill_y = density, x
     else:
         ax.set_ylim(0, auto=True)
-        rug_marker = '|'
         rug_x, rug_y = values, np.zeros_like(values)
-        fill_x, fill_y = x, density
+
     if rug:
-        ax.plot(rug_x, rug_y, kwargs.pop('color', 'C0'), marker=rug_marker, linestyle='None',
-                **kwargs)
-    if fill_alpha:
-        ax.fill_between(fill_x, fill_y, alpha=fill_alpha, color=fill_color, **kwargs_shade)
+        ax.plot(rug_x, rug_y, **rug_kwargs)
+    fill_func(fill_x, fill_y, **fill_kwargs)
+    if label:
+        ax.legend()
 
     return ax
 
