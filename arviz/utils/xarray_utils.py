@@ -199,7 +199,7 @@ class PyStanToXarray(Converter):
             A dictionary containing the values that are used as index. The key
             is the name of the dimension, the values are the index values.
         dims : dict[str, Tuple(str)]
-            A mapping from pymc3 variables to a tuple corresponding to
+            A mapping from pystan variables to a tuple corresponding to
             the shape of the variable, where the elements of the tuples are
             the names of the coordinate dimensions.
 
@@ -266,7 +266,7 @@ class PyStanToXarray(Converter):
         if coords is None:
             coords = {}
 
-        coords['draw'] = np.arange(obj.sim['n_save'][0] - obj.sim['warmup']) # assume no thinning
+        coords['draw'] = np.arange(obj.sim['n_save'][0] - obj.sim['warmup2'][0])
         coords['chain'] = np.arange(obj.sim['chains'])
         coords = {key: xr.IndexVariable((key,), data=vals) for key, vals in coords.items()}
 
@@ -312,11 +312,19 @@ class PyStanToXarray(Converter):
         throw = False
 
         #infer dtypes
-        pattern = r"int(?:\[.*\])*\s*(.)(?:\s*[=;]|(?:\s*<-))"
-        # assume "generated_quantities" appears only once
-        generated_quantities = fit.get_stancode().split("generated quantities")[-1]
-        dtypes = re.findall(pattern, generated_quantities)
-        dtypes = {item : 'int' for item in dtypes if item in self.varnames}
+        pattern_remove_comments = re.compile(
+            r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+            re.DOTALL | re.MULTILINE
+        )
+        pattern_int = re.compile(
+            r"int(?:\[.*\])*\s*(.*)(?:\s*[=;]|(?:\s*<-))"
+            re.IGNORECASE
+        )
+        stan_code = fit.get_stancode()
+        stan_code = re.sub(pattern_remove_comments, "", stan_code)
+        stan_code = stan_code.split("generated_quantities")[-1]
+        dtypes = re.findall(pattern_int, stan_code)
+        dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self.varnames}
 
         for varname in self.varnames:
             var_dtype = {varname : 'int'} if varname in dtypes else {}
