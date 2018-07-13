@@ -212,8 +212,6 @@ class PyStanToXarray(Converter):
 
     def to_xarray(self):
         fit = self.obj
-        
-        #infer dtypes
         dtypes = self.infer_dtypes()
 
         data = xr.Dataset(coords=self.coords)
@@ -335,11 +333,11 @@ class PyStanToXarray(Converter):
             msg = f'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'
             return False, msg
         return True, ''
-    
+
     def infer_dtypes(self):
         pattern_remove_comments = re.compile(
             r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-            re.DOTALL | re.MULTILINE
+            re.DOTALL|re.MULTILINE
         )
         pattern_int = re.compile(
             r"int(?:\[.*\])*\s*(.*)(?:\s*[=;]|(?:\s*<-))",
