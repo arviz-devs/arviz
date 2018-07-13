@@ -322,7 +322,7 @@ class PyStanToXarray(Converter):
         )
         stan_code = fit.get_stancode()
         stan_code = re.sub(pattern_remove_comments, "", stan_code)
-        stan_code = stan_code.split("generated_quantities")[-1]
+        stan_code = stan_code.split("generated quantities")[-1]
         dtypes = re.findall(pattern_int, stan_code)
         dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self.varnames}
 
