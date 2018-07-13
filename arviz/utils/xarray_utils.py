@@ -342,7 +342,7 @@ class PyStanToXarray(Converter):
             re.DOTALL | re.MULTILINE
         )
         pattern_int = re.compile(
-            r"int(?:\[.*\])*\s*(.*)(?:\s*[=;]|(?:\s*<-))"
+            r"int(?:\[.*\])*\s*(.*)(?:\s*[=;]|(?:\s*<-))",
             re.IGNORECASE
         )
         stan_code = self.obj.get_stancode()
