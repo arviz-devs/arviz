@@ -8,5 +8,11 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-trace = az.utils.load_trace('data/non_centered_eight_trace.gzip')
-az.jointplot(trace, kind='hexbin', varnames=('tau', 'mu'))
+
+data = az.load_data('data/non_centered_eight.nc')
+
+az.jointplot(data,
+             var_names=['theta'],
+             coords={'school': ['Choate', 'Phillips Andover']},
+             kind='hexbin',
+             figsize=(10, 10))

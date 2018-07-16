@@ -2,36 +2,33 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
 from .kdeplot import kdeplot
-from ..utils import trace_to_dataframe, get_varnames
-from .plot_utils import _scale_text, get_bins
+from ..utils import convert_to_xarray
+from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
-def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter', gridsize='auto',
-              skip_first=0, joint_kwargs=None, marginal_kwargs=None):
+def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
+              gridsize='auto', skip_first=0, joint_kwargs=None, marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
     Parameters
     ----------
 
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames : list of variable names
+    var_names : list of variable names
         Variables to be plotted, two variables are required.
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple
         If None, size is (8, 8)
     textsize: int
         Text size for labels
     kind : str
         Type of plot to display (scatter of hexbin)
-    hexbin : Boolean
-        If True draws an hexbin plot
     gridsize : int or (int, int), optional.
-        Only works when hexbin is True.
-        The number of hexagons in the x-direction. The corresponding number of hexagons in the
-        y-direction is chosen such that the hexagons are approximately regular.
-        Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
-        in the x-direction and the y-direction.
+        The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
+        for details
     skip_first : int
         Number of first samples not shown in plots (burn-in)
     joint_shade : dicts, optional
@@ -45,16 +42,21 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
     """
-    trace = trace_to_dataframe(trace[skip_first:], combined=True)
-    varnames = get_varnames(trace, varnames)
+
+    data = convert_to_xarray(data)
+    data = data.where(data.draw >= skip_first).dropna('draw')
+    if coords is None:
+        coords = {}
+
+    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
+
+    if len(plotters) != 2:
+        raise Exception(f'Number of variables to be plotted must 2 (you supplied {len(plotters)})')
 
     if figsize is None:
         figsize = (6, 6)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
-
-    if len(varnames) != 2:
-        raise Exception('Number of variables to be plotted must 2')
 
     if joint_kwargs is None:
         joint_kwargs = {}
@@ -66,11 +68,11 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
 
     axjoin, ax_hist_x, ax_hist_y = _define_axes()
 
-    x_var_name = varnames[0]
-    y_var_name = varnames[1]
+    x_var_name = make_label(*plotters[0][:2])
+    y_var_name = make_label(*plotters[1][:2])
 
-    x = trace[x_var_name].values
-    y = trace[y_var_name].values
+    x = plotters[0][2].flatten()
+    y = plotters[1][2].flatten()
 
     axjoin.set_xlabel(x_var_name, fontsize=textsize)
     axjoin.set_ylabel(y_var_name, fontsize=textsize)
@@ -80,26 +82,22 @@ def jointplot(trace, varnames=None, figsize=None, textsize=None, kind='scatter',
         axjoin.scatter(x, y, **joint_kwargs)
     elif kind == 'hexbin':
         if gridsize == 'auto':
-            gridsize = int(len(trace)**0.35)
+            gridsize = int(len(x)**0.5)
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
     else:
-        raise ValueError('Plot type {} not recognized.'.format(kind))
+        raise ValueError(f'Plot type {kind} not recognized.')
 
-    if x.dtype.kind == 'i':
-        bins = get_bins(x)
-        ax_hist_x.hist(x, bins=bins, align='left', density=True,
-                       **marginal_kwargs)
-    else:
-        kdeplot(x, ax=ax_hist_x, **marginal_kwargs)
-    if y.dtype.kind == 'i':
-        bins = get_bins(y)
-        ax_hist_y.hist(y, bins=bins, align='left', density=True, orientation='horizontal',
-                       **marginal_kwargs)
-    else:
-        marginal_kwargs.setdefault('plot_kwargs', {})
-        marginal_kwargs['plot_kwargs']['linewidth'] = linewidth
-        kdeplot(y, ax=ax_hist_y, rotated=True, **marginal_kwargs)
+    for val, ax, orient, rotate in ((x, ax_hist_x, 'vertical', False),
+                                    (y, ax_hist_y, 'horizontal', True)):
+        if val.dtype.kind == 'i':
+            bins = get_bins(val)
+            ax.hist(val, bins=bins, align='left', density=True,
+                    orientation=orient, **marginal_kwargs)
+        else:
+            marginal_kwargs.setdefault('plot_kwargs', {})
+            marginal_kwargs['plot_kwargs']['linewidth'] = linewidth
+            kdeplot(val, rotated=rotate, ax=ax, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())
