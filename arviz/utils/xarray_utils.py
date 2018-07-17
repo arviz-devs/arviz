@@ -88,10 +88,9 @@ class DictToXarray(Converter):
             The coordinates are those passed in and ('chain', 'draw')
         """
         if chains is None:
-            try:
-                self.chains = min(val.shape[1] for val in obj.values())
-            except IndexError:
-                self.chains = 1
+            varnames = list(obj.keys())
+            val = obj[varnames[0]]
+            self.chains = val.shape[-1] if val.ndim > 1 else 1
         else:
             self.chains = chains
 
