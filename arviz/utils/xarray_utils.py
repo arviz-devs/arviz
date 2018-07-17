@@ -78,9 +78,8 @@ class DictToXarray(Converter):
             A mapping from variables to a tuple corresponding to
             the shape of the variable, where the elements of the tuples are
             the names of the coordinate dimensions.
-        chains : int or None
-            The number of chains that were sampled.  If None, we attempt to
-            infer this from the shape of the data.
+        chains : int
+            The number of chains that were sampled.
 
         Returns
         -------
@@ -88,10 +87,7 @@ class DictToXarray(Converter):
             The coordinates are those passed in and ('chain', 'draw')
         """
         if chains is None:
-            try:
-                self.chains = min(val.shape[1] for val in obj.values())
-            except IndexError:
-                self.chains = 1
+            raise ValueError('Must specify the number of chains')
         else:
             self.chains = chains
 
