@@ -8,7 +8,7 @@ import xarray as xr
 from arviz.compat import pymc3 as pm
 
 
-def convert_to_xarray(obj, coords=None, dims=None):
+def convert_to_xarray(obj, coords=None, dims=None, **kwargs):
     """Convert a supported object to an xarray dataset.
 
     This function sends `obj` to the right conversion function. It is idempotent,
@@ -34,11 +34,11 @@ def convert_to_xarray(obj, coords=None, dims=None):
     if isinstance(obj, xr.Dataset):
         return obj
     elif isinstance(obj, dict):
-        return DictToXarray(obj, coords, dims).to_xarray()
+        return DictToXarray(obj, coords, dims, **kwargs).to_xarray()
     elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
-        return PyStanToXarray(obj, coords, dims).to_xarray()
+        return PyStanToXarray(obj, coords, dims, **kwargs).to_xarray()
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
-        return PyMC3ToXarray(obj, coords, dims).to_xarray()
+        return PyMC3ToXarray(obj, coords, dims, **kwargs).to_xarray()
     else:
         raise TypeError('Can only convert PyStan, PyMC3, or dict objects to xarray, not {}'.format(
             obj.__class__.__name__))
@@ -55,8 +55,8 @@ class Converter(ABC):
     def to_xarray(self):
         pass
 
-    @abstractstaticmethod
-    def default_varnames_coords_dims(obj, coords, dims):  # pylint: disable=unused-argument
+    @abstractmethod
+    def default_varnames_coords_dims(self, obj, coords, dims):  # pylint: disable=unused-argument
         return
 
     @abstractmethod
@@ -65,7 +65,7 @@ class Converter(ABC):
 
 
 class DictToXarray(Converter):
-    def __init__(self, obj, coords=None, dims=None):
+    def __init__(self, obj, coords=None, dims=None, chains=None):
         """Convert a dict to an xarray dataset.
 
         Parameters
@@ -78,12 +78,23 @@ class DictToXarray(Converter):
             A mapping from variables to a tuple corresponding to
             the shape of the variable, where the elements of the tuples are
             the names of the coordinate dimensions.
+        chains : int or None
+            The number of chains that were sampled.  If None, we attempt to
+            infer this from the shape of the data.
 
         Returns
         -------
         xarray.Dataset
             The coordinates are those passed in and ('chain', 'draw')
         """
+        if chains is None:
+            try:
+                self.chains = min(val.shape[1] for val in obj.values())
+            except IndexError:
+                self.chains = 1
+        else:
+            self.chains = chains
+
         super().__init__(obj, coords=coords, dims=dims)
 
     def to_xarray(self):
@@ -107,8 +118,7 @@ class DictToXarray(Converter):
 
         return data
 
-    @staticmethod
-    def default_varnames_coords_dims(obj, coords, dims):
+    def default_varnames_coords_dims(self, obj, coords, dims):
         """Set up varnames, coordinates, and dimensions for .to_xarray function
 
         obj : dict[str, iterable]
@@ -134,7 +144,7 @@ class DictToXarray(Converter):
             coords = {}
 
         coords['draw'] = np.arange(obj[varnames[0]].shape[0]) # assume no thinning or warmup
-        coords['chain'] = np.arange(coords.pop('chains', 1))
+        coords['chain'] = np.arange(self.chains)
         coords = {key: xr.IndexVariable((key,), data=vals) for key, vals in coords.items()}
 
         if dims is None:
