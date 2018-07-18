@@ -7,7 +7,7 @@ from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
 def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-              gridsize='auto', skip_first=0, joint_kwargs=None, marginal_kwargs=None):
+              gridsize='auto', joint_kwargs=None, marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -29,8 +29,6 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     gridsize : int or (int, int), optional.
         The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
         for details
-    skip_first : int
-        Number of first samples not shown in plots (burn-in)
     joint_shade : dicts, optional
         Additional keywords modifying the join distribution (central subplot)
     marginal_shade : dicts, optional
@@ -44,7 +42,6 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     """
 
     data = convert_to_xarray(data)
-    data = data.where(data.draw >= skip_first).dropna('draw')
     if coords is None:
         coords = {}
 
@@ -82,7 +79,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         axjoin.scatter(x, y, **joint_kwargs)
     elif kind == 'hexbin':
         if gridsize == 'auto':
-            gridsize = int(len(x)**0.5)
+            gridsize = int(len(x)**0.35)
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
     else:
