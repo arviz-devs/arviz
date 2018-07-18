@@ -71,6 +71,12 @@ class DictToXarray(Converter):
         Parameters
         ----------
         obj : dict[str, iterable]
+            A dictionary containing the samples from the posterior
+            distribution. The shape of the values should be
+            (draws, chains, *shape), where draws is the number of draws from the
+            posterior in a chain, chains is the number of chains, and shape is
+            the shape of the random variable.  If there is only one chain,
+            the shape of the values can be (draws, *shape)
         coords : dict[str, iterable]
             A dictionary containing the values that are used as index. The key
             is the name of the dimension, the values are the index values.
