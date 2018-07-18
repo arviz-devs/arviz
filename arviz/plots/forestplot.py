@@ -251,7 +251,7 @@ class PlotHandler(object):
         for plotter in self.plotters.values():
             for y, n_eff, color in plotter.n_eff():
                 if n_eff is not None:
-                    ax.plot(n_eff, y, 'o', color=color, markersize=markersize)
+                    ax.plot(n_eff, y, 'o', color=color, markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0)
         ax.set_title('Effective n', fontsize=textsize)
         ax.tick_params(labelsize=textsize)
@@ -261,7 +261,7 @@ class PlotHandler(object):
         for plotter in self.plotters.values():
             for y, r_hat, color in plotter.r_hat():
                 if r_hat is not None:
-                    ax.plot(r_hat, y, 'o', color=color, markersize=markersize)
+                    ax.plot(r_hat, y, 'o', color=color, markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0.9, right=2.1)
         ax.set_xticks([1, 2])
         ax.tick_params(labelsize=textsize)
