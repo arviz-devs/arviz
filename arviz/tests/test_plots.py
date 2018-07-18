@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 import numpy as np
 import pymc3 as pm
-from pytest import raises
+import pytest
 
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
@@ -51,17 +51,19 @@ class TestPlots(object):
             assert axes.shape == (1,)
 
     def test_energyplot(self):
-        with raises(AttributeError):
+        with pytest.raises(AttributeError):
             energyplot(self.df_trace)
         assert energyplot(self.short_trace)
 
     def test_parallelplot(self):
-        with raises(ValueError):
+        with pytest.raises(ValueError):
             parallelplot(self.df_trace)
         assert parallelplot(self.short_trace)
 
-    def test_jointplot(self):
-        jointplot(self.short_trace, varnames=['mu', 'tau'])
+    @pytest.mark.parametrize('kind', ['scatter', 'hexbin'])
+    def test_jointplot(self, kind):
+        for obj in (self.short_trace, self.fit):
+            jointplot(obj, var_names=('mu', 'tau'), kind=kind)
 
     def test_pairplot(self):
         pairplot(self.short_trace, varnames=['theta__0', 'theta__1'], divergences=True,
