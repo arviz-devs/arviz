@@ -3,7 +3,8 @@ import numpy as np
 #import pytest
 
 from .helpers import eight_schools_params, load_cached_models
-from ..utils.xarray_utils import convert_to_xarray, get_converter, DictToXarray, PyMC3ToXarray, PyStanToXarray
+from ..utils.xarray_utils import convert_to_xarray, get_converter, \
+                                 DictToXarray, PyMC3ToXarray, PyStanToXarray
 
 
 class CheckXarrayUtils(object):
@@ -23,12 +24,9 @@ class CheckXarrayUtils(object):
         self.check_varnames_coords_dims(converter.varnames, converter.coords, converter.dims)
 
     def test_default_varnames_bad(self):
-        converter = get_converter(self.obj, None, None, chains=self.chains)
-        varnames, coords, dims = converter.default_varnames_coords_dims(self.obj,
-                                                                        {'a': range(2)},
-                                                                        None)
+        converter = get_converter(self.obj, {'a': range(2)}, None, chains=self.chains)
         self.check_varnames_coords_dims(converter.varnames, converter.coords, converter.dims)
-        assert 'a' in coords
+        assert 'a' in converter.coords
 
     def test_verify_coords_dims(self):
         converter = get_converter(self.obj, None, None, chains=self.chains)

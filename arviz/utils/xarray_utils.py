@@ -119,7 +119,7 @@ class DictToXarray(Converter):
         """
         if chains is None:
             raise ValueError('Number of chains required when converting a dict')
-        
+
         if coords is None:
             coords = {}
 
