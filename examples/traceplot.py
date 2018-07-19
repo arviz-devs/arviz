@@ -2,7 +2,7 @@
 Traceplot
 =========
 
-_thumb: .8, .8
+_thumb: .1, .8
 """
 import arviz as az
 
