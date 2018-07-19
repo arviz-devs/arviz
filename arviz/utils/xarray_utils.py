@@ -69,7 +69,10 @@ def convert_to_xarray(obj, coords=None, dims=None, chains=None):
     xarray.Dataset
         The coordinates are those passed in and ('chain', 'draw')
     """
-    return get_converter(obj, coords=coords, dims=dims, chains=chains).to_xarray()
+    if isinstance(obj, xr.Dataset):
+        return obj
+    else:
+        return get_converter(obj, coords=coords, dims=dims, chains=chains).to_xarray()
 
 
 class Converter(ABC):
