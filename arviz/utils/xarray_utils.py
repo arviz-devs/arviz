@@ -8,15 +8,15 @@ import xarray as xr
 from arviz.compat import pymc3 as pm
 
 
-def convert_to_xarray(obj, coords=None, dims=None):
-    """Convert a supported object to an xarray dataset.
+def get_converter(obj, coords=None, dims=None, chains=None):
+    """Get the converter to transform a supported object to an xarray dataset.
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return xarray.Datasets unchanged.
 
     Parameters
     ----------
-    obj : An object from PyStan or PyMC3 to convert
+    obj : A dict, or an object from PyStan or PyMC3 to convert
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -24,22 +24,55 @@ def convert_to_xarray(obj, coords=None, dims=None):
         A mapping from pymc3 variables to a tuple corresponding to
         the shape of the variable, where the elements of the tuples are
         the names of the coordinate dimensions.
+    chains : int or None
+        The number of chains sampled from the posterior, only necessary for
+        converting dicts.
 
     Returns
     -------
     xarray.Dataset
         The coordinates are those passed in and ('chain', 'draw')
     """
-
-    if isinstance(obj, xr.Dataset):
-        return obj
+    if isinstance(obj, dict):
+        return DictToXarray(obj, coords, dims, chains=chains)
     elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
-        return PyStanToXarray(obj, coords, dims).to_xarray()
+        return PyStanToXarray(obj, coords, dims)
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
-        return PyMC3ToXarray(obj, coords, dims).to_xarray()
+        return PyMC3ToXarray(obj, coords, dims)
     else:
         raise TypeError('Can only convert PyStan or PyMC3 object to xarray, not {}'.format(
             obj.__class__.__name__))
+
+
+def convert_to_xarray(obj, coords=None, dims=None, chains=None):
+    """Convert a supported object to an xarray dataset.
+
+    This function sends `obj` to the right conversion function. It is idempotent,
+    in that it will return xarray.Datasets unchanged.
+
+    Parameters
+    ----------
+    obj : A dict, or an object from PyStan or PyMC3 to convert
+    coords : dict[str, iterable]
+        A dictionary containing the values that are used as index. The key
+        is the name of the dimension, the values are the index values.
+    dims : dict[str, Tuple(str)]
+        A mapping from pymc3 variables to a tuple corresponding to
+        the shape of the variable, where the elements of the tuples are
+        the names of the coordinate dimensions.
+    chains : int or None
+        The number of chains sampled from the posterior, only necessary for
+        converting dicts.
+
+    Returns
+    -------
+    xarray.Dataset
+        The coordinates are those passed in and ('chain', 'draw')
+    """
+    if isinstance(obj, xr.Dataset):
+        return obj
+    else:
+        return get_converter(obj, coords=coords, dims=dims, chains=chains).to_xarray()
 
 
 class Converter(ABC):
@@ -60,6 +93,143 @@ class Converter(ABC):
     @abstractmethod
     def verify_coords_dims(self):
         return
+
+
+class DictToXarray(Converter):
+    def __init__(self, obj, coords=None, dims=None, chains=None):
+        """Convert a dict containing posterior samples to an xarray dataset.
+
+        Parameters
+        ----------
+        obj : dict[str, iterable]
+            The values should have shape (draws, chains, *rv_shape),
+            where rv_shape is the shape of the random variable.
+        coords : dict[str, iterable]
+            A dictionary containing the values that are used as index. The key
+            is the name of the dimension, the values are the index values.
+        dims : dict[str, Tuple(str)]
+            A mapping from pystan variables to a tuple corresponding to
+            the shape of the variable, where the elements of the tuples are
+            the names of the coordinate dimensions.
+
+        Returns
+        -------
+        xarray.Dataset
+            The coordinates are those passed in and ('chain', 'draw')
+        """
+        if chains is None:
+            raise ValueError('Number of chains required when converting a dict')
+
+        if coords is None:
+            coords = {}
+
+        coords['chain'] = np.arange(chains)
+        super().__init__(obj, coords=coords, dims=dims)
+
+    def to_xarray(self):
+        data = xr.Dataset(coords=self.coords)
+        base_dims = ['chain', 'draw']
+
+        for key in self.varnames:
+            vals = self.obj[key]
+            if len(vals.shape) == 1:
+                vals = np.expand_dims(vals, axis=1)
+            vals = np.swapaxes(vals, 0, 1)
+            dims_str = base_dims + self.dims[key]
+            try:
+                coords = {v: self.coords[v] for v in dims_str if v in self.coords}
+                data[key] = xr.DataArray(vals, coords=coords, dims=dims_str)
+            except (KeyError, ValueError) as exc:
+                if not self.verified:
+                    raise TypeError(self.warning) from exc
+                else:
+                    raise exc
+
+        return data
+
+    @staticmethod
+    def default_varnames_coords_dims(obj, coords, dims):
+        """Set up varnames, coordinates, and dimensions for .to_xarray function
+
+        obj : dict[str, iterable]
+        coords : dict[str, iterable]
+            A dictionary containing the values that are used as index. The key
+            is the name of the dimension, the values are the index values.
+        dims : dict[str, Tuple(str)]
+            A mapping from pymc3 variables to a tuple corresponding to
+            the shape of the variable, where the elements of the tuples are
+            the names of the coordinate dimensions.
+
+        Returns
+        -------
+        iterable[str]
+            The non-transformed variable names from the trace
+        dict[str, iterable]
+            Default coordinates for the trace
+        dict[str, Tuple(str)]
+            Default dimensions for the xarray
+        """
+        varnames = list(obj.keys())
+
+        coords['draw'] = np.arange(obj[varnames[0]].shape[0])
+        coords = {key: xr.IndexVariable((key,), data=vals) for key, vals in coords.items()}
+
+        if dims is None:
+            dims = {}
+
+        for varname in varnames:
+            if varname not in dims:
+                vals = obj[varname]
+                if len(vals.shape) == 1:
+                    vals = np.expand_dims(vals, axis=1)
+                vals = np.swapaxes(vals, 0, 1)
+                shape_len = len(vals.shape)
+                if shape_len == 2:
+                    dims[varname] = []
+                else:
+                    dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
+
+        return varnames, coords, dims
+
+    def verify_coords_dims(self):
+        """Light checking and guessing on the structure of an xarray
+
+        Returns
+        -------
+        bool
+            Whether it passes the check
+        str
+            Warning string in case it does not pass
+        """
+        inferred_coords = copy(self.coords)
+        inferred_dims = copy(self.dims)
+        for key in ('draw', 'chain'):
+            inferred_coords.pop(key)
+        global_coords = {}
+        throw = False
+
+        for varname in self.varnames:
+            vals = self.obj[varname]
+            if len(vals.shape) == 1:
+                vals = np.expand_dims(vals, axis=1)
+            vals = np.swapaxes(vals, 0, 1)
+            shapes = [d for shape in self.coords.values() for d in shape.shape]
+            for idx, shape in enumerate(vals[0].shape[1:], 1):
+                try:
+                    shapes.remove(shape)
+                except ValueError:
+                    throw = True
+                    if shape not in global_coords:
+                        global_coords[shape] = f'{varname}_dim_{idx}'
+                    key = global_coords[shape]
+                    inferred_dims[varname].append(key)
+                    if key not in inferred_coords:
+                        inferred_coords[key] = f'np.arange({shape})'
+        if throw:
+            inferred_dims = {k: v for k, v in inferred_dims.items() if v}
+            msg = f'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'
+            return False, msg
+        return True, ''
 
 
 class PyMC3ToXarray(Converter):
