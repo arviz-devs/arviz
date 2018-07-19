@@ -6,7 +6,7 @@ from ..utils import convert_to_xarray
 
 
 def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, combined=False,
-                 figsize=None, textsize=None, skip_first=0):
+                 figsize=None, textsize=None):
     """
     Bar plot of the autocorrelation function for a posterior.
 
@@ -29,15 +29,12 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
         Note this is not used if ax is supplied.
     textsize: int
         Text size for labels, titles and lines. If None it will be autoscaled based on figsize.
-    skip_first : int, optional
-        Number of first samples not shown in plots (burn-in).
 
     Returns
     -------
     ax : matplotlib axes
     """
     data = convert_to_xarray(posterior)
-    data = data.where(data.draw >= skip_first).dropna('draw')
 
     if symmetric_plot:
         min_lag = -max_lag
@@ -49,7 +46,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
 
     if figsize is None:
         figsize = (3 * cols, 2.5 * rows)
-    textsize, linewidth, _ = _scale_text(figsize, textsize, 1)
+    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
     _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
 
@@ -57,6 +54,8 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
     y_min = 0
     ax = None
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+        if combined:
+            x = x.flatten()
         y = x - x.mean()
         y = np.correlate(y, y, mode=2)
         y = y / np.abs(y).max()

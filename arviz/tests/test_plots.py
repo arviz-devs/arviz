@@ -27,9 +27,12 @@ class TestPlots(object):
         for obj in (self.short_trace, self.fit):
             assert densityplot(obj).shape == (18, 1)
 
-    def test_traceplot(self):
-        assert traceplot(self.df_trace).shape == (1, 2)
-        assert traceplot(self.short_trace).shape == (18, 2)
+    @pytest.mark.parametrize('combined', [True, False])
+    def test_traceplot(self, combined):
+        for obj in (self.short_trace, self.fit):
+            axes = traceplot(obj, var_names=('mu', 'tau'),
+                             combined=combined, lines=[('mu', {}, [1, 2])])
+            assert axes.shape == (2, 2)
 
     def test_posteriorplot(self):
         # posteriorplot(self.df_trace).shape == (1,)

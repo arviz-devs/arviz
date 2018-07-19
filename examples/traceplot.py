@@ -8,5 +8,5 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-trace = az.utils.load_trace('data/centered_eight_trace.gzip')
-az.traceplot(trace, varnames=('tau', 'theta__0', 'mu__0'))
+data = az.load_data('data/non_centered_eight.nc')
+az.traceplot(data, var_names=('tau', 'mu'))

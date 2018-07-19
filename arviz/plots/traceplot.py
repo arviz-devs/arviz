@@ -1,209 +1,107 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from .kdeplot import fast_kde
-from .plot_utils import make_2d, get_bins, _scale_text
-from ..utils import get_varnames, trace_to_dataframe, untransform_varnames
-from ..compat import altair as alt
-
-
-def _var_to_traceplot(dataframe, varname, brush):
-    df = dataframe.reset_index().melt(id_vars='index')
-
-    trace = alt.Chart().mark_line().encode(
-        alt.X('index:Q', title='Sample'),
-        alt.Y('value:Q', title=varname),
-        color=alt.Color('variable:N'),
-        opacity=alt.value(0.4 + 0.6 / len(df.variable.unique())),
-    ).properties(
-        selection=brush,
-        width=600,
-        height=200
-    )
-
-    if all(np.issubdtype(dtype, np.dtype('int')) for dtype in dataframe.dtypes.values):
-        base = alt.Chart().mark_bar()
-    else:
-        base = alt.Chart().mark_line()
-
-    kde = base.encode(
-        x=alt.X('value:Q', bin=alt.Bin(maxbins=100), title=varname),
-        y=alt.Y('count():Q', title='Number of Samples'),
-        color=alt.Color('variable:N'),
-    ).transform_filter(
-        brush.ref()
-    ).properties(
-        height=200
-    )
-
-    return alt.hconcat(kde, trace, data=df)
+from .kdeplot import kdeplot
+from ..utils import convert_to_xarray
+from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
-def traceplot_altair(dataframe):
-    """Interactive traceplot using Altair
-    """
-    all_vars, _ = untransform_varnames(dataframe.columns)
-    brush = alt.selection_interval(encodings=['x'])
-    charts = []
-    for base_name, varnames in all_vars.items():
-        charts.append(_var_to_traceplot(dataframe.loc[:, varnames], base_name, brush))
-    return alt.vconcat(*charts)
-
-
-def traceplot(trace, varnames=None, figsize=None, textsize=None, lines=None, combined=False,
-              grid=True, shade=0.35, priors=None, prior_shade=1, prior_style='--', bw=4.5,
-              skip_first=0, ax=None, altair=False):
+def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
+              combined=False, kde_kwargs=None, trace_kwargs=None):
     """Plot samples histograms and values.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames : list of variable names
-        Variables to be plotted, if None all variable are plotted
+    var_names : list of variable names
+        Variables to be plotted, two variables are required.
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple
-        If None, size is (12, num of variables * 2) inch
+        If None, size is (8, 8)
     textsize: int
-        Text size for labels, titles and lines. If None it will be autoscaled based on figsize.
-    lines : dict
-        Dictionary of variable name / value  to be overplotted as vertical lines to the posteriors
-        and horizontal lines on sample values e.g. mean of posteriors, true values of a simulation.
-        If an array of values, line colors are matched to posterior colors. Otherwise, a default
-        `C3` line.
+        Text size for labels
+    lines : tuple
+        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
+        vertical lines on the density and horizontal lines on the trace.
     combined : bool
-        Flag for combining multiple chains into a single chain. If False (default), chains will be
+        Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    grid : bool
-        Flag for adding gridlines to histogram. Defaults to True.
-    shade : float
-        Alpha blending value for plot line. Defaults to 0.35.
-    priors : iterable of scipy distributions
-        Prior distribution(s) to be plotted alongside posterior. Defaults to None (no prior plots).
-    prior_Shade : float
-        Alpha blending value for prior plot. Defaults to 1.
-    prior_style : str
-        Line style for prior plot. Defaults to '--' (dashed line).
-    bw : float
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy).
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
-    ax : axes
-        Matplotlib axes. Accepts an array of axes, e.g.:
-
-        >>> fig, axs = plt.subplots(3, 2) # 3 RVs
-        >>> pymc3.traceplot(trace, ax=axs)
-
-        Creates own axes by default.
-    altair : bool
-        Should returned plot be an altair chart.
-
+    kde_kwargs : dict
+        Extra keyword arguments passed to `arviz.kdeplot`
+    trace_kwargs : dict
+        Extra keyword arguments passed to `plt.plot`
     Returns
     -------
-
-    ax : matplotlib axes
-
+    axes : matplotlib axes
     """
-    trace = trace_to_dataframe(trace[skip_first:], combined=combined)
-    varnames = get_varnames(trace, varnames)
+    data = convert_to_xarray(data)
 
-    if altair:
-        return traceplot_altair(trace.loc[:, varnames])
+    if coords is None:
+        coords = {}
+
+    if lines is None:
+        lines = ()
+
+    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
 
     if figsize is None:
-        figsize = (12, len(varnames) * 2)
+        figsize = (12, len(plotters) * 2)
+
+    if trace_kwargs is None:
+        trace_kwargs = {}
+
+    trace_kwargs.setdefault('alpha', 0.35)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
 
     textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
+    trace_kwargs.setdefault('linewidth', linewidth)
 
-    _, ax = plt.subplots(len(varnames), 2, squeeze=False, figsize=figsize)
+    _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
 
-    for i, varname in enumerate(varnames):
-        if priors is not None:
-            prior = priors[i]
-        else:
-            prior = None
+    for i, (var_name, selection, value) in enumerate(plotters):
+        if combined:
+            value = value.flatten()
+        value = np.atleast_2d(value)
+        colors = []
+        for row in value:
+            axes[i, 1].plot(np.arange(len(row)), row, **trace_kwargs)
+            colors.append(axes[i, 1].get_lines()[-1].get_color())
+            kde_kwargs.setdefault('plot_kwargs', {})
+            kde_kwargs['plot_kwargs']['color'] = colors[-1]
+            kde_kwargs.setdefault('fill_kwargs', {})
+            kde_kwargs['fill_kwargs']['alpha'] = 0
+            if row.dtype.kind == 'i':
+                _histplot_op(axes[i, 0], row, alpha=kde_kwargs['alpha'])
+            else:
+                kdeplot(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
 
-        data = trace[varname].values
-        data = np.squeeze(data)
-        data = make_2d(data)
-        width = len(data)
-        if data.dtype.kind == 'i':
-            hist_objs = _histplot_op(ax[i, 0], data, shade, prior, prior_shade, prior_style)
-            colors = [h[-1][0].get_facecolor() for h in hist_objs]
-        else:
-            artists = _kdeplot_op(ax[i, 0], data, bw, linewidth, prior, prior_shade, prior_style)[0]
-            colors = [a[0].get_color() for a in artists]
-        ax[i, 0].set_title(varname, fontsize=textsize)
-        ax[i, 0].grid(grid)
-        ax[i, 1].set_title(varname, fontsize=textsize)
-        ax[i, 1].plot(range(width), data, lw=linewidth, alpha=shade)
+        axes[i, 0].set_yticks([])
+        for idx in (0, 1):
+            axes[i, idx].set_title(make_label(var_name, selection), fontsize=textsize)
+            axes[i, idx].tick_params(labelsize=textsize)
 
-        ax[i, 0].set_yticks([])
-        ax[i, 0].tick_params(labelsize=textsize)
-        ax[i, 1].tick_params(labelsize=textsize)
-
-        if lines:
-            try:
-                if isinstance(lines[varname], (float, int)):
-                    line_values, colors = [lines[varname]], ['C3']
-                else:
-                    line_values = np.atleast_1d(lines[varname]).ravel()
-                    if len(colors) != len(line_values):
-                        raise AssertionError("An incorrect number of lines was specified for "
-                                             "'{}'. Expected an iterable of length {} or to "
-                                             " a scalar".format(varname, len(colors)))
-                for color, line_value in zip(colors, line_values):
-                    ax[i, 0].axvline(x=line_value, color=color, lw=1.5, alpha=0.75)
-                    ax[i, 1].axhline(y=line_value, color=color, lw=1.5, alpha=shade)
-            except KeyError:
-                pass
-
-        ax[i, 0].set_ylim(ymin=0)
+        for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
+            if isinstance(vlines, (float, int)):
+                line_values = [vlines]
+            else:
+                line_values = np.atleast_1d(vlines).ravel()
+            axes[i, 0].vlines(line_values, *axes[i, 0].get_ylim(), colors=colors,
+                              linewidth=1.5, alpha=0.75)
+            axes[i, 1].hlines(line_values, *axes[i, 1].get_xlim(), colors=colors,
+                              linewidth=1.5, alpha=trace_kwargs['alpha'])
+        axes[i, 0].set_ylim(ymin=0)
     plt.tight_layout()
-    return ax
+    return axes
 
 
-def _histplot_op(ax, data, shade=.35, prior=None, prior_shade=1, prior_style='--'):
-    """Add a histogram for each column of the data to the provided axes."""
-    hists = []
-    for column in data.T:
-        bins = get_bins(column)
-        hists.append(ax.hist(column, bins=bins, alpha=shade, align='left',
-                             density=True))
-        if prior is not None:
-            x_sample = prior.rvs(1000)
-            x = np.arange(x_sample.min(), x_sample.max())
-            pmf = prior.pmf(x)
-            ax.step(x, pmf, where='mid', alpha=prior_shade, ls=prior_style)
+def _histplot_op(ax, data, alpha=0.35):
+    """Add a histogram for the data to the axes."""
+    bins = get_bins(data)
+    ax.hist(data, bins=bins, alpha=alpha, align='left', density=True)
     xticks = get_bins(data, max_bins=10, fenceposts=1)
     ax.set_xticks(xticks)
-
-    return hists
-
-
-def _kdeplot_op(ax, data, bw, linewidth, prior=None, prior_shade=1, prior_style='--'):
-    """Get a list of density and likelihood plots, if a prior is provided."""
-    densities = []
-    priors = []
-    errored = []
-    for i, col in enumerate(data.T):
-        try:
-            density, lower, upper = fast_kde(col, bw=bw)
-            x = np.linspace(lower, upper, len(density))
-            densities.append(ax.plot(x, density, lw=linewidth))
-            if prior is not None:
-                x_sample = prior.rvs(10000)
-                x = np.linspace(x_sample.min(), x_sample.max(), 1000)
-                pdf = prior.pdf(x)
-                priors.append(ax.plot(x, pdf, alpha=prior_shade, ls=prior_style))
-
-        except ValueError:
-            errored.append(str(i))
-
-    if errored:
-        ax.text(.27, .47, 'WARNING: KDE plot failed for: ' + ','.join(errored),
-                bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10},
-                style='italic')
-
-    return densities, priors
+    return ax
