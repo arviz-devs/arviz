@@ -509,11 +509,19 @@ class PyStanToXarray(Converter):
             r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
             re.DOTALL|re.MULTILINE
         )
+        STAN_INTEGER = r"int"
+        STAN_LIMITS = r"(?:\<[^\>]+\>)*" # <....>
+        STAN_SHAPE = r"(?:\[[^\]]+])*" # [...]
+        WS = r"\s*"
+        STAN_PARAM = r"([^;=\s]+)" # ends= ";", "=" or whitespace
         pattern_int = re.compile(
-            r"int(?:\[.*\])*\s*(.*)(?:\s*[=;]|(?:\s*<-))",
+            "".join((STAN_INTEGER, WS, STAN_LIMITS,
+                     WS, STAN_SHAPE, WS, STAN_PARAM))
             re.IGNORECASE
         )
         stan_code = self.obj.get_stancode()
+        # remove deprecated comments
+        stan_code = "\n".join(line if "#" not in line else line[:line.find("#")] for line in stan_code.splitlines()) 
         stan_code = re.sub(pattern_remove_comments, "", stan_code)
         stan_code = stan_code.split("generated quantities")[-1]
         dtypes = re.findall(pattern_int, stan_code)
