@@ -1,4 +1,5 @@
 git+https://github.com/pymc-devs/pymc3
+cython
 git+https://github.com/stan-dev/pystan
 ipython
 nbsphinx
