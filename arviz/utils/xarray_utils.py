@@ -516,7 +516,7 @@ class PyStanToXarray(Converter):
         STAN_PARAM = r"([^;=\s]+)" # ends= ";", "=" or whitespace
         pattern_int = re.compile(
             "".join((STAN_INTEGER, WS, STAN_LIMITS,
-                     WS, STAN_SHAPE, WS, STAN_PARAM))
+                     WS, STAN_SHAPE, WS, STAN_PARAM)),
             re.IGNORECASE
         )
         stan_code = self.obj.get_stancode()
