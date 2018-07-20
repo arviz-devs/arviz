@@ -509,19 +509,21 @@ class PyStanToXarray(Converter):
             r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
             re.DOTALL|re.MULTILINE
         )
-        STAN_INTEGER = r"int"
-        STAN_LIMITS = r"(?:\<[^\>]+\>)*" # <....>
-        STAN_SHAPE = r"(?:\[[^\]]+])*" # [...]
-        WS = r"\s*"
-        STAN_PARAM = r"([^;=\s]+)" # ends= ";", "=" or whitespace
+        stan_integer = r"int"
+        stan_limits = r"(?:\<[^\>]+\>)*" # <....>
+        stan_shape = r"(?:\[[^\]]+])*" # [...]
+        stan_param = r"([^;=\s]+)" # ends= ";", "=" or whitespace
+        stan_ws = r"\s*"
         pattern_int = re.compile(
-            "".join((STAN_INTEGER, WS, STAN_LIMITS,
-                     WS, STAN_SHAPE, WS, STAN_PARAM)),
+            "".join((stan_integer, stan_ws, stan_limits,
+                     stan_ws, stan_shape, stan_ws, stan_param)),
             re.IGNORECASE
         )
         stan_code = self.obj.get_stancode()
         # remove deprecated comments
-        stan_code = "\n".join(line if "#" not in line else line[:line.find("#")] for line in stan_code.splitlines()) 
+        stan_code = "\n".join(\
+                line if "#" not in line else line[:line.find("#")]\
+                for line in stan_code.splitlines())
         stan_code = re.sub(pattern_remove_comments, "", stan_code)
         stan_code = stan_code.split("generated quantities")[-1]
         dtypes = re.findall(pattern_int, stan_code)
