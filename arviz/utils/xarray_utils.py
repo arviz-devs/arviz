@@ -510,9 +510,9 @@ class PyStanToXarray(Converter):
             re.DOTALL|re.MULTILINE
         )
         stan_integer = r"int"
-        stan_limits = r"(?:\<[^\>]+\>)*" # <....>
-        stan_param = r"([^;=\s\[]+)" # ends= ";", "=", "[" or whitespace
-        stan_ws = r"\s*"
+        stan_limits = r"(?:\<[^\>]+\>)*" # ignore group: 0 or more <....>
+        stan_param = r"([^;=\s\[]+)" # capture group: ends= ";", "=", "[" or whitespace
+        stan_ws = r"\s*" # 0 or more whitespace
         pattern_int = re.compile(
             "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)),
             re.IGNORECASE
