@@ -511,12 +511,10 @@ class PyStanToXarray(Converter):
         )
         stan_integer = r"int"
         stan_limits = r"(?:\<[^\>]+\>)*" # <....>
-        stan_shape = r"(?:\[[^\]]+])*" # [...]
-        stan_param = r"([^;=\s]+)" # ends= ";", "=" or whitespace
+        stan_param = r"([^;=\s\[]+)" # ends= ";", "=", "[" or whitespace
         stan_ws = r"\s*"
         pattern_int = re.compile(
-            "".join((stan_integer, stan_ws, stan_limits,
-                     stan_ws, stan_shape, stan_ws, stan_param)),
+            "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)),
             re.IGNORECASE
         )
         stan_code = self.obj.get_stancode()
