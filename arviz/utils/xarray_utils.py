@@ -187,7 +187,7 @@ class DictToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
+                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
 
         return varnames, coords, dims
 
@@ -220,14 +220,14 @@ class DictToXarray(Converter):
                 except ValueError:
                     throw = True
                     if shape not in global_coords:
-                        global_coords[shape] = f'{varname}_dim_{idx}'
+                        global_coords[shape] = '{}_dim_{}'.format(varname, idx)
                     key = global_coords[shape]
                     inferred_dims[varname].append(key)
                     if key not in inferred_coords:
-                        inferred_coords[key] = f'np.arange({shape})'
+                        inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = f'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
             return False, msg
         return True, ''
 
@@ -316,7 +316,7 @@ class PyMC3ToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
+                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
 
         return varnames, coords, dims
 
@@ -346,14 +346,14 @@ class PyMC3ToXarray(Converter):
                 except ValueError:
                     throw = True
                     if shape not in global_coords:
-                        global_coords[shape] = f'{varname}_dim_{idx}'
+                        global_coords[shape] = '{}_dim_{}'.format(varname, idx)
                     key = global_coords[shape]
                     inferred_dims[varname].append(key)
                     if key not in inferred_coords:
-                        inferred_coords[key] = f'np.arange({shape})'
+                        inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = f'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
             return False, msg
         return True, ''
 
@@ -448,7 +448,7 @@ class PyStanToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = [f"{varname}_dim_{idx}" for idx in range(1, shape_len-2+1)]
+                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
 
         return varnames, coords, dims
 
@@ -493,14 +493,14 @@ class PyStanToXarray(Converter):
                 except ValueError:
                     throw = True
                     if shape not in global_coords:
-                        global_coords[shape] = f'{varname}_dim_{idx}'
+                        global_coords[shape] = '{}_dim_{}'.format(varname, idx)
                     key = global_coords[shape]
                     inferred_dims[varname].append(key)
                     if key not in inferred_coords:
-                        inferred_coords[key] = f'np.arange({shape})'
+                        inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = f'Bad arguments! Try setting\ncoords={inferred_coords}\ndims={inferred_dims}'
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
             return False, msg
         return True, ''
 

@@ -163,8 +163,8 @@ def make_label(var_name, selection):
         A text representation of the label
     """
     if selection:
-        return f'{var_name} ({selection_to_string(selection)})'
-    return f'{var_name}'
+        return '{} ({})'.format(var_name, selection_to_string(selection))
+    return '{}'.format(var_name)
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):

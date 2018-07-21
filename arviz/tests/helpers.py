@@ -69,7 +69,10 @@ def load_cached_models(draws, chains):
     data_directory = os.path.join(here, 'saved_models')
     models = {}
     for library, func in supported:
-        fname = f'{library.__name__}_{library.__version__}_{draws}_{chains}.pkl'
+        fname = '{}_{}_{}_{}.pkl'.format(
+            library.__name__, library.__version__, draws, chains
+
+        )
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
             with open(path, 'wb') as buff:

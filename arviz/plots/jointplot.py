@@ -48,7 +48,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
 
     if len(plotters) != 2:
-        raise Exception(f'Number of variables to be plotted must 2 (you supplied {len(plotters)})')
+        raise Exception('Number of variables to be plotted must 2 (you supplied {})'.format(len(plotters)))
 
     if figsize is None:
         figsize = (6, 6)
@@ -83,7 +83,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
     else:
-        raise ValueError(f'Plot type {kind} not recognized.')
+        raise ValueError('Plot type {} not recognized.'.format(kind))
 
     for val, ax, orient, rotate in ((x, ax_hist_x, 'vertical', False),
                                     (y, ax_hist_y, 'horizontal', True)):

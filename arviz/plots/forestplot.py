@@ -114,8 +114,8 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     elif kind == 'joyplot':
         plot_handler.joyplot(joyplot_overlap, textsize, linewidth, joyplot_alpha, axes[0])
     else:
-        raise TypeError(f"Argument 'kind' must be one of 'forestplot' or "
-                        f"'joyplot' (you provided {kind})")
+        raise TypeError("Argument 'kind' must be one of 'forestplot' or "
+                        "'joyplot' (you provided {})".format(kind))
 
     idx = 1
     if r_hat:
@@ -161,7 +161,7 @@ class PlotHandler(object):
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = [f'Model {idx}' for idx, _ in enumerate(self.data)]
+                model_names = ['Model {}'.format(idx) for idx, _ in enumerate(self.data)]
             else:
                 model_names = ['']
         elif len(model_names) != len(self.data):
@@ -177,7 +177,7 @@ class PlotHandler(object):
         self.combined = combined
 
         if colors == 'cycle':
-            colors = [f'C{idx % 10}' for idx, _ in enumerate(self.data)]
+            colors = ['C{}'.format(idx) for idx, _ in enumerate(self.data)]
         elif isinstance(colors, str):
             colors = [colors for _ in self.data]
 
@@ -243,7 +243,7 @@ class PlotHandler(object):
                         markersize=markersize * 0.75,
                         color=color)
         ax.tick_params(labelsize=textsize)
-        ax.set_title(f'{credible_interval:.1%} Credible Interval', fontsize=textsize)
+        ax.set_title('{:.1%} Credible Interval'.format(credible_interval), fontsize=textsize)
 
         return ax
 
@@ -342,7 +342,7 @@ class VarHandler(object):
         for label, model_data in label_dict.items():
             for model_name, value_list in model_data.items():
                 if model_name:
-                    row_label = f'{model_name}: {label}'
+                    row_label = '{}: {}'.format(model_name, label)
                 else:
                     row_label = label
                 for values in value_list:

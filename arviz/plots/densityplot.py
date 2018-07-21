@@ -67,21 +67,21 @@ def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estima
     datasets = [data.where(data.draw >= skip_first).dropna('draw') for data in datasets]
 
     if point_estimate not in ('mean', 'median', None):
-        raise ValueError(f"Point estimate should be 'mean', 'median' or None, not {point_estimate}")
+        raise ValueError("Point estimate should be 'mean', 'median' or None, not {}".format(point_estimate))
 
     n_data = len(datasets)
 
     if data_labels is None:
         if n_data > 1:
-            data_labels = [f'{idx}' for idx in range(n_data)]
+            data_labels = ['{}'.format(idx) for idx in range(n_data)]
         else:
             data_labels = ['']
     elif len(data_labels) != n_data:
-        raise ValueError(f'The number of names for the models ({len(data_labels)}) '
-                         f'does not match the number of models ({n_data})')
+        raise ValueError('The number of names for the models ({}) '
+                         'does not match the number of models ({})'.format(len(data_labels), n_data))
 
     if colors == 'cycle':
-        colors = [f'C{idx % 10}' for idx in range(n_data)]
+        colors = ['C{}'.format(idx % 10) for idx in range(n_data)]
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
