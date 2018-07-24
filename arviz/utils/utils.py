@@ -1,5 +1,6 @@
 import bz2
 import gzip
+import importlib
 import lzma
 import os
 import re
@@ -7,6 +8,51 @@ import re
 import numpy as np
 import pandas as pd
 import xarray as xr
+
+
+def _has_type(object_, typename, module_path):
+    """Check if an object is an instance of a type under a given module.
+
+    Avoids explicit dependencies on a module found under `module_path`
+    by using `importlib`.
+
+    Parameters
+    ----------
+    object_ : object
+        Arbitrary python object.
+    typename : str
+        Name of a type in the module under `module_path`.
+    module_path : str
+        Import path to a module that contains `typename`.
+        Is fed to `importlib.import_module`.
+
+    Returns
+    ----------
+    has_type : bool
+        `True` if `isinstance(object, getattr(importlib.import_module(module_path), typename))`.
+        `False` if this condition does not hold or the module under
+        `module_path` is not installed.
+
+    Examples
+    ----------
+    A string is not a real number:
+
+    >>> _has_type("aha", typename="Real", module_path="numbers")
+    False
+
+    A timedelta object has type timedelta:
+
+    >>> from datetime import timedelta
+    >>> object_ = timedelta(10)
+    >>> _has_type(object_, typename="timedelta", module_path="datetime")
+    True
+    """
+    try:
+        type_cls = getattr(importlib.import_module(module_path), typename)
+    except ImportError:
+        return False
+    else:
+        return isinstance(object_, type_cls)
 
 
 def untransform_varnames(varnames):
@@ -82,7 +128,7 @@ def get_stats(trace, stat=None, combined=True):
     ----------
     stat: array with the choosen statistic
     """
-    if type(trace).__name__ == 'MultiTrace':
+    if _has_type(trace, typename="MultiTrace", module_path="pymc3.backends.base"):
         try:
             return trace.get_sampler_stats(stat, combine=combined)
         except KeyError:
@@ -121,10 +167,13 @@ def log_post_trace(trace, model):
     logp : array of shape (n_samples, n_observations)
         The contribution of the observations to the logp of the whole model.
     """
-    tr_t = type(trace).__name__
-    mo_t = type(model).__name__
+    is_pymc3_multitrace = _has_type(
+        object_=trace, typename="MultiTrace", module_path="pymc3.backends.base"
+    )
 
-    if tr_t == 'MultiTrace' and mo_t == 'Model':
+    is_pymc3_model = _has_type(object_=model, typename="Model", module_path="pymc3")
+
+    if is_pymc3_multitrace and is_pymc3_model:
         cached = [(var, var.logp_elemwise) for var in model.observed_RVs]
 
         def logp_vals_point(point):
@@ -158,7 +207,9 @@ def trace_to_dataframe(trace, combined=True):
         If True multiple chains will be combined together in the same columns. Otherwise they will
         be assigned to separate columns.
     """
-    if type(trace).__name__ == 'MultiTrace':
+    if _has_type(object_=trace,
+                 typename="MultiTrace",
+                 module_path="pymc3.backends.base"):
         var_shapes = trace._straces[0].var_shapes  # pylint: disable=protected-access
         varnames = [var for var in var_shapes.keys() if not _is_transformed_name(str(var))]
 
