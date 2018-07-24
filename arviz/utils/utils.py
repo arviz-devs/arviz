@@ -29,7 +29,7 @@ def _has_type(object_, typename, module_path):
     Returns
     ----------
     has_type : bool
-        `True` if `type(object_) == getattr(importlib.import_module(module_path), typename)`.
+        `True` if `isinstance(object, getattr(importlib.import_module(module_path), typename))`.
         `False` if this condition does not hold or the module under
         `module_path` is not installed.
 
@@ -52,7 +52,7 @@ def _has_type(object_, typename, module_path):
     except ImportError:
         return False
     else:
-        return type(object_) == type_cls
+        return isinstance(object_, type_cls)
 
 
 def untransform_varnames(varnames):
