@@ -31,7 +31,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes
     """
     data = convert_to_xarray(posterior)
 

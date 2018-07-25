@@ -34,7 +34,7 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
 
     for ax_, (var, ppss) in zip(np.atleast_1d(ax), ppc_sample.items()):
         if kind == 'kde':
-            kdeplot(data, label=f'{var}',
+            kdeplot(data, label='{}'.format(var),
                     plot_kwargs={'color': 'k', 'linewidth': linewidth, 'zorder': 3},
                     fill_kwargs={'alpha': 0},
                     ax=ax_)
@@ -47,7 +47,7 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
             if mean:
                 kdeplot(ppss,
                         plot_kwargs={'color': 'C0', 'linestyle': '--', 'linewidth': linewidth},
-                        label=f'mean {var}_pps',
+                        label='mean {}_pps'.format(var),
                         ax=ax_)
             ax_.set_xlabel(var, fontsize=textsize)
             ax_.set_yticks([])
