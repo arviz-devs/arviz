@@ -45,7 +45,6 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
     _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
-    ax = None
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
         x_ = x
 
@@ -61,7 +60,8 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
         ax.set_title(make_label(var_name, selection), fontsize=textsize)
         ax.tick_params(labelsize=textsize)
 
-    if ax is not None:
-        ax.set_xlim(0, max_lag)
-        ax.set_ylim(-1, 1)
-    return ax
+    if axes.size > 0:
+        axes[0, 0].set_xlim(0, max_lag)
+        axes[0, 0].set_ylim(-1, 1)
+
+    return axes
