@@ -32,7 +32,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes
     """
     data = convert_to_xarray(posterior)
 
