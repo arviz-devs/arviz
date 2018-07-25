@@ -187,7 +187,10 @@ class DictToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
+                    dims[varname] = [
+                        "{}_dim_{}".format(varname, idx)
+                        for idx in range(1, shape_len-2+1)
+                    ]
 
         return varnames, coords, dims
 
@@ -227,7 +230,9 @@ class DictToXarray(Converter):
                         inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(
+                inferred_coords, inferred_dims
+            )
             return False, msg
         return True, ''
 
@@ -316,7 +321,10 @@ class PyMC3ToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
+                    dims[varname] = [
+                        "{}_dim_{}".format(varname, idx)
+                        for idx in range(1, shape_len-2+1)
+                    ]
 
         return varnames, coords, dims
 
@@ -448,7 +456,10 @@ class PyStanToXarray(Converter):
                 if shape_len == 2:
                     dims[varname] = []
                 else:
-                    dims[varname] = ["{}_dim_{}".format(varname, idx) for idx in range(1, shape_len-2+1)]
+                    dims[varname] = [
+                        "{}_dim_{}".format(varname, idx)
+                        for idx in range(1, shape_len-2+1)
+                    ]
 
         return varnames, coords, dims
 
@@ -500,7 +511,9 @@ class PyStanToXarray(Converter):
                         inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(
+                inferred_coords, inferred_dims
+            )
             return False, msg
         return True, ''
 

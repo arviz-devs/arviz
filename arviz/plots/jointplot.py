@@ -48,7 +48,11 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
 
     if len(plotters) != 2:
-        raise Exception('Number of variables to be plotted must 2 (you supplied {})'.format(len(plotters)))
+        raise Exception(
+            'Number of variables to be plotted must 2 (you supplied {})'.format(
+                len(plotters)
+            )
+        )
 
     if figsize is None:
         figsize = (6, 6)
