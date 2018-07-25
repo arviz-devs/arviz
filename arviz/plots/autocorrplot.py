@@ -46,12 +46,12 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
-        x_ = x
+        x_prime = x
 
         if combined:
-            x_ = x.flatten()
+            x_prime = x.flatten()
 
-        y = autocorr(x_)
+        y = autocorr(x_prime)
 
         ax.vlines(x=np.arange(0, max_lag),
                   ymin=0, ymax=y[0:max_lag],
