@@ -6,7 +6,7 @@ from ..utils import convert_to_xarray
 from ..stats.diagnostics import autocorr
 
 
-def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, combined=False,
+def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
                  figsize=None, textsize=None):
     """
     Bar plot of the autocorrelation function for a posterior.
@@ -20,8 +20,6 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
         Vector-value stochastics are handled automatically.
     max_lag : int, optional
         Maximum lag to calculate autocorrelation. Defaults to 100.
-    symmetric_plot : boolean, optional
-        Plot from either [0, +lag] or [-lag, lag]. Defaults to False, [-, +lag].
     combined : bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
@@ -37,11 +35,6 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
     """
     data = convert_to_xarray(posterior)
 
-    if symmetric_plot:
-        min_lag = -max_lag
-    else:
-        min_lag = 0
-
     plotters = list(xarray_var_iter(data, var_names, combined))
     rows, cols = default_grid(len(plotters))
 
@@ -52,22 +45,23 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
     _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
-    y_min = 0
     ax = None
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+        x_ = x
+
         if combined:
-            x = x.flatten()
-        y = autocorr(x)
-        ax.vlines(x=np.arange(min_lag, max_lag),
-                  ymin=0,
-                  ymax=y[min_lag:max_lag],
+            x_ = x.flatten()
+
+        y = autocorr(x_)
+
+        ax.vlines(x=np.arange(0, max_lag),
+                  ymin=0, ymax=y[0:max_lag],
                   lw=linewidth)
-        ax.hlines(0, min_lag, max_lag, 'steelblue')
+        ax.hlines(0, 0, max_lag, 'steelblue')
         ax.set_title(make_label(var_name, selection), fontsize=textsize)
         ax.tick_params(labelsize=textsize)
-        y_min = min(y_min, y.min())
 
     if ax is not None:
-        ax.set_xlim(min_lag, max_lag)
-        ax.set_ylim(y_min, 1)
+        ax.set_xlim(0, max_lag)
+        ax.set_ylim(-1, 1)
     return ax
