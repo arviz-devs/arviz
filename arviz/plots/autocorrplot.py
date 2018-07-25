@@ -3,6 +3,7 @@ import numpy as np
 
 from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter
 from ..utils import convert_to_xarray
+from ..stats.diagnostics import autocorr
 
 
 def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, combined=False,
@@ -56,13 +57,10 @@ def autocorrplot(posterior, var_names=None, max_lag=100, symmetric_plot=False, c
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
         if combined:
             x = x.flatten()
-        y = x - x.mean()
-        y = np.correlate(y, y, mode=2)
-        y = y / np.abs(y).max()
-        midpoint = len(y) // 2
+        y = autocorr(x)
         ax.vlines(x=np.arange(min_lag, max_lag),
-                  ymin=np.zeros(max_lag - min_lag),
-                  ymax=y[midpoint + min_lag:midpoint + max_lag],
+                  ymin=0,
+                  ymax=y[min_lag:max_lag],
                   lw=linewidth)
         ax.hlines(0, min_lag, max_lag, 'steelblue')
         ax.set_title(make_label(var_name, selection), fontsize=textsize)
