@@ -40,7 +40,7 @@ class TestPlots(object):
 
     def test_autocorrplot(self):
         for obj in (self.short_trace, self.fit):
-            assert autocorrplot(obj)[0, 0].get_geometry() == (6, 6, 36)
+            assert autocorrplot(obj).shape == (6, 6)
 
     def test_forestplot(self):
         for obj in (self.short_trace, self.fit, [self.short_trace, self.fit]):
