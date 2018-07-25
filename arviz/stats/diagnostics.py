@@ -106,7 +106,7 @@ def _get_neff(trace_value):
     return ess
 
 
-def _autocorr(x):
+def autocorr(x):
     """
     Compute autocorrelation using FFT for every lag for the input array
     https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
@@ -142,7 +142,7 @@ def _autocov(x):
     -------
     acov: Numpy array same size as the input array
     """
-    acorr = _autocorr(x)
+    acorr = autocorr(x)
     varx = np.var(x, ddof=1) * (len(x) - 1) / len(x)
     acov = acorr * varx
     return acov
