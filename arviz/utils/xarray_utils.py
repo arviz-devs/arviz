@@ -361,7 +361,9 @@ class PyMC3ToXarray(Converter):
                         inferred_coords[key] = 'np.arange({})'.format(shape)
         if throw:
             inferred_dims = {k: v for k, v in inferred_dims.items() if v}
-            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(inferred_coords, inferred_dims)
+            msg = 'Bad arguments! Try setting\ncoords={}\ndims={}'.format(
+                inferred_coords, inferred_dims
+            )
             return False, msg
         return True, ''
 
