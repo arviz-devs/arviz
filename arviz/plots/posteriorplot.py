@@ -58,6 +58,32 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
     -------
     ax : matplotlib axes
 
+    Examples
+    --------
+    Show one example plot for reference
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> import arviz as az
+        >>> np.random.seed(0)
+        >>> trace = pd.DataFrame({"mu":np.random.randn(100), "theta":np.random.randn(100)})
+        >>> az.posteriorplot(trace, varnames=["mu", "theta"])
+
+    Change a parameter and show another plot to show what happens
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import pandas as pd
+        >>> import arviz as az
+        >>> np.random.seed(0)
+        >>> trace = pd.DataFrame({"mu":np.random.randn(100), "theta":np.random.randn(100)})
+        >>> az.posteriorplot(trace, varnames=["mu", "theta"], kind="hist")
+
     """
 
     trace = trace_to_dataframe(trace[skip_first:], combined=True)
