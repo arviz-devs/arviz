@@ -33,6 +33,8 @@ import arviz
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 sys.path.insert(0, os.path.abspath('sphinxext'))
+
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -49,6 +51,13 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'gallery_generator',
 ]
+
+# Copy plot options from Seaborn
+# Include the example source for plots in API docs
+plot_include_source = True
+plot_formats = [("png", 90)]
+plot_html_show_formats = False
+plot_html_show_source_link = False
 
 # Generate API documentation when building
 autosummary_generate = True
