@@ -4,4 +4,4 @@ from matplotlib.pyplot import style
 
 from .plots import *
 from .stats import *
-from .utils import trace_to_dataframe, save_data, load_data, convert_to_xarray
+from .utils import trace_to_dataframe, save_data, load_data, convert_to_xarray, load_arviz_data

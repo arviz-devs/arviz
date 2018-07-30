@@ -36,7 +36,9 @@ class TestPlots(object):
 
     def test_posteriorplot(self):
         # posteriorplot(self.df_trace).shape == (1,)
-        assert posteriorplot(self.short_trace).shape == (18,)
+        for obj in (self.short_trace, self.fit):
+            axes = posteriorplot(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
+            assert axes.shape == (1, 2)
 
     def test_autocorrplot(self):
         for obj in (self.short_trace, self.fit):
