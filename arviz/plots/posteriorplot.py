@@ -3,22 +3,24 @@ import numpy as np
 from scipy.stats import mode
 from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
-from ..utils import trace_to_dataframe, expand_variable_names
-from .plot_utils import _scale_text, _create_axes_grid
+from ..utils import convert_to_xarray
+from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid
 
 
-def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05, round_to=1,
-                  point_estimate='mean', rope=None, ref_val=None, kind='kde', bw=4.5, bins=None,
-                  skip_first=0, ax=None, **kwargs):
+def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None, alpha=0.05,
+                  round_to=1, point_estimate='mean', rope=None, ref_val=None, kind='kde', bw=4.5,
+                  bins=None, **kwargs):
     """
     Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames : list of variable names
-        Variables to be plotted, if None all variable are plotted
+    var_names : list of variable names
+        Variables to be plotted, two variables are required.
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
         Figure size. If None, size is (12, num of variables * 2)
     textsize: int
@@ -30,10 +32,10 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
         Controls formatting for floating point numbers
     point_estimate: str
         Must be in ('mode', 'mean', 'median')
-    rope: tuple of list of tuples
+    rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
         length should match the number of variables.
-    ref_val: float or list-like
+    ref_val: float or dictionary of floats
         display the percentage below and above the values in ref_val. If a list is provided, its
         length should match the number of variables.
     kind: str
@@ -47,10 +49,6 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
-    ax : axes
-        Matplotlib axes. Defaults to None.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -65,82 +63,103 @@ def posteriorplot(trace, varnames=None, figsize=None, textsize=None, alpha=0.05,
     .. plot::
         :context: close-figs
 
-        >>> import numpy as np
-        >>> import pandas as pd
         >>> import arviz as az
-        >>> np.random.seed(0)
-        >>> trace = pd.DataFrame({"mu":np.random.randn(100), "theta":np.random.randn(100)})
-        >>> az.posteriorplot(trace, varnames=["mu", "theta"])
+        >>> non_centered = az.load_arviz_data('non_centered_eight')
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'tau'), textsize=12)
 
     Change a parameter and show another plot to show what happens
 
     .. plot::
         :context: close-figs
 
-        >>> import numpy as np
-        >>> import pandas as pd
         >>> import arviz as az
-        >>> np.random.seed(0)
-        >>> trace = pd.DataFrame({"mu":np.random.randn(100), "theta":np.random.randn(100)})
-        >>> az.posteriorplot(trace, varnames=["mu", "theta"], kind="hist")
+        >>> non_centered = az.load_arviz_data('non_centered_eight')
+        >>> az.posteriorplot(non_centered, var_names=('theta_tilde',),
+                             ref_val=0, rope=(-1, 1), textsize=11)
 
     """
+    data = convert_to_xarray(data)
 
-    trace = trace_to_dataframe(trace[skip_first:], combined=True)
-
-    if varnames is not None:
-        varnames = expand_variable_names(trace, varnames)
-        trace = trace[varnames]
-
-    ax, figsize = _create_axes_grid(trace, figsize, ax)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize)
-
-    var_num = trace.shape[1]
-    if ref_val is None:
-        ref_val = [None] * var_num
-    elif np.isscalar(ref_val):
-        ref_val = [ref_val for _ in range(var_num)]
-
-    if rope is None:
-        rope = [None] * var_num
-    elif np.ndim(rope) == 1:
-        rope = [rope] * var_num
-
-    for idx, (ax_, col) in enumerate(zip(np.atleast_1d(ax), trace.columns)):
-        _plot_posterior_op(trace[col], ax=ax_, bw=bw, linewidth=linewidth, bins=bins, kind=kind,
-                           point_estimate=point_estimate, round_to=round_to, alpha=alpha,
-                           ref_val=ref_val[idx], rope=rope[idx], textsize=textsize, **kwargs)
-        ax_.set_title(col, fontsize=textsize)
-
-    plt.tight_layout()
-    return ax
+    if coords is None:
+        coords = {}
 
 
-def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estimate, round_to,
-                       alpha, ref_val, rope, textsize, **kwargs):
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
+    rows, cols = default_grid(len(plotters))
+
+    if figsize is None:
+        figsize = (3.5 * cols, 3 * rows)
+
+    textsize, linewidth, _ = _scale_text(figsize, textsize, scale_ratio=0.9)
+
+    _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False)
+
+    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+        _plot_posterior_op(x.flatten(), var_name, selection, ax=ax, bw=bw, linewidth=linewidth,
+                           bins=bins, kind=kind, point_estimate=point_estimate,
+                           round_to=round_to, alpha=alpha, ref_val=ref_val, rope=rope,
+                           textsize=textsize, **kwargs)
+
+        ax.set_title(make_label(var_name, selection), fontsize=textsize)
+    return axes
+
+
+
+def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind,
+                       point_estimate, round_to, alpha, ref_val, rope, textsize, **kwargs):
     """
     Artist to draw posterior.
     """
     def format_as_percent(x, round_to=0):
         return '{0:.{1:d}f}%'.format(100 * x, round_to)
 
-    def display_ref_val(ref_val):
-        less_than_ref_probability = (trace_values < ref_val).mean()
-        greater_than_ref_probability = (trace_values >= ref_val).mean()
+    def display_ref_val():
+        if ref_val is None:
+            return
+        elif isinstance(ref_val, dict):
+            for sel in ref_val.get(var_name, []):
+                if all(k in selection and selection[k] == v for k, v in sel.items()):
+                    val = sel['ref_val']
+                    break
+        elif np.isscalar(ref_val):
+            val = ref_val
+        else:
+            raise ValueError('Argument `ref_val` must be None, a constant, or a '
+                             'dictionary like {"var_name": {"ref_val": (lo, hi)}}')
+
+
+        less_than_ref_probability = (values < val).mean()
+        greater_than_ref_probability = (values >= val).mean()
         ref_in_posterior = "{} <{:g}< {}".format(format_as_percent(less_than_ref_probability, 1),
-                                                 ref_val,
+                                                 val,
                                                  format_as_percent(greater_than_ref_probability, 1))
-        ax.axvline(ref_val, ymin=0.05, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
-        ax.text(trace_values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
+        ax.axvline(val, ymin=0.05, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
+        ax.text(values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
                 color='C1', weight='semibold', horizontalalignment='center')
 
-    def display_rope(rope):
-        ax.plot(rope, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*5, color='C2',
-                solid_capstyle='round')
-        text_props = dict(size=textsize, horizontalalignment='center', color='C2')
-        ax.text(rope[0], plot_height * 0.2, rope[0], weight='semibold', **text_props)
-        ax.text(rope[1], plot_height * 0.2, rope[1], weight='semibold', **text_props)
+    def display_rope():
+        if rope is None:
+            return
+        elif isinstance(rope, dict):
+            vals = None
+            for sel in rope.get(var_name, []):
+                if all(k in selection and selection[k] == v for k, v in sel.items() if k != 'rope'):
+                    vals = sel['rope']
+                    break
+            if vals is None:
+                return
+        elif len(rope) == 2:
+            vals = rope
+        else:
+            raise ValueError('Argument `rope` must be None, a dictionary like'
+                             '{"var_name": {"rope": (lo, hi)}}, or an'
+                             'iterable of length 2')
+
+        ax.plot(vals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*5, color='C2',
+                solid_capstyle='round', zorder=0, alpha=0.7)
+        text_props = {'size': textsize, 'horizontalalignment': 'center', 'color': 'C2'}
+        ax.text(vals[0], plot_height * 0.2, vals[0], weight='semibold', **text_props)
+        ax.text(vals[1], plot_height * 0.2, vals[1], weight='semibold', **text_props)
 
     def display_point_estimate():
         if not point_estimate:
@@ -149,23 +168,23 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
             raise ValueError(
                 "Point Estimate should be in ('mode','mean','median')")
         if point_estimate == 'mean':
-            point_value = trace_values.mean()
+            point_value = values.mean()
         elif point_estimate == 'mode':
-            if isinstance(trace_values.iloc[0], float):
-                density, lower, upper = fast_kde(trace_values, bw=bw)
+            if isinstance(values.iloc[0], float):
+                density, lower, upper = fast_kde(values, bw=bw)
                 x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
             else:
-                point_value = mode(trace_values.round(round_to))[0][0]
+                point_value = mode(values.round(round_to))[0][0]
         elif point_estimate == 'median':
-            point_value = np.median(trace_values)
+            point_value = np.median(values)
         point_text = '{}={:.{}f}'.format(point_estimate, point_value, round_to)
 
         ax.text(point_value, plot_height * 0.8, point_text, size=textsize,
                 horizontalalignment='center')
 
     def display_hpd():
-        hpd_intervals = hpd(trace_values, alpha=alpha)
+        hpd_intervals = hpd(values, alpha=alpha)
         ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*2, color='k',
                 solid_capstyle='round')
         ax.text(hpd_intervals[0], plot_height * 0.07,
@@ -189,8 +208,8 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
                        color='0.5', labelsize=textsize)
         ax.spines['bottom'].set_color('0.5')
 
-    if kind == 'kde' and isinstance(trace_values.iloc[0], float):
-        kdeplot(trace_values,
+    if kind == 'kde' and values.dtype.kind == 'f':
+        kdeplot(values,
                 bw=bw,
                 fill_kwargs={'alpha': kwargs.pop('fill_alpha', 0)},
                 plot_kwargs={'linewidth': linewidth},
@@ -198,16 +217,16 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
 
     else:
         if bins is None:
-            if trace_values.dtype.kind == 'i':
-                xmin = trace_values.min()
-                xmax = trace_values.max()
+            if values.dtype.kind == 'i':
+                xmin = values.min()
+                xmax = values.max()
                 bins = range(xmin, xmax + 2)
                 ax.set_xlim(xmin - 0.5, xmax + 0.5)
             else:
                 bins = 'auto'
         kwargs.setdefault('align', 'left')
         kwargs.setdefault('color', 'C0')
-        ax.hist(trace_values, bins=bins, alpha=0.35, **kwargs)
+        ax.hist(values, bins=bins, alpha=0.35, **kwargs)
 
     plot_height = ax.get_ylim()[1]
 
@@ -215,6 +234,6 @@ def _plot_posterior_op(trace_values, ax, bw, linewidth, bins, kind, point_estima
     display_hpd()
     display_point_estimate()
     if ref_val is not None:
-        display_ref_val(ref_val)
+        display_ref_val()
     if rope is not None:
-        display_rope(rope)
+        display_rope()
