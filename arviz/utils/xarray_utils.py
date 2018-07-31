@@ -396,7 +396,6 @@ class PyStanToXarray(Converter):
 
         data = xr.Dataset(coords=self.coords)
         base_dims = ['chain', 'draw']
-        
         extract = fit.extract(pars=self.varnames,
                               dtypes=dtypes,
                               permuted=False)
@@ -448,8 +447,7 @@ class PyStanToXarray(Converter):
 
         if dims is None:
             dims = {}
-        
-        extract = fit.extract(varnames, permuted=False)
+        extract = obj.extract(varnames, permuted=False)
         for varname, vals in extract.items():
             if varname not in dims:
                 if len(vals.shape) == 1:
