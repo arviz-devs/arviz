@@ -24,6 +24,6 @@ with pm.Model() as centered_eight:
     centered_eight_trace = pm.sample()
 
 with centered_eight:
-    ppc_samples = pm.sample_ppc(centered_eight_trace)
+    ppc_samples = pm.sample_ppc(centered_eight_trace, samples=100)
 
 az.ppcplot(y, ppc_samples)

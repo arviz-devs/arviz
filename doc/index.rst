@@ -28,6 +28,7 @@ Contributions and issue reports are very welcome at `the github repository
    :maxdepth: 1
 
    installation
+   Current Roadmap<roadmap>
    Example Gallery<examples>
    Quickstart<notebooks/Introduction>
    api
