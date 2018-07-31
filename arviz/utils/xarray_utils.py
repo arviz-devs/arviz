@@ -396,10 +396,11 @@ class PyStanToXarray(Converter):
 
         data = xr.Dataset(coords=self.coords)
         base_dims = ['chain', 'draw']
-
-        for key in self.varnames:
-            var_dtype = {key : 'int'} if key in dtypes else {}
-            vals = fit.extract(key, dtypes=var_dtype, permuted=False)[key]
+        
+        extract = fit.extract(pars=self.varnames,
+                              dtypes=dtypes,
+                              permuted=False)
+        for key, vals in extract.items():
             if len(vals.shape) == 1:
                 vals = np.expand_dims(vals, axis=1)
             vals = np.swapaxes(vals, 0, 1)
@@ -447,10 +448,10 @@ class PyStanToXarray(Converter):
 
         if dims is None:
             dims = {}
-
-        for varname in varnames:
+        
+        extract = fit.extract(varnames, permuted=False)
+        for varname, vals in extract.items():
             if varname not in dims:
-                vals = obj.extract(varname, permuted=False)[varname]
                 if len(vals.shape) == 1:
                     vals = np.expand_dims(vals, axis=1)
                 vals = np.swapaxes(vals, 0, 1)
