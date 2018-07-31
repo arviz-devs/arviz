@@ -40,7 +40,7 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
                     ax=ax_)
             for pps in ppss:
                 kdeplot(pps,
-                        plot_kwargs={'color': 'C5', 'linewidth': 1},
+                        plot_kwargs={'color': 'C5', 'linewidth': 0.5 * linewidth},
                         fill_kwargs={'alpha': 0},
                         ax=ax_)
             ax_.plot([], color='C5', label='{}_pps'.format(var))
