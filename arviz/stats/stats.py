@@ -360,8 +360,8 @@ def loo(trace, model, pointwise=False, reff=None):
         return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
                             columns=['loo', 'loo_se', 'p_loo', 'warning', 'loo_i'])
     else:
-        return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
-                            columns=['loo', 'loo_se', 'p_loo', 'warning', 'loo_i'])
+        return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg]],
+                            columns=['loo', 'loo_se', 'p_loo', 'warning'])
 
 
 def psislw(log_weights, reff=1.):

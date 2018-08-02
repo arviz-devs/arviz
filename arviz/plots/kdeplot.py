@@ -48,17 +48,18 @@ def kdeplot(values, cumulative=False, rug=False, label=None, bw=4.5, rotated=Fal
         plot_kwargs = {}
     plot_kwargs.setdefault('color', 'C0')
 
+    default_color = plot_kwargs.get('color')
     if fill_kwargs is None:
         fill_kwargs = {}
 
-    fill_kwargs.setdefault('alpha', 0.2)
-    fill_kwargs.setdefault('color', 'C0')
+    fill_kwargs.setdefault('alpha', 0)
+    fill_kwargs.setdefault('color', default_color)
 
     if rug_kwargs is None:
         rug_kwargs = {}
     rug_kwargs.setdefault('marker', '_' if rotated else '|')
     rug_kwargs.setdefault('linestyle', 'None')
-    rug_kwargs.setdefault('color', 'C0')
+    rug_kwargs.setdefault('color', default_color)
 
     if figsize is None:
         if ax:

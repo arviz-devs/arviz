@@ -7,7 +7,7 @@ from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
 def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
-              combined=False, kde_kwargs=None, trace_kwargs=None):
+              combined=False, kde_kwargs=None, hist_kwargs=None, trace_kwargs=None):
     """Plot samples histograms and values.
 
     Parameters
@@ -29,7 +29,9 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
     kde_kwargs : dict
-        Extra keyword arguments passed to `arviz.kdeplot`
+        Extra keyword arguments passed to `arviz.kdeplot`. Only affects continuous variables.
+    hist_kwargs : dict
+        Extra keyword arguments passed to `plt.hist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
     Returns
@@ -57,6 +59,11 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
     if kde_kwargs is None:
         kde_kwargs = {}
 
+    if hist_kwargs is None:
+        hist_kwargs = {}
+
+    hist_kwargs.setdefault('alpha', 0.35)
+
     textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
     trace_kwargs.setdefault('linewidth', linewidth)
 
@@ -72,10 +79,8 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
             colors.append(axes[i, 1].get_lines()[-1].get_color())
             kde_kwargs.setdefault('plot_kwargs', {})
             kde_kwargs['plot_kwargs']['color'] = colors[-1]
-            kde_kwargs.setdefault('fill_kwargs', {})
-            kde_kwargs['fill_kwargs']['alpha'] = 0
             if row.dtype.kind == 'i':
-                _histplot_op(axes[i, 0], row, alpha=kde_kwargs['alpha'])
+                _histplot_op(axes[i, 0], row, **hist_kwargs)
             else:
                 kdeplot(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
 
@@ -98,10 +103,10 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
     return axes
 
 
-def _histplot_op(ax, data, alpha=0.35):
+def _histplot_op(ax, data, **kwargs):
     """Add a histogram for the data to the axes."""
     bins = get_bins(data)
-    ax.hist(data, bins=bins, alpha=alpha, align='left', density=True)
+    ax.hist(data, bins=bins, align='left', density=True, **kwargs)
     xticks = get_bins(data, max_bins=10, fenceposts=1)
     ax.set_xticks(xticks)
     return ax
