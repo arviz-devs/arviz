@@ -58,31 +58,78 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
     Examples
     --------
-    Show one example plot for reference
+
+    Show a default kernel density plot following style of John Kruschke
 
     .. plot::
         :context: close-figs
 
         >>> import arviz as az
         >>> non_centered = az.load_arviz_data('non_centered_eight')
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'tau'), textsize=12)
+        >>> az.posteriorplot(non_centered)
 
-    Change a parameter and show another plot to show what happens
+    Plot subset variables by specifying variable name exactly
 
     .. plot::
         :context: close-figs
 
-        >>> import arviz as az
-        >>> non_centered = az.load_arviz_data('non_centered_eight')
-        >>> az.posteriorplot(non_centered, var_names=('theta_tilde',),
-                             ref_val=0, rope=(-1, 1), textsize=11)
+        >>> az.posteriorplot(non_centered, var_names=("mu",), textsize=11)
 
+    Plot subset of variables by matching start of variable name
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=("mu", "theta_tilde"))
+
+    Plot Region of Practical Equivalence (rope) for all distributions
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), rope=(-1, 1))
+
+    Plot Region of Practical Equivalence for selected distributions
+
+    .. plot::
+        :context: close-figs
+
+        >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), rope=rope)
+
+
+    Add reference lines
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), ref_val=0)
+
+    Show point estimate of distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), point_estimate="mode")
+
+    Plot posterior as a histogram
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), kind="hist")
+
+    Change size of credible interval
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), alpha=.5)
     """
     data = convert_to_xarray(data)
 
     if coords is None:
         coords = {}
-
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
     rows, cols = default_grid(len(plotters))
@@ -102,7 +149,6 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
         ax.set_title(make_label(var_name, selection), fontsize=textsize)
     return axes
-
 
 
 def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind,
@@ -126,7 +172,6 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
         else:
             raise ValueError('Argument `ref_val` must be None, a constant, or a '
                              'dictionary like {"var_name": {"ref_val": (lo, hi)}}')
-
 
         less_than_ref_probability = (values < val).mean()
         greater_than_ref_probability = (values >= val).mean()
@@ -170,7 +215,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
         if point_estimate == 'mean':
             point_value = values.mean()
         elif point_estimate == 'mode':
-            if isinstance(values.iloc[0], float):
+            if isinstance(values[0], float):
                 density, lower, upper = fast_kde(values, bw=bw)
                 x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
