@@ -34,5 +34,5 @@ script:
   - travis-sphinx build --nowarn --source=doc
 
 after_success:
-  - travis-sphinx deploy
+  - if [[ $(python --version 2>&1) =~ 3\.6 ]]; then travis-sphinx deploy; fi
   - coveralls
