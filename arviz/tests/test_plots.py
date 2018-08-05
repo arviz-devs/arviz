@@ -9,7 +9,8 @@ from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorr
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
 
-class TestPlots(object):
+class SetupPlots(object):
+
     @classmethod
     def setup_class(cls):
         cls.data = eight_schools_params()
@@ -23,6 +24,8 @@ class TestPlots(object):
     def teardown_method(self):
         plt.close('all')
 
+
+class TestPlots(SetupPlots):
     def test_density_plot(self):
         for obj in (self.short_trace, self.fit):
             assert densityplot(obj).shape == (18, 1)
@@ -33,12 +36,6 @@ class TestPlots(object):
             axes = traceplot(obj, var_names=('mu', 'tau'),
                              combined=combined, lines=[('mu', {}, [1, 2])])
             assert axes.shape == (2, 2)
-
-    def test_posteriorplot(self):
-        # posteriorplot(self.df_trace).shape == (1,)
-        for obj in (self.short_trace, self.fit):
-            axes = posteriorplot(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
-            assert axes.shape == (1, 2)
 
     def test_autocorrplot(self):
         for obj in (self.short_trace, self.fit):
@@ -84,3 +81,17 @@ class TestPlots(object):
     def test_violintraceplot(self):
         violintraceplot(self.df_trace)
         violintraceplot(self.short_trace)
+
+
+class TestPosteriorPlot(SetupPlots):
+
+    def test_posteriorplot(self):
+        for obj in (self.short_trace, self.fit):
+            axes = posteriorplot(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
+            assert axes.shape == (1, 2)
+
+    @pytest.mark.parametrize("point_estimate", ('mode', 'mean', 'median'))
+    def test_point_estimates(self, point_estimate):
+        for obj in (self.short_trace, self.fit):
+            axes = posteriorplot(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
+            assert axes.shape == (1, 2)

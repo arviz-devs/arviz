@@ -5,6 +5,7 @@ import numpy as np
 import pymc3 as pm
 import pystan
 
+
 def eight_schools_params():
     """Share setup for eight schools"""
     return {
