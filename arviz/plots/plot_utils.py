@@ -62,40 +62,6 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     return bins
 
 
-def _create_axes_grid(trace, figsize, ax):
-    """
-    Parameters
-    ----------
-    trace : dict or DataFrame
-        dictionary with ppc samples of DataFrame with posterior samples
-    figsize : tuple
-        figure size
-    ax : matplotlib axes
-
-    Returns
-    -------
-    fig : matplotlib figure
-    ax : matplotlib axes
-    """
-    if isinstance(trace, dict):
-        l_trace = len(trace)
-    else:
-        l_trace = trace.shape[1]
-    if figsize is None:
-        figsize = (8, 2 + l_trace + (l_trace % 2))
-    if ax is None:
-        if l_trace == 1:
-            _, ax = plt.subplots(figsize=figsize)
-        else:
-            n_rows = np.ceil(l_trace / 2.0).astype(int)
-            _, ax = plt.subplots(n_rows, 2, figsize=figsize)
-            ax = ax.reshape(2 * n_rows)
-            if l_trace % 2 == 1:
-                ax[-1].set_axis_off()
-                ax = ax[:-1]
-    return ax, figsize
-
-
 def default_grid(n_items, max_cols=6, min_cols=3):
     """Makes a grid for subplots
 
@@ -129,6 +95,32 @@ def default_grid(n_items, max_cols=6, min_cols=3):
         if extra == 0:
             return rows, cols
     return n_items // ideal + 1, ideal
+
+
+def _create_axes_grid(length_plotters, rows, cols, **kwargs):
+    """
+    Parameters
+    ----------
+    n_items : int
+        Number of panels required
+    rows : int
+        Number of rows
+    cols : int
+        Number of columns
+
+    Returns
+    -------
+    fig : matplotlib figure
+    ax : matplotlib axes
+    """
+    fig, ax = plt.subplots(rows, cols, **kwargs)
+    ax = np.ravel(ax)
+    extra = (rows * cols) - length_plotters
+    if extra:
+        for i in range(1, extra+1):
+            ax[-i].set_axis_off()
+        ax = ax[:-extra]
+    return fig, ax
 
 
 def selection_to_string(selection):

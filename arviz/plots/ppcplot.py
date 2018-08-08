@@ -1,6 +1,6 @@
 import numpy as np
 from .kdeplot import kdeplot
-from .plot_utils import _scale_text, _create_axes_grid
+from .plot_utils import _scale_text, _create_axes_grid, default_grid
 
 
 def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None, ax=None):
@@ -28,7 +28,13 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
     -------
     ax : matplotlib axes
     """
-    ax, figsize = _create_axes_grid(ppc_sample, figsize, ax)
+
+    rows, cols = default_grid(len(ppc_sample))
+
+    if figsize is None:
+        figsize = (3 * cols, 2.5 * rows)
+
+    _, ax = _create_axes_grid(len(ppc_sample), rows, cols, figsize=figsize)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
