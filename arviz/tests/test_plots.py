@@ -9,7 +9,7 @@ from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorr
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
 
-class SetupPlots(object):
+class SetupPlots():
 
     @classmethod
     def setup_class(cls):

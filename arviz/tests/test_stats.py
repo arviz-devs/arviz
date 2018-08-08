@@ -28,7 +28,7 @@ def test_r2_score():
     assert_almost_equal(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
 
 
-class TestCompare(object):
+class TestCompare():
     @classmethod
     def setup_class(cls):
         np.random.seed(42)

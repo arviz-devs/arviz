@@ -7,7 +7,7 @@ from ..utils.xarray_utils import convert_to_xarray, get_converter, \
                                  DictToXarray, PyMC3ToXarray, PyStanToXarray
 
 
-class CheckXarrayUtils(object):
+class CheckXarrayUtils():
 
     def check_varnames_coords_dims(self, varnames, coords, dims):
         expected_varnames = {'mu', 'tau', 'theta_tilde', 'theta'}
