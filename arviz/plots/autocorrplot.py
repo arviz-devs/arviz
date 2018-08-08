@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
 from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
@@ -45,7 +44,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
 
 
     _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize,
-                               squeeze=False, sharex=True, sharey=True)
+                                squeeze=False, sharex=True, sharey=True)
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):

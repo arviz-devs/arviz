@@ -4,7 +4,7 @@ from scipy.stats import mode
 from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
 from ..utils import convert_to_xarray
-from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid,  _create_axes_grid
+from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
 
 
 def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None, alpha=0.05,
