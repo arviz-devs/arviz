@@ -115,7 +115,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
     else:
         raise NotImplementedError('The information criterion {} is not supported.'.format(ic))
 
-    if len(set([len(m.observed_RVs) for m in model_dict])) != 1:
+    if len({len(m.observed_RVs) for m in model_dict}) != 1:
         raise ValueError('The number of observed RVs should be the same across all models')
 
     if method not in ['stacking', 'BB-pseudo-BMA', 'pseudo-BMA']:
