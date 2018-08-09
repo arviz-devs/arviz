@@ -7,8 +7,6 @@ command -v conda >/dev/null 2>&1 || {
   exit 1;
 }
 
-PYTHON_VERSION=${PYTHON_VERSION:-3.6} # if no python specified, use 3.6
-
 if [[ $* != *--global* ]]; then
     ENVNAME="testenv"
 
@@ -16,7 +14,7 @@ if [[ $* != *--global* ]]; then
     then
         echo "Environment ${ENVNAME} already exists, keeping up to date"
     else
-        conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
+        conda create -n ${ENVNAME} --yes pip python=${TRAVIS_PYTHON_VERSION}
         source activate ${ENVNAME}
     fi
 fi
