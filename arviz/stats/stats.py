@@ -231,9 +231,9 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
+def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     """
-    Calculate highest posterior density (HPD) of array for given alpha.
+    Calculate highest posterior density (HPD) of array for given credible_interval.
 
     The HPD is the minimum width Bayesian credible interval (BCI). This implementation works only
     for unimodal distributions.
@@ -242,8 +242,8 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     ----------
     x : Numpy array
         An array containing posterior samples
-    alpha : float, optional
-        Desired probability of type I error (defaults to 0.05)
+    credible_interval : float, optional
+        Credible interval to plot. Defaults to 0.94.
     transform : callable
         Function to transform data (defaults to identity)
     circular : bool, optional
@@ -258,7 +258,6 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
     # Make a copy of trace
     x = transform(x.copy())
     len_x = len(x)
-    cred_mass = 1.0 - alpha
 
     if circular:
         mean = circmean(x, high=np.pi, low=-np.pi)
@@ -266,7 +265,7 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
         x = np.arctan2(np.sin(x), np.cos(x))
 
     x = np.sort(x)
-    interval_idx_inc = int(np.floor(cred_mass * len_x))
+    interval_idx_inc = int(np.floor(credible_interval * len_x))
     n_intervals = len_x - interval_idx_inc
     interval_width = x[interval_idx_inc:] - x[:n_intervals]
 
@@ -284,12 +283,6 @@ def hpd(x, alpha=0.05, transform=lambda x: x, circular=False):
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
     return hdi_min, hdi_max
-
-
-def _hpd_df(x, alpha):
-    cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
-              'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
-    return pd.DataFrame(hpd(x, alpha), columns=cnames)
 
 
 def loo(trace, model, pointwise=False, reff=None):
@@ -542,7 +535,7 @@ def r2_score(y_true, y_pred, round_to=2):
 
 
 def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
-            stat_funcs=None, extend=False, alpha=0.05, skip_first=0, batches=None):
+            stat_funcs=None, extend=False, credible_interval=0.94, skip_first=0, batches=None):
     R"""
     Create a data frame with summary statistics.
 
@@ -576,9 +569,9 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
     include_transformed : bool
         Flag for reporting automatically transformed variables in addition to original variables
         (defaults to False).
-    alpha : float
-        The alpha level for generating posterior intervals. Defaults to 0.05. This is only
-        meaningful when `stat_funcs` is None.
+    credible_interval : float, optional
+        Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
+        None.
     skip_first : int
         Number of first samples not shown in plots (burn-in).
     batches : None or int
@@ -588,7 +581,7 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
     Returns
     -------
     `pandas.DataFrame` with summary statistics for each variable Defaults one are: `mean`, `sd`,
-    `mc_error`, `hpd_2.5`, `hpd_97.5`, `n_eff` and `Rhat`. Last two are only computed for traces
+    `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. Last two are only computed for traces
     with 2 or more chains.
 
     Examples
@@ -597,9 +590,9 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-                   mean        sd  mc_error     hpd_5    hpd_95  n_eff      Rhat
-        mu__0  0.106897  0.066473  0.001818 -0.020612  0.231626  487.0   1.00001
-        mu__1 -0.046597  0.067513  0.002048 -0.174753  0.081924  379.0   1.00203
+               mean    sd  hpd_3  hpd_97  mc_error  n_eff  Rhat
+        mu__0  0.10  0.06  -0.02    0.23      0.00  487.0  1.00
+        mu__1 -0.04  0.06  -0.17    0.08      0.00  379.0  1.00
 
     Other statistics can be calculated by passing a list of functions.
 
@@ -613,9 +606,9 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         ...     return pd.DataFrame(pd.quantiles(x, [5, 50, 95]))
         ...
         >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
-                     sd         5        50        95
-        mu__0  0.066473  0.000312  0.105039  0.214242
-        mu__1  0.067513 -0.159097 -0.045637  0.062912
+                 sd     5    50    95
+        mu__0  0.06  0.00  0.10  0.21
+        mu__1  0.07 -0.16 -0.04  0.06
     """
     trace = trace_to_dataframe(trace, combined=False)[skip_first:]
     varnames = get_varnames(trace, varnames)
@@ -627,23 +620,23 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         circ_varnames = []
     else:
         circ_varnames = get_varnames(trace, circ_varnames)
-
+    alpha = 1 - credible_interval
     cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
               'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
 
     funcs = [lambda x: pd.Series(np.mean(x, 0), name='mean').round(round_to),
              lambda x: pd.Series(np.std(x, 0), name='sd').round(round_to),
-             lambda x: pd.Series(_mc_error(x, batches).round(round_to), name='mc_error'),
-             lambda x: pd.DataFrame([hpd(x, alpha)], columns=cnames).round(round_to)]
+             lambda x: pd.DataFrame([hpd(x, credible_interval)], columns=cnames).round(round_to),
+             lambda x: pd.Series(_mc_error(x, batches).round(round_to), name='mc_error')]
 
     circ_funcs = [lambda x: pd.Series(circmean(x, high=np.pi, low=-np.pi, axis=0),
                                       name='mean').round(round_to),
                   lambda x: pd.Series(circstd(x, high=np.pi, low=-np.pi, axis=0),
                                       name='sd').round(round_to),
+                  lambda x: pd.DataFrame([hpd(x, credible_interval, circular=True)],
+                                         columns=cnames).round(round_to),
                   lambda x: pd.Series(_mc_error(x, batches, circular=True).round(
-                      round_to), name='mc_error'),
-                  lambda x: pd.DataFrame([hpd(x, alpha, circular=True)],
-                                         columns=cnames).round(round_to)]
+                      round_to), name='mc_error')]
 
     if stat_funcs is not None:
         if extend:

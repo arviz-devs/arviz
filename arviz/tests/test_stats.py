@@ -18,7 +18,7 @@ def test_bfmi():
 def test_hpd():
     normal_sample = np.random.randn(5000000)
     interval = hpd(normal_sample)
-    assert_array_almost_equal(interval, [-1.96, 1.96], 2)
+    assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
 def test_r2_score():
