@@ -152,7 +152,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     return fig, axes
 
 
-class PlotHandler(object):
+class PlotHandler():
     def __init__(self, data, var_names, model_names, combined, colors):
         if not isinstance(data, (list, tuple)):
             data = [data]
@@ -303,7 +303,7 @@ class PlotHandler(object):
         return max(p.y_max() for p in self.plotters.values())
 
 
-class VarHandler(object):
+class VarHandler():
     def __init__(self, var_name, data, y_start, model_names, combined, colors):
         self.var_name = var_name
         self.data = data

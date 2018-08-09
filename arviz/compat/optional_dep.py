@@ -2,7 +2,7 @@ import importlib
 import sys
 
 
-class OptionalDep(object):
+class OptionalDep():
     """Wrapper for optional library dependencies.
 
     Note that since only __getattr__ is implemented, if this object implements

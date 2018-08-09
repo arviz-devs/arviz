@@ -1,7 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
-from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter
+from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
 from ..utils import convert_to_xarray
 from ..stats.diagnostics import autocorr
 
@@ -36,13 +35,16 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
     data = convert_to_xarray(posterior)
 
     plotters = list(xarray_var_iter(data, var_names, combined))
-    rows, cols = default_grid(len(plotters))
+    length_plotters = len(plotters)
+    rows, cols = default_grid(length_plotters)
 
     if figsize is None:
         figsize = (3 * cols, 2.5 * rows)
     textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
 
-    _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
+
+    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize,
+                                squeeze=False, sharex=True, sharey=True)
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):

@@ -1,10 +1,9 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import mode
 from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
 from ..utils import convert_to_xarray
-from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid
+from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
 
 
 def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None, alpha=0.05,
@@ -132,14 +131,15 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
         coords = {}
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
-    rows, cols = default_grid(len(plotters))
+    length_plotters = len(plotters)
+    rows, cols = default_grid(length_plotters)
 
     if figsize is None:
         figsize = (3.5 * cols, 3 * rows)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize, scale_ratio=0.9)
 
-    _, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False)
+    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
         _plot_posterior_op(x.flatten(), var_name, selection, ax=ax, bw=bw, linewidth=linewidth,

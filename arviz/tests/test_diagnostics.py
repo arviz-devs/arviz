@@ -5,7 +5,7 @@ import pandas as pd
 from ..stats import gelman_rubin, effective_n, geweke
 
 
-class TestDiagnostics(object):
+class TestDiagnostics():
     good_rhat = 1.1
 
     def fake_trace(self, n_samples):

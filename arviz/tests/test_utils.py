@@ -4,7 +4,7 @@ from pandas.testing import assert_frame_equal
 from ..utils import trace_to_dataframe, save_trace, load_trace
 
 
-class TestUtils(object):
+class TestUtils():
 
     @classmethod
     def setup_class(cls):
