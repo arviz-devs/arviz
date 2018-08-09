@@ -11,7 +11,7 @@ command -v conda >/dev/null 2>&1 || {
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv"
+    ENVNAME="testenv${PYTHON_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
