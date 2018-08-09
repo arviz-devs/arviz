@@ -7,9 +7,9 @@ from ..utils import convert_to_xarray
 from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 
-def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estimate='mean',
-                colors='cycle', outline=True, hpd_markers='', shade=0., bw=4.5, figsize=None,
-                textsize=None, skip_first=0):
+def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
+                point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
+                bw=4.5, figsize=None, textsize=None, skip_first=0):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -25,8 +25,8 @@ def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estima
     varnames: list
         List of variables to plot (defaults to None, which results in all
         variables plotted).
-    alpha : float
-        Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).
+    credible_interval : float
+        Credible intervals. Defaults to 0.94.
     point_estimate : str or None
         Plot point estimate per variable. Values should be 'mean', 'median' or None.
         Defaults to 'mean'.
@@ -111,7 +111,8 @@ def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estima
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
             _d_helper(values.flatten(), label, colors[m_idx], bw, textsize, linewidth, markersize,
-                      alpha, point_estimate, hpd_markers, outline, shade, axis_map[label])
+                      credible_interval, point_estimate, hpd_markers, outline, shade,
+                      axis_map[label])
 
     if n_data > 1:
         ax = axes.flatten()[0]
@@ -124,7 +125,7 @@ def densityplot(data, data_labels=None, var_names=None, alpha=0.05, point_estima
     return axes
 
 
-def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, alpha,
+def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_interval,
               point_estimate, hpd_markers, outline, shade, ax):
     """
     vec : array
@@ -143,8 +144,8 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, alpha,
         Thickness of lines
     markersize : float
         Size of markers
-    alpha : float
-        Alpha value for (1-alpha)*100% credible intervals (defaults to 0.05).
+    credible_interval : float
+        Credible intervals. Defaults to 0.94
     point_estimate : str or None
         'mean' or 'median'
     shade : float
@@ -155,7 +156,7 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, alpha,
     if vec.dtype.kind == 'f':
         density, lower, upper = fast_kde(vec, bw=bw)
         x = np.linspace(lower, upper, len(density))
-        hpd_ = hpd(vec, alpha)
+        hpd_ = hpd(vec, credible_interval)
         cut = (x >= hpd_[0]) & (x <= hpd_[1])
 
         xmin = x[cut][0]
@@ -172,7 +173,7 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, alpha,
             ax.fill_between(x, density, where=cut, color=color, alpha=shade)
 
     else:
-        xmin, xmax = hpd(vec, alpha)
+        xmin, xmax = hpd(vec, credible_interval)
         bins = range(xmin, xmax + 2)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype='step', align='left')

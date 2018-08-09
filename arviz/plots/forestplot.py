@@ -19,7 +19,7 @@ def pairwise(iterable):
 
 
 def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
-               credible_interval=0.95, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
+               credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
                textsize=None, linewidth=None, markersize=None, joyplot_alpha=None,
                joyplot_overlap=2, figsize=None):
     """
@@ -44,7 +44,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
         Flag for combining multiple chains into a single chain. If False (default),
         chains will be plotted separately.
     credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.95.
+        Credible interval to plot. Defaults to 0.94.
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
@@ -366,7 +366,7 @@ class VarHandler():
     def treeplot(self, qlist, credible_interval):
         for y, _, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), alpha=1-credible_interval)
+            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
             yield y, ntiles, color
 
     def joyplot(self, mult):
