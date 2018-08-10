@@ -19,7 +19,6 @@ install:
   - . ./scripts/install_miniconda.sh
   - conda info -a
   - . ./scripts/create_testenv.sh
-
   - pip install coveralls
 
 before_script:
@@ -29,7 +28,7 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - pylint arviz/
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pylint arviz/; fi
   - pytest -v arviz/tests/ --cov=arviz/
   - travis-sphinx build --nowarn --source=doc
 
