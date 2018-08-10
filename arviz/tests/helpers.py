@@ -1,5 +1,6 @@
 import os
 import pickle
+import sys
 
 import numpy as np
 import pymc3 as pm
@@ -70,8 +71,9 @@ def load_cached_models(draws, chains):
     data_directory = os.path.join(here, 'saved_models')
     models = {}
     for library, func in supported:
-        fname = '{}_{}_{}_{}.pkl'.format(
-            library.__name__, library.__version__, draws, chains
+        py_version = sys.version_info
+        fname = '{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}.pkl'.format(
+            py_version, library, draws, chains
 
         )
         path = os.path.join(data_directory, fname)
