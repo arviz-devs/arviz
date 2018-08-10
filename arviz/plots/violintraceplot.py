@@ -7,8 +7,8 @@ from ..stats import hpd
 from ..utils import get_varnames, trace_to_dataframe
 
 
-def violintraceplot(trace, varnames=None, quartiles=True, alpha=0.05, shade=0.35, bw=4.5,
-                    sharey=True, figsize=None, textsize=None, skip_first=0, ax=None,
+def violintraceplot(trace, varnames=None, quartiles=True, credible_interval=0.94, shade=0.35,
+                    bw=4.5, sharey=True, figsize=None, textsize=None, skip_first=0, ax=None,
                     kwargs_shade=None):
     """
     Violinplot
@@ -20,10 +20,10 @@ def violintraceplot(trace, varnames=None, quartiles=True, alpha=0.05, shade=0.35
     varnames: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
     quartiles : bool, optional
-        Flag for plotting the interquartile range, in addition to the (1-alpha)*100% intervals.
-        Defaults to True
-    alpha : float, optional
-        Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
+        Flag for plotting the interquartile range, in addition to the credible_interval*100%
+        intervals. Defaults to True
+    credible_interval : float, optional
+        Credible intervals. Defaults to 0.94.
     shade : float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
@@ -69,7 +69,7 @@ def violintraceplot(trace, varnames=None, quartiles=True, alpha=0.05, shade=0.35
             _violinplot(val, shade, bw, ax[axind], **kwargs_shade)
 
         per = np.percentile(val, [25, 75, 50])
-        hpd_intervals = hpd(val, alpha)
+        hpd_intervals = hpd(val, credible_interval)
 
         if quartiles:
             ax[axind].plot([0, 0], per[:2], lw=linewidth*3, color='k', solid_capstyle='round')

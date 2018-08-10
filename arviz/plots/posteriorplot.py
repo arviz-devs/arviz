@@ -6,9 +6,9 @@ from ..utils import convert_to_xarray
 from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
 
 
-def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None, alpha=0.05,
-                  round_to=1, point_estimate='mean', rope=None, ref_val=None, kind='kde', bw=4.5,
-                  bins=None, **kwargs):
+def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None,
+                  credible_interval=0.94, round_to=1, point_estimate='mean', rope=None,
+                  ref_val=None, kind='kde', bw=4.5, bins=None, **kwargs):
     """
     Plot Posterior densities in the style of John K. Kruschke's book.
 
@@ -25,8 +25,8 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     textsize: int
         Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
         based on figsize.
-    alpha : float, optional
-        Alpha value for (1-alpha)*100% credible intervals. Defaults to 0.05.
+    credible_interval : float, optional
+        Credible intervals. Defaults to 0.94.
     round_to : int
         Controls formatting for floating point numbers
     point_estimate: str
@@ -123,7 +123,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), alpha=.5)
+        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
     """
     data = convert_to_xarray(data)
 
@@ -144,15 +144,15 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
         _plot_posterior_op(x.flatten(), var_name, selection, ax=ax, bw=bw, linewidth=linewidth,
                            bins=bins, kind=kind, point_estimate=point_estimate,
-                           round_to=round_to, alpha=alpha, ref_val=ref_val, rope=rope,
-                           textsize=textsize, **kwargs)
+                           round_to=round_to, credible_interval=credible_interval,
+                           ref_val=ref_val, rope=rope, textsize=textsize, **kwargs)
 
         ax.set_title(make_label(var_name, selection), fontsize=textsize)
     return axes
 
 
-def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind,
-                       point_estimate, round_to, alpha, ref_val, rope, textsize, **kwargs):
+def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind, point_estimate,
+                       round_to, credible_interval, ref_val, rope, textsize, **kwargs):
     """
     Artist to draw posterior.
     """
@@ -229,7 +229,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                 horizontalalignment='center')
 
     def display_hpd():
-        hpd_intervals = hpd(values, alpha=alpha)
+        hpd_intervals = hpd(values, credible_interval=credible_interval)
         ax.plot(hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*2, color='k',
                 solid_capstyle='round')
         ax.text(hpd_intervals[0], plot_height * 0.07,
@@ -239,7 +239,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                 hpd_intervals[1].round(round_to),
                 size=textsize, horizontalalignment='center')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.3,
-                format_as_percent(1 - alpha) + ' HPD',
+                format_as_percent(1 - credible_interval) + ' HPD',
                 size=textsize, horizontalalignment='center')
 
     def format_axes():
