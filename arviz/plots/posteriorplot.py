@@ -245,7 +245,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                 hpd_intervals[1].round(round_to),
                 size=textsize, horizontalalignment='center')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.3,
-                format_as_percent(1 - credible_interval) + ' HPD',
+                format_as_percent(credible_interval) + ' HPD',
                 size=textsize, horizontalalignment='center')
 
     def format_axes():
