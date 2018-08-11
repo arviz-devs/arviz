@@ -2,22 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
-from .plot_utils import get_bins, _scale_text
+from .plot_utils import get_bins, _scale_text, xarray_var_iter
 from ..stats import hpd
-from ..utils import get_varnames, trace_to_dataframe
+from ..utils import convert_to_xarray
 
 
-def violintraceplot(trace, varnames=None, quartiles=True, credible_interval=0.94, shade=0.35,
-                    bw=4.5, sharey=True, figsize=None, textsize=None, skip_first=0, ax=None,
-                    kwargs_shade=None):
+def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
+                    bw=4.5, sharey=True, figsize=None, textsize=None, ax=None, kwargs_shade=None):
     """
-    Violinplot
+    Plot posterior of traces as Violinplot
+
+    Notes
+    -----
+    If multiple chains are provided for a variable they will be combined
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames: list, optional
+    var_names: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval*100%
@@ -31,10 +34,13 @@ def violintraceplot(trace, varnames=None, quartiles=True, credible_interval=0.94
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default rule used by SciPy).
+    figsize : tuple
+        Figure size. If None, size is 5 (num of variables * 2, 5)
+    textsize: int
+        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
+        based on figsize.
     sharey : bool
         Defaults to True, violinplots share a common y-axis scale.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
     ax : matplotlib axes
     kwargs_shade : dicts, optional
         Additional keywords passed to `fill_between`, or `barh` to control the shade
@@ -43,26 +49,24 @@ def violintraceplot(trace, varnames=None, quartiles=True, credible_interval=0.94
     ax : matplotlib axes
 
     """
-    trace = trace_to_dataframe(trace[skip_first:], combined=True)
-    varnames = get_varnames(trace, varnames)
-    trace = trace[varnames]
+
+    data = convert_to_xarray(data)
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:
         kwargs_shade = {}
 
     if figsize is None:
-        figsize = (len(varnames) * 2, 5)
+        figsize = (len(plotters) * 2, 5)
 
     textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
 
     if ax is None:
-        _, ax = plt.subplots(1, len(varnames), figsize=figsize, sharey=sharey)
+        _, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
     ax = np.atleast_1d(ax)
 
-    names = trace.columns.values
-
-    for axind, var in enumerate(trace.columns):
-        val = trace[var]
+    for axind, (var_name, _, x) in enumerate(plotters):
+        val = x.flatten()
         if val[0].dtype.kind == 'i':
             cat_hist(val, shade, ax[axind], **kwargs_shade)
         else:
@@ -76,11 +80,10 @@ def violintraceplot(trace, varnames=None, quartiles=True, credible_interval=0.94
         ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color='k', solid_capstyle='round')
         ax[axind].plot(0, per[-1], 'wo', ms=linewidth*1.5)
 
-        ax[axind].set_xlabel(names[axind], fontsize=textsize)
+        ax[axind].set_xlabel(var_name, fontsize=textsize)
         ax[axind].set_xticks([])
         ax[axind].tick_params(labelsize=textsize)
         ax[axind].grid(None, axis='x')
-        #ax[axind].set_xlim(-np.max(density)*5, np.max(density)*5)
 
     if sharey:
         plt.subplots_adjust(wspace=0)
@@ -102,10 +105,9 @@ def _violinplot(val, shade, bw, ax, **kwargs_shade):
     ax.fill_betweenx(x, density, alpha=shade, lw=0, **kwargs_shade)
 
 
-
 def cat_hist(val, shade, ax, **kwargs_shade):
     """
-    Auxiliar function to plot discrete-violinplots
+    Auxiliary function to plot discrete-violinplots
     """
     bins = get_bins(val)
     binned_d, _ = np.histogram(val, bins=bins, normed=True)
