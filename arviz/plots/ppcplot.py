@@ -32,11 +32,11 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
     rows, cols = default_grid(len(ppc_sample))
 
     if figsize is None:
-        figsize = (3 * cols, 2.5 * rows)
+        figsize = (7, 5)
 
     _, ax = _create_axes_grid(len(ppc_sample), rows, cols, figsize=figsize)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
+    textsize, linewidth, _ = _scale_text(figsize, textsize, 2)
 
     for ax_, (var, ppss) in zip(np.atleast_1d(ax), ppc_sample.items()):
         if kind == 'kde':

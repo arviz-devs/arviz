@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.stats import mode
 from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
@@ -8,7 +9,7 @@ from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, 
 
 def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None,
                   credible_interval=0.94, round_to=1, point_estimate='mean', rope=None,
-                  ref_val=None, kind='kde', bw=4.5, bins=None, **kwargs):
+                  ref_val=None, kind='kde', bw=4.5, bins=None, ax=None, **kwargs):
     """
     Plot Posterior densities in the style of John K. Kruschke's book.
 
@@ -48,6 +49,8 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
+    ax : axes
+        Matplotlib axes. Defaults to None.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -135,20 +138,23 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     rows, cols = default_grid(length_plotters)
 
     if figsize is None:
-        figsize = (3.5 * cols, 3 * rows)
+        figsize = (7, 5)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize, scale_ratio=0.9)
+    textsize, linewidth, _ = _scale_text(figsize, textsize, scale_ratio=1.5)
 
-    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+    if ax is None:
+        _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
-    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
-        _plot_posterior_op(x.flatten(), var_name, selection, ax=ax, bw=bw, linewidth=linewidth,
+    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+        _plot_posterior_op(x.flatten(), var_name, selection, ax=ax_, bw=bw, linewidth=linewidth,
                            bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, credible_interval=credible_interval,
                            ref_val=ref_val, rope=rope, textsize=textsize, **kwargs)
 
-        ax.set_title(make_label(var_name, selection), fontsize=textsize)
-    return axes
+        ax_.set_title(make_label(var_name, selection), fontsize=textsize)
+
+    plt.tight_layout()
+    return ax
 
 
 def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind, point_estimate,
@@ -239,7 +245,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                 hpd_intervals[1].round(round_to),
                 size=textsize, horizontalalignment='center')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.3,
-                format_as_percent(1 - credible_interval) + ' HPD',
+                format_as_percent(credible_interval) + ' HPD',
                 size=textsize, horizontalalignment='center')
 
     def format_axes():
