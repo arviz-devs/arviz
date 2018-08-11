@@ -270,7 +270,8 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     interval_width = x[interval_idx_inc:] - x[:n_intervals]
 
     if len(interval_width) == 0:
-        raise ValueError('Too few elements for interval calculation')
+        raise ValueError('Too few elements for interval calculation.'
+                         ' Check that credible_interval meets condition 0 =< credible_interval < 1')
 
     min_idx = np.argmin(interval_width)
     hdi_min = x[min_idx]
