@@ -56,7 +56,7 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     x_max, x_min = ary.max(), ary.min()
     x_range = x_max - x_min
     if x_range > max_bins:
-        bins = range(x_min, x_max + fenceposts, int(x_range / 10))
+        bins = range(x_min, x_max + fenceposts, max(1, int(x_range / 10)))
     else:
         bins = range(x_min, x_max + fenceposts)
     return bins
