@@ -2,18 +2,12 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from scipy import __version__ as scipy_version
+from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
 from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
 from .diagnostics import effective_n, gelman_rubin
-
-# logsumexp gets moved
-if scipy_version < '1.0.0':
-    from scipy.misc import logsumexp
-else:
-    from scipy.special import logsumexp
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
 

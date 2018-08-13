@@ -32,3 +32,15 @@ class TestUtils():
 
         assert_equal(self.trace['b'][:1000], df_fc['b'].iloc[:, 0])
         assert_equal(self.trace['b'][1000:], df_fc['b'].iloc[:, 1])
+
+    def test_save_and_load(self, tmpdir_factory):
+        filename = tmpdir_factory.mktemp('traces').join('trace.gzip')
+        save_trace(self.trace, filename=filename)
+        trl0 = load_trace(filename)
+        tr = trace_to_dataframe(self.trace, combined=False)
+        save_trace(tr, filename=filename)
+        trl1 = load_trace(filename)
+
+        assert_frame_equal(tr, trl0)
+        assert_frame_equal(tr, trl1)
+        assert_frame_equal(trl0, trl1)
