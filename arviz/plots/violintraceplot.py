@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
-from .plot_utils import get_bins, _scale_text, xarray_var_iter
+from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
 from ..stats import hpd
 from ..utils import convert_to_xarray
 
@@ -65,7 +65,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
         _, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
     ax = np.atleast_1d(ax)
 
-    for axind, (var_name, _, x) in enumerate(plotters):
+    for axind, (var_name, selection, x) in enumerate(plotters):
         val = x.flatten()
         if val[0].dtype.kind == 'i':
             cat_hist(val, shade, ax[axind], **kwargs_shade)
@@ -80,7 +80,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
         ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color='k', solid_capstyle='round')
         ax[axind].plot(0, per[-1], 'wo', ms=linewidth*1.5)
 
-        ax[axind].set_xlabel(var_name, fontsize=textsize)
+        ax[axind].set_xlabel(make_label(var_name, selection), fontsize=textsize)
         ax[axind].set_xticks([])
         ax[axind].tick_params(labelsize=textsize)
         ax[axind].grid(None, axis='x')
