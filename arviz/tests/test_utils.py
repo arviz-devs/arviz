@@ -1,6 +1,5 @@
 import pymc3 as pm
 from numpy.testing import assert_equal
-from pandas.testing import assert_frame_equal
 from ..utils import trace_to_dataframe, save_trace, load_trace
 
 
@@ -42,6 +41,6 @@ class TestUtils():
         save_trace(tr, filename=filename)
         trl1 = load_trace(filename)
 
-        assert_frame_equal(tr, trl0)
-        assert_frame_equal(tr, trl1)
-        assert_frame_equal(trl0, trl1)
+        assert tr.equals(trl0)
+        assert tr.equals(trl1)
+        assert tr10.equals(trl1)
