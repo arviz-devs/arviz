@@ -4,30 +4,28 @@ import numpy as np
 import pandas as pd
 from scipy.signal import fftconvolve
 
-
-from ..utils import trace_to_dataframe, get_varnames
-
+from ..utils import convert_to_xarray
+from ..plots.plot_utils import xarray_var_iter, selection_to_string
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
 
-def effective_n(trace, varnames=None, round_to=2):
+def effective_n(trace, var_names=None, round_to=2):
     R"""
     Returns estimate of the effective sample size of a set of traces.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. At least 2 chains are needed to compute this diagnostic of one or more
-      stochastic parameters.
-    varnames : list
+    posterior : xarray, or object that can be converted (pystan or pymc3 draws)
+        Posterior samples. At least 2 chains are needed.
+    var_names : list
       Names of variables to include in the effective_n report
     round_to : int
         Controls formatting for floating point numbers. Default 2.
 
     Returns
     -------
-    n_eff : dictionary of floats (MultiTrace) or float (trace object)
+    n_eff : Pandas' DataFrame
         Return the effective sample size, :math:`\hat{n}_{eff}`
 
     Notes
@@ -47,20 +45,18 @@ def effective_n(trace, varnames=None, round_to=2):
     ----------
     Gelman et al. BDA (2014)
     """
+    data = convert_to_xarray(trace)
 
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
-
-    if not np.all(trace.columns.duplicated(keep=False)):
-        raise ValueError(
-            'Calculation of effective sample size requires multiple chains of the same length.')
+    if len(data.chain) < 2:
+        raise ValueError('Calculation of effective sample size requires more than one chain')
     else:
-        n_eff = pd.Series(name='n_eff')
+        n_eff = []
 
-        for var in varnames:
-            n_eff[var] = round(_get_neff(trace[var].values.T), round_to)
+        for var_name, selection, x in xarray_var_iter(data, var_names, True):
+            n_eff.append((var_name, selection_to_string(selection), round(_get_neff(x), round_to)))
 
-        return n_eff
+        return pd.DataFrame(n_eff,
+                            columns=['var_name', 'dimensions', 'n_eff']).set_index('var_name')
 
 
 def _get_neff(trace_value):
@@ -148,7 +144,7 @@ def _autocov(x):
     return acov
 
 
-def gelman_rubin(trace, varnames=None, round_to=2):
+def gelman_rubin(trace, var_names=None, round_to=2):
     R"""
     Returns estimate of R for a set of traces.
 
@@ -160,16 +156,16 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. at least 2 chains are needed to compute this diagnostic
-    varnames : list
+    posterior : xarray, or object that can be converted (pystan or pymc3 draws)
+        Posterior samples. At least 2 chains are needed.
+    var_names : list
       Names of variables to include in the rhat report
     round_to : int
         Controls formatting for floating point numbers. Default 2.
 
     Returns
     -------
-    r_hat : dict of floats (MultiTrace) or float (trace object)
+    r_hat : Pandas' DataFrame
       Returns dictionary of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
@@ -189,18 +185,18 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """
+    data = convert_to_xarray(trace)
 
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
+    if len(data.chain) < 2:
+        raise ValueError('Calculation of effective sample size requires more than one chain')
+    else:
+        r_hat = []
 
-    if not np.all(trace.columns.duplicated(keep=False)):
-        raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
+        for var_name, selection, x in xarray_var_iter(data, var_names, True):
+            r_hat.append((var_name, selection_to_string(selection), round(_get_rhat(x), round_to)))
 
-    r_hat = pd.Series(name='Rhat')
-
-    for var in varnames:
-        r_hat[var] = _get_rhat(trace[var].values.T, round_to)
-    return r_hat
+        return pd.DataFrame(r_hat,
+                            columns=['var_name', 'dimensions', 'r_hat']).set_index('var_name')
 
 
 def _get_rhat(values, round_to=2):
@@ -218,7 +214,7 @@ def _get_rhat(values, round_to=2):
     return round((v_hat / within_chain_variance)**0.5, round_to)
 
 
-def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
+def geweke(trace, var_names=None, first=.1, last=.5, intervals=20):
     R"""
     Return z-scores for convergence diagnostics.
 
@@ -228,8 +224,9 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
 
     Parameters
     ----------
-    x : array-like
-      The trace of some stochastic parameter.
+    posterior : xarray, or object that can be converted (pystan or pymc3 draws)
+    var_names : list
+      Names of variables to include in the rhat report
     first : float
       The fraction of series at the beginning of the trace.
     last : float
@@ -240,9 +237,9 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
 
     Returns
     -------
-    scores : list [[]]
-      Return a list of [i, score], where i is the starting index for each interval and score the
-      Geweke score on the interval.
+    scores : Pandas's DataFrame
+      The r_hat column contains lists of [i, score], where i is the starting index for each
+      interval and score the Geweke score on the interval.
 
     Notes
     -----
@@ -259,16 +256,14 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     ----------
     Geweke (1992)
     """
+    data = convert_to_xarray(trace)
 
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
+    geweke = []
+    for var_name, selection, x in xarray_var_iter(data, var_names, False):
+        geweke.append((var_name, selection_to_string(selection), 
+                     _get_geweke(x, first, last, intervals)))
 
-    gewekes = {}
-
-    for var in varnames:
-        gewekes[var] = _get_geweke(trace[var].values, first, last, intervals)
-
-    return gewekes
+    return pd.DataFrame(geweke, columns=['var_name', 'dimensions', 'r_hat']).set_index('var_name')
 
 
 def _get_geweke(x, first=.1, last=.5, intervals=20):
