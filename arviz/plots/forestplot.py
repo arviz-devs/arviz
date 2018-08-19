@@ -329,7 +329,8 @@ class VarHandler():
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(sub_data,
                                              var_names=[self.var_name],
-                                             skip_dims=skip_dims)
+                                             skip_dims=skip_dims,
+                                             reverse_selections=True)
                 for _, selection, values in datum_iter:
                     label = make_label(self.var_name, selection)
                     if label not in label_dict:

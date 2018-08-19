@@ -159,7 +159,7 @@ def make_label(var_name, selection):
     return '{}'.format(var_name)
 
 
-def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
+def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
     """Converts xarray data to an iterator over vectors
 
     Iterates over each var_name and all of its coordinates, returning the 1d
@@ -178,6 +178,9 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
 
     skip_dims : set
         dimensions to not iterate over
+
+    reverse_selections : bool
+        Whether to reverse selections before iterating.
 
     Returns
     -------
@@ -205,5 +208,8 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
             new_dims = set(data[var_name].dims) - skip_dims
             vals = [data[var_name][dim].values for dim in new_dims]
             dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
+            if reverse_selections:
+                dims = reversed(dims)
+
             for selection in dims:
                 yield var_name, selection, data[var_name].sel(**selection).values
