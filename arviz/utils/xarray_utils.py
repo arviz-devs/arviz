@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod, abstractstaticmethod
 import re
 from copy import deepcopy as copy
+import itertools
 
 import numpy as np
 import xarray as xr
@@ -541,3 +542,66 @@ class PyStanToXarray(Converter):
         dtypes = re.findall(pattern_int, stan_code)
         dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self.varnames}
         return dtypes
+
+def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
+    """Converts xarray data to an iterator over vectors
+
+    Iterates over each var_name and all of its coordinates, returning the 1d
+    data
+
+    Parameters
+    ----------
+    data : xarray.Dataset
+        Posterior data in an xarray
+
+    var_names : iterator of strings (optional)
+        Should be a subset of data.data_vars. Defaults to all of them.
+
+    combined : bool
+        Whether to combine chains or leave them separate
+
+    skip_dims : set
+        dimensions to not iterate over
+
+    Returns
+    -------
+    Iterator of (str, dict(str, any), np.array)
+        The string is the variable name, the dictionary are coordinate names to values,
+        and the array are the values of the variable at those coordinates.
+    """
+    if skip_dims is None:
+        skip_dims = set()
+
+    if combined:
+        skip_dims = skip_dims.union({'chain', 'draw'})
+    else:
+        skip_dims.add('draw')
+
+    if var_names is None:
+        if isinstance(data, xr.Dataset):
+            var_names = list(data.data_vars)
+        elif isinstance(data, xr.DataArray):
+            var_names = [data.name]
+            data = {data.name: data}
+
+    for var_name in var_names:
+        if var_name in data:
+            new_dims = set(data[var_name].dims) - skip_dims
+            vals = [data[var_name][dim].values for dim in new_dims]
+            dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
+            for selection in dims:
+                yield var_name, selection, data[var_name].sel(**selection).values
+
+def selection_to_string(selection):
+    """Convert dictionary of coordinates to a string for labels.
+
+    Parameters
+    ----------
+    selection : dict[Any] -> Any
+
+    Returns
+    -------
+    str
+        key1: value1, key2: value2, ...
+    """
+    return ', '.join(['{}: {}'.format(k, v) for k, v in selection.items()])

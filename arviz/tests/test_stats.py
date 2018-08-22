@@ -6,9 +6,16 @@ import pandas as pd
 import pymc3 as pm
 from scipy import stats
 
+from .helpers import eight_schools_params, load_cached_models
 from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
+class SetupPlots():
 
+    @classmethod
+    def setup_class(cls):
+        cls.data = eight_schools_params()
+        models = load_cached_models(draws=500, chains=2)
+        _, cls.short_trace = models['pymc3']
 
 def test_bfmi():
     trace = pd.DataFrame([1, 2, 3, 4], columns=['energy'])
@@ -72,15 +79,16 @@ class TestCompare():
             assert_almost_equal(np.sum(weight), 1.)
 
 
-def test_summary():
-    alpha = np.repeat((1, 5, 10), 100)
-    beta = np.repeat((1, 5, 1), 100)
-    data = np.random.beta(alpha, beta).reshape(-1, 50)
-    trace = pd.DataFrame(data.T, columns=['a', 'a', 'b', 'b', 'c', 'c'])
+class Test_Stats(SetupPlots):
 
-    df_s = summary(trace)
-    assert df_s.shape == (3, 7)
-    assert np.all(df_s.index == ['a', 'b', 'c'])
+    def test_summary(self):
+        df_s = summary(self.short_trace)
+        print(df_s, df_s.shape, df_s.index)
+        assert df_s.shape == (18, 7)
+        assert np.all(df_s.index == ['mu', 'theta_tilde', 'theta_tilde', 'theta_tilde',
+                                     'theta_tilde', 'theta_tilde', 'theta_tilde', 'theta_tilde',
+                                     'theta_tilde', 'tau', 'theta', 'theta', 'theta', 'theta',
+                                     'theta', 'theta', 'theta', 'theta'])
 
 
 def test_waic():

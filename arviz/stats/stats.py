@@ -6,7 +6,8 @@ from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
-from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
+from ..utils import (get_stats, get_varnames, trace_to_dataframe, log_post_trace,
+                     convert_to_xarray, xarray_var_iter, selection_to_string)
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
@@ -535,7 +536,7 @@ def r2_score(y_true, y_pred, round_to=2):
                      index=['r2', 'r2_std']).round(decimals=round_to)
 
 
-def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
+def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x, circ_var_names=None,
             stat_funcs=None, extend=False, credible_interval=0.94, skip_first=0, batches=None):
     R"""
     Create a data frame with summary statistics.
@@ -544,8 +545,10 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
     ----------
     trace : Pandas DataFrame or PyMC3 trace
         Posterior samples
-    varnames : list
+    var_names : list
         Names of variables to include in summary
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     round_to : int
         Controls formatting for floating point numbers. Default 2.
     transform : callable
@@ -611,16 +614,19 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         mu__0  0.06  0.00  0.10  0.21
         mu__1  0.07 -0.16 -0.04  0.06
     """
-    trace = trace_to_dataframe(trace, combined=False)[skip_first:]
-    varnames = get_varnames(trace, varnames)
+    if coords is None:
+        coords = {}
+
+    data = convert_to_xarray(data)
+    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
 
     if batches is None:
-        batches = min([100, len(trace)])
+        batches = min([100, len(data.draw)])
 
-    if circ_varnames is None:
-        circ_varnames = []
+    if circ_var_names is None:
+        circ_var_names = []
     else:
-        circ_varnames = get_varnames(trace, circ_varnames)
+        circ_var_names = get_var_names(data, circ_var_names)
     alpha = 1 - credible_interval
     cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
               'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
@@ -646,24 +652,24 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
             funcs = stat_funcs
 
     var_dfs = []
-    for var in varnames:
-        vals = transform(np.ravel(trace[var].values))
-        if var in circ_varnames:
+    for var_name, selection, value in plotters:
+        vals = transform(np.ravel(value))
+        if var_name in circ_var_names:
             var_df = pd.concat([f(vals) for f in circ_funcs], axis=1)
         else:
             var_df = pd.concat([f(vals) for f in funcs], axis=1)
-        var_df.index = [var]
+        var_df.index = [var_name]
         var_dfs.append(var_df)
     dforg = pd.concat(var_dfs, axis=0)
 
     if (stat_funcs is not None) and (not extend):
         return dforg
-    elif trace.columns.value_counts()[0] < 2:
+    elif len(data.chain) < 2:
         return dforg
     else:
-        n_eff = effective_n(trace, varnames=varnames, round_to=round_to)
-        rhat = gelman_rubin(trace, varnames=varnames, round_to=round_to)
-        return pd.concat([dforg, n_eff, rhat], axis=1, join_axes=[dforg.index])
+        n_eff = effective_n(data, var_names=var_names, round_to=round_to)
+        rhat = gelman_rubin(data, var_names=var_names, round_to=round_to)
+        return pd.concat([dforg, n_eff.n_eff, rhat.r_hat], axis=1, join_axes=[dforg.index])
 
 
 def _mc_error(x, batches=5, circular=False):

@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from .kdeplot import kdeplot
-from ..utils import convert_to_xarray
-from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
+from ..utils import convert_to_xarray, xarray_var_iter, selection_to_string
+from .plot_utils import _scale_text, get_bins, make_label
 
 
 def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,

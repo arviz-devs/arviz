@@ -4,8 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import fftconvolve
 
-from ..utils import convert_to_xarray
-from ..plots.plot_utils import xarray_var_iter, selection_to_string
+from ..utils import convert_to_xarray, xarray_var_iter, selection_to_string
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
@@ -263,7 +262,7 @@ def geweke(trace, var_names=None, first=.1, last=.5, intervals=20):
         geweke.append((var_name, selection_to_string(selection), 
                      _get_geweke(x, first, last, intervals)))
 
-    return pd.DataFrame(geweke, columns=['var_name', 'dimensions', 'r_hat']).set_index('var_name')
+    return pd.DataFrame(geweke, columns=['var_name', 'dimensions', 'geweke']).set_index('var_name')
 
 
 def _get_geweke(x, first=.1, last=.5, intervals=20):
