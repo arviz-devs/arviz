@@ -543,26 +543,23 @@ class PyStanToXarray(Converter):
         dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self.varnames}
         return dtypes
 
-def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
-    """Converts xarray data to an iterator over vectors
 
+def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
+    """Converts xarray data to an iterator over vectors
     Iterates over each var_name and all of its coordinates, returning the 1d
     data
-
     Parameters
     ----------
     data : xarray.Dataset
         Posterior data in an xarray
-
     var_names : iterator of strings (optional)
         Should be a subset of data.data_vars. Defaults to all of them.
-
     combined : bool
         Whether to combine chains or leave them separate
-
     skip_dims : set
         dimensions to not iterate over
-
+    reverse_selections : bool
+        Whether to reverse selections before iterating.
     Returns
     -------
     Iterator of (str, dict(str, any), np.array)
@@ -589,6 +586,9 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None):
             new_dims = set(data[var_name].dims) - skip_dims
             vals = [data[var_name][dim].values for dim in new_dims]
             dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
+            if reverse_selections:
+                dims = reversed(dims)
+
             for selection in dims:
                 yield var_name, selection, data[var_name].sel(**selection).values
 

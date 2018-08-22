@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
+from ..utils import selection_to_string
 
 
 def make_2d(ary):
