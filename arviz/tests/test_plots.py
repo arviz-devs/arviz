@@ -79,8 +79,9 @@ class TestPlots(SetupPlots):
         ppcplot(self.data['y'], self.sample_ppc)
 
     def test_violintraceplot(self):
-        violintraceplot(self.df_trace)
-        violintraceplot(self.short_trace)
+        for obj in (self.short_trace, self.fit):
+            axes = violintraceplot(obj)
+            assert axes.shape == (18,)
 
 
 class TestPosteriorPlot(SetupPlots):
