@@ -120,6 +120,7 @@ def _create_axes_grid(length_plotters, rows, cols, **kwargs):
         ax = ax[:-extra]
     return fig, ax
 
+
 def make_label(var_name, selection):
     """Consistent labelling for plots
 
