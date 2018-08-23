@@ -4,10 +4,10 @@ import numpy as np
 
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 from ..utils.xarray_utils import convert_to_netcdf, get_converter, \
-                                 DictToXarray, PyMC3ToXarray, PyStanToXarray
+                                 DictToNetCDF, PyMC3ToNetCDF, PyStanToNetCDF
 
 
-class CheckXarrayUtils(BaseArvizTest):
+class CheckNetCDFUtils(BaseArvizTest):
 
     def check_varnames_coords_dims(self, varnames, coords, dims):
         expected_varnames = {'mu', 'tau', 'theta_tilde', 'theta'}
@@ -65,7 +65,7 @@ class CheckXarrayUtils(BaseArvizTest):
         assert data.posterior.theta.shape == (self.chains, self.draws, self.data['J'])
 
 
-class TestDictXarrayUtils(CheckXarrayUtils):
+class TestDictNetCDFUtils(CheckNetCDFUtils):
 
     @classmethod
     def setup_class(cls):
@@ -75,10 +75,10 @@ class TestDictXarrayUtils(CheckXarrayUtils):
         cls.draws, cls.chains = 500, 2
         _, stan_fit = load_cached_models(cls.draws, cls.chains)['pystan']
         cls.obj = stan_fit.extract(stan_fit.model_pars, permuted=False)
-        cls.cls = DictToXarray
+        cls.cls = DictToNetCDF
 
 
-class TestPyMC3XarrayUtils(CheckXarrayUtils):
+class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
 
     @classmethod
     def setup_class(cls):
@@ -87,10 +87,10 @@ class TestPyMC3XarrayUtils(CheckXarrayUtils):
         cls.data = eight_schools_params()
         cls.draws, cls.chains = 500, 2
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pymc3']
-        cls.cls = PyMC3ToXarray
+        cls.cls = PyMC3ToNetCDF
 
 
-class TestPyStanXarrayUtils(CheckXarrayUtils):
+class TestPyStanNetCDFUtils(CheckNetCDFUtils):
 
     @classmethod
     def setup_class(cls):
@@ -99,4 +99,4 @@ class TestPyStanXarrayUtils(CheckXarrayUtils):
         cls.data = eight_schools_params()
         cls.draws, cls.chains = 500, 2
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']
-        cls.cls = PyStanToXarray
+        cls.cls = PyStanToNetCDF

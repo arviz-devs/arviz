@@ -11,11 +11,11 @@ from arviz import InferenceData, config
 from arviz.compat import pymc3 as pm
 
 
-def get_converter(obj, filename=None, coords=None, dims=None, chains=None):
+def get_converter(obj, *_, filename=None, coords=None, dims=None, chains=None):
     """Get the converter to transform a supported object to an xarray dataset.
 
     This function sends `obj` to the right conversion function. It is idempotent,
-    in that it will return xarray.Datasets unchanged.
+    in that it will return arviz.InferenceData objects unchanged.
 
     Parameters
     ----------
@@ -33,21 +33,21 @@ def get_converter(obj, filename=None, coords=None, dims=None, chains=None):
 
     Returns
     -------
-    xarray.Dataset
+    InferenceData
         The coordinates are those passed in and ('chain', 'draw')
     """
     if isinstance(obj, dict):
-        return DictToXarray(obj, filename=filename, coords=coords, dims=dims, chains=chains)
+        return DictToNetCDF(obj, filename=filename, coords=coords, dims=dims, chains=chains)
     elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
-        return PyStanToXarray(obj, filename=filename, coords=coords, dims=dims)
+        return PyStanToNetCDF(obj, filename=filename, coords=coords, dims=dims)
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
-        return PyMC3ToXarray(obj, filename=filename, coords=coords, dims=dims)
+        return PyMC3ToNetCDF(obj, filename=filename, coords=coords, dims=dims)
     else:
         raise TypeError('Can only convert PyStan or PyMC3 object to xarray, not {}'.format(
             obj.__class__.__name__))
 
 
-def convert_to_netcdf(obj, filename=None, coords=None, dims=None, chains=None):
+def convert_to_netcdf(obj, *_, filename=None, coords=None, dims=None, chains=None):
     """Convert a supported object to a netCDF dataset
 
     This function sends `obj` to the right conversion function. It is idempotent,
@@ -71,7 +71,7 @@ def convert_to_netcdf(obj, filename=None, coords=None, dims=None, chains=None):
 
     Returns
     -------
-    arviz.InferenceData
+    InferenceData
         This wraps a netCDF datset representing those groups available to the object.
         The coordinates are those passed in and ('chain', 'draw')
     """
@@ -85,10 +85,10 @@ class Converter(ABC):
     def __init__(self, obj, filename=None, coords=None, dims=None):
         self.obj = obj
         if filename is None:
-            directory = '.arviz_data'
+            directory = config['default_data_directory']
             if not os.path.exists(directory):
                 os.mkdir(directory)
-            _, filename = tempfile.mkstemp(prefix='arviz_', dir=config['default_data_directory'], suffix='.nc')
+            _, filename = tempfile.mkstemp(prefix='arviz_', dir=directory, suffix='.nc')
         self.filename = filename
         # pylint: disable=assignment-from-none
         self.varnames, self.coords, self.dims = self.default_varnames_coords_dims(obj, coords, dims)
@@ -127,9 +127,9 @@ class Converter(ABC):
         return
 
 
-class DictToXarray(Converter):
+class DictToNetCDF(Converter):
     def __init__(self, obj, filename=None, coords=None, dims=None, chains=None):
-        """Convert a dict containing posterior samples to an xarray dataset.
+        """Convert a dict containing posterior samples to an InferenceData object.
 
         Parameters
         ----------
@@ -143,10 +143,12 @@ class DictToXarray(Converter):
             A mapping from pystan variables to a tuple corresponding to
             the shape of the variable, where the elements of the tuples are
             the names of the coordinate dimensions.
+        chains : int
+            Number of chains in the numpy array. Defaults to 1.
 
         Returns
         -------
-        xarray.Dataset
+        InferenceData
             The coordinates are those passed in and ('chain', 'draw')
         """
         if chains is None:
@@ -159,6 +161,7 @@ class DictToXarray(Converter):
         super().__init__(obj, filename=filename, coords=coords, dims=dims)
 
     def posterior_to_xarray(self):
+        """Extract posterior data from a dictionary"""
         data = xr.Dataset(coords=self.coords)
         base_dims = ['chain', 'draw']
 
@@ -176,7 +179,6 @@ class DictToXarray(Converter):
                     raise TypeError(self.warning) from exc
                 else:
                     raise exc
-
         return data
 
     @staticmethod
@@ -269,9 +271,9 @@ class DictToXarray(Converter):
         return True, ''
 
 
-class PyMC3ToXarray(Converter):
+class PyMC3ToNetCDF(Converter):
     def __init__(self, trace, filename=None, coords=None, dims=None):
-        """Convert a pymc3 trace to an xarray dataset.
+        """Convert a pymc3 trace to an InferenceData object
 
         Parameters
         ----------
@@ -286,7 +288,7 @@ class PyMC3ToXarray(Converter):
 
         Returns
         -------
-        xarray.Dataset
+        InferenceData
             The coordinates are those passed in and ('chain', 'draw')
         """
         super().__init__(trace, filename=filename, coords=coords, dims=dims)
@@ -302,8 +304,8 @@ class PyMC3ToXarray(Converter):
             sampler_stats[key] = xr.DataArray(vals, coords=coords, dims=dims)
         return sampler_stats
 
-
     def posterior_to_xarray(self):
+        """Extract posterior from PyMC3 trace."""
         varnames, coords, dims = self.varnames, self.coords, self.dims
 
         data = xr.Dataset(coords=coords)
@@ -412,9 +414,9 @@ class PyMC3ToXarray(Converter):
         return True, ''
 
 
-class PyStanToXarray(Converter):
+class PyStanToNetCDF(Converter):
     def __init__(self, fit, filename=None, coords=None, dims=None):
-        """Convert a PyStan StanFit4Model-object to an xarray dataset.
+        """Convert a PyStan StanFit4Model-object to an InferenceData object.
 
         Parameters
         ----------
@@ -429,12 +431,13 @@ class PyStanToXarray(Converter):
 
         Returns
         -------
-        xarray.Dataset
+        InferenceData
             The coordinates are those passed in and ('chain', 'draw')
         """
         super().__init__(fit, filename=filename, coords=coords, dims=dims)
 
     def posterior_to_xarray(self):
+        """Extract posterior data from a pystan fit"""
         fit = self.obj
         dtypes = self.infer_dtypes()
 

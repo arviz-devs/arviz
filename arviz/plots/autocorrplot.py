@@ -12,8 +12,8 @@ def autocorrplot(data, var_names=None, max_lag=100, combined=False,
 
     Parameters
     ----------
-    data : xarray, or object that can be converted (pystan or pymc3 draws)
-        Posterior samples
+    data : inference_data, or object that can be converted (pystan or pymc3 draws)
+        Must contain posterior data
     var_names : list of variable names, optional
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.

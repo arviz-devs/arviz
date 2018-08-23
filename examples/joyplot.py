@@ -8,7 +8,7 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-non_centered_data = az.load_data('data/non_centered_eight.nc')
+non_centered_data = az.load_arviz_data('non_centered_eight')
 fig, axes = az.forestplot(non_centered_data,
                           kind='joyplot',
                           var_names=['theta'],
