@@ -1,14 +1,17 @@
 from abc import ABC, abstractmethod, abstractstaticmethod
-import re
 from copy import deepcopy as copy
+import os
+import re
+import tempfile
 
 import numpy as np
 import xarray as xr
 
+from arviz import InferenceData, config
 from arviz.compat import pymc3 as pm
 
 
-def get_converter(obj, coords=None, dims=None, chains=None):
+def get_converter(obj, filename=None, coords=None, dims=None, chains=None):
     """Get the converter to transform a supported object to an xarray dataset.
 
     This function sends `obj` to the right conversion function. It is idempotent,
@@ -34,25 +37,27 @@ def get_converter(obj, coords=None, dims=None, chains=None):
         The coordinates are those passed in and ('chain', 'draw')
     """
     if isinstance(obj, dict):
-        return DictToXarray(obj, coords, dims, chains=chains)
+        return DictToXarray(obj, filename=filename, coords=coords, dims=dims, chains=chains)
     elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
-        return PyStanToXarray(obj, coords, dims)
+        return PyStanToXarray(obj, filename=filename, coords=coords, dims=dims)
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
-        return PyMC3ToXarray(obj, coords, dims)
+        return PyMC3ToXarray(obj, filename=filename, coords=coords, dims=dims)
     else:
         raise TypeError('Can only convert PyStan or PyMC3 object to xarray, not {}'.format(
             obj.__class__.__name__))
 
 
-def convert_to_xarray(obj, coords=None, dims=None, chains=None):
-    """Convert a supported object to an xarray dataset.
+def convert_to_netcdf(obj, filename=None, coords=None, dims=None, chains=None):
+    """Convert a supported object to a netCDF dataset
 
     This function sends `obj` to the right conversion function. It is idempotent,
-    in that it will return xarray.Datasets unchanged.
+    in that it will return `arviz.InferenceData` unchanged.
 
     Parameters
     ----------
     obj : A dict, or an object from PyStan or PyMC3 to convert
+    filename : str
+        Location to store the netCDF dataset
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -66,25 +71,52 @@ def convert_to_xarray(obj, coords=None, dims=None, chains=None):
 
     Returns
     -------
-    xarray.Dataset
+    arviz.InferenceData
+        This wraps a netCDF datset representing those groups available to the object.
         The coordinates are those passed in and ('chain', 'draw')
     """
-    if isinstance(obj, xr.Dataset):
+    if isinstance(obj, InferenceData):
         return obj
     else:
-        return get_converter(obj, coords=coords, dims=dims, chains=chains).to_xarray()
+        return get_converter(obj, filename=filename, coords=coords, dims=dims, chains=chains).to_netcdf()
 
 
 class Converter(ABC):
-    def __init__(self, obj, coords=None, dims=None):
+    def __init__(self, obj, filename=None, coords=None, dims=None):
         self.obj = obj
+        if filename is None:
+            directory = '.arviz_data'
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+            _, filename = tempfile.mkstemp(prefix='arviz_', dir=config['default_data_directory'], suffix='.nc')
+        self.filename = filename
         # pylint: disable=assignment-from-none
         self.varnames, self.coords, self.dims = self.default_varnames_coords_dims(obj, coords, dims)
         self.verified, self.warning = self.verify_coords_dims()
+        self.converters = {
+            'posterior': 'posterior_to_xarray',
+            'sample_stats': 'sample_stats_to_xarray',
+        }
 
-    @abstractmethod
-    def to_xarray(self):
-        pass
+    def to_netcdf(self):
+        has_group = False
+        mode = 'w' # overwrite first, then append
+        for group, func_name in self.converters.items():
+            if hasattr(self, func_name):
+                data = getattr(self, func_name)()
+                try:
+                    data.to_netcdf(self.filename, mode=mode, group=group)
+                except PermissionError as err:
+                    msg = 'File "{}" is in use - is another object using it?'.format(self.filename)
+                    raise PermissionError(msg) from err
+                has_group = True
+                mode = 'a'
+        if not has_group:
+            msg = ('{} has no functions creating groups! Must implement one of '
+                   'the following functions:\n{}'.format(
+                       self.__class__.__name__, '\n'.join(self.converters.values())))
+            raise RuntimeError(msg)
+        return InferenceData(self.filename)
 
     @abstractstaticmethod
     def default_varnames_coords_dims(obj, coords, dims):  # pylint: disable=unused-argument
@@ -96,7 +128,7 @@ class Converter(ABC):
 
 
 class DictToXarray(Converter):
-    def __init__(self, obj, coords=None, dims=None, chains=None):
+    def __init__(self, obj, filename=None, coords=None, dims=None, chains=None):
         """Convert a dict containing posterior samples to an xarray dataset.
 
         Parameters
@@ -124,9 +156,9 @@ class DictToXarray(Converter):
             coords = {}
 
         coords['chain'] = np.arange(chains)
-        super().__init__(obj, coords=coords, dims=dims)
+        super().__init__(obj, filename=filename, coords=coords, dims=dims)
 
-    def to_xarray(self):
+    def posterior_to_xarray(self):
         data = xr.Dataset(coords=self.coords)
         base_dims = ['chain', 'draw']
 
@@ -149,7 +181,7 @@ class DictToXarray(Converter):
 
     @staticmethod
     def default_varnames_coords_dims(obj, coords, dims):
-        """Set up varnames, coordinates, and dimensions for .to_xarray function
+        """Set up varnames, coordinates, and dimensions for .posterior_to_xarray function
 
         obj : dict[str, iterable]
         coords : dict[str, iterable]
@@ -238,7 +270,7 @@ class DictToXarray(Converter):
 
 
 class PyMC3ToXarray(Converter):
-    def __init__(self, trace, coords=None, dims=None):
+    def __init__(self, trace, filename=None, coords=None, dims=None):
         """Convert a pymc3 trace to an xarray dataset.
 
         Parameters
@@ -257,9 +289,21 @@ class PyMC3ToXarray(Converter):
         xarray.Dataset
             The coordinates are those passed in and ('chain', 'draw')
         """
-        super().__init__(trace, coords=coords, dims=dims)
+        super().__init__(trace, filename=filename, coords=coords, dims=dims)
 
-    def to_xarray(self):
+    def sample_stats_to_xarray(self):
+        """Extract sampler statistics from PyMC3 trace."""
+        dims = ['chain', 'draw']
+        coords = {d: self.coords[d] for d in dims}
+
+        sampler_stats = xr.Dataset(coords=coords)
+        for key in sorted(self.obj.stat_names):
+            vals = np.array(self.obj.get_sampler_stats(key, combine=False, squeeze=False))
+            sampler_stats[key] = xr.DataArray(vals, coords=coords, dims=dims)
+        return sampler_stats
+
+
+    def posterior_to_xarray(self):
         varnames, coords, dims = self.varnames, self.coords, self.dims
 
         data = xr.Dataset(coords=coords)
@@ -282,7 +326,7 @@ class PyMC3ToXarray(Converter):
 
     @staticmethod
     def default_varnames_coords_dims(obj, coords, dims):
-        """Set up varnames, coordinates, and dimensions for .to_xarray function
+        """Set up varnames, coordinates, and dimensions for .posterior_to_xarray function
 
         obj : pymc3 trace
         coords : dict[str, iterable]
@@ -369,7 +413,7 @@ class PyMC3ToXarray(Converter):
 
 
 class PyStanToXarray(Converter):
-    def __init__(self, fit, coords=None, dims=None):
+    def __init__(self, fit, filename=None, coords=None, dims=None):
         """Convert a PyStan StanFit4Model-object to an xarray dataset.
 
         Parameters
@@ -388,9 +432,9 @@ class PyStanToXarray(Converter):
         xarray.Dataset
             The coordinates are those passed in and ('chain', 'draw')
         """
-        super().__init__(fit, coords=coords, dims=dims)
+        super().__init__(fit, filename=filename, coords=coords, dims=dims)
 
-    def to_xarray(self):
+    def posterior_to_xarray(self):
         fit = self.obj
         dtypes = self.infer_dtypes()
 
@@ -417,7 +461,7 @@ class PyStanToXarray(Converter):
 
     @staticmethod
     def default_varnames_coords_dims(obj, coords, dims):
-        """Set up varnames, coordinates, and dimensions for .to_xarray function
+        """Set up varnames, coordinates, and dimensions for .posterior_to_xarray function
 
         obj : StanFit4Model
         coords : dict[str, iterable]

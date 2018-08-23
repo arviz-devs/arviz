@@ -350,7 +350,7 @@ def save_data(data, filename='posterior.nc'):
     Parameters
     ----------
     data : xarray.Dataset
-        Posterior samples. Use arviz.convert_to_xarray to turn samples from
+        Posterior samples. Use arviz.convert_to_netcdf to turn samples from
         other libraries into xarray.
     filename : str
         name or path of the file to save data

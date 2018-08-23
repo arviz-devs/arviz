@@ -4,15 +4,16 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from .helpers import eight_schools_params, load_cached_models
+from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
 
-class SetupPlots():
+class SetupPlots(BaseArvizTest):
 
     @classmethod
     def setup_class(cls):
+        super().setup_class()
         cls.data = eight_schools_params()
         models = load_cached_models(draws=500, chains=2)
         model, cls.short_trace = models['pymc3']
@@ -22,6 +23,7 @@ class SetupPlots():
         cls.df_trace = DataFrame({'a': np.random.poisson(2.3, 100)})
 
     def teardown_method(self):
+        super().teardown_method()
         plt.close('all')
 
 
