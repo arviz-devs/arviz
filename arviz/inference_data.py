@@ -2,7 +2,7 @@ import netCDF4 as nc
 import xarray as xr
 
 
-class InferenceData(object):
+class InferenceData():
     """Container for accessing netCDF files using xarray."""
 
     def __init__(self, filename):

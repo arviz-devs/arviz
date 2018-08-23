@@ -78,7 +78,11 @@ def convert_to_netcdf(obj, *_, filename=None, coords=None, dims=None, chains=Non
     if isinstance(obj, InferenceData):
         return obj
     else:
-        return get_converter(obj, filename=filename, coords=coords, dims=dims, chains=chains).to_netcdf()
+        return get_converter(obj,
+                             filename=filename,
+                             coords=coords,
+                             dims=dims,
+                             chains=chains).to_netcdf()
 
 
 class Converter(ABC):

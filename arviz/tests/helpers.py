@@ -12,7 +12,7 @@ import pystan
 import arviz
 
 
-class BaseArvizTest(object):
+class BaseArvizTest():
     @classmethod
     def setup_class(cls):
         cls.default_data_directory = arviz.config['default_data_directory']
