@@ -29,7 +29,7 @@ Contributions and issue reports are very welcome at `the github repository
 
    installation
    Current Roadmap<roadmap>
-   Example Gallery<examples>
+   Example Gallery<examples/index>
    Quickstart<notebooks/Introduction>
    api
    about

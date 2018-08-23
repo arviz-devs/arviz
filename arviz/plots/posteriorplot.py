@@ -89,7 +89,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), rope=(-1, 1))
+        >>> az.posteriorplot(non_centered, var_names=("mu", 'theta_tilde',), rope=(-1, 1))
 
     Plot Region of Practical Equivalence for selected distributions
 
