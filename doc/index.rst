@@ -14,14 +14,16 @@ ArviZ: Exploratory analysis of Bayesian models
 ArviZ includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
 
 It is currently in heavy development.  The goal is to provide backend-agnostic tools
-for Bayesian inference in Python. Currently `PyMC3
-<http://docs.pymc.io/>`_ is best supported,
-though many functions will work if the samples are stored in a pandas dataframe, and active work is being
-done to support `PyStan
-<https://pystan.readthedocs.io/en/latest/>`_ as well.
+for diagnostics and visualizations of Bayesian inference in Python, by first
+converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
 
-Contributions and issue reports are very welcome at `the github repository
-<https://github.com/arviz-devs/arviz>`_.
+Currently `PyMC3 <http://docs.pymc.io/>`_ and
+`PyStan <https://pystan.readthedocs.io/en/latest/>`_ are best supported, but
+support for PyMC4, TensorFlow Probability, Pyro, Edward2, and Edward are on the
+roadmap.
+
+Contributions and issue reports are very welcome at
+`the github repository <https://github.com/arviz-devs/arviz>`_.
 
 
 .. toctree::
