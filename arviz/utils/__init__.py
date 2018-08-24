@@ -2,4 +2,4 @@ from .utils import (trace_to_dataframe, get_stats, expand_variable_names, get_va
                     _create_flat_names, log_post_trace, save_data, load_data,
                     save_trace, load_trace, untransform_varnames, load_arviz_data)
 
-from .xarray_utils import convert_to_xarray
+from .xarray_utils import convert_to_xarray, xarray_var_iter, selection_to_string

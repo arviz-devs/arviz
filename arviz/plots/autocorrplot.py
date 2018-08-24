@@ -1,7 +1,7 @@
 import numpy as np
 
-from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
-from ..utils import convert_to_xarray
+from .plot_utils import _scale_text, default_grid, make_label, _create_axes_grid
+from ..utils import convert_to_xarray, xarray_var_iter
 from ..stats.diagnostics import autocorr
 
 

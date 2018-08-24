@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 from ..stats.diagnostics import _get_neff, _get_rhat
 from ..stats import hpd
-from .plot_utils import _scale_text, xarray_var_iter, make_label
-from ..utils import convert_to_xarray
+from .plot_utils import _scale_text, make_label
+from ..utils import convert_to_xarray, xarray_var_iter
 from .kdeplot import fast_kde
 
 

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
 from ..stats import hpd
-from ..utils import convert_to_xarray
-from .plot_utils import _scale_text, make_label, xarray_var_iter
+from ..utils import convert_to_xarray, xarray_var_iter
+from .plot_utils import _scale_text, make_label
 
 
 def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
