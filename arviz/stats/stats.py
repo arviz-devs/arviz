@@ -7,7 +7,7 @@ from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
 from ..utils import (get_stats, get_varnames, trace_to_dataframe, log_post_trace,
-                     convert_to_xarray, xarray_var_iter, selection_to_string)
+                     convert_to_xarray, xarray_var_iter)
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
@@ -536,8 +536,9 @@ def r2_score(y_true, y_pred, round_to=2):
                      index=['r2', 'r2_std']).round(decimals=round_to)
 
 
-def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x, circ_var_names=None,
-            stat_funcs=None, extend=False, credible_interval=0.94, skip_first=0, batches=None):
+def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x,
+            circ_var_names=None, stat_funcs=None, extend=False, credible_interval=0.94,
+            batches=None):
     R"""
     Create a data frame with summary statistics.
 
@@ -576,8 +577,6 @@ def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
     batches : None or int
         Batch size for calculating standard deviation for non-independent samples. Defaults to the
         smaller of 100 or the number of samples. This is only meaningful when `stat_funcs` is None.
@@ -626,7 +625,7 @@ def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x
     if circ_var_names is None:
         circ_var_names = []
     else:
-        circ_var_names = get_var_names(data, circ_var_names)
+        circ_var_names = get_varnames(data, circ_var_names)
     alpha = 1 - credible_interval
     cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
               'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
@@ -652,7 +651,7 @@ def summary(data, var_names=None, coords=None, round_to=2, transform=lambda x: x
             funcs = stat_funcs
 
     var_dfs = []
-    for var_name, selection, value in plotters:
+    for var_name, _, value in plotters:
         vals = transform(np.ravel(value))
         if var_name in circ_var_names:
             var_df = pd.concat([f(vals) for f in circ_funcs], axis=1)
