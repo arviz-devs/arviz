@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
 from .kdeplot import kdeplot
-from ..utils import convert_to_xarray
+from ..utils import convert_to_netcdf
 from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
@@ -41,7 +41,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     ax_hist_y : matplotlib axes, y (right) distribution
     """
 
-    data = convert_to_xarray(data)
+    data = convert_to_netcdf(data).posterior
     if coords is None:
         coords = {}
 

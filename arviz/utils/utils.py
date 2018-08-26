@@ -7,7 +7,8 @@ import re
 
 import numpy as np
 import pandas as pd
-import xarray as xr
+
+from arviz import InferenceData
 
 
 def _has_type(object_, typename, module_path):
@@ -343,31 +344,16 @@ def load_trace(filepath, combined=False):
     return df
 
 
-def save_data(data, filename='posterior.nc'):
-    """
-    Save posterior samples to a netcdf file.
-
-    Parameters
-    ----------
-    data : xarray.Dataset
-        Posterior samples. Use arviz.convert_to_xarray to turn samples from
-        other libraries into xarray.
-    filename : str
-        name or path of the file to save data
-    """
-    return data.to_netcdf(filename)
-
-
 def load_data(filename):
     """
-    Load netcdf file back into an xarray.Dataset
+    Load netcdf file back into an arviz.InferenceData
 
     Parameters
     ----------
     filename : str
         name or path of the file to load trace
     """
-    return xr.open_dataset(filename)
+    return InferenceData(filename)
 
 
 def load_arviz_data(dataset):
@@ -382,7 +368,7 @@ def load_arviz_data(dataset):
 
     Returns
     -------
-    xr.Dataset
+    InferenceData
     """
     top = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     data_path = os.path.join(top, 'doc', 'data')
@@ -403,7 +389,7 @@ def load_arviz_data(dataset):
         }
     }
     if dataset in datasets_available:
-        return xr.open_dataset(datasets_available[dataset]['path'])
+        return InferenceData(datasets_available[dataset]['path'])
     else:
         msg = ['\'dataset\' must be one of the following options:']
         for key, value in sorted(datasets_available.items()):

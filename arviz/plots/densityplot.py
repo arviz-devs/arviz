@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
 from ..stats import hpd
-from ..utils import convert_to_xarray
+from ..utils import convert_to_netcdf
 from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 
 def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
                 point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
-                bw=4.5, figsize=None, textsize=None, skip_first=0):
+                bw=4.5, figsize=None, textsize=None):
     """
     Generates KDE plots for continuous variables and histograms for discretes ones.
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -51,8 +51,6 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
         Figure size. If None, size is (6, number of variables * 2)
     textsize: int
         Text size for labels and legend. If None it will be autoscaled based on figsize.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
 
     Returns
     -------
@@ -61,10 +59,10 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
 
     """
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_xarray(data)]
+        datasets = [convert_to_netcdf(data)]
     else:
-        datasets = [convert_to_xarray(d) for d in data]
-    datasets = [data.where(data.draw >= skip_first).dropna('draw') for data in datasets]
+        datasets = [convert_to_netcdf(d) for d in data]
+    datasets = [data.posterior for data in datasets]
 
     if point_estimate not in ('mean', 'median', None):
         raise ValueError(

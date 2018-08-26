@@ -1,10 +1,34 @@
 import os
 import pickle
+import shutil
 import sys
+import tempfile
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import pystan
+
+import arviz
+
+
+class BaseArvizTest():
+    @classmethod
+    def setup_class(cls):
+        cls.default_data_directory = arviz.config['default_data_directory']
+        cls.tempdir = tempfile.mkdtemp()
+        arviz.config['default_data_directory'] = cls.tempdir
+
+    @classmethod
+    def teardown_class(cls):
+        arviz.config['default_data_directory'] = cls.default_data_directory
+        shutil.rmtree(cls.tempdir)
+
+    def setup_method(self):
+        np.random.seed(1)
+
+    def teardown_method(self):
+        plt.close('all')
 
 
 def eight_schools_params():

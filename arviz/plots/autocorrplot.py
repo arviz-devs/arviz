@@ -1,19 +1,19 @@
 import numpy as np
 
 from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
-from ..utils import convert_to_xarray
+from ..utils import convert_to_netcdf
 from ..stats.diagnostics import autocorr
 
 
-def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
+def autocorrplot(data, var_names=None, max_lag=100, combined=False,
                  figsize=None, textsize=None):
     """
     Bar plot of the autocorrelation function for a posterior.
 
     Parameters
     ----------
-    posterior : xarray, or object that can be converted (pystan or pymc3 draws)
-        Posterior samples
+    data : inference_data, or object that can be converted (pystan or pymc3 draws)
+        Must contain posterior data
     var_names : list of variable names, optional
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.
@@ -32,7 +32,7 @@ def autocorrplot(posterior, var_names=None, max_lag=100, combined=False,
     -------
     axes : matplotlib axes
     """
-    data = convert_to_xarray(posterior)
+    data = convert_to_netcdf(data).posterior
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

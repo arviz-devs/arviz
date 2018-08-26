@@ -8,8 +8,8 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-centered_data = az.load_data('data/centered_eight.nc')
-non_centered_data = az.load_data('data/non_centered_eight.nc')
+centered_data = az.load_arviz_data('centered_eight')
+non_centered_data = az.load_arviz_data('non_centered_eight')
 fig, axes = az.forestplot([centered_data, non_centered_data],
                           model_names=['Centered', 'Non Centered'],
                           var_names=['mu'])

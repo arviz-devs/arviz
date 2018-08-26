@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from .kdeplot import fast_kde
 from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
 from ..stats import hpd
-from ..utils import convert_to_xarray
+from ..utils import convert_to_netcdf
 
 
 def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
@@ -18,7 +18,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
     Parameters
     ----------
-    data : xarray, or object that can be converted (pystan or pymc3 draws)
+    data : InferenceData, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
     var_names: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
@@ -50,7 +50,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
     """
 
-    data = convert_to_xarray(data)
+    data = convert_to_netcdf(data).posterior
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:
@@ -94,7 +94,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
 def _violinplot(val, shade, bw, ax, **kwargs_shade):
     """
-    Auxiliar function to plot violinplots
+    Auxiliary function to plot violinplots
     """
     density, low_b, up_b = fast_kde(val, bw=bw)
     x = np.linspace(low_b, up_b, len(density))
