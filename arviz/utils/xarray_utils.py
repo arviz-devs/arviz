@@ -440,6 +440,49 @@ class PyStanToNetCDF(Converter):
         """
         super().__init__(fit, filename=filename, coords=coords, dims=dims)
 
+    def sample_stats_to_xarray(self):
+        """Extract sampler statistics from PyStan fit."""
+        dims = ['chain', 'draw']
+        coords = {d: self.coords[d] for d in dims}
+
+        sample_stats_list = self.obj.get_sampler_params(inc_warmup=False)
+        sample_stats_keys = list(sample_stats_list[0].keys()) + ['lp__']
+        sample_stats_keys = sorted(sample_stats_keys)
+
+        dtypes = {
+            'divergent__' : bool,
+            'n_leapfrog__' : np.int64,
+            'treedepth__' : np.int64,
+        }
+
+        rename_key = {
+            'accept_stat__' : 'accept_stat',
+            'divergent__' : 'diverging',
+            'energy__' : 'energy',
+            'lp__' : 'lp',
+            'n_leapfrog__' : 'n_leapfrog',
+            'stepsize__' : 'stepsize',
+            'treedepth__' : 'treedepth',
+        }
+
+        sampler_stats = xr.Dataset(coords=coords)
+        for key in sorted(sample_stats_keys):
+            if key != 'lp__':
+                vals_list = []
+                for sample_stats_dict in sample_stats_list:
+                    vals = sample_stats_dict[key]
+                    vals = vals.astype(dtypes.get(key, np.float64))
+                    vals_list.append(vals)
+                vals = np.vstack(vals_list)
+            else:
+                vals = self.obj.extract(pars=['lp__'], permuted=False)
+                vals = vals['lp__']
+                vals = vals.T
+            # remove __ from end
+            key = rename_key.get(key, re.sub('__$', "", key))
+            sampler_stats[key] = xr.DataArray(vals, coords=coords, dims=dims)
+        return sampler_stats
+
     def posterior_to_xarray(self):
         """Extract posterior data from a pystan fit"""
         fit = self.obj
@@ -498,20 +541,14 @@ class PyStanToNetCDF(Converter):
 
         if dims is None:
             dims = {}
-        extract = obj.extract(varnames, permuted=False)
-        for varname, vals in extract.items():
+        for varname, dim in zip(obj.sim['pars_oi'], obj.sim['dims_oi']):
             if varname not in dims:
-                if len(vals.shape) == 1:
-                    vals = np.expand_dims(vals, axis=1)
-                vals = np.swapaxes(vals, 0, 1)
-                shape_len = len(vals.shape)
-                if shape_len == 2:
-                    dims[varname] = []
-                else:
-                    dims[varname] = [
-                        "{}_dim_{}".format(varname, idx)
-                        for idx in range(1, shape_len-2+1)
-                    ]
+                if varname == 'lp__':
+                    continue
+                dims[varname] = [
+                    "{}_dim_{}".format(varname, idx)
+                    for idx in range(1, len(dim)+1)
+                ]
 
         return varnames, coords, dims
 
@@ -527,10 +564,12 @@ class PyStanToNetCDF(Converter):
         """
         fit = self.obj
         if fit.mode == 1:
-            return "Stan model '{}' is of mode 'test_grad';\n"\
-                "sampling is not conducted.".format(fit.model_name)
+            msg = "Stan model '{}' is of mode 'test_grad';\n"\
+                  "sampling is not conducted.".format(fit.model_name)
+            return False, msg
         elif fit.mode == 2:
-            return "Stan model '{}' does not contain samples.".format(fit.model_name)
+            msg = "Stan model '{}' does not contain samples.".format(fit.model_name)
+            return False, msg
 
         inferred_coords = copy(self.coords)
         inferred_dims = copy(self.dims)
