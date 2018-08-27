@@ -42,9 +42,9 @@ Contributions and issue reports are very welcome at
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/joyplot.html">
+            <a href="examples/ridgeplot.html">
             <div class="col-md-4 thumbnail">
-                <img src="_static/joyplot_thumb.png">
+                <img src="_static/ridgeplot_thumb.png">
             </div>
             </a>
             <a href="examples/parallelplot.html">

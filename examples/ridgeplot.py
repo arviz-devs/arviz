@@ -1,5 +1,5 @@
 """
-Joyplot
+Ridgeplot
 =======
 
 _thumb: .8, .5
@@ -10,11 +10,11 @@ az.style.use('arviz-darkgrid')
 
 non_centered_data = az.load_arviz_data('non_centered_eight')
 fig, axes = az.forestplot(non_centered_data,
-                          kind='joyplot',
+                          kind='ridgeplot',
                           var_names=['theta'],
                           combined=True,
                           textsize=11,
-                          joyplot_overlap=3,
+                          ridgeplot_overlap=3,
                           colors='white',
                           r_hat=False,
                           n_eff=False)

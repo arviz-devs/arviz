@@ -51,7 +51,7 @@ class TestPlots(SetupPlots):
             assert axes.shape == (2,)
             _, axes = forestplot(obj, var_names=['mu'], colors='C0', n_eff=False, combined=True)
             assert axes.shape == (2,)
-            _, axes = forestplot(obj, kind='joyplot', r_hat=False, n_eff=False)
+            _, axes = forestplot(obj, kind='ridgeplot', r_hat=False, n_eff=False)
             assert axes.shape == (1,)
 
     def test_energyplot(self):
