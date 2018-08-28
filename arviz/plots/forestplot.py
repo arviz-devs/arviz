@@ -20,8 +20,8 @@ def pairwise(iterable):
 
 def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
                credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
-               textsize=None, linewidth=None, markersize=None, joyplot_alpha=None,
-               joyplot_overlap=2, figsize=None):
+               textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
+               ridgeplot_overlap=2, figsize=None):
     """
     Forest plot
 
@@ -33,7 +33,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     data : xarray.Dataset or list of compatible
         Samples from a model posterior
     kind : str
-        Choose kind of plot for main axis. Supports "forestplot" or "joyplot"
+        Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot"
     model_names : list[str], optional
         List with names for the models in the list of data. Useful when
         plotting more that one dataset
@@ -63,11 +63,11 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
         Line width throughout. If None it will be autoscaled based on figsize.
     markersize : int
         Markersize throughout. If None it will be autoscaled based on figsize.
-    joyplot_alpha : float
-        Transparency for joyplot fill.  If 0, border is colored by model, otherwise
+    ridgeplot_alpha : float
+        Transparency for ridgeplot fill.  If 0, border is colored by model, otherwise
         a black outline is used.
-    joyplot_overlap : float
-        Overlap height for joyplots.
+    ridgeplot_overlap : float
+        Overlap height for ridgeplots.
     figsize : tuple, optional
         Figure size. Defaults to None
 
@@ -111,11 +111,11 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     if kind == 'forestplot':
         plot_handler.forestplot(credible_interval, quartiles, textsize,
                                 linewidth, markersize, axes[0])
-    elif kind == 'joyplot':
-        plot_handler.joyplot(joyplot_overlap, textsize, linewidth, joyplot_alpha, axes[0])
+    elif kind == 'ridgeplot':
+        plot_handler.ridgeplot(ridgeplot_overlap, textsize, linewidth, ridgeplot_alpha, axes[0])
     else:
         raise TypeError("Argument 'kind' must be one of 'forestplot' or "
-                        "'joyplot' (you provided {})".format(kind))
+                        "'ridgeplot' (you provided {})".format(kind))
 
     idx = 1
     if r_hat:
@@ -145,8 +145,8 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     axes[0].set_yticklabels(labels)
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
-    if kind == 'joyplot':  # space at the top
-        y_max += joyplot_overlap
+    if kind == 'ridgeplot':  # space at the top
+        y_max += ridgeplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
 
     return fig, axes
@@ -205,12 +205,12 @@ class PlotHandler():
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def joyplot(self, mult, textsize, linewidth, alpha, ax):
+    def ridgeplot(self, mult, textsize, linewidth, alpha, ax):
         if alpha is None:
             alpha = 1.
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, color in plotter.joyplot(mult):
+            for x, y_min, y_max, color in plotter.ridgeplot(mult):
                 if alpha == 0:
                     border = color
                 else:
@@ -223,6 +223,7 @@ class PlotHandler():
         ax.tick_params(labelsize=textsize)
 
         return ax
+
     def forestplot(self, credible_interval, quartiles, textsize, linewidth, markersize, ax):
         # Quantiles to be calculated
         endpoint = 100 * (1 - credible_interval) / 2
@@ -371,7 +372,7 @@ class VarHandler():
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
             yield y, ntiles, color
 
-    def joyplot(self, mult):
+    def ridgeplot(self, mult):
         xvals, yvals, pdfs, colors = [], [], [], []
         for y, _, values, color in self.iterator():
             yvals.append(y)
