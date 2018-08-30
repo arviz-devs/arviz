@@ -308,7 +308,7 @@ class ExampleGenerator(object):
                 "\n\n"
                 "".format(self.htmlfilename,
                           self.thumbfilename,
-                          self.plotfunc))
+                          self.sphinxtag))
 
 
 def main(app):
