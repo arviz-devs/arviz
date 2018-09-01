@@ -129,6 +129,33 @@ class requires: # pylint: disable=invalid-name
 
 
 def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
+    """Convert a numpy array to an xarray.DataArray.
+
+    The first two dimensions will be (chain, draw), and any remaining
+    dimensions will be "shape".
+    If the numpy array is 1d, this dimension is interpreted as draw
+    If the numpy array is 2d, it is interpreted as (chain, draw)
+    If the numpy array is 3 or more dimensions, the last dimensions are kept as shapes.
+
+    Parameters
+    ----------
+    ary : np.ndarray
+        A numpy array. If it has 2 or more dimensions, the first dimension should be
+        independent chains from a simulation. Use `np.expand_dims(ary, 0)` to add a
+        single dimension to the front if there is only 1 chain.
+    var_name : str
+        If there are no dims passed, this string is used to name dimensions
+    coords : dict[str, iterable]
+        A dictionary containing the values that are used as index. The key
+        is the name of the dimension, the values are the index values.
+    dims : List(str)
+        A list of coordinate names for the variable
+
+    Returns
+    -------
+    xr.DataArray
+        Will have the same data as passed, but with coordinates and dimensions
+    """
     default_dims = ['chain', 'draw']
     if dims is None:
         can_squeeze = False
@@ -144,6 +171,7 @@ def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
         coords = {}
         dims = default_dims
         if can_squeeze and len(shape) == 1 and shape[0] == 1:
+            # this means I added dimensions to the passed shape, and can remove them
             ary = np.squeeze(ary, axis=-1)
         else:
             for idx, dim_len in enumerate(shape):
@@ -154,6 +182,7 @@ def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
         coords = dict(coords)
         if dims[:2] != default_dims:
             dims = default_dims + dims
+
     n_chains, n_samples, *_ = ary.shape
     if 'chain' not in coords:
         coords['chain'] = np.arange(n_chains)
