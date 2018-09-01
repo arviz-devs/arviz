@@ -1,7 +1,7 @@
 import numpy as np
 
 from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
-from ..utils import convert_to_netcdf
+from ..utils import convert_to_dataset
 from ..stats.diagnostics import autocorr
 
 
@@ -32,7 +32,7 @@ def autocorrplot(data, var_names=None, max_lag=100, combined=False,
     -------
     axes : matplotlib axes
     """
-    data = convert_to_netcdf(data).posterior
+    data = convert_to_dataset(data, 'posterior')
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

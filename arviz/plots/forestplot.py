@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from ..stats.diagnostics import _get_neff, _get_rhat
 from ..stats import hpd
 from .plot_utils import _scale_text, xarray_var_iter, make_label
-from ..utils import convert_to_netcdf
+from ..utils import convert_to_dataset
 from .kdeplot import fast_kde
 
 
@@ -158,7 +158,7 @@ class PlotHandler():
             data = [data]
 
         # y-values upside down
-        self.data = [convert_to_netcdf(datum).posterior for datum in reversed(data)]
+        self.data = [convert_to_dataset(datum, 'posterior') for datum in reversed(data)]
 
         if model_names is None:
             if len(self.data) > 1:

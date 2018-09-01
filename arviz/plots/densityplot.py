@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from .kdeplot import fast_kde
 from ..stats import hpd
-from ..utils import convert_to_netcdf
+from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 
@@ -59,10 +59,9 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
 
     """
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_netcdf(data)]
+        datasets = [convert_to_dataset(data, 'posterior')]
     else:
-        datasets = [convert_to_netcdf(d) for d in data]
-    datasets = [data.posterior for data in datasets]
+        datasets = [convert_to_dataset(d, 'posterior') for d in data]
 
     if point_estimate not in ('mean', 'median', None):
         raise ValueError(

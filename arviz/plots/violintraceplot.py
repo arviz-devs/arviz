@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from .kdeplot import fast_kde
 from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
 from ..stats import hpd
-from ..utils import convert_to_netcdf
+from ..utils import convert_to_dataset
 
 
 def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
@@ -50,7 +50,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
     """
 
-    data = convert_to_netcdf(data).posterior
+    data = convert_to_dataset(data, 'posterior')
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:

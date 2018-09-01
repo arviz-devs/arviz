@@ -5,7 +5,7 @@ import xarray as xr
 class InferenceData():
     """Container for accessing netCDF files using xarray."""
 
-    def __init__(self, filename):
+    def __init__(self, *_, **kwargs):
         """Attach to a netcdf file.
 
         This will inspect the netcdf for the available groups, so that they can be
@@ -16,25 +16,33 @@ class InferenceData():
         filename : str
             netcdf4 file that contains groups for accessing with xarray.
         """
-        if filename == '':  # netcdf freezes in this case
-            raise FileNotFoundError("No such file b''")
-        self._filename = filename
-        self._nc_dataset = nc.Dataset(filename, mode='r')
-        self._groups = self._nc_dataset.groups
+        self._groups = []
+        for key, dataset in kwargs.items():
+            if dataset is None:
+                continue
+            elif not isinstance(dataset, xr.Dataset):
+                raise ValueError('Arguments to InferenceData must be xarray Datasets '
+                                 '(argument "{}" was type "{}")'.format(key, type(dataset)))
+            setattr(self, key, dataset)
+            self._groups.append(key)
 
     def __repr__(self):
-        return 'Inference data from "{filename}" with groups:\n\t> {options}'.format(
-            filename=self._filename,
+        return 'Inference data with groups:\n\t> {options}'.format(
             options='\n\t> '.join(self._groups)
         )
 
-    def __getattr__(self, name):
-        """Lazy load xarray DataSets when they are requested"""
-        if name in self._groups:
-            setattr(self, name, xr.open_dataset(self._filename, group=name))
-            return getattr(self, name)
-        return self.__getattribute__(name)
+    @staticmethod
+    def from_netcdf(filename):
+        groups = {}
+        for group in nc.Dataset(filename, mode='r').groups:
+            groups[group] = xr.open_dataset(filename, group=group)
+        return InferenceData(**groups)
 
-    def __dir__(self):
-        """Enable tab-completion in iPython and Jupyter environments"""
-        return super(InferenceData, self).__dir__() + list(self._groups.keys())
+    def to_netcdf(self, filename):
+        mode = 'w' # overwrite first, then append
+        for group in self._groups:
+            data = getattr(self, group)
+            data.to_netcdf(filename, mode=mode, group=group)
+            data.close()
+            mode = 'a'
+        return filename
