@@ -8,7 +8,7 @@ import re
 import numpy as np
 import pandas as pd
 
-from arviz import InferenceData
+from ..inference_data import InferenceData
 
 
 def _has_type(object_, typename, module_path):
@@ -115,19 +115,19 @@ def expand_variable_names(trace, varnames):
 
 def get_stats(trace, stat=None, combined=True):
     """
-    get sampling statistics from trace
+    Get sampling statistics from trace
 
     Parameters
     ----------
     trace : Posterior sample
         Pandas DataFrame or PyMC3 trace
-    stats : string
+    stat : string
         Statistics
     combined : Bool
         If True multiple statistics from different chains will be combined together.
     Returns
     ----------
-    stat: array with the choosen statistic
+    stat: array with the chosen statistic
     """
     if _has_type(trace, typename="MultiTrace", module_path="pymc3.backends.base"):
         try:
