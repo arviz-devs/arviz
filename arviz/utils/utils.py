@@ -389,7 +389,7 @@ def load_arviz_data(dataset):
         }
     }
     if dataset in datasets_available:
-        return InferenceData(datasets_available[dataset]['path'])
+        return InferenceData.from_netcdf(datasets_available[dataset]['path'])
     else:
         msg = ['\'dataset\' must be one of the following options:']
         for key, value in sorted(datasets_available.items()):
