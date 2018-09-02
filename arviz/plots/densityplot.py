@@ -59,7 +59,7 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
 
     """
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, 'posterior')]
+        datasets = [convert_to_dataset(data, group='posterior')]
     else:
         datasets = [convert_to_dataset(d, 'posterior') for d in data]
 

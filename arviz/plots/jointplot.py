@@ -41,7 +41,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     ax_hist_y : matplotlib axes, y (right) distribution
     """
 
-    data = convert_to_dataset(data, 'posterior')
+    data = convert_to_dataset(data, group='posterior')
     if coords is None:
         coords = {}
 

@@ -50,7 +50,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
     """
 
-    data = convert_to_dataset(data, 'posterior')
+    data = convert_to_dataset(data, group='posterior')
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:
