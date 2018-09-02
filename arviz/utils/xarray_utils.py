@@ -4,8 +4,8 @@ import warnings
 import numpy as np
 import xarray as xr
 
-from arviz import InferenceData
-from arviz.compat import pymc3 as pm
+from ..inference_data import InferenceData
+from ..compat import pymc3 as pm
 
 
 def convert_to_inference_data(obj, *_, group='posterior', coords=None, dims=None):
