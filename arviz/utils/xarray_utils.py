@@ -264,6 +264,17 @@ class PyStanConverter:
         dtypes = self.infer_dtypes()
         data = {}
         var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=False)
+        if not isinstance(var_dict, dict):
+            # PyStan version < 2.18
+            var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=True)
+            permutation_order = self.fit.sim["permutation"]
+            original_order = []
+            for i_permutation_order in permutation_order:
+                reorder = np.argsort(i_permutation_order) + len(original_order)
+                original_order.extend(list(reorder))
+            nchain = self.fit.sim["chains"]
+            for key, values in var_dict.items():
+                var_dict[key] = self.unpermute(values, original_order, nchain)
         for var_name, values in var_dict.items():
             data[var_name] = np.swapaxes(values, 0, 1)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
@@ -287,13 +298,35 @@ class PyStanConverter:
         }
 
         sampler_params = self.fit.get_sampler_params(inc_warmup=False)
+        stat_lp = self.fit.extract('lp__', permuted=False)
+        if not isinstance(stat_lp, dict):
+            # PyStan version < 2.18
+            permutation_order = self.fit.sim["permutation"]
+            original_order = []
+            for i_permutation_order in permutation_order:
+                reorder = np.argsort(i_permutation_order) + len(original_order)
+                original_order.extend(list(reorder))
+            nchain = self.fit.sim["chains"]
+            stat_lp = self.fit.extract('lp__', permuted=True)['lp__']
+            stat_lp = self.unpermute(stat_lp, original_order, nchain)
+        else:
+            # PyStan version 2.18+
+            stat_lp = stat_lp['lp__']
+        # Add lp to sampler_params
+        for i, _ in enumerate(sampler_params):
+            sampler_params[i]['lp__'] = stat_lp[:, i]
         data = {}
         for key in sampler_params[0]:
             name = rename_key.get(key, re.sub('__$', "", key))
             data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
+    @requires('fit')
     def infer_dtypes(self):
+        """Infer dtypes from Stan model code. Function strips out generated quantities block
+        and searchs for `int` dtypes after stripping out comments inside the block.
+
+        """
         pattern_remove_comments = re.compile(
             r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
             re.DOTALL|re.MULTILINE
@@ -316,6 +349,33 @@ class PyStanConverter:
         dtypes = re.findall(pattern_int, stan_code)
         dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self._var_names}
         return dtypes
+
+    def unpermute(self, ary, idx, nchain):
+        """Unpermute permuted sample
+
+        Returns output compatible with PyStan 2.18+
+        fit.extract(par, permuted=False)[par]
+
+        Parameters
+        ----------
+        ary : list
+            Permuted sample
+        idx : list
+            list containing reorder indexes.
+            `idx = np.argsort(permutation_order)`
+        nchain : int
+            number of chains used
+            `fit.sim['chains']´
+
+        Returns
+        -------
+        numpy.ndarray
+            Unpermuted sample
+        """
+        ary = np.asarray(ary)[idx]
+        ary_shape = ary.shape[1:]
+        ary = ary.reshape((-1, nchain, *ary_shape), order='F')
+        return ary
 
     def to_inference_data(self):
         return InferenceData(**{
