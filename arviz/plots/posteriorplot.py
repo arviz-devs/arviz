@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import mode
 from .kdeplot import kdeplot, fast_kde
 from ..stats import hpd
-from ..utils import convert_to_netcdf
+from ..utils import convert_to_dataset
 from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
 
 
@@ -128,7 +128,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
         >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
     """
-    data = convert_to_netcdf(data).posterior
+    data = convert_to_dataset(data, 'posterior')
 
     if coords is None:
         coords = {}
