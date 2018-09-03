@@ -32,7 +32,7 @@ def autocorrplot(data, var_names=None, max_lag=100, combined=False,
     -------
     axes : matplotlib axes
     """
-    data = convert_to_dataset(data, 'posterior')
+    data = convert_to_dataset(data, group='posterior')
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

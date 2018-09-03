@@ -128,7 +128,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
         >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
     """
-    data = convert_to_dataset(data, 'posterior')
+    data = convert_to_dataset(data, group='posterior')
 
     if coords is None:
         coords = {}

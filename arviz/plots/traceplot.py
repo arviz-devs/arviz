@@ -38,7 +38,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
     -------
     axes : matplotlib axes
     """
-    data = convert_to_dataset(data, 'posterior')
+    data = convert_to_dataset(data, group='posterior')
 
     if coords is None:
         coords = {}
