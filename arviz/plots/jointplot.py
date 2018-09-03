@@ -1,3 +1,4 @@
+"""Joint scatter plot of two variables."""
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
@@ -13,7 +14,6 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     Parameters
     ----------
-
     data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
     var_names : list of variable names
@@ -34,13 +34,13 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     marginal_shade : dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
         (to control the shade)
+
     Returns
     -------
     axjoin : matplotlib axes, join (central) distribution
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
     """
-
     data = convert_to_dataset(data, group='posterior')
     if coords is None:
         coords = {}

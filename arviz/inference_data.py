@@ -1,3 +1,4 @@
+"""Data structure for using netcdf groups with xarray."""
 import netCDF4 as nc
 import xarray as xr
 
@@ -6,15 +7,16 @@ class InferenceData():
     """Container for accessing netCDF files using xarray."""
 
     def __init__(self, *_, **kwargs):
-        """Attach to a netcdf file.
+        """Initialize InferenceData object from keyword xarray datasets.
 
-        This will inspect the netcdf for the available groups, so that they can be
-        later loaded into memory.
+        Examples
+        --------
+        InferenceData(posterior=posterior, prior=prior)
 
-        Parameters:
-        -----------
-        filename : str
-            netcdf4 file that contains groups for accessing with xarray.
+        Parameters
+        ----------
+        kwargs :
+            Keyword arguments of xarray datasets
         """
         self._groups = []
         for key, dataset in kwargs.items():
@@ -27,18 +29,44 @@ class InferenceData():
             self._groups.append(key)
 
     def __repr__(self):
+        """Make string representation of object."""
         return 'Inference data with groups:\n\t> {options}'.format(
             options='\n\t> '.join(self._groups)
         )
 
     @staticmethod
     def from_netcdf(filename):
+        """Initialize object from a netcdf file.
+
+        Expects that the file will have groups, each of which can be loaded by xarray.
+
+        Parameters
+        ----------
+        filename : str
+            location of netcdf file
+
+        Returns
+        -------
+        InferenceData object
+        """
         groups = {}
         for group in nc.Dataset(filename, mode='r').groups:
             groups[group] = xr.open_dataset(filename, group=group)
         return InferenceData(**groups)
 
     def to_netcdf(self, filename):
+        """Write InferenceData to file using netcdf4.
+
+        Parameters
+        ----------
+        filename : str
+            Location to write to
+
+        Returns
+        -------
+        str
+            Location of netcdf file
+        """
         mode = 'w' # overwrite first, then append
         for group in self._groups:
             data = getattr(self, group)

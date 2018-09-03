@@ -1,3 +1,4 @@
+"""Plot posterior densities."""
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import mode
@@ -10,8 +11,7 @@ from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, 
 def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None,
                   credible_interval=0.94, round_to=1, point_estimate='mean', rope=None,
                   ref_val=None, kind='kde', bw=4.5, bins=None, ax=None, **kwargs):
-    """
-    Plot Posterior densities in the style of John K. Kruschke's book.
+    """Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
     ----------
@@ -60,7 +60,6 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
     Examples
     --------
-
     Show a default kernel density plot following style of John Kruschke
 
     .. plot::
@@ -159,9 +158,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
 def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind, point_estimate,
                        round_to, credible_interval, ref_val, rope, textsize, **kwargs):
-    """
-    Artist to draw posterior.
-    """
+    """Artist to draw posterior."""
     def format_as_percent(x, round_to=0):
         return '{0:.{1:d}f}%'.format(100 * x, round_to)
 

@@ -1,3 +1,4 @@
+"""Plot a scatter or hexbin of sampled parameters."""
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter

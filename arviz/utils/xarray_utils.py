@@ -1,3 +1,4 @@
+"""Utilities for converting and working with netcdf and xarray data."""
 import re
 import warnings
 
@@ -9,7 +10,7 @@ from ..compat import pymc3 as pm
 
 
 def convert_to_inference_data(obj, *_, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an InferenceData object
+    """Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return arviz.InferenceData objects unchanged.
@@ -72,7 +73,7 @@ def convert_to_inference_data(obj, *_, group='posterior', coords=None, dims=None
 
 
 def convert_to_dataset(obj, *_, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an xarray dataset
+    """Convert a supported object to an xarray dataset.
 
     This function is idempotent, in that it will return xarray.Dataset functions
     unchanged. Raises `ValueError` if the desired group can not be extracted.
@@ -115,12 +116,15 @@ def convert_to_dataset(obj, *_, group='posterior', coords=None, dims=None):
 
 
 class requires: # pylint: disable=invalid-name
-    """Decorator to return None if an object does not have the required attribute"""
+    """Decorator to return None if an object does not have the required attribute."""
+
     def __init__(self, *props):
         self.props = props
 
     def __call__(self, func):
+        """Wrap the decorated function."""
         def wrapped(cls, *args, **kwargs):
+            """Return None if not all props are available."""
             for prop in self.props:
                 if getattr(cls, prop) is None:
                     return None
@@ -194,6 +198,12 @@ def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
 
 
 def dict_to_dataset(data, *_, coords=None, dims=None):
+    """Convert a dictionary of numpy arrays to an xarray.Dataset.
+
+    Examples
+    --------
+    dict_to_dataset({'x': np.random.randn(4, 100), 'y', np.random.rand(4, 100)})
+    """
     if dims is None:
         dims = {}
 
@@ -207,6 +217,8 @@ def dict_to_dataset(data, *_, coords=None, dims=None):
 
 
 class PyMC3Converter:
+    """Encapsulate PyMC3 specific logic."""
+
     def __init__(self, *_, trace=None, prior=None, posterior_predictive=None,
                  coords=None, dims=None):
         self.trace = trace
@@ -217,8 +229,7 @@ class PyMC3Converter:
 
     @requires('trace')
     def posterior_to_xarray(self):
-        """Convert the posterior to an xarray dataset
-        """
+        """Convert the posterior to an xarray dataset."""
         var_names = pm.utils.get_default_varnames(self.trace.varnames, include_transformed=False)
         data = {}
         for var_name in var_names:
@@ -227,6 +238,7 @@ class PyMC3Converter:
 
     @requires('trace')
     def sample_stats_to_xarray(self):
+        """Extract sample_stats from PyMC3 trace."""
         data = {}
         for stat in self.trace.stat_names:
             data[stat] = np.array(self.trace.get_sampler_stats(stat, combine=False))
@@ -234,16 +246,24 @@ class PyMC3Converter:
 
     @requires('posterior_predictive')
     def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
         data = {k: np.expand_dims(v, 0) for k, v in self.posterior_predictive.items()}
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('prior')
     def prior_to_xarray(self):
+        """Convert prior samples to xarray."""
         return dict_to_dataset({k: np.expand_dims(v, 0) for k, v in self.prior.items()},
                                coords=self.coords,
                                dims=self.dims)
 
     def to_inference_data(self):
+        """Convert all available data to an InferenceData object.
+
+        Note that if groups can not be created (i.e., there is no `trace`, so
+        the `posterior` and `sample_stats` can not be extracted), then the InferenceData
+        will not have those groups.
+        """
         return InferenceData(**{
             'posterior': self.posterior_to_xarray(),
             'sample_stats': self.sample_stats_to_xarray(),
@@ -253,6 +273,8 @@ class PyMC3Converter:
 
 
 class PyStanConverter:
+    """Encapsulate PyStan specific logic."""
+
     def __init__(self, *_, fit=None, coords=None, dims=None):
         self.fit = fit
         self.coords = coords
@@ -261,6 +283,7 @@ class PyStanConverter:
 
     @requires('fit')
     def posterior_to_xarray(self):
+        """Extract posterior samples from fit."""
         dtypes = self.infer_dtypes()
         data = {}
         var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=False)
@@ -281,6 +304,7 @@ class PyStanConverter:
 
     @requires('fit')
     def sample_stats_to_xarray(self):
+        """Extract sample_stats from fit."""
         dtypes = {
             'divergent__' : bool,
             'n_leapfrog__' : np.int64,
@@ -323,9 +347,10 @@ class PyStanConverter:
 
     @requires('fit')
     def infer_dtypes(self):
-        """Infer dtypes from Stan model code. Function strips out generated quantities block
-        and searchs for `int` dtypes after stripping out comments inside the block.
+        """Infer dtypes from Stan model code.
 
+        Function strips out generated quantities block and searchs for `int`
+        dtypes after stripping out comments inside the block.
         """
         pattern_remove_comments = re.compile(
             r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
@@ -351,7 +376,7 @@ class PyStanConverter:
         return dtypes
 
     def unpermute(self, ary, idx, nchain):
-        """Unpermute permuted sample
+        """Unpermute permuted sample.
 
         Returns output compatible with PyStan 2.18+
         fit.extract(par, permuted=False)[par]
@@ -378,6 +403,12 @@ class PyStanConverter:
         return ary
 
     def to_inference_data(self):
+        """Convert all available data to an InferenceData object.
+
+        Note that if groups can not be created (i.e., there is no `trace`, so
+        the `posterior` and `sample_stats` can not be extracted), then the InferenceData
+        will not have those groups.
+        """
         return InferenceData(**{
             'posterior': self.posterior_to_xarray(),
             'sample_stats': self.sample_stats_to_xarray(),
@@ -386,6 +417,7 @@ class PyStanConverter:
 
 def pymc3_to_inference_data(*_, trace=None, prior=None, posterior_predictive=None,
                             coords=None, dims=None):
+    """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,
         prior=prior,
@@ -395,6 +427,7 @@ def pymc3_to_inference_data(*_, trace=None, prior=None, posterior_predictive=Non
 
 
 def pystan_to_inference_data(*_, fit=None, coords=None, dims=None):
+    """Convert pystan data into an InferenceData object."""
     return PyStanConverter(
         fit=fit,
         coords=coords,

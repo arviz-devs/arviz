@@ -1,3 +1,4 @@
+"""Wrapper for optional library dependencies."""
 import importlib
 import sys
 
@@ -18,11 +19,13 @@ class OptionalDep():
     pm.trace_to_dataframe(trace)  # calls the OptionalDep method
     pm.Normal('x', 0, 1)  # calls pymc3.Normal
     """
+
     def __init__(self, name):
         self.__name = name
         self.__module = None
 
     def __getattr__(self, name):
+        """Try to import selected module in a lazy manner."""
         if self.__module is None:
             try:
                 self.__module = importlib.import_module(self.__name)

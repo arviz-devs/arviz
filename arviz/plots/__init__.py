@@ -1,3 +1,4 @@
+"""Plotting functions."""
 from .autocorrplot import autocorrplot
 from .compareplot import compareplot
 from .densityplot import densityplot

@@ -1,3 +1,4 @@
+"""Plot posterior traces as violin plot."""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,8 +10,7 @@ from ..utils import convert_to_dataset
 
 def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
                     bw=4.5, sharey=True, figsize=None, textsize=None, ax=None, kwargs_shade=None):
-    """
-    Plot posterior of traces as Violinplot
+    """Plot posterior of traces as violin plot.
 
     Notes
     -----
@@ -44,12 +44,11 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
     ax : matplotlib axes
     kwargs_shade : dicts, optional
         Additional keywords passed to `fill_between`, or `barh` to control the shade
+
     Returns
-    ----------
+    -------
     ax : matplotlib axes
-
     """
-
     data = convert_to_dataset(data, group='posterior')
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
@@ -93,9 +92,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
 
 def _violinplot(val, shade, bw, ax, **kwargs_shade):
-    """
-    Auxiliary function to plot violinplots
-    """
+    """Auxiliary function to plot violinplots."""
     density, low_b, up_b = fast_kde(val, bw=bw)
     x = np.linspace(low_b, up_b, len(density))
 
@@ -106,9 +103,7 @@ def _violinplot(val, shade, bw, ax, **kwargs_shade):
 
 
 def cat_hist(val, shade, ax, **kwargs_shade):
-    """
-    Auxiliary function to plot discrete-violinplots
-    """
+    """Auxiliary function to plot discrete-violinplots."""
     bins = get_bins(val)
     binned_d, _ = np.histogram(val, bins=bins, normed=True)
 

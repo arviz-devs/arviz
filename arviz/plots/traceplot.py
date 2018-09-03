@@ -1,3 +1,4 @@
+"""Plot histogram and values from MCMC samples."""
 import matplotlib.pyplot as plt
 import numpy as np
 

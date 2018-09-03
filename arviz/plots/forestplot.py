@@ -1,3 +1,4 @@
+"""Forest plot."""
 from collections import defaultdict
 from itertools import tee
 
@@ -22,8 +23,7 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
                credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
                textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
                ridgeplot_overlap=2, figsize=None):
-    """
-    Forest plot
+    """Forest plot to compare credible intervals from a number of distributions.
 
     Generates a forest plot of 100*(credible_interval)% credible intervals from
     a trace or list of traces.
@@ -76,7 +76,6 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
     gridspec : matplotlib GridSpec
 
     """
-
     ncols, width_ratios = 1, [3]
 
     if n_eff:
@@ -153,6 +152,8 @@ def forestplot(data, kind='forestplot', model_names=None, var_names=None, combin
 
 
 class PlotHandler():
+    """Class to handle logic from ForestPlot."""
+
     def __init__(self, data, var_names, model_names, combined, colors):
         if not isinstance(data, (list, tuple)):
             data = [data]
@@ -187,6 +188,7 @@ class PlotHandler():
         self.plotters = self.make_plotters()
 
     def make_plotters(self):
+        """Initialize an object for each variable to be plotted."""
         plotters, y = {}, 0
         for var_name in self.var_names:
             plotters[var_name] = VarHandler(var_name, self.data, y,
@@ -198,6 +200,7 @@ class PlotHandler():
         return plotters
 
     def labels_and_ticks(self):
+        """Collect labels and ticks from plotters."""
         labels, idxs = [], []
         for plotter in self.plotters.values():
             sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
@@ -206,6 +209,21 @@ class PlotHandler():
         return np.concatenate(labels), np.concatenate(idxs)
 
     def ridgeplot(self, mult, textsize, linewidth, alpha, ax):
+        """Draw ridgeplot for each plotter.
+
+        Parameters
+        ----------
+        mult : float
+            How much to multiply height by. Set this to greater than 1 to have some overlap.
+        textsize : float
+            Size of tick text
+        linewidth : float
+            Width of line on border of ridges
+        alpha : float
+            Transparency of ridges
+        ax : Axes
+            Axes to draw on
+        """
         if alpha is None:
             alpha = 1.
         zorder = 0
@@ -225,6 +243,23 @@ class PlotHandler():
         return ax
 
     def forestplot(self, credible_interval, quartiles, textsize, linewidth, markersize, ax):
+        """Draw forestplot for each plotter.
+
+        Parameters
+        ----------
+        credible_interval : float
+            How wide each line should be
+        quartiles : bool
+            Whether to mark quartiles
+        textsize : float
+            Size of tick text
+        linewidth : float
+            Width of forestplot line
+        markersize : float
+            Size of marker in center of forestplot line
+        ax : Axes
+            Axes to draw on
+        """
         # Quantiles to be calculated
         endpoint = 100 * (1 - credible_interval) / 2
         if quartiles:
@@ -250,6 +285,7 @@ class PlotHandler():
         return ax
 
     def plot_neff(self, ax, textsize, markersize):
+        """Draw effective n for each plotter."""
         for plotter in self.plotters.values():
             for y, n_eff, color in plotter.n_eff():
                 if n_eff is not None:
@@ -260,6 +296,7 @@ class PlotHandler():
         return ax
 
     def plot_rhat(self, ax, textsize, markersize):
+        """Draw r-hat for each plotter."""
         for plotter in self.plotters.values():
             for y, r_hat, color in plotter.r_hat():
                 if r_hat is not None:
@@ -271,6 +308,7 @@ class PlotHandler():
         return ax
 
     def make_bands(self, ax):
+        """Draw shaded horizontal bands for each plotter."""
         y_vals, y_prev, is_zero = [0], None, False
         prev_color_index = 0
         plotter = None  # To make sure it is defined
@@ -296,16 +334,20 @@ class PlotHandler():
         return ax
 
     def fig_height(self):
+        """Figure out the height of this plot."""
         # hand-tuned
         return (len(self.data) * len(self.var_names) - 1 +
                 0.25 * sum(1 for j in self.plotters.values() for _ in j.iterator())
                )
 
     def y_max(self):
+        """Get maximum y value for the plot."""
         return max(p.y_max() for p in self.plotters.values())
 
 
 class VarHandler():
+    """Handle individual variable logic."""
+
     def __init__(self, var_name, data, y_start, model_names, combined, colors):
         self.var_name = var_name
         self.data = data
@@ -319,6 +361,7 @@ class VarHandler():
         self.group_offset = 2 * self.var_offset
 
     def iterator(self):
+        """Iterate over models and chains for each variable."""
         if self.combined:
             grouped_data = [[(0, datum)] for datum in self.data]
             skip_dims = {'chain'}
@@ -355,6 +398,7 @@ class VarHandler():
             y += self.group_offset
 
     def labels_ticks_and_vals(self):
+        """Get labels, ticks, values, and colors for the variable."""
         y_ticks = defaultdict(list)
         for y, label, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color))
@@ -367,12 +411,14 @@ class VarHandler():
         return labels, ticks, vals, colors
 
     def treeplot(self, qlist, credible_interval):
+        """Get data for each treeplot for the variable."""
         for y, _, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
             yield y, ntiles, color
 
     def ridgeplot(self, mult):
+        """Get data for each ridgeplot for the variable."""
         xvals, yvals, pdfs, colors = [], [], [], []
         for y, _, values, color in self.iterator():
             yvals.append(y)
@@ -388,6 +434,7 @@ class VarHandler():
             yield x, y, mult * pdf / scaling + y, color
 
     def n_eff(self):
+        """Get effective n data for the variable."""
         _, y_vals, values, colors = self.labels_ticks_and_vals()
         for y, value, color in zip(y_vals, values, colors):
             if value.ndim != 2 or value.shape[0] < 2:
@@ -396,6 +443,7 @@ class VarHandler():
                 yield y, _get_neff(value), color
 
     def r_hat(self):
+        """Get rhat data for the variable."""
         _, y_vals, values, colors = self.labels_ticks_and_vals()
         for y, value, color in zip(y_vals, values, colors):
             if value.ndim != 2 or value.shape[0] < 2:
@@ -404,6 +452,7 @@ class VarHandler():
                 yield y, _get_rhat(value), color
 
     def y_max(self):
+        """Get max y value for the variable."""
         end_y = max(y for y, *_ in self.iterator())
 
         if self.combined:
