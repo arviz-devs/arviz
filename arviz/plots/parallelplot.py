@@ -1,22 +1,22 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import matplotlib.pyplot as plt
 import numpy as np
+from ..utils import convert_to_dataset
+from .plot_utils import _scale_text, xarray_to_nparray
 
-from ..utils import trace_to_dataframe, get_varnames, get_stats
-from .plot_utils import _scale_text
 
-
-def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True, colornd='k',
-                 colord='C1', shadend=.025, skip_first=0, ax=None):
-    """Parallel coordinates plot showing posterior points with and without divergences marked.
+def parallelplot(data, var_names=None, figsize=None, textsize=None, legend=True, colornd='k',
+                 colord='C1', shadend=.025, ax=None):
+    """
+    A parallel coordinates plot showing posterior points with and without divergences
 
     Described by https://arxiv.org/abs/1709.01449, suggested by Ari Hartikainen
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
         Posterior samples
-    varnames : list of variable names
+    var_names : list of variable names
         Variables to be plotted, if None all variable are plotted. Can be used to change the order
         of the plotted variables
     figsize : figure size tuple
@@ -32,8 +32,6 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True,
     shadend : float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
-    skip_first : int, optional
-        Number of first samples not shown in plots (burn-in).
     ax : axes
         Matplotlib axes.
 
@@ -41,14 +39,17 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True,
     -------
     ax : matplotlib axes
     """
-    divergent = get_stats(trace[skip_first:], 'diverging')
-    trace = trace_to_dataframe(trace[skip_first:])
-    varnames = get_varnames(trace, varnames)
+    # Get posterior draws and combine chains
+    posterior_data = convert_to_dataset(data, group='posterior')
+    _var_names, _posterior = xarray_to_nparray(posterior_data, var_names=var_names, combined=True)
 
-    if len(varnames) < 2:
+    # Get diverging draws and combine chains
+    divergent_data = convert_to_dataset(data, group='sample_stats')
+    _, diverging_mask = xarray_to_nparray(divergent_data, var_names=('diverging',), combined=True)
+    diverging_mask = np.squeeze(diverging_mask)
+
+    if len(_var_names) < 2:
         raise ValueError('This plot needs at least two variables')
-
-    trace = trace[varnames]
 
     if figsize is None:
         figsize = (12, 6)
@@ -59,17 +60,18 @@ def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True,
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
-    ax.plot(trace.values[divergent == 0].T, color=colornd, alpha=shadend)
-    if np.any(divergent):
-        ax.plot(trace.values[divergent == 1].T, color=colord, lw=1)
+    ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
+
+    if np.any(diverging_mask):
+        ax.plot(_posterior[:, diverging_mask], color=colord, lw=1)
 
     ax.tick_params(labelsize=textsize)
-    ax.set_xticks(range(trace.shape[1]))
-    ax.set_xticklabels(varnames)
+    ax.set_xticks(range(len(_var_names)))
+    ax.set_xticklabels(_var_names)
 
     if legend:
         ax.plot([], color=colornd, label='non-divergent')
-        if np.any(divergent):
+        if np.any(diverging_mask):
             ax.plot([], color=colord, label='divergent')
         ax.legend(fontsize=textsize)
 

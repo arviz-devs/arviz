@@ -213,3 +213,37 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
 
             for selection in dims:
                 yield var_name, selection, data[var_name].sel(**selection).values
+
+
+def xarray_to_nparray(data, *, var_names=None, combined=True):
+    """Takes xarray data and unpacks into variables and data into list and numpy array respectively
+
+    Assumes that chain and draw are in coordinates
+
+    Parameters
+    ----------
+    data: xarray.DataSet
+        Data in an xarray from an InferenceData object. Examples include posterior or sample_stats
+
+    var_names: iter
+        Should be a subset of data.data_vars not including chain and draws. Defaults to all of them
+
+    combined: bool
+        Whether to combine chain into one array
+
+    Returns
+    -------
+    var_names: list
+        List of variable names
+    data: np.array
+        Data values
+    """
+    unpacked_data, unpacked_var_names, = [], []
+
+    # Merge chains and variables
+    for var_name, selection, data_array in xarray_var_iter(data, var_names=var_names,
+                                                           combined=combined):
+        unpacked_data.append(data_array.flatten())
+        unpacked_var_names.append(make_label(var_name, selection))
+
+    return unpacked_var_names, np.array(unpacked_data)
