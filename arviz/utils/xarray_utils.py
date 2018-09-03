@@ -9,8 +9,8 @@ from ..inference_data import InferenceData
 from ..compat import pymc3 as pm
 
 
-def convert_to_inference_data(obj, *_, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an InferenceData object.
+def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None):
+    """Convert a supported object to an InferenceData object
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return arviz.InferenceData objects unchanged.
@@ -72,8 +72,8 @@ def convert_to_inference_data(obj, *_, group='posterior', coords=None, dims=None
     return InferenceData(**{group: dataset})
 
 
-def convert_to_dataset(obj, *_, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an xarray dataset.
+def convert_to_dataset(obj, *, group='posterior', coords=None, dims=None):
+    """Convert a supported object to an xarray dataset
 
     This function is idempotent, in that it will return xarray.Dataset functions
     unchanged. Raises `ValueError` if the desired group can not be extracted.
@@ -132,7 +132,7 @@ class requires: # pylint: disable=invalid-name
         return wrapped
 
 
-def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
+def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     """Convert a numpy array to an xarray.DataArray.
 
     The first two dimensions will be (chain, draw), and any remaining
@@ -197,7 +197,7 @@ def numpy_to_data_array(ary, *_, var_name='data', coords=None, dims=None):
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
-def dict_to_dataset(data, *_, coords=None, dims=None):
+def dict_to_dataset(data, *, coords=None, dims=None):
     """Convert a dictionary of numpy arrays to an xarray.Dataset.
 
     Examples
@@ -415,7 +415,7 @@ class PyStanConverter:
         })
 
 
-def pymc3_to_inference_data(*_, trace=None, prior=None, posterior_predictive=None,
+def pymc3_to_inference_data(*, trace=None, prior=None, posterior_predictive=None,
                             coords=None, dims=None):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
@@ -426,7 +426,7 @@ def pymc3_to_inference_data(*_, trace=None, prior=None, posterior_predictive=Non
         dims=dims).to_inference_data()
 
 
-def pystan_to_inference_data(*_, fit=None, coords=None, dims=None):
+def pystan_to_inference_data(*, fit=None, coords=None, dims=None):
     """Convert pystan data into an InferenceData object."""
     return PyStanConverter(
         fit=fit,
