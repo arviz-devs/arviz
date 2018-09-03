@@ -8,6 +8,7 @@ from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 
+# pylint:disable-msg=too-many-function-args
 def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
                 point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
                 bw=4.5, figsize=None, textsize=None):
@@ -23,7 +24,7 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
     data_labels : list[str]
         List with names for the samples in the list of datasets. Useful when
         plotting more than one trace.
-    varnames: list
+    var_names: list
         List of variables to plot (defaults to None, which results in all
         variables plotted).
     credible_interval : float
