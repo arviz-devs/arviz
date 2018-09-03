@@ -1,3 +1,4 @@
+"""Statistical functions in ArviZ."""
 import warnings
 
 import numpy as np
@@ -39,12 +40,11 @@ def bfmi(trace):
 
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
             seed=None, round_to=2):
-    R"""
-    Compare models based on the widely applicable information criterion (WAIC) or leave-one-out
-    (LOO) cross-validation.
+    R"""Compare models based on WAIC or LOO cross validation.
 
-    Read more theory here - in a paper by some of the leading authorities on model selection
-    - dx.doi.org/10.1111/1467-9868.00353
+    WAIC is Widely applicable information criterion, and LOO is leave-one-out
+    (LOO) cross-validation. Read more theory here - in a paper by some of the
+    leading authorities on model selection - dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
@@ -97,7 +97,6 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
     warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
         be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
     """
-
     names = [model.name for model in model_dict if model.name]
     if not names:
         names = np.arange(len(model_dict))
@@ -213,9 +212,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
 
 
 def _ic_matrix(ics, ic_i):
-    """
-    Store the previously computed pointwise predictive accuracy values (ics) in a 2D matrix array.
-    """
+    """Store the previously computed pointwise predictive accuracy values (ics) in a 2D matrix."""
     cols, _ = ics.shape
     rows = len(ics[ic_i].iloc[0])
     ic_i_val = np.zeros((rows, cols))
@@ -287,8 +284,7 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
 
 
 def loo(trace, model, pointwise=False, reff=None):
-    """
-    Pareto-smoothed importance sampling leave-one-out cross-validation
+    """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
     following Vehtari et al. (2015). Cross-validation is computed using Pareto-smoothed
@@ -315,7 +311,6 @@ def loo(trace, model, pointwise=False, reff=None):
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
     """
-
     if reff is None:
         df = trace_to_dataframe(trace, combined=False)
         nchains = df.columns.value_counts()[0]
@@ -428,8 +423,8 @@ def psislw(log_weights, reff=1.):
 
 
 def _gpdfit(x):
-    """
-    Estimate the parameters for the Generalized Pareto Distribution (GPD)
+    """Estimate the parameters for the Generalized Pareto Distribution (GPD).
+
     Empirical Bayes estimate for the parameters of the generalized Pareto
     distribution given the data.
 
@@ -478,7 +473,7 @@ def _gpdfit(x):
 
 
 def _gpinv(probs, kappa, sigma):
-    """Inverse Generalized Pareto distribution function"""
+    """Inverse Generalized Pareto distribution function."""
     x = np.full_like(probs, np.nan)
     if sigma <= 0:
         return x
@@ -505,8 +500,7 @@ def _gpinv(probs, kappa, sigma):
 
 
 def r2_score(y_true, y_pred, round_to=2):
-    """
-    R² for Bayesian regression models. Only valid for linear models.
+    """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
     ----------
@@ -516,6 +510,7 @@ def r2_score(y_true, y_pred, round_to=2):
         Estimated target values.
     round_to : int
         Number of decimals used to round results. Defaults to 2.
+
     Returns
     -------
     Pandas Series with the following indices:
@@ -537,8 +532,7 @@ def r2_score(y_true, y_pred, round_to=2):
 
 def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
             stat_funcs=None, extend=False, credible_interval=0.94, skip_first=0, batches=None):
-    R"""
-    Create a data frame with summary statistics.
+    R"""Create a data frame with summary statistics.
 
     Parameters
     ----------
@@ -587,7 +581,6 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
 
     Examples
     --------
-
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
@@ -667,10 +660,10 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
 
 
 def _mc_error(x, batches=5, circular=False):
-    """
-    Calculates the simulation standard error, accounting for non-independent
-    samples. The trace is divided into batches, and the standard deviation of
-    the batch means is calculated.
+    """Calculate the simulation standard error, accounting for non-independent samples.
+
+    The trace is divided into batches, and the standard deviation of the batch
+    means is calculated.
 
     Parameters
     ----------
@@ -721,10 +714,11 @@ def _mc_error(x, batches=5, circular=False):
 
 
 def waic(trace, model, pointwise=False):
-    """
-    Calculate the widely available information criterion, its standard error and the effective
-    number of parameters of the samples in trace from model.
-    Read more theory here - in a paper by some of the leading authorities on model selection
+    """Calculate the widely available information criterion.
+
+    Also calculates the WAIC's standard error and the effective number of
+    parameters of the samples in trace from model. Read more theory here - in
+    a paper by some of the leading authorities on model selection
     dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
@@ -745,7 +739,6 @@ def waic(trace, model, pointwise=False):
          densities exceeds 0.4
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
     """
-
     log_py = log_post_trace(trace, model)
 
     lppd_i = logsumexp(log_py, axis=0, b=1.0 / log_py.shape[0])
