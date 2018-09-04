@@ -1,0 +1,6 @@
+include *.md
+include LICENSE
+
+recursive-include arviz *.gzip
+recursive-include arviz *.mplstyle
+recursive-include arviz *.nc
