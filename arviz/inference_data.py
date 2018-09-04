@@ -51,7 +51,7 @@ class InferenceData():
         """
         groups = {}
         for group in nc.Dataset(filename, mode='r').groups:
-            groups[group] = xr.open_dataset(filename, group=group)
+            groups[group] = xr.open_dataset(filename, group=group, autoclose=True)
         return InferenceData(**groups)
 
     def to_netcdf(self, filename):
