@@ -159,7 +159,7 @@ class PlotHandler():
             data = [data]
 
         # y-values upside down
-        self.data = [convert_to_dataset(datum, 'posterior') for datum in reversed(data)]
+        self.data = [convert_to_dataset(datum, group='posterior') for datum in reversed(data)]
 
         if model_names is None:
             if len(self.data) > 1:

@@ -108,7 +108,7 @@ class CheckNetCDFUtils(BaseArvizTest):
         self.check_var_names_coords_dims(inference_data.posterior)
 
     def test_convert_to_dataset(self):
-        data = convert_to_dataset(self.obj, 'posterior',
+        data = convert_to_dataset(self.obj, group='posterior',
                                   coords={'school': np.arange(self.data['J'])},
                                   dims={'theta': ['school'], 'theta_tilde': ['school']},
                                  )
