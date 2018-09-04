@@ -216,7 +216,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
 
 
 def xarray_to_nparray(data, *, var_names=None, combined=True):
-    """Takes xarray data and unpacks into variables and data into list and numpy array respectively
+    """Take xarray data and unpacks into variables and data into list and numpy array respectively.
 
     Assumes that chain and draw are in coordinates
 
