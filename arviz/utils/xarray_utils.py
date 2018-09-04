@@ -10,7 +10,7 @@ from ..compat import pymc3 as pm
 
 
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an InferenceData object
+    """Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return arviz.InferenceData objects unchanged.
@@ -73,7 +73,7 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None)
 
 
 def convert_to_dataset(obj, *, group='posterior', coords=None, dims=None):
-    """Convert a supported object to an xarray dataset
+    """Convert a supported object to an xarray dataset.
 
     This function is idempotent, in that it will return xarray.Dataset functions
     unchanged. Raises `ValueError` if the desired group can not be extracted.
