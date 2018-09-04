@@ -23,4 +23,5 @@ with pm.Model() as centered_eight:
     obs = pm.Normal('obs', mu=theta, sd=sigma, observed=y)
     centered_eight_trace = pm.sample()
 
-az.parallelplot(centered_eight_trace, varnames=['theta', 'tau', 'mu'])
+az.parallelplot(centered_eight_trace, var_names=['theta', 'tau', 'mu'])
+
