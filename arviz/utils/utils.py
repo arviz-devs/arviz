@@ -1,3 +1,4 @@
+"""Miscellaneous utilities for supporting ArviZ."""
 import bz2
 import gzip
 import importlib
@@ -28,14 +29,14 @@ def _has_type(object_, typename, module_path):
         Is fed to `importlib.import_module`.
 
     Returns
-    ----------
+    -------
     has_type : bool
         `True` if `isinstance(object, getattr(importlib.import_module(module_path), typename))`.
         `False` if this condition does not hold or the module under
         `module_path` is not installed.
 
     Examples
-    ----------
+    --------
     A string is not a real number:
 
     >>> _has_type("aha", typename="Real", module_path="numbers")
@@ -102,9 +103,7 @@ def untransform_varnames(varnames):
 
 
 def expand_variable_names(trace, varnames):
-    """
-    Expand the name of variables to include multidimensional variables
-    """
+    """Expand the name of variables to include multidimensional variables."""
     tmp = []
     for vtrace in pd.unique(trace.columns):
         for varname in varnames:
@@ -114,8 +113,7 @@ def expand_variable_names(trace, varnames):
 
 
 def get_stats(trace, stat=None, combined=True):
-    """
-    Get sampling statistics from trace
+    """Get sampling statistics from trace.
 
     Parameters
     ----------
@@ -125,8 +123,9 @@ def get_stats(trace, stat=None, combined=True):
         Statistics
     combined : Bool
         If True multiple statistics from different chains will be combined together.
+
     Returns
-    ----------
+    -------
     stat: array with the chosen statistic
     """
     if _has_type(trace, typename="MultiTrace", module_path="pymc3.backends.base"):
@@ -146,6 +145,7 @@ def get_stats(trace, stat=None, combined=True):
 
 
 def get_varnames(trace, varnames):
+    """Extract variable names from a trace."""
     if varnames is None:
         return np.unique(trace.columns)
     else:
@@ -153,8 +153,8 @@ def get_varnames(trace, varnames):
 
 
 def log_post_trace(trace, model):
-    """
-    Calculate the elementwise log-posterior for the sampled trace.
+    """Calculate the elementwise log-posterior for the sampled trace.
+
     Currently only supports trace and models from PyMC3.
 
     Parameters
@@ -241,6 +241,7 @@ def trace_to_dataframe(trace, combined=True):
 
 def _create_flat_names(varname, shape):
     """Return flat variable names for `varname` of `shape`.
+
     Examples
     --------
     >>> create_flat_names('x', (5,))
@@ -256,8 +257,7 @@ def _create_flat_names(varname, shape):
 
 
 def _is_transformed_name(name):
-    """
-    Quickly check if a name was transformed with `get_transformed_name`
+    """Quickly check if a name was transformed with `get_transformed_name`.
 
     Parameters
     ----------
@@ -345,8 +345,7 @@ def load_trace(filepath, combined=False):
 
 
 def load_data(filename):
-    """
-    Load netcdf file back into an arviz.InferenceData
+    """Load netcdf file back into an arviz.InferenceData.
 
     Parameters
     ----------
@@ -357,7 +356,7 @@ def load_data(filename):
 
 
 def load_arviz_data(dataset):
-    """Load built-in arviz dataset into memory
+    """Load built-in arviz dataset into memory.
 
     Will print out available datasets in case of error.
 

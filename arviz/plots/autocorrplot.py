@@ -1,3 +1,4 @@
+"""Autocorrelation plot of data."""
 import numpy as np
 
 from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
@@ -7,8 +8,9 @@ from ..stats.diagnostics import autocorr
 
 def autocorrplot(data, var_names=None, max_lag=100, combined=False,
                  figsize=None, textsize=None):
-    """
-    Bar plot of the autocorrelation function for a posterior.
+    """Bar plot of the autocorrelation function for a sequence of data.
+
+    Useful in particular for posteriors from MCMC samples which may display correlation.
 
     Parameters
     ----------

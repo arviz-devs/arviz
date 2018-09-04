@@ -1,3 +1,4 @@
+"""One-dimensional kernel density estimate plots."""
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve  # pylint: disable=no-name-in-module
@@ -9,8 +10,7 @@ from .plot_utils import _scale_text
 def kdeplot(values, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
             figsize=None, textsize=None, plot_kwargs=None, fill_kwargs=None,
             rug_kwargs=None, ax=None):
-    """
-    1D KDE plot taking into account boundary conditions
+    """1D KDE plot taking into account boundary conditions.
 
     Parameters
     ----------
@@ -98,8 +98,8 @@ def kdeplot(values, cumulative=False, rug=False, label=None, bw=4.5, rotated=Fal
 
 
 def fast_kde(x, cumulative=False, bw=4.5):
-    """
-    A fft-based Gaussian kernel density estimate (KDE)
+    """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
+
     The code was adapted from https://github.com/mfouesneau/faststats
 
     Parameters

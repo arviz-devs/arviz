@@ -1,3 +1,4 @@
+"""Posterior predictive plot."""
 import numpy as np
 from .kdeplot import kdeplot
 from .plot_utils import _scale_text, _create_axes_grid, default_grid
@@ -5,7 +6,7 @@ from .plot_utils import _scale_text, _create_axes_grid, default_grid
 
 def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None, ax=None):
     """
-    Plot for Posterior Predictive Checks
+    Plot for Posterior Predictive checks.
 
     Parameters
     ----------
@@ -28,7 +29,6 @@ def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None
     -------
     ax : matplotlib axes
     """
-
     rows, cols = default_grid(len(ppc_sample))
 
     if figsize is None:

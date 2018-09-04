@@ -1,3 +1,4 @@
+"""Test helper functions."""
 import os
 import pickle
 import sys
@@ -9,24 +10,35 @@ import pystan
 
 
 class BaseArvizTest():
+    """Base class for running arviz tests."""
 
     @classmethod
     def setup_class(cls):
+        """Run once for the class.
+
+        This has to exist so subclasses can inherit.
+        """
         pass
 
     @classmethod
     def teardown_class(cls):
+        """Teardown at end of tests.
+
+        This has to exist so subclasses can inherit.
+        """
         pass
 
     def setup_method(self):
+        """Run for every test."""
         np.random.seed(1)
 
     def teardown_method(self):
+        """Run for every test."""
         plt.close('all')
 
 
 def eight_schools_params():
-    """Share setup for eight schools"""
+    """Share setup for eight schools."""
     return {
         'J': 8,
         'y': np.array([28., 8., -3., 7., -1., 1., 18., 12.]),
@@ -35,6 +47,7 @@ def eight_schools_params():
 
 
 def pystan_noncentered_schools(data, draws, chains):
+    """Non-centered eight schools implementation for pystan."""
     schools_code = '''
         data {
             int<lower=0> J;
@@ -69,6 +82,7 @@ def pystan_noncentered_schools(data, draws, chains):
 
 
 def pymc3_noncentered_schools(data, draws, chains):
+    """Non-centered eight schools implementation for pymc3."""
     with pm.Model() as model:
         mu = pm.Normal('mu', mu=0, sd=5)
         tau = pm.HalfCauchy('tau', beta=5)
@@ -80,6 +94,7 @@ def pymc3_noncentered_schools(data, draws, chains):
 
 
 def load_cached_models(draws, chains):
+    """Load pymc3 and pystan models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     data = eight_schools_params()
     supported = (

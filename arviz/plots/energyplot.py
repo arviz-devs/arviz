@@ -1,3 +1,4 @@
+"""Plot energy transition distribution in HMC inference."""
 import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import kdeplot
@@ -8,8 +9,9 @@ from ..utils import get_stats
 def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
                fill_color=('C0', 'C5'), bw=4.5, skip_first=0, fill_kwargs=None, ax=None,
                **kwargs):
-    """Plot energy transition distribution and marginal energy distribution in
-    order to diagnose poor exploration by HMC algorithms.
+    """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
+
+    This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
 
     Parameters
     ----------
@@ -44,7 +46,6 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     -------
     ax : matplotlib axes
     """
-
     energy = get_stats(trace[skip_first:], 'energy')
 
     if figsize is None:

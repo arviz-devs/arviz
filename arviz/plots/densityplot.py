@@ -1,3 +1,4 @@
+"""KDE and histogram plots for multiple variables."""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,8 +11,8 @@ from .plot_utils import _scale_text, make_label, xarray_var_iter
 def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
                 point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
                 bw=4.5, figsize=None, textsize=None):
-    """
-    Generates KDE plots for continuous variables and histograms for discretes ones.
+    """Generate KDE plots for continuous variables and histograms for discretes ones.
+
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
     and colors assigned to models.
 
@@ -54,9 +55,7 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
 
     Returns
     -------
-
     ax : Matplotlib axes
-
     """
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group='posterior')]
@@ -124,7 +123,10 @@ def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
 
 def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_interval,
               point_estimate, hpd_markers, outline, shade, ax):
-    """
+    """Plot an individual dimension.
+
+    Parameters
+    ----------
     vec : array
         1D array from trace
     vname : str

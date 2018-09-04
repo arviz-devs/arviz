@@ -3,6 +3,7 @@ pystan
 ipython
 nbsphinx
 numpydoc
+pydocstyle
 pylint
 pytest
 pytest-cov

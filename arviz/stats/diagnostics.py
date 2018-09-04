@@ -1,3 +1,4 @@
+"""Diagnostic functions for ArviZ."""
 import warnings
 
 import numpy as np
@@ -12,8 +13,7 @@ __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
 
 def effective_n(trace, varnames=None, round_to=2):
-    R"""
-    Returns estimate of the effective sample size of a set of traces.
+    r"""Calculate estimate of the effective sample size.
 
     Parameters
     ----------
@@ -47,7 +47,6 @@ def effective_n(trace, varnames=None, round_to=2):
     ----------
     Gelman et al. BDA (2014)
     """
-
     trace = trace_to_dataframe(trace, combined=False)
     varnames = get_varnames(trace, varnames)
 
@@ -64,9 +63,7 @@ def effective_n(trace, varnames=None, round_to=2):
 
 
 def _get_neff(trace_value):
-    """
-    Compute the effective sample size for a 2D array
-    """
+    """Compute the effective sample size for a 2D array."""
     nchain, n_samples = trace_value.shape
 
     acov = np.asarray([_autocov(trace_value[chain]) for chain in range(nchain)])
@@ -107,9 +104,9 @@ def _get_neff(trace_value):
 
 
 def autocorr(x):
-    """
-    Compute autocorrelation using FFT for every lag for the input array
-    https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
+    """Compute autocorrelation using FFT for every lag for the input array.
+
+    See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
 
     Parameters
     ----------
@@ -130,8 +127,7 @@ def autocorr(x):
 
 
 def _autocov(x):
-    """
-    Compute autocovariance estimates for every lag for the input array
+    """Compute autocovariance estimates for every lag for the input array.
 
     Parameters
     ----------
@@ -149,8 +145,7 @@ def _autocov(x):
 
 
 def gelman_rubin(trace, varnames=None, round_to=2):
-    R"""
-    Returns estimate of R for a set of traces.
+    r"""Compute estimate of R-hat for a set of traces.
 
     The Gelman-Rubin diagnostic tests for lack of convergence by comparing the variance between
     multiple chains to the variance within each chain. If convergence has been achieved, the
@@ -174,7 +169,6 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
     Notes
     -----
-
     The diagnostic is computed by:
 
       .. math:: \hat{R} = \frac{\hat{V}}{W}
@@ -189,7 +183,6 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """
-
     trace = trace_to_dataframe(trace, combined=False)
     varnames = get_varnames(trace, varnames)
 
@@ -204,8 +197,7 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
 
 def _get_rhat(values, round_to=2):
-    """Compute the rhat for a 2d array
-    """
+    """Compute the rhat for a 2d array."""
     num_samples = values.shape[1]
     # Calculate between-chain variance
     between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
@@ -219,8 +211,7 @@ def _get_rhat(values, round_to=2):
 
 
 def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
-    R"""
-    Return z-scores for convergence diagnostics.
+    r"""Compute z-scores for convergence diagnostics.
 
     Compare the mean of the first % of series with the mean of the last % of series. x is divided
     into a number of segments for which this difference is computed. If the series is converged,
@@ -246,7 +237,6 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
 
     Notes
     -----
-
     The Geweke score on some series x is computed by:
 
       .. math:: \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
@@ -259,7 +249,6 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     ----------
     Geweke (1992)
     """
-
     trace = trace_to_dataframe(trace, combined=False)
     varnames = get_varnames(trace, varnames)
 

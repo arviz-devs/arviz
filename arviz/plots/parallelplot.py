@@ -1,13 +1,16 @@
+"""Parallel coordinates plot showing posterior points with and without divergences marked."""
 import matplotlib.pyplot as plt
 import numpy as np
+
 from ..utils import trace_to_dataframe, get_varnames, get_stats
 from .plot_utils import _scale_text
 
 
 def parallelplot(trace, varnames=None, figsize=None, textsize=None, legend=True, colornd='k',
                  colord='C1', shadend=.025, skip_first=0, ax=None):
-    """
-    A parallel coordinates plot showing posterior points with and without divergences
+    """Parallel coordinates plot showing posterior points with and without divergences marked.
+
+    Described by https://arxiv.org/abs/1709.01449, suggested by Ari Hartikainen
 
     Parameters
     ----------

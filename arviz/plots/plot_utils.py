@@ -1,3 +1,4 @@
+"""Utilities for plotting."""
 import itertools
 
 import numpy as np
@@ -31,7 +32,6 @@ def _scale_text(figsize, textsize, scale_ratio=2):
     scale_ratio : float (default: 2)
         Ratio of size of elements compared to figsize.  Larger is bigger.
     """
-
     if textsize is None and figsize is not None:
         textsize = figsize[0] * scale_ratio
 
@@ -41,8 +41,7 @@ def _scale_text(figsize, textsize, scale_ratio=2):
 
 
 def get_bins(ary, max_bins=50, fenceposts=2):
-    """
-    Compute number of bins (or ticks)
+    """Compute number of bins (or ticks).
 
     Parameters
     ----------
@@ -63,7 +62,7 @@ def get_bins(ary, max_bins=50, fenceposts=2):
 
 
 def default_grid(n_items, max_cols=6, min_cols=3):
-    """Makes a grid for subplots
+    """Make a grid for subplots.
 
     Tries to get as close to sqrt(n_items) x sqrt(n_items) as it can,
     but allows for custom logic
@@ -98,7 +97,8 @@ def default_grid(n_items, max_cols=6, min_cols=3):
 
 
 def _create_axes_grid(length_plotters, rows, cols, **kwargs):
-    """
+    """Create figure and axes for grids with multiple plots.
+
     Parameters
     ----------
     n_items : int
@@ -139,7 +139,7 @@ def selection_to_string(selection):
 
 
 def make_label(var_name, selection):
-    """Consistent labelling for plots
+    """Consistent labelling for plots.
 
     Parameters
     ----------
@@ -160,10 +160,10 @@ def make_label(var_name, selection):
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
-    """Converts xarray data to an iterator over vectors
+    """Convert xarray data to an iterator over vectors.
 
     Iterates over each var_name and all of its coordinates, returning the 1d
-    data
+    data.
 
     Parameters
     ----------

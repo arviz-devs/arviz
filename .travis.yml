@@ -27,7 +27,7 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pylint arviz/; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then . ./scripts/lint.sh ; fi
   - pytest -v arviz/tests/ --cov=arviz/
   - travis-sphinx build --nowarn --source=doc
 
