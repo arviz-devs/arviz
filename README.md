@@ -10,7 +10,7 @@ Includes functions for posterior analysis, model checking, comparison and diagno
 ## Documentation
 
 The official Arviz documentation can be found here
-http://arviz-devs.github.io/arviz/index.html
+https://arviz-devs.github.io/arviz/index.html
 
 ## Installation
 
@@ -23,37 +23,37 @@ pip install git+git://github.com/arviz-devs/arviz.git
 Another option is to clone the repository and install using `python setup.py install`.
 
 -------------------------------------------------------------------------------
-## Gallery
+## [Gallery](https://arviz-devs.github.io/arviz/examples/index.html)
 
 <p>
-<table cellspacing="20">
+<table>
 <tr>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/ridgeplot.html">
   <img alt="Ridge plot"
-  src="doc/example_thumbs/ridgeplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/ridgeplot_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/parallelplot.html">
   <img alt="Parallel plot"
-  src="doc/example_thumbs/parallelplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/parallelplot_thumb.png" />
   </a>
   </td>
 
   <td>
   <a href="https://arviz-devs.github.io/arviz/examples/traceplot.html">
   <img alt="Trace plot"
-  src="doc/example_thumbs/traceplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/traceplot_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/jointplot.html">
-  <img alt="Joint plot"
-  src="doc/example_thumbs/jointplot_thumb.png" />
+  <a href="https://arviz-devs.github.io/arviz/examples/densityplot.html">
+  <img alt="Density plot"
+  src="https://arviz-devs.github.io/arviz/_static/densityplot_thumb.png" />
   </a>
   </td>
 
@@ -61,16 +61,61 @@ Another option is to clone the repository and install using `python setup.py ins
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/ppcplot.html">
-  <img alt="Posterior predictive plot"
-  src="doc/example_thumbs/ppcplot_thumb.png" />
+  <a href="https://arviz-devs.github.io/arviz/examples/posteriorplot.html">
+  <img alt="Posterior plot"
+  src="https://arviz-devs.github.io/arviz/_static/posteriorplot_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://bokeh.pydata.org/en/latest/docs/gallery/image.html">
-  <img alt="Autocorrelation plot"
-  src="doc/example_thumbs/autocorrplot_thumb.png" />
+  <a href="https://arviz-devs.github.io/arviz/examples/jointplot.html">
+  <img alt="Joint plot"
+  src="https://arviz-devs.github.io/arviz/_static/jointplot_thumb.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/ppcplot.html">
+  <img alt="Posterior predictive plot"
+  src="https://arviz-devs.github.io/arviz/_static/ppcplot_thumb.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/pairplot.html">
+  <img alt="Pairplot"
+  src="https://arviz-devs.github.io/arviz/_static/pairplot_thumb.png" />
+  </a>
+  </td>
+
+  </tr>
+  <tr>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/energyplot.html">
+  <img alt="Energy Plot"
+  src="https://arviz-devs.github.io/arviz/_static/energyplot_thumb.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/violinplot.html">
+  <img alt="Violin Plot"
+  src="https://arviz-devs.github.io/arviz/_static/violinplot_thumb.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/forestplot.html">
+  <img alt="Forest Plot"
+  src="https://arviz-devs.github.io/arviz/_static/forestplot_thumb.png" />
+  </a>
+  </td>
+
+  <td>
+  <a href="https://arviz-devs.github.io/arviz/examples/autocorrplot.html">
+  <img alt="Autocorrelation Plot"
+  src="https://arviz-devs.github.io/arviz/_static/autocorrplot_thumb.png" />
   </a>
   </td>
 
@@ -83,4 +128,9 @@ Arviz is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, Xarray, and 
 
 ## Developing
 
-There is a Dockerfile which helps for isolating build problems and local development. Install Docker for your operating system, clone this repo, then run ./scripts/start_container.sh. This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
+There is a Dockerfile which helps for isolating build problems and local development.
+1. Install Docker for your operating system
+2. Clone this repo,
+3. Run `./scripts/start_container.sh`
+
+ This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
