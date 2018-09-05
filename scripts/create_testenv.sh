@@ -22,7 +22,7 @@ if [[ $* != *--global* ]]; then
     fi
 fi
 
-conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray mkl-service
+conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray netcdf4 mkl-service
 
 pip install --upgrade pip
 
