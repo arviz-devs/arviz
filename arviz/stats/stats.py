@@ -7,13 +7,13 @@ from scipy.special import logsumexp
 from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
-from ..utils import get_stats, get_varnames, trace_to_dataframe, log_post_trace
+from ..utils import get_varnames, trace_to_dataframe, log_post_trace
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
 
 
-def bfmi(trace):
+def bfmi(energy):
     R"""Calculate the estimated Bayesian fraction of missing information (BFMI).
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
@@ -24,8 +24,10 @@ def bfmi(trace):
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-        Result of an HMC/NUTS run, must contain energy information
+    energy : NumPy array
+        Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
+        after converting a trace or fit to InferenceData, the energy will be in
+        `data.sample_stats.energy`.
 
     Returns
     -------
@@ -33,9 +35,8 @@ def bfmi(trace):
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
     """
-    energy = np.atleast_2d(get_stats(trace, 'energy', combined=False))
-
-    return np.square(np.diff(energy, axis=1)).mean(axis=1) / np.var(energy, axis=1)
+    energy_mat = np.atleast_2d(energy)
+    return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
 
 
 def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
