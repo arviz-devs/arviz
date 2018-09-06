@@ -38,6 +38,37 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
     Returns
     -------
     axes : matplotlib axes
+
+
+    Examples
+    --------
+    Plot a subset variables
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('non_centered_eight')
+        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
+        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords)
+
+    Combine all chains into one distribution and trace
+
+    .. plot::
+        :context: close-figs
+
+        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
+        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
+
+
+    Plot reference lines against distribution and trace
+
+    .. plot::
+        :context: close-figs
+
+        >>> lines = (('theta_t',{'theta_t_dim_0':0}, [-1]),)
+        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
+        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
     data = convert_to_dataset(data, group='posterior')
 

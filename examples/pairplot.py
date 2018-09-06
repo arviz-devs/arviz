@@ -24,5 +24,5 @@ with pm.Model() as centered_eight:
     centered_eight_trace = pm.sample()
 
 az.pairplot(centered_eight_trace,
-            varnames=['theta__0', 'theta__1', 'tau', 'mu'],
+            var_names=['theta__0', 'theta__1', 'tau', 'mu'],
             divergences=True)

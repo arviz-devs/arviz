@@ -132,7 +132,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     if coords is None:
         coords = {}
 
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
+    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
