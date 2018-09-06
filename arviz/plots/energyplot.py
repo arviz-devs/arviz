@@ -39,7 +39,9 @@ def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alph
     textsize: int
         Text size for labels
     fill_kwargs : dicts, optional
-        Additional keywords passed to `fill_between` (to control the shade)
+        Additional keywords passed to `arviz.kdeplot` (to control the shade)
+    plot_kwargs : dicts, optional
+        Additional keywords passed to `arviz.kdeplot` or `plt.hist` (if type='hist')
     ax : axes
         Matplotlib axes.
 
