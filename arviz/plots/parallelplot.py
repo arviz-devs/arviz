@@ -5,8 +5,8 @@ from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_nparray
 
 
-def parallelplot(data, var_names=None, coords=None, figsize=None, textsize=None, legend=True, colornd='k',
-                 colord='C1', shadend=.025, ax=None):
+def parallelplot(data, var_names=None, coords=None, figsize=None, textsize=None, legend=True,
+                 colornd='k', colord='C1', shadend=.025, ax=None):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
 
