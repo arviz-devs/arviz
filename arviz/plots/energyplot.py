@@ -81,7 +81,8 @@ def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alph
 
     elif kind == 'hist':
         for alpha, color, label, value in series:
-            ax.hist(value.flatten(), bins='auto', density=True, alpha=alpha, label=label, color=color, **plot_kwargs)
+            ax.hist(value.flatten(), bins='auto', density=True, alpha=alpha,
+                    label=label, color=color, **plot_kwargs)
 
     else:
         raise ValueError('Plot type {} not recognized.'.format(kind))
