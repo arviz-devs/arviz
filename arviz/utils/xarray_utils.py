@@ -160,13 +160,19 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     xr.DataArray
         Will have the same data as passed, but with coordinates and dimensions
     """
-    n_chains, n_samples, *shape = np.atleast_2d(ary).shape
+    default_dims = ["chain", "draw"]
+    ary = np.atleast_2d(ary)
+    n_chains, n_samples, *shape = ary.shape
     if n_chains > n_samples:
         warnings.warn('More chains ({n_chains}) than draws ({n_samples}). '
                       'Passed array should have shape (chains, draws, *shape)'.format(
                           n_chains=n_chains, n_samples=n_samples), SyntaxWarning)
     if dims is None:
         dims = []
+    if len([dim for dim in dims if dim not in default_dims]) > len(shape):
+        warnings.warn('More dims ({dims_len}) given than exists ({shape_len}). '
+                      'Passed array should have shape (chains, draws, *shape)'.format(
+                          dims_len=len(dims), shape_len=len(shape)), SyntaxWarning)
     if coords is None:
         coords = {}
     for idx, dim_len in enumerate(shape):
@@ -187,6 +193,7 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     if 'draw' not in coords:
         coords['draw'] = np.arange(n_samples)
 
+    # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
     return xr.DataArray(ary, coords=coords, dims=dims)
 
