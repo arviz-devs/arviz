@@ -5,7 +5,7 @@ from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_nparray
 
 
-def parallelplot(data, var_names=None, figsize=None, textsize=None, legend=True, colornd='k',
+def parallelplot(data, var_names=None, coords=None, figsize=None, textsize=None, legend=True, colornd='k',
                  colord='C1', shadend=.025, ax=None):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -19,6 +19,8 @@ def parallelplot(data, var_names=None, figsize=None, textsize=None, legend=True,
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted. Can be used to change the order
         of the plotted variables
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple
         If None, size is (12 x 6)
     textsize: int
@@ -39,9 +41,13 @@ def parallelplot(data, var_names=None, figsize=None, textsize=None, legend=True,
     -------
     ax : matplotlib axes
     """
+    if coords is None:
+        coords = {}
+
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
-    _var_names, _posterior = xarray_to_nparray(posterior_data, var_names=var_names, combined=True)
+    _var_names, _posterior = xarray_to_nparray(posterior_data.sel(**coords), var_names=var_names,
+                                               combined=True)
 
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group='sample_stats')

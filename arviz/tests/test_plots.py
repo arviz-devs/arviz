@@ -70,12 +70,15 @@ class TestPlots(SetupPlots):
             jointplot(obj, var_names=('mu', 'tau'), kind=kind)
 
     def test_pairplot(self):
-        pairplot(self.short_trace, varnames=['theta__0', 'theta__1'], divergences=True,
-                 marker='x', kwargs_divergences={'marker': '*', 'c': 'C'})
+
+        pairplot(self.short_trace, var_names=['theta'], divergences=True,
+                 coords={'theta_dim_0': [0, 1]}, marker='x',
+                 kwargs_divergences={'marker': '*', 'c': 'C'})
+
         pairplot(self.short_trace, divergences=True, marker='x',
                  kwargs_divergences={'marker': '*', 'c': 'C'})
-        pairplot(self.short_trace, kind='hexbin', varnames=['theta__0', 'theta__1'],
-                 cmap='viridis', textsize=20)
+        pairplot(self.short_trace, kind='hexbin', var_names=['theta'],
+                 coords={'theta_dim_0': [0, 1]}, cmap='viridis', textsize=20)
 
     def test_ppcplot(self):
         ppcplot(self.data['y'], self.sample_ppc)
