@@ -11,7 +11,7 @@ from .plot_utils import _scale_text, xarray_to_nparray
 
 def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
              gridsize='auto', divergences=False, colorbar=False, gs=None, ax=None,
-             kwargs_divergences=None, **kwargs):
+             divergences_kwargs=None, plot_kwargs=None):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
@@ -35,18 +35,19 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
         y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
+    divergences : Boolean
+        If True divergences will be plotted in a different color
     colorbar : bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
-    divergences : Boolean
-        If True divergences will be plotted in a diferent color
     gs : Grid spec
         Matplotlib Grid spec.
-    kwargs_divergences : dicts, optional
-        Additional keywords passed to ax.scatter for divergences
     ax: axes
         Matplotlib axes
-
+    divergences_kwargs : dicts, optional
+        Additional keywords passed to ax.scatter for divergences
+    plot_kwargs : dicts, optional
+        Additional keywords passed to ax.scatter for divergences
     Returns
     -------
     ax : matplotlib axes
@@ -59,6 +60,8 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     if coords is None:
         coords = {}
 
+    if plot_kwargs is None:
+        plot_kwargs = {}
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
     _var_names, _posterior = xarray_to_nparray(posterior_data.sel(**coords),
@@ -69,8 +72,8 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     _, diverging_mask = xarray_to_nparray(divergent_data, var_names=('diverging',), combined=True)
     diverging_mask = np.squeeze(diverging_mask)
 
-    if kwargs_divergences is None:
-        kwargs_divergences = {}
+    if divergences_kwargs is None:
+        divergences_kwargs = {}
 
     if gridsize == 'auto':
         gridsize = int(len(_posterior[0])**0.35)
@@ -89,10 +92,10 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
 
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
-            ax.scatter(_posterior[0], _posterior[1], s=markersize, **kwargs)
+            ax.scatter(_posterior[0], _posterior[1], s=markersize, **plot_kwargs)
         else:
             hexbin = ax.hexbin(posterior_data[0], posterior_data[1], mincnt=1, gridsize=gridsize,
-                               **kwargs)
+                               **plot_kwargs)
             ax.grid(False)
             if colorbar:
                 cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
@@ -100,7 +103,7 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
 
         if divergences:
             ax.scatter(_posterior[0][diverging_mask], _posterior[1][diverging_mask],
-                       s=markersize, **kwargs_divergences)
+                       s=markersize, **divergences_kwargs)
 
         ax.set_xlabel('{}'.format(_var_names[0]), fontsize=textsize)
         ax.set_ylabel('{}'.format(_var_names[1]), fontsize=textsize)
@@ -120,11 +123,11 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
                 ax = plt.subplot(gs[j, i])
 
                 if kind == 'scatter':
-                    ax.scatter(var1, var2, s=markersize, **kwargs)
+                    ax.scatter(var1, var2, s=markersize, **plot_kwargs)
                 else:
                     ax.grid(False)
                     if i == j == 0 and colorbar:
-                        hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                        hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                         divider = make_axes_locatable(ax)
                         cax = divider.append_axes('right', size='7%', pad=0.1)
                         cbar = plt.colorbar(hexbin,
@@ -134,14 +137,14 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
                         divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
 
                     else:
-                        ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **kwargs)
+                        ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                         divider = make_axes_locatable(ax)
                         divider.append_axes('right', size='7%', pad=0.1).set_axis_off()
                         divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
 
                 if divergences:
                     ax.scatter(var1[diverging_mask], var2[diverging_mask],
-                               s=markersize, **kwargs_divergences)
+                               s=markersize, **divergences_kwargs)
 
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())
