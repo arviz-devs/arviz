@@ -160,34 +160,28 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     xr.DataArray
         Will have the same data as passed, but with coordinates and dimensions
     """
-    default_dims = ['chain', 'draw']
+    n_chains, n_samples, *shape = np.atleast_2d(ary).shape
+    if n_chains > n_samples:
+        warnings.warn('More chains ({n_chains}) than draws ({n_samples}). '
+                      'Passed array should have shape (chains, draws, *shape)'.format(
+                          n_chains=n_chains, n_samples=n_samples), SyntaxWarning)
     if dims is None:
-        can_squeeze = False
-        if len(ary.shape) < 3:
-            ary = np.atleast_3d(ary)
-            can_squeeze = True # added a dimension, might remove it too
-        n_chains, n_samples, *shape = ary.shape
-        if n_chains > n_samples:
-            warnings.warn('More chains ({n_chains}) than draws ({n_samples}). '
-                          'Passed array should have shape (chains, draws, *shape)'.format(
-                              n_chains=n_chains, n_samples=n_samples), SyntaxWarning)
-
+        dims = []
+    if coords is None:
         coords = {}
-        dims = default_dims
-        if can_squeeze and len(shape) == 1 and shape[0] == 1:
-            # this means I added dimensions to the passed shape, and can remove them
-            ary = np.squeeze(ary, axis=-1)
-        else:
-            for idx, dim_len in enumerate(shape):
-                dims.append('{var_name}_dim_{idx}'.format(var_name=var_name, idx=idx))
-                coords[dims[-1]] = np.arange(dim_len)
-    else:
-        dims = list(dims)
-        coords = dict(coords)
-        if dims[:2] != default_dims:
-            dims = default_dims + dims
+    for idx, dim_len in enumerate(shape):
+        if len(dims) < idx+1 or dims[idx] is None:
+            dim_name = '{var_name}_dim_{idx}'.format(var_name=var_name, idx=idx)
+            dims.append(dim_name)
+        dim_name = dims[idx]
+        if dim_name not in coords:
+            coords[dim_name] = np.arange(dim_len)
+    # reversed order for default dims: 'chain', 'draw'
+    if 'draw' not in dims:
+        dims = ['draw'] + dims
+    if 'chain' not in dims:
+        dims = ['chain'] + dims
 
-    n_chains, n_samples, *_ = ary.shape
     if 'chain' not in coords:
         coords['chain'] = np.arange(n_chains)
     if 'draw' not in coords:
