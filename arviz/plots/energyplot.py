@@ -3,20 +3,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .kdeplot import kdeplot
 from ..stats import bfmi as e_bfmi
-from ..utils import get_stats
+from .plot_utils import _scale_text
+from ..utils import convert_to_dataset
 
 
-def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
-               fill_color=('C0', 'C5'), bw=4.5, skip_first=0, fill_kwargs=None, ax=None,
-               **kwargs):
+def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
+               fill_color=('C0', 'C5'), bw=4.5, textsize=None, fill_kwargs=None, plot_kwargs=None,
+               ax=None):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-        Posterior samples
+    data : xarray dataset, or object that can be converted (must represent
+           `sample_stats` and have an `energy` variable)
     kind : str
         Type of plot to display (kde or histogram)
     bfmi : bool
@@ -35,8 +36,8 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy). Only works if `kind='kde'`
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
+    textsize: int
+        Text size for labels
     fill_kwargs : dicts, optional
         Additional keywords passed to `fill_between` (to control the shade)
     ax : axes
@@ -46,16 +47,20 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     -------
     ax : matplotlib axes
     """
-    energy = get_stats(trace[skip_first:], 'energy')
+    energy = convert_to_dataset(data, group='sample_stats').energy.values
 
     if figsize is None:
-        figsize = (6, 6)
+        figsize = (8, 6)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
     if fill_kwargs is None:
         fill_kwargs = {}
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
 
     series = zip(
         fill_alpha,
@@ -68,24 +73,22 @@ def energyplot(trace, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         for alpha, color, label, value in series:
             fill_kwargs['alpha'] = alpha
             fill_kwargs['color'] = color
-            plot_kwargs = {
-                'color': color,
-                'alpha': 0
-            }
-            plot_kwargs.update(kwargs)
-            kdeplot(value, bw=bw, label=label,
+            plot_kwargs.setdefault('color', color)
+            plot_kwargs.setdefault('alpha', 0)
+            plot_kwargs.setdefault('linewidth', linewidth)
+            kdeplot(value, bw=bw, label=label, textsize=textsize,
                     plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
 
     elif kind == 'hist':
         for alpha, color, label, value in series:
-            ax.hist(value, alpha=alpha, label=label, color=color, **kwargs)
+            ax.hist(value.flatten(), bins='auto', density=True, alpha=alpha, label=label, color=color, **plot_kwargs)
 
     else:
         raise ValueError('Plot type {} not recognized.'.format(kind))
 
     if bfmi:
-        for idx, val in enumerate(e_bfmi(trace)):
-            plt.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, val), alpha=0)
+        for idx, val in enumerate(e_bfmi(energy)):
+            ax.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, val), alpha=0)
 
     ax.set_xticks([])
     ax.set_yticks([])

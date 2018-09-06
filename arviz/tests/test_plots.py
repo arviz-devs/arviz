@@ -54,10 +54,10 @@ class TestPlots(SetupPlots):
             _, axes = forestplot(obj, kind='ridgeplot', r_hat=False, n_eff=False)
             assert axes.shape == (1,)
 
-    def test_energyplot(self):
-        with pytest.raises(AttributeError):
-            energyplot(self.df_trace)
-        assert energyplot(self.short_trace)
+    @pytest.mark.parametrize('kind', ['kde', 'hist'])
+    def test_energyplot(self, kind):
+        for obj in (self.short_trace, self.fit):
+            assert energyplot(obj, kind=kind)
 
     def test_parallelplot(self):
         with pytest.raises(ValueError):

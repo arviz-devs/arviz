@@ -11,8 +11,8 @@ from ..stats import bfmi, compare, hpd, r2_score, summary, waic, psislw
 
 
 def test_bfmi():
-    trace = pd.DataFrame([1, 2, 3, 4], columns=['energy'])
-    assert_almost_equal(bfmi(trace), 0.8)
+    energy = np.array([1, 2, 3, 4])
+    assert_almost_equal(bfmi(energy), 0.8)
 
 
 def test_hpd():
