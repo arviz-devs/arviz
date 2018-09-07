@@ -1,6 +1,7 @@
 """Utilities for converting and working with netcdf and xarray data."""
 import re
 import warnings
+from copy import deepcopy
 
 import numpy as np
 import xarray as xr
@@ -160,6 +161,9 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     xr.DataArray
         Will have the same data as passed, but with coordinates and dimensions
     """
+    # manage and transform copies
+    coords = deepcopy(coords)
+    dims = deepcopy(dims)
     default_dims = ["chain", "draw"]
     ary = np.atleast_2d(ary)
     n_chains, n_samples, *shape = ary.shape
