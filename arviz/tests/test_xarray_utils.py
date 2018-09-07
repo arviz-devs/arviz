@@ -46,6 +46,73 @@ class TestNumpyToDataArray():
         assert inference_data.foo.draw.shape == shape[1:2]
         assert inference_data.foo[var_name].shape == shape
 
+class TestConvertToDataset():
+    def setup_method(self):
+        # pylint: disable=attribute-defined-outside-init
+        self.datadict = {
+            'a': np.random.randn(100),
+            'b': np.random.randn(1, 100, 10),
+            'c': np.random.randn(1, 100, 3, 4),
+        }
+        self.coords = {'c1' : np.arange(3), 'c2' : np.arange(4), 'b1' : np.arange(10)}
+        self.dims = {'b' : ['b1'], 'c' : ['c1', 'c2']}
+
+    def test_use_all(self):
+        dataset = convert_to_dataset(self.datadict,
+                                     coords=self.coords,
+                                     dims=self.dims)
+        assert set(dataset.data_vars) == {'a', 'b', 'c'}
+        assert set(dataset.coords) == {'chain', 'draw', 'c1', 'c2', 'b1'}
+
+        assert set(dataset.a.coords) == {'chain', 'draw'}
+        assert set(dataset.b.coords) == {'chain', 'draw', 'b1'}
+        assert set(dataset.c.coords) == {'chain', 'draw', 'c1', 'c2'}
+
+    def test_missing_coords(self):
+        dataset = convert_to_dataset(self.datadict,
+                                     coords=None,
+                                     dims=self.dims)
+        assert set(dataset.data_vars) == {'a', 'b', 'c'}
+        assert set(dataset.coords) == {'chain', 'draw', 'c1', 'c2', 'b1'}
+
+        assert set(dataset.a.coords) == {'chain', 'draw'}
+        assert set(dataset.b.coords) == {'chain', 'draw', 'b1'}
+        assert set(dataset.c.coords) == {'chain', 'draw', 'c1', 'c2'}
+
+    def test_missing_dims(self):
+        # missing dims
+        coords = {
+            'c_dim_0' : np.arange(3),
+            'c_dim_1' : np.arange(4),
+            'b_dim_0' : np.arange(10)
+        }
+        dataset = convert_to_dataset(self.datadict,
+                                     coords=coords,
+                                     dims=None)
+        assert set(dataset.data_vars) == {'a', 'b', 'c'}
+        assert set(dataset.coords) == {'chain', 'draw', 'c_dim_0', 'c_dim_1', 'b_dim_0'}
+
+        assert set(dataset.a.coords) == {'chain', 'draw'}
+        assert set(dataset.b.coords) == {'chain', 'draw', 'b_dim_0'}
+        assert set(dataset.c.coords) == {'chain', 'draw', 'c_dim_0', 'c_dim_1'}
+
+    def test_skip_dim_0(self):
+        dims = {'c' : [None, 'c2']}
+        coords = {
+            'c_dim_0' : np.arange(3),
+            'c2' : np.arange(4),
+            'b_dim_0' : np.arange(10)
+        }
+        dataset = convert_to_dataset(self.datadict,
+                                     coords=coords,
+                                     dims=dims)
+        assert set(dataset.data_vars) == {'a', 'b', 'c'}
+        assert set(dataset.coords) == {'chain', 'draw', 'c_dim_0', 'c2', 'b_dim_0'}
+
+        assert set(dataset.a.coords) == {'chain', 'draw'}
+        assert set(dataset.b.coords) == {'chain', 'draw', 'b_dim_0'}
+        assert set(dataset.c.coords) == {'chain', 'draw', 'c_dim_0', 'c2'}
+
 
 def test_dict_to_dataset():
     datadict = {
@@ -61,58 +128,6 @@ def test_dict_to_dataset():
     assert set(dataset.a.coords) == {'chain', 'draw'}
     assert set(dataset.b.coords) == {'chain', 'draw', 'c'}
 
-def test_missing_coords_or_dims():
-    datadict = {
-        'a': np.random.randn(100),
-        'b': np.random.randn(1, 100, 10),
-        'c': np.random.randn(1, 100, 3, 4),
-    }
-    # use all
-    coords = {'c1' : np.arange(3), 'c2' : np.arange(4), 'b1' : np.arange(10)}
-    dims = {'b' : ['b1'], 'c' : ['c1', 'c2']}
-    dataset = convert_to_dataset(datadict,
-                                 coords=coords,
-                                 dims=dims)
-    assert set(dataset.data_vars) == {'a', 'b', 'c'}
-    assert set(dataset.coords) == {'chain', 'draw', 'c1', 'c2', 'b1'}
-
-    assert set(dataset.a.coords) == {'chain', 'draw'}
-    assert set(dataset.b.coords) == {'chain', 'draw', 'b1'}
-    assert set(dataset.c.coords) == {'chain', 'draw', 'c1', 'c2'}
-    # missing coords
-    dims = {"b" : ["b1"], "c" : ["c1", "c2"]}
-    dataset = convert_to_dataset(datadict,
-                                 coords=None,
-                                 dims=dims)
-    assert set(dataset.data_vars) == {'a', 'b', 'c'}
-    assert set(dataset.coords) == {'chain', 'draw', 'c1', 'c2', 'b1'}
-
-    assert set(dataset.a.coords) == {'chain', 'draw'}
-    assert set(dataset.b.coords) == {'chain', 'draw', 'b1'}
-    assert set(dataset.c.coords) == {'chain', 'draw', 'c1', 'c2'}
-    # missing dims
-    coords = {'c_dim_0' : np.arange(3), 'c_dim_1' : np.arange(4), 'b_dim_0' : np.arange(10)}
-    dataset = convert_to_dataset(datadict,
-                                 coords=coords,
-                                 dims=None)
-    assert set(dataset.data_vars) == {'a', 'b', 'c'}
-    assert set(dataset.coords) == {'chain', 'draw', 'c_dim_0', 'c_dim_1', 'b_dim_0'}
-
-    assert set(dataset.a.coords) == {'chain', 'draw'}
-    assert set(dataset.b.coords) == {'chain', 'draw', 'b_dim_0'}
-    assert set(dataset.c.coords) == {'chain', 'draw', 'c_dim_0', 'c_dim_1'}
-    # dims skipping dimension 0
-    dims = {'c' : [None, 'c2']}
-    coords = {'c_dim_0' : np.arange(3), 'c2' : np.arange(4), 'b_dim_0' : np.arange(10)}
-    dataset = convert_to_dataset(datadict,
-                                 coords=coords,
-                                 dims=None)
-    assert set(dataset.data_vars) == {'a', 'b', 'c'}
-    assert set(dataset.coords) == {'chain', 'draw', 'c_dim_0', 'c2', 'b_dim_0'}
-
-    assert set(dataset.a.coords) == {'chain', 'draw'}
-    assert set(dataset.b.coords) == {'chain', 'draw', 'b_dim_0'}
-    assert set(dataset.c.coords) == {'chain', 'draw', 'c_dim_0', 'c2'}
 
 
 def test_convert_to_dataset_idempotent():

@@ -180,9 +180,12 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     if coords is None:
         coords = {}
     for idx, dim_len in enumerate(shape):
-        if len(dims) < idx+1 or dims[idx] is None:
+        if (len(dims) < idx+1) or (dims[idx] is None):
             dim_name = '{var_name}_dim_{idx}'.format(var_name=var_name, idx=idx)
-            dims.append(dim_name)
+            if len(dims) < idx + 1:
+                dims.append(dim_name)
+            else:
+                dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(dim_len)
