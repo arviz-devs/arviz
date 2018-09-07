@@ -356,7 +356,8 @@ class VarHandler():
         self.combined = combined
         self.colors = colors
         self.model_color = dict(zip(self.model_names, self.colors))
-        self.chain_offset = len(data) * 0.45 / max(datum.chain.max().values for datum in data)
+        max_chains = max(datum.chain.max().values for datum in data)
+        self.chain_offset = len(data) * 0.45 / max(1, max_chains)
         self.var_offset = 1.5 * self.chain_offset
         self.group_offset = 2 * self.var_offset
 
