@@ -336,7 +336,7 @@ class PyMC3Converter:
             'sample_stats': self.sample_stats_to_xarray(),
             'posterior_predictive': self.posterior_predictive_to_xarray(),
             'prior': self.prior_to_xarray(),
-            'observed_data': self.data_to_xarray(),
+            'observed_data': self.observed_data_to_xarray(),
         })
 
 
