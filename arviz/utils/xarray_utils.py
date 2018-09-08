@@ -301,7 +301,7 @@ class PyMC3Converter:
                                dims=self.dims)
 
     @requires('trace')
-    def data_to_xarray(self):
+    def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         # This next line is brittle and may not work forever, but is a secret
         # way to access the model from the trace.
@@ -312,7 +312,7 @@ class PyMC3Converter:
             dims = {}
         else:
             dims = self.dims
-        data = {}
+        observed_data = {}
         for name, vals in observations.items():
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
@@ -320,8 +320,8 @@ class PyMC3Converter:
                                                      dims=val_dims, coords=self.coords)
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=data)
+            observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=observed_data)
 
 
     def to_inference_data(self):
@@ -336,7 +336,7 @@ class PyMC3Converter:
             'sample_stats': self.sample_stats_to_xarray(),
             'posterior_predictive': self.posterior_predictive_to_xarray(),
             'prior': self.prior_to_xarray(),
-            'data': self.data_to_xarray(),
+            'observed_data': self.data_to_xarray(),
         })
 
 
