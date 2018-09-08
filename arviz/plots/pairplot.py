@@ -111,7 +111,7 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
 
     if gs is None and ax is None:
         plt.figure(figsize=figsize)
-        gs = gridspec.GridSpec(numvars - 1, numvars - 1)
+        gs = gridspec.GridSpec(numvars - 1, numvars - 1, wspace=0.05, hspace=0.05)
 
         axs = []
         for i in range(0, numvars - 1):
