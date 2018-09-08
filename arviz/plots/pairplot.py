@@ -54,11 +54,10 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     gs : matplotlib gridspec
 
     """
-
     valid_kinds = ['scatter', 'hexbin']
     if kind not in valid_kinds:
         raise ValueError(('Plot type {} not recognized.'
-                         ' Valid plot type must be in {}').format(kind, valid_kinds))
+                          'Plot type must be in {}').format(kind, valid_kinds))
 
     if coords is None:
         coords = {}
