@@ -54,14 +54,17 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     gs : matplotlib gridspec
 
     """
-    if kind not in ['scatter', 'hexbin']:
-        raise ValueError('Plot type {} not recognized.'.format(kind))
+    valid_kinds = ['scatter', 'hexbin']
+    if kind not in valid_kinds:
+        raise ValueError(('Plot type {} not recognized.'
+                          'Plot type must be in {}').format(kind, valid_kinds))
 
     if coords is None:
         coords = {}
 
     if plot_kwargs is None:
         plot_kwargs = {}
+
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
     _var_names, _posterior = xarray_to_nparray(posterior_data.sel(**coords),
@@ -129,18 +132,18 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
                     if i == j == 0 and colorbar:
                         hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                         divider = make_axes_locatable(ax)
-                        cax = divider.append_axes('right', size='7%', pad=0.1)
+                        cax = divider.append_axes('right', size='7%')
                         cbar = plt.colorbar(hexbin,
                                             ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
                                             cax=cax)
                         cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
-                        divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
+                        divider.append_axes('top', size='7%').set_axis_off()
 
                     else:
                         ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                         divider = make_axes_locatable(ax)
-                        divider.append_axes('right', size='7%', pad=0.1).set_axis_off()
-                        divider.append_axes('top', size='7%', pad=0.1).set_axis_off()
+                        divider.append_axes('right', size='7%').set_axis_off()
+                        divider.append_axes('top', size='7%').set_axis_off()
 
                 if divergences:
                     ax.scatter(var1[diverging_mask], var2[diverging_mask],
