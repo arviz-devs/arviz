@@ -24,4 +24,3 @@ with pm.Model() as centered_eight:
     centered_eight_trace = pm.sample()
 
 az.parallelplot(centered_eight_trace, var_names=['theta', 'tau', 'mu'])
-
