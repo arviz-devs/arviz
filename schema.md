@@ -49,14 +49,14 @@ For each variable, the effective_n
     Points in parameter space where the leapfrog starts that lead to a divergence (excluding tuning).
     Does stan have access to that info? We could also just store the accepted point of a divergent trajectory.
 
-/data
+/observed_data
     All data that is used in observed variables (or the data (or transformed?) data sections in stan.)
 
 /warnings
     A list of warnings during sampling. Eg low effective_n, divergences....
     TODO Not sure about the format. Can we somehow share at least part of that between stan/pymc?
     They mostly produce the same warnings I think.
-    
+
 /prior?
 Samples from the prior distribution. Same shapes as in trace. (except for (sample, chain))
 
@@ -65,18 +65,18 @@ Samples from the prior predictive distribution. Same vars as in /data
 
 /posterior_predictive?
 Samples from the posterior predicitve distribution. Same vars as in /data
-    
+
 /trace
 TODO We could call this /posterior
 
-    attrs:        
+    attrs:
             The final parameters for the sampler. ie the final mass matrix and step size.
-            
+
     /trace//var1
             One entry for each variable. The first two dimensions should always be
             `(chain, sample)`. I guess the decision whether or not we want to expose a stacked version `draw=('chain', 'sample')`
             is up to arviz.
-            
+
             Variable names must not share names with coordinate names.
 
             attrs:
@@ -91,5 +91,5 @@ TODO We could call this /posterior
 
 
 
-TODO: In order to reproduce the run, it may make sense to also store some data on the random state (in numpy, this is a tuple of arrays), as 
-well as some version info.  Hopefully just `PyMC3, (3, 4, 1)` or similar works. 
+TODO: In order to reproduce the run, it may make sense to also store some data on the random state (in numpy, this is a tuple of arrays), as
+well as some version info.  Hopefully just `PyMC3, (3, 4, 1)` or similar works.
