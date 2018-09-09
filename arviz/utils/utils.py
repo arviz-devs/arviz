@@ -391,7 +391,7 @@ def load_arviz_data(dataset):
                 Contextual effects model for radon contamination in Minnesota, from
                 Gelman and Hill (2006), adapted from a PyMC3 example by Chris
                 Fonnesbeck (https://docs.pymc.io/notebooks/multilevel_modeling.html).
-                Four chains, 1000 draws each, fit with NUTS in PyMC3. Features county
+                Four chains, 500 draws each, fit with NUTS in PyMC3. Features county
                 names as coordinates.
             ''',
             'path': os.path.join(data_path, 'radon.nc')
