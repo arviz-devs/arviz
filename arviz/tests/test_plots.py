@@ -5,6 +5,7 @@ import pymc3 as pm
 import pytest
 
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
+from ..utils import pymc3_to_inference_data
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 
@@ -80,8 +81,10 @@ class TestPlots(SetupPlots):
         pairplot(self.short_trace, kind='hexbin', var_names=['theta'],
                  coords={'theta_dim_0': [0, 1]}, plot_kwargs={'cmap': 'viridis'}, textsize=20)
 
-    def test_ppcplot(self):
-        ppcplot(self.data['y'], self.sample_ppc)
+    @pytest.mark.parametrize('kind', ['kde', 'cumulative'])
+    def test_ppcplot(self, kind):
+        data = pymc3_to_inference_data(trace=self.short_trace, posterior_predictive=self.sample_ppc)
+        ppcplot(data, kind=kind)
 
     def test_violintraceplot(self):
         for obj in (self.short_trace, self.fit):

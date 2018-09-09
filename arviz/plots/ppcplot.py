@@ -4,81 +4,104 @@ from .kdeplot import kdeplot
 from .plot_utils import _scale_text, _create_axes_grid, default_grid
 
 
-def ppcplot(data, ppc_sample, kind='kde', mean=True, figsize=None, textsize=None, ax=None):
+def ppcplot(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None):
     """
     Plot for Posterior Predictive checks.
+
+    Note that this plot will flatten out any dimensions in the posterior predictive variables.
 
     Parameters
     ----------
     data : Array-like
         Observed values
-    ppc_samples : dict
-        Posterior predictive check samples
     kind : str
         Type of plot to display (kde or cumulative)
+    alpha : float
+        Opacity of posterior predictive density curves
     mean : bool
-        Whether or not to plot the mean ppc distribution. Defaults to True
+        Whether or not to plot the mean posterior predictive distribution. Defaults to True
     figsize : figure size tuple
         If None, size is (6, 5)
     textsize: int
         Text size for labels. If None it will be auto-scaled based on figsize.
-    ax: axes
-        Matplotlib axes
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes
     """
-    rows, cols = default_grid(len(ppc_sample))
+    for group in ('posterior_predictive', 'observed_data'):
+        if not hasattr(data, group):
+            raise TypeError(
+                '`data` argument must have the group "{group}" for ppcplot'.format(group=group))
 
+    observed = data.observed_data
+    posterior_predictive = data.posterior_predictive
+
+    rows, cols = default_grid(len(observed.data_vars))
     if figsize is None:
-        figsize = (7, 5)
+        figsize = (7 * cols, 5 * rows)
+    _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
 
-    _, ax = _create_axes_grid(len(ppc_sample), rows, cols, figsize=figsize)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize, 2)
-
-    for ax_, (var, ppss) in zip(np.atleast_1d(ax), ppc_sample.items()):
+    textsize, linewidth, _ = _scale_text(figsize, textsize)
+    for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
         if kind == 'kde':
-            kdeplot(data, label='{}'.format(var),
+            kdeplot(observed[var_name].values.flatten(), label='Observed {}'.format(var_name),
                     plot_kwargs={'color': 'k', 'linewidth': linewidth, 'zorder': 3},
                     fill_kwargs={'alpha': 0},
-                    ax=ax_)
-            for pps in ppss:
-                kdeplot(pps,
-                        plot_kwargs={'color': 'C5', 'linewidth': 0.5 * linewidth},
-                        fill_kwargs={'alpha': 0},
-                        ax=ax_)
-            ax_.plot([], color='C5', label='{}_pps'.format(var))
+                    ax=ax)
+            for _, chain_vals in posterior_predictive[var_name].groupby('chain'):
+                for _, vals in chain_vals.groupby('draw'):
+                    kdeplot(vals,
+                            plot_kwargs={'color': 'C4',
+                                         'alpha': alpha,
+                                         'linewidth': 0.5 * linewidth},
+                            fill_kwargs={'alpha': 0},
+                            ax=ax)
+            ax.plot([], color='C4', label='Posterior predictive {}'.format(var_name))
             if mean:
-                kdeplot(ppss,
+                kdeplot(posterior_predictive[var_name].values.flatten(),
                         plot_kwargs={'color': 'C0',
                                      'linestyle': '--',
                                      'linewidth': linewidth,
                                      'zorder': 2},
-                        label='mean {}_pps'.format(var),
-                        ax=ax_)
-            ax_.set_xlabel(var, fontsize=textsize)
-            ax_.set_yticks([])
+                        label='Posterior predictive mean {}'.format(var_name),
+                        ax=ax)
+            ax.set_xlabel(var_name, fontsize=textsize)
+            ax.set_yticks([])
 
         elif kind == 'cumulative':
-            ax_.plot(*_ecdf(data), color='k', lw=linewidth, label='{}'.format(var), zorder=3)
-            for pps in ppss:
-                ax_.plot(*_ecdf(pps), alpha=0.2, color='C5', lw=linewidth)
-            ax_.plot([], color='C5', label='{}_pps'.format(var))
+            ax.plot(*_empirical_cdf(observed[var_name].values.flatten()),
+                    color='k',
+                    linewidth=linewidth,
+                    label='Observed {}'.format(var_name),
+                    zorder=3)
+            for _, chain_vals in posterior_predictive[var_name].groupby('chain'):
+                for _, vals in chain_vals.groupby('draw'):
+                    ax.plot(*_empirical_cdf(vals), alpha=alpha, color='C4', linewidth=linewidth)
+            ax.plot([], color='C4', label='Posterior predictive {}'.format(var_name))
             if mean:
-                ax_.plot(*_ecdf(ppss.flatten()), color='C0', ls='--', lw=linewidth,
-                         label='mean {}_pps'.format(var))
-            ax_.set_xlabel(var, fontsize=textsize)
-            ax_.set_yticks([0, 0.5, 1])
-        ax_.legend(fontsize=textsize)
-        ax_.tick_params(labelsize=textsize)
+                ax.plot(*_empirical_cdf(posterior_predictive[var_name].values.flatten()),
+                        color='C0',
+                        linestyle='--',
+                        linewidth=linewidth,
+                        label='Posterior predictive mean {}'.format(var_name))
+            ax.set_xlabel(var_name, fontsize=textsize)
+            ax.set_yticks([0, 0.5, 1])
+        ax.legend(fontsize=textsize)
+    return axes
 
-    return ax
 
+def _empirical_cdf(data):
+    """Compute empirical cdf of a numpy array.
 
-def _ecdf(data):
-    len_data = len(data)
-    data_s = np.sort(data)
-    cdf = np.arange(1, len_data + 1) / len_data
-    return data_s, cdf
+    Parameters
+    ----------
+    data : np.array
+        1d array
+
+    Returns
+    -------
+    np.array, np.array
+        x and y coordinates for the empirical cdf of the data
+    """
+    return np.sort(data), np.linspace(0, 1, len(data))

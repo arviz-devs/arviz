@@ -6,8 +6,7 @@ from ..utils import convert_to_dataset
 from ..stats.diagnostics import autocorr
 
 
-def autocorrplot(data, var_names=None, max_lag=100, combined=False,
-                 figsize=None, textsize=None):
+def autocorrplot(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
     """Bar plot of the autocorrelation function for a sequence of data.
 
     Useful in particular for posteriors from MCMC samples which may display correlation.
