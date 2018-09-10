@@ -155,7 +155,7 @@ def make_label(var_name, selection):
         A text representation of the label
     """
     if selection:
-        return '{} ({})'.format(var_name, selection_to_string(selection))
+        return '{} \n ({})'.format(var_name, selection_to_string(selection))
     return '{}'.format(var_name)
 
 
