@@ -385,7 +385,7 @@ def load_arviz_data(dataset):
                 NUTS in PyMC3.  Features named coordinates for each of the eight schools.
             ''',
             'path': os.path.join(data_path, 'non_centered_eight.nc')
-        }
+        },
     }
     if dataset in datasets_available:
         return InferenceData.from_netcdf(datasets_available[dataset]['path'])

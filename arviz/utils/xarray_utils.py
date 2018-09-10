@@ -282,9 +282,13 @@ class PyMC3Converter:
     @requires('trace')
     def sample_stats_to_xarray(self):
         """Extract sample_stats from PyMC3 trace."""
+        rename_key = {
+            'model_logp' : 'lp',
+        }
         data = {}
         for stat in self.trace.stat_names:
-            data[stat] = np.array(self.trace.get_sampler_stats(stat, combine=False))
+            name = rename_key.get(stat, stat)
+            data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
         return dict_to_dataset(data)
 
     @requires('posterior_predictive')

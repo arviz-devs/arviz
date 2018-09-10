@@ -58,13 +58,16 @@ class InferenceData():
                 groups[group] = data
         return InferenceData(**groups)
 
-    def to_netcdf(self, filename):
+    def to_netcdf(self, filename, compress=True):
         """Write InferenceData to file using netcdf4.
 
         Parameters
         ----------
         filename : str
             Location to write to
+        compress : bool
+            Whether to compress result. Note this saves disk space, but may make
+            saving and loading somewhat slower (default: True).
 
         Returns
         -------
@@ -74,7 +77,10 @@ class InferenceData():
         mode = 'w' # overwrite first, then append
         for group in self._groups:
             data = getattr(self, group)
-            data.to_netcdf(filename, mode=mode, group=group)
+            kwargs = {}
+            if compress:
+                kwargs['encoding'] = {var_name: {'zlib': True} for var_name in data.variables}
+            data.to_netcdf(filename, mode=mode, group=group, **kwargs)
             data.close()
             mode = 'a'
         return filename
