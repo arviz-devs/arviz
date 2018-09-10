@@ -10,4 +10,6 @@ az.style.use('arviz-darkgrid')
 
 centered = az.load_arviz_data('centered_eight')
 
-az.pairplot(centered, var_names=['theta', "mu"], kind='hexbin', colorbar=True, divergences=True)
+coords = {'school': ['Choate', 'Deerfield']}
+az.pairplot(centered, var_names=['theta', "mu", "tau"], kind='hexbin', coords=coords,
+            colorbar=True, divergences=True)
