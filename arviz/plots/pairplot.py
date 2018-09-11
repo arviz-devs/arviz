@@ -134,7 +134,7 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
                     divider.append_axes('right', size='1%').set_axis_off()
                     divider.append_axes('top', size='1%').set_axis_off()
 
-                    if i == j == 0 and colorbar is True:
+                    if i == j == 0 and colorbar:
                         cax = divider.append_axes('right', size='7%')
                         cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
                                             cax=cax)
