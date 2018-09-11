@@ -235,7 +235,7 @@ def _rhat_ufunc(ary):
     return target
 
 
-def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
+def geweke(values, first=.1, last=.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
 
     Compare the mean of the first % of series with the mean of the last % of series. x is divided
@@ -244,7 +244,7 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
 
     Parameters
     ----------
-    x : array-like
+    values : 1D array-like
       The trace of some stochastic parameter.
     first : float
       The fraction of series at the beginning of the trace.
@@ -274,18 +274,6 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     ----------
     Geweke (1992)
     """
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
-
-    gewekes = {}
-
-    for var in varnames:
-        gewekes[var] = _get_geweke(trace[var].values, first, last, intervals)
-
-    return gewekes
-
-
-def _get_geweke(x, first=.1, last=.5, intervals=20):
     # Filter out invalid intervals
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
@@ -297,7 +285,7 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
     zscores = []
 
     # Last index value
-    end = len(x) - 1
+    end = len(values) - 1
 
     # Start intervals going up to the <last>% of the chain
     last_start_idx = (1 - last) * end
@@ -308,8 +296,8 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
-        first_slice = x[start: start + int(first * (end - start))]
-        last_slice = x[int(end - last * (end - start)):]
+        first_slice = values[start: start + int(first * (end - start))]
+        last_slice = values[int(end - last * (end - start)):]
 
         z_score = first_slice.mean() - last_slice.mean()
         z_score /= np.sqrt(first_slice.var() + last_slice.var())
