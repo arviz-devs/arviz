@@ -655,8 +655,8 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
     elif trace.columns.value_counts()[0] < 2:
         return dforg
     else:
-        n_eff = effective_n(trace, varnames=varnames, round_to=round_to)
-        rhat = gelman_rubin(trace, varnames=varnames, round_to=round_to)
+        n_eff = effective_n(trace, var_names=varnames).round(round_to)
+        rhat = gelman_rubin(trace, var_names=varnames).round(round_to)
         return pd.concat([dforg, n_eff, rhat], axis=1, join_axes=[dforg.index])
 
 
