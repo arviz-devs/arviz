@@ -129,21 +129,16 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
                     ax.scatter(var1, var2, s=markersize, **plot_kwargs)
                 else:
                     ax.grid(False)
+                    hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
+                    divider = make_axes_locatable(ax)
+                    divider.append_axes('right', size='1%').set_axis_off()
+                    divider.append_axes('top', size='1%').set_axis_off()
+
                     if i == j == 0 and colorbar:
-                        hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
-                        divider = make_axes_locatable(ax)
                         cax = divider.append_axes('right', size='7%')
-                        cbar = plt.colorbar(hexbin,
-                                            ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
+                        cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
                                             cax=cax)
                         cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
-                        divider.append_axes('top', size='7%').set_axis_off()
-
-                    else:
-                        ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
-                        divider = make_axes_locatable(ax)
-                        divider.append_axes('right', size='7%').set_axis_off()
-                        divider.append_axes('top', size='7%').set_axis_off()
 
                 if divergences:
                     ax.scatter(var1[diverging_mask], var2[diverging_mask],
