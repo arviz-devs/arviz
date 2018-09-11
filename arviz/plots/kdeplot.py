@@ -47,7 +47,7 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
     ax : matplotlib axes
 
     Returns
-    ----------
+    -------
     ax : matplotlib axes
 
     """
@@ -172,7 +172,7 @@ def fast_kde(x, cumulative=False, bw=4.5):
 
 def fast_kde_2d(x, y, circular=False):
     """
-    A 2D fft-based Gaussian kernel density estimate (KDE)
+    2D fft-based Gaussian kernel density estimate (KDE).
 
     The code was adapted from https://github.com/mfouesneau/faststats
 
