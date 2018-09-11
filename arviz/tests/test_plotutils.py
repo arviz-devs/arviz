@@ -3,7 +3,7 @@ import numpy as np
 import xarray as xr
 import pytest
 
-from ..plots.plot_utils import xarray_to_nparray
+from ..plots.plot_utils import xarray_to_nparray, xarray_var_iter
 
 
 @pytest.fixture(scope='function')
@@ -36,3 +36,18 @@ def test_dataset_to_numpy_combined(sample_dataset):
     assert len(var_names) == 2
     assert (data[0] == mu.reshape(1, 6)).all()
     assert (data[1] == tau.reshape(1, 6)).all()
+
+
+def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
+    """Assert that varname order stays consistent when chains are combined"""
+    _, _, data = sample_dataset
+    var_names = [var for (var, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
+    assert var_names == ["mu", "tau"]
+
+
+def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
+    """Assert that varname order stays consistent when chains are not combined"""
+    _, _, data = sample_dataset
+    var_names = [(var, selection) for (var, selection, _) in xarray_var_iter(data, var_names=None)]
+    assert var_names == [("mu", {"chain": 0}), ("mu", {"chain": 1}),
+                         ("tau", {"chain": 0}), ("tau", {"chain": 1})]
