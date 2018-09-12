@@ -8,7 +8,8 @@ from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
 def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-              gridsize='auto', joint_kwargs=None, marginal_kwargs=None):
+              gridsize='auto', contour=True, fill_last=True, joint_kwargs=None,
+              marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -29,6 +30,10 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     gridsize : int or (int, int), optional.
         The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
         for details
+    contour : bool
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+    fill_last : bool
+        If True fill the last contour of the 2D KDE plot. Defaults to True.
     joint_kwargs : dicts, optional
         Additional keywords modifying the join distribution (central subplot)
     marginal_kwargs : dicts, optional
@@ -86,7 +91,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     if kind == 'scatter':
         axjoin.scatter(x, y, **joint_kwargs)
     elif kind == 'kde':
-        kdeplot(x, y, ax=axjoin, **joint_kwargs)
+        kdeplot(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
     else:
         if gridsize == 'auto':
             gridsize = int(len(x)**0.35)

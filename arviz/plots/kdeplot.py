@@ -9,8 +9,8 @@ from .plot_utils import _scale_text
 
 
 def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
-            figsize=None, textsize=None, plot_kwargs=None, fill_kwargs=None,
-            rug_kwargs=None, countour_kwargs=None, ax=None):
+            contour=True, fill_last=True, figsize=None, textsize=None, plot_kwargs=None,
+            fill_kwargs=None, rug_kwargs=None, contour_kwargs=None, ax=None):
     """1D or 2D KDE plot taking into account boundary conditions.
 
     Parameters
@@ -20,30 +20,35 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
     values2 : array-like, optional
         Values to plot. If present, a 2D KDE will be estimated
     cumulative : bool
-        If true plot the estimated cumulative distribution function. Defaults to False
+        If true plot the estimated cumulative distribution function. Defaults to False.
+        Ignored for 2D KDE
     rug : bool
-        If True adds a rugplot. Defaults to False
+        If True adds a rugplot. Defaults to False. Ignored for 2D KDE
     label : string
         Text to include as part of the legend
     bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default rule used by SciPy).
+        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
+        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
+        rule of thumb (the default rule used by SciPy).
     rotated : bool
-        Whether to rotate the plot 90 degrees
+        Whether to rotate the 1D KDE plot 90 degrees.
+    contour : bool
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+    fill_last : bool
+        If True fill the last contour of the 2D KDE plot. Defaults to True.
     figsize : tuple
         Size of figure in inches. Defaults to (12, 8)
     textsize : float
         Size of text on figure.
     plot_kwargs : dict
-        Keywords passed to the pdf line. Ignored for 2D KDE
+        Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
         Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
         Ignored for 2D KDE
     rug_kwargs : dict
         Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
-    countour_kwargs : dict
-        Keywords passed to the countour plot. Ignored for 1D KDE
+    contour_kwargs : dict
+        Keywords passed to the contourplot. Ignored for 1D KDE
     ax : matplotlib axes
 
     Returns
@@ -104,17 +109,26 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
         if label:
             ax.legend()
     else:
-        if countour_kwargs is None:
-            countour_kwargs = {}
-        countour_kwargs.setdefault('colors', '0.5')
+        if contour_kwargs is None:
+            contour_kwargs = {}
+        contour_kwargs.setdefault('colors', '0.5')
 
-        density, xmin, xmax, ymin, ymax = fast_kde_2d(values, values2)
-        x_x, y_y = np.mgrid[xmin:xmax:128j, ymin:ymax:128j]
+        gridsize = (128, 128) if contour else (256, 256)
 
+        density, xmin, xmax, ymin, ymax = fast_kde_2d(values, values2, gridsize=gridsize)
+        g_s = complex(gridsize[0])
+        x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
+
+        ax.grid(False)
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
-        ax.contourf(x_x, y_y, density)
-        ax.contour(x_x, y_y, density, **countour_kwargs)
+        if contour:
+            qcfs = ax.contourf(x_x, y_y, density, antialiased=True)
+            if not fill_last:
+                qcfs.collections[0].set_alpha(0)
+            ax.contour(x_x, y_y, density, **contour_kwargs)
+        else:
+            ax.pcolormesh(x_x, y_y, density)
 
     return ax
 
@@ -170,7 +184,7 @@ def fast_kde(x, cumulative=False, bw=4.5):
     return density, xmin, xmax
 
 
-def fast_kde_2d(x, y, circular=False):
+def fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
     2D fft-based Gaussian kernel density estimate (KDE).
 
@@ -180,6 +194,8 @@ def fast_kde_2d(x, y, circular=False):
     ----------
     x : Numpy array or list
     y : Numpy array or list
+    gridsize : tuple
+        Number of points used to discretize data. Use powers of 2 for fft optimization
     circular: bool
         If True, use circular boundaries. Defaults to False
     Returns
@@ -200,7 +216,7 @@ def fast_kde_2d(x, y, circular=False):
 
     len_x = len(x)
     weights = np.ones(len_x)
-    n_x, n_y = [128, 128]  # [256, 256]
+    n_x, n_y = gridsize
 
     d_x = (xmax - xmin) / (n_x - 1)
     d_y = (ymax - ymin) / (n_y - 1)
@@ -222,7 +238,7 @@ def fast_kde_2d(x, y, circular=False):
     x_x, y_y = np.meshgrid(x_x, y_y)
 
     kernel = np.vstack((x_x.flatten(), y_y.flatten()))
-    kernel = (inv_cov @ kernel) * kernel
+    kernel = np.dot(inv_cov, kernel) * kernel
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
 
