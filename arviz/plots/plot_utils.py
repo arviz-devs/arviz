@@ -135,7 +135,7 @@ def selection_to_string(selection):
     str
         key1: value1, key2: value2, ...
     """
-    return ', '.join(['{}: {}'.format(k, v) for k, v in selection.items()])
+    return ', '.join(['{}'.format(v) for _, v in selection.items()])
 
 
 def make_label(var_name, selection):
@@ -155,7 +155,7 @@ def make_label(var_name, selection):
         A text representation of the label
     """
     if selection:
-        return '{} ({})'.format(var_name, selection_to_string(selection))
+        return '{} \n ({})'.format(var_name, selection_to_string(selection))
     return '{}'.format(var_name)
 
 
