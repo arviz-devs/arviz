@@ -271,6 +271,40 @@ class PyMC3Converter:
         self.dims = dims
 
     @requires('trace')
+    def _extract_log_likelihood(self):
+        """Compute log likelihood of each observation.
+
+        Return None if there is not exactly 1 observed random variable.
+        """
+        # This next line is brittle and may not work forever, but is a secret
+        # way to access the model from the trace.
+        model = self.trace._straces[0].model # pylint: disable=protected-access
+        if len(model.observed_RVs) != 1:
+            return None, None
+        else:
+            if self.dims is not None:
+                coord_name = self.dims.get(model.observed_RVs[0].name)
+            else:
+                coord_name = None
+
+        cached = [(var, var.logp_elemwise) for var in model.observed_RVs]
+        def log_likelihood_vals_point(point):
+            """Compute log likelihood for each observed point."""
+            log_like_vals = []
+            for var, log_like in cached:
+                log_like_val = log_like(point)
+                if var.missing_values:
+                    log_like_val = log_like_val[~var.observations.mask]
+                log_like_vals.append(log_like_val.ravel())
+            return np.concatenate(log_like_vals)
+
+        chain_likelihoods = []
+        for chain in self.trace.chains:
+            log_like = (log_likelihood_vals_point(point) for point in self.trace.points([chain]))
+            chain_likelihoods.append(np.stack(log_like))
+        return np.stack(chain_likelihoods), coord_name
+
+    @requires('trace')
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         var_names = pm.utils.get_default_varnames(self.trace.varnames, include_transformed=False)
@@ -289,7 +323,14 @@ class PyMC3Converter:
         for stat in self.trace.stat_names:
             name = rename_key.get(stat, stat)
             data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
-        return dict_to_dataset(data)
+        log_likelihood, dims = self._extract_log_likelihood()
+        if log_likelihood is not None:
+            data['log_likelihood'] = log_likelihood
+            dims = {'log_likelihood': dims}
+        else:
+            dims = None
+
+        return dict_to_dataset(data, dims=dims, coords=self.coords)
 
     @requires('posterior_predictive')
     def posterior_predictive_to_xarray(self):
