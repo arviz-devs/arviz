@@ -19,21 +19,8 @@ For each dimension, we store a corresponding variable here, that contains the la
 Each backend can store a representation of the model in here. (I guess
 source code for stan, no clue for pymc3 at this point.)
 
-/stats
-
-/stats/rhat
-
-/stats/rhat/var1
-For each variable, the rhat.
-
-/stats/effective_n
-
-/stats/effective_n/var1
-For each variable, the effective_n
-
-/stats/treedepth?
-/stats/accept_stat?
-/stats/diverging?
+/sample_stats
+Statistics computed while sampling, like step size (step_size), depth, diverging, energy (for HMC), log probability (lp), and log likelihood (log_likelihood).
 
 /initial_point
     One point in parameter space for each chain, where that chain started.
