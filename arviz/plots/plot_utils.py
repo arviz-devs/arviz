@@ -255,7 +255,10 @@ def get_coords(data, coords):
     Raises
     ------
     ValueError
-        If coords name or dims are not available in data
+        If coords name are not available in data
+
+    KeyError
+        If coords dims are not available in data
 
     Returns
     -------
