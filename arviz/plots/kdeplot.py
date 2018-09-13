@@ -87,7 +87,7 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
         plot_kwargs.setdefault('linewidth', linewidth)
         rug_kwargs.setdefault('markersize', 2 * markersize)
 
-        density, lower, upper = fast_kde(values, cumulative, bw)
+        density, lower, upper = _fast_kde(values, cumulative, bw)
         x = np.linspace(lower, upper, len(density))
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
@@ -115,7 +115,7 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
 
         gridsize = (128, 128) if contour else (256, 256)
 
-        density, xmin, xmax, ymin, ymax = fast_kde_2d(values, values2, gridsize=gridsize)
+        density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 
@@ -133,7 +133,7 @@ def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.
     return ax
 
 
-def fast_kde(x, cumulative=False, bw=4.5):
+def _fast_kde(x, cumulative=False, bw=4.5):
     """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
 
     The code was adapted from https://github.com/mfouesneau/faststats
@@ -184,7 +184,7 @@ def fast_kde(x, cumulative=False, bw=4.5):
     return density, xmin, xmax
 
 
-def fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
+def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
     2D fft-based Gaussian kernel density estimate (KDE).
 
