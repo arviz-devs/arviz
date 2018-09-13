@@ -724,7 +724,7 @@ def _mc_error(x, batches=5, circular=False):
         return std / np.sqrt(batches)
 
 
-def waic(trace, model, pointwise=False):
+def waic(data, pointwise=False):
     """Calculate the widely available information criterion.
 
     Also calculates the WAIC's standard error and the effective number of
@@ -750,11 +750,21 @@ def waic(trace, model, pointwise=False):
          densities exceeds 0.4
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
     """
-    log_py = log_post_trace(trace, model)
+    inference_data = convert_to_inference_data(data)
+    for group in ('posterior', 'sample_stats'):
+        if not hasattr(inference_data, group):
+            raise TypeError('Must be able to extract a {group} group from data!'.format(group))
+    if 'log_likelihood' not in inference_data.sample_stats:
+        raise TypeError('Data must include log_likelihood in sample_stats')
+    posterior = inference_data.posterior
+    log_likelihood = inference_data.sample_stats.log_likelihood
+    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
+    new_shape = (n_samples, ) + log_likelihood.shape[2:]
+    log_likelihood = log_likelihood.values.reshape(*new_shape)
 
-    lppd_i = logsumexp(log_py, axis=0, b=1.0 / log_py.shape[0])
+    lppd_i = logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0])
 
-    vars_lpd = np.var(log_py, axis=0)
+    vars_lpd = np.var(log_likelihood, axis=0)
     warn_mg = 0
     if np.any(vars_lpd > 0.4):
         warnings.warn("""For one or more samples the posterior variance of the log predictive
