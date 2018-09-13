@@ -4,7 +4,7 @@ import numpy as np
 
 from .kdeplot import kdeplot
 from ..utils import convert_to_dataset
-from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
+from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
 
 
 def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
@@ -78,7 +78,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
     if lines is None:
         lines = ()
 
-    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
+    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)

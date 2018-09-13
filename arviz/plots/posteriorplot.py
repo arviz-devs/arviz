@@ -5,7 +5,8 @@ from scipy.stats import mode
 from .kdeplot import kdeplot, _fast_kde
 from ..stats import hpd
 from ..utils import convert_to_dataset
-from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
+from .plot_utils import (xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid,
+                         get_coords)
 
 
 def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None,
@@ -132,7 +133,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     if coords is None:
         coords = {}
 
-    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
+    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

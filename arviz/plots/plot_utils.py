@@ -247,3 +247,26 @@ def xarray_to_nparray(data, *, var_names=None, combined=True):
         unpacked_var_names.append(make_label(var_name, selection))
 
     return unpacked_var_names, np.array(unpacked_data)
+
+
+def get_coords(data, coords):
+    """Subselects xarray dataset object to provided coords. Raises exception if fails
+
+    Raises
+    ------
+    ValueError
+        If coords name or dims are not available in data
+
+    Returns
+    -------
+    data: xarray
+        xarray.Dataset object
+    """
+    try:
+        return data.sel(**coords)
+
+    except ValueError as err:
+        raise ValueError("Verify coords keys. {}".format(err))
+
+    except KeyError as err:
+        raise KeyError("Verify coords values. {}".format(err))
