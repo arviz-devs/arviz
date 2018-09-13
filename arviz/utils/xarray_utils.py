@@ -290,19 +290,18 @@ class PyMC3Converter:
         cached = [(var, var.logp_elemwise) for var in model.observed_RVs]
         def log_likelihood_vals_point(point):
             """Compute log likelihood for each observed point."""
-            logp_vals = []
-            for var, logp in cached:
-                logp = logp(point)
+            log_like_vals = []
+            for var, log_like in cached:
+                log_like_val = log_like(point)
                 if var.missing_values:
-                    logp = logp[~var.observations.mask]
-                logp_vals.append(logp.ravel())
-
-            return np.concatenate(logp_vals)
+                    log_like_val = log_like_val[~var.observations.mask]
+                log_like_vals.append(log_like_val.ravel())
+            return np.concatenate(log_like_vals)
 
         chain_likelihoods = []
         for chain in self.trace.chains:
-            logp = (log_likelihood_vals_point(point) for point in self.trace.points([chain]))
-            chain_likelihoods.append(np.stack(logp))
+            log_like = (log_likelihood_vals_point(point) for point in self.trace.points([chain]))
+            chain_likelihoods.append(np.stack(log_like))
         return np.stack(chain_likelihoods), coord_name
 
     @requires('trace')
