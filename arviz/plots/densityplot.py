@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .kdeplot import fast_kde
+from .kdeplot import _fast_kde
 from ..stats import hpd
 from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, make_label, xarray_var_iter
@@ -154,7 +154,7 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_i
     ax : matplotlib axes
     """
     if vec.dtype.kind == 'f':
-        density, lower, upper = fast_kde(vec, bw=bw)
+        density, lower, upper = _fast_kde(vec, bw=bw)
         x = np.linspace(lower, upper, len(density))
         hpd_ = hpd(vec, credible_interval)
         cut = (x >= hpd_[0]) & (x <= hpd_[1])

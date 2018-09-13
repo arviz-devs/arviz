@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .kdeplot import fast_kde
+from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
 from ..stats import hpd
 from ..utils import convert_to_dataset
@@ -93,7 +93,7 @@ def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94
 
 def _violinplot(val, shade, bw, ax, **kwargs_shade):
     """Auxiliary function to plot violinplots."""
-    density, low_b, up_b = fast_kde(val, bw=bw)
+    density, low_b, up_b = _fast_kde(val, bw=bw)
     x = np.linspace(low_b, up_b, len(density))
 
     x = np.concatenate([x, x[::-1]])

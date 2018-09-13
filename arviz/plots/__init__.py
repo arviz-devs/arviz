@@ -4,7 +4,7 @@ from .compareplot import compareplot
 from .densityplot import densityplot
 from .energyplot import energyplot
 from .forestplot import forestplot
-from .kdeplot import kdeplot
+from .kdeplot import kdeplot, _fast_kde, _fast_kde_2d
 from .parallelplot import parallelplot
 from .posteriorplot import posteriorplot
 from .traceplot import traceplot

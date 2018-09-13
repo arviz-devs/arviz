@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import mode
-from .kdeplot import kdeplot, fast_kde
+from .kdeplot import kdeplot, _fast_kde
 from ..stats import hpd
 from ..utils import convert_to_dataset
 from .plot_utils import xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid
@@ -219,7 +219,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
             point_value = values.mean()
         elif point_estimate == 'mode':
             if isinstance(values[0], float):
-                density, lower, upper = fast_kde(values, bw=bw)
+                density, lower, upper = _fast_kde(values, bw=bw)
                 x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
             else:

@@ -9,7 +9,7 @@ from ..stats.diagnostics import _get_neff, _get_rhat
 from ..stats import hpd
 from .plot_utils import _scale_text, xarray_var_iter, make_label
 from ..utils import convert_to_dataset
-from .kdeplot import fast_kde
+from .kdeplot import _fast_kde
 
 
 def pairwise(iterable):
@@ -425,7 +425,7 @@ class VarHandler():
             yvals.append(y)
             colors.append(color)
             values = values.flatten()
-            density, lower, upper = fast_kde(values)
+            density, lower, upper = _fast_kde(values)
             xvals.append(np.linspace(lower, upper, len(density)))
             pdfs.append(density)
 
