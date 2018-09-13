@@ -8,6 +8,7 @@ from scipy.stats import dirichlet, circmean, circstd
 from scipy.optimize import minimize
 
 from ..utils import get_varnames, trace_to_dataframe, log_post_trace
+from arviz.utils.xarray_utils import convert_to_inference_data
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
@@ -284,7 +285,7 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     return hdi_min, hdi_max
 
 
-def loo(trace, model, pointwise=False, reff=None):
+def loo(data, pointwise=False, reff=None):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
@@ -293,13 +294,11 @@ def loo(trace, model, pointwise=False, reff=None):
 
     Parameters
     ----------
-    trace : result of MCMC run
-    model : PyMC Model
-        Optional model. Default None, taken from context.
+    data : result of MCMC run
     pointwise: bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
-        relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
+        Relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
 
     Returns
@@ -312,20 +311,30 @@ def loo(trace, model, pointwise=False, reff=None):
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
     """
+    inference_data = convert_to_inference_data(data)
+    for group in ('posterior', 'sample_stats'):
+        if not hasattr(inference_data, group):
+            raise TypeError('Must be able to extract a {group} group from data!'.format(group))
+    if 'log_likelihood' not in inference_data.sample_stats:
+        raise TypeError('Data must include log_likelihood in sample_stats')
+    posterior = inference_data.posterior
+    log_likelihood = inference_data.sample_stats.log_likelihood
+    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
+    new_shape = (n_samples, ) + log_likelihood.shape[2:]
+    log_likelihood = log_likelihood.values.reshape(*new_shape)
+
+
     if reff is None:
-        df = trace_to_dataframe(trace, combined=False)
-        nchains = df.columns.value_counts()[0]
-        if nchains == 1:
+        n_chains = len(posterior.chain)
+        if n_chains == 1:
             reff = 1.
         else:
-            eff_ave = effective_n(df).mean()
-            samples = len(df) * nchains
-            reff = eff_ave / samples
+            eff_n = effective_n(posterior)
+            # this mean is over all data variables
+            reff = np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
 
-    log_py = log_post_trace(trace, model)
-
-    log_weights, pareto_shape = psislw(-log_py, reff)
-    log_weights += log_py
+    log_weights, pareto_shape = psislw(-log_likelihood, reff)
+    log_weights += log_likelihood
 
     warn_mg = 0
     if np.any(pareto_shape > 0.7):
@@ -339,7 +348,8 @@ def loo(trace, model, pointwise=False, reff=None):
     loo_lppd_i = - 2 * logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
-    lppd = np.sum(logsumexp(log_py, axis=0, b=1. / log_py.shape[0]))
+
+    lppd = np.sum(logsumexp(log_likelihood, axis=0, b=1. / log_likelihood.shape[0]))
     p_loo = lppd + (0.5 * loo_lppd)
 
     if pointwise:
