@@ -5,13 +5,14 @@ from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from ..utils import  convert_to_dataset
+from .kdeplot import kdeplot
+from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_nparray
 
 
 def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-             gridsize='auto', divergences=False, colorbar=False, gs=None, ax=None,
-             divergences_kwargs=None, plot_kwargs=None):
+             gridsize='auto', contour=True, fill_last=True, divergences=False, colorbar=False,
+             gs=None, ax=None, divergences_kwargs=None, plot_kwargs=None):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
@@ -35,6 +36,10 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
         y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
+    contour : bool
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+    fill_last : bool
+        If True fill the last contour of the 2D KDE plot. Defaults to True.
     divergences : Boolean
         If True divergences will be plotted in a different color
     colorbar : bool
@@ -47,14 +52,14 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     divergences_kwargs : dicts, optional
         Additional keywords passed to ax.scatter for divergences
     plot_kwargs : dicts, optional
-        Additional keywords passed to ax.scatter for divergences
+        Additional keywords passed to ax.scatter, az.kdeplot or ax.hexbin
     Returns
     -------
     ax : matplotlib axes
     gs : matplotlib gridspec
 
     """
-    valid_kinds = ['scatter', 'hexbin']
+    valid_kinds = ['scatter', 'kde', 'hexbin']
     if kind not in valid_kinds:
         raise ValueError(('Plot type {} not recognized.'
                           'Plot type must be in {}').format(kind, valid_kinds))
@@ -96,6 +101,9 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
             ax.scatter(_posterior[0], _posterior[1], s=markersize, **plot_kwargs)
+        elif kind == 'kde':
+            kdeplot(_posterior[0], _posterior[1], contour=contour, fill_last=fill_last, ax=ax,
+                    **plot_kwargs)
         else:
             hexbin = ax.hexbin(posterior_data[0], posterior_data[1], mincnt=1, gridsize=gridsize,
                                **plot_kwargs)
@@ -127,6 +135,8 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
 
                 if kind == 'scatter':
                     ax.scatter(var1, var2, s=markersize, **plot_kwargs)
+                elif kind == 'kde':
+                    kdeplot(var1, var2, contour=contour, fill_last=fill_last, ax=ax, **plot_kwargs)
                 else:
                     ax.grid(False)
                     hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)

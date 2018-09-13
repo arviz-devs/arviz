@@ -8,7 +8,8 @@ from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
 
 
 def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-              gridsize='auto', joint_kwargs=None, marginal_kwargs=None):
+              gridsize='auto', contour=True, fill_last=True, joint_kwargs=None,
+              marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -25,15 +26,18 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     textsize: int
         Text size for labels
     kind : str
-        Type of plot to display (scatter of hexbin)
+        Type of plot to display (scatter, kde or hexbin)
     gridsize : int or (int, int), optional.
         The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
         for details
-    joint_shade : dicts, optional
+    contour : bool
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+    fill_last : bool
+        If True fill the last contour of the 2D KDE plot. Defaults to True.
+    joint_kwargs : dicts, optional
         Additional keywords modifying the join distribution (central subplot)
-    marginal_shade : dicts, optional
+    marginal_kwargs : dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
-        (to control the shade)
 
     Returns
     -------
@@ -41,6 +45,11 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
     """
+    valid_kinds = ['scatter', 'kde', 'hexbin']
+    if kind not in valid_kinds:
+        raise ValueError(('Plot type {} not recognized.'
+                          'Plot type must be in {}').format(kind, valid_kinds))
+
     data = convert_to_dataset(data, group='posterior')
     if coords is None:
         coords = {}
@@ -81,13 +90,13 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     if kind == 'scatter':
         axjoin.scatter(x, y, **joint_kwargs)
-    elif kind == 'hexbin':
+    elif kind == 'kde':
+        kdeplot(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
+    else:
         if gridsize == 'auto':
             gridsize = int(len(x)**0.35)
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
-    else:
-        raise ValueError('Plot type {} not recognized.'.format(kind))
 
     for val, ax, orient, rotate in ((x, ax_hist_x, 'vertical', False),
                                     (y, ax_hist_y, 'horizontal', True)):
