@@ -389,11 +389,12 @@ class PyStanConverter:
     """Encapsulate PyStan specific logic."""
 
     def __init__(self, *_, fit=None, prior=None, posterior_predictive=None,
-                 observed_data=None, coords=None, dims=None):
+                 observed_data=None, log_likelihood=None, coords=None, dims=None):
         self.fit = fit
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.observed_data = observed_data
+        self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
         self._var_names = fit.model_pars
@@ -415,14 +416,23 @@ class PyStanConverter:
             nchain = self.fit.sim["chains"]
             for key, values in var_dict.items():
                 var_dict[key] = self.unpermute(values, original_order, nchain)
+        # filter posterior_predictive and log_likelihood
         post_pred = self.posterior_predictive
         if post_pred is None or isinstance(post_pred, dict):
             post_pred = []
         elif isinstance(post_pred, str):
             post_pred = [post_pred]
+        log_lik = self.log_likelihood
+        if not isinstance(log_lik, str):
+            log_lik = []
+        else:
+            log_lik = [log_lik]
+
         for var_name, values in var_dict.items():
-            if var_name in post_pred:
+            if var_name in post_pred+log_lik:
                 continue
+            if len(values.shape) == 1:
+                values = np.expand_dims(values, -1)
             data[var_name] = np.swapaxes(values, 0, 1)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -447,6 +457,12 @@ class PyStanConverter:
 
         sampler_params = self.fit.get_sampler_params(inc_warmup=False)
         stat_lp = self.fit.extract('lp__', permuted=False)
+        log_likelihood = self.log_likelihood
+        if log_likelihood is not None:
+            if isinstance(log_likelihood, str):
+                log_likelihood_vals = self.fit.extract(log_likelihood, permuted=False)
+            else:
+                log_likelihood_vals = np.asarray(log_likelihood)
         if not isinstance(stat_lp, dict):
             # PyStan version < 2.18
             permutation_order = self.fit.sim["permutation"]
@@ -457,12 +473,40 @@ class PyStanConverter:
             nchain = self.fit.sim["chains"]
             stat_lp = self.fit.extract('lp__', permuted=True)['lp__']
             stat_lp = self.unpermute(stat_lp, original_order, nchain)
+            if log_likelihood is not None:
+                if isinstance(log_likelihood, str):
+                    log_likelihood_vals = self.fit.extract(log_likelihood, permuted=True)
+                    log_likelihood_vals = log_likelihood_vals[log_likelihood]
+                log_likelihood_vals = self.unpermute(log_likelihood_vals, original_order, nchain)
         else:
             # PyStan version 2.18+
             stat_lp = stat_lp['lp__']
+            if len(stat_lp.shape) == 1:
+                stat_lp = np.expand_dims(stat_lp, -1)
+            stat_lp = np.swapaxes(stat_lp, 0, 1)
+            if log_likelihood is not None:
+                if isinstance(log_likelihood, str):
+                    log_likelihood_vals = log_likelihood_vals[log_likelihood]
+                if len(log_likelihood_vals.shape) == 1:
+                    log_likelihood_vals = np.expand_dims(log_likelihood, -1)
+                log_likelihood_vals = np.swapaxes(log_likelihood_vals, 0, 1)
+        # copy dims and coords
+        dims = deepcopy(self.dims) if self.dims is not None else {}
+        coords = deepcopy(self.coords) if self.coords is not None else {}
+
         # Add lp to sampler_params
         for i, _ in enumerate(sampler_params):
-            sampler_params[i]['lp__'] = stat_lp[:, i]
+            sampler_params[i]['lp__'] = stat_lp[i]
+        if log_likelihood is not None:
+            # Add log_likelihood to sampler_params
+            for i, _ in enumerate(sampler_params):
+                # slice log_likelihood to keep dimensions
+                sampler_params[i]['log_likelihood'] = log_likelihood_vals[i:i+1]
+            # change dims and coords for log_likelihood if defined
+            if isinstance(log_likelihood, str) and log_likelihood in dims:
+                dims["log_likelihood"] = dims.pop(log_likelihood)
+            if isinstance(log_likelihood, str) and log_likelihood in coords:
+                coords["log_likelihood"] = coords.pop(log_likelihood)
         data = {}
         for key in sampler_params[0]:
             name = rename_key.get(key, re.sub('__$', "", key))
@@ -474,8 +518,12 @@ class PyStanConverter:
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         if isinstance(self.posterior_predictive, dict):
-            data = {k : np.swapaxes(v, 0, 1)
-                    for k, v in self.posterior_predictive.items()}
+            data = {}
+            for key, values in self.posterior_predictive.items():
+                if len(values.shape) == 1:
+                    values = np.expand_dims(values, -1)
+                values = np.swapaxes(values, 0, 1)
+                data[key] = values
         else:
             dtypes = self.infer_dtypes()
             data = {}
@@ -492,14 +540,20 @@ class PyStanConverter:
                 for key, values in var_dict.items():
                     var_dict[key] = self.unpermute(values, original_order, nchain)
             for var_name, values in var_dict.items():
+                if len(values.shape) == 1:
+                    values = np.expand_dims(values, -1)
                 data[var_name] = np.swapaxes(values, 0, 1)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('prior')
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        data = {k : np.swapaxes(v, 0, 1)
-                for k, v in self.prior.items()}
+        data = {}
+        for key, values in self.prior.items():
+            if len(values.shape) == 1:
+                values = np.expand_dims(values, -1)
+            values = np.swapaxes(values, 0, 1)
+            data[key] = values
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('fit')
@@ -563,7 +617,7 @@ class PyStanConverter:
             `idx = np.argsort(permutation_order)`
         nchain : int
             number of chains used
-            `fit.sim['chains']´
+            `fit.sim['chains']`
 
         Returns
         -------
@@ -603,12 +657,13 @@ def pymc3_to_inference_data(*, trace=None, prior=None, posterior_predictive=None
 
 
 def pystan_to_inference_data(*, fit=None, prior=None, posterior_predictive=None,
-                             observed_data=None, coords=None, dims=None):
+                             observed_data=None, log_likelihood=None, coords=None, dims=None):
     """Convert pystan data into an InferenceData object."""
     return PyStanConverter(
         fit=fit,
         prior=prior,
         posterior_predictive=posterior_predictive,
         observed_data=observed_data,
+        log_likelihood=log_likelihood,
         coords=coords,
         dims=dims).to_inference_data()
