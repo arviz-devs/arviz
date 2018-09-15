@@ -34,7 +34,7 @@ class TestDiagnostics():
 
     def test_effective_n_dataset(self):
         eff_n = effective_n(self.data)
-        assert eff_n.mu > 200 # this should be deterministically 392.
+        assert eff_n.mu > 100 # This might break if the data is regenerated
 
 
     def test_geweke(self):

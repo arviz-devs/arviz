@@ -42,7 +42,7 @@ def bfmi(energy):
     )
 
 
-def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
+def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             seed=None, round_to=2):
     r"""Compare models based on WAIC or LOO cross validation.
 
@@ -101,9 +101,7 @@ def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
         be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
     """
-    names = [model.name for model in model_dict if model.name]
-    if not names:
-        names = np.arange(len(model_dict))
+    names = list(dataset_dict.keys())
 
     if ic == "waic":
         ic_func = waic
@@ -124,11 +122,6 @@ def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             "The information criterion {} is not supported.".format(ic)
         )
 
-    if len({len(m.observed_RVs) for m in model_dict}) != 1:
-        raise ValueError(
-            "The number of observed RVs should be the same across all models"
-        )
-
     if method not in ["stacking", "BB-pseudo-BMA", "pseudo-BMA"]:
         raise ValueError(
             "The method {}, to compute weights, is not supported.".format(method)
@@ -139,8 +132,10 @@ def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     ic_i = "{}_i".format(ic)
 
     ics = pd.DataFrame()
-    for model, trace in model_dict.items():
-        ics = ics.append(ic_func(trace, model, pointwise=True))
+    names = []
+    for name, dataset in dataset_dict.items():
+        names.append(name)
+        ics = ics.append(ic_func(dataset, pointwise=True))
     ics.index = names
     ics.sort_values(by=ic, inplace=True)
 
@@ -202,8 +197,8 @@ def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             z_bs[i] = z_b
             weights[i] = u_weights / np.sum(u_weights)
 
-        weights = weights.mean(0)
-        ses = pd.Series(z_bs.std(0))
+        weights = weights.mean(axis=0)
+        ses = pd.Series(z_bs.std(axis=0), index=names)
 
     elif method == "pseudo-BMA":
         min_ic = ics.iloc[0][ic]
@@ -221,12 +216,12 @@ def compare(model_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             std_err = ses.loc[val]
             weight = weights[idx]
             df_comp.at[val] = (
-                round(res[ic], round_to),
-                round(res[p_ic], round_to),
-                round(d_ic, round_to),
-                round(weight, round_to),
-                round(std_err, round_to),
-                round(d_std_err, round_to),
+                res[ic],
+                res[p_ic],
+                d_ic,
+                weight,
+                std_err,
+                d_std_err,
                 res["warning"],
             )
 
@@ -557,7 +552,7 @@ def _gpinv(probs, kappa, sigma):
     return x
 
 
-def r2_score(y_true, y_pred, round_to=2):
+def r2_score(y_true, y_pred):
     """R² for Bayesian regression models. Only valid for linear models.
 
     Parameters
@@ -566,8 +561,6 @@ def r2_score(y_true, y_pred, round_to=2):
         Ground truth (correct) target values.
     y_pred : array-like of shape = (n_samples) or (n_samples, n_outputs)
         Estimated target values.
-    round_to : int
-        Number of decimals used to round results. Defaults to 2.
 
     Returns
     -------
@@ -586,11 +579,11 @@ def r2_score(y_true, y_pred, round_to=2):
 
     return pd.Series(
         [np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"]
-    ).round(decimals=round_to)
+    )
 
 
 def summary(data, var_names=None, include_circ=None, stat_funcs=None,
-            extend=False, credible_interval=0.94, batches=None):
+            extend=True, credible_interval=0.94, batches=None):
     r"""Create a data frame with summary statistics.
 
     Parameters
@@ -599,35 +592,21 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
         Interpreted as a collection of posterior samples
     var_names : list
         Names of variables to include in summary
-    round_to : int
-        Controls formatting for floating point numbers. Default 2.
-    transform : callable
-        Function to transform data (defaults to identity)
-    circ_var_names : list
-        Names of circular variables to include in summary
+    include_circ : bool
+        Whether to include circular statistics
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
 
-        The functions will be given one argument, the samples for a variable as a 2-D array,
-        where the first axis corresponds to sampling iterations and the second axis represents the
-        flattened variable (e.g., x__0, x__1,...). Each function should return either
-
-        1) A `pandas.Series` instance containing the result of calculating the statistic along the
-           first axis. The name attribute will be taken as the name of the statistic.
-        2) A `pandas.DataFrame` where each column contains the result of calculating the statistic
-           along the first axis. The column names will be taken as the names of the statistics.
+        The functions will be given one argument, the samples for a variable as an nD array,
+        The functions should be in the style of a ufunc and return a single number. For example,
+        `np.sin`, or `scipy.stats.var` would both work.
     extend : boolean
         If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
         of, the default statistics. This is only meaningful when `stat_funcs` is not None.
-    include_transformed : bool
-        Flag for reporting automatically transformed variables in addition to original variables
-        (defaults to False).
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
-    skip_first : int
-        Number of first samples not shown in plots (burn-in).
     batches : None or int
         Batch size for calculating standard deviation for non-independent samples. Defaults to the
         smaller of 100 or the number of samples. This is only meaningful when `stat_funcs` is None.
@@ -673,9 +652,9 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     alpha = 1 - credible_interval
 
-    def make_stat_ufunc(fn, **kwargs):
+    def make_stat_ufunc(func, **kwargs):
         def circ_ufunc(ary):
-            return fn(ary.reshape(*ary.shape[:-2], -1), **kwargs, axis=-1)
+            return func(ary.reshape(*ary.shape[:-2], -1), **kwargs, axis=-1)
 
         return circ_ufunc
 
@@ -876,14 +855,13 @@ def waic(data, pointwise=False):
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("posterior", "sample_stats"):
+    for group in ("sample_stats",):
         if not hasattr(inference_data, group):
             raise TypeError(
                 "Must be able to extract a {group} group from data!".format(group=group)
             )
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
-    posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
