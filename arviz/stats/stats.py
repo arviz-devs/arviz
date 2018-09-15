@@ -4,11 +4,12 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy.special import logsumexp
-from scipy.stats import dirichlet, circmean, circstd
+import scipy.stats as st
 from scipy.optimize import minimize
+import xarray as xr
 
-from ..utils import get_varnames, trace_to_dataframe, log_post_trace
-from arviz.utils.xarray_utils import convert_to_inference_data
+from ..utils import get_varnames, trace_to_dataframe
+from arviz.utils.xarray_utils import convert_to_inference_data, convert_to_dataset
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ['bfmi', 'compare', 'hpd', 'loo', 'psislw', 'r2_score', 'summary', 'waic']
@@ -174,7 +175,7 @@ def compare(model_dict, ic='waic', method='stacking', b_samples=1000, alpha=1,
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         ic_i_val = ic_i_val * rows
 
-        b_weighting = dirichlet.rvs(alpha=[alpha] * rows, size=b_samples,
+        b_weighting = st.dirichlet.rvs(alpha=[alpha] * rows, size=b_samples,
                                     random_state=seed)
         weights = np.zeros((b_samples, cols))
         z_bs = np.zeros_like(weights)
@@ -254,12 +255,16 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     tuple
         lower and upper value of the interval.
     """
+    if x.ndim > 1:
+        return np.array([hpd(row, credible_interval=credible_interval,
+                                  transform=transform,
+                                  circular=circular) for row in x])
     # Make a copy of trace
     x = transform(x.copy())
     len_x = len(x)
 
     if circular:
-        mean = circmean(x, high=np.pi, low=-np.pi)
+        mean = st.circmean(x, high=np.pi, low=-np.pi)
         x = x - mean
         x = np.arctan2(np.sin(x), np.cos(x))
 
@@ -282,7 +287,7 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
         hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
-    return hdi_min, hdi_max
+    return np.array([hdi_min, hdi_max])
 
 
 def loo(data, pointwise=False, reff=None):
@@ -314,7 +319,7 @@ def loo(data, pointwise=False, reff=None):
     inference_data = convert_to_inference_data(data)
     for group in ('posterior', 'sample_stats'):
         if not hasattr(inference_data, group):
-            raise TypeError('Must be able to extract a {group} group from data!'.format(group))
+            raise TypeError('Must be able to extract a {group} group from data!'.format(group=group))
     if 'log_likelihood' not in inference_data.sample_stats:
         raise TypeError('Data must include log_likelihood in sample_stats')
     posterior = inference_data.posterior
@@ -541,21 +546,21 @@ def r2_score(y_true, y_pred, round_to=2):
                      index=['r2', 'r2_std']).round(decimals=round_to)
 
 
-def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnames=None,
-            stat_funcs=None, extend=False, credible_interval=0.94, skip_first=0, batches=None):
+def summary(data, var_names=None, include_circ=None,
+            stat_funcs=None, extend=False, credible_interval=0.94, batches=None):
     R"""Create a data frame with summary statistics.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-        Posterior samples
-    varnames : list
+    data : Object that can be converted to a Dataset
+        Interpreted as a collection of posterior samples
+    var_names : list
         Names of variables to include in summary
     round_to : int
         Controls formatting for floating point numbers. Default 2.
     transform : callable
         Function to transform data (defaults to identity)
-    circ_varnames : list
+    circ_var_names : list
         Names of circular variables to include in summary
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
@@ -615,59 +620,79 @@ def summary(trace, varnames=None, round_to=2, transform=lambda x: x, circ_varnam
         mu__0  0.06  0.00  0.10  0.21
         mu__1  0.07 -0.16 -0.04  0.06
     """
-    trace = trace_to_dataframe(trace, combined=False)[skip_first:]
-    varnames = get_varnames(trace, varnames)
+    posterior = convert_to_dataset(data, group='posterior')
+
+    if var_names is None:
+        var_names = list(posterior.data_vars)
 
     if batches is None:
-        batches = min([100, len(trace)])
+        batches = min([100, posterior.draw.size])
 
-    if circ_varnames is None:
-        circ_varnames = []
-    else:
-        circ_varnames = get_varnames(trace, circ_varnames)
     alpha = 1 - credible_interval
-    cnames = ['hpd_{0:g}'.format(100 * alpha / 2),
-              'hpd_{0:g}'.format(100 * (1 - alpha / 2))]
 
-    funcs = [lambda x: pd.Series(np.mean(x, 0), name='mean').round(round_to),
-             lambda x: pd.Series(np.std(x, 0), name='sd').round(round_to),
-             lambda x: pd.DataFrame([hpd(x, credible_interval)], columns=cnames).round(round_to),
-             lambda x: pd.Series(_mc_error(x, batches).round(round_to), name='mc_error')]
+    def make_stat_ufunc(fn, **kwargs):
+        def circ_ufunc(ary):
+            return fn(ary.reshape(*ary.shape[:-2], -1), **kwargs, axis=-1)
+        return circ_ufunc
 
-    circ_funcs = [lambda x: pd.Series(circmean(x, high=np.pi, low=-np.pi, axis=0),
-                                      name='mean').round(round_to),
-                  lambda x: pd.Series(circstd(x, high=np.pi, low=-np.pi, axis=0),
-                                      name='sd').round(round_to),
-                  lambda x: pd.DataFrame([hpd(x, credible_interval, circular=True)],
-                                         columns=cnames).round(round_to),
-                  lambda x: pd.Series(_mc_error(x, batches, circular=True).round(
-                      round_to), name='mc_error')]
+    def make_mc_error_ufunc(**kwargs):
+        def mc_error_ufunc(ary):
+            return _mc_error(ary.reshape(*ary.shape[:-2], -1).T, **kwargs)
+        return mc_error_ufunc
+
+    def make_hpd_ufunc(idx, **kwargs):
+        def hpd_ufunc(ary):
+            return hpd(ary.reshape(*ary.shape[:-2], -1), **kwargs)[..., idx]
+        return hpd_ufunc
+
+    metrics = []
+    metric_names = []
 
     if stat_funcs is not None:
-        if extend:
-            funcs = funcs + stat_funcs
-        else:
-            funcs = stat_funcs
+        for stat_func in stat_funcs:
+            metrics.append(xr.apply_ufunc(make_stat_ufunc(stat_func), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+            metric_names.append(stat_func.__name__)
 
-    var_dfs = []
-    for var in varnames:
-        vals = transform(np.ravel(trace[var].values))
-        if var in circ_varnames:
-            var_df = pd.concat([f(vals) for f in circ_funcs], axis=1)
-        else:
-            var_df = pd.concat([f(vals) for f in funcs], axis=1)
-        var_df.index = [var]
-        var_dfs.append(var_df)
-    dforg = pd.concat(var_dfs, axis=0)
+    if extend:
+        metrics.append(posterior[var_names].mean(dim=('chain', 'draw')))
+        metric_names.append('mean')
 
-    if (stat_funcs is not None) and (not extend):
-        return dforg
-    elif trace.columns.value_counts()[0] < 2:
-        return dforg
-    else:
-        n_eff = effective_n(trace, var_names=varnames).round(round_to)
-        rhat = gelman_rubin(trace, var_names=varnames).round(round_to)
-        return pd.concat([dforg, n_eff, rhat], axis=1, join_axes=[dforg.index])
+        metrics.append(posterior[var_names].std(dim=('chain', 'draw')))
+        metric_names.append('standard deviation')
+
+        metrics.append(xr.apply_ufunc(make_mc_error_ufunc(), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('mc error')
+
+        metrics.append(xr.apply_ufunc(make_hpd_ufunc(0, credible_interval=credible_interval), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('hpd {:.2%}'.format(alpha / 2))
+
+        metrics.append(xr.apply_ufunc(make_hpd_ufunc(1, credible_interval=credible_interval), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('hpd {:.2%}'.format(1 - alpha / 2))
+
+    if include_circ:
+        metrics.append(xr.apply_ufunc(make_stat_ufunc(st.circmean, high=np.pi, low=-np.pi), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('circular mean')
+
+        metrics.append(xr.apply_ufunc(make_stat_ufunc(st.circmean, high=np.pi, low=-np.pi), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('circular standard deviation')
+
+        metrics.append(xr.apply_ufunc(make_mc_error_ufunc(circular=True), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('circular mc error')
+
+        metrics.append(xr.apply_ufunc(make_hpd_ufunc(0, credible_interval=credible_interval, circular=True), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('circular hpd {:.2%}'.format(alpha / 2))
+
+        metrics.append(xr.apply_ufunc(make_hpd_ufunc(1, credible_interval=credible_interval, circular=True), posterior[var_names], input_core_dims=(('chain', 'draw'),)))
+        metric_names.append('circular hpd {:.2%}'.format(1 - alpha / 2))
+
+    metrics.append(effective_n(posterior, var_names=var_names))
+    metric_names.append('effective samples')
+
+    metrics.append(gelman_rubin(posterior, var_names=var_names))
+    metric_names.append('gelman-rubin statistic')
+
+    joined = xr.concat(metrics, dim='metric').assign_coords(metric=metric_names)
+    return joined
 
 
 def _mc_error(x, batches=5, circular=False):
@@ -701,7 +726,7 @@ def _mc_error(x, batches=5, circular=False):
     else:
         if batches == 1:
             if circular:
-                std = circstd(x, high=np.pi, low=-np.pi)
+                std = st.circstd(x, high=np.pi, low=-np.pi)
             else:
                 std = np.std(x)
             return std / np.sqrt(len(x))
@@ -715,8 +740,8 @@ def _mc_error(x, batches=5, circular=False):
             batched_traces = np.resize(x[:-resid], new_shape)
 
         if circular:
-            means = circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
-            std = circstd(means, high=np.pi, low=-np.pi)
+            means = st.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
+            std = st.circstd(means, high=np.pi, low=-np.pi)
         else:
             means = np.mean(batched_traces, 1)
             std = np.std(means)
@@ -753,7 +778,7 @@ def waic(data, pointwise=False):
     inference_data = convert_to_inference_data(data)
     for group in ('posterior', 'sample_stats'):
         if not hasattr(inference_data, group):
-            raise TypeError('Must be able to extract a {group} group from data!'.format(group))
+            raise TypeError('Must be able to extract a {group} group from data!'.format(group=group))
     if 'log_likelihood' not in inference_data.sample_stats:
         raise TypeError('Data must include log_likelihood in sample_stats')
     posterior = inference_data.posterior
