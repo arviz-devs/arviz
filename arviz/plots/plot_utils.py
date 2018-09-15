@@ -250,7 +250,7 @@ def xarray_to_nparray(data, *, var_names=None, combined=True):
 
 
 def get_coords(data, coords):
-    """Subselects xarray dataset object to provided coords. Raises exception if fails
+    """Subselects xarray dataset object to provided coords. Raises exception if fails.
 
     Raises
     ------
@@ -268,8 +268,11 @@ def get_coords(data, coords):
     try:
         return data.sel(**coords)
 
-    except ValueError as err:
-        raise ValueError("Verify coords keys. {}".format(err))
+    except ValueError:
+        invalid_coords = set(coords.keys()) - set(data.coords.keys())
+        raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
 
     except KeyError as err:
-        raise KeyError("Verify coords values. {}".format(err))
+        raise KeyError(("Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
+                        "Check that coords structure is correct and"
+                        " dimensions are valid. {}").format(err))
