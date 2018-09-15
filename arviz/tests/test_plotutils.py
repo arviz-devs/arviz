@@ -79,6 +79,5 @@ class TestCoordsExceptions:
         _, _, data = sample_dataset
         coords = {"draw"}
 
-        with pytest.raises(TypeError) as err:
+        with pytest.raises(TypeError):
             get_coords(data, coords)
-
