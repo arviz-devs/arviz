@@ -7,7 +7,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from .kdeplot import kdeplot
 from ..utils import convert_to_dataset
-from .plot_utils import _scale_text, xarray_to_nparray
+from .plot_utils import _scale_text, xarray_to_nparray, get_coords
 
 
 def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
@@ -72,7 +72,7 @@ def pairplot(data, var_names=None, coords=None, figsize=None, textsize=None, kin
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
-    _var_names, _posterior = xarray_to_nparray(posterior_data.sel(**coords),
+    _var_names, _posterior = xarray_to_nparray(get_coords(posterior_data, coords),
                                                var_names=var_names, combined=True)
 
     # Get diverging draws and combine chains
