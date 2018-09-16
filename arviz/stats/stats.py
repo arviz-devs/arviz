@@ -43,7 +43,7 @@ def bfmi(energy):
 
 
 def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
-            seed=None, round_to=2):
+            seed=None):
     r"""Compare models based on WAIC or LOO cross validation.
 
     WAIC is Widely applicable information criterion, and LOO is leave-one-out
@@ -76,8 +76,6 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
            If int or RandomState, use it for seeding Bayesian bootstrap. Only
            useful when method = 'BB-pseudo-BMA'. Default None the global
            np.random state is used.
-    round_to : int
-        Number of decimals used to round results (default 2).
 
     Returns
     -------
@@ -238,7 +236,7 @@ def _ic_matrix(ics, ic_i):
         ic = ics.loc[val][ic_i]
         if len(ic) != rows:
             raise ValueError(
-                "The number of observations should be the same " "across all models"
+                "The number of observations should be the same across all models"
             )
         else:
             ic_i_val[:, idx] = ic
