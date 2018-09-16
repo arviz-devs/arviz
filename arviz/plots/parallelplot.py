@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from ..utils import convert_to_dataset
-from .plot_utils import _scale_text, xarray_to_nparray
+from .plot_utils import _scale_text, xarray_to_nparray, get_coords
 
 
 def parallelplot(data, var_names=None, coords=None, figsize=None, textsize=None, legend=True,
@@ -44,15 +44,16 @@ def parallelplot(data, var_names=None, coords=None, figsize=None, textsize=None,
     if coords is None:
         coords = {}
 
-    # Get posterior draws and combine chains
-    posterior_data = convert_to_dataset(data, group='posterior')
-    _var_names, _posterior = xarray_to_nparray(posterior_data.sel(**coords), var_names=var_names,
-                                               combined=True)
-
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group='sample_stats')
     _, diverging_mask = xarray_to_nparray(divergent_data, var_names=('diverging',), combined=True)
     diverging_mask = np.squeeze(diverging_mask)
+
+    # Get posterior draws and combine chains
+    posterior_data = convert_to_dataset(data, group='posterior')
+    _var_names, _posterior = xarray_to_nparray(get_coords(posterior_data, coords),
+                                               var_names=var_names, combined=True)
+
 
     if len(_var_names) < 2:
         raise ValueError('This plot needs at least two variables')

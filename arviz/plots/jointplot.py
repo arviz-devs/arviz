@@ -4,7 +4,7 @@ from matplotlib.ticker import NullFormatter
 
 from .kdeplot import kdeplot
 from ..utils import convert_to_dataset
-from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label
+from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
 
 
 def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
@@ -54,7 +54,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     if coords is None:
         coords = {}
 
-    plotters = list(xarray_var_iter(data.sel(**coords), var_names=var_names, combined=True))
+    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 
     if len(plotters) != 2:
         raise Exception(
