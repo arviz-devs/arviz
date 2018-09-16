@@ -1,29 +1,28 @@
 """Diagnostic functions for ArviZ."""
+import itertools
 import warnings
 
 import numpy as np
 import pandas as pd
 from scipy.signal import fftconvolve
+import xarray as xr
 
-
-from ..utils import trace_to_dataframe, get_varnames
+from ..utils.xarray_utils import convert_to_dataset
 
 
 __all__ = ['effective_n', 'gelman_rubin', 'geweke']
 
 
-def effective_n(trace, varnames=None, round_to=2):
+def effective_n(data, *, var_names=None):
     r"""Calculate estimate of the effective sample size.
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
       Posterior samples. At least 2 chains are needed to compute this diagnostic of one or more
       stochastic parameters.
-    varnames : list
+    var_names : list
       Names of variables to include in the effective_n report
-    round_to : int
-        Controls formatting for floating point numbers. Default 2.
 
     Returns
     -------
@@ -47,35 +46,35 @@ def effective_n(trace, varnames=None, round_to=2):
     ----------
     Gelman et al. BDA (2014)
     """
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
+    if isinstance(data, np.ndarray):
+        return _get_neff(data)
 
-    if not np.all(trace.columns.duplicated(keep=False)):
-        raise ValueError(
-            'Calculation of effective sample size requires multiple chains of the same length.')
-    else:
-        n_eff = pd.Series(name='n_eff')
-
-        for var in varnames:
-            n_eff[var] = round(_get_neff(trace[var].values.T), round_to)
-
-        return n_eff
+    dataset = convert_to_dataset(data, group='posterior')
+    if var_names is None:
+        var_names = list(dataset.data_vars)
+    dataset = dataset[var_names]
+    return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
 
 
-def _get_neff(trace_value):
+def _get_neff(sample_array):
     """Compute the effective sample size for a 2D array."""
-    nchain, n_samples = trace_value.shape
+    shape = sample_array.shape
+    if len(shape) != 2:
+        raise TypeError('Effective sample size calculation requires 2 dimensional arrays.')
+    n_chain, n_draws = shape
+    if n_chain <= 1:
+        raise TypeError('Effective sample size calculation requires multiple chains.')
 
-    acov = np.asarray([_autocov(trace_value[chain]) for chain in range(nchain)])
+    acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
 
-    chain_mean = trace_value.mean(axis=1)
-    chain_var = acov[:, 0] * n_samples / (n_samples - 1.)
-    acov_t = acov[:, 1] * n_samples / (n_samples - 1.)
+    chain_mean = sample_array.mean(axis=1)
+    chain_var = acov[:, 0] * n_draws / (n_draws - 1.)
+    acov_t = acov[:, 1] * n_draws / (n_draws - 1.)
     mean_var = np.mean(chain_var)
-    var_plus = mean_var * (n_samples - 1.) / n_samples
+    var_plus = mean_var * (n_draws - 1.) / n_draws
     var_plus += np.var(chain_mean, ddof=1)
 
-    rho_hat_t = np.zeros(n_samples)
+    rho_hat_t = np.zeros(n_draws)
     rho_hat_even = 1.
     rho_hat_t[0] = rho_hat_even
     rho_hat_odd = 1. - (mean_var - np.mean(acov_t)) / var_plus
@@ -83,7 +82,7 @@ def _get_neff(trace_value):
     # Geyer's initial positive sequence
     max_t = 1
     t = 1
-    while t < (n_samples - 2) and (rho_hat_even + rho_hat_odd) >= 0.:
+    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.:
         rho_hat_even = 1. - (mean_var - np.mean(acov[:, t + 1])) / var_plus
         rho_hat_odd = 1. - (mean_var - np.mean(acov[:, t + 2])) / var_plus
         if (rho_hat_even + rho_hat_odd) >= 0:
@@ -99,8 +98,22 @@ def _get_neff(trace_value):
             rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
-    ess = (nchain * n_samples) / (-1. + 2. * np.sum(rho_hat_t))
+    ess = (n_chain * n_draws) / (-1. + 2. * np.sum(rho_hat_t))
     return ess
+
+
+def _neff_ufunc(ary):
+    """Ufunc for computing effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
+        idxs = list(idxs)
+        idxs.append(Ellipsis)
+        target[idxs] = _get_neff(ary[idxs])
+    return target
 
 
 def autocorr(x):
@@ -144,7 +157,7 @@ def _autocov(x):
     return acov
 
 
-def gelman_rubin(trace, varnames=None, round_to=2):
+def gelman_rubin(data, var_names=None):
     r"""Compute estimate of R-hat for a set of traces.
 
     The Gelman-Rubin diagnostic tests for lack of convergence by comparing the variance between
@@ -155,12 +168,10 @@ def gelman_rubin(trace, varnames=None, round_to=2):
 
     Parameters
     ----------
-    trace : Pandas DataFrame or PyMC3 trace
-      Posterior samples. at least 2 chains are needed to compute this diagnostic
-    varnames : list
+    data : xarray, or object that can be converted (pystan or pymc3 draws)
+      Posterior samples. At least 2 chains are needed to compute this diagnostic.
+    var_names : list
       Names of variables to include in the rhat report
-    round_to : int
-        Controls formatting for floating point numbers. Default 2.
 
     Returns
     -------
@@ -183,22 +194,23 @@ def gelman_rubin(trace, varnames=None, round_to=2):
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
+    if isinstance(data, np.ndarray):
+        return _get_rhat(data)
 
-    if not np.all(trace.columns.duplicated(keep=False)):
-        raise ValueError('Gelman-Rubin diagnostic requires multiple chains of the same length.')
-
-    r_hat = pd.Series(name='Rhat')
-
-    for var in varnames:
-        r_hat[var] = _get_rhat(trace[var].values.T, round_to)
-    return r_hat
+    dataset = convert_to_dataset(data, group='posterior')
+    if var_names is None:
+        var_names = list(dataset.data_vars)
+    dataset = dataset[var_names]
+    return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
 
 
 def _get_rhat(values, round_to=2):
     """Compute the rhat for a 2d array."""
-    num_samples = values.shape[1]
+    shape = values.shape
+    if len(shape) != 2:
+        raise TypeError('Effective sample size calculation requires 2 dimensional arrays.')
+    _, num_samples = shape
+
     # Calculate between-chain variance
     between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
     # Calculate within-chain variance
@@ -209,8 +221,21 @@ def _get_rhat(values, round_to=2):
 
     return round((v_hat / within_chain_variance)**0.5, round_to)
 
+def _rhat_ufunc(ary):
+    """Ufunc for computing effective sample size.
 
-def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
+        idxs = list(idxs)
+        idxs.append(Ellipsis)
+        target[idxs] = _get_rhat(ary[idxs])
+    return target
+
+
+def geweke(values, first=.1, last=.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
 
     Compare the mean of the first % of series with the mean of the last % of series. x is divided
@@ -219,7 +244,7 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
 
     Parameters
     ----------
-    x : array-like
+    values : 1D array-like
       The trace of some stochastic parameter.
     first : float
       The fraction of series at the beginning of the trace.
@@ -249,18 +274,6 @@ def geweke(trace, varnames=None, first=.1, last=.5, intervals=20):
     ----------
     Geweke (1992)
     """
-    trace = trace_to_dataframe(trace, combined=False)
-    varnames = get_varnames(trace, varnames)
-
-    gewekes = {}
-
-    for var in varnames:
-        gewekes[var] = _get_geweke(trace[var].values, first, last, intervals)
-
-    return gewekes
-
-
-def _get_geweke(x, first=.1, last=.5, intervals=20):
     # Filter out invalid intervals
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
@@ -272,20 +285,19 @@ def _get_geweke(x, first=.1, last=.5, intervals=20):
     zscores = []
 
     # Last index value
-    end = len(x) - 1
+    end = len(values) - 1
 
     # Start intervals going up to the <last>% of the chain
     last_start_idx = (1 - last) * end
 
     # Calculate starting indices
-    start_indices = np.arange(0, int(last_start_idx), step=int(
-        (last_start_idx) / (intervals - 1)))
+    start_indices = np.linspace(0, last_start_idx, num=intervals, endpoint=True, dtype=int)
 
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
-        first_slice = x[start: start + int(first * (end - start))]
-        last_slice = x[int(end - last * (end - start)):]
+        first_slice = values[start: start + int(first * (end - start))]
+        last_slice = values[int(end - last * (end - start)):]
 
         z_score = first_slice.mean() - last_slice.mean()
         z_score /= np.sqrt(first_slice.var() + last_slice.var())
