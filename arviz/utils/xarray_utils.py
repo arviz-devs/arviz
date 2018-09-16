@@ -7,7 +7,6 @@ import numpy as np
 import xarray as xr
 
 from ..inference_data import InferenceData
-from ..compat import pymc3 as pm
 
 
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None):
@@ -307,7 +306,9 @@ class PyMC3Converter:
     @requires('trace')
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        var_names = pm.utils.get_default_varnames(self.trace.varnames, include_transformed=False)
+        import pymc3 as pm
+        var_names = pm.utils.get_default_varnames(self.trace.varnames, # pylint: disable=no-member
+                                                  include_transformed=False)
         data = {}
         for var_name in var_names:
             data[var_name] = np.array(self.trace.get_values(var_name, combine=False))
