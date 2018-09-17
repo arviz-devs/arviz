@@ -2,9 +2,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from arviz import convert_to_dataset
+from arviz.stats import hpd
 from .kdeplot import _fast_kde
-from ..stats import hpd
-from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 

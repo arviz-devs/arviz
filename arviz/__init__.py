@@ -3,7 +3,6 @@
 __version__ = '0.1.0'
 from matplotlib.pyplot import style
 
-from .inference_data import InferenceData
+from .data import *
 from .plots import *
 from .stats import *
-from .utils import *

@@ -1,10 +1,11 @@
 """Plot energy transition distribution in HMC inference."""
 import numpy as np
 import matplotlib.pyplot as plt
+
+from arviz import convert_to_dataset
+from arviz.stats import bfmi as e_bfmi
 from .kdeplot import kdeplot
-from ..stats import bfmi as e_bfmi
 from .plot_utils import _scale_text
-from ..utils import convert_to_dataset
 
 
 def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),

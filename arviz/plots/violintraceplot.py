@@ -1,11 +1,11 @@
 """Plot posterior traces as violin plot."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
+from arviz import convert_to_dataset
+from arviz.stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
-from ..stats import hpd
-from ..utils import convert_to_dataset
 
 
 def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,

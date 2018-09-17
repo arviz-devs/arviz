@@ -1,7 +1,8 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import matplotlib.pyplot as plt
 import numpy as np
-from ..utils import convert_to_dataset
+
+from arviz import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_nparray, get_coords
 
 

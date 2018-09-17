@@ -2,9 +2,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import mode
+
+from arviz import convert_to_dataset
+from arviz.stats import hpd
 from .kdeplot import kdeplot, _fast_kde
-from ..stats import hpd
-from ..utils import convert_to_dataset
 from .plot_utils import (xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid,
                          get_coords)
 
