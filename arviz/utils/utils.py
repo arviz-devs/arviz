@@ -30,7 +30,7 @@ def load_arviz_data(dataset):
     InferenceData
     """
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(here, 'data')
+    data_path = os.path.join(here, 'data', '_datasets')
     datasets_available = {
         'centered_eight': {
             'description': '''
