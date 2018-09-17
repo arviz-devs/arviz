@@ -5,8 +5,8 @@ from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from arviz import convert_to_dataset
 from .kdeplot import kdeplot
-from ..utils import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_nparray, get_coords
 
 

@@ -1,7 +1,8 @@
-"""Miscellaneous utilities for supporting ArviZ."""
+"""Input and output support for data."""
 import os
 
-from ..inference_data import InferenceData
+from .inference_data import InferenceData
+from .convert import convert_to_inference_data
 
 
 def load_data(filename):
@@ -12,7 +13,34 @@ def load_data(filename):
     filename : str
         name or path of the file to load trace
     """
-    return InferenceData(filename)
+    return InferenceData.from_netcdf(filename)
+
+
+def save_data(data, filename, *, group='posterior', coords=None, dims=None):
+    """Save dataset as a netcdf file.
+
+    WARNING: Only idempotent in case `data` is InferenceData
+
+    Parameters
+    ----------
+    data : InferenceData, or any object accepted by `convert_to_inference_data`
+        Object to be saved
+    filename : str
+        name or path of the file to load trace
+    group : str (optional)
+        In case `data` is not InferenceData, this is the group it will be saved to
+    coords : dict (optional)
+        See `convert_to_inference_data`
+    dims : dict (optional)
+        See `convert_to_inference_data`
+
+    Returns
+    -------
+    str
+        filename saved to
+    """
+    inference_data = convert_to_inference_data(data, group=group, coords=coords, dims=dims)
+    return inference_data.to_netcdf(filename)
 
 
 def load_arviz_data(dataset):
@@ -30,7 +58,7 @@ def load_arviz_data(dataset):
     InferenceData
     """
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(here, 'data')
+    data_path = os.path.join(here, 'data', '_datasets')
     datasets_available = {
         'centered_eight': {
             'description': '''

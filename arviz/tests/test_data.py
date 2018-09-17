@@ -3,9 +3,13 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
+from arviz import (
+    convert_to_inference_data,
+    convert_to_dataset,
+    pymc3_to_inference_data,
+    pystan_to_inference_data,
+)
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
-from ..utils.xarray_utils import (convert_to_inference_data, convert_to_dataset,
-                                  pymc3_to_inference_data)
 
 
 class TestNumpyToDataArray():
@@ -251,6 +255,12 @@ class TestPyStanNetCDFUtils(CheckNetCDFUtils):
         cls.draws, cls.chains = 500, 2
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']
 
+    def get_inference_data(self):
+        return pystan_to_inference_data(
+            fit=self.obj,
+            coords={'school': np.arange(self.data['J'])},
+            dims={'theta': ['school'], 'theta_tilde': ['school']},
+        )
     def test_sampler_stats(self):
         inference_data = self.get_inference_data()
         assert hasattr(inference_data, 'sample_stats')

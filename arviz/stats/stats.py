@@ -8,7 +8,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from arviz.utils.xarray_utils import convert_to_inference_data, convert_to_dataset
+from arviz.data import convert_to_inference_data, convert_to_dataset
 from .diagnostics import effective_n, gelman_rubin
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]

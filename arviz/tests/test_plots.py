@@ -4,8 +4,8 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
+from arviz import pymc3_to_inference_data
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
-from ..utils import pymc3_to_inference_data
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
 

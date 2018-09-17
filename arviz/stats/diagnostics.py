@@ -7,10 +7,10 @@ import pandas as pd
 from scipy.signal import fftconvolve
 import xarray as xr
 
-from ..utils.xarray_utils import convert_to_dataset
+from arviz import convert_to_dataset
 
 
-__all__ = ['effective_n', 'gelman_rubin', 'geweke']
+__all__ = ['effective_n', 'gelman_rubin', 'geweke', 'autocorr']
 
 
 def effective_n(data, *, var_names=None):
