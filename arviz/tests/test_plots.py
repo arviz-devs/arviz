@@ -4,7 +4,7 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from arviz import pymc3_to_inference_data
+from arviz import from_pymc3
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
                      parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
@@ -83,7 +83,7 @@ class TestPlots(SetupPlots):
 
     @pytest.mark.parametrize('kind', ['kde', 'cumulative'])
     def test_ppcplot(self, kind):
-        data = pymc3_to_inference_data(trace=self.short_trace, posterior_predictive=self.sample_ppc)
+        data = from_pymc3(trace=self.short_trace, posterior_predictive=self.sample_ppc)
         ppcplot(data, kind=kind)
 
     def test_violintraceplot(self):

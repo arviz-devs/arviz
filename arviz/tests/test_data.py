@@ -6,8 +6,8 @@ import pytest
 from arviz import (
     convert_to_inference_data,
     convert_to_dataset,
-    pymc3_to_inference_data,
-    pystan_to_inference_data,
+    from_pymc3,
+    from_pystan,
 )
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 
@@ -226,7 +226,7 @@ class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
             prior = pm.sample_prior_predictive()
             posterior_predictive = pm.sample_posterior_predictive(self.obj)
 
-        return pymc3_to_inference_data(
+        return from_pymc3(
             trace=self.obj,
             prior=prior,
             posterior_predictive=posterior_predictive,
@@ -256,7 +256,7 @@ class TestPyStanNetCDFUtils(CheckNetCDFUtils):
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']
 
     def get_inference_data(self):
-        return pystan_to_inference_data(
+        return from_pystan(
             fit=self.obj,
             coords={'school': np.arange(self.data['J'])},
             dims={'theta': ['school'], 'theta_tilde': ['school']},
