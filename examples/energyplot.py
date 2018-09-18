@@ -23,4 +23,4 @@ with pm.Model('Centered Eight Schools') as centered_eight:
     obs = pm.Normal('obs', mu=theta, sd=sigma, observed=y)
     centered_eight_trace = pm.sample()
 
-az.energyplot(centered_eight_trace, figsize=(12, 8))
+az.plot_energy(centered_eight_trace, figsize=(12, 8))

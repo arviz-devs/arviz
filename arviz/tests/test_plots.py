@@ -6,8 +6,8 @@ import pytest
 
 from arviz import from_pymc3
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
-from ..plots import (densityplot, traceplot, energyplot, posteriorplot, autocorrplot, forestplot,
-                     parallelplot, pairplot, jointplot, ppcplot, violintraceplot)
+from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior, plot_autocorr, plot_forest,
+                     plot_parallel, plot_pair, plot_joint, plot_ppc, plot_violintrace)
 
 
 class SetupPlots(BaseArvizTest):
@@ -31,64 +31,64 @@ class SetupPlots(BaseArvizTest):
 class TestPlots(SetupPlots):
     def test_density_plot(self):
         for obj in (self.short_trace, self.fit):
-            assert densityplot(obj).shape == (18, 1)
+            assert plot_density(obj).shape == (18, 1)
 
     @pytest.mark.parametrize('combined', [True, False])
     def test_traceplot(self, combined):
         for obj in (self.short_trace, self.fit):
-            axes = traceplot(obj, var_names=('mu', 'tau'),
+            axes = plot_trace(obj, var_names=('mu', 'tau'),
                              combined=combined, lines=[('mu', {}, [1, 2])])
             assert axes.shape == (2, 2)
 
     def test_autocorrplot(self):
         for obj in (self.short_trace, self.fit):
-            assert autocorrplot(obj).shape == (1, 36)
+            assert plot_autocorr(obj).shape == (1, 36)
 
     def test_forestplot(self):
         for obj in (self.short_trace, self.fit, [self.short_trace, self.fit]):
-            _, axes = forestplot(obj)
+            _, axes = plot_forest(obj)
             assert axes.shape == (3,)
-            _, axes = forestplot(obj, r_hat=False, quartiles=False)
+            _, axes = plot_forest(obj, r_hat=False, quartiles=False)
             assert axes.shape == (2,)
-            _, axes = forestplot(obj, var_names=['mu'], colors='C0', n_eff=False, combined=True)
+            _, axes = plot_forest(obj, var_names=['mu'], colors='C0', n_eff=False, combined=True)
             assert axes.shape == (2,)
-            _, axes = forestplot(obj, kind='ridgeplot', r_hat=False, n_eff=False)
+            _, axes = plot_forest(obj, kind='ridgeplot', r_hat=False, n_eff=False)
             assert axes.shape == (1,)
 
     @pytest.mark.parametrize('kind', ['kde', 'hist'])
     def test_energyplot(self, kind):
         for obj in (self.short_trace, self.fit):
-            assert energyplot(obj, kind=kind)
+            assert plot_energy(obj, kind=kind)
 
     def test_parallelplot(self):
         with pytest.raises(ValueError):
-            parallelplot(self.df_trace)
-        assert parallelplot(self.short_trace)
+            plot_parallel(self.df_trace)
+        assert plot_parallel(self.short_trace)
 
     @pytest.mark.parametrize('kind', ['scatter', 'hexbin'])
     def test_jointplot(self, kind):
         for obj in (self.short_trace, self.fit):
-            jointplot(obj, var_names=('mu', 'tau'), kind=kind)
+            plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
 
     def test_pairplot(self):
 
-        pairplot(self.short_trace, var_names=['theta'], divergences=True,
+        plot_pair(self.short_trace, var_names=['theta'], divergences=True,
                  coords={'theta_dim_0': [0, 1]}, plot_kwargs={'marker': 'x'},
                  divergences_kwargs={'marker': '*', 'c': 'C'})
 
-        pairplot(self.short_trace, divergences=True, plot_kwargs={'marker': 'x'},
+        plot_pair(self.short_trace, divergences=True, plot_kwargs={'marker': 'x'},
                  divergences_kwargs={'marker': '*', 'c': 'C'})
-        pairplot(self.short_trace, kind='hexbin', var_names=['theta'],
+        plot_pair(self.short_trace, kind='hexbin', var_names=['theta'],
                  coords={'theta_dim_0': [0, 1]}, plot_kwargs={'cmap': 'viridis'}, textsize=20)
 
     @pytest.mark.parametrize('kind', ['kde', 'cumulative'])
     def test_ppcplot(self, kind):
         data = from_pymc3(trace=self.short_trace, posterior_predictive=self.sample_ppc)
-        ppcplot(data, kind=kind)
+        plot_ppc(data, kind=kind)
 
     def test_violintraceplot(self):
         for obj in (self.short_trace, self.fit):
-            axes = violintraceplot(obj)
+            axes = plot_violintrace(obj)
             assert axes.shape == (18,)
 
 
@@ -96,11 +96,11 @@ class TestPosteriorPlot(SetupPlots):
 
     def test_posteriorplot(self):
         for obj in (self.short_trace, self.fit):
-            axes = posteriorplot(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
+            axes = plot_posterior(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
             assert axes.shape == (2,)
 
     @pytest.mark.parametrize("point_estimate", ('mode', 'mean', 'median'))
     def test_point_estimates(self, point_estimate):
         for obj in (self.short_trace, self.fit):
-            axes = posteriorplot(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
+            axes = plot_posterior(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
             assert axes.shape == (2,)

@@ -11,8 +11,8 @@ az.style.use('arviz-darkgrid')
 
 data = az.load_arviz_data('non_centered_eight')
 
-az.jointplot(data,
-             var_names=['theta'],
-             coords={'school': ['Choate', 'Phillips Andover']},
-             kind='hexbin',
-             figsize=(10, 10))
+az.plot_joint(data,
+              var_names=['theta'],
+              coords={'school': ['Choate', 'Phillips Andover']},
+              kind='hexbin',
+              figsize=(10, 10))

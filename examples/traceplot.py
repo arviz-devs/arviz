@@ -9,4 +9,4 @@ import arviz as az
 az.style.use('arviz-darkgrid')
 
 data = az.load_arviz_data('non_centered_eight')
-az.traceplot(data, var_names=('tau', 'mu'))
+az.plot_trace(data, var_names=('tau', 'mu'))
