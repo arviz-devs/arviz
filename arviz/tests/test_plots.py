@@ -6,8 +6,9 @@ import pytest
 
 from arviz import from_pymc3
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
-from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior, plot_autocorr, plot_forest,
-                     plot_parallel, plot_pair, plot_joint, plot_ppc, plot_violintrace)
+from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
+                     plot_autocorr, plot_forest, plot_parallel, plot_pair,
+                     plot_joint, plot_ppc, plot_violintrace)
 
 
 class SetupPlots(BaseArvizTest):
@@ -37,7 +38,7 @@ class TestPlots(SetupPlots):
     def test_traceplot(self, combined):
         for obj in (self.short_trace, self.fit):
             axes = plot_trace(obj, var_names=('mu', 'tau'),
-                             combined=combined, lines=[('mu', {}, [1, 2])])
+                              combined=combined, lines=[('mu', {}, [1, 2])])
             assert axes.shape == (2, 2)
 
     def test_autocorrplot(self):
@@ -73,13 +74,13 @@ class TestPlots(SetupPlots):
     def test_pairplot(self):
 
         plot_pair(self.short_trace, var_names=['theta'], divergences=True,
-                 coords={'theta_dim_0': [0, 1]}, plot_kwargs={'marker': 'x'},
-                 divergences_kwargs={'marker': '*', 'c': 'C'})
+                  coords={'theta_dim_0': [0, 1]}, plot_kwargs={'marker': 'x'},
+                  divergences_kwargs={'marker': '*', 'c': 'C'})
 
         plot_pair(self.short_trace, divergences=True, plot_kwargs={'marker': 'x'},
-                 divergences_kwargs={'marker': '*', 'c': 'C'})
+                  divergences_kwargs={'marker': '*', 'c': 'C'})
         plot_pair(self.short_trace, kind='hexbin', var_names=['theta'],
-                 coords={'theta_dim_0': [0, 1]}, plot_kwargs={'cmap': 'viridis'}, textsize=20)
+                  coords={'theta_dim_0': [0, 1]}, plot_kwargs={'cmap': 'viridis'}, textsize=20)
 
     @pytest.mark.parametrize('kind', ['kde', 'cumulative'])
     def test_ppcplot(self, kind):
