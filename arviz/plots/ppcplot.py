@@ -1,6 +1,6 @@
 """Posterior predictive plot."""
 import numpy as np
-from .kdeplot import plot_kde
+from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import _scale_text, _create_axes_grid, default_grid
 
 
@@ -59,14 +59,17 @@ def plot_ppc(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None
                      fill_kwargs={'alpha': 0},
                      ax=ax)
             pp_var_name = data_pairs.get(var_name, var_name)
+            # run plot_kde manually with one plot call
+            pp_densities = []
             for _, chain_vals in posterior_predictive[pp_var_name].groupby('chain'):
                 for _, vals in chain_vals.groupby('draw'):
-                    plot_kde(vals,
-                             plot_kwargs={'color': 'C4',
-                                          'alpha': alpha,
-                                          'linewidth': 0.5 * linewidth},
-                             fill_kwargs={'alpha': 0},
-                             ax=ax)
+                    pp_density, lower, upper = _fast_kde(vals)
+                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_densities.extend([pp_x, pp_density])
+            plot_kwargs = {'color': 'C4',
+                           'alpha': alpha,
+                           'linewidth': 0.5 * linewidth}
+            ax.plot(*pp_densities, **plot_kwargs)
             ax.plot([], color='C4', label='Posterior predictive {}'.format(pp_var_name))
             if mean:
                 plot_kde(posterior_predictive[pp_var_name].values.flatten(),
@@ -90,9 +93,13 @@ def plot_ppc(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None
                     label='Observed {}'.format(var_name),
                     zorder=3)
             pp_var_name = data_pairs.get(var_name, var_name)
+            # run plot_kde manually with one plot call
+            pp_densities = []
             for _, chain_vals in posterior_predictive[pp_var_name].groupby('chain'):
                 for _, vals in chain_vals.groupby('draw'):
-                    ax.plot(*_empirical_cdf(vals), alpha=alpha, color='C4', linewidth=linewidth)
+                    pp_x, pp_density = _empirical_cdf(vals)
+                    pp_densities.extend([pp_x, pp_density])
+            ax.plot(*pp_densities, alpha=alpha, color='C4', linewidth=linewidth)
             ax.plot([], color='C4', label='Posterior predictive {}'.format(pp_var_name))
             if mean:
                 ax.plot(*_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
