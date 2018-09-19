@@ -1,10 +1,10 @@
 """Posterior predictive plot."""
 import numpy as np
-from .kdeplot import kdeplot
+from .kdeplot import plot_kde
 from .plot_utils import _scale_text, _create_axes_grid, default_grid
 
 
-def ppcplot(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None):
+def plot_ppc(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None):
     """
     Plot for Posterior Predictive checks.
 
@@ -45,27 +45,27 @@ def ppcplot(data, kind='kde', alpha=0.2, mean=True, figsize=None, textsize=None)
     textsize, linewidth, _ = _scale_text(figsize, textsize)
     for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
         if kind == 'kde':
-            kdeplot(observed[var_name].values.flatten(), label='Observed {}'.format(var_name),
-                    plot_kwargs={'color': 'k', 'linewidth': linewidth, 'zorder': 3},
-                    fill_kwargs={'alpha': 0},
-                    ax=ax)
+            plot_kde(observed[var_name].values.flatten(), label='Observed {}'.format(var_name),
+                     plot_kwargs={'color': 'k', 'linewidth': linewidth, 'zorder': 3},
+                     fill_kwargs={'alpha': 0},
+                     ax=ax)
             for _, chain_vals in posterior_predictive[var_name].groupby('chain'):
                 for _, vals in chain_vals.groupby('draw'):
-                    kdeplot(vals,
-                            plot_kwargs={'color': 'C4',
-                                         'alpha': alpha,
-                                         'linewidth': 0.5 * linewidth},
-                            fill_kwargs={'alpha': 0},
-                            ax=ax)
+                    plot_kde(vals,
+                             plot_kwargs={'color': 'C4',
+                                          'alpha': alpha,
+                                          'linewidth': 0.5 * linewidth},
+                             fill_kwargs={'alpha': 0},
+                             ax=ax)
             ax.plot([], color='C4', label='Posterior predictive {}'.format(var_name))
             if mean:
-                kdeplot(posterior_predictive[var_name].values.flatten(),
-                        plot_kwargs={'color': 'C0',
-                                     'linestyle': '--',
-                                     'linewidth': linewidth,
-                                     'zorder': 2},
-                        label='Posterior predictive mean {}'.format(var_name),
-                        ax=ax)
+                plot_kde(posterior_predictive[var_name].values.flatten(),
+                         plot_kwargs={'color': 'C0',
+                                      'linestyle': '--',
+                                      'linewidth': linewidth,
+                                      'zorder': 2},
+                         label='Posterior predictive mean {}'.format(var_name),
+                         ax=ax)
             ax.set_xlabel(var_name, fontsize=textsize)
             ax.set_yticks([])
 

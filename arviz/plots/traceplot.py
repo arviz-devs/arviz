@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from arviz import convert_to_dataset
-from .kdeplot import kdeplot
+from .kdeplot import plot_kde
 from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
 
 
-def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
-              combined=False, kde_kwargs=None, hist_kwargs=None, trace_kwargs=None):
+def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
+               combined=False, kde_kwargs=None, hist_kwargs=None, trace_kwargs=None):
     """Plot samples histograms and values.
 
     Parameters
@@ -30,7 +30,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
     kde_kwargs : dict
-        Extra keyword arguments passed to `arviz.kdeplot`. Only affects continuous variables.
+        Extra keyword arguments passed to `arviz.plot_kde`. Only affects continuous variables.
     hist_kwargs : dict
         Extra keyword arguments passed to `plt.hist`. Only affects discrete variables.
     trace_kwargs : dict
@@ -50,7 +50,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
         >>> import arviz as az
         >>> data = az.load_arviz_data('non_centered_eight')
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
-        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords)
+        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
 
     Combine all chains into one distribution and trace
 
@@ -58,7 +58,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
         :context: close-figs
 
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
-        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
+        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
 
 
     Plot reference lines against distribution and trace
@@ -68,7 +68,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
 
         >>> lines = (('theta_t',{'theta_t_dim_0':0}, [-1]),)
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
-        >>> az.traceplot(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
+        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
     data = convert_to_dataset(data, group='posterior')
 
@@ -114,7 +114,7 @@ def traceplot(data, var_names=None, coords=None, figsize=None, textsize=None, li
             if row.dtype.kind == 'i':
                 _histplot_op(axes[i, 0], row, **hist_kwargs)
             else:
-                kdeplot(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
+                plot_kde(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
 
         axes[i, 0].set_yticks([])
         for idx in (0, 1):

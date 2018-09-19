@@ -8,8 +8,8 @@ from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
 
 
-def violintraceplot(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
-                    bw=4.5, sharey=True, figsize=None, textsize=None, ax=None, kwargs_shade=None):
+def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
+                bw=4.5, sharey=True, figsize=None, textsize=None, ax=None, kwargs_shade=None):
     """Plot posterior of traces as violin plot.
 
     Notes

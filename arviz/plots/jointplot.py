@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
 from arviz import convert_to_dataset
-from .kdeplot import kdeplot
+from .kdeplot import plot_kde
 from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
 
 
-def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-              gridsize='auto', contour=True, fill_last=True, joint_kwargs=None,
-              marginal_kwargs=None):
+def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
+               gridsize='auto', contour=True, fill_last=True, joint_kwargs=None,
+               marginal_kwargs=None):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -91,7 +91,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     if kind == 'scatter':
         axjoin.scatter(x, y, **joint_kwargs)
     elif kind == 'kde':
-        kdeplot(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
+        plot_kde(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
     else:
         if gridsize == 'auto':
             gridsize = int(len(x)**0.35)
@@ -107,7 +107,7 @@ def jointplot(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         else:
             marginal_kwargs.setdefault('plot_kwargs', {})
             marginal_kwargs['plot_kwargs']['linewidth'] = linewidth
-            kdeplot(val, rotated=rotate, ax=ax, **marginal_kwargs)
+            plot_kde(val, rotated=rotate, ax=ax, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())

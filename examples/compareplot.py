@@ -38,4 +38,4 @@ model_compare = az.compare({
     non_centered: non_centered_eight_trace
 })
 
-az.compareplot(model_compare, figsize=(12, 4))
+az.plot_compare(model_compare, figsize=(12, 4))

@@ -273,9 +273,53 @@ class PyStanConverter:
         })
 
 
-def pystan_to_inference_data(*, fit=None, prior=None, posterior_predictive=None,
-                             observed_data=None, log_likelihood=None, coords=None, dims=None):
-    """Convert pystan data into an InferenceData object."""
+def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
+                observed_data=None, log_likelihood=None, coords=None, dims=None):
+    """Convert pystan data into an InferenceData object.
+
+    Parameters
+    ----------
+    fit : StanFit4Model
+        PyStan fit object.
+    prior : dict
+        A dictionary containing prior samples extracted from pystan fit object.
+        For PyStan 2.18+:
+            `prior_dict = prior_fit.extract(pars=prior_vars, permuted=False)`
+        For PyStan 2.17 and earlier:
+            `prior_dict = prior_fit.extract(pars=prior_vars)`
+            `prior_dict = {k : az.from_pystan.unpermute(v) for k, v in prior_dict.items()}`
+    posterior_predictive : str, a list of str or dict
+        Posterior predictive samples for the fit. If given string or a list of strings
+        function extracts values from the fit object. Else a dictionary of posterior samples
+        is assumed in PyStan extract format.
+        For PyStan 2.18+:
+            `pp_dict = posterior_predictive_fit.extract(pars=pp_vars, permuted=False)`
+        For PyStan 2.17 and earlier:
+            `pp_dict = posterior_predictive_fit.extract(pars=prior_vars)`
+            `pp_dict = {k : az.from_pystan.unpermute(v) for k, v in pp_dict.items()}`
+    observed_data : str or a list of str or a dictionary
+        observed data used in the sampling. If a str or a list of str is given, observed data is
+         extracted from the `fit.data`. Else a dictionary is assumed containing observed data.
+    log_likelihood : str or np.ndarray
+        log_likelihood for data calculated elementwise. If a string is given, log_likelihood is
+        extracted from the fit object. Else a ndarray containing elementwise log_likelihood is
+        assumed in PyStan extract format.
+        For PyStan 2.18+:
+            `log_likelihood = log_likelihood_fit.extract(pars=log_likelihood_var, permuted=False)`
+            `log_likelihood = log_likelihood[log_likelihood_var]`
+        For PyStan 2.17 and earlier:
+            `log_likelihood = log_likelihood_fit.extract(pars=log_likelihood_var)`
+            `log_likelihood = az.from_pystan.unpermute(log_likelihood[log_likelihood_var])`
+    coords : dict[str, iterable]
+        A dictionary containing the values that are used as index. The key
+        is the name of the dimension, the values are the index values.
+    dims : dict[str, List(str)]
+        A mapping from variables to a list of coordinate names for the variable.
+
+    Returns
+    -------
+    InferenceData object
+    """
     return PyStanConverter(
         fit=fit,
         prior=prior,

@@ -133,8 +133,8 @@ class PyMC3Converter:
         })
 
 
-def pymc3_to_inference_data(*, trace=None, prior=None, posterior_predictive=None,
-                            coords=None, dims=None):
+def from_pymc3(*, trace=None, prior=None, posterior_predictive=None,
+               coords=None, dims=None):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,

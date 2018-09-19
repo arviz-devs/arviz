@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from .plot_utils import _scale_text
 
 
-def compareplot(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_diff=True,
-                figsize=None, textsize=None, plot_kwargs=None, ax=None):
+def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_diff=True,
+                 figsize=None, textsize=None, plot_kwargs=None, ax=None):
     """Summary plot for model comparison.
 
     This plot is in the style of the one used in the book Statistical Rethinking

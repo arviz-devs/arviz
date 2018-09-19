@@ -4,12 +4,12 @@ import xarray as xr
 
 from ..inference_data import InferenceData
 from .base import dict_to_dataset
-from .from_pymc3 import pymc3_to_inference_data
-from .from_pystan import pystan_to_inference_data
+from .io_pymc3 import from_pymc3
+from .io_pystan import from_pystan
 
 
 
-def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None):
+def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
     """Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
@@ -35,6 +35,8 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None)
         is the name of the dimension, the values are the index values.
     dims : dict[str, List(str)]
         A mapping from variables to a list of coordinate names for the variable
+    kwargs
+        Rest of the supported keyword arguments transferred to conversion function.
 
     Returns
     -------
@@ -46,9 +48,9 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None)
     elif isinstance(obj, str):
         return InferenceData.from_netcdf(obj)
     elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
-        return pystan_to_inference_data(fit=obj, coords=coords, dims=dims)
+        return from_pystan(fit=obj, coords=coords, dims=dims, **kwargs)
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
-        return pymc3_to_inference_data(trace=obj, coords=coords, dims=dims)
+        return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
