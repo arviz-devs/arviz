@@ -3,7 +3,7 @@ import numpy as np
 import xarray as xr
 import pytest
 
-from ..plots.plot_utils import xarray_to_nparray, xarray_var_iter, get_coords
+from ..plots.plot_utils import xarray_to_ndarray, xarray_var_iter, get_coords
 
 
 @pytest.fixture(scope='function')
@@ -22,7 +22,7 @@ def sample_dataset():
 
 def test_dataset_to_numpy_not_combined(sample_dataset):  # pylint: disable=invalid-name
     mu, tau, data = sample_dataset
-    var_names, data = xarray_to_nparray(data, combined=False)
+    var_names, data = xarray_to_ndarray(data, combined=False)
 
     # 2 vars x 2 chains
     assert len(var_names) == 4
@@ -31,7 +31,7 @@ def test_dataset_to_numpy_not_combined(sample_dataset):  # pylint: disable=inval
 
 def test_dataset_to_numpy_combined(sample_dataset):
     mu, tau, data = sample_dataset
-    var_names, data = xarray_to_nparray(data, combined=True)
+    var_names, data = xarray_to_ndarray(data, combined=True)
 
     assert len(var_names) == 2
     assert (data[0] == mu.reshape(1, 6)).all()

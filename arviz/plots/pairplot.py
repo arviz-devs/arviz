@@ -7,7 +7,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from arviz import convert_to_dataset
 from .kdeplot import plot_kde
-from .plot_utils import _scale_text, xarray_to_nparray, get_coords
+from .plot_utils import _scale_text, xarray_to_ndarray, get_coords
 
 
 def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
@@ -72,12 +72,12 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
-    _var_names, _posterior = xarray_to_nparray(get_coords(posterior_data, coords),
+    _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords),
                                                var_names=var_names, combined=True)
 
     # Get diverging draws and combine chains
     divergent_data = convert_to_dataset(data, group='sample_stats')
-    _, diverging_mask = xarray_to_nparray(divergent_data, var_names=('diverging',), combined=True)
+    _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=('diverging',), combined=True)
     diverging_mask = np.squeeze(diverging_mask)
 
     if divergences_kwargs is None:

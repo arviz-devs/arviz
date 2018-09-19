@@ -1,5 +1,6 @@
 """Utilities for plotting."""
-import itertools
+from itertools import product
+from collections import OrderedDict as odict
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,12 +13,8 @@ def make_2d(ary):
     In case the array is already more than 2 dimensional, will ravel the
     dimensions after the first.
     """
-    ary = np.atleast_2d(ary.T).T
-    # flatten out dimensions beyond the first
-    first_dim = ary.shape[0]
-    newshape = np.product(ary.shape[1:]).astype(int)
-    ary = ary.reshape((first_dim, newshape), order='F')
-    return ary
+    dim_0, *_ = np.atleast_1d(ary).shape
+    return ary.reshape(dim_0, -1, order='F')
 
 
 def _scale_text(figsize, textsize, scale_ratio=2):
@@ -82,11 +79,11 @@ def default_grid(n_items, max_cols=6, min_cols=3):
         Rows and columns, so that rows * columns >= n_items
     """
     def in_bounds(val):
-        return max(min(val, max_cols), min_cols)
+        return np.clip(val, min_cols, max_cols)
 
     if n_items <= max_cols:
         return 1, n_items
-    ideal = in_bounds(int(np.round(n_items ** 0.5)))
+    ideal = in_bounds(round(n_items ** 0.5))
 
     for offset in (0, 1, -1, 2, -2):
         cols = in_bounds(ideal + offset)
@@ -155,7 +152,7 @@ def make_label(var_name, selection):
         A text representation of the label
     """
     if selection:
-        return '{} \n ({})'.format(var_name, selection_to_string(selection))
+        return '{}\n({})'.format(var_name, selection_to_string(selection))
     return '{}'.format(var_name)
 
 
@@ -207,7 +204,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         if var_name in data:
             new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
             vals = [data[var_name][dim].values for dim in new_dims]
-            dims = [{k: v for k, v in zip(new_dims, prod)} for prod in itertools.product(*vals)]
+            dims = [odict((k, v) for k, v in zip(new_dims, prod)) for prod in product(*vals)]
             if reverse_selections:
                 dims = reversed(dims)
 
@@ -215,7 +212,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
                 yield var_name, selection, data[var_name].sel(**selection).values
 
 
-def xarray_to_nparray(data, *, var_names=None, combined=True):
+def xarray_to_ndarray(data, *, var_names=None, combined=True):
     """Take xarray data and unpacks into variables and data into list and numpy array respectively.
 
     Assumes that chain and draw are in coordinates
