@@ -39,8 +39,6 @@ Contributions and issue reports are very welcome at
    Quickstart<notebooks/Introduction>
    Example Gallery<examples/index>
    Current Roadmap<roadmap>
-   Example Gallery<examples/index>
-   Current Roadmap<roadmap>
    api
    about
 

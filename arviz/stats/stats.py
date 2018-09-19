@@ -52,7 +52,8 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
 
     Parameters
     ----------
-    model_dict : dictionary of PyMC3 traces indexed by corresponding model
+    model_dict : dict[str] -> InferenceData
+        A dictionary of model names and InferenceData objects
     ic : string
         Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
     method : str
