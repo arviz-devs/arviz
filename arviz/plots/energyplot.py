@@ -80,7 +80,7 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
             plot_kwargs.setdefault('alpha', 0)
             plot_kwargs.setdefault('linewidth', linewidth)
             plot_kde(value, bw=bw, label=label, textsize=textsize,
-                    plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
+                     plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
 
     elif kind == 'hist':
         for alpha, color, label, value in series:
