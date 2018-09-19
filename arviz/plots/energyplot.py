@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 
 from arviz import convert_to_dataset
 from arviz.stats import bfmi as e_bfmi
-from .kdeplot import kdeplot
+from .kdeplot import plot_kde
 from .plot_utils import _scale_text
 
 
-def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
-               fill_color=('C0', 'C5'), bw=4.5, textsize=None, fill_kwargs=None, plot_kwargs=None,
-               ax=None):
+def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
+                fill_color=('C0', 'C5'), bw=4.5, textsize=None, fill_kwargs=None, plot_kwargs=None,
+                ax=None):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
@@ -40,9 +40,9 @@ def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alph
     textsize: int
         Text size for labels
     fill_kwargs : dicts, optional
-        Additional keywords passed to `arviz.kdeplot` (to control the shade)
+        Additional keywords passed to `arviz.plot_kde` (to control the shade)
     plot_kwargs : dicts, optional
-        Additional keywords passed to `arviz.kdeplot` or `plt.hist` (if type='hist')
+        Additional keywords passed to `arviz.plot_kde` or `plt.hist` (if type='hist')
     ax : axes
         Matplotlib axes.
 
@@ -79,7 +79,7 @@ def energyplot(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alph
             plot_kwargs.setdefault('color', color)
             plot_kwargs.setdefault('alpha', 0)
             plot_kwargs.setdefault('linewidth', linewidth)
-            kdeplot(value, bw=bw, label=label, textsize=textsize,
+            plot_kde(value, bw=bw, label=label, textsize=textsize,
                     plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
 
     elif kind == 'hist':

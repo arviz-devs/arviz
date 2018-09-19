@@ -19,10 +19,10 @@ def pairwise(iterable):
     return zip(first, second)
 
 
-def forestplot(data, kind='forestplot', model_names=None, var_names=None, combined=False,
-               credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
-               textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
-               ridgeplot_overlap=2, figsize=None):
+def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combined=False,
+                credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
+                textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
+                ridgeplot_overlap=2, figsize=None):
     """Forest plot to compare credible intervals from a number of distributions.
 
     Generates a forest plot of 100*(credible_interval)% credible intervals from

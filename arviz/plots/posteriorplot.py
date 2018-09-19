@@ -5,14 +5,14 @@ from scipy.stats import mode
 
 from arviz import convert_to_dataset
 from arviz.stats import hpd
-from .kdeplot import kdeplot, _fast_kde
+from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import (xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid,
                          get_coords)
 
 
-def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None,
-                  credible_interval=0.94, round_to=1, point_estimate='mean', rope=None,
-                  ref_val=None, kind='kde', bw=4.5, bins=None, ax=None, **kwargs):
+def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=None,
+                   credible_interval=0.94, round_to=1, point_estimate='mean', rope=None,
+                   ref_val=None, kind='kde', bw=4.5, bins=None, ax=None, **kwargs):
     """Plot Posterior densities in the style of John K. Kruschke's book.
 
     Parameters
@@ -69,28 +69,28 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
 
         >>> import arviz as az
         >>> non_centered = az.load_arviz_data('non_centered_eight')
-        >>> az.posteriorplot(non_centered)
+        >>> az.plot_posterior(non_centered)
 
     Plot subset variables by specifying variable name exactly
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=("mu",), textsize=11)
+        >>> az.plot_posterior(non_centered, var_names=("mu",), textsize=11)
 
     Plot subset of variables by matching start of variable name
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=("mu", "theta_tilde"))
+        >>> az.plot_posterior(non_centered, var_names=("mu", "theta_tilde"))
 
     Plot Region of Practical Equivalence (rope) for all distributions
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=("mu", 'theta_tilde',), rope=(-1, 1))
+        >>> az.plot_posterior(non_centered, var_names=("mu", 'theta_tilde',), rope=(-1, 1))
 
     Plot Region of Practical Equivalence for selected distributions
 
@@ -98,7 +98,7 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
         :context: close-figs
 
         >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), rope=rope)
+        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), rope=rope)
 
 
     Add reference lines
@@ -106,28 +106,28 @@ def posteriorplot(data, var_names=None, coords=None, figsize=None, textsize=None
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), ref_val=0)
+        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), ref_val=0)
 
     Show point estimate of distribution
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), point_estimate="mode")
+        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), point_estimate="mode")
 
     Plot posterior as a histogram
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), kind="hist")
+        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), kind="hist")
 
     Change size of credible interval
 
     .. plot::
         :context: close-figs
 
-        >>> az.posteriorplot(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
+        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
     """
     data = convert_to_dataset(data, group='posterior')
 
@@ -259,12 +259,11 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
         ax.spines['bottom'].set_color('0.5')
 
     if kind == 'kde' and values.dtype.kind == 'f':
-        kdeplot(values,
-                bw=bw,
-                fill_kwargs={'alpha': kwargs.pop('fill_alpha', 0)},
-                plot_kwargs={'linewidth': linewidth},
-                ax=ax)
-
+        plot_kde(values,
+                 bw=bw,
+                 fill_kwargs={'alpha': kwargs.pop('fill_alpha', 0)},
+                 plot_kwargs={'linewidth': linewidth},
+                 ax=ax)
     else:
         if bins is None:
             if values.dtype.kind == 'i':

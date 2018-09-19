@@ -9,9 +9,9 @@ from .plot_utils import _scale_text, make_label, xarray_var_iter
 
 
 # pylint:disable-msg=too-many-function-args
-def densityplot(data, data_labels=None, var_names=None, credible_interval=0.94,
-                point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
-                bw=4.5, figsize=None, textsize=None):
+def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
+                 point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
+                 bw=4.5, figsize=None, textsize=None):
     """Generate KDE plots for continuous variables and histograms for discretes ones.
 
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable

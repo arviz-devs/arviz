@@ -5,7 +5,7 @@ import numpy as np
 from .plot_utils import _scale_text
 
 
-def khatplot(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwargs):
+def plot_khat(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwargs):
     R"""
     Plot Pareto tail indices.
 

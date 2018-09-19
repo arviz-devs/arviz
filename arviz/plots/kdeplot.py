@@ -8,9 +8,9 @@ from scipy.stats import entropy
 from .plot_utils import _scale_text
 
 
-def kdeplot(values, values2=None, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
-            contour=True, fill_last=True, figsize=None, textsize=None, plot_kwargs=None,
-            fill_kwargs=None, rug_kwargs=None, contour_kwargs=None, ax=None):
+def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
+             contour=True, fill_last=True, figsize=None, textsize=None, plot_kwargs=None,
+             fill_kwargs=None, rug_kwargs=None, contour_kwargs=None, ax=None):
     """1D or 2D KDE plot taking into account boundary conditions.
 
     Parameters

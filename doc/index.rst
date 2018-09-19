@@ -29,7 +29,8 @@ Contributions and issue reports are very welcome at
 .. toctree::
    :maxdepth: 1
 
-   installation
+   Quickstart<notebooks/Introduction>
+   Example Gallery<examples/index>
    Current Roadmap<roadmap>
    Example Gallery<examples/index>
    Quickstart<notebooks/Introduction>
