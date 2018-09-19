@@ -13,19 +13,19 @@ Plots
 .. autosummary::
     :toctree: generated/
 
-    autocorrplot
-    compareplot
-    densityplot
-    energyplot
-    forestplot
-    kdeplot
-    parallelplot
-    posteriorplot
-    traceplot
-    pairplot
-    jointplot
-    khatplot
-    ppcplot
+    plot_autocorr
+    plot_compare
+    plot_density
+    plot_energy
+    plot_forest
+    plot_kde
+    plot_parallel
+    plot_posterior
+    plot_trace
+    plot_pair
+    plot_joint
+    plot_khat
+    plot_ppc
 
 .. _stats_api:
 

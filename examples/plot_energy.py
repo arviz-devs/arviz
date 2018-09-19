@@ -9,4 +9,4 @@ import arviz as az
 az.style.use('arviz-darkgrid')
 
 data = az.load_arviz_data('centered_eight')
-az.energyplot(data, figsize=(12, 8))
+az.plot_energy(data, figsize=(12, 8))
