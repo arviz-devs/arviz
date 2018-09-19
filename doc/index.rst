@@ -1,6 +1,7 @@
 ArviZ: Exploratory analysis of Bayesian models
 ==============================================
 |Build Status|
+|Coverage Status|
 
 .. raw:: html
 
@@ -11,15 +12,21 @@ ArviZ: Exploratory analysis of Bayesian models
             <div class="col-md-6">
 
 
-ArviZ includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
+ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
 
-It is currently in heavy development.  The goal is to provide backend-agnostic tools
-for diagnostics and visualizations of Bayesian inference in Python, by first
-converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
+The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
 
-Currently `PyMC3 <http://docs.pymc.io/>`_ and
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_ are best supported, but
-support for PyMC4, TensorFlow Probability, Pyro, Edward2, and Edward are on the
+
+**ArviZ is under heavy development.**
+
+Installation is currently through github, via:
+
+.. code:: bash
+
+    pip install git+git://github.com/arviz-devs/arviz.git
+
+ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <http://docs.pymc.io/>`_ and
+`PyStan <https://pystan.readthedocs.io/en/latest/>`_ objects. Support for PyMC4, TensorFlow Probability, Pyro, Edward2, and Edward are on the
 roadmap.
 
 Contributions and issue reports are very welcome at
@@ -32,8 +39,6 @@ Contributions and issue reports are very welcome at
    Quickstart<notebooks/Introduction>
    Example Gallery<examples/index>
    Current Roadmap<roadmap>
-   Example Gallery<examples/index>
-   Quickstart<notebooks/Introduction>
    api
    about
 
@@ -43,34 +48,64 @@ Contributions and issue reports are very welcome at
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/ridgeplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/ridgeplot_thumb.png">
+            <a href="examples/plot_pair.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_pair_thumb.png">
             </div>
             </a>
-            <a href="examples/parallelplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/parallelplot_thumb.png">
+            <a href="examples/plot_forest.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_forest_thumb.png">
             </div>
             </a>
-            <a href="examples/traceplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/traceplot_thumb.png">
+            <a href="examples/plot_density.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_density_thumb.png">
             </div>
             </a>
-            <a href="examples/jointplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/jointplot_thumb.png">
+            <a href="examples/plot_energy.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_energy_thumb.png">
             </div>
             </a>
-            <a href="examples/ppcplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/ppcplot_thumb.png">
+            <a href="examples/plot_posterior.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_posterior_thumb.png">
             </div>
             </a>
-            <a href="examples/autocorrplot.html">
-            <div class="col-md-4 thumbnail">
-                <img src="_static/autocorrplot_thumb.png">
+            <a href="examples/plot_violin.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_violin_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_forest_ridge.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_forest_ridge_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_parallel.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_parallel_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_trace.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_trace_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_joint.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_joint_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_ppc.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_ppc_thumb.png">
+            </div>
+            </a>
+            <a href="examples/plot_autocorr.html">
+            <div class="col-md-3 thumbnail">
+                <img src="_static/plot_autocorr_thumb.png">
             </div>
             </a>
         </div>
@@ -83,3 +118,5 @@ Contributions and issue reports are very welcome at
 
 .. |Build Status| image:: https://travis-ci.org/arviz-devs/arviz.png?branch=master
    :target: https://travis-ci.org/arviz-devs/arviz
+.. |Coverage Status| image:: https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master
+   :target: https://coveralls.io/github/arviz-devs/arviz?branch=master
