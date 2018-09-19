@@ -5,8 +5,6 @@ Parallel Plot
 _thumb: .2, .5
 """
 import arviz as az
-import numpy as np
-import pymc3 as pm
 
 az.style.use('arviz-darkgrid')
 
