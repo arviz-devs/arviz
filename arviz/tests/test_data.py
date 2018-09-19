@@ -209,7 +209,8 @@ class TestDictNetCDFUtils(CheckNetCDFUtils):
         stan_dict = stan_fit.extract(stan_fit.model_pars, permuted=False)
         cls.obj = {}
         for name, vals in stan_dict.items():
-            cls.obj[name] = np.swapaxes(vals, 0, 1)
+            if name not in {'y_hat', 'log_lik'}:  # extra vars
+                cls.obj[name] = np.swapaxes(vals, 0, 1)
 
 
 class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
@@ -256,21 +257,19 @@ class TestPyStanNetCDFUtils(CheckNetCDFUtils):
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']
 
     def get_inference_data(self):
-        return from_pystan(
-            fit=self.obj,
-            coords={'school': np.arange(self.data['J'])},
-            dims={'theta': ['school'], 'theta_tilde': ['school']},
-        )
+        return from_pystan(fit=self.obj,
+                           posterior_predictive='y_hat',
+                           observed_data=['y'],
+                           log_likelihood='log_lik',
+                           coords={'school': np.arange(self.data['J'])},
+                           dims={'theta': ['school'],
+                                 'y': ['school'],
+                                 'log_lik': ['school'],
+                                 'y_hat': ['school'],
+                                 'theta_tilde': ['school']
+                                }
+                           )
+
     def test_sampler_stats(self):
         inference_data = self.get_inference_data()
         assert hasattr(inference_data, 'sample_stats')
-
-
-class TestNumpyNetCDFUtils(CheckNetCDFUtils):
-
-    @classmethod
-    def setup_class(cls):
-        # Data of the Eight Schools Model
-        cls.data = eight_schools_params()
-        cls.draws, cls.chains = 500, 2
-        cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)['pystan']

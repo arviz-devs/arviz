@@ -183,6 +183,10 @@ class PyStanConverter:
     @requires('observed_data')
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
         if isinstance(self.observed_data, str):
             observed_names = [self.observed_data]
         else:
@@ -190,8 +194,9 @@ class PyStanConverter:
         observed_data = {}
         for key in observed_names:
             vals = np.atleast_1d(self.fit.data[key])
+            val_dims = dims.get(key)
             val_dims, coords = generate_dims_coords(vals.shape, key,
-                                                    dims=None, coords=self.coords)
+                                                    dims=val_dims, coords=self.coords)
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
 
