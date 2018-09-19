@@ -2,7 +2,7 @@
 import numpy as np
 import xarray as xr
 
-from ..inference_data import InferenceData
+from arviz.data.inference_data import InferenceData
 from .base import dict_to_dataset
 from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
