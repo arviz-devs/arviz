@@ -31,7 +31,9 @@ class SetupPlots(BaseArvizTest):
 class TestPlots(SetupPlots):
     def test_density_plot(self):
         for obj in (self.short_trace, self.fit):
-            assert densityplot(obj).shape == (18, 1)
+            axes = densityplot(obj)
+            assert axes.shape[0] >= 18
+            assert axes.shape[1] == 1
 
     @pytest.mark.parametrize('combined', [True, False])
     def test_traceplot(self, combined):
@@ -42,7 +44,9 @@ class TestPlots(SetupPlots):
 
     def test_autocorrplot(self):
         for obj in (self.short_trace, self.fit):
-            assert autocorrplot(obj).shape == (1, 36)
+            axes = autocorrplot(obj)
+            assert axes.shape[0] == 1
+            assert axes.shape[1] >= 36
 
     def test_forestplot(self):
         for obj in (self.short_trace, self.fit, [self.short_trace, self.fit]):
@@ -89,7 +93,7 @@ class TestPlots(SetupPlots):
     def test_violintraceplot(self):
         for obj in (self.short_trace, self.fit):
             axes = violintraceplot(obj)
-            assert axes.shape == (18,)
+            assert axes.shape[0] >= 18
 
 
 class TestPosteriorPlot(SetupPlots):
