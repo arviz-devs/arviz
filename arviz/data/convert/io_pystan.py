@@ -277,6 +277,8 @@ def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
                 observed_data=None, log_likelihood=None, coords=None, dims=None):
     """Convert pystan data into an InferenceData object.
 
+    Parameters
+    ----------
     fit : StanFit4Model
         PyStan fit object.
     prior : dict
@@ -312,7 +314,11 @@ def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
     dims : dict[str, List(str)]
-        A mapping from variables to a list of coordinate names for the variable
+        A mapping from variables to a list of coordinate names for the variable.
+
+    Returns
+    -------
+    InferenceData object
     """
     return PyStanConverter(
         fit=fit,
