@@ -270,6 +270,32 @@ class TestPyStanNetCDFUtils(CheckNetCDFUtils):
                                 }
                            )
 
+    def get_inference_data2(self):
+        # dictionary
+        observed_data = {'y_hat' : self.data['y']}
+        # ndarray
+        log_likelihood = self.obj.extract('log_lik', permuted=False)['log_lik']
+        return from_pystan(fit=self.obj,
+                           posterior_predictive='y_hat',
+                           observed_data=observed_data,
+                           log_likelihood=log_likelihood,
+                           coords={'school': np.arange(self.data['J'])},
+                           dims={'theta': ['school'],
+                                 'y': ['school'],
+                                 'log_lik': ['school'],
+                                 'y_hat': ['school'],
+                                 'theta_tilde': ['school']
+                                }
+                           )
+
     def test_sampler_stats(self):
         inference_data = self.get_inference_data()
         assert hasattr(inference_data, 'sample_stats')
+
+    def test_inference_data(self):
+        inference_data1 = self.get_inference_data()
+        inference_data2 = self.get_inference_data2()
+        assert hasattr(inference_data1.sample_stats, 'log_likelihood')
+        assert hasattr(inference_data1.observed_data, 'y')
+        assert hasattr(inference_data2.sample_stats, 'log_likelihood')
+        assert hasattr(inference_data2.observed_data, 'y_hat')
