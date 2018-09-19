@@ -48,64 +48,64 @@ Contributions and issue reports are very welcome at
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/pairplot.html">
+            <a href="examples/plot_pair.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/pairplot_thumb.png">
+                <img src="_static/plot_pair_thumb.png">
             </div>
             </a>
-            <a href="examples/forestplot.html">
+            <a href="examples/plot_forest.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/forestplot_thumb.png">
+                <img src="_static/plot_forest_thumb.png">
             </div>
             </a>
-            <a href="examples/densityplot.html">
+            <a href="examples/plot_density.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/densityplot_thumb.png">
+                <img src="_static/plot_density_thumb.png">
             </div>
             </a>
-            <a href="examples/energyplot.html">
+            <a href="examples/plot_energy.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/energyplot_thumb.png">
+                <img src="_static/plot_energy_thumb.png">
             </div>
             </a>
-            <a href="examples/posteriorplot.html">
+            <a href="examples/plot_posterior.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/posteriorplot_thumb.png">
+                <img src="_static/plot_posterior_thumb.png">
             </div>
             </a>
-            <a href="examples/violinplot.html">
+            <a href="examples/plot_violin.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/violinplot_thumb.png">
+                <img src="_static/plot_violin_thumb.png">
             </div>
             </a>
-            <a href="examples/ridgeplot.html">
+            <a href="examples/plot_forest_ridge.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/ridgeplot_thumb.png">
+                <img src="_static/plot_forest_ridge_thumb.png">
             </div>
             </a>
-            <a href="examples/parallelplot.html">
+            <a href="examples/plot_parallel.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/parallelplot_thumb.png">
+                <img src="_static/plot_parallel_thumb.png">
             </div>
             </a>
-            <a href="examples/traceplot.html">
+            <a href="examples/plot_trace.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/traceplot_thumb.png">
+                <img src="_static/plot_trace_thumb.png">
             </div>
             </a>
-            <a href="examples/jointplot.html">
+            <a href="examples/plot_joint.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/jointplot_thumb.png">
+                <img src="_static/plot_joint_thumb.png">
             </div>
             </a>
-            <a href="examples/ppcplot.html">
+            <a href="examples/plot_ppc.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/ppcplot_thumb.png">
+                <img src="_static/plot_ppc_thumb.png">
             </div>
             </a>
-            <a href="examples/autocorrplot.html">
+            <a href="examples/plot_autocorr.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/autocorrplot_thumb.png">
+                <img src="_static/plot_autocorr_thumb.png">
             </div>
             </a>
         </div>
