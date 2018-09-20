@@ -5,7 +5,7 @@ from matplotlib import gridspec
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from arviz import convert_to_dataset
+from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_text, xarray_to_ndarray, get_coords
 

@@ -5,9 +5,9 @@ from itertools import tee
 import numpy as np
 import matplotlib.pyplot as plt
 
-from arviz import convert_to_dataset
-from arviz.stats import hpd
-from arviz.stats.diagnostics import _get_neff, _get_rhat
+from ..data import convert_to_dataset
+from ..stats import hpd
+from ..stats.diagnostics import _get_neff, _get_rhat
 from .plot_utils import _scale_text, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
 

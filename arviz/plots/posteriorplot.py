@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import mode
 
-from arviz import convert_to_dataset
-from arviz.stats import hpd
+from ..data import convert_to_dataset
+from ..stats import hpd
 from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import (xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid,
                          get_coords)
