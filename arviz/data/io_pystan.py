@@ -187,17 +187,26 @@ class PyStanConverter:
             dims = {}
         else:
             dims = self.dims
-        if isinstance(self.observed_data, str):
-            observed_names = [self.observed_data]
+        if isinstance(self.observed_data, dict):
+            observed_data = {}
+            for key, vals in self.observed_data.items():
+                vals = np.atleast_1d(vals)
+                val_dims = dims.get(key)
+                val_dims, coords = generate_dims_coords(vals.shape, key,
+                                                        dims=val_dims, coords=self.coords)
+                observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         else:
-            observed_names = self.observed_data
-        observed_data = {}
-        for key in observed_names:
-            vals = np.atleast_1d(self.fit.data[key])
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(vals.shape, key,
-                                                    dims=val_dims, coords=self.coords)
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+            if isinstance(self.observed_data, str):
+                observed_names = [self.observed_data]
+            else:
+                observed_names = self.observed_data
+            observed_data = {}
+            for key in observed_names:
+                vals = np.atleast_1d(self.fit.data[key])
+                val_dims = dims.get(key)
+                val_dims, coords = generate_dims_coords(vals.shape, key,
+                                                        dims=val_dims, coords=self.coords)
+                observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
 
     @requires('fit')
