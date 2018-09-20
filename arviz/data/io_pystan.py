@@ -26,6 +26,7 @@ class PyStanConverter:
     def posterior_to_xarray(self):
         """Extract posterior samples from fit."""
         dtypes = self.infer_dtypes()
+        nchain = self.fit.sim["chains"]
         data = {}
         var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=False)
         if not isinstance(var_dict, dict):
@@ -54,8 +55,13 @@ class PyStanConverter:
         for var_name, values in var_dict.items():
             if var_name in post_pred+log_lik:
                 continue
-            if len(values.shape) == 1:
-                values = np.expand_dims(values, -1)
+            if len(values.shape) == 0:
+                values = np.atleast_2d(values)
+            elif len(values.shape) == 1:
+                if nchain == 1:
+                    values = np.expand_dims(values, -1)
+                else:
+                    values = np.expand_dims(values, 0)
             data[var_name] = np.swapaxes(values, 0, 1)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -78,6 +84,7 @@ class PyStanConverter:
             'treedepth__' : 'treedepth',
         }
 
+        nchain = self.fit.sim["chains"]
         sampler_params = self.fit.get_sampler_params(inc_warmup=False)
         stat_lp = self.fit.extract('lp__', permuted=False)
         log_likelihood = self.log_likelihood
@@ -104,14 +111,24 @@ class PyStanConverter:
         else:
             # PyStan version 2.18+
             stat_lp = stat_lp['lp__']
-            if len(stat_lp.shape) == 1:
-                stat_lp = np.expand_dims(stat_lp, -1)
+            if len(stat_lp.shape) == 0:
+                stat_lp = np.atleast_2d(stat_lp)
+            elif len(stat_lp.shape) == 1:
+                if nchain == 1:
+                    stat_lp = np.expand_dims(stat_lp, -1)
+                else:
+                    stat_lp = np.expand_dims(stat_lp, 0)
             stat_lp = np.swapaxes(stat_lp, 0, 1)
             if log_likelihood is not None:
                 if isinstance(log_likelihood, str):
                     log_likelihood_vals = log_likelihood_vals[log_likelihood]
-                if len(log_likelihood_vals.shape) == 1:
-                    log_likelihood_vals = np.expand_dims(log_likelihood, -1)
+                elif len(log_likelihood_vals.shape) == 1:
+                    if len(log_likelihood_vals.shape) == 0:
+                        log_likelihood_vals = np.atleast_2d(log_likelihood_vals)
+                    elif nchain == 1:
+                        log_likelihood_vals = np.expand_dims(log_likelihood, 0)
+                    else:
+                        log_likelihood_vals = np.expand_dims(log_likelihood, -1)
                 log_likelihood_vals = np.swapaxes(log_likelihood_vals, 0, 1)
         # copy dims and coords
         dims = deepcopy(self.dims) if self.dims is not None else {}
@@ -140,11 +157,17 @@ class PyStanConverter:
     @requires('posterior_predictive')
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
+        nchain = self.fit.sim["chains"]
         if isinstance(self.posterior_predictive, dict):
             data = {}
             for key, values in self.posterior_predictive.items():
-                if len(values.shape) == 1:
-                    values = np.expand_dims(values, -1)
+                if len(values.shape) == 0:
+                    values = np.atleast_2d(values)
+                elif len(values.shape) == 1:
+                    if nchain == 1:
+                        values = np.expand_dims(values, -1)
+                    else:
+                        values = np.expand_dims(values, 0)
                 values = np.swapaxes(values, 0, 1)
                 data[key] = values
         else:
@@ -163,18 +186,30 @@ class PyStanConverter:
                 for key, values in var_dict.items():
                     var_dict[key] = self.unpermute(values, original_order, nchain)
             for var_name, values in var_dict.items():
-                if len(values.shape) == 1:
-                    values = np.expand_dims(values, -1)
+                if len(values.shape) == 0:
+                    values = np.atleast_2d(values)
+                elif len(values.shape) == 1:
+                    if nchain == 1:
+                        values = np.expand_dims(values, -1)
+                    else:
+                        values = np.expand_dims(values, 0)
                 data[var_name] = np.swapaxes(values, 0, 1)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
+    @requires('fit')
     @requires('prior')
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
+        nchain = self.fit.sim["chains"]
         data = {}
         for key, values in self.prior.items():
-            if len(values.shape) == 1:
-                values = np.expand_dims(values, -1)
+            if len(values.shape) == 0:
+                values = np.atleast_2d(values)
+            elif len(values.shape) == 1:
+                if nchain == 1:
+                    values = np.expand_dims(values, -1)
+                else:
+                    values = np.expand_dims(values, 0)
             values = np.swapaxes(values, 0, 1)
             data[key] = values
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
@@ -262,7 +297,10 @@ class PyStanConverter:
             Unpermuted sample
         """
         ary = np.asarray(ary)[idx]
-        ary_shape = ary.shape[1:]
+        if ary.shape:
+            ary_shape = ary.shape[1:]
+        else:
+            ary_shape = ary.shape
         ary = ary.reshape((-1, nchain, *ary_shape), order='F')
         return ary
 
