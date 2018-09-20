@@ -57,7 +57,6 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
 
     Examples
     --------
-
     Plot default KDE
 
     .. plot::
@@ -107,7 +106,6 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
 
     """
-
     if figsize is None:
         if ax:
             figsize = ax.get_figure().get_size_inches()
