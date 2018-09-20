@@ -5,7 +5,7 @@ import re
 import numpy as np
 import xarray as xr
 
-from ..inference_data import InferenceData
+from arviz.data.inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords
 
 class PyStanConverter:

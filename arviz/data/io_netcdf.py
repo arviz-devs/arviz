@@ -2,7 +2,7 @@
 import os
 
 from .inference_data import InferenceData
-from .convert import convert_to_inference_data
+from .converters import convert_to_inference_data
 
 
 def load_data(filename):
