@@ -26,7 +26,11 @@ def test_dataset_to_numpy_not_combined(sample_dataset):  # pylint: disable=inval
 
     # 2 vars x 2 chains
     assert len(var_names) == 4
-    assert (data == np.concatenate((mu, tau), axis=0)).all()
+    mu_tau = np.concatenate((mu, tau), axis=0)
+    tau_mu = np.concatenate((tau, mu), axis=0)
+    deqmt = data == mu_tau
+    deqtm = data == tau_mu
+    assert deqmt.all() or deqtm.all()
 
 
 def test_dataset_to_numpy_combined(sample_dataset):
@@ -34,6 +38,8 @@ def test_dataset_to_numpy_combined(sample_dataset):
     var_names, data = xarray_to_ndarray(data, combined=True)
 
     assert len(var_names) == 2
+    if var_names[0] == 'tau':
+        data = data[::-1]
     assert (data[0] == mu.reshape(1, 6)).all()
     assert (data[1] == tau.reshape(1, 6)).all()
 
