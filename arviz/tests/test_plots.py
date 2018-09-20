@@ -86,7 +86,7 @@ class TestPlots(SetupPlots):
         plot_pair(self.short_trace, kind='hexbin', var_names=['theta'],
                   coords={'theta_dim_0': [0, 1]}, plot_kwargs={'cmap': 'viridis'}, textsize=20)
 
-    @pytest.mark.parametrize('kind', ['kde', 'cumulative'])
+    @pytest.mark.parametrize('kind', ['density', 'cumulative'])
     def test_plot_ppc(self, kind):
         data = from_pymc3(trace=self.short_trace, posterior_predictive=self.sample_ppc)
         plot_ppc(data, kind=kind)
