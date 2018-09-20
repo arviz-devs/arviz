@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from arviz import convert_to_dataset
+from ..data import convert_to_dataset
 from .plot_utils import _scale_text, xarray_to_ndarray, get_coords
 
 

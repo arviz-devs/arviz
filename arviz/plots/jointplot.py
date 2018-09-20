@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
-from arviz import convert_to_dataset
+from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
 
