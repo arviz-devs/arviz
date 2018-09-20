@@ -55,7 +55,59 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     -------
     ax : matplotlib axes
 
+    Examples
+    --------
+
+    Plot default KDE
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> non_centered = az.load_arviz_data('non_centered_eight')
+        >>> mu_posterior = np.concatenate(non_centered.posterior["mu"].values)
+        >>> az.plot_kde(mu_posterior)
+
+    Plot a cumulative distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, cumulative=True)
+
+
+    Rotate plot 90 degrees
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, rotated=True)
+
+
+    Plot 2d contour KDE
+
+    .. plot::
+        :context: close-figs
+
+        >>> tau_posterior = np.concatenate(non_centered.posterior["tau"].values)
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior)
+
+    Remove fill for last contour in 2d KDE
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior, fill_last=False)
+
+    Plot 2d smooth KDE
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
+
     """
+
     if figsize is None:
         if ax:
             figsize = ax.get_figure().get_size_inches()
