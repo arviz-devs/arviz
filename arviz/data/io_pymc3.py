@@ -58,7 +58,8 @@ class PyMC3Converter:
                                                   include_transformed=False)
         data = {}
         for var_name in var_names:
-            data[var_name] = np.array(self.trace.get_values(var_name, combine=False))
+            data[var_name] = np.array(self.trace.get_values(var_name, combine=False,
+                                      squeeze=False))
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('trace')
