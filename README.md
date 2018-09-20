@@ -30,30 +30,30 @@ Another option is to clone the repository and install using `python setup.py ins
 <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/ridgeplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://arviz-devs.github.io/arviz/_static/ridgeplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_forest_ridge_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/parallelplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_parallel.html">
   <img alt="Parallel plot"
-  src="https://arviz-devs.github.io/arviz/_static/parallelplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_parallel_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/traceplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_trace.html">
   <img alt="Trace plot"
-  src="https://arviz-devs.github.io/arviz/_static/traceplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_trace_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/densityplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
   <img alt="Density plot"
-  src="https://arviz-devs.github.io/arviz/_static/densityplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_density_thumb.png" />
   </a>
   </td>
 
@@ -61,30 +61,30 @@ Another option is to clone the repository and install using `python setup.py ins
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/posteriorplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_posterior.html">
   <img alt="Posterior plot"
-  src="https://arviz-devs.github.io/arviz/_static/posteriorplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_posterior_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/jointplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
   <img alt="Joint plot"
-  src="https://arviz-devs.github.io/arviz/_static/jointplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_joint_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/ppcplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://arviz-devs.github.io/arviz/_static/ppcplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_ppc_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/pairplot.html">
-  <img alt="Pairplot"
-  src="https://arviz-devs.github.io/arviz/_static/pairplot_thumb.png" />
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_pair.html">
+  <img alt="Pair plot"
+  src="https://arviz-devs.github.io/arviz/_static/plot_pair_thumb.png" />
   </a>
   </td>
 
@@ -92,30 +92,30 @@ Another option is to clone the repository and install using `python setup.py ins
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/energyplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_energy.html">
   <img alt="Energy Plot"
-  src="https://arviz-devs.github.io/arviz/_static/energyplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_energy_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/violinplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_violin.html">
   <img alt="Violin Plot"
-  src="https://arviz-devs.github.io/arviz/_static/violinplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_violin_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/forestplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest.html">
   <img alt="Forest Plot"
-  src="https://arviz-devs.github.io/arviz/_static/forestplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_forest_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/autocorrplot.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/plot_autocorr.html">
   <img alt="Autocorrelation Plot"
-  src="https://arviz-devs.github.io/arviz/_static/autocorrplot_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/plot_autocorr_thumb.png" />
   </a>
   </td>
 
