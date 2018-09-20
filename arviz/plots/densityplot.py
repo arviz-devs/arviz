@@ -19,16 +19,9 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
 
     Parameters
     ----------
-    data : dict, str, np.ndarray, xr.Dataset, pystan fit, pymc3 trace
-        A supported object to convert to InferenceData:
-            InferenceData: returns unchanged
-            str: Attempts to load the netcdf dataset from disk
-            pystan fit: Automatically extracts data
-            pymc3 trace: Automatically extracts data
-            xarray.Dataset: adds to InferenceData as only group
-            dict: creates an xarray dataset as the only group
-            numpy array: creates an xarray dataset as the only group, gives the
-                         array an arbitrary name
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     data_labels : list[str]
         List with names for the samples in the list of datasets. Useful when
         plotting more than one trace.
