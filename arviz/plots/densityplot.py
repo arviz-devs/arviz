@@ -12,19 +12,20 @@ from .plot_utils import _scale_text, make_label, xarray_var_iter
 def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
                  point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
                  bw=4.5, figsize=None, textsize=None):
-    """Generate KDE plots for continuous variables and histograms for discretes ones.
+    """Generate KDE plots for continuous variables and histograms for discrete ones.
 
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
     and colors assigned to models.
 
     Parameters
     ----------
-    data : xarray.Dataset, object that can be converted, or list of these
-           Posterior samples
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     data_labels : list[str]
         List with names for the samples in the list of datasets. Useful when
         plotting more than one trace.
-    var_names: list
+    var_names: list, optional
         List of variables to plot (defaults to None, which results in all
         variables plotted).
     credible_interval : float

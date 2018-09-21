@@ -46,7 +46,8 @@ def save_data(data, filename, *, group='posterior', coords=None, dims=None):
 def load_arviz_data(dataset):
     """Load built-in arviz dataset into memory.
 
-    Will print out available datasets in case of error.
+    Available datasets are `centered_eight` and `non_centered_eight`. Will print out available
+    datasets in case of error.
 
     Parameters
     ----------

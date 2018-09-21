@@ -13,8 +13,9 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
 
     Parameters
     ----------
-    data : inference_data, or object that can be converted (pystan or pymc3 draws)
-        Must contain posterior data
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names : list of variable names, optional
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.

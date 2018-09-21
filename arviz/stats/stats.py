@@ -52,7 +52,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
 
     Parameters
     ----------
-    model_dict : dict[str] -> InferenceData
+    dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
     ic : string
         Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
@@ -583,12 +583,13 @@ def r2_score(y_true, y_pred):
 
 def summary(data, var_names=None, include_circ=None, stat_funcs=None,
             extend=True, credible_interval=0.94, batches=None):
-    r"""Create a data frame with summary statistics.
+    """Create a data frame with summary statistics.
 
     Parameters
     ----------
-    data : Object that can be converted to a Dataset
-        Interpreted as a collection of posterior samples
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names : list
         Names of variables to include in summary
     include_circ : bool
@@ -612,9 +613,10 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     Returns
     -------
-    `pandas.DataFrame` with summary statistics for each variable Defaults one are: `mean`, `sd`,
-    `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. Last two are only computed for traces
-    with 2 or more chains.
+    pd.DataFrame
+        With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
+        `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. `n_eff` and `Rhat` are only computed
+        for traces with 2 or more chains.
 
     Examples
     --------
@@ -837,8 +839,6 @@ def waic(data, pointwise=False):
 
     Parameters
     ----------
-    trace : result of MCMC run
-    model : Probabilistic Model
     pointwise: bool
         if True the pointwise predictive accuracy will be returned.
         Default False

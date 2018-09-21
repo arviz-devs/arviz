@@ -55,3 +55,13 @@ Diagnostics
     effective_n
     gelman_rubin
     geweke
+
+
+Data
+-----------
+
+.. autosummary::
+    :toctree: generated/
+
+    convert_to_inference_data
+    load_arviz_data

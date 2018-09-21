@@ -30,8 +30,9 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
 
     Parameters
     ----------
-    data : xarray.Dataset or list of compatible
-        Samples from a model posterior
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     kind : str
         Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot"
     model_names : list[str], optional
