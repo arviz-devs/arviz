@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .plot_utils import _scale_text
+from .plot_utils import _scale_fig_size
 
 
 def plot_khat(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwargs):
@@ -29,13 +29,10 @@ def plot_khat(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, *
     ax : axes
       Matplotlib axes.
     """
-    if figsize is None:
-        figsize = (8, 5)
-
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    textsize, linewidth, markersize = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, linewidth, markersize = _scale_fig_size(figsize, textsize)
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize)

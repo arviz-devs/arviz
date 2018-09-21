@@ -5,7 +5,7 @@ from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-na
 from scipy.sparse import coo_matrix
 from scipy.stats import entropy
 
-from .plot_utils import _scale_text
+from .plot_utils import _scale_fig_size
 
 
 def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
@@ -106,12 +106,10 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
 
     """
-    if figsize is None:
-        if ax:
-            figsize = ax.get_figure().get_size_inches()
-        else:
-            figsize = (12, 8)
-    textsize, linewidth, markersize = _scale_text(figsize, textsize, 1)
+    if figsize is None and ax:
+        figsize = ax.get_figure().get_size_inches()
+
+    figsize, textsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)

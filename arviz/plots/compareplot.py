@@ -1,7 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 import matplotlib.pyplot as plt
-from .plot_utils import _scale_text
+from .plot_utils import _scale_fig_size
 
 
 def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_diff=True,
@@ -41,7 +41,8 @@ def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_d
     if figsize is None:
         figsize = (6, len(comp_df))
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 

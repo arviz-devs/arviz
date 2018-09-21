@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from ..stats import bfmi as e_bfmi
 from .kdeplot import plot_kde
-from .plot_utils import _scale_text
+from .plot_utils import _scale_fig_size
 
 
 def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
@@ -52,9 +52,6 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     """
     energy = convert_to_dataset(data, group='sample_stats').energy.values
 
-    if figsize is None:
-        figsize = (8, 6)
-
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
@@ -63,7 +60,8 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
 
     if plot_kwargs is None:
         plot_kwargs = {}
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
+
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     series = zip(
         fill_alpha,
