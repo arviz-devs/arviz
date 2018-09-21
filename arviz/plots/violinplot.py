@@ -18,8 +18,9 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
 
     Parameters
     ----------
-    data : InferenceData, or object that can be converted (pystan or pymc3 draws)
-        Posterior samples
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
     quartiles : bool, optional

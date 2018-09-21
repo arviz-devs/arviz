@@ -9,7 +9,7 @@ from .io_pystan import from_pystan
 
 
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
-    R"""Convert a supported object to an InferenceData object.
+    r"""Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return arviz.InferenceData objects unchanged.

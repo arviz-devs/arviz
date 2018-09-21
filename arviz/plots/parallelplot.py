@@ -15,8 +15,9 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
 
     Parameters
     ----------
-    data : xarray, or object that can be converted (pystan or pymc3 draws)
-        Posterior samples
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted. Can be used to change the order
         of the plotted variables

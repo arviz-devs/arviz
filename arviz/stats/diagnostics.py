@@ -18,9 +18,11 @@ def effective_n(data, *, var_names=None):
 
     Parameters
     ----------
-    data : xarray, or object that can be converted (pystan or pymc3 draws)
-      Posterior samples. At least 2 chains are needed to compute this diagnostic of one or more
-      stochastic parameters.
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+        At least 2 posterior chains are needed to compute this diagnostic of one or more
+        stochastic parameters.
     var_names : list
       Names of variables to include in the effective_n report
 
@@ -168,8 +170,11 @@ def gelman_rubin(data, var_names=None):
 
     Parameters
     ----------
-    data : xarray, or object that can be converted (pystan or pymc3 draws)
-      Posterior samples. At least 2 chains are needed to compute this diagnostic.
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+        At least 2 posterior chains are needed to compute this diagnostic of one or more
+        stochastic parameters.
     var_names : list
       Names of variables to include in the rhat report
 
@@ -311,8 +316,7 @@ def geweke(values, first=.1, last=.5, intervals=20):
 
 
 def ks_summary(pareto_tail_indices):
-    """
-    Display a summary of Pareto tail indices.
+    """Display a summary of Pareto tail indices.
 
     Parameters
     ----------

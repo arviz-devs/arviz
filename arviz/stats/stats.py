@@ -52,7 +52,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
 
     Parameters
     ----------
-    model_dict : dict[str] -> InferenceData
+    dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
     ic : string
         Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
@@ -587,8 +587,9 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     Parameters
     ----------
-    data : Object that can be converted to a Dataset
-        Interpreted as a collection of posterior samples
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     var_names : list
         Names of variables to include in summary
     include_circ : bool
@@ -837,8 +838,6 @@ def waic(data, pointwise=False):
 
     Parameters
     ----------
-    trace : result of MCMC run
-    model : Probabilistic Model
     pointwise: bool
         if True the pointwise predictive accuracy will be returned.
         Default False
