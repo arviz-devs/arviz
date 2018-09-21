@@ -18,8 +18,8 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
     ----------
     obj : dict, str, np.ndarray, xr.Dataset, pystan fit, pymc3 trace
         A supported object to convert to InferenceData:
-            | InferenceData: returns unchanged \n
-            | str: Attempts to load the netcdf dataset from disk \n
+            | InferenceData: returns unchanged
+            | str: Attempts to load the netcdf dataset from disk
             | pystan fit: Automatically extracts data
             | pymc3 trace: Automatically extracts data
             | xarray.Dataset: adds to InferenceData as only group
