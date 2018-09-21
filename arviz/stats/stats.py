@@ -583,7 +583,7 @@ def r2_score(y_true, y_pred):
 
 def summary(data, var_names=None, include_circ=None, stat_funcs=None,
             extend=True, credible_interval=0.94, batches=None):
-    r"""Create a data frame with summary statistics.
+    """Create a data frame with summary statistics.
 
     Parameters
     ----------
