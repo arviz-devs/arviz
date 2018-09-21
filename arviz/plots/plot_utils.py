@@ -18,7 +18,7 @@ def make_2d(ary):
 
 
 def _scale_fig_size(figsize, textsize, rows=1, cols=1):
-    """Scale figure properties according to rows and cols
+    """Scale figure properties according to rows and cols.
 
     Parameters
     ----------
