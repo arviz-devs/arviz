@@ -613,9 +613,10 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     Returns
     -------
-    `pandas.DataFrame` with summary statistics for each variable Defaults one are: `mean`, `sd`,
-    `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. Last two are only computed for traces
-    with 2 or more chains.
+    pd.DataFrame
+        With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
+        `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. `n_eff` and `Rhat` are only computed
+        for traces with 2 or more chains.
 
     Examples
     --------
