@@ -8,9 +8,8 @@ from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
 
 
-
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
-    """Convert a supported object to an InferenceData object.
+    R"""Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
     in that it will return arviz.InferenceData objects unchanged.
@@ -19,13 +18,13 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
     ----------
     obj : dict, str, np.ndarray, xr.Dataset, pystan fit, pymc3 trace
         A supported object to convert to InferenceData:
-            InferenceData: returns unchanged
-            str: Attempts to load the netcdf dataset from disk
-            pystan fit: Automatically extracts data
-            pymc3 trace: Automatically extracts data
-            xarray.Dataset: adds to InferenceData as only group
-            dict: creates an xarray dataset as the only group
-            numpy array: creates an xarray dataset as the only group, gives the
+            | InferenceData: returns unchanged \n
+            | str: Attempts to load the netcdf dataset from disk \n
+            | pystan fit: Automatically extracts data
+            | pymc3 trace: Automatically extracts data
+            | xarray.Dataset: adds to InferenceData as only group
+            | dict: creates an xarray dataset as the only group
+            | numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
     group : str
         If `obj` is a dict or numpy array, assigns the resulting xarray
