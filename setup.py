@@ -36,8 +36,8 @@ class InstallStyles(install):
         install.run(self)
 
 def get_version():
-    VERSIONFILE = os.path.join('arviz', '__init__.py')
-    lines = open(VERSIONFILE, 'rt').readlines()
+    versionfile = os.path.join('arviz', '__init__.py')
+    lines = open(versionfile, 'rt').readlines()
     version_regex = r"^__version__ = ['\"]([^'\"]*)['\"]"
     for line in lines:
         mo = re.search(version_regex, line, re.M)
