@@ -7,7 +7,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
-from .plot_utils import _scale_text, xarray_to_ndarray, get_coords
+from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 
 
 def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
@@ -89,12 +89,8 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     numvars = len(_var_names)
 
-    if figsize is None:
-        figsize = (2 * numvars, 2 * numvars)
-
-    if textsize is None:
-        scale_ratio = (6 / numvars) ** 0.75
-        textsize, _, markersize = _scale_text(figsize, textsize=textsize, scale_ratio=scale_ratio)
+    figsize, textsize, _, markersize = _scale_fig_size(
+        figsize, textsize, numvars-1, numvars-1)
 
     if numvars < 2:
         raise Exception('Number of variables to be plotted must be 2 or greater.')

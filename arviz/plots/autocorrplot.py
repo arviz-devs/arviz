@@ -3,7 +3,8 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from ..stats.diagnostics import autocorr
-from .plot_utils import _scale_text, default_grid, make_label, xarray_var_iter, _create_axes_grid
+from .plot_utils import (_scale_fig_size, default_grid, make_label, xarray_var_iter,
+                         _create_axes_grid)
 
 
 def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
@@ -40,10 +41,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    if figsize is None:
-        figsize = (3 * cols, 2.5 * rows)
-    textsize, linewidth, _ = _scale_text(figsize, textsize, 1.5)
-
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize,
                                 squeeze=False, sharex=True, sharey=True)

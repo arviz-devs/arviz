@@ -1,7 +1,7 @@
 """Posterior predictive plot."""
 import numpy as np
 from .kdeplot import plot_kde, _fast_kde
-from .plot_utils import _scale_text, _create_axes_grid, default_grid
+from .plot_utils import _scale_fig_size, _create_axes_grid, default_grid
 
 
 def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=None,
@@ -51,11 +51,10 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
     posterior_predictive = data.posterior_predictive
 
     rows, cols = default_grid(len(observed.data_vars))
-    if figsize is None:
-        figsize = (7 * cols, 5 * rows)
+
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
     _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize)
     for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
         dtype = observed[var_name].dtype.kind
         if kind == 'density':

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import _fast_kde
-from .plot_utils import _scale_text, make_label, xarray_var_iter
+from .plot_utils import _scale_fig_size, make_label, xarray_var_iter
 
 
 # pylint:disable-msg=too-many-function-args
@@ -97,10 +97,8 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         for var_name, selection, _ in plotters:
             all_labels.add(make_label(var_name, selection))
 
-    if figsize is None:
-        figsize = (6, len(all_labels) * 2)
-
-    textsize, linewidth, markersize = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, linewidth, markersize = _scale_fig_size(
+        figsize, textsize, len(all_labels), 1)
 
     fig, axes = plt.subplots(len(all_labels), 1, squeeze=False, figsize=figsize)
     axis_map = {label: ax for label, ax in zip(all_labels, axes.flatten())}

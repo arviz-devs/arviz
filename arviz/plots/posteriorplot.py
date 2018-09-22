@@ -6,8 +6,8 @@ from scipy.stats import mode
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import plot_kde, _fast_kde
-from .plot_utils import (xarray_var_iter, _scale_text, make_label, default_grid, _create_axes_grid,
-                         get_coords)
+from .plot_utils import (xarray_var_iter, _scale_fig_size, make_label, default_grid,
+                         _create_axes_grid, get_coords)
 
 
 def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=None,
@@ -139,10 +139,7 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    if figsize is None:
-        figsize = (7, 5)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize, scale_ratio=1.5)
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
         _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_text, xarray_to_ndarray, get_coords
+from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 
 
 def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None, legend=True,
@@ -56,15 +56,10 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
     _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords),
                                                var_names=var_names, combined=True)
 
-
     if len(_var_names) < 2:
         raise ValueError('This plot needs at least two variables')
 
-    if figsize is None:
-        figsize = (12, 6)
-
-    if textsize is None:
-        textsize, _, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
+    figsize, textsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)

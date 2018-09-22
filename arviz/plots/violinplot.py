@@ -5,7 +5,7 @@ import numpy as np
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import _fast_kde
-from .plot_utils import get_bins, _scale_text, xarray_var_iter, make_label
+from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label
 
 
 def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
@@ -56,10 +56,8 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    if figsize is None:
-        figsize = (len(plotters) * 2, 5)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, len(plotters))
+    textsize *= 2
 
     if ax is None:
         _, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)

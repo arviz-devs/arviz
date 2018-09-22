@@ -3,6 +3,7 @@ from itertools import product
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import xarray as xr
 
 
@@ -16,24 +17,56 @@ def make_2d(ary):
     return ary.reshape(dim_0, -1, order='F')
 
 
-def _scale_text(figsize, textsize, scale_ratio=2):
-    """Scale text and linewidth to figsize.
+def _scale_fig_size(figsize, textsize, rows=1, cols=1):
+    """Scale figure properties according to rows and cols.
 
     Parameters
     ----------
     figsize : float or None
         Size of figure in inches
     textsize : float or None
-        Desired text size
-    scale_ratio : float (default: 2)
-        Ratio of size of elements compared to figsize.  Larger is bigger.
-    """
-    if textsize is None and figsize is not None:
-        textsize = figsize[0] * scale_ratio
+        fontsize
+    rows : int
+        Number of rows
+    cols : int
+        Number of columns
 
-    linewidth = textsize / 8
-    markersize = textsize / 2
-    return textsize, linewidth, markersize
+    Returns
+    -------
+    figsize : float or None
+        Size of figure in inches
+    fontsize : int
+        fontsize
+    linewidth : int
+        linewidth
+    markersize : int
+        markersize
+    """
+    rc_width, rc_height = tuple(mpl.rc_params()['figure.figsize'])
+    rc_fontsize = mpl.rc_params()['font.size']
+    rc_linewidth = mpl.rc_params()['lines.linewidth']
+    rc_markersize = mpl.rc_params()['lines.markersize']
+    if figsize is None:
+        width, height = rc_width, rc_height
+        width = width * cols
+        height = height * rows
+    else:
+        width, height = figsize
+
+    if rows and cols > 1:
+        fontsize = rc_fontsize
+        linewidth = rc_linewidth
+        markersize = rc_markersize
+    else:
+        scale_factor = ((width * height) / (rc_width * rc_height))**0.5
+        fontsize = scale_factor * rc_fontsize
+        linewidth = scale_factor * rc_linewidth
+        markersize = scale_factor * rc_markersize
+
+    if textsize is not None:
+        fontsize = textsize
+
+    return (width, height), fontsize, linewidth, markersize
 
 
 def get_bins(ary, max_bins=50, fenceposts=2):
@@ -203,7 +236,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         if var_name in data:
             new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
             vals = [data[var_name][dim].values for dim in new_dims]
-            dims = [{k : v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
+            dims = [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
             if reverse_selections:
                 dims = reversed(dims)
 

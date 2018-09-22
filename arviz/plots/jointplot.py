@@ -4,7 +4,7 @@ from matplotlib.ticker import NullFormatter
 
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
-from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
+from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
 
 
 def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
@@ -64,10 +64,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
             )
         )
 
-    if figsize is None:
-        figsize = (6, 6)
-
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
     if joint_kwargs is None:
         joint_kwargs = {}

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from ..stats import hpd
 from ..stats.diagnostics import _get_neff, _get_rhat
-from .plot_utils import _scale_text, xarray_var_iter, make_label
+from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
 
 
@@ -93,7 +93,8 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
     if figsize is None:
         figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    textsize, auto_linewidth, auto_markersize = _scale_text(figsize, textsize=textsize)
+    figsize, textsize, auto_linewidth, auto_markersize = _scale_fig_size(figsize, textsize, 1, 1)
+
     if linewidth is None:
         linewidth = auto_linewidth
 
@@ -105,7 +106,7 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
                              figsize=figsize,
                              gridspec_kw={'width_ratios': width_ratios},
                              sharey=True
-                            )
+                             )
 
     axes = np.atleast_1d(axes)
     if kind == 'forestplot':
@@ -196,7 +197,7 @@ class PlotHandler():
                                             model_names=self.model_names,
                                             combined=self.combined,
                                             colors=self.colors,
-                                           )
+                                            )
             y = plotters[var_name].y_max()
         return plotters
 
@@ -339,7 +340,7 @@ class PlotHandler():
         # hand-tuned
         return (len(self.data) * len(self.var_names) - 1 +
                 0.25 * sum(1 for j in self.plotters.values() for _ in j.iterator())
-               )
+                )
 
     def y_max(self):
         """Get maximum y value for the plot."""

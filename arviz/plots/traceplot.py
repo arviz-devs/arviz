@@ -4,7 +4,7 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
-from .plot_utils import _scale_text, get_bins, xarray_var_iter, make_label, get_coords
+from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
 
 
 def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
@@ -97,8 +97,9 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
 
     hist_kwargs.setdefault('alpha', 0.35)
 
-    textsize, linewidth, _ = _scale_text(figsize, textsize=textsize, scale_ratio=1)
+    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, len(plotters), 2)
     trace_kwargs.setdefault('linewidth', linewidth)
+    kde_kwargs.setdefault('plot_kwargs', {'linewidth': linewidth})
 
     _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
 
