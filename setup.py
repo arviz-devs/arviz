@@ -1,3 +1,4 @@
+import codecs
 import shutil
 import os
 import re
@@ -9,9 +10,18 @@ from setuptools.command.develop import develop
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, 'requirements.txt')
+README_FILE = os.path.join(PROJECT_ROOT, 'README.md')
+VERSION_FILE = os.path.join(PROJECT_ROOT, 'arviz', '__init__.py')
 
-with open(REQUIREMENTS_FILE) as buff:
-    install_reqs = buff.read().splitlines()
+
+def get_requirements():
+    with codecs.open(REQUIREMENTS_FILE) as buff:
+        return buff.read().splitlines()
+
+
+def get_long_description():
+    with codecs.open(README_FILE, 'rt') as buff:
+        return buff.read()
 
 
 def copy_styles():
@@ -25,6 +35,7 @@ def copy_styles():
     for s in styles:
         shutil.copy(os.path.join(lsd, s), os.path.join(sd, s))
 
+
 class DevelopStyles(develop):
     def run(self):
         copy_styles()
@@ -36,14 +47,13 @@ class InstallStyles(install):
         install.run(self)
 
 def get_version():
-    versionfile = os.path.join('arviz', '__init__.py')
-    lines = open(versionfile, 'rt').readlines()
+    lines = open(VERSION_FILE, 'rt').readlines()
     version_regex = r"^__version__ = ['\"]([^'\"]*)['\"]"
     for line in lines:
         mo = re.search(version_regex, line, re.M)
         if mo:
             return mo.group(1)
-    raise RuntimeError('Unable to find version in %s.' % (VERSIONFILE,))
+    raise RuntimeError('Unable to find version in %s.' % (VERSION_FILE,))
 
 setup(
     name='arviz',
@@ -52,7 +62,8 @@ setup(
     author='ArviZ Developers',
     url="http://github.com/arviz-devs/arviz",
     packages=find_packages(),
-    install_requires=install_reqs,
+    install_requires=get_requirements(),
+    long_description=get_long_description(),
     include_package_data=True,
     cmdclass={
         'develop': DevelopStyles,
