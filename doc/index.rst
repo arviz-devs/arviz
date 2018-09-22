@@ -19,11 +19,11 @@ The goal is to provide backend-agnostic tools for diagnostics and visualizations
 
 **ArviZ is under heavy development.**
 
-Installation is currently through github, via:
+Installation with pip is recommended
 
 .. code:: bash
 
-    pip install git+git://github.com/arviz-devs/arviz.git
+    pip install arviz
 
 ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <http://docs.pymc.io/>`_ and
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_ objects. Support for PyMC4, TensorFlow Probability, Pyro, Edward2, and Edward are on the
