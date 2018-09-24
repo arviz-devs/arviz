@@ -118,7 +118,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         ax.tick_params(labelsize=textsize)
 
     if gs is None and ax is None:
-        plt.figure(figsize=figsize)
+        fig, _ = plt.subplots(0, 0, figsize=figsize)
         gs = gridspec.GridSpec(numvars - 1, numvars - 1, wspace=0.05, hspace=0.05)
 
         axs = []
@@ -128,7 +128,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
             for j in range(i, numvars - 1):
                 var2 = _posterior[j + 1]
 
-                ax = plt.subplot(gs[j, i])
+                ax = fig.add_subplot(gs[j, i])
 
                 if kind == 'scatter':
                     ax.scatter(var1, var2, s=markersize, **plot_kwargs)
@@ -163,5 +163,5 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                 ax.tick_params(labelsize=textsize)
                 axs.append(ax)
 
-    plt.tight_layout()
+    fig.tight_layout()
     return ax, gs
