@@ -84,13 +84,13 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
                         hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                         hist = np.concatenate((hist[:1], hist))
                         pp_densities.extend([bin_edges, hist])
-            plot_kwargs = {'color': 'C4',
+            plot_kwargs = {'color': 'C5',
                            'alpha': alpha,
                            'linewidth': 0.5 * linewidth}
             if dtype == 'i':
                 plot_kwargs['drawstyle'] = 'steps-pre'
             ax.plot(*pp_densities, **plot_kwargs)
-            ax.plot([], color='C4', label='Posterior predictive {}'.format(pp_var_name))
+            ax.plot([], color='C5', label='Posterior predictive {}'.format(pp_var_name))
             if mean:
                 if dtype == 'f':
                     plot_kde(posterior_predictive[pp_var_name].values.flatten(),
@@ -114,6 +114,7 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
             else:
                 xlabel = var_name
             ax.set_xlabel(xlabel, fontsize=textsize)
+            ax.tick_params(labelsize=textsize)
             ax.set_yticks([])
 
         elif kind == 'cumulative':
@@ -138,11 +139,11 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
                     pp_x, pp_density = _empirical_cdf(vals)
                     pp_densities.extend([pp_x, pp_density])
             if dtype == 'f':
-                ax.plot(*pp_densities, alpha=alpha, color='C4', linewidth=linewidth)
+                ax.plot(*pp_densities, alpha=alpha, color='C5', linewidth=linewidth)
             else:
-                ax.plot(*pp_densities, alpha=alpha, color='C4', drawstyle='steps-pre',
+                ax.plot(*pp_densities, alpha=alpha, color='C5', drawstyle='steps-pre',
                         linewidth=linewidth)
-            ax.plot([], color='C4', label='Posterior predictive {}'.format(pp_var_name))
+            ax.plot([], color='C5', label='Posterior predictive {}'.format(pp_var_name))
             if mean:
                 if dtype == 'f':
                     ax.plot(*_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
