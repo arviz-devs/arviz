@@ -60,7 +60,11 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
     textsize *= 2
 
     if ax is None:
-        _, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
+        fig, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
+
+    else:
+        fig = ax.figure
+
     ax = np.atleast_1d(ax)
 
     for axind, (var_name, selection, x) in enumerate(plotters):
@@ -84,9 +88,10 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
         ax[axind].grid(None, axis='x')
 
     if sharey:
-        plt.subplots_adjust(wspace=0)
+        fig.subplots_adjust(wspace=0)
     else:
-        plt.tight_layout()
+        fig.tight_layout()
+
     return ax
 
 
