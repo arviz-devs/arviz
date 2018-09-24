@@ -1,6 +1,5 @@
 """Plot posterior densities."""
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import mode
 
 from ..data import convert_to_dataset
@@ -142,7 +141,7 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+        fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(x.flatten(), var_name, selection, ax=ax_, bw=bw, linewidth=linewidth,
@@ -152,7 +151,7 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
 
         ax_.set_title(make_label(var_name, selection), fontsize=textsize)
 
-    plt.tight_layout()
+    fig.tight_layout()
     return ax
 
 
