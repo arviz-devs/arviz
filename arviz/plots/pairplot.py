@@ -106,7 +106,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                                **plot_kwargs)
             ax.grid(False)
             if colorbar:
-                cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
+                cbar = ax.fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
                 cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
 
         if divergences:
@@ -132,8 +132,10 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
                 if kind == 'scatter':
                     ax.scatter(var1, var2, s=markersize, **plot_kwargs)
+
                 elif kind == 'kde':
                     plot_kde(var1, var2, contour=contour, fill_last=fill_last, ax=ax, **plot_kwargs)
+
                 else:
                     ax.grid(False)
                     hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
@@ -143,7 +145,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
                     if i == j == 0 and colorbar:
                         cax = divider.append_axes('right', size='7%')
-                        cbar = plt.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
+                        cbar = fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
                                             cax=cax)
                         cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
 
