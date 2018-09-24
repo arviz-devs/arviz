@@ -266,7 +266,7 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
 
     Returns
     -------
-    tuple
+    np.ndarray
         lower and upper value of the interval.
     """
     if x.ndim > 1:
