@@ -114,7 +114,7 @@ def _neff_ufunc(ary):
     for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
         idxs = list(idxs)
         idxs.append(Ellipsis)
-        target[idxs] = _get_neff(ary[idxs])
+        target[tuple(idxs)] = _get_neff(ary[tuple(idxs)])
     return target
 
 
@@ -236,7 +236,7 @@ def _rhat_ufunc(ary):
     for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
         idxs = list(idxs)
         idxs.append(Ellipsis)
-        target[idxs] = _get_rhat(ary[idxs])
+        target[tuple(idxs)] = _get_rhat(ary[tuple(idxs)])
     return target
 
 
