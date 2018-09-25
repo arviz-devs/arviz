@@ -101,7 +101,7 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
     trace_kwargs.setdefault('linewidth', linewidth)
     kde_kwargs.setdefault('plot_kwargs', {'linewidth': linewidth})
 
-    _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
+    fig, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
 
     for i, (var_name, selection, value) in enumerate(plotters):
         if combined:
@@ -133,7 +133,7 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
             axes[i, 1].hlines(line_values, *axes[i, 1].get_xlim(), colors=colors,
                               linewidth=1.5, alpha=trace_kwargs['alpha'])
         axes[i, 0].set_ylim(ymin=0)
-    plt.tight_layout()
+    fig.tight_layout()
     return axes
 
 
