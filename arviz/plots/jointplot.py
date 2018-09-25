@@ -1,6 +1,5 @@
 """Joint scatter plot of two variables."""
 import matplotlib.pyplot as plt
-from matplotlib.ticker import NullFormatter
 
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
@@ -52,6 +51,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
                           'Plot type must be in {}').format(kind, valid_kinds))
 
     data = convert_to_dataset(data, group='posterior')
+
     if coords is None:
         coords = {}
 
@@ -59,9 +59,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
 
     if len(plotters) != 2:
         raise Exception(
-            'Number of variables to be plotted must 2 (you supplied {})'.format(
-                len(plotters)
-            )
+            'Number of variables to be plotted must 2 (you supplied {})'.format(len(plotters))
         )
 
     figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize)
@@ -72,19 +70,32 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
     if marginal_kwargs is None:
         marginal_kwargs = {}
 
-    plt.figure(figsize=figsize)
+    # Instantiate figure and grid
+    fig, _ = plt.subplots(0, 0, figsize=figsize)
+    grid = plt.GridSpec(4, 4, hspace=.1, wspace=.1)
 
-    axjoin, ax_hist_x, ax_hist_y = _define_axes()
+    # Set up main plot
+    axjoin = fig.add_subplot(grid[1:, :-1])
 
-    x_var_name = make_label(*plotters[0][:2])
-    y_var_name = make_label(*plotters[1][:2])
+    # Set up top KDE
+    ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+    ax_hist_x.tick_params(labelleft=False, labelbottom=False)
 
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
+    # Set up right KDE
+    ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
+    ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+
+    # Set labels for axes
+    x_var_name = make_label(plotters[0][0], plotters[0][1])
+    y_var_name = make_label(plotters[1][0], plotters[1][1])
 
     axjoin.set_xlabel(x_var_name, fontsize=textsize)
     axjoin.set_ylabel(y_var_name, fontsize=textsize)
     axjoin.tick_params(labelsize=textsize)
+
+    # Flatten data
+    x = plotters[0][2].flatten()
+    y = plotters[1][2].flatten()
 
     if kind == 'scatter':
         axjoin.scatter(x, y, **joint_kwargs)
@@ -109,26 +120,5 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())
-
-    return axjoin, ax_hist_x, ax_hist_y
-
-
-def _define_axes():
-    left, width = 0.1, 0.65
-    bottom, height = 0.1, 0.65
-    bottom_h = left_h = left + width + 0.02
-
-    rect_join = [left, bottom, width, height]
-    rect_histx = [left, bottom_h, width, 0.2]
-    rect_histy = [left_h, bottom, 0.2, height]
-
-    axjoin = plt.axes(rect_join)
-    ax_hist_x = plt.axes(rect_histx)
-    ax_hist_y = plt.axes(rect_histy)
-
-    ax_hist_x.xaxis.set_major_formatter(NullFormatter())
-    ax_hist_y.yaxis.set_major_formatter(NullFormatter())
-    ax_hist_x.set_yticks([])
-    ax_hist_y.set_xticks([])
 
     return axjoin, ax_hist_x, ax_hist_y
