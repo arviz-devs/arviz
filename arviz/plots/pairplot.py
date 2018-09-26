@@ -118,8 +118,8 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         ax.tick_params(labelsize=textsize)
 
     if gs is None and ax is None:
-        fig, _ = plt.subplots(0, 0, figsize=figsize)
-        gs = gridspec.GridSpec(numvars - 1, numvars - 1, wspace=0.05, hspace=0.05)
+        fig = plt.figure(figsize=figsize, constrained_layout=True)
+        gs = gridspec.GridSpec(numvars - 1, numvars - 1, figure=fig)
 
         axs = []
         for i in range(0, numvars - 1):
@@ -165,5 +165,4 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                 ax.tick_params(labelsize=textsize)
                 axs.append(ax)
 
-    fig.tight_layout()
     return ax, gs
