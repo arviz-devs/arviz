@@ -98,14 +98,16 @@ class TestAutoCorrPlot(SetupPlots):
         obj = getattr(self, obj_attr)
         axes = plot_autocorr(obj, combined=False)
         assert axes.shape[0] == 1
-        assert axes.shape[1] in (36, 68)
+        assert (axes.shape[1] == 36 and obj_attr == "pymc3_fit" or
+                axes.shape[1] == 68 and obj_attr == "stan_fit")
 
     @pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
     def test_plot_autocorr_combined(self, obj_attr):
         obj = getattr(self, obj_attr)
         axes = plot_autocorr(obj, combined=True)
         assert axes.shape[0] == 1
-        assert axes.shape[1] == 18
+        assert (axes.shape[1] == 18 and obj_attr == "pymc3_fit" or
+                axes.shape[1] == 34 and obj_attr == "stan_fit")
 
 
 class TestPosteriorPlot(SetupPlots):
