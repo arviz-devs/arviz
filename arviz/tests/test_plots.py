@@ -43,12 +43,6 @@ class TestPlots(SetupPlots):
                               combined=combined, lines=[('mu', {}, [1, 2])])
             assert axes.shape == (2, 2)
 
-    def test_plot_autocorr(self):
-        for obj in (self.pymc3_fit, self.stan_fit):
-            axes = plot_autocorr(obj)
-            assert axes.shape[0] == 1
-            assert axes.shape[1] >= 36
-
     def test_plot_forest(self):
         for obj in (self.pymc3_fit, self.stan_fit, [self.pymc3_fit, self.stan_fit]):
             _, axes = plot_forest(obj)
@@ -95,6 +89,25 @@ class TestPlots(SetupPlots):
         for obj in (self.pymc3_fit, self.stan_fit):
             axes = plot_violin(obj)
             assert axes.shape[0] >= 18
+
+
+class TestAutoCorrPlot(SetupPlots):
+
+    @pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+    def test_plot_autocorr_uncombined(self, obj_attr):
+        obj = getattr(self, obj_attr)
+        axes = plot_autocorr(obj, combined=False)
+        assert axes.shape[0] == 1
+        assert (axes.shape[1] == 36 and obj_attr == "pymc3_fit" or
+                axes.shape[1] == 68 and obj_attr == "stan_fit")
+
+    @pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+    def test_plot_autocorr_combined(self, obj_attr):
+        obj = getattr(self, obj_attr)
+        axes = plot_autocorr(obj, combined=True)
+        assert axes.shape[0] == 1
+        assert (axes.shape[1] == 18 and obj_attr == "pymc3_fit" or
+                axes.shape[1] == 34 and obj_attr == "stan_fit")
 
 
 class TestPosteriorPlot(SetupPlots):
