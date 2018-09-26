@@ -44,40 +44,40 @@ def df_trace():
     return DataFrame({'a': np.random.poisson(2.3, 100)})
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_density(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_density(models, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_density(obj)
     assert axes.shape[0] >= 18
     assert axes.shape[1] == 1
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('combined', [True, False])
-def test_plot_trace(models, combined, obj_attr):
-    obj = getattr(models, obj_attr)
+def test_plot_trace(models, combined, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_trace(obj, var_names=('mu', 'tau'), combined=combined, lines=[('mu', {}, [1, 2])])
     assert axes.shape == (2, 2)
 
 
-@pytest.mark.parametrize("obj_attrs", [["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
+@pytest.mark.parametrize("model_fits", [["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
 @pytest.mark.parametrize("args_expected", [(dict(), (3,)),
                                            (dict(r_hat=False, quartiles=False), (2,)),
                                            (dict(var_names=['mu'], colors='C0', n_eff=False,
                                                  combined=True), (2,)),
                                            (dict(kind='ridgeplot', r_hat=False, n_eff=False), (1,))
                                            ])
-def test_plot_forest(models, obj_attrs, args_expected):
-    obj = [getattr(models, obj_attr) for obj_attr in obj_attrs]
+def test_plot_forest(models, model_fits, args_expected):
+    obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
     assert axes.shape == expected
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('kind', ['kde', 'hist'])
-def test_plot_energy(models, obj_attr, kind):
-    obj = getattr(models, obj_attr)
+def test_plot_energy(models, model_fit, kind):
+    obj = getattr(models, model_fit)
     assert plot_energy(obj, kind=kind)
 
 
@@ -86,20 +86,20 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
         plot_parallel(df_trace)
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_parallel_exception(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_parallel_exception(models, model_fit):
+    obj = getattr(models, model_fit)
     assert plot_parallel(obj)
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('kind', ['scatter', 'hexbin'])
-def test_plot_joint(models, obj_attr, kind):
-    obj = getattr(models, obj_attr)
+def test_plot_joint(models, model_fit, kind):
+    obj = getattr(models, model_fit)
     plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("kwargs", [{"var_names":['theta'], "divergences":True,
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'marker': 'x'},
@@ -111,8 +111,8 @@ def test_plot_joint(models, obj_attr, kind):
                                     {"kind":'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
-def test_plot_pair(models, obj_attr, kwargs):
-    obj = getattr(models, obj_attr)
+def test_plot_pair(models, model_fit, kwargs):
+    obj = getattr(models, model_fit)
     ax, _ = plot_pair(obj, **kwargs)
     assert ax
 
@@ -125,41 +125,41 @@ def test_plot_ppc(models, pymc3_sample_ppc, kind):
     assert axes
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_violin(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_violin(models, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_violin(obj)
     assert axes.shape[0] >= 18
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_autocorr_uncombined(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_autocorr_uncombined(models, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=False)
     assert axes.shape[0] == 1
-    assert (axes.shape[1] == 36 and obj_attr == "pymc3_fit" or
-            axes.shape[1] == 68 and obj_attr == "stan_fit")
+    assert (axes.shape[1] == 36 and model_fit == "pymc3_fit" or
+            axes.shape[1] == 68 and model_fit == "stan_fit")
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_autocorr_combined(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_autocorr_combined(models, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=True)
     assert axes.shape[0] == 1
-    assert (axes.shape[1] == 18 and obj_attr == "pymc3_fit" or
-            axes.shape[1] == 34 and obj_attr == "stan_fit")
+    assert (axes.shape[1] == 18 and model_fit == "pymc3_fit" or
+            axes.shape[1] == 34 and model_fit == "stan_fit")
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
-def test_plot_posterior(models, obj_attr):
-    obj = getattr(models, obj_attr)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_posterior(models, model_fit):
+    obj = getattr(models, model_fit)
     axes = plot_posterior(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
     assert axes.shape == (2,)
 
 
-@pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("point_estimate", ('mode', 'mean', 'median'))
-def test_point_estimates(models, obj_attr, point_estimate):
-    obj = getattr(models, obj_attr)
+def test_point_estimates(models, model_fit, point_estimate):
+    obj = getattr(models, model_fit)
     axes = plot_posterior(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
     assert axes.shape == (2,)
