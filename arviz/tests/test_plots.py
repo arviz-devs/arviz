@@ -16,10 +16,8 @@ from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
 def plot_inputs(request):
     class PlotInputs:
         models = load_cached_models(draws=500, chains=2)
-        model, pymc3_fit = models['pymc3']
-        with model:
-            pymc3_sample_ppc = pm.sample_ppc(pymc3_fit, 100)
 
+        pymc3_model, pymc3_fit = models['pymc3']
         stan_model, stan_fit = models['pystan']
 
     def fin():
@@ -27,6 +25,13 @@ def plot_inputs(request):
 
     request.addfinalizer(fin)
     return PlotInputs()
+
+
+@pytest.fixture(scope='module')
+def pymc3_sample_ppc(plot_inputs):
+
+    with plot_inputs.pymc3_model:
+        return pm.sample_ppc(plot_inputs.pymc3_fit, 100)
 
 
 @pytest.fixture(scope='module')
@@ -114,9 +119,9 @@ def test_plot_pair(plot_inputs, obj_attr, kwargs):
 
 
 @pytest.mark.parametrize('kind', ['density', 'cumulative'])
-def test_plot_ppc(plot_inputs, kind):
+def test_plot_ppc(plot_inputs, pymc3_sample_ppc, kind):
     data = from_pymc3(trace=plot_inputs.pymc3_fit,
-                      posterior_predictive=plot_inputs.pymc3_sample_ppc)
+                      posterior_predictive=pymc3_sample_ppc)
     axes = plot_ppc(data, kind=kind)
     assert axes
 
