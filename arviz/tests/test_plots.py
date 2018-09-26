@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 import matplotlib.pyplot as plt
 from pandas import DataFrame
 import numpy as np
@@ -5,7 +6,7 @@ import pymc3 as pm
 import pytest
 
 from arviz import from_pymc3
-from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
+from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
                      plot_joint, plot_ppc, plot_violin)
@@ -25,7 +26,7 @@ def plot_inputs(request):
         plt.close('all')
 
     request.addfinalizer(fin)
-    yield PlotInputs()
+    return PlotInputs()
 
 
 @pytest.fixture(scope='module')
@@ -76,9 +77,9 @@ def test_plot_energy(plot_inputs, obj_attr, kind):
     assert plot_energy(obj, kind=kind)
 
 
-def test_plot_parallel_raises_valueerror(df_trace):
-        with pytest.raises(ValueError):
-            plot_parallel(df_trace)
+def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
+    with pytest.raises(ValueError):
+        plot_parallel(df_trace)
 
 
 @pytest.mark.parametrize("obj_attr", ["pymc3_fit", "stan_fit"])
@@ -101,7 +102,7 @@ def test_plot_joint(plot_inputs, obj_attr, kind):
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
                                     {"divergences":True, "plot_kwargs":{'marker': 'x'},
-                                    "divergences_kwargs": {'marker': '*', 'c': 'C'}},
+                                     "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
                                     {"kind":'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]},
