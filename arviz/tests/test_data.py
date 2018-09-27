@@ -247,7 +247,8 @@ class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
         inference_data = self.get_inference_data()
         assert hasattr(inference_data, 'prior')
 
-class TestPyStanNetCDFUtils(CheckNetCDFUtils):
+
+class TestPyStanNetCDFUtils(BaseArvizTest):
 
     @classmethod
     def setup_class(cls):
