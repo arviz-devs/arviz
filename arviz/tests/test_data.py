@@ -50,6 +50,7 @@ class TestNumpyToDataArray():
         assert inference_data.foo.draw.shape == shape[1:2]
         assert inference_data.foo[var_name].shape == shape
 
+
 class TestConvertToDataset():
     def setup_method(self):
         # pylint: disable=attribute-defined-outside-init
@@ -133,7 +134,6 @@ def test_dict_to_dataset():
     assert set(dataset.b.coords) == {'chain', 'draw', 'c'}
 
 
-
 def test_convert_to_dataset_idempotent():
     first = convert_to_dataset(np.random.randn(100))
     second = convert_to_dataset(first)
@@ -143,7 +143,7 @@ def test_convert_to_dataset_idempotent():
 def test_convert_to_inference_data_idempotent():
     first = convert_to_inference_data(np.random.randn(100), group='foo')
     second = convert_to_inference_data(first)
-    assert first.foo.equals(second.foo)
+    assert first.foo is second.foo
 
 
 def test_convert_to_inference_data_from_file(tmpdir):
@@ -167,7 +167,19 @@ def test_convert_to_dataset_bad(tmpdir):
         convert_to_dataset(filename, group='bar')
 
 
-class CheckNetCDFUtils(BaseArvizTest):
+class TestDictNetCDFUtils(BaseArvizTest):
+
+    @classmethod
+    def setup_class(cls):
+        # Data of the Eight Schools Model
+        cls.data = eight_schools_params()
+        cls.draws, cls.chains = 500, 2
+        _, stan_fit = load_cached_models(cls.draws, cls.chains)['pystan']
+        stan_dict = stan_fit.extract(stan_fit.model_pars, permuted=False)
+        cls.obj = {}
+        for name, vals in stan_dict.items():
+            if name not in {'y_hat', 'log_lik'}:  # extra vars
+                cls.obj[name] = np.swapaxes(vals, 0, 1)
 
     def check_var_names_coords_dims(self, dataset):
         assert set(dataset.data_vars) == {'mu', 'tau', 'theta_tilde', 'theta'}
@@ -198,22 +210,7 @@ class CheckNetCDFUtils(BaseArvizTest):
         )
 
 
-class TestDictNetCDFUtils(CheckNetCDFUtils):
-
-    @classmethod
-    def setup_class(cls):
-        # Data of the Eight Schools Model
-        cls.data = eight_schools_params()
-        cls.draws, cls.chains = 500, 2
-        _, stan_fit = load_cached_models(cls.draws, cls.chains)['pystan']
-        stan_dict = stan_fit.extract(stan_fit.model_pars, permuted=False)
-        cls.obj = {}
-        for name, vals in stan_dict.items():
-            if name not in {'y_hat', 'log_lik'}:  # extra vars
-                cls.obj[name] = np.swapaxes(vals, 0, 1)
-
-
-class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
+class TestPyMC3NetCDFUtils(BaseArvizTest):
 
     @classmethod
     def setup_class(cls):
@@ -247,7 +244,8 @@ class TestPyMC3NetCDFUtils(CheckNetCDFUtils):
         inference_data = self.get_inference_data()
         assert hasattr(inference_data, 'prior')
 
-class TestPyStanNetCDFUtils(CheckNetCDFUtils):
+
+class TestPyStanNetCDFUtils(BaseArvizTest):
 
     @classmethod
     def setup_class(cls):
