@@ -278,7 +278,7 @@ class PyStanConverter:
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
-        Note that if groups can not be created (i.e., there is no `trace`, so
+        Note that if groups can not be created (i.e., there is no `fit`, so
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
@@ -324,14 +324,14 @@ def unpermute(ary, idx, nchain):
 
 def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
                 observed_data=None, log_likelihood=None, coords=None, dims=None):
-    """Convert pystan data into an InferenceData object.
+    """Convert PyStan data into an InferenceData object.
 
     Parameters
     ----------
     fit : StanFit4Model
         PyStan fit object.
     prior : dict
-        A dictionary containing prior samples extracted from pystan fit object.
+        A dictionary containing prior samples extracted from PyStan fit object.
 
         Example: dict for PyStan 2.18+:
 
