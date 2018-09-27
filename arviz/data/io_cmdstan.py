@@ -3,6 +3,7 @@ from collections import defaultdict
 from copy import deepcopy
 from glob import glob
 import linecache
+import os
 import re
 
 
@@ -21,8 +22,16 @@ class CmdStanConverter:
                  observed_data=None, observed_data_var=None,
                  log_likelihood=None, coords=None, dims=None):
         self.output = glob(output) if isinstance(output, str) else output
+        if isinstance(output, str) and len(self.output) > 1:
+            msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
+                            for i, path in enumerate(self.output,1))
+            print("glob found {} files for 'output':\n{}".format(len(self.output), msg))
         if isinstance(prior, str) and prior.endswith(".csv"):
             prior = glob(prior)
+            if len(prior) > 1:
+                msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
+                                for i, path in enumerate(prior,1))
+                print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.observed_data = observed_data
@@ -40,7 +49,7 @@ class CmdStanConverter:
     def parse_output(self):
         chain_data = []
         for path in self.output:
-            sample, sample_stats, config, adaptation, timing = read_output(path)
+            sample, sample_stats, config, adaptation, timing = _read_output(path)
 
             chain_data.append({
                 'sample' : sample,
@@ -70,7 +79,7 @@ class CmdStanConverter:
             log_lik = [log_lik]
 
         valid_cols = [col for col in columns if col not in post_pred+log_lik]
-        data = unpack_dataframes([item[valid_cols] for item in self.posterior])
+        data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('sample_stats')
@@ -126,7 +135,7 @@ class CmdStanConverter:
         var_names = self.posterior_predictive
         if isinstance(var_names, str):
             var_names = [var_names]
-        data = unpack_dataframes([item[var_names] for item in self.posterior])
+        data = _unpack_dataframes([item[var_names] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('posterior')
@@ -135,16 +144,16 @@ class CmdStanConverter:
         """Convert prior samples to xarray."""
         chains = []
         for path in self.prior:
-            prior, *_ = read_output(path)
+            prior, *_ = _read_output(path)
             chains.append(prior)
-        data = unpack_dataframes(chains)
+        data = _unpack_dataframes(chains)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('posterior')
     @requires('observed_data')
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        observed_data_raw = read_data(self.observed_data)
+        observed_data_raw = _read_data(self.observed_data)
         variables = self.observed_data_var
         if isinstance(variables, str):
             variables = [variables]
@@ -195,8 +204,8 @@ def _process_configuration(comments):
             'thin' : thin,
            }
 
-def read_output(path):
-    """Function for reading CmdStan output.csv
+def _read_output(path):
+    """Read CmdStan output.csv
 
     Parameters
     ----------
@@ -266,6 +275,18 @@ def read_output(path):
     return sample_df, sample_stats, configuration_info, adaptation_info, timing_info
 
 def _process_data_var(string):
+    """Transform datastring to key, values pair.
+    All values are transformed to floating point values.
+
+    Parameters
+    ----------
+    string : str
+
+    Returns
+    -------
+    Tuple[Str, Str]
+        key, values pair
+    """
     key, var = string.split("<-")
     if 'structure' in var:
         var, dim = var.replace("structure(", "").replace(",", "").split(".Dim")
@@ -286,7 +307,19 @@ def _process_data_var(string):
         var = dtype(var)
     return key.strip(), var
 
-def read_data(path):
+def _read_data(path):
+    """Read Rdump output and transform to Python dictionary.
+    Assumes
+
+    Parameters
+    ----------
+    path : str
+
+    Returns
+    -------
+    Dict
+        key, values pairs from Rdump formatted data.
+    """
     data = {}
     with open(path, "r") as f_obj:
         var = ""
@@ -302,7 +335,18 @@ def read_data(path):
             data[key] = var
     return data
 
-def unpack_dataframes(dfs):
+def _unpack_dataframes(dfs):
+    """Transform a list of pandas.DataFrames to dictionary containing ndarrays.
+
+    Parameters
+    ----------
+    dfs : List[pandas.DataFrame]
+
+    Returns
+    -------
+    Dict
+        key, values pairs. Values are formatted to shape = (nchain, ndraws, *shape)
+    """
     col_groups = defaultdict(list)
     columns = dfs[0].columns
     for col in columns:
