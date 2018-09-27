@@ -143,7 +143,7 @@ def test_convert_to_dataset_idempotent():
 def test_convert_to_inference_data_idempotent():
     first = convert_to_inference_data(np.random.randn(100), group='foo')
     second = convert_to_inference_data(first)
-    assert first.foo.equals(second.foo)
+    assert first.foo is second.foo
 
 
 def test_convert_to_inference_data_from_file(tmpdir):
