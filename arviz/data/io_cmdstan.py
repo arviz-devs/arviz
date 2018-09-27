@@ -352,22 +352,22 @@ def _unpack_dataframes(dfs):
     for col in columns:
         key, *loc = col.split('.')
         loc = list(map(int, loc))
+        loc = tuple([i-1 for i in loc])
         col_groups[key].append((col, loc))
 
     chains = len(dfs)
     draws = len(dfs[0])
     sample = {}
     for key, cols_locs in col_groups.items():
-        ndim = np.array([loc for _, loc in cols_locs]).max(0)
+        ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
         sample[key] = np.full((chains, draws, *ndim), np.nan)
         for col, loc in cols_locs:
             for chain_id, df in enumerate(dfs):
                 draw = df[col].values
-                if loc == []:
+                if loc == ():
                     sample[key][chain_id, :] = draw
                 else:
                     axis1_all = range(sample[key].shape[1])
-                    loc = tuple([s-1 for s in loc])
                     slicer = (chain_id, axis1_all, *loc)
                     sample[key][slicer] = draw
     return sample
