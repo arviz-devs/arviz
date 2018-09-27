@@ -18,19 +18,21 @@ from .base import requires, dict_to_dataset, generate_dims_coords
 class CmdStanConverter:
     """Encapsulate CmdStan specific logic."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, *, output=None, prior=None, posterior_predictive=None,
                  observed_data=None, observed_data_var=None,
                  log_likelihood=None, coords=None, dims=None):
         self.output = glob(output) if isinstance(output, str) else output
         if isinstance(output, str) and len(self.output) > 1:
             msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
-                            for i, path in enumerate(self.output,1))
+                            for i, path in enumerate(self.output, 1))
             print("glob found {} files for 'output':\n{}".format(len(self.output), msg))
         if isinstance(prior, str) and prior.endswith(".csv"):
             prior = glob(prior)
             if len(prior) > 1:
                 msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
-                                for i, path in enumerate(prior,1))
+                                for i, path in enumerate(prior, 1))
                 print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
         self.prior = prior
         self.posterior_predictive = posterior_predictive
