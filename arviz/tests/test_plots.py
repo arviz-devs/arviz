@@ -116,12 +116,12 @@ def test_plot_parallel_exception(models, model_fit):
 @pytest.mark.parametrize('kind', ['scatter', 'hexbin', 'kde'])
 def test_plot_joint(models, model_fit, kind):
     obj = getattr(models, model_fit)
-    axjoin, ax_hist_x, ax_hist_y = plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
+    axjoin, _, _ = plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
     assert axjoin
 
 
 def test_plot_joint_int(discrete_model):
-    axjoin, ax_hist_x, ax_hist_y = plot_joint(discrete_model)
+    axjoin, _, _ = plot_joint(discrete_model)
     assert axjoin
 
 
