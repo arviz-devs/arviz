@@ -21,12 +21,15 @@ def models(request):
         models = load_cached_models(draws=500, chains=2)
         pymc3_model, pymc3_fit = models['pymc3']
         stan_model, stan_fit = models['pystan']
+    return Models()
 
+
+@pytest.fixture(scope='function')
+def clean_plots(request):
     def fin():
         plt.close('all')
 
     request.addfinalizer(fin)
-    return Models()
 
 
 @pytest.fixture(scope='module')
@@ -60,21 +63,21 @@ def discrete_model():
                                     {"colors": "gb"},
                                     {"hpd_markers": ["v"]},
                                     {"shade": 1}])
-def test_plot_density_float(models, kwargs):
+def test_plot_density_float(models, clean_plots, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit"]]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
     assert axes.shape[1] == 1
 
 
-def test_plot_density_int():
+def test_plot_density_int(clean_plots):
     axes = plot_density(np.random.randint(10, size=10), shade=.9)
     assert axes.shape[1] == 1
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('combined', [True, False])
-def test_plot_trace(models, combined, model_fit):
+def test_plot_trace(models, clean_plots, combined, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_trace(obj, var_names=('mu', 'tau'), combined=combined, lines=[('mu', {}, [1, 2])])
     assert axes.shape == (2, 2)
@@ -87,7 +90,7 @@ def test_plot_trace(models, combined, model_fit):
                                                  combined=True), (2,)),
                                            (dict(kind='ridgeplot', r_hat=False, n_eff=False), (1,))
                                            ])
-def test_plot_forest(models, model_fits, args_expected):
+def test_plot_forest(models, clean_plots, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
@@ -96,31 +99,31 @@ def test_plot_forest(models, model_fits, args_expected):
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('kind', ['kde', 'hist'])
-def test_plot_energy(models, model_fit, kind):
+def test_plot_energy(models, clean_plots, model_fit, kind):
     obj = getattr(models, model_fit)
     assert plot_energy(obj, kind=kind)
 
 
-def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
+def test_plot_parallel_raises_valueerror(df_trace, clean_plots):  # pylint: disable=invalid-name
     with pytest.raises(ValueError):
         plot_parallel(df_trace)
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_parallel_exception(models, model_fit):
+def test_plot_parallel_exception(models, clean_plots, model_fit):
     obj = getattr(models, model_fit)
     assert plot_parallel(obj)
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('kind', ['scatter', 'hexbin', 'kde'])
-def test_plot_joint(models, model_fit, kind):
+def test_plot_joint(models, clean_plots, model_fit, kind):
     obj = getattr(models, model_fit)
     axjoin, _, _ = plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
     assert axjoin
 
 
-def test_plot_joint_int(discrete_model):
+def test_plot_joint_int(discrete_model, clean_plots):
     axjoin, _, _ = plot_joint(discrete_model)
     assert axjoin
 
@@ -128,7 +131,7 @@ def test_plot_joint_int(discrete_model):
 @pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
                                     {"contour": True, "fill_last": False},
                                     {"contour": False}])
-def test_plot_kde(discrete_model, kwargs):
+def test_plot_kde(discrete_model, clean_plots, kwargs):
     axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
     assert axes
 
@@ -136,7 +139,7 @@ def test_plot_kde(discrete_model, kwargs):
 @pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
                                     {"cumulative": True},
                                     {"rug": True}])
-def test_plot_kde_cumulative(discrete_model, kwargs):
+def test_plot_kde_cumulative(discrete_model, clean_plots, kwargs):
     axes = plot_kde(discrete_model["x"], **kwargs)
     assert axes
 
@@ -153,14 +156,14 @@ def test_plot_kde_cumulative(discrete_model, kwargs):
                                     {"kind": 'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
-def test_plot_pair(models, model_fit, kwargs):
+def test_plot_pair(models, clean_plots, model_fit, kwargs):
     obj = getattr(models, model_fit)
     ax, _ = plot_pair(obj, **kwargs)
     assert ax
 
 
 @pytest.mark.parametrize('kind', ['density', 'cumulative'])
-def test_plot_ppc(models, pymc3_sample_ppc, kind):
+def test_plot_ppc(models, clean_plots, pymc3_sample_ppc, kind):
     data = from_pymc3(trace=models.pymc3_fit,
                       posterior_predictive=pymc3_sample_ppc)
     axes = plot_ppc(data, kind=kind)
@@ -168,14 +171,14 @@ def test_plot_ppc(models, pymc3_sample_ppc, kind):
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_violin(models, model_fit):
+def test_plot_violin(models, clean_plots, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_violin(obj)
     assert axes.shape[0] >= 18
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_autocorr_uncombined(models, model_fit):
+def test_plot_autocorr_uncombined(models, clean_plots, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=False)
     assert axes.shape[0] == 1
@@ -184,7 +187,7 @@ def test_plot_autocorr_uncombined(models, model_fit):
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_autocorr_combined(models, model_fit):
+def test_plot_autocorr_combined(models, clean_plots, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=True)
     assert axes.shape[0] == 1
@@ -193,7 +196,7 @@ def test_plot_autocorr_combined(models, model_fit):
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_posterior(models, model_fit):
+def test_plot_posterior(models, clean_plots, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
     assert axes.shape == (2,)
@@ -201,7 +204,7 @@ def test_plot_posterior(models, model_fit):
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("point_estimate", ('mode', 'mean', 'median'))
-def test_point_estimates(models, model_fit, point_estimate):
+def test_point_estimates(models, clean_plots, model_fit, point_estimate):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
     assert axes.shape == (2,)
@@ -211,7 +214,7 @@ def test_point_estimates(models, model_fit, point_estimate):
                                     {"plot_standard_error": False},
                                     {"plot_ic_diff": False}
                                     ])
-def test_plot_compare(models, kwargs):
+def test_plot_compare(models, clean_plots, kwargs):
 
     # Pymc3 models create loglikelihood on InferenceData automatically
     model_compare = compare({
