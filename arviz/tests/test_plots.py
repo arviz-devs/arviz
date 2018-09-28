@@ -9,7 +9,7 @@ from arviz import from_pymc3, compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
-                     plot_joint, plot_ppc, plot_violin, plot_compare)
+                     plot_joint, plot_ppc, plot_violin, plot_compare, plot_kde)
 
 
 np.random.seed(0)
@@ -45,6 +45,12 @@ def data():
 @pytest.fixture(scope='module')
 def df_trace():
     return DataFrame({'a': np.random.poisson(2.3, 100)})
+
+
+@pytest.fixture(scope='module')
+def discrete_model():
+    """Simple fixture for random discrete model"""
+    return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
 
 
 @pytest.mark.parametrize("kwargs", [{"point_estimate": "mean"},
@@ -107,22 +113,44 @@ def test_plot_parallel_exception(models, model_fit):
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-@pytest.mark.parametrize('kind', ['scatter', 'hexbin'])
+@pytest.mark.parametrize('kind', ['scatter', 'hexbin', 'kde'])
 def test_plot_joint(models, model_fit, kind):
     obj = getattr(models, model_fit)
-    plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
+    axjoin, _, _ = plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
+    assert axjoin
+
+
+def test_plot_joint_int(discrete_model):
+    axjoin, _, _ = plot_joint(discrete_model)
+    assert axjoin
+
+
+@pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
+                                    {"contour": True, "fill_last": False},
+                                    {"contour": False}])
+def test_plot_kde(discrete_model, kwargs):
+    axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
+                                    {"cumulative": True},
+                                    {"rug": True}])
+def test_plot_kde_cumulative(discrete_model, kwargs):
+    axes = plot_kde(discrete_model["x"], **kwargs)
+    assert axes
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-@pytest.mark.parametrize("kwargs", [{"var_names":['theta'], "divergences":True,
+@pytest.mark.parametrize("kwargs", [{"var_names": ['theta'], "divergences":True,
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
-                                    {"divergences":True, "plot_kwargs":{'marker': 'x'},
+                                    {"divergences": True, "plot_kwargs":{'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
-                                    {"kind":'hexbin', "var_names": ['theta'],
+                                    {"kind": 'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
 def test_plot_pair(models, model_fit, kwargs):
