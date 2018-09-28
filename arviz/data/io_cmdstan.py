@@ -1,4 +1,4 @@
-"""PyStan-specific conversion code."""
+"""CmdStan-specific conversion code."""
 from collections import defaultdict
 from copy import deepcopy
 from glob import glob
@@ -41,25 +41,25 @@ class CmdStanConverter:
         self.log_likelihood = log_likelihood
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
-        self.chains = len(output)
         self.sample_stats = None
         self.posterior = None
         # populate posterior and sample_Stats
-        self.parse_output()
+        self._parse_output()
 
     @requires('output')
-    def parse_output(self):
+    def _parse_output(self):
+        """Read csv paths to list of dataframes."""
         chain_data = []
         for path in self.output:
-            sample, sample_stats, config, adaptation, timing = _read_output(path)
-
-            chain_data.append({
-                'sample' : sample,
-                'sample_stats' : sample_stats,
-                'configuration_info' : config,
-                'adaptation_info' : adaptation,
-                'timing_info' : timing,
-            })
+            parsed_output = _read_output(path)
+            for sample, sample_stats, config, adaptation, timing  in parsed_output:
+                chain_data.append({
+                    'sample' : sample,
+                    'sample_stats' : sample_stats,
+                    'configuration_info' : config,
+                    'adaptation_info' : adaptation,
+                    'timing_info' : timing,
+                })
         self.posterior = [item['sample'] for item in chain_data]
         self.sample_stats = [item['sample_stats'] for item in chain_data]
 
@@ -186,6 +186,7 @@ class CmdStanConverter:
         })
 
 def _process_configuration(comments):
+    """Extract sampling information."""
     num_samples = None
     num_warmup = None
     save_warmup = None
@@ -207,7 +208,7 @@ def _process_configuration(comments):
            }
 
 def _read_output(path):
-    """Read CmdStan output.csv
+    """Read CmdStan output.csv.
 
     Parameters
     ----------
@@ -215,22 +216,24 @@ def _read_output(path):
 
     Returns
     -------
-    pandas.DataFrame
-        Sample data
-    pandas.DataFrame
-        Sample stats
-    list[str]
-        Configuration information
-    list[str]
-        Adaptation information
-    list[str]
-        Timing info
+    List[DataFrame, DataFrame, list[str], list[str], list[str]]
+        pandas.DataFrame
+            Sample data
+        pandas.DataFrame
+            Sample stats
+        list[str]
+            Configuration information
+        list[str]
+            Adaptation information
+        list[str]
+            Timing info
     """
+    chains = []
     configuration_info = []
     adaptation_info = []
     timing_info = []
     i = 0
-    # Read configuration and adaption
+    # Read (first) configuration and adaption
     with open(path, "r") as f_obj:
         column_names = False
         for i, line in enumerate(f_obj):
@@ -249,35 +252,111 @@ def _read_output(path):
     with open(path, "r") as f_obj:
         df = pd.read_csv(f_obj, comment="#")
 
-    # Read timing info from the end of the file
-    linelen = 1
-    linenum = i + df.shape[0] + 1
-    while linelen:
-        line = linecache.getline(path, linenum)
-        linenum += 1
-        linelen = len(line)
-        if linelen:
-            line = line.strip()
-            if line and line != '#':
-                timing_info.append(line)
+    pd.options.mode.chained_assignment = None
+    # split dataframe if header found multiple times
+    if df.iloc[:, 0].dtype.kind == 'O':
+        first_col = df.columns[0]
+        col_locations = first_col == df.loc[:, first_col]
+        col_locations = col_locations[col_locations].index
+        dfs = []
+        for idx, last_idx in zip(col_locations, [-1] + list(col_locations[:-1])):
+            df_ = df.loc[last_idx+1:idx-1, :]
+            for col in df_.columns:
+                df_.loc[:, col] = pd.to_numeric(df_.loc[:, col])
+            if len(df_):
+                dfs.append(df_.reset_index(drop=True))
+            df = df.loc[idx+1:, :]
+        for col in df.columns:
+            df.loc[:, col] = pd.to_numeric(df.loc[:, col])
+        dfs.append(df)
+    else:
+        dfs = [df]
+    pd.options.mode.chained_assignment = 'warn'
 
-    # Remove warmup
-    processed_config = _process_configuration(configuration_info)
-    if processed_config['save_warmup']:
-        saved_samples = processed_config['num_samples']//processed_config['thin']
-        df = df.iloc[-saved_samples:, :]
+    for j, df in enumerate(dfs):
+        if j == 0:
+            # Read timing info (first) from the end of the file
+            line_num = i + df.shape[0] + 1
+            for k in range(5):
+                line = linecache.getline(path, line_num+k).strip()
+                if len(line):
+                    timing_info.append(line)
+            configuration_info_len = len(configuration_info)
+            adaptation_info_len = len(adaptation_info)
+            timing_info_len = len(timing_info)
+            num_of_samples = df.shape[0]
+            header_count = 1
+            last_line_num = configuration_info_len + adaptation_info_len +\
+                            timing_info_len + num_of_samples + header_count
+        else:
+            # header location found in the dataframe (not first)
+            configuration_info = []
+            adaptation_info = []
+            timing_info = []
 
-    # Split data to sample_stats and sample
-    sample_stats_columns = [col for col in df.columns if col.endswith("__")]
-    sample_columns = [col for col in df.columns if col not in sample_stats_columns]
+            # line number for the next dataframe in csv
+            line_num = last_line_num + 1
 
-    sample_stats = df.loc[:, sample_stats_columns]
-    sample_df = df.loc[:, sample_columns]
+            # row ranges
+            config_start = line_num
+            config_end = config_start+configuration_info_len
+            adaption_start = config_end + 1
+            adaption_end = adaption_start + adaptation_info_len
+            timing_start = adaption_end + len(df)
+            timing_end = timing_start + timing_info_len
 
-    return sample_df, sample_stats, configuration_info, adaptation_info, timing_info
+            # read configuration_info
+            for reading_line in range(config_start, config_end):
+                line = linecache.getline(path, reading_line)
+                if line.startswith("#"):
+                    configuration_info.append(line)
+                else:
+                    msg = "Invalid input file. " \
+                          "Header information missing from combined csv. " \
+                          "Configuration: {}".format(path)
+                    raise ValueError(msg)
+            # read adaptation_info
+            for reading_line in range(adaption_start, adaption_end):
+                line = linecache.getline(path, reading_line)
+                if line.startswith("#"):
+                    adaptation_info.append(line)
+                else:
+                    msg = "Invalid input file. " \
+                          "Header information missing from combined csv. " \
+                          "Adaptation: {}".format(path)
+                    raise ValueError(msg)
+            # read timing_info
+            for reading_line in range(timing_start, timing_end):
+                line = linecache.getline(path, reading_line)
+                if line.startswith("#"):
+                    timing_info.append(line)
+                else:
+                    msg = "Invalid input file. " \
+                          "Header information missing from combined csv. " \
+                          "Timing: {}".format(path)
+                    raise ValueError(msg)
+            last_line_num = reading_line
+
+        # Remove warmup
+        processed_config = _process_configuration(configuration_info)
+        if processed_config['save_warmup']:
+            saved_samples = processed_config['num_samples']//processed_config['thin']
+            df = df.iloc[-saved_samples:, :]
+
+        # Split data to sample_stats and sample
+        sample_stats_columns = [col for col in df.columns if col.endswith("__")]
+        sample_columns = [col for col in df.columns if col not in sample_stats_columns]
+
+        sample_stats = df.loc[:, sample_stats_columns]
+        sample_df = df.loc[:, sample_columns]
+
+        chains.append((sample_df, sample_stats, configuration_info, adaptation_info, timing_info))
+
+    return chains
 
 def _process_data_var(string):
     """Transform datastring to key, values pair.
+
     All values are transformed to floating point values.
 
     Parameters
@@ -311,7 +390,6 @@ def _process_data_var(string):
 
 def _read_data(path):
     """Read Rdump output and transform to Python dictionary.
-    Assumes
 
     Parameters
     ----------
@@ -353,8 +431,7 @@ def _unpack_dataframes(dfs):
     columns = dfs[0].columns
     for col in columns:
         key, *loc = col.split('.')
-        loc = list(map(int, loc))
-        loc = tuple([i-1 for i in loc])
+        loc = tuple(int(i) - 1 for i in loc)
         col_groups[key].append((col, loc))
 
     chains = len(dfs)
@@ -382,9 +459,17 @@ def from_cmdstan(*, output=None, prior=None, posterior_predictive=None,
     Parameters
     ----------
     output : List[Str]
-        List of paths to output.csv files
+        List of paths to output.csv files.
+        CSV file can be stacked csv containing all the chains
+
+            cat output*.csv > combined_output.CSV
+
     prior : List[Str]
         List of paths to output.csv files
+        CSV file can be stacked csv containing all the chains.
+
+            cat output*.csv > combined_output.CSV
+
     posterior_predictive : Str, List[Str]
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : Str
