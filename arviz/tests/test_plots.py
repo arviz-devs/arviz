@@ -12,6 +12,9 @@ from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_joint, plot_ppc, plot_violin)
 
 
+np.random.seed(0)
+
+
 @pytest.fixture(scope='module')
 def models(request):
     class Models:
@@ -44,11 +47,22 @@ def df_trace():
     return DataFrame({'a': np.random.poisson(2.3, 100)})
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_density(models, model_fit):
-    obj = getattr(models, model_fit)
-    axes = plot_density(obj)
+@pytest.mark.parametrize("kwargs", [{"point_estimate": "mean"},
+                                    {"point_estimate": "median"},
+                                    {"outline": True},
+                                    {"colors": ["g", "b"]},
+                                    {"colors": "gb"},
+                                    {"hpd_markers": ["v"]},
+                                    {"shade": 1}])
+def test_plot_density_float(models, kwargs):
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit"]]
+    axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
+    assert axes.shape[1] == 1
+
+
+def test_plot_density_int():
+    axes = plot_density(np.random.randint(10, size=10), shade=.9)
     assert axes.shape[1] == 1
 
 
