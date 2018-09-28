@@ -9,7 +9,7 @@ from arviz import from_pymc3, compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
-                     plot_joint, plot_ppc, plot_violin, plot_compare)
+                     plot_joint, plot_ppc, plot_violin, plot_compare, plot_kde)
 
 
 np.random.seed(0)
@@ -118,6 +118,23 @@ def test_plot_joint_int():
     data = {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
     axjoin, ax_hist_x, ax_hist_y = plot_joint(data)
     assert axjoin
+
+
+@pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
+                                    {"contour": True, "fill_last": False},
+                                    {"contour": False}])
+def test_plot_kde(kwargs):
+    data = {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
+    axes = plot_kde(data["x"], data["y"], **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
+                                    {"cumulative": True},
+                                    {"rug": True}])
+def test_plot_kde_cumulative(kwargs):
+    axes = plot_kde(np.random.randint(10, size=100), **kwargs)
+    assert axes
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
