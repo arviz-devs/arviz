@@ -5,11 +5,11 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from arviz import from_pymc3
+from arviz import from_pymc3, compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
-                     plot_joint, plot_ppc, plot_violin)
+                     plot_joint, plot_ppc, plot_violin, plot_compare)
 
 
 np.random.seed(0)
@@ -177,3 +177,19 @@ def test_point_estimates(models, model_fit, point_estimate):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, var_names=('mu', 'tau'), point_estimate=point_estimate)
     assert axes.shape == (2,)
+
+
+@pytest.mark.parametrize("kwargs", [{"insample_dev": False},
+                                    {"plot_standard_error": False},
+                                    {"plot_ic_diff": False}
+                                    ])
+def test_plot_compare(models, kwargs):
+
+    # Pymc3 models create loglikelihood on InferenceData automatically
+    model_compare = compare({
+        'Pymc3': models.pymc3_fit,
+        'Pymc3_Again': models.pymc3_fit,
+    })
+
+    axes = plot_compare(model_compare, **kwargs)
+    assert axes
