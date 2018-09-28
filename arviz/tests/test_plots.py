@@ -47,6 +47,12 @@ def df_trace():
     return DataFrame({'a': np.random.poisson(2.3, 100)})
 
 
+@pytest.fixture(scope='module')
+def discrete_model():
+    """Simple fixture for random discrete model"""
+    return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
+
+
 @pytest.mark.parametrize("kwargs", [{"point_estimate": "mean"},
                                     {"point_estimate": "median"},
                                     {"outline": True},
@@ -114,39 +120,37 @@ def test_plot_joint(models, model_fit, kind):
     assert axjoin
 
 
-def test_plot_joint_int():
-    data = {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
-    axjoin, ax_hist_x, ax_hist_y = plot_joint(data)
+def test_plot_joint_int(discrete_model):
+    axjoin, ax_hist_x, ax_hist_y = plot_joint(discrete_model)
     assert axjoin
 
 
 @pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
                                     {"contour": True, "fill_last": False},
                                     {"contour": False}])
-def test_plot_kde(kwargs):
-    data = {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
-    axes = plot_kde(data["x"], data["y"], **kwargs)
+def test_plot_kde(discrete_model, kwargs):
+    axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
     assert axes
 
 
 @pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}},
                                     {"cumulative": True},
                                     {"rug": True}])
-def test_plot_kde_cumulative(kwargs):
-    axes = plot_kde(np.random.randint(10, size=100), **kwargs)
+def test_plot_kde_cumulative(discrete_model, kwargs):
+    axes = plot_kde(discrete_model["x"], **kwargs)
     assert axes
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-@pytest.mark.parametrize("kwargs", [{"var_names":['theta'], "divergences":True,
+@pytest.mark.parametrize("kwargs", [{"var_names": ['theta'], "divergences":True,
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
-                                    {"divergences":True, "plot_kwargs":{'marker': 'x'},
+                                    {"divergences": True, "plot_kwargs":{'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
-                                    {"kind":'hexbin', "var_names": ['theta'],
+                                    {"kind": 'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
 def test_plot_pair(models, model_fit, kwargs):
