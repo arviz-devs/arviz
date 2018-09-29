@@ -105,11 +105,11 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
             plot_kde(_posterior[0], _posterior[1], contour=contour, fill_last=fill_last, ax=ax,
                      **plot_kwargs)
         else:
-            hexbin = ax.hexbin(posterior_data[0], posterior_data[1], mincnt=1, gridsize=gridsize,
+            hexbin = ax.hexbin(_posterior[0], _posterior[1], mincnt=1, gridsize=gridsize,
                                **plot_kwargs)
             ax.grid(False)
             if colorbar:
-                cbar = ax.fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
+                cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
                 cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
 
         if divergences:

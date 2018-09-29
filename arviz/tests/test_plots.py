@@ -9,8 +9,10 @@ from arviz import from_pymc3, compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
-                     plot_joint, plot_ppc, plot_violin, plot_compare, plot_kde)
+                     plot_joint, plot_ppc, plot_violin, plot_compare, plot_kde,
+                     plot_khat)
 
+from ..stats import psislw
 
 np.random.seed(0)
 
@@ -52,6 +54,12 @@ def df_trace():
 def discrete_model():
     """Simple fixture for random discrete model"""
     return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
+
+
+@pytest.fixture(scope="function")
+def fig_ax():
+    fig, ax = plt.subplots(1, 1)
+    return fig, ax
 
 
 @pytest.mark.parametrize("kwargs", [{"point_estimate": "mean"},
@@ -156,21 +164,39 @@ def test_plot_kde_cumulative(discrete_model, kwargs):
     assert axes
 
 
+def test_plot_khat():
+    linewidth = np.random.randn(20000, 10)
+    _, khats = psislw(linewidth)
+    axes = plot_khat(khats)
+    assert axes
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("kwargs", [{"var_names": ['theta'], "divergences":True,
                                      "coords":{'theta_dim_0': [0, 1]},
                                      "plot_kwargs":{'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
-                                    {"divergences": True, "plot_kwargs":{'marker': 'x'},
+                                    {"divergences": True, "plot_kwargs": {'marker': 'x'},
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
+                                    {"kind": "kde"},
+
                                     {"kind": 'hexbin', "var_names": ['theta'],
-                                     "coords":{'theta_dim_0': [0, 1]},
+                                     "coords":{'theta_dim_0': [0, 1]}, "colorbar": True,
                                      "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
 def test_plot_pair(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     ax, _ = plot_pair(obj, **kwargs)
+    assert ax
+
+
+@pytest.mark.parametrize("kwargs", [{"kind": "scatter"},
+                                    {"kind": "kde"},
+                                    {"kind": "hexbin", "colorbar": True}])
+def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
+    _, ax = fig_ax
+    ax, _ = plot_pair(discrete_model, ax=ax, **kwargs)
     assert ax
 
 
