@@ -171,6 +171,7 @@ def test_plot_khat():
     assert axes
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("kwargs", [{"var_names": ['theta'], "divergences":True,
                                      "coords":{'theta_dim_0': [0, 1]},
