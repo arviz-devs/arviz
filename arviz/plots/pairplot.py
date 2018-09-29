@@ -77,12 +77,15 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                                                var_names=var_names, combined=True)
 
     # Get diverging draws and combine chains
-    divergent_data = convert_to_dataset(data, group='sample_stats')
-    _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=('diverging',), combined=True)
-    diverging_mask = np.squeeze(diverging_mask)
+    if divergences:
+        divergent_data = convert_to_dataset(data, group='sample_stats')
+        _, diverging_mask = xarray_to_ndarray(divergent_data,
+                                              var_names=('diverging',),
+                                              combined=True)
+        diverging_mask = np.squeeze(diverging_mask)
 
-    if divergences_kwargs is None:
-        divergences_kwargs = {}
+        if divergences_kwargs is None:
+            divergences_kwargs = {}
 
     if gridsize == 'auto':
         gridsize = int(len(_posterior[0])**0.35)

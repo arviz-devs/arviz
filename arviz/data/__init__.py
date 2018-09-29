@@ -5,8 +5,9 @@ from .base import numpy_to_data_array, dict_to_dataset
 from .converters import convert_to_dataset, convert_to_inference_data
 from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
+from .io_emcee import from_emcee
 
 
 __all__ = ['InferenceData', 'load_data', 'save_data', 'load_arviz_data', 'numpy_to_data_array',
            'dict_to_dataset', 'convert_to_dataset', 'convert_to_inference_data', 'from_pymc3',
-           'from_pystan']
+           'from_pystan', 'from_emcee']
