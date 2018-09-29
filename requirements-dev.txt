@@ -1,3 +1,4 @@
+emcee
 git+https://github.com/pymc-devs/pymc3
 pystan
 ipython
