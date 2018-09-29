@@ -6,6 +6,7 @@ import pytest
 from arviz import (
     convert_to_inference_data,
     convert_to_dataset,
+    from_cmdstan,
     from_pymc3,
     from_pystan,
     from_emcee,
@@ -322,3 +323,59 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         assert hasattr(inference_data1.observed_data, 'y')
         assert hasattr(inference_data2.sample_stats, 'log_likelihood')
         assert hasattr(inference_data2.observed_data, 'y_hat')
+
+
+class TestCmdStanNetCDFUtils(BaseArvizTest):
+
+    @classmethod
+    def setup_class(cls):
+        # Data of the Eight Schools Model
+        cls.paths = {
+            'no_warmup' : [
+                "./saved_models/cmdstan/output_no_warmup1.csv",
+                "./saved_models/cmdstan/output_no_warmup2.csv",
+                "./saved_models/cmdstan/output_no_warmup3.csv",
+                "./saved_models/cmdstan/output_no_warmup4.csv",
+            ],
+            'warmup' : [
+                "./saved_models/cmdstan/output_warmup1.csv",
+                "./saved_models/cmdstan/output_warmup2.csv",
+                "./saved_models/cmdstan/output_warmup3.csv",
+                "./saved_models/cmdstan/output_warmup4.csv",
+            ],
+            'no_warmup_glob' : "./saved_models/cmdstan/output_no_warmup[0-9].csv",
+            'warmup_glob' : "./saved_models/cmdstan/output_warmup[0-9].csv",
+            'combined_no_warmup' : ["./saved_models/cmdstan/combined_output_no_warmup.csv"],
+            'combined_warmup' : ["./saved_models/cmdstan/combined_output_warmup.csv"],
+            'combined_no_warmup_glob' : "./saved_models/cmdstan/combined_output_no_warmup.csv",
+            'combined_warmup_glob' : "./saved_models/cmdstan/combined_output_warmup.csv",
+        }
+
+    def get_inference_data(self, output):
+        return from_cmdstan(output=output)
+
+    def test_sampler_stats(self):
+        for _, path in self.paths:
+            inference_data = self.get_inference_data(path)
+            assert hasattr(inference_data, 'sample_stats')
+
+    def test_inference_data(self):
+        for _, path in self.paths:
+            inference_data = self.get_inference_data(path)
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data.posterior, 'y')
+            assert hasattr(inference_data.posterior, 'x')
+            assert hasattr(inference_data.posterior, 'Z')
+            assert inference_data.posterior['y'].shape == (4, 100)
+            assert inference_data.posterior['x'].shape == (4, 100, 3)
+            assert inference_data.posterior['Z'].shape == (4, 100, 4, 6)
+            dims = ['chain', 'draw']
+            y_mean_true = 0
+            y_mean = inference_data.posterior['y'].mean(dim=dims)
+            assert np.isclose(y_mean, y_mean_true, atol=1e-1)
+            x_mean_true = np.array([1, 2, 3])
+            x_mean = inference_data.posterior['x'].mean(dim=dims)
+            assert np.isclose(x_mean, x_mean_true, atol=1e-1).all()
+            Z_mean_true = np.array([1, 2, 3, 4])[:, None]*np.ones((1, 6))
+            Z_mean = inference_data.posterior['Z'].mean(dim=dims)
+            assert np.isclose(Z_mean, Z_mean_true, atol=1e0).all()
