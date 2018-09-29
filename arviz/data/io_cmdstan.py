@@ -71,12 +71,14 @@ class CmdStanConverter:
 
         # filter posterior_predictive and log_likelihood
         post_pred = self.posterior_predictive
-        if post_pred is None or isinstance(post_pred, dict):
+        if post_pred is None or \
+           (isinstance(post_pred, str) and post_pred.lower().endswith('.csv')):
             post_pred = []
         elif isinstance(post_pred, str):
             post_pred = [post_pred]
         log_lik = self.log_likelihood
-        if not isinstance(log_lik, str):
+        if not isinstance(log_lik, str) or \
+           (isinstance(log_lik, str) and log_lik.endswith('.csv')):
             log_lik = []
         else:
             log_lik = [log_lik]
@@ -96,12 +98,13 @@ class CmdStanConverter:
 
         sampler_params = self.sample_stats
         log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            if isinstance(log_likelihood, str):
-                if self.posterior is None:
-                    log_likelihood = None
-                else:
-                    log_likelihood_vals = [item[log_likelihood] for item in self.posterior]
+        if isinstance(log_likelihood, str):
+            if self.posterior is None:
+                # Warning?
+                log_likelihood = None
+            else:
+                log_likelihood_vals = [item[log_likelihood] for item in self.posterior]
+
         # copy dims and coords
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
@@ -127,10 +130,30 @@ class CmdStanConverter:
     @requires('posterior_predictive')
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        var_names = self.posterior_predictive
-        if isinstance(var_names, str):
-            var_names = [var_names]
-        data = _unpack_dataframes([item[var_names] for item in self.posterior])
+        ppred = self.posterior_predictive
+
+        if isinstance(ppred, (tuple, list)) and ppred[0].endswith(".csv") or \
+           isinstance(ppred, str) and ppred.endswith(".csv"):
+            if isinstance(ppred, str):
+                ppred = sorted(glob(ppred))
+                if len(ppred) > 1:
+                    msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
+                                   for i, path in enumerate(ppred, 1))
+                    print("glob found {} files for 'posterior_predictive':\n{}".format(
+                        len(ppred),
+                        msg
+                    ))
+            chain_data = []
+            for path in ppred:
+                parsed_output = _read_output(path)
+                for sample, *_ in parsed_output:
+                    chain_data.append(sample)
+            data = _unpack_dataframes(chain_data)
+        else:
+            var_names = self.posterior_predictive
+            if isinstance(var_names, str):
+                var_names = [var_names]
+            data = _unpack_dataframes([item[var_names] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('posterior')
@@ -210,16 +233,16 @@ def _read_output(path):
 
     Returns
     -------
-    List[DataFrame, DataFrame, list[str], list[str], list[str]]
+    List[DataFrame, DataFrame, List[str], List[str], List[str]]
         pandas.DataFrame
             Sample data
         pandas.DataFrame
             Sample stats
-        list[str]
+        List[str]
             Configuration information
-        list[str]
+        List[str]
             Adaptation information
-        list[str]
+        List[str]
             Timing info
     """
     chains = []
@@ -458,29 +481,27 @@ def from_cmdstan(*, output=None, prior=None, posterior_predictive=None,
 
     Parameters
     ----------
-    output : List[Str]
+    output : List[str]
         List of paths to output.csv files.
         CSV file can be stacked csv containing all the chains
 
             cat output*.csv > combined_output.CSV
 
-    prior : List[Str]
+    prior : List[str]
         List of paths to output.csv files
         CSV file can be stacked csv containing all the chains.
 
             cat output*.csv > combined_output.CSV
 
-    posterior_predictive : Str, List[Str]
+    posterior_predictive : str, List[Str]
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
-    observed_data : Str
+    observed_data : str
         Observed data used in the sampling. Path to data file in Rdump format.
-    observed_data_var : Str, List[Str]
+    observed_data_var : str, List[str]
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
-    log_likelihood : Str, np.ndarray
-        Pointwise log_likelihood for the data. If endswith ".csv" assumes file.
-        A ndarray containing pointwise log_likelihood format:
-            chain x draw x *data_shape
+    log_likelihood : str
+        Pointwise log_likelihood for the data.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
