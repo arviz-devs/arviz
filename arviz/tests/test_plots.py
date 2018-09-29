@@ -104,6 +104,11 @@ def test_plot_forest(models, model_fits, args_expected):
     assert axes.shape == expected
 
 
+def test_plot_forest_single_value():
+    _, axes = plot_forest({"x": [1]})
+    assert axes.shape
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize('kind', ['kde', 'hist'])
 def test_plot_energy(models, model_fit, kind):
