@@ -1,4 +1,5 @@
 # pylint: disable=no-member,invalid-name
+import os
 import numpy as np
 import pymc3 as pm
 import pytest
@@ -329,38 +330,47 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
 
     @classmethod
     def setup_class(cls):
-        # Data of the Eight Schools Model
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, 'saved_models')
         cls.paths = {
             'no_warmup' : [
-                "./saved_models/cmdstan/output_no_warmup1.csv",
-                "./saved_models/cmdstan/output_no_warmup2.csv",
-                "./saved_models/cmdstan/output_no_warmup3.csv",
-                "./saved_models/cmdstan/output_no_warmup4.csv",
+                os.path.join(data_directory, "cmdstan/output_no_warmup1.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup2.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup3.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup4.csv"),
             ],
             'warmup' : [
-                "./saved_models/cmdstan/output_warmup1.csv",
-                "./saved_models/cmdstan/output_warmup2.csv",
-                "./saved_models/cmdstan/output_warmup3.csv",
-                "./saved_models/cmdstan/output_warmup4.csv",
+                os.path.join(data_directory, "cmdstan/output_warmup1.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup2.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup3.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup4.csv"),
             ],
-            'no_warmup_glob' : "./saved_models/cmdstan/output_no_warmup[0-9].csv",
-            'warmup_glob' : "./saved_models/cmdstan/output_warmup[0-9].csv",
-            'combined_no_warmup' : ["./saved_models/cmdstan/combined_output_no_warmup.csv"],
-            'combined_warmup' : ["./saved_models/cmdstan/combined_output_warmup.csv"],
-            'combined_no_warmup_glob' : "./saved_models/cmdstan/combined_output_no_warmup.csv",
-            'combined_warmup_glob' : "./saved_models/cmdstan/combined_output_warmup.csv",
+            'no_warmup_glob' : os.path.join(data_directory,
+                                            "cmdstan/output_no_warmup[0-9].csv"),
+            'warmup_glob' : os.path.join(data_directory,
+                                         "cmdstan/output_warmup[0-9].csv"),
+            'combined_no_warmup' : [
+                os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
+            ],
+            'combined_warmup' : [
+                os.path.join(data_directory, "cmdstan/combined_output_warmup.csv")
+            ],
+            'combined_no_warmup_glob' : os.path.join(data_directory,
+                                                     "cmdstan/combined_output_no_warmup.csv"),
+            'combined_warmup_glob' : os.path.join(data_directory,
+                                                  "cmdstan/combined_output_warmup.csv"),
         }
 
     def get_inference_data(self, output):
         return from_cmdstan(output=output)
 
     def test_sampler_stats(self):
-        for _, path in self.paths:
+        for _, path in self.paths.items():
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'sample_stats')
 
     def test_inference_data(self):
-        for _, path in self.paths:
+        for _, path in self.paths.items():
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'posterior')
             assert hasattr(inference_data.posterior, 'y')
@@ -376,6 +386,6 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             x_mean_true = np.array([1, 2, 3])
             x_mean = inference_data.posterior['x'].mean(dim=dims)
             assert np.isclose(x_mean, x_mean_true, atol=1e-1).all()
-            Z_mean_true = np.array([1, 2, 3, 4])[:, None]*np.ones((1, 6))
-            Z_mean = inference_data.posterior['Z'].mean(dim=dims)
-            assert np.isclose(Z_mean, Z_mean_true, atol=1e0).all()
+            Z_mean_true = np.array([1, 2, 3, 4])
+            Z_mean = inference_data.posterior['Z'].mean(dim=dims).mean(axis=1)
+            assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()

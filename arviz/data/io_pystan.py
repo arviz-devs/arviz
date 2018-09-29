@@ -70,19 +70,9 @@ class PyStanConverter:
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
         dtypes = {
-            'divergent__' : bool,
+            'divergent__' :  bool,
             'n_leapfrog__' : np.int64,
-            'treedepth__' : np.int64,
-        }
-
-        rename_key = {
-            'accept_stat__' : 'accept_stat',
-            'divergent__' : 'diverging',
-            'energy__' : 'energy',
-            'lp__' : 'lp',
-            'n_leapfrog__' : 'n_leapfrog',
-            'stepsize__' : 'stepsize',
-            'treedepth__' : 'treedepth',
+            'treedepth__' :  np.int64,
         }
 
         nchain = self.fit.sim["chains"]
@@ -150,7 +140,8 @@ class PyStanConverter:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
         data = {}
         for key in sampler_params[0]:
-            name = rename_key.get(key, re.sub('__$', "", key))
+            name = re.sub('__$', "", key)
+            name = "diverging" if name == 'divergent' else name
             data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 

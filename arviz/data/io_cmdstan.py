@@ -23,14 +23,15 @@ class CmdStanConverter:
     def __init__(self, *, output=None, prior=None, posterior_predictive=None,
                  observed_data=None, observed_data_var=None,
                  log_likelihood=None, coords=None, dims=None):
-        self.output = glob(output) if isinstance(output, str) else output
+        self.output = sorted(glob(output)) if isinstance(output, str) else output
         if isinstance(output, str) and len(self.output) > 1:
             msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
                             for i, path in enumerate(self.output, 1))
             print("glob found {} files for 'output':\n{}".format(len(self.output), msg))
-        if isinstance(prior, str) and prior.endswith(".csv"):
-            prior = glob(prior)
-            if len(prior) > 1:
+        if isinstance(prior, str):
+            prior_glob = glob(prior)
+            if len(prior_glob) > 1:
+                prior = sorted(prior_glob)
                 msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) \
                                 for i, path in enumerate(prior, 1))
                 print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
@@ -88,20 +89,11 @@ class CmdStanConverter:
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
         dtypes = {
-            'divergent__' : bool,
+            'divergent__' :  bool,
             'n_leapfrog__' : np.int64,
-            'treedepth__' : np.int64,
+            'treedepth__' :  np.int64,
         }
 
-        rename_key = {
-            'accept_stat__' : 'accept_stat',
-            'divergent__' : 'diverging',
-            'energy__' : 'energy',
-            'lp__' : 'lp',
-            'n_leapfrog__' : 'n_leapfrog',
-            'stepsize__' : 'stepsize',
-            'treedepth__' : 'treedepth',
-        }
         sampler_params = self.sample_stats
         log_likelihood = self.log_likelihood
         if log_likelihood is not None:
@@ -126,7 +118,8 @@ class CmdStanConverter:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
         data = {}
         for key in sampler_params[0]:
-            name = rename_key.get(key, re.sub('__$', "", key))
+            name = re.sub('__$', "", key)
+            name = "diverging" if name == 'divergent' else name
             data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -146,8 +139,9 @@ class CmdStanConverter:
         """Convert prior samples to xarray."""
         chains = []
         for path in self.prior:
-            prior, *_ = _read_output(path)
-            chains.append(prior)
+            parsed_output = _read_output(path)
+            for prior, *_ in parsed_output:
+                chains.append(prior)
         data = _unpack_dataframes(chains)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -245,6 +239,11 @@ def _read_output(path):
                     configuration_info.append(line.strip())
             elif not column_names:
                 column_names = True
+                pconf = _process_configuration(configuration_info)
+                if pconf['save_warmup']:
+                    warmup_range = range(pconf['num_warmup']//pconf['thin'])
+                    for _, _ in zip(warmup_range, f_obj):
+                        continue
             else:
                 break
 
@@ -252,15 +251,14 @@ def _read_output(path):
     with open(path, "r") as f_obj:
         df = pd.read_csv(f_obj, comment="#")
 
-    pd.options.mode.chained_assignment = None
     # split dataframe if header found multiple times
     if df.iloc[:, 0].dtype.kind == 'O':
         first_col = df.columns[0]
         col_locations = first_col == df.loc[:, first_col]
-        col_locations = col_locations[col_locations].index
+        col_locations = list(col_locations.loc[col_locations].index)
         dfs = []
         for idx, last_idx in zip(col_locations, [-1] + list(col_locations[:-1])):
-            df_ = df.loc[last_idx+1:idx-1, :]
+            df_ = deepcopy(df.loc[last_idx+1:idx-1, :])
             for col in df_.columns:
                 df_.loc[:, col] = pd.to_numeric(df_.loc[:, col])
             if len(df_):
@@ -271,7 +269,6 @@ def _read_output(path):
         dfs.append(df)
     else:
         dfs = [df]
-    pd.options.mode.chained_assignment = 'warn'
 
     for j, df in enumerate(dfs):
         if j == 0:
@@ -300,10 +297,6 @@ def _read_output(path):
             # row ranges
             config_start = line_num
             config_end = config_start+configuration_info_len
-            adaption_start = config_end + 1
-            adaption_end = adaption_start + adaptation_info_len
-            timing_start = adaption_end + len(df)
-            timing_end = timing_start + timing_info_len
 
             # read configuration_info
             for reading_line in range(config_start, config_end):
@@ -315,6 +308,11 @@ def _read_output(path):
                           "Header information missing from combined csv. " \
                           "Configuration: {}".format(path)
                     raise ValueError(msg)
+
+            pconf = _process_configuration(configuration_info)
+            warmup_rows = pconf['save_warmup']*pconf['num_warmup']//pconf['thin']
+            adaption_start = config_end + 1 + warmup_rows
+            adaption_end = adaption_start + adaptation_info_len
             # read adaptation_info
             for reading_line in range(adaption_start, adaption_end):
                 line = linecache.getline(path, reading_line)
@@ -325,6 +323,9 @@ def _read_output(path):
                           "Header information missing from combined csv. " \
                           "Adaptation: {}".format(path)
                     raise ValueError(msg)
+
+            timing_start = adaption_end + len(df) - warmup_rows
+            timing_end = timing_start + timing_info_len
             # read timing_info
             for reading_line in range(timing_start, timing_end):
                 line = linecache.getline(path, reading_line)
@@ -338,9 +339,8 @@ def _read_output(path):
             last_line_num = reading_line
 
         # Remove warmup
-        processed_config = _process_configuration(configuration_info)
-        if processed_config['save_warmup']:
-            saved_samples = processed_config['num_samples']//processed_config['thin']
+        if pconf['save_warmup']:
+            saved_samples = pconf['num_samples']//pconf['thin']
             df = df.iloc[-saved_samples:, :]
 
         # Split data to sample_stats and sample
