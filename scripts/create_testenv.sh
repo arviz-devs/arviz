@@ -18,8 +18,9 @@ if [[ $* != *--global* ]]; then
         echo "Environment ${ENVNAME} already exists, keeping up to date"
     else
         conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
-        source activate ${ENVNAME}
     fi
+
+    source activate ${ENVNAME}
 fi
 
 conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray netcdf4 mkl-service
