@@ -8,6 +8,7 @@ from arviz import (
     convert_to_dataset,
     from_pymc3,
     from_pystan,
+    from_emcee,
 )
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 
@@ -208,6 +209,30 @@ class TestDictNetCDFUtils(BaseArvizTest):
             coords={'school': np.arange(self.data['J'])},
             dims={'theta': ['school'], 'theta_tilde': ['school']},
         )
+
+class TestEmceeNetCDFUtils(BaseArvizTest):
+
+    @classmethod
+    def setup_class(cls):
+        cls.draws, cls.chains = 500, 20
+        fake_chains = cls.chains // 10  # emcee uses lots of walkers
+        cls.obj = load_cached_models(cls.draws, fake_chains)['emcee']
+
+    def get_inference_data(self):
+
+        return from_emcee(
+            self.obj,
+            var_names=['ln(f)', 'b', 'm']
+        )
+
+    def test__verify_var_names(self):
+        with pytest.raises(ValueError):
+            from_emcee(self.obj, var_names=['not', 'enough'])
+
+    def test__verify_arg_names(self):
+        with pytest.raises(ValueError):
+            from_emcee(self.obj, arg_names=['not', 'enough'])
+
 
 
 class TestPyMC3NetCDFUtils(BaseArvizTest):
