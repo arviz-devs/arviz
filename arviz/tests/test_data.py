@@ -378,13 +378,15 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
     def get_inference_data(self, output, **kwargs):
         return from_cmdstan(output=output, **kwargs)
 
-    def test_sampler_stats(self):
+    def test_sample_stats(self):
         for _, path in self.paths.items():
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'sample_stats')
 
     def test_inference_data(self):
-        for _, path in self.paths.items():
+        for key, path in self.paths.items():
+            if 'eight' in key:
+                continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'posterior')
             assert hasattr(inference_data.posterior, 'y')

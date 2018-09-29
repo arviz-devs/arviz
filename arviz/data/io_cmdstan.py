@@ -75,13 +75,20 @@ class CmdStanConverter:
            (isinstance(post_pred, str) and post_pred.lower().endswith('.csv')):
             post_pred = []
         elif isinstance(post_pred, str):
-            post_pred = [post_pred]
-        log_lik = self.log_likelihood
-        if not isinstance(log_lik, str) or \
-           (isinstance(log_lik, str) and log_lik.endswith('.csv')):
-            log_lik = []
+            post_pred = [col for col in columns if post_pred == col.split(".")[0]]
         else:
-            log_lik = [log_lik]
+            post_pred = [
+                col for col in columns \
+                if any(item == col.split(".")[0] for item in post_pred)
+            ]
+
+        log_lik = self.log_likelihood
+        if log_lik is None:
+            log_lik = []
+        elif isinstance(log_lik, str):
+            log_lik = [col for col in columns if log_lik == col.split('.')[0]]
+        else:
+            log_lik = [col for col in columns if any(item == col.split('.')[0] for item in log_lik)]
 
         valid_cols = [col for col in columns if col not in post_pred+log_lik]
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
@@ -103,7 +110,13 @@ class CmdStanConverter:
                 # Warning?
                 log_likelihood = None
             else:
-                log_likelihood_vals = [item[log_likelihood] for item in self.posterior]
+                log_likelihood_cols = [
+                    col for col in self.posterior[0].columns \
+                    if log_likelihood == col.split(".")[0]
+                ]
+                log_likelihood_vals = [
+                    item[log_likelihood_cols] for item in self.posterior
+                ]
 
         # copy dims and coords
         dims = deepcopy(self.dims) if self.dims is not None else {}
@@ -113,18 +126,25 @@ class CmdStanConverter:
             # Add log_likelihood to sampler_params
             for i, _ in enumerate(sampler_params):
                 # slice log_likelihood to keep dimensions
-                sampler_params[i]['log_likelihood'] = log_likelihood_vals[i]
+                for col in log_likelihood_cols:
+                    col_ll = col.replace(log_likelihood, 'log_likelihood')
+                    sampler_params[i][col_ll] = log_likelihood_vals[i][col]
             # change dims and coords for log_likelihood if defined
             if isinstance(log_likelihood, str) and log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
             if isinstance(log_likelihood, str) and log_likelihood in coords:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
-        data = {}
-        for key in sampler_params[0]:
-            name = re.sub('__$', "", key)
-            name = "diverging" if name == 'divergent' else name
-            data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        for j, s_params in enumerate(sampler_params):
+            rename_dict = {}
+            for key in s_params:
+                key_, *end = key.split(".")
+                name = re.sub('__$', "", key_)
+                name = "diverging" if name == 'divergent' else name
+                rename_dict[key] = ".".join((name, *end))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+            sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
+        data = _unpack_dataframes(sampler_params)
+        return dict_to_dataset(data, coords=coords, dims=dims)
 
     @requires('posterior')
     @requires('posterior_predictive')
@@ -150,10 +170,13 @@ class CmdStanConverter:
                     chain_data.append(sample)
             data = _unpack_dataframes(chain_data)
         else:
-            var_names = self.posterior_predictive
-            if isinstance(var_names, str):
-                var_names = [var_names]
-            data = _unpack_dataframes([item[var_names] for item in self.posterior])
+            if isinstance(ppred, str):
+                ppred = [ppred]
+            ppred_cols = [
+                col for col in self.posterior[0] \
+                if any(item == col.split(".")[0] for item in ppred)
+            ]
+            data = _unpack_dataframes([item[ppred_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires('posterior')

@@ -11,8 +11,4 @@ from .io_cmdstan import from_cmdstan
 
 __all__ = ['InferenceData', 'load_data', 'save_data', 'load_arviz_data', 'numpy_to_data_array',
            'dict_to_dataset', 'convert_to_dataset', 'convert_to_inference_data', 'from_pymc3',
-<<<<<<< HEAD
-           'from_pystan', 'from_emcee']
-=======
-           'from_pystan', 'from_cmdstan']
->>>>>>> 7510962... add io_cmdstan
+           'from_pystan', 'from_emcee', 'from_cmdstan']
