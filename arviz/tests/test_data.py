@@ -11,6 +11,7 @@ from arviz import (
     from_pymc3,
     from_pystan,
     from_emcee,
+    from_pyro,
 )
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 

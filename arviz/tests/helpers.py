@@ -7,8 +7,12 @@ import emcee
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
+import pyro
+import pyro.distributions as dist
+from pyro.infer.mcmc import MCMC, NUTS
 import pystan
 import scipy.optimize as op
+import torch
 
 
 class BaseArvizTest():
@@ -111,9 +115,47 @@ def eight_schools_params():
     }
 
 
+# pylint:disable=no-member,no-value-for-parameter
+def _pyro_centered_model(sigma):
+    """Centered model setup."""
+    mu = pyro.sample('mu', dist.Normal(torch.zeros(1), 10 * torch.ones(1)))
+    tau = pyro.sample('tau', dist.HalfCauchy(scale=25 * torch.ones(1)))
+
+    theta = pyro.sample('theta',
+                        dist.Normal(
+                            mu * torch.ones(8),
+                            tau * torch.ones(8)))
+
+    return pyro.sample("obs", dist.Normal(theta, sigma))
+
+
+def _pyro_conditioned_model(model, sigma, y):
+    """Condition the model."""
+    return pyro.poutine.condition(model, data={"obs": y})(sigma)
+
+
+def pyro_centered_schools(data, draws, chains):
+    """Centered eight schools implementation in Pyro.
+
+    Note there is not really a deterministic node in pyro, so I do not
+    know how to do a non-centered implementation.
+    """
+    del chains
+    y = torch.Tensor(data['y']).type(torch.Tensor)
+    sigma = torch.Tensor(data['sigma']).type(torch.Tensor)
+
+    nuts_kernel = NUTS(_pyro_conditioned_model, adapt_step_size=True)
+    posterior = MCMC(
+        nuts_kernel,
+        num_samples=draws,
+        warmup_steps=500,
+    ).run(_pyro_centered_model, sigma, y)
+    return posterior
+
+
 def pystan_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for pystan."""
-    schools_code = '''
+    schools_code = """
         data {
             int<lower=0> J;
             real y[J];
@@ -147,7 +189,7 @@ def pystan_noncentered_schools(data, draws, chains):
                 y_hat[j] = normal_rng(theta[j], sigma[j]);
             }
         }
-    '''
+    """
     stan_model = pystan.StanModel(model_code=schools_code)
     fit = stan_model.sampling(data=data,
                               iter=draws,
