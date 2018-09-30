@@ -293,7 +293,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
                                  'y_hat': ['school'],
                                  'theta_tilde': ['school']
                                 }
-                           )
+                          )
 
     def get_inference_data2(self):
         # dictionary
@@ -311,7 +311,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
                                  'y_hat': ['school'],
                                  'theta_tilde': ['school']
                                 }
-                           )
+                          )
 
     def test_sampler_stats(self):
         inference_data = self.get_inference_data()
@@ -347,10 +347,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             ],
             'no_warmup_glob' : os.path.join(data_directory,
                                             "cmdstan/output_no_warmup[0-9].csv"
-                                            ),
+                                           ),
             'warmup_glob' : os.path.join(data_directory,
                                          "cmdstan/output_warmup[0-9].csv"
-                                         ),
+                                        ),
             'combined_no_warmup' : [
                 os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
             ],
@@ -359,13 +359,13 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             ],
             'combined_no_warmup_glob' : os.path.join(data_directory,
                                                      "cmdstan/combined_output_no_warmup.csv"
-                                                     ),
+                                                    ),
             'combined_warmup_glob' : os.path.join(data_directory,
                                                   "cmdstan/combined_output_warmup.csv"
-                                                  ),
+                                                 ),
             'eight_schools_glob' : os.path.join(data_directory,
                                                 "cmdstan/eight_schools_output[0-9].csv"
-                                                ),
+                                               ),
             'eight_schools' : [
                 os.path.join(data_directory, "cmdstan/eight_schools_output1.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output2.csv"),
@@ -479,10 +479,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
-                coords={'school': np.arange(8)},
+                coords={'school': np.arange(8), 'log_lik_dim_0' : np.arange(8)},
                 dims={'theta': ['school'],
                       'y': ['school'],
-                      'log_lik': ['school'],
                       'y_hat': ['school'],
                       'theta_tilde': ['school']
                      }
@@ -505,10 +504,11 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood=['log_lik'],
-                coords={'school': np.arange(8)},
+                coords={'school': np.arange(8),
+                        'log_lik_dim' : np.arange(8)},
                 dims={'theta': ['school'],
                       'y': ['school'],
-                      'log_lik': ['school'],
+                      'log_lik': ['log_lik_dim'],
                       'y_hat': ['school'],
                       'theta_tilde': ['school']
                      }
@@ -520,11 +520,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'observed_data')
 
     def test_inference_data_bad_csv(self):
-        for key, path in self.paths.items():
+        for key, paths in self.paths.items():
             if 'missing' not in key:
                 continue
-            with pytest.raises(ValueError):
-                self.get_inference_data(output=path)
+            for path in paths:
+                with pytest.raises(ValueError):
+                    self.get_inference_data(output=path)
 
     def test_inference_data_observed_data1(self):
         path = self.observed_data_paths[1]

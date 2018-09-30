@@ -69,6 +69,10 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(dim_len)
+    coords = {
+        key : coord for key, coord in coords.items() \
+        if any(key == dim for dim in dims)
+    }
     return dims, coords
 
 

@@ -138,8 +138,22 @@ class CmdStanConverter:
             # change dims and coords for log_likelihood if defined
             if log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
-            if log_likelihood in coords:
-                coords["log_likelihood"] = coords.pop(log_likelihood)
+
+            log_likelihood_dims = np.array([
+                list(map(int, col.split(".")[1:])) for col in log_likelihood_cols
+            ])
+            max_dims = log_likelihood_dims.max(0)
+            max_dims = max_dims if hasattr(max_dims, "__iter__") else (max_dims, )
+            default_dim_names, _ = generate_dims_coords(
+                shape=max_dims, var_name=log_likelihood,
+            )
+            log_likelihood_dim_names, _ = generate_dims_coords(
+                shape=max_dims, var_name="log_likelihood",
+            )
+            for default_dim_name, log_likelihood_dim_name in zip(default_dim_names,
+                                                                 log_likelihood_dim_names):
+                if default_dim_name in coords:
+                    coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
 
         for j, s_params in enumerate(sampler_params):
             rename_dict = {}
@@ -203,7 +217,8 @@ class CmdStanConverter:
             vals = np.atleast_1d(vals)
             val_dims = self.dims.get(key)
             val_dims, coords = generate_dims_coords(vals.shape, key,
-                                                    dims=val_dims, coords=self.coords)
+                                                    dims=val_dims,
+                                                    coords=self.coords)
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
 
@@ -378,11 +393,12 @@ def _read_output(path):
                 else:
                     raise_timing_error = True
                     break
-            if raise_timing_error or not any("elapsed time" in row.lower() for row in timing_info):
+            no_elapsed_time = not any("elapsed time" in row.lower() for row in timing_info)
+            if raise_timing_error or no_elapsed_time:
                 msg = "Invalid input file. " \
                       "Header information missing from combined csv. " \
                       "Timing: {}".format(path)
-                ValueError(msg)
+                raise ValueError(msg)
 
             last_line_num = reading_line
 
