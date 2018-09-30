@@ -93,15 +93,14 @@ class CmdStanConverter:
         log_lik = self.log_likelihood
         if log_lik is None:
             log_lik = []
-        elif isinstance(log_lik, str):
-            log_lik = [col for col in columns if log_lik == col.split('.')[0]]
         else:
-            log_lik = [col for col in columns if any(item == col.split('.')[0] for item in log_lik)]
+            log_lik = [col for col in columns if log_lik == col.split('.')[0]]
 
         valid_cols = [col for col in columns if col not in post_pred+log_lik]
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
+    @requires('posterior')
     @requires('sample_stats')
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
@@ -111,37 +110,34 @@ class CmdStanConverter:
             'treedepth__' :  np.int64,
         }
 
-        sampler_params = self.sample_stats
-        log_likelihood = self.log_likelihood
-        if isinstance(log_likelihood, str):
-            if self.posterior is None:
-                # Warning?
-                log_likelihood = None
-            else:
-                log_likelihood_cols = [
-                    col for col in self.posterior[0].columns \
-                    if log_likelihood == col.split(".")[0]
-                ]
-                log_likelihood_vals = [
-                    item[log_likelihood_cols] for item in self.posterior
-                ]
-
         # copy dims and coords
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
-        if log_likelihood is not None:
+        sampler_params = self.sample_stats
+        log_likelihood = self.log_likelihood
+        if isinstance(log_likelihood, str):
+            log_likelihood_cols = [
+                col for col in self.posterior[0].columns \
+                if log_likelihood == col.split(".")[0]
+            ]
+            log_likelihood_vals = [
+                item[log_likelihood_cols] for item in self.posterior
+            ]
+
             # Add log_likelihood to sampler_params
             for i, _ in enumerate(sampler_params):
                 # slice log_likelihood to keep dimensions
                 for col in log_likelihood_cols:
                     col_ll = col.replace(log_likelihood, 'log_likelihood')
                     sampler_params[i][col_ll] = log_likelihood_vals[i][col]
+
             # change dims and coords for log_likelihood if defined
-            if isinstance(log_likelihood, str) and log_likelihood in dims:
+            if log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
-            if isinstance(log_likelihood, str) and log_likelihood in coords:
+            if log_likelihood in coords:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
+
         for j, s_params in enumerate(sampler_params):
             rename_dict = {}
             for key in s_params:
