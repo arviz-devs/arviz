@@ -388,7 +388,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         return from_cmdstan(output=output, **kwargs)
 
     def test_sample_stats(self):
-        for _, path in self.paths.items():
+        for key, path in self.paths.items():
+            if 'missing' in key:
+                continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'sample_stats')
 
@@ -423,7 +425,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive='y_hat',
-                observed_data=self.observed_data_path[0],
+                observed_data=self.observed_data_paths[0],
                 observed_data_var='y',
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -448,7 +450,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=['y_hat'],
-                observed_data=self.observed_data_path[0],
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -474,7 +476,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path[0],
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -500,7 +502,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path[0],
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood=['log_lik'],
                 coords={'school': np.arange(8)},
@@ -525,7 +527,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 self.get_inference_data(output=path)
 
     def test_inference_data_observed_data1(self):
-        path = self.observed_data_path[1]
+        path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
             observed_data=path,
@@ -537,7 +539,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['Z'].shape == (4, 5)
 
     def test_inference_data_observed_data2(self):
-        path = self.observed_data_path[1]
+        path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
             observed_data=path,
@@ -548,7 +550,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['x'].shape == (1,)
 
     def test_inference_data_observed_data3(self):
-        path = self.observed_data_path[1]
+        path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
             observed_data=path,
@@ -559,7 +561,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['x'].shape == (1,)
 
     def test_inference_data_observed_data4(self):
-        path = self.observed_data_path[1]
+        path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
             observed_data=path,
