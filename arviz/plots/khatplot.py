@@ -5,19 +5,22 @@ import numpy as np
 from .plot_utils import _scale_fig_size
 
 
-def plot_khat(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, **kwargs):
+def plot_khat(khats, figsize=None, textsize=None, markersize=5, ax=None,
+              hlines_kwargs=None, **kwargs):
     R"""
     Plot Pareto tail indices.
 
     Parameters
     ----------
     khats : array
-      Pareto tail indices.
+        Pareto tail indices.
     figsize : figure size tuple
-      If None, size is (8, 4)
+        If None, size is (8, 4)
     textsize: int
-      Text size for labels. If None it will be autoscaled based on figsize.
-    ax: axes
+        Text size for labels. If None it will be autoscaled based on figsize.
+    markersize: int
+        markersize for scatter plot. Defaults to 5
+    ax: axes, opt
       Matplotlib axes
     hlines_kwargs: dictionary
       Additional keywords passed to ax.hlines
@@ -44,7 +47,7 @@ def plot_khat(khats, figsize=None, textsize=None, ax=None, hlines_kwargs=None, *
     rgba_c = np.zeros((len(khats), 4))
     rgba_c[:, 2] = .8
     rgba_c[:, 3] = alphas
-    ax.scatter(np.arange(len(khats)), khats, c=rgba_c, marker='+', markersize=markersize, **kwargs)
+    ax.scatter(np.arange(len(khats)), khats, c=rgba_c, marker='+', s=markersize, **kwargs)
     ax.set_xlabel('Data point', fontsize=textsize)
     ax.set_ylabel(r'Shape parameter κ', fontsize=textsize)
     ax.tick_params(labelsize=textsize)
