@@ -5,7 +5,8 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from arviz import from_pymc3, compare
+from ..data import from_pymc3
+from ..stats import compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
                      plot_autocorr, plot_forest, plot_parallel, plot_pair,
