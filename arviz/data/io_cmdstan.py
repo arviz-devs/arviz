@@ -47,6 +47,9 @@ class CmdStanConverter:
         self.posterior_predictive = posterior_predictive
         self.observed_data = observed_data
         self.observed_data_var = observed_data_var
+        if isinstance(log_likelihood, (list, tuple)):
+            if len(log_likelihood) == 1:
+                log_likelihood = log_likelihood[0]
         self.log_likelihood = log_likelihood
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
@@ -186,7 +189,6 @@ class CmdStanConverter:
         data = _unpack_dataframes(chains)
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
-    @requires('posterior')
     @requires('observed_data')
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
@@ -368,15 +370,20 @@ def _read_output(path):
             timing_start = adaption_end + len(df) - warmup_rows
             timing_end = timing_start + timing_info_len
             # read timing_info
+            raise_timing_error = False
             for reading_line in range(timing_start, timing_end):
                 line = linecache.getline(path, reading_line)
                 if line.startswith("#"):
                     timing_info.append(line)
                 else:
-                    msg = "Invalid input file. " \
-                          "Header information missing from combined csv. " \
-                          "Timing: {}".format(path)
-                    raise ValueError(msg)
+                    raise_timing_error = True
+                    break
+            if raise_timing_error or not any("elapsed time" in row.lower() for row in timing_info):
+                msg = "Invalid input file. " \
+                      "Header information missing from combined csv. " \
+                      "Timing: {}".format(path)
+                ValueError(msg)
+
             last_line_num = reading_line
 
         # Remove warmup

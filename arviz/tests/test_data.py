@@ -372,8 +372,17 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 os.path.join(data_directory, "cmdstan/eight_schools_output3.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output4.csv"),
             ],
+            'missing_files' : [
+                os.path.join(data_directory, "cmdstan/combined_missing_config.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_adaptation.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_timing1.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_timing2.csv"),
+            ],
         }
-        cls.observed_data_path = os.path.join(data_directory, "cmdstan/eight_schools.data.R")
+        cls.observed_data_paths = [
+            os.path.join(data_directory, "cmdstan/eight_schools.data.R"),
+            os.path.join(data_directory, "cmdstan/example_stan.data.R"),
+        ]
 
     def get_inference_data(self, output, **kwargs):
         return from_cmdstan(output=output, **kwargs)
@@ -383,9 +392,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'sample_stats')
 
-    def test_inference_data(self):
+    def test_inference_data_shapes(self):
         for key, path in self.paths.items():
-            if 'eight' in key:
+            if 'eight' in key or 'missing' in key:
                 continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'posterior')
@@ -406,7 +415,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             Z_mean = inference_data.posterior['Z'].mean(dim=dims).mean(axis=1)
             assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()
 
-    def test_inference_data2(self):
+    def test_inference_data_input_types1(self):
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -414,7 +423,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive='y_hat',
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_path[0],
                 observed_data_var='y',
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -431,7 +440,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data3(self):
+    def test_inference_data_input_types2(self):
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -439,7 +448,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=['y_hat'],
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_path[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -456,7 +465,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data4(self):
+    def test_inference_data_input_types3(self):
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -465,7 +474,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_path[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -482,7 +491,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data5(self):
+    def test_inference_data_input_types4(self):
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -491,9 +500,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_path[0],
                 observed_data_var=['y'],
-                log_likelihood='log_lik',
+                log_likelihood=['log_lik'],
                 coords={'school': np.arange(8)},
                 dims={'theta': ['school'],
                       'y': ['school'],
@@ -507,3 +516,56 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data.sample_stats, 'log_likelihood')
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data_bad_csv(self):
+        for key, path in self.paths.items():
+            if 'missing' not in key:
+                continue
+            with pytest.raises(ValueError):
+                self.get_inference_data(output=path)
+
+    def test_inference_data_observed_data1(self):
+        path = self.observed_data_path[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 3
+        assert inference_data.observed_data['x'].shape == (1,)
+        assert inference_data.observed_data['y'].shape == (3,)
+        assert inference_data.observed_data['Z'].shape == (4, 5)
+
+    def test_inference_data_observed_data2(self):
+        path = self.observed_data_path[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var='x',
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 1
+        assert inference_data.observed_data['x'].shape == (1,)
+
+    def test_inference_data_observed_data3(self):
+        path = self.observed_data_path[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var=['x'],
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 1
+        assert inference_data.observed_data['x'].shape == (1,)
+
+    def test_inference_data_observed_data4(self):
+        path = self.observed_data_path[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var=['y', 'Z'],
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 2
+        assert inference_data.observed_data['y'].shape == (3,)
+        assert inference_data.observed_data['Z'].shape == (4, 5)
