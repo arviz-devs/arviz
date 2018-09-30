@@ -48,7 +48,7 @@ def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=i
     """Assert that varname order stays consistent when chains are combined"""
     _, _, data = sample_dataset
     var_names = [var for (var, _, _) in xarray_var_iter(data, var_names=None, combined=True)]
-    assert var_names == ["mu", "tau"]
+    assert set(var_names) == {"mu", "tau"}
 
 
 def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable=invalid-name
