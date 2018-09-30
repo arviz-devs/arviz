@@ -1,4 +1,5 @@
 # pylint: disable=no-member,invalid-name
+import os
 import numpy as np
 import pymc3 as pm
 import pytest
@@ -6,6 +7,7 @@ import pytest
 from arviz import (
     convert_to_inference_data,
     convert_to_dataset,
+    from_cmdstan,
     from_pymc3,
     from_pystan,
     from_emcee,
@@ -322,3 +324,186 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         assert hasattr(inference_data1.observed_data, 'y')
         assert hasattr(inference_data2.sample_stats, 'log_likelihood')
         assert hasattr(inference_data2.observed_data, 'y_hat')
+
+
+class TestCmdStanNetCDFUtils(BaseArvizTest):
+
+    @classmethod
+    def setup_class(cls):
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, 'saved_models')
+        cls.paths = {
+            'no_warmup' : [
+                os.path.join(data_directory, "cmdstan/output_no_warmup1.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup2.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup3.csv"),
+                os.path.join(data_directory, "cmdstan/output_no_warmup4.csv"),
+            ],
+            'warmup' : [
+                os.path.join(data_directory, "cmdstan/output_warmup1.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup2.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup3.csv"),
+                os.path.join(data_directory, "cmdstan/output_warmup4.csv"),
+            ],
+            'no_warmup_glob' : os.path.join(data_directory,
+                                            "cmdstan/output_no_warmup[0-9].csv"
+                                            ),
+            'warmup_glob' : os.path.join(data_directory,
+                                         "cmdstan/output_warmup[0-9].csv"
+                                         ),
+            'combined_no_warmup' : [
+                os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
+            ],
+            'combined_warmup' : [
+                os.path.join(data_directory, "cmdstan/combined_output_warmup.csv")
+            ],
+            'combined_no_warmup_glob' : os.path.join(data_directory,
+                                                     "cmdstan/combined_output_no_warmup.csv"
+                                                     ),
+            'combined_warmup_glob' : os.path.join(data_directory,
+                                                  "cmdstan/combined_output_warmup.csv"
+                                                  ),
+            'eight_schools_glob' : os.path.join(data_directory,
+                                                "cmdstan/eight_schools_output[0-9].csv"
+                                                ),
+            'eight_schools' : [
+                os.path.join(data_directory, "cmdstan/eight_schools_output1.csv"),
+                os.path.join(data_directory, "cmdstan/eight_schools_output2.csv"),
+                os.path.join(data_directory, "cmdstan/eight_schools_output3.csv"),
+                os.path.join(data_directory, "cmdstan/eight_schools_output4.csv"),
+            ],
+        }
+        cls.observed_data_path = os.path.join(data_directory, "cmdstan/eight_schools.data.R")
+
+    def get_inference_data(self, output, **kwargs):
+        return from_cmdstan(output=output, **kwargs)
+
+    def test_sample_stats(self):
+        for _, path in self.paths.items():
+            inference_data = self.get_inference_data(path)
+            assert hasattr(inference_data, 'sample_stats')
+
+    def test_inference_data(self):
+        for key, path in self.paths.items():
+            if 'eight' in key:
+                continue
+            inference_data = self.get_inference_data(path)
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data.posterior, 'y')
+            assert hasattr(inference_data.posterior, 'x')
+            assert hasattr(inference_data.posterior, 'Z')
+            assert inference_data.posterior['y'].shape == (4, 100)
+            assert inference_data.posterior['x'].shape == (4, 100, 3)
+            assert inference_data.posterior['Z'].shape == (4, 100, 4, 6)
+            dims = ['chain', 'draw']
+            y_mean_true = 0
+            y_mean = inference_data.posterior['y'].mean(dim=dims)
+            assert np.isclose(y_mean, y_mean_true, atol=1e-1)
+            x_mean_true = np.array([1, 2, 3])
+            x_mean = inference_data.posterior['x'].mean(dim=dims)
+            assert np.isclose(x_mean, x_mean_true, atol=1e-1).all()
+            Z_mean_true = np.array([1, 2, 3, 4])
+            Z_mean = inference_data.posterior['Z'].mean(dim=dims).mean(axis=1)
+            assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()
+
+    def test_inference_data2(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            inference_data = self.get_inference_data(
+                output=path,
+                prior=path,
+                posterior_predictive='y_hat',
+                observed_data=self.observed_data_path,
+                observed_data_var='y',
+                log_likelihood='log_lik',
+                coords={'school': np.arange(8)},
+                dims={'theta': ['school'],
+                      'y': ['school'],
+                      'log_lik': ['school'],
+                      'y_hat': ['school'],
+                      'theta_tilde': ['school'],
+                     }
+            )
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data3(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            inference_data = self.get_inference_data(
+                output=path,
+                prior=path,
+                posterior_predictive=['y_hat'],
+                observed_data=self.observed_data_path,
+                observed_data_var=['y'],
+                log_likelihood='log_lik',
+                coords={'school': np.arange(8)},
+                dims={'theta': ['school'],
+                      'y': ['school'],
+                      'log_lik': ['school'],
+                      'y_hat': ['school'],
+                      'theta_tilde': ['school']
+                     }
+            )
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data4(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            post_pred = self.paths['eight_schools_glob']
+            inference_data = self.get_inference_data(
+                output=path,
+                prior=path,
+                posterior_predictive=post_pred,
+                observed_data=self.observed_data_path,
+                observed_data_var=['y'],
+                log_likelihood='log_lik',
+                coords={'school': np.arange(8)},
+                dims={'theta': ['school'],
+                      'y': ['school'],
+                      'log_lik': ['school'],
+                      'y_hat': ['school'],
+                      'theta_tilde': ['school']
+                     }
+            )
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data5(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            post_pred = self.paths['eight_schools']
+            inference_data = self.get_inference_data(
+                output=path,
+                prior=path,
+                posterior_predictive=post_pred,
+                observed_data=self.observed_data_path,
+                observed_data_var=['y'],
+                log_likelihood='log_lik',
+                coords={'school': np.arange(8)},
+                dims={'theta': ['school'],
+                      'y': ['school'],
+                      'log_lik': ['school'],
+                      'y_hat': ['school'],
+                      'theta_tilde': ['school']
+                     }
+            )
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
