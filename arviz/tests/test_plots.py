@@ -79,8 +79,8 @@ def test_plot_density_float(models, kwargs):
     assert axes.shape[1] == 1
 
 
-def test_plot_density_int():
-    axes = plot_density(np.random.randint(10, size=10), shade=.9)
+def test_plot_density_discrete(discrete_model):
+    axes = plot_density(discrete_model, shade=.9)
     assert axes.shape[1] == 1
 
 
@@ -153,7 +153,7 @@ def test_plot_joint(models, model_fit, kind):
     assert axjoin
 
 
-def test_plot_joint_int(discrete_model):
+def test_plot_joint_discrete(discrete_model):
     axjoin, _, _ = plot_joint(discrete_model)
     assert axjoin
 
@@ -220,7 +220,7 @@ def test_plot_ppc(models, pymc3_sample_ppc, kind):
 
 
 @pytest.mark.parametrize('kind', ['density', 'cumulative'])
-def test_plot_ppc_int(kind):
+def test_plot_ppc_discrete(kind):
     data = MagicMock(spec=InferenceData)
     observed_data = xr.Dataset({"obs": (["obs_dim_0"], [9, 9])}, coords={"obs_dim_0": [1, 2]})
     posterior_predictive = xr.Dataset({"obs": (["draw", "chain", "obs_dim_0"], [[[1]], [[1]]])},
@@ -239,7 +239,7 @@ def test_plot_violin(models, model_fit):
     assert axes.shape[0] >= 18
 
 
-def test_plot_violin_int(discrete_model):
+def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model)
     assert axes.shape
 
