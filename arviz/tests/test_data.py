@@ -431,7 +431,11 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-            inference_data2 = self.get_inference_data(
+    def test_inference_data3(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            inference_data = self.get_inference_data(
                 output=path,
                 prior=path,
                 posterior_predictive=['y_hat'],
@@ -446,13 +450,18 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                       'theta_tilde': ['school']
                      }
             )
-            assert hasattr(inference_data2, 'posterior')
-            assert hasattr(inference_data2, 'sample_stats')
-            assert hasattr(inference_data2.sample_stats, 'log_likelihood')
-            assert hasattr(inference_data2, 'posterior_predictive')
-            assert hasattr(inference_data2, 'observed_data')
-            post_pred = self.paths['combined_no_warmup']
-            inference_data3 = self.get_inference_data(
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data4(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            post_pred = self.paths['eight_schools_glob']
+            inference_data = self.get_inference_data(
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
@@ -467,8 +476,34 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                       'theta_tilde': ['school']
                      }
             )
-            assert hasattr(inference_data3, 'posterior')
-            assert hasattr(inference_data3, 'sample_stats')
-            assert hasattr(inference_data3.sample_stats, 'log_likelihood')
-            assert hasattr(inference_data3, 'posterior_predictive')
-            assert hasattr(inference_data3, 'observed_data')
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data5(self):
+        for key, path in self.paths.items():
+            if 'eight' not in key:
+                continue
+            post_pred = self.paths['eight_schools']
+            inference_data = self.get_inference_data(
+                output=path,
+                prior=path,
+                posterior_predictive=post_pred,
+                observed_data=self.observed_data_path,
+                observed_data_var=['y'],
+                log_likelihood='log_lik',
+                coords={'school': np.arange(8)},
+                dims={'theta': ['school'],
+                      'y': ['school'],
+                      'log_lik': ['school'],
+                      'y_hat': ['school'],
+                      'theta_tilde': ['school']
+                     }
+            )
+            assert hasattr(inference_data, 'posterior')
+            assert hasattr(inference_data, 'sample_stats')
+            assert hasattr(inference_data.sample_stats, 'log_likelihood')
+            assert hasattr(inference_data, 'posterior_predictive')
+            assert hasattr(inference_data, 'observed_data')
