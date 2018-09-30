@@ -1,11 +1,13 @@
 # pylint: disable=redefined-outer-name
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+import xarray as xr
 import numpy as np
 import pymc3 as pm
 import pytest
+from unittest.mock import MagicMock
 
-from ..data import from_pymc3
+from ..data import from_pymc3, InferenceData
 from ..stats import compare
 from .helpers import eight_schools_params, load_cached_models
 from ..plots import (plot_density, plot_trace, plot_energy, plot_posterior,
@@ -209,6 +211,18 @@ def test_plot_ppc(models, pymc3_sample_ppc, kind):
     axes = plot_ppc(data, kind=kind)
     assert axes
 
+
+@pytest.mark.parametrize('kind', ['density', 'cumulative'])
+def test_plot_ppc_int(kind):
+    data = MagicMock(spec=InferenceData)
+    observed_data = xr.Dataset({"obs": (["obs_dim_0"], [9, 9])}, coords={"obs_dim_0": [1, 2]})
+    posterior_predictive = xr.Dataset({"obs": (["draw", "chain", "obs_dim_0"], [[[1]], [[1]]])},
+                                      coords={"obs_dim_0": [1], "chain": [1], "draw": [1, 2]})
+    data.observed_data = observed_data
+    data.posterior_predictive = posterior_predictive
+
+    axes = plot_ppc(data, kind=kind)
+    assert axes
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_violin(models, model_fit):
