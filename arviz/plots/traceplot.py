@@ -132,7 +132,7 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
                               linewidth=1.5, alpha=0.75)
             axes[i, 1].hlines(line_values, *axes[i, 1].get_xlim(), colors=colors,
                               linewidth=1.5, alpha=trace_kwargs['alpha'])
-        axes[i, 0].set_ylim(ymin=0)
+        axes[i, 0].set_ylim(bottom=0)
     fig.tight_layout()
     return axes
 
