@@ -55,8 +55,11 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
     """Assert that varname order stays consistent when chains are not combined"""
     _, _, data = sample_dataset
     var_names = [(var, selection) for (var, selection, _) in xarray_var_iter(data, var_names=None)]
-    assert var_names == [("mu", {"chain": 0}), ("mu", {"chain": 1}),
-                         ("tau", {"chain": 0}), ("tau", {"chain": 1})]
+
+    assert len(var_names) == 4
+    for var_name in var_names:
+        assert var_name in [("mu", {"chain": 0}), ("mu", {"chain": 1}),
+                            ("tau", {"chain": 0}), ("tau", {"chain": 1})]
 
 
 class TestCoordsExceptions:

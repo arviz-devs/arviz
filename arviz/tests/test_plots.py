@@ -21,19 +21,21 @@ np.random.seed(0)
 
 
 @pytest.fixture(scope='module')
-def models(request):
+def models():
     class Models:
         models = load_cached_models(draws=500, chains=2)
         pymc3_model, pymc3_fit = models['pymc3']
         stan_model, stan_fit = models['pystan']
         emcee_fit = models['emcee']
+    return Models()
 
+
+@pytest.fixture(scope='function', autouse=True)
+def clean_plots(request):
     def fin():
         plt.close('all')
 
     request.addfinalizer(fin)
-    return Models()
-
 
 @pytest.fixture(scope='module')
 def pymc3_sample_ppc(models):
