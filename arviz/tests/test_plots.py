@@ -1,11 +1,11 @@
 # pylint: disable=redefined-outer-name
+from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
 import xarray as xr
 import numpy as np
 import pymc3 as pm
 import pytest
-from unittest.mock import MagicMock
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
@@ -85,20 +85,27 @@ def test_plot_density_int():
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "emcee_fit"])
-@pytest.mark.parametrize('combined', [True, False])
-def test_plot_trace(models, combined, model_fit):
+@pytest.mark.parametrize("kwargs", [{},
+                                    {"var_names": ["mu", "tau"]},
+                                    {"combined":True},
+                                    {"lines": [('mu', {}, [1, 2])]},
+                                    {"lines": [("mu", 0)]}
+                                    ])
+def test_plot_trace(models, model_fit, kwargs):
     has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit'})
     obj = getattr(models, model_fit)
     if has_labels:
         kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
     else:
         kwargs = {}
-    axes = plot_trace(obj, combined=combined, **kwargs)
+    axes = plot_trace(obj,  **kwargs)
 
-    assert axes.ndim == 2
-    assert axes.shape[1] == 2
-    if has_labels:
-        assert axes.shape == (2, 2)
+    assert axes.shape
+
+
+def test_plot_trace_discrete(discrete_model):
+    axes = plot_trace(discrete_model)
+    assert axes.shape
 
 
 @pytest.mark.parametrize("model_fits", [["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
@@ -224,6 +231,7 @@ def test_plot_ppc_int(kind):
     axes = plot_ppc(data, kind=kind)
     assert axes
 
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_violin(models, model_fit):
     obj = getattr(models, model_fit)
@@ -264,15 +272,15 @@ def test_plot_autocorr_combined(models, model_fit):
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_posterior(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
-    axes = plot_posterior(obj,  **kwargs)
+    axes = plot_posterior(obj, **kwargs)
     assert axes.shape
 
 
 @pytest.mark.parametrize("kwargs", [{},
                                     {"point_estimate": "mode"},
-                                    {"bins": None, "kind":"hist"}])
+                                    {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
-    axes = plot_posterior(discrete_model,  **kwargs)
+    axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
 
 
