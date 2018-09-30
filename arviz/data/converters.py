@@ -4,6 +4,7 @@ import xarray as xr
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset
+from .io_emcee import from_emcee
 from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
 
@@ -50,6 +51,8 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
         return from_pystan(fit=obj, coords=coords, dims=dims, **kwargs)
     elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
         return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
+    elif obj.__class__.__name__ == 'EnsembleSampler':  # ugly, but doesn't make emcee a requirement
+        return from_emcee(obj, coords=coords, dims=dims, **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):

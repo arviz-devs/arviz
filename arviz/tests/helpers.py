@@ -3,10 +3,12 @@ import os
 import pickle
 import sys
 
+import emcee
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import pystan
+import scipy.optimize as op
 
 
 class BaseArvizTest():
@@ -35,6 +37,69 @@ class BaseArvizTest():
     def teardown_method(self):
         """Run for every test."""
         plt.close('all')
+
+
+def _emcee_neg_lnlike(theta, x, y, yerr):
+    """Proper function to allow pickling."""
+    slope, intercept, lnf = theta
+    model = slope * x + intercept
+    inv_sigma2 = 1.0/(yerr**2 + model**2*np.exp(2*lnf))
+    return 0.5*(np.sum((y-model)**2*inv_sigma2 - np.log(inv_sigma2)))
+
+
+def _emcee_lnprior(theta):
+    """Proper function to allow pickling."""
+    slope, intercept, lnf = theta
+    if -5.0 < slope < 0.5 and 0.0 < intercept < 10.0 and -10.0 < lnf < 1.0:
+        return 0.0
+    return -np.inf
+
+
+def _emcee_lnprob(theta, x, y, yerr):
+    """Proper function to allow pickling."""
+    logp = _emcee_lnprior(theta)
+    if not np.isfinite(logp):
+        return -np.inf
+    return logp - _emcee_neg_lnlike(theta, x, y, yerr)
+
+
+def emcee_linear_model(data, draws, chains):
+    """Linear model fit in emcee.
+
+    Note that the data is unused, but included to fit the pattern
+    from other libraries.
+
+    From http://dfm.io/emcee/current/user/line/
+    """
+    del data
+    chains = 10 * chains  # emcee is sad with too few walkers
+
+    # Choose the "true" parameters.
+    m_true = -0.9594
+    b_true = 4.294
+    f_true = 0.534
+
+    # make reproducible
+    np.random.seed(0)
+
+    # Generate some synthetic data from the model.
+    num_data = 50
+    x = np.sort(10*np.random.rand(num_data))
+    yerr = 0.1+0.5*np.random.rand(num_data)
+    y = m_true*x+b_true
+    y += np.abs(f_true*y) * np.random.randn(num_data)
+    y += yerr * np.random.randn(num_data)
+
+    result = op.minimize(_emcee_neg_lnlike, [m_true, b_true, np.log(f_true)],
+                         args=(x, y, yerr))
+
+    ndim = result['x'].shape[0]
+    pos = [result["x"] + 1e-4*np.random.randn(ndim) for _ in range(chains)]
+
+    sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+
+    sampler.run_mcmc(pos, draws)
+    return sampler
 
 
 def eight_schools_params():
@@ -104,12 +169,13 @@ def pymc3_noncentered_schools(data, draws, chains):
 
 
 def load_cached_models(draws, chains):
-    """Load pymc3 and pystan models from pickle."""
+    """Load pymc3, pystan, and emcee models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     data = eight_schools_params()
     supported = (
         (pystan, pystan_noncentered_schools),
         (pm, pymc3_noncentered_schools),
+        (emcee, emcee_linear_model),
     )
     data_directory = os.path.join(here, 'saved_models')
     models = {}

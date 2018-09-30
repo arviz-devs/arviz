@@ -21,6 +21,7 @@ def models(request):
         models = load_cached_models(draws=500, chains=2)
         pymc3_model, pymc3_fit = models['pymc3']
         stan_model, stan_fit = models['pystan']
+        emcee_fit = models['emcee']
 
     def fin():
         plt.close('all')
@@ -72,12 +73,21 @@ def test_plot_density_int():
     assert axes.shape[1] == 1
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "emcee_fit"])
 @pytest.mark.parametrize('combined', [True, False])
 def test_plot_trace(models, combined, model_fit):
+    has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit'})
     obj = getattr(models, model_fit)
-    axes = plot_trace(obj, var_names=('mu', 'tau'), combined=combined, lines=[('mu', {}, [1, 2])])
-    assert axes.shape == (2, 2)
+    if has_labels:
+        kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
+    else:
+        kwargs = {}
+    axes = plot_trace(obj, combined=combined, **kwargs)
+
+    assert axes.ndim == 2
+    assert axes.shape[1] == 2
+    if has_labels:
+        assert axes.shape == (2, 2)
 
 
 @pytest.mark.parametrize("model_fits", [["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
