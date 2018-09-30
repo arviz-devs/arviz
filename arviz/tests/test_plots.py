@@ -98,7 +98,7 @@ def test_plot_trace(models, model_fit, kwargs):
         kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
     else:
         kwargs = {}
-    axes = plot_trace(obj,  **kwargs)
+    axes = plot_trace(obj, **kwargs)
 
     assert axes.shape
 
