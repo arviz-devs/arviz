@@ -234,11 +234,31 @@ def test_plot_autocorr_combined(models, model_fit):
             axes.shape[1] == 34 and model_fit == "stan_fit")
 
 
+@pytest.mark.parametrize("kwargs", [{},
+                                    {"var_names": ('mu', 'tau')},
+                                    {"rope": (-2, 2)},
+                                    {"rope": {'mu': [{'rope': (-2, 2)}],
+                                              'theta': [{'school': 'Choate', 'rope': (2, 4)}]}},
+
+                                    {"point_estimate": 'mode'},
+                                    {"point_estimate": 'median'},
+                                    {"ref_val": 0},
+                                    {"bins": None, "kind":"hist"},
+                                    {"mu": {"ref_val": (-1, 1)}}
+                                    ])
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_posterior(models, model_fit):
+def test_plot_posterior(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
-    axes = plot_posterior(obj, var_names=('mu', 'tau'), rope=(-2, 2), ref_val=0)
-    assert axes.shape == (2,)
+    axes = plot_posterior(obj,  **kwargs)
+    assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{},
+                                    {"point_estimate": "mode"},
+                                    {"bins": None, "kind":"hist"}])
+def test_plot_posterior_discrete(discrete_model, kwargs):
+    axes = plot_posterior(discrete_model,  **kwargs)
+    assert axes.shape
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
