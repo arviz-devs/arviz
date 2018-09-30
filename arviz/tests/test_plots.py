@@ -21,7 +21,7 @@ np.random.seed(0)
 
 
 @pytest.fixture(scope='module')
-def models(request):
+def models():
     class Models:
         models = load_cached_models(draws=500, chains=2)
         pymc3_model, pymc3_fit = models['pymc3']
