@@ -239,6 +239,11 @@ def test_plot_violin(models, model_fit):
     assert axes.shape[0] >= 18
 
 
+def test_plot_violin_int(discrete_model):
+    axes = plot_violin(discrete_model)
+    assert axes.shape
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_autocorr_uncombined(models, model_fit):
     obj = getattr(models, model_fit)
