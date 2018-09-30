@@ -25,11 +25,10 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
         If None, size is (6, 5)
     textsize: int
         Text size for labels. If None it will be auto-scaled based on figsize.
-    data_pairs : dict
-        Dictionary containing relations between observed data and posterior predictive data.
-        Dictionary structure:
-            Key = data var_name
-            Value = posterior predictive var_name
+    data_pairs : dict[str] -> str
+        Dictionary containing relations between observed data and posterior
+        predictive data. Dictionary keys are data var_name and posterior
+        predictive var_name.
         Example: `data_pairs = {'y' : 'y_hat'}`
 
     Returns
