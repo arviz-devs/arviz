@@ -395,6 +395,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'sample_stats')
 
     def test_inference_data_shapes(self):
+        """Assert that shapes are transformed correctly"""
         for key, path in self.paths.items():
             if 'eight' in key or 'missing' in key:
                 continue
@@ -418,6 +419,17 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()
 
     def test_inference_data_input_types1(self):
+        """Check input types
+
+            output --> str, list of str
+            prior --> str, list of str
+            posterior_predictive --> str, variable in output
+            observed_data --> Rdump format
+            observed_data_var --> str, variable
+            log_likelihood --> str
+            coords --> one to many
+            dims --> one to many
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -443,6 +455,11 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'observed_data')
 
     def test_inference_data_input_types2(self):
+        """Check input types (change, see earlier)
+
+            posterior_predictive --> List[str], variable in output
+            observed_data_var --> List[str], variable
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -468,6 +485,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'observed_data')
 
     def test_inference_data_input_types3(self):
+        """Check input types (change, see earlier)
+
+            posterior_predictive --> str, csv file
+            coords --> one to many + one to one (default dim)
+            dims --> one to many
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -493,6 +516,11 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'observed_data')
 
     def test_inference_data_input_types4(self):
+        """Check input types (change, see earlier)
+
+            coords --> one to many + one to one (non-default dim)
+            dims --> one to many + one to one
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -520,6 +548,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'observed_data')
 
     def test_inference_data_bad_csv(self):
+        """Check ValueError for csv with missing headers"""
         for key, paths in self.paths.items():
             if 'missing' not in key:
                 continue
@@ -528,6 +557,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                     self.get_inference_data(output=path)
 
     def test_inference_data_observed_data1(self):
+        """Read Rdump, check shapes are correct
+
+            All variables
+        """
         path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
@@ -540,6 +573,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['Z'].shape == (4, 5)
 
     def test_inference_data_observed_data2(self):
+        """Read Rdump, check shapes are correct
+
+            One variable as str
+        """
         path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
@@ -551,6 +588,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['x'].shape == (1,)
 
     def test_inference_data_observed_data3(self):
+        """Read Rdump, check shapes are correct
+
+            One variable as a list
+        """
         path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
@@ -562,6 +603,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
         assert inference_data.observed_data['x'].shape == (1,)
 
     def test_inference_data_observed_data4(self):
+        """Read Rdump, check shapes are correct
+
+            Many variables as list
+        """
         path = self.observed_data_paths[1]
         inference_data = self.get_inference_data(
             output=None,
