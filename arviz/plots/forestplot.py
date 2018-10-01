@@ -291,7 +291,8 @@ class PlotHandler():
         for plotter in self.plotters.values():
             for y, n_eff, color in plotter.n_eff():
                 if n_eff is not None:
-                    ax.plot(n_eff, y, 'o', color=color, markersize=markersize, markeredgecolor='k')
+                    ax.plot(n_eff, y, 'o', color=color, clip_on=False,
+                            markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0)
         ax.set_title('Effective n', fontsize=textsize)
         ax.tick_params(labelsize=textsize)
