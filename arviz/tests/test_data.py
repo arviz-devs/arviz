@@ -293,7 +293,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
                                  'y_hat': ['school'],
                                  'theta_tilde': ['school']
                                 }
-                           )
+                          )
 
     def get_inference_data2(self):
         # dictionary
@@ -311,7 +311,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
                                  'y_hat': ['school'],
                                  'theta_tilde': ['school']
                                 }
-                           )
+                          )
 
     def test_sampler_stats(self):
         inference_data = self.get_inference_data()
@@ -347,10 +347,10 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             ],
             'no_warmup_glob' : os.path.join(data_directory,
                                             "cmdstan/output_no_warmup[0-9].csv"
-                                            ),
+                                           ),
             'warmup_glob' : os.path.join(data_directory,
                                          "cmdstan/output_warmup[0-9].csv"
-                                         ),
+                                        ),
             'combined_no_warmup' : [
                 os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
             ],
@@ -359,33 +359,45 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             ],
             'combined_no_warmup_glob' : os.path.join(data_directory,
                                                      "cmdstan/combined_output_no_warmup.csv"
-                                                     ),
+                                                    ),
             'combined_warmup_glob' : os.path.join(data_directory,
                                                   "cmdstan/combined_output_warmup.csv"
-                                                  ),
+                                                 ),
             'eight_schools_glob' : os.path.join(data_directory,
                                                 "cmdstan/eight_schools_output[0-9].csv"
-                                                ),
+                                               ),
             'eight_schools' : [
                 os.path.join(data_directory, "cmdstan/eight_schools_output1.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output2.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output3.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output4.csv"),
             ],
+            'missing_files' : [
+                os.path.join(data_directory, "cmdstan/combined_missing_config.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_adaptation.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_timing1.csv"),
+                os.path.join(data_directory, "cmdstan/combined_missing_timing2.csv"),
+            ],
         }
-        cls.observed_data_path = os.path.join(data_directory, "cmdstan/eight_schools.data.R")
+        cls.observed_data_paths = [
+            os.path.join(data_directory, "cmdstan/eight_schools.data.R"),
+            os.path.join(data_directory, "cmdstan/example_stan.data.R"),
+        ]
 
     def get_inference_data(self, output, **kwargs):
         return from_cmdstan(output=output, **kwargs)
 
     def test_sample_stats(self):
-        for _, path in self.paths.items():
+        for key, path in self.paths.items():
+            if 'missing' in key:
+                continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'sample_stats')
 
-    def test_inference_data(self):
+    def test_inference_data_shapes(self):
+        """Assert that shapes are transformed correctly"""
         for key, path in self.paths.items():
-            if 'eight' in key:
+            if 'eight' in key or 'missing' in key:
                 continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, 'posterior')
@@ -406,7 +418,18 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             Z_mean = inference_data.posterior['Z'].mean(dim=dims).mean(axis=1)
             assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()
 
-    def test_inference_data2(self):
+    def test_inference_data_input_types1(self):
+        """Check input types
+
+            output --> str, list of str
+            prior --> str, list of str
+            posterior_predictive --> str, variable in output
+            observed_data --> Rdump format
+            observed_data_var --> str, variable
+            log_likelihood --> str
+            coords --> one to many
+            dims --> one to many
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -414,7 +437,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive='y_hat',
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_paths[0],
                 observed_data_var='y',
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -431,7 +454,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data3(self):
+    def test_inference_data_input_types2(self):
+        """Check input types (change, see earlier)
+
+            posterior_predictive --> List[str], variable in output
+            observed_data_var --> List[str], variable
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -439,7 +467,7 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=['y_hat'],
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
                 coords={'school': np.arange(8)},
@@ -456,7 +484,13 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data4(self):
+    def test_inference_data_input_types3(self):
+        """Check input types (change, see earlier)
+
+            posterior_predictive --> str, csv file
+            coords --> one to many + one to one (default dim)
+            dims --> one to many
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -465,13 +499,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
                 log_likelihood='log_lik',
-                coords={'school': np.arange(8)},
+                coords={'school': np.arange(8), 'log_lik_dim_0' : np.arange(8)},
                 dims={'theta': ['school'],
                       'y': ['school'],
-                      'log_lik': ['school'],
                       'y_hat': ['school'],
                       'theta_tilde': ['school']
                      }
@@ -482,7 +515,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
 
-    def test_inference_data5(self):
+    def test_inference_data_input_types4(self):
+        """Check input types (change, see earlier)
+
+            coords --> one to many + one to one (non-default dim)
+            dims --> one to many + one to one
+        """
         for key, path in self.paths.items():
             if 'eight' not in key:
                 continue
@@ -491,13 +529,14 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 output=path,
                 prior=path,
                 posterior_predictive=post_pred,
-                observed_data=self.observed_data_path,
+                observed_data=self.observed_data_paths[0],
                 observed_data_var=['y'],
-                log_likelihood='log_lik',
-                coords={'school': np.arange(8)},
+                log_likelihood=['log_lik'],
+                coords={'school': np.arange(8),
+                        'log_lik_dim' : np.arange(8)},
                 dims={'theta': ['school'],
                       'y': ['school'],
-                      'log_lik': ['school'],
+                      'log_lik': ['log_lik_dim'],
                       'y_hat': ['school'],
                       'theta_tilde': ['school']
                      }
@@ -507,3 +546,74 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             assert hasattr(inference_data.sample_stats, 'log_likelihood')
             assert hasattr(inference_data, 'posterior_predictive')
             assert hasattr(inference_data, 'observed_data')
+
+    def test_inference_data_bad_csv(self):
+        """Check ValueError for csv with missing headers"""
+        for key, paths in self.paths.items():
+            if 'missing' not in key:
+                continue
+            for path in paths:
+                with pytest.raises(ValueError):
+                    self.get_inference_data(output=path)
+
+    def test_inference_data_observed_data1(self):
+        """Read Rdump, check shapes are correct
+
+            All variables
+        """
+        path = self.observed_data_paths[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 3
+        assert inference_data.observed_data['x'].shape == (1,)
+        assert inference_data.observed_data['y'].shape == (3,)
+        assert inference_data.observed_data['Z'].shape == (4, 5)
+
+    def test_inference_data_observed_data2(self):
+        """Read Rdump, check shapes are correct
+
+            One variable as str
+        """
+        path = self.observed_data_paths[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var='x',
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 1
+        assert inference_data.observed_data['x'].shape == (1,)
+
+    def test_inference_data_observed_data3(self):
+        """Read Rdump, check shapes are correct
+
+            One variable as a list
+        """
+        path = self.observed_data_paths[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var=['x'],
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 1
+        assert inference_data.observed_data['x'].shape == (1,)
+
+    def test_inference_data_observed_data4(self):
+        """Read Rdump, check shapes are correct
+
+            Many variables as list
+        """
+        path = self.observed_data_paths[1]
+        inference_data = self.get_inference_data(
+            output=None,
+            observed_data=path,
+            observed_data_var=['y', 'Z'],
+        )
+        assert hasattr(inference_data, 'observed_data')
+        assert len(inference_data.observed_data.data_vars) == 2
+        assert inference_data.observed_data['y'].shape == (3,)
+        assert inference_data.observed_data['Z'].shape == (4, 5)
