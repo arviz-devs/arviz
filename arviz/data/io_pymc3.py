@@ -3,7 +3,7 @@ import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords
+from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 
 class PyMC3Converter:
@@ -16,6 +16,8 @@ class PyMC3Converter:
         self.posterior_predictive = posterior_predictive
         self.coords = coords
         self.dims = dims
+        import pymc3
+        self.pymc3 = pymc3
 
     @requires('trace')
     def _extract_log_likelihood(self):
@@ -55,14 +57,14 @@ class PyMC3Converter:
     @requires('trace')
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        import pymc3 as pm
-        var_names = pm.utils.get_default_varnames(self.trace.varnames,  # pylint: disable=no-member
-                                                  include_transformed=False)
+        var_names = self.pymc3.utils.get_default_varnames(  # pylint: disable=no-member
+            self.trace.varnames,
+            include_transformed=False)
         data = {}
         for var_name in var_names:
             data[var_name] = np.array(self.trace.get_values(var_name, combine=False,
                                                             squeeze=False))
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
     @requires('trace')
     def sample_stats_to_xarray(self):
@@ -81,18 +83,19 @@ class PyMC3Converter:
         else:
             dims = None
 
-        return dict_to_dataset(data, dims=dims, coords=self.coords)
+        return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
 
     @requires('posterior_predictive')
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         data = {k: np.expand_dims(v, 0) for k, v in self.posterior_predictive.items()}
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
     @requires('prior')
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
         return dict_to_dataset({k: np.expand_dims(v, 0) for k, v in self.prior.items()},
+                               library=self.pymc3,
                                coords=self.coords,
                                dims=self.dims)
 
@@ -117,7 +120,7 @@ class PyMC3Converter:
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data)
+        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
