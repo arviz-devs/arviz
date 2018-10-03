@@ -660,7 +660,7 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     def make_hpd_ufunc(idx, **kwargs):
         def hpd_ufunc(ary):
-            return hpd(ary.reshape(*ary.shape[:-2], -1), **kwargs)[..., idx]
+            return hpd(ary.reshape(*ary.shape[:-2], -1).T, **kwargs)[..., idx]
 
         return hpd_ufunc
 
