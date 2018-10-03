@@ -29,7 +29,7 @@ class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
     def __init__(self, posterior, *_, coords=None, dims=None):
-        """Convert emcee data into an InferenceData object.
+        """Convert pyro data into an InferenceData object.
 
         Parameters
         ----------
@@ -47,6 +47,7 @@ class PyroConverter:
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
+        # Do not make pyro a requirement
         from pyro.infer import EmpiricalMarginal
         data = {}
         for var_name in self.latent_vars:
