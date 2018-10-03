@@ -150,6 +150,14 @@ def pyro_centered_schools(data, draws, chains):
         num_samples=draws,
         warmup_steps=500,
     ).run(_pyro_centered_model, sigma, y)
+
+    # This block lets the posterior be pickled
+    for trace in posterior.exec_traces:
+        for node in trace.nodes.values():
+            node.pop('fn', None)
+    posterior.kernel = None
+    posterior.run = None
+    posterior.logger = None
     return posterior
 
 

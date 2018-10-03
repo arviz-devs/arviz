@@ -23,6 +23,12 @@ if [[ $* != *--global* ]]; then
     source activate ${ENVNAME}
 fi
 
+if [ "$PYTHON_VERSION" -eq "3.5" ]; then
+    pip install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
+else
+    pip install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+fi
+
 conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray netcdf4 mkl-service
 
 pip install --upgrade pip
