@@ -17,7 +17,7 @@ cmap = matplotlib.colors.LinearSegmentedColormap.from_list('', ["#00bfbf", "#00b
 
 im = plt.imshow(np.array([[1, 0, 0], [1, 1, 0]]),
                 cmap=cmap, interpolation='bicubic',
-                origin='lower',extent=[0,1, 0.0, 5],
+                origin='lower', extent=[0, 1, 0.0, 5],
                 aspect="auto", clip_path=patch, clip_on=True)
 
 plt.axis('off')
@@ -27,10 +27,11 @@ plt.xlim(0, 0.9)
 bbox = Bbox([[0.75, 0.5], [5.4, 2.2]])
 
 #plt.savefig('logo_00.png', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.text(x=0.04, y=-0.01, s='ArviZ', fontdict={'name':'ubuntu mono', 'fontsize':62}, color='w')
+plt.text(x=0.04, y=-0.01, s='ArviZ',
+         fontdict={'name': 'ubuntu mono', 'fontsize': 62}, color='w')
 
-plt.savefig('ArviZ.png', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.savefig('ArviZ.pdf', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.savefig('ArviZ.svg', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.savefig('ArviZ.eps', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.savefig('ArviZ.jpg', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.png', dpi=300, bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.pdf', dpi=300, bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.svg', dpi=300, bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.eps', dpi=70, bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.jpg', dpi=300, bbox_inches=bbox, transparent=True)
