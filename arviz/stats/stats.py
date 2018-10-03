@@ -270,17 +270,10 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
         lower and upper value of the interval.
     """
     if x.ndim > 1:
-        return np.array(
-            [
-                hpd(
-                    row,
-                    credible_interval=credible_interval,
-                    transform=transform,
-                    circular=circular,
-                )
-                for row in x
-            ]
-        )
+        return np.array([hpd(row,
+                             credible_interval=credible_interval,
+                             transform=transform,
+                             circular=circular) for row in x.T])
     # Make a copy of trace
     x = transform(x.copy())
     len_x = len(x)
@@ -667,7 +660,7 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     def make_hpd_ufunc(idx, **kwargs):
         def hpd_ufunc(ary):
-            return hpd(ary.reshape(*ary.shape[:-2], -1), **kwargs)[..., idx]
+            return hpd(ary.reshape(*ary.shape[:-2], -1).T, **kwargs)[..., idx]
 
         return hpd_ufunc
 
