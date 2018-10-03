@@ -1,8 +1,6 @@
 """Low level converters usually used by other functions."""
 from copy import deepcopy
 import datetime
-import multiprocessing
-import platform
 import warnings
 
 import numpy as np
@@ -200,20 +198,6 @@ def make_attrs(attrs=None, library=None):
             default_attrs['inference_library_version'] = version
         except pkg_resources.DistributionNotFound:
             pass
-    for key in (
-            'machine',
-            'platform',
-            'python_implementation',
-            'python_version',
-            'python_compiler',
-            'architecture',
-            'processor',
-            'libc_ver',):
-        value = getattr(platform, key, lambda: '')()
-        if isinstance(value, tuple):
-            value = list(value)
-        default_attrs[key] = value
-    default_attrs['cpu_count'] = multiprocessing.cpu_count()
 
     if attrs is not None:
         default_attrs.update(attrs)
