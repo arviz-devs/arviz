@@ -192,9 +192,10 @@ def test_plot_khat():
                                      "divergences_kwargs": {'marker': '*', 'c': 'C'}},
 
                                     {"divergences": True, "plot_kwargs": {'marker': 'x'},
-                                     "divergences_kwargs": {'marker': '*', 'c': 'C'}},
+                                     "divergences_kwargs": {'marker': '*', 'c': 'C'},
+                                     "var_names": ['theta']},
 
-                                    {"kind": "kde"},
+                                    {"kind": "kde", "var_names": ['theta']},
 
                                     {"kind": 'hexbin', "var_names": ['theta'],
                                      "coords":{'theta_dim_0': [0, 1]}, "colorbar": True,

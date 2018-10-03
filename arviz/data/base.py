@@ -1,6 +1,10 @@
 """Low level converters usually used by other functions."""
-import warnings
 from copy import deepcopy
+import datetime
+import multiprocessing
+import pkg_resources
+import platform
+import warnings
 
 import numpy as np
 import xarray as xr
@@ -134,12 +138,31 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     return xr.DataArray(ary, coords=coords, dims=dims)
 
 
-def dict_to_dataset(data, *, coords=None, dims=None):
+def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
     """Convert a dictionary of numpy arrays to an xarray.Dataset.
+
+    Parameters
+    ----------
+    data : dict[str] -> ndarray
+        Data to convert. Keys are variable names.
+    attrs : dict
+        Json serializable metadata to attach to the dataset, in addition to defaults.
+    library : module
+        Library used for performing inference. Will be attached to the attrs metadata.
+    coords : dict[str] -> ndarray
+        Coordinates for the dataset
+    dims : dict[str] -> list[str]
+        Dimensions of each variable. The keys are variable names, values are lists of
+        coordinates.
+
+    Returns
+    -------
+    xr.Dataset
 
     Examples
     --------
     dict_to_dataset({'x': np.random.randn(4, 100), 'y', np.random.rand(4, 100)})
+
     """
     if dims is None:
         dims = {}
@@ -150,4 +173,48 @@ def dict_to_dataset(data, *, coords=None, dims=None):
                                              var_name=key,
                                              coords=coords,
                                              dims=dims.get(key))
-    return xr.Dataset(data_vars=data_vars)
+    return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
+
+
+def make_attrs(attrs=None, library=None):
+    """Standard attributes to attach to xarray datasets.
+
+    Parameters
+    ----------
+    attrs : dict (optional)
+        Additional attributes to add or overwrite
+
+    Returns
+    -------
+    dict
+        attrs
+    """
+    default_attrs = {
+        'created_at': datetime.datetime.utcnow().isoformat(),
+    }
+    if library is not None:
+        library_name = library.__name__
+        default_attrs['inference_library'] = library_name
+        try:
+            version = pkg_resources.get_distribution(library_name).version
+            default_attrs['inference_library_version'] = version
+        except pkg_resources.DistributionNotFound:
+            pass
+    for key in (
+            'machine',
+            'platform',
+            'python_implementation',
+            'python_version',
+            'python_compiler',
+            'architecture',
+            'processor',
+            'libc_ver',):
+        value = getattr(platform, key, lambda : '')()
+        if isinstance(value, tuple):
+            value = list(value)
+        default_attrs[key] = value
+    default_attrs['cpu_count'] = multiprocessing.cpu_count()
+
+    if attrs is not None:
+        default_attrs.update(attrs)
+    return default_attrs

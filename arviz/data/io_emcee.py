@@ -1,6 +1,6 @@
 """emcee-specific conversion code."""
 from .inference_data import InferenceData
-from .base import dict_to_dataset
+from .base import dict_to_dataset, make_attrs
 
 def _verify_names(sampler, var_names, arg_names):
     """Make sure var_names and arg_names are assigned reasonably.
@@ -54,20 +54,22 @@ class EmceeConverter:
         self.arg_names = arg_names
         self.coords = coords
         self.dims = dims
+        import emcee
+        self.emcee = emcee
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = {}
         for idx, var_name in enumerate(self.var_names):
             data[var_name] = self.sampler.chain[(..., idx)]
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         data = {}
         for idx, var_name in enumerate(self.arg_names):
             data[var_name] = self.sampler.args[idx]
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""

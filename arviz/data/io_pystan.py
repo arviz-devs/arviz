@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords
+from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 
 class PyStanConverter:
@@ -22,6 +22,8 @@ class PyStanConverter:
         self.coords = coords
         self.dims = dims
         self._var_names = fit.model_pars
+        import pystan
+        self.pystan = pystan
 
     @requires('fit')
     def posterior_to_xarray(self):
@@ -64,7 +66,7 @@ class PyStanConverter:
                 else:
                     values = np.expand_dims(values, 0)
             data[var_name] = np.swapaxes(values, 0, 1)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires('fit')
     def sample_stats_to_xarray(self):
@@ -143,7 +145,7 @@ class PyStanConverter:
             name = re.sub('__$', "", key)
             name = "diverging" if name == 'divergent' else name
             data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires('fit')
     @requires('posterior_predictive')
@@ -186,7 +188,7 @@ class PyStanConverter:
                     else:
                         values = np.expand_dims(values, 0)
                 data[var_name] = np.swapaxes(values, 0, 1)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires('fit')
     @requires('prior')
@@ -204,7 +206,7 @@ class PyStanConverter:
                     values = np.expand_dims(values, 0)
             values = np.swapaxes(values, 0, 1)
             data[key] = values
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires('fit')
     @requires('observed_data')
@@ -234,7 +236,7 @@ class PyStanConverter:
                 val_dims, coords = generate_dims_coords(vals.shape, key,
                                                         dims=val_dims, coords=self.coords)
                 observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data)
+        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pystan))
 
     @requires('fit')
     def infer_dtypes(self):
