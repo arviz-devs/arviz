@@ -128,6 +128,7 @@ html_theme_options = {
     'navbar_links': [
         ('Gallery', 'examples/index'),
         ('Quickstart', 'notebooks/Introduction'),
+        ('Cookbook', 'notebooks/InferenceDataCookbook'),
         ('API', 'api'),
     ],
 }
