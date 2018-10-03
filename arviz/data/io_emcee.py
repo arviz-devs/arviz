@@ -1,6 +1,6 @@
 """emcee-specific conversion code."""
 from .inference_data import InferenceData
-from .base import dict_to_dataset, make_attrs
+from .base import dict_to_dataset
 
 def _verify_names(sampler, var_names, arg_names):
     """Make sure var_names and arg_names are assigned reasonably.

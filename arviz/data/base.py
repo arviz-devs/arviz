@@ -2,11 +2,11 @@
 from copy import deepcopy
 import datetime
 import multiprocessing
-import pkg_resources
 import platform
 import warnings
 
 import numpy as np
+import pkg_resources
 import xarray as xr
 
 
@@ -177,7 +177,7 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
 
 def make_attrs(attrs=None, library=None):
-    """Standard attributes to attach to xarray datasets.
+    """Make standard attributes to attach to xarray datasets.
 
     Parameters
     ----------
@@ -209,7 +209,7 @@ def make_attrs(attrs=None, library=None):
             'architecture',
             'processor',
             'libc_ver',):
-        value = getattr(platform, key, lambda : '')()
+        value = getattr(platform, key, lambda: '')()
         if isinstance(value, tuple):
             value = list(value)
         default_attrs[key] = value
