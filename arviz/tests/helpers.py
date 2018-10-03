@@ -145,7 +145,7 @@ def pyro_centered_schools(data, draws, chains):
     sigma = torch.Tensor(data['sigma']).type(torch.Tensor)
 
     nuts_kernel = NUTS(_pyro_conditioned_model, adapt_step_size=True)
-    posterior = MCMC(
+    posterior = MCMC(  # pylint:disable=not-callable
         nuts_kernel,
         num_samples=draws,
         warmup_steps=500,

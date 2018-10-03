@@ -10,6 +10,7 @@ from .io_pyro import from_pyro
 from .io_pystan import from_pystan
 
 
+# pylint: disable=too-many-return-statements
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
     r"""Convert a supported object to an InferenceData object.
 
