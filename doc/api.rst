@@ -69,3 +69,4 @@ Data
     from_pymc3
     from_emcee
     from_cmdstan
+    from_pyro
