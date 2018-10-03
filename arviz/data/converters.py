@@ -6,9 +6,11 @@ from .inference_data import InferenceData
 from .base import dict_to_dataset
 from .io_emcee import from_emcee
 from .io_pymc3 import from_pymc3
+from .io_pyro import from_pyro
 from .io_pystan import from_pystan
 
 
+# pylint: disable=too-many-return-statements
 def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
     r"""Convert a supported object to an InferenceData object.
 
@@ -23,6 +25,8 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
             | str: Attempts to load the netcdf dataset from disk
             | pystan fit: Automatically extracts data
             | pymc3 trace: Automatically extracts data
+            | emcee sampler: Automatically extracts data
+            | pyro MCMC: Automatically extracts data
             | xarray.Dataset: adds to InferenceData as only group
             | dict: creates an xarray dataset as the only group
             | numpy array: creates an xarray dataset as the only group, gives the
@@ -53,6 +57,8 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
         return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
     elif obj.__class__.__name__ == 'EnsembleSampler':  # ugly, but doesn't make emcee a requirement
         return from_emcee(obj, coords=coords, dims=dims, **kwargs)
+    elif obj.__class__.__name__ == 'MCMC' and obj.__class__.__module__.startswith('pyro'):
+        return from_pyro(obj, coords=coords, dims=dims, **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
