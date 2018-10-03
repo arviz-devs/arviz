@@ -226,6 +226,7 @@ def load_cached_models(draws, chains):
         (pystan, pystan_noncentered_schools),
         (pm, pymc3_noncentered_schools),
         (emcee, emcee_linear_model),
+        (pyro, pyro_centered_schools),
     )
     data_directory = os.path.join(here, 'saved_models')
     models = {}
