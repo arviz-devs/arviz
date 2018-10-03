@@ -26,9 +26,11 @@ plt.xlim(0, 0.9)
 
 bbox = Bbox([[0.75, 0.5], [5.4, 2.2]])
 
-plt.savefig('logo_00.png', dpi=300,  bbox_inches=bbox, transparent=True)
+#plt.savefig('logo_00.png', dpi=300,  bbox_inches=bbox, transparent=True)
 plt.text(x=0.04, y=-0.01, s='ArviZ', fontdict={'name':'ubuntu mono', 'fontsize':62}, color='w')
 
-plt.savefig('logo_01.png', dpi=300,  bbox_inches=bbox)
-plt.savefig('logo_02.png', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.savefig('logo_03.svg', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.png', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.pdf', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.svg', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.eps', dpi=300,  bbox_inches=bbox, transparent=True)
+plt.savefig('ArviZ.jpg', dpi=300,  bbox_inches=bbox, transparent=True)
