@@ -33,5 +33,4 @@ plt.text(x=0.04, y=-0.01, s='ArviZ',
 plt.savefig('ArviZ.png', dpi=300, bbox_inches=bbox, transparent=True)
 plt.savefig('ArviZ.pdf', dpi=300, bbox_inches=bbox, transparent=True)
 plt.savefig('ArviZ.svg', dpi=300, bbox_inches=bbox, transparent=True)
-plt.savefig('ArviZ.eps', dpi=70, bbox_inches=bbox, transparent=True)
 plt.savefig('ArviZ.jpg', dpi=300, bbox_inches=bbox, transparent=True)
