@@ -44,6 +44,8 @@ class PyroConverter:
         self.observed_vars, self.latent_vars = _get_var_names(posterior)
         self.coords = coords
         self.dims = dims
+        import pyro
+        self.pyro = pyro
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
@@ -53,7 +55,7 @@ class PyroConverter:
         for var_name in self.latent_vars:
             samples = EmpiricalMarginal(self.posterior, sites=var_name).get_samples_and_weights()[0]
             data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
@@ -62,7 +64,7 @@ class PyroConverter:
         for var_name in self.observed_vars:
             samples = EmpiricalMarginal(self.posterior, sites=var_name).get_samples_and_weights()[0]
             data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
