@@ -69,6 +69,7 @@ setup(
     packages=find_packages(),
     install_requires=get_requirements(),
     long_description=get_long_description(),
+    long_description_content_type='text/markdown',
     include_package_data=True,
     cmdclass={
         'develop': DevelopStyles,
