@@ -1,4 +1,5 @@
 # pylint: disable=redefined-outer-name
+import os
 from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -32,11 +33,16 @@ def models():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def clean_plots(request):
+def clean_plots(request, save_figs):
+    """Close plots after each test, optionally save if --save is specified during test invocation"""
     def fin():
+        if save_figs is not None:
+            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
         plt.close('all')
 
     request.addfinalizer(fin)
+    return
+
 
 @pytest.fixture(scope='module')
 def pymc3_sample_ppc(models):
