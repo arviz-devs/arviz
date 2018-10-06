@@ -64,6 +64,9 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
     else:
         datasets = [convert_to_dataset(d, group='posterior') for d in data]
 
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     if point_estimate not in ('mean', 'median', None):
         raise ValueError(
             "Point estimate should be 'mean', 'median' or None, not {}".format(

@@ -65,6 +65,9 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         raise ValueError(('Plot type {} not recognized.'
                           'Plot type must be in {}').format(kind, valid_kinds))
 
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     if coords is None:
         coords = {}
 

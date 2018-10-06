@@ -52,6 +52,9 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
 
     data = convert_to_dataset(data, group='posterior')
 
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     if coords is None:
         coords = {}
 

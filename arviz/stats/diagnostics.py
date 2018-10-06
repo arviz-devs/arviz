@@ -54,6 +54,8 @@ def effective_n(data, *, var_names=None):
     dataset = convert_to_dataset(data, group='posterior')
     if var_names is None:
         var_names = list(dataset.data_vars)
+    elif isinstance(var_names, str):
+        var_names = [var_names]
     dataset = dataset[var_names]
     return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
 
@@ -205,6 +207,8 @@ def gelman_rubin(data, var_names=None):
     dataset = convert_to_dataset(data, group='posterior')
     if var_names is None:
         var_names = list(dataset.data_vars)
+    elif isinstance(var_names, str):
+        var_names = [var_names]
     dataset = dataset[var_names]
     return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
 

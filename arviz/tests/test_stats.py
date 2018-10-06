@@ -7,7 +7,6 @@ from arviz import load_arviz_data
 from ..stats import bfmi, compare, hpd, r2_score, waic, psislw, summary
 
 
-
 def test_bfmi():
     energy = np.array([1, 2, 3, 4])
     assert_almost_equal(bfmi(energy), 0.8)
@@ -61,10 +60,17 @@ def test_summary(include_circ):
     summary(centered, include_circ=include_circ)
 
 
+@pytest.mark.parametrize('include_circ', [True, False])
+def test_summary_var_name(include_circ):
+    centered = load_arviz_data('centered_eight')
+    summary(centered, var_names='mu', include_circ=include_circ)
+
+
 def test_waic():
     """Test widely available information criterion calculation"""
     centered = load_arviz_data('centered_eight')
     waic(centered)
+
 
 def test_psis():
     linewidth = np.random.randn(20000, 10)

@@ -43,6 +43,9 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
     -------
     ax : matplotlib axes
     """
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     if coords is None:
         coords = {}
 

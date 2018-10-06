@@ -37,6 +37,9 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     """
     data = convert_to_dataset(data, group='posterior')
 
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)

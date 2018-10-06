@@ -87,6 +87,9 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
         ncols += 1
         width_ratios.append(1)
 
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     plot_handler = PlotHandler(data, var_names=var_names, model_names=model_names,
                                combined=combined, colors=colors)
 

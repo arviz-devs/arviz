@@ -640,6 +640,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     if var_names is None:
         var_names = list(posterior.data_vars)
+    elif isinstance(var_names, str):
+        var_names = [var_names]
 
     if batches is None:
         batches = min([100, posterior.draw.size])

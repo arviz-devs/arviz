@@ -81,6 +81,20 @@ def test_plot_density_float(models, kwargs):
     assert axes.shape[1] == 1
 
 
+@pytest.mark.parametrize("kwargs", [{"point_estimate": "mean"},
+                                    {"point_estimate": "median"},
+                                    {'var_name' : 'mu'},
+                                    {"outline": True},
+                                    {"colors": ["g", "b", "r"]},
+                                    {"hpd_markers": ["v"]},
+                                    {"shade": 1}])
+def test_plot_density_var_name(models, kwargs):
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
+    axes = plot_density(obj, **kwargs)
+    assert axes.shape[0] >= 18
+    assert axes.shape[1] == 1
+
+
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=.9)
     assert axes.shape[1] == 1
@@ -94,6 +108,25 @@ def test_plot_density_discrete(discrete_model):
                                     {"lines": [("mu", 0)]}
                                     ])
 def test_plot_trace(models, model_fit, kwargs):
+    has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit', "pyro_fit"})
+    obj = getattr(models, model_fit)
+    if has_labels:
+        kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
+    else:
+        kwargs = {}
+    axes = plot_trace(obj, **kwargs)
+
+    assert axes.shape
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "emcee_fit", "pyro_fit"])
+@pytest.mark.parametrize("kwargs", [{},
+                                    {"var_names": "mu"},
+                                    {"combined":True},
+                                    {"lines": [('mu', {}, [1, 2])]},
+                                    {"lines": [("mu", 0)]}
+                                    ])
+def test_plot_trace_var_name(models, model_fit, kwargs):
     has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit', "pyro_fit"})
     obj = getattr(models, model_fit)
     if has_labels:
@@ -119,6 +152,21 @@ def test_plot_trace_discrete(discrete_model):
                                            (dict(kind='ridgeplot', r_hat=False, n_eff=False), (1,))
                                            ])
 def test_plot_forest(models, model_fits, args_expected):
+    obj = [getattr(models, model_fit) for model_fit in model_fits]
+    args, expected = args_expected
+    _, axes = plot_forest(obj, **args)
+    assert axes.shape == expected
+
+
+@pytest.mark.parametrize("model_fits",
+                         [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
+@pytest.mark.parametrize("args_expected", [(dict(), (3,)),
+                                           (dict(r_hat=False, quartiles=False), (2,)),
+                                           (dict(var_names='mu', colors='C0', n_eff=False,
+                                                 combined=True), (2,)),
+                                           (dict(kind='ridgeplot', r_hat=False, n_eff=False), (1,))
+                                           ])
+def test_plot_forest_var_name(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
@@ -153,6 +201,14 @@ def test_plot_parallel_exception(models, model_fit):
 def test_plot_joint(models, model_fit, kind):
     obj = getattr(models, model_fit)
     axjoin, _, _ = plot_joint(obj, var_names=('mu', 'tau'), kind=kind)
+    assert axjoin
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+@pytest.mark.parametrize('kind', ['scatter', 'hexbin', 'kde'])
+def test_plot_joint_var_name(models, model_fit, kind):
+    obj = getattr(models, model_fit)
+    axjoin, _, _ = plot_joint(obj, var_names='mu', kind=kind)
     assert axjoin
 
 
@@ -206,6 +262,27 @@ def test_plot_pair(models, model_fit, kwargs):
     assert ax
 
 
+@pytest.mark.slow
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("kwargs", [{"var_names": 'theta', "divergences":True,
+                                     "coords":{'theta_dim_0': [0, 1]},
+                                     "plot_kwargs":{'marker': 'x'},
+                                     "divergences_kwargs": {'marker': '*', 'c': 'C'}},
+
+                                    {"divergences": True, "plot_kwargs": {'marker': 'x'},
+                                     "divergences_kwargs": {'marker': '*', 'c': 'C'},
+                                     "var_names": 'theta'},
+
+                                    {"kind": "kde", "var_names": 'theta'},
+
+                                    {"kind": 'hexbin', "var_names": 'theta',
+                                     "coords":{'theta_dim_0': [0, 1]}, "colorbar": True,
+                                     "plot_kwargs":{'cmap': 'viridis'}, "textsize": 20}])
+def test_plot_pair_var_name(models, model_fit, kwargs):
+    obj = getattr(models, model_fit)
+    ax, _ = plot_pair(obj, **kwargs)
+    assert ax
+
 @pytest.mark.parametrize("kwargs", [{"kind": "scatter"},
                                     {"kind": "kde"},
                                     {"kind": "hexbin", "colorbar": True}])
@@ -243,6 +320,13 @@ def test_plot_violin(models, model_fit):
     assert axes.shape[0] >= 10
 
 
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+def test_plot_violin_var_name(models, model_fit):
+    obj = getattr(models, model_fit)
+    axes = plot_violin(obj, var_names='mu')
+    assert axes is not None
+
+
 def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model)
     assert axes.shape
@@ -268,6 +352,13 @@ def test_plot_autocorr_combined(models, model_fit):
             axes.shape[1] == 10 and model_fit == "pyro_fit")
 
 
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+def test_plot_autocorr_var_name(models, model_fit):
+    obj = getattr(models, model_fit)
+    axes = plot_autocorr(obj, var_names='mu')
+    assert axes is not None
+
+
 @pytest.mark.parametrize("kwargs", [{},
                                     {"var_names": ('mu', 'tau')},
                                     {"rope": (-2, 2)},
@@ -285,6 +376,25 @@ def test_plot_posterior(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, **kwargs)
     assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{},
+                                    {"var_names": 'mu'},
+                                    {"rope": (-2, 2)},
+                                    {"rope": {'mu': [{'rope': (-2, 2)}],
+                                              'theta': [{'school': 'Choate', 'rope': (2, 4)}]}},
+
+                                    {"point_estimate": 'mode'},
+                                    {"point_estimate": 'median'},
+                                    {"ref_val": 0},
+                                    {"bins": None, "kind":"hist"},
+                                    {"mu": {"ref_val": (-1, 1)}}
+                                    ])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+def test_plot_posterior_var_name(models, model_fit, kwargs):
+    obj = getattr(models, model_fit)
+    axes = plot_posterior(obj, **kwargs)
+    assert axes is not None
 
 
 @pytest.mark.parametrize("kwargs", [{},
