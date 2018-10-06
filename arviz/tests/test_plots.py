@@ -41,7 +41,6 @@ def clean_plots(request, save_figs):
         plt.close('all')
 
     request.addfinalizer(fin)
-    return
 
 
 @pytest.fixture(scope='module')
