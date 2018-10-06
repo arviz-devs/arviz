@@ -20,6 +20,13 @@ class TestDiagnostics():
             assert ((1 / self.good_rhat < rhat.values) | (rhat.values < self.good_rhat)).all()
         assert list(rhat_data.data_vars) == list(self.data.data_vars)
 
+    def test_gelman_rubin_var_name(self):
+        """Confirm Gelman-Rubin statistic for var_name == str"""
+        rhat_data = gelman_rubin(self.data, var_names='mu')
+        for rhat in rhat_data.data_vars.values():
+            assert ((1 / self.good_rhat < rhat.values) | (rhat.values < self.good_rhat)).all()
+        assert list(rhat_data.data_vars) == list(self.data.data_vars)
+
     def test_gelman_rubin_bad(self):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
         rhat = gelman_rubin(np.hstack([
@@ -36,6 +43,9 @@ class TestDiagnostics():
         eff_n = effective_n(self.data)
         assert eff_n.mu > 100 # This might break if the data is regenerated
 
+    def test_effective_n_dataset_var_name(self):
+        eff_n = effective_n(self.data, var_names='mu')
+        assert eff_n.mu > 100 # This might break if the data is regenerated
 
     def test_geweke(self):
         first = 0.1

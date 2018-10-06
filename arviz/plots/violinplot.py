@@ -51,6 +51,10 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
     ax : matplotlib axes
     """
     data = convert_to_dataset(data, group='posterior')
+
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:
