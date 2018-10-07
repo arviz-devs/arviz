@@ -37,7 +37,18 @@ def clean_plots(request, save_figs):
     """Close plots after each test, optionally save if --save is specified during test invocation"""
     def fin():
         if save_figs is not None:
-            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+
+            # Retry save three times
+            for i in range(3):
+                try:
+                    plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+
+                except Exception as err:
+                    if i == 2:
+                        raise err
+                else:
+                    break
+
         plt.close('all')
 
     request.addfinalizer(fin)
