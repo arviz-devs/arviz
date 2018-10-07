@@ -43,7 +43,7 @@ def clean_plots(request, save_figs):
                 try:
                     plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
 
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-except
                     if i == 2:
                         raise err
                 else:
