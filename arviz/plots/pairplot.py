@@ -95,7 +95,8 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     if numvars < 2:
         raise Exception('Number of variables to be plotted must be 2 or greater.')
 
-    figsize, ax_labelsize, _, xt_labelsize, _, markersize = _scale_fig_size(figsize, textsize, numvars-1, numvars-1)
+    (figsize, ax_labelsize, _, xt_labelsize,
+     _, markersize) = _scale_fig_size(figsize, textsize, numvars-1, numvars-1)
 
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
