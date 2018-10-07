@@ -1,5 +1,6 @@
 # pylint: disable=redefined-outer-name
 import os
+import time
 from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -46,6 +47,7 @@ def clean_plots(request, save_figs):
                 except Exception as err:  # pylint: disable=broad-except
                     if i == 2:
                         raise err
+                    time.sleep(.250)
                 else:
                     break
 
