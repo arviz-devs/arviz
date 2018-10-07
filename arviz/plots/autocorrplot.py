@@ -25,11 +25,12 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     combined : bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
-    figsize : figure size tuple
-        If None, size is (12, num of variables * 2) inches.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
         Note this is not used if ax is supplied.
-    textsize: int
-        Text size for labels, titles and lines. If None it will be autoscaled based on figsize.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
 
     Returns
     -------
@@ -41,7 +42,8 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize,
+                                                                        rows, cols)
 
     _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize,
                                 squeeze=False, sharex=True, sharey=True)
@@ -59,8 +61,8 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
                   ymin=0, ymax=y[0:max_lag],
                   lw=linewidth)
         ax.hlines(0, 0, max_lag, 'steelblue')
-        ax.set_title(make_label(var_name, selection), fontsize=textsize)
-        ax.tick_params(labelsize=textsize)
+        ax.set_title(make_label(var_name, selection), fontsize=titlesize)
+        ax.tick_params(labelsize=xt_labelsize)
 
     if axes.size > 0:
         axes[0, 0].set_xlim(0, max_lag)

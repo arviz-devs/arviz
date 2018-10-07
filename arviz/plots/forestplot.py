@@ -58,8 +58,9 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
         If the string is `cycle`, it will automatically chose a color per model from the
         matyplolibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
         for all models. Defauls to 'cycle'.
-    textsize: int
-        Text size for labels. If None it will be autoscaled based on figsize.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     linewidth : int
         Line width throughout. If None it will be autoscaled based on figsize.
     markersize : int
@@ -69,8 +70,8 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
         a black outline is used.
     ridgeplot_overlap : float
         Overlap height for ridgeplots.
-    figsize : tuple, optional
-        Figure size. Defaults to None
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
 
     Returns
     -------
@@ -93,7 +94,8 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
     if figsize is None:
         figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    figsize, textsize, auto_linewidth, auto_markersize = _scale_fig_size(figsize, textsize, 1, 1)
+    (figsize, _, titlesize, xt_labelsize,
+     auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
 
     if linewidth is None:
         linewidth = auto_linewidth
@@ -110,21 +112,22 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
 
     axes = np.atleast_1d(axes)
     if kind == 'forestplot':
-        plot_handler.forestplot(credible_interval, quartiles, textsize,
-                                linewidth, markersize, axes[0])
+        plot_handler.forestplot(credible_interval, quartiles, xt_labelsize, titlesize, linewidth,
+                                markersize, axes[0])
     elif kind == 'ridgeplot':
-        plot_handler.ridgeplot(ridgeplot_overlap, textsize, linewidth, ridgeplot_alpha, axes[0])
+        plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha,
+                               axes[0])
     else:
         raise TypeError("Argument 'kind' must be one of 'forestplot' or "
                         "'ridgeplot' (you provided {})".format(kind))
 
     idx = 1
     if r_hat:
-        plot_handler.plot_rhat(axes[idx], textsize, markersize)
+        plot_handler.plot_rhat(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
     if n_eff:
-        plot_handler.plot_neff(axes[idx], textsize, markersize)
+        plot_handler.plot_neff(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
     for ax in axes:
@@ -210,14 +213,14 @@ class PlotHandler():
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def ridgeplot(self, mult, textsize, linewidth, alpha, ax):
+    def ridgeplot(self, mult, xt_labelsize, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
         ----------
         mult : float
             How much to multiply height by. Set this to greater than 1 to have some overlap.
-        textsize : float
+        xt_labelsize : float
             Size of tick text
         linewidth : float
             Width of line on border of ridges
@@ -240,11 +243,12 @@ class PlotHandler():
                 ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
 
-        ax.tick_params(labelsize=textsize)
+        ax.tick_params(labelsize=xt_labelsize)
 
         return ax
 
-    def forestplot(self, credible_interval, quartiles, textsize, linewidth, markersize, ax):
+    def forestplot(self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth,
+                   markersize, ax):
         """Draw forestplot for each plotter.
 
         Parameters
@@ -253,8 +257,10 @@ class PlotHandler():
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
-        textsize : float
+        xt_textsize : float
             Size of tick text
+        titlesize : float
+            Size of title text
         linewidth : float
             Width of forestplot line
         markersize : float
@@ -281,12 +287,12 @@ class PlotHandler():
                         mfc=ax.get_facecolor(),
                         markersize=markersize * 0.75,
                         color=color)
-        ax.tick_params(labelsize=textsize)
-        ax.set_title('{:.1%} Credible Interval'.format(credible_interval), fontsize=textsize)
+        ax.tick_params(labelsize=xt_labelsize)
+        ax.set_title('{:.1%} Credible Interval'.format(credible_interval), fontsize=titlesize)
 
         return ax
 
-    def plot_neff(self, ax, textsize, markersize):
+    def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
         """Draw effective n for each plotter."""
         for plotter in self.plotters.values():
             for y, n_eff, color in plotter.n_eff():
@@ -294,11 +300,11 @@ class PlotHandler():
                     ax.plot(n_eff, y, 'o', color=color, clip_on=False,
                             markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0)
-        ax.set_title('Effective n', fontsize=textsize)
-        ax.tick_params(labelsize=textsize)
+        ax.set_title('Effective n', fontsize=titlesize)
+        ax.tick_params(labelsize=xt_labelsize)
         return ax
 
-    def plot_rhat(self, ax, textsize, markersize):
+    def plot_rhat(self, ax, xt_labelsize, titlesize, markersize):
         """Draw r-hat for each plotter."""
         for plotter in self.plotters.values():
             for y, r_hat, color in plotter.r_hat():
@@ -306,8 +312,8 @@ class PlotHandler():
                     ax.plot(r_hat, y, 'o', color=color, markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0.9, right=2.1)
         ax.set_xticks([1, 2])
-        ax.tick_params(labelsize=textsize)
-        ax.set_title('R-hat', fontsize=textsize)
+        ax.tick_params(labelsize=xt_labelsize)
+        ax.set_title('R-hat', fontsize=titlesize)
         return ax
 
     def make_bands(self, ax):
@@ -339,8 +345,8 @@ class PlotHandler():
     def fig_height(self):
         """Figure out the height of this plot."""
         # hand-tuned
-        return (len(self.data) * len(self.var_names) - 1 +
-                0.25 * sum(1 for j in self.plotters.values() for _ in j.iterator())
+        return (4 + len(self.data) * len(self.var_names) - 1 +
+                0.1 * sum(1 for j in self.plotters.values() for _ in j.iterator())
                 )
 
     def y_max(self):

@@ -4,6 +4,7 @@
 # Colorblind friendly color cycle 
 # .15 = dark_gray
 # .8 = light_gray
+figure.figsize: 7.2, 4.8
 figure.facecolor: white
 text.color: .15
 axes.labelcolor: .15
@@ -18,11 +19,11 @@ axes.axisbelow: True
 grid.linestyle: -
 lines.solid_capstyle: round
 
-axes.labelsize: 14
-axes.titlesize: 14
-xtick.labelsize: 11
-ytick.labelsize: 11
-legend.fontsize: 11
+axes.labelsize: 15
+axes.titlesize: 16
+xtick.labelsize: 14
+ytick.labelsize: 14
+legend.fontsize: 14
 
 axes.grid: True
 axes.facecolor: white

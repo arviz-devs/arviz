@@ -42,31 +42,42 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     markersize : int
         markersize
     """
-    rc_width, rc_height = tuple(mpl.rc_params()['figure.figsize'])
-    rc_fontsize = mpl.rc_params()['font.size']
-    rc_linewidth = mpl.rc_params()['lines.linewidth']
-    rc_markersize = mpl.rc_params()['lines.markersize']
+    params = mpl.rcParams
+    rc_width, rc_height = tuple(params['figure.figsize'])
+    rc_ax_labelsize = params['axes.labelsize']
+    rc_titlesize = params['axes.titlesize']
+    rc_xt_labelsize = params['xtick.labelsize']
+    rc_linewidth = params['lines.linewidth']
+    rc_markersize = params['lines.markersize']
+    if isinstance(rc_ax_labelsize, str):
+        rc_ax_labelsize = 15
+    if isinstance(rc_titlesize, str):
+        rc_titlesize = 16
+    if isinstance(rc_xt_labelsize, str):
+        rc_xt_labelsize = 14
+
     if figsize is None:
         width, height = rc_width, rc_height
-        width = width * cols
-        height = height * rows
+        sff = 1 if (rows == cols == 1) else 1.15
+        width = width * cols * sff
+        height = height * rows  * sff
     else:
         width, height = figsize
 
-    if rows and cols > 1:
-        fontsize = rc_fontsize
-        linewidth = rc_linewidth
-        markersize = rc_markersize
-    else:
-        scale_factor = ((width * height) / (rc_width * rc_height))**0.5
-        fontsize = scale_factor * rc_fontsize
-        linewidth = scale_factor * rc_linewidth
-        markersize = scale_factor * rc_markersize
-
     if textsize is not None:
-        fontsize = textsize
+        scale_factor = textsize / rc_xt_labelsize
+    elif rows == cols == 1:
+        scale_factor = ((width * height) / (rc_width * rc_height))**0.5
+    elif rows > 1 or cols > 1:
+        scale_factor = 1
 
-    return (width, height), fontsize, linewidth, markersize
+    ax_labelsize = rc_ax_labelsize * scale_factor
+    titlesize = rc_titlesize * scale_factor
+    xt_labelsize = rc_xt_labelsize * scale_factor
+    linewidth = rc_linewidth * scale_factor
+    markersize = rc_markersize * scale_factor
+
+    return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
 
 
 def get_bins(ary, max_bins=50, fenceposts=2):
@@ -90,7 +101,7 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     return bins
 
 
-def default_grid(n_items, max_cols=6, min_cols=3):
+def default_grid(n_items, max_cols=4, min_cols=3):
     """Make a grid for subplots.
 
     Tries to get as close to sqrt(n_items) x sqrt(n_items) as it can,

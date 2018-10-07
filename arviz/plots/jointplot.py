@@ -21,10 +21,11 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
         Variables to be plotted, two variables are required.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : figure size tuple
-        If None, size is (8, 8)
-    textsize: int
-        Text size for labels
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     kind : str
         Type of plot to display (scatter, kde or hexbin)
     gridsize : int or (int, int), optional.
@@ -62,7 +63,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
             'Number of variables to be plotted must 2 (you supplied {})'.format(len(plotters))
         )
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize)
+    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
     if joint_kwargs is None:
         joint_kwargs = {}
@@ -89,9 +90,9 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
     x_var_name = make_label(plotters[0][0], plotters[0][1])
     y_var_name = make_label(plotters[1][0], plotters[1][1])
 
-    axjoin.set_xlabel(x_var_name, fontsize=textsize)
-    axjoin.set_ylabel(y_var_name, fontsize=textsize)
-    axjoin.tick_params(labelsize=textsize)
+    axjoin.set_xlabel(x_var_name, fontsize=ax_labelsize)
+    axjoin.set_ylabel(y_var_name, fontsize=ax_labelsize)
+    axjoin.tick_params(labelsize=xt_labelsize)
 
     # Flatten data
     x = plotters[0][2].flatten()

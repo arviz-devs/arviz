@@ -36,7 +36,7 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default rule used by SciPy).
     figsize : tuple
-        Figure size. If None, size is 5 (num of variables * 2, 5)
+        Figure size. If None it will be defined automatically.
     textsize: int
         Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
         based on figsize.
@@ -56,8 +56,9 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, len(plotters))
-    textsize *= 2
+    (figsize, ax_labelsize, _, xt_labelsize,
+     linewidth, _) = _scale_fig_size(figsize, textsize, 1, len(plotters))
+    ax_labelsize *= 2
 
     if ax is None:
         fig, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
@@ -82,9 +83,9 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
         ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color='k', solid_capstyle='round')
         ax[axind].plot(0, per[-1], 'wo', ms=linewidth*1.5)
 
-        ax[axind].set_xlabel(make_label(var_name, selection), fontsize=textsize)
+        ax[axind].set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
         ax[axind].set_xticks([])
-        ax[axind].tick_params(labelsize=textsize)
+        ax[axind].tick_params(labelsize=xt_labelsize)
         ax[axind].grid(None, axis='x')
 
     if sharey:

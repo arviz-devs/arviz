@@ -23,10 +23,11 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
         of the plotted variables
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : figure size tuple
-        If None, size is (12 x 6)
-    textsize: int
-        Text size for labels. If None it will be autoscaled based on figsize.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     legend : bool
         Flag for plotting legend (defaults to True)
     colornd : valid matplotlib color
@@ -59,7 +60,7 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
     if len(_var_names) < 2:
         raise ValueError('This plot needs at least two variables')
 
-    figsize, textsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -77,6 +78,6 @@ def plot_parallel(data, var_names=None, coords=None, figsize=None, textsize=None
         ax.plot([], color=colornd, label='non-divergent')
         if np.any(diverging_mask):
             ax.plot([], color=colord, label='divergent')
-        ax.legend(fontsize=textsize)
+        ax.legend(fontsize=xt_labelsize)
 
     return ax

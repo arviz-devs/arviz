@@ -92,11 +92,10 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     numvars = len(_var_names)
 
-    figsize, textsize, _, markersize = _scale_fig_size(
-        figsize, textsize, numvars-1, numvars-1)
-
     if numvars < 2:
         raise Exception('Number of variables to be plotted must be 2 or greater.')
+
+    figsize, ax_labelsize, _, xt_labelsize, _, markersize = _scale_fig_size(figsize, textsize, numvars-1, numvars-1)
 
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
@@ -110,15 +109,15 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
             ax.grid(False)
             if colorbar:
                 cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
-                cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
+                cbar.ax.set_yticklabels(['low', 'high'], fontsize=ax_labelsize)
 
         if divergences:
             ax.scatter(_posterior[0][diverging_mask], _posterior[1][diverging_mask],
                        s=markersize, **divergences_kwargs)
 
-        ax.set_xlabel('{}'.format(_var_names[0]), fontsize=textsize)
-        ax.set_ylabel('{}'.format(_var_names[1]), fontsize=textsize)
-        ax.tick_params(labelsize=textsize)
+        ax.set_xlabel('{}'.format(_var_names[0]), fontsize=ax_labelsize)
+        ax.set_ylabel('{}'.format(_var_names[1]), fontsize=ax_labelsize)
+        ax.tick_params(labelsize=xt_labelsize)
 
     if gs is None and ax is None:
         fig = plt.figure(figsize=figsize, constrained_layout=True)
@@ -150,7 +149,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                         cax = divider.append_axes('right', size='7%')
                         cbar = fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
                                             cax=cax)
-                        cbar.ax.set_yticklabels(['low', 'high'], fontsize=textsize)
+                        cbar.ax.set_yticklabels(['low', 'high'], fontsize=ax_labelsize)
 
                 if divergences:
                     ax.scatter(var1[diverging_mask], var2[diverging_mask],
@@ -159,13 +158,13 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_xlabel('{}'.format(_var_names[i]), fontsize=textsize)
+                    ax.set_xlabel('{}'.format(_var_names[i]), fontsize=ax_labelsize)
                 if i != 0:
                     ax.axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_ylabel('{}'.format(_var_names[j + 1]), fontsize=textsize)
+                    ax.set_ylabel('{}'.format(_var_names[j + 1]), fontsize=ax_labelsize)
 
-                ax.tick_params(labelsize=textsize)
+                ax.tick_params(labelsize=xt_labelsize)
                 axs.append(ax)
 
     return ax, gs

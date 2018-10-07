@@ -51,9 +51,10 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy).
     figsize : tuple
-        Figure size. If None, size is (6, number of variables * 2)
-    textsize: int
-        Text size for labels and legend. If None it will be autoscaled based on figsize.
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
 
     Returns
     -------
@@ -65,11 +66,8 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         datasets = [convert_to_dataset(d, group='posterior') for d in data]
 
     if point_estimate not in ('mean', 'median', None):
-        raise ValueError(
-            "Point estimate should be 'mean', 'median' or None, not {}".format(
-                point_estimate
-            )
-        )
+        raise ValueError("Point estimate should be 'mean',"
+                         "median' or None, not {}".format(point_estimate))
 
     n_data = len(datasets)
 
@@ -79,12 +77,9 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         else:
             data_labels = ['']
     elif len(data_labels) != n_data:
-        raise ValueError(
-            'The number of names for the models ({}) '
-            'does not match the number of models ({})'.format(
-                len(data_labels), n_data
-            )
-        )
+        raise ValueError('The number of names for the models ({}) '
+                         'does not match the number of models ({})'.format(len(data_labels),
+                                                                           n_data))
 
     if colors == 'cycle':
         colors = ['C{}'.format(idx % 10) for idx in range(n_data)]
@@ -97,8 +92,8 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         for var_name, selection, _ in plotters:
             all_labels.add(make_label(var_name, selection))
 
-    figsize, textsize, linewidth, markersize = _scale_fig_size(
-        figsize, textsize, len(all_labels), 1)
+    (figsize, _, titlesize, xt_labelsize,
+     linewidth, markersize) = _scale_fig_size(figsize, textsize, len(all_labels), 1)
 
     fig, axes = plt.subplots(len(all_labels), 1, squeeze=False, figsize=figsize)
     axis_map = {label: ax for label, ax in zip(all_labels, axes.flatten())}
@@ -106,23 +101,23 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
-            _d_helper(values.flatten(), label, colors[m_idx], bw, textsize, linewidth, markersize,
-                      credible_interval, point_estimate, hpd_markers, outline, shade,
-                      axis_map[label])
+            _d_helper(values.flatten(), label, colors[m_idx], bw, titlesize, xt_labelsize,
+                      linewidth, markersize, credible_interval, point_estimate, hpd_markers,
+                      outline, shade, axis_map[label])
 
     if n_data > 1:
         ax = axes.flatten()[0]
         for m_idx, label in enumerate(data_labels):
             ax.plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax.legend(fontsize=textsize)
+        ax.legend(fontsize=xt_labelsize)
 
     fig.tight_layout()
 
     return axes
 
 
-def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_interval,
-              point_estimate, hpd_markers, outline, shade, ax):
+def _d_helper(vec, vname, color, bw, titlesize, xt_labelsize, linewidth, markersize,
+              credible_interval, point_estimate, hpd_markers, outline, shade, ax):
     """Plot an individual dimension.
 
     Parameters
@@ -137,8 +132,10 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_i
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default used rule by SciPy).
-    textsize : float
-        Fontsize of text
+    titlesize : float
+        font size for title
+    xt_labelsize : float
+       fontsize for xticks
     linewidth : float
         Thickness of lines
     markersize : float
@@ -191,7 +188,7 @@ def _d_helper(vec, vname, color, bw, textsize, linewidth, markersize, credible_i
         ax.plot(est, -0.001, 'o', color=color, markeredgecolor='k', markersize=markersize)
 
     ax.set_yticks([])
-    ax.set_title(vname)
+    ax.set_title(vname, fontsize=titlesize)
     for pos in ['left', 'right', 'top']:
         ax.spines[pos].set_visible(0)
-    ax.tick_params(labelsize=textsize)
+    ax.tick_params(labelsize=xt_labelsize)
