@@ -112,12 +112,12 @@ def test_plot_density_discrete(discrete_model):
                                     {"lines": [("mu", 0)]}
                                     ])
 def test_plot_trace(models, model_fit, kwargs):
-    has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit', "pyro_fit"})
+    # has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit', "pyro_fit"})
     obj = getattr(models, model_fit)
-    if has_labels:
-        kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
-    else:
-        kwargs = {}
+    # if has_labels:
+    #     kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
+    # else:
+    #     kwargs = {}
     axes = plot_trace(obj, **kwargs)
 
     assert axes.shape
