@@ -18,12 +18,9 @@ def save_figs(request):
     if fig_dir is not None:
         # Try creating directory if it doesn't exist
         print("Saving generated images in {}".format(fig_dir))
-        try:
-            os.mkdir(fig_dir)
-            print("Directory {} created".format(fig_dir))
 
-        except FileExistsError:
-            print("Directory {} exists".format(fig_dir))
+        os.makedirs(fig_dir, exist_ok=True)
+        print("Directory {} created".format(fig_dir))
 
         # Clear all files from the directory
         for file in os.listdir(fig_dir):
