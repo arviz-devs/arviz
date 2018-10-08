@@ -673,7 +673,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
         metrics.append(posterior.mean(dim=("chain", "draw")))
         metric_names.append("mean")
 
-        metrics.append(posterior.std(dim=("chain", "draw"), ddof=1))
+        metrics.append(posterior.std(dim=("chain", "draw")))
         metric_names.append("standard deviation")
 
         metrics.append(
@@ -715,7 +715,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
         metrics.append(
             xr.apply_ufunc(
-                _make_ufunc(st.circstd, high=np.pi, low=-np.pi, ddof=1),
+                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
                 posterior,
                 input_core_dims=(("chain", "draw"),),
             )
