@@ -644,14 +644,11 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
     if batches is None:
         batches = min([100, posterior.draw.size])
 
-    if fmt is None:
-        fmt = 'wide'
-    else:
-        fmt_group = ("wide", "long", "xarray")
-        if fmt.lower() not in fmt_group:
-            raise TypeError(
-                "Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group)
-            )
+    fmt_group = ("wide", "long", "xarray")
+    if not isinstance(fmt, str) or (fmt not in fmt_group):
+        raise TypeError(
+            "Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group)
+        )
 
     alpha = 1 - credible_interval
 
