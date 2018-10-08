@@ -783,7 +783,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
 
 def _make_ufunc(func, index=Ellipsis, **kwargs):
-    """Make ufunc from function"""
+    """Make ufunc from function."""
     def _ufunc(ary):
         target = np.empty(ary.shape[:-2])
         for idx in np.ndindex(target.shape):
