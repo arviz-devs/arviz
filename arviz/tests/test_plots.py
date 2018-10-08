@@ -1,4 +1,6 @@
 # pylint: disable=redefined-outer-name
+import os
+import time
 from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -32,11 +34,27 @@ def models():
 
 
 @pytest.fixture(scope='function', autouse=True)
-def clean_plots(request):
+def clean_plots(request, save_figs):
+    """Close plots after each test, optionally save if --save is specified during test invocation"""
     def fin():
+        if save_figs is not None:
+
+            # Retry save three times
+            for i in range(3):
+                try:
+                    plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
+
+                except Exception as err:  # pylint: disable=broad-except
+                    if i == 2:
+                        raise err
+                    time.sleep(.250)
+                else:
+                    break
+
         plt.close('all')
 
     request.addfinalizer(fin)
+
 
 @pytest.fixture(scope='module')
 def pymc3_sample_ppc(models):
