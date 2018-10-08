@@ -7,17 +7,18 @@ from .plot_utils import _scale_fig_size
 
 def plot_khat(khats, figsize=None, textsize=None, markersize=5, ax=None,
               hlines_kwargs=None, **kwargs):
-    R"""
+    """
     Plot Pareto tail indices.
 
     Parameters
     ----------
     khats : array
         Pareto tail indices.
-    figsize : figure size tuple
-        If None, size is (8, 4)
-    textsize: int
-        Text size for labels. If None it will be autoscaled based on figsize.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     markersize: int
         markersize for scatter plot. Defaults to 5
     ax: axes, opt
@@ -35,7 +36,8 @@ def plot_khat(khats, figsize=None, textsize=None, markersize=5, ax=None,
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    figsize, textsize, linewidth, markersize = _scale_fig_size(figsize, textsize)
+    (figsize, ax_labelsize, _, xt_labelsize,
+     linewidth, markersize) = _scale_fig_size(figsize, textsize)
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize)
@@ -48,7 +50,7 @@ def plot_khat(khats, figsize=None, textsize=None, markersize=5, ax=None,
     rgba_c[:, 2] = .8
     rgba_c[:, 3] = alphas
     ax.scatter(np.arange(len(khats)), khats, c=rgba_c, marker='+', s=markersize, **kwargs)
-    ax.set_xlabel('Data point', fontsize=textsize)
-    ax.set_ylabel(r'Shape parameter κ', fontsize=textsize)
-    ax.tick_params(labelsize=textsize)
+    ax.set_xlabel('Data point', fontsize=ax_labelsize)
+    ax.set_ylabel(r'Shape parameter κ', fontsize=ax_labelsize)
+    ax.tick_params(labelsize=xt_labelsize)
     return ax

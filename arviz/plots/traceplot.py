@@ -21,9 +21,10 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple
-        If None, size is (8, 8)
-    textsize: int
-        Text size for labels
+        If None, size is (12, variables * 2)
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -97,7 +98,8 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
 
     hist_kwargs.setdefault('alpha', 0.35)
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, len(plotters), 2)
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize,
+                                                                        len(plotters), 2)
     trace_kwargs.setdefault('linewidth', linewidth)
     kde_kwargs.setdefault('plot_kwargs', {'linewidth': linewidth})
 
@@ -116,12 +118,12 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
             if row.dtype.kind == 'i':
                 _histplot_op(axes[i, 0], row, **hist_kwargs)
             else:
-                plot_kde(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
+                plot_kde(row, textsize=xt_labelsize, ax=axes[i, 0], **kde_kwargs)
 
         axes[i, 0].set_yticks([])
         for idx in (0, 1):
-            axes[i, idx].set_title(make_label(var_name, selection), fontsize=textsize)
-            axes[i, idx].tick_params(labelsize=textsize)
+            axes[i, idx].set_title(make_label(var_name, selection), fontsize=titlesize)
+            axes[i, idx].tick_params(labelsize=xt_labelsize)
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):

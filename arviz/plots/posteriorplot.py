@@ -24,10 +24,10 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
-        Figure size. If None, size is (12, num of variables * 2)
-    textsize: int
-        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
-        based on figsize.
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     credible_interval : float, optional
         Credible intervals. Defaults to 0.94.
     round_to : int
@@ -138,7 +138,8 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, titlesize, xt_labelsize,
+     linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
         fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
@@ -147,16 +148,18 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
         _plot_posterior_op(x.flatten(), var_name, selection, ax=ax_, bw=bw, linewidth=linewidth,
                            bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, credible_interval=credible_interval,
-                           ref_val=ref_val, rope=rope, textsize=textsize, **kwargs)
+                           ref_val=ref_val, rope=rope, ax_labelsize=ax_labelsize,
+                           xt_labelsize=xt_labelsize, **kwargs)
 
-        ax_.set_title(make_label(var_name, selection), fontsize=textsize)
+        ax_.set_title(make_label(var_name, selection), fontsize=titlesize)
 
     fig.tight_layout()
     return ax
 
 
 def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kind, point_estimate,
-                       round_to, credible_interval, ref_val, rope, textsize, **kwargs):
+                       round_to, credible_interval, ref_val, rope, ax_labelsize, xt_labelsize,
+                       **kwargs):
     """Artist to draw posterior."""
     def format_as_percent(x, round_to=0):
         return '{0:.{1:d}f}%'.format(100 * x, round_to)
@@ -181,7 +184,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                                                  val,
                                                  format_as_percent(greater_than_ref_probability, 1))
         ax.axvline(val, ymin=0.05, ymax=.75, color='C1', lw=linewidth, alpha=0.65)
-        ax.text(values.mean(), plot_height * 0.6, ref_in_posterior, size=textsize,
+        ax.text(values.mean(), plot_height * 0.6, ref_in_posterior, size=ax_labelsize,
                 color='C1', weight='semibold', horizontalalignment='center')
 
     def display_rope():
@@ -204,7 +207,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
 
         ax.plot(vals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth*5, color='C2',
                 solid_capstyle='round', zorder=0, alpha=0.7)
-        text_props = {'size': textsize, 'horizontalalignment': 'center', 'color': 'C2'}
+        text_props = {'size': ax_labelsize, 'horizontalalignment': 'center', 'color': 'C2'}
         ax.text(vals[0], plot_height * 0.2, vals[0], weight='semibold', **text_props)
         ax.text(vals[1], plot_height * 0.2, vals[1], weight='semibold', **text_props)
 
@@ -227,7 +230,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
             point_value = np.median(values)
         point_text = '{}={:.{}f}'.format(point_estimate, point_value, round_to)
 
-        ax.text(point_value, plot_height * 0.8, point_text, size=textsize,
+        ax.text(point_value, plot_height * 0.8, point_text, size=ax_labelsize,
                 horizontalalignment='center')
 
     def display_hpd():
@@ -236,13 +239,13 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
                 solid_capstyle='round')
         ax.text(hpd_intervals[0], plot_height * 0.07,
                 hpd_intervals[0].round(round_to),
-                size=textsize, horizontalalignment='center')
+                size=ax_labelsize, horizontalalignment='center')
         ax.text(hpd_intervals[1], plot_height * 0.07,
                 hpd_intervals[1].round(round_to),
-                size=textsize, horizontalalignment='center')
+                size=ax_labelsize, horizontalalignment='center')
         ax.text((hpd_intervals[0] + hpd_intervals[1]) / 2, plot_height * 0.3,
                 format_as_percent(credible_interval) + ' HPD',
-                size=textsize, horizontalalignment='center')
+                size=ax_labelsize, horizontalalignment='center')
 
     def format_axes():
         ax.yaxis.set_ticks([])
@@ -252,7 +255,7 @@ def _plot_posterior_op(values, var_name, selection, ax, bw, linewidth, bins, kin
         ax.spines['bottom'].set_visible(True)
         ax.xaxis.set_ticks_position('bottom')
         ax.tick_params(axis='x', direction='out', width=1, length=3,
-                       color='0.5', labelsize=textsize)
+                       color='0.5', labelsize=xt_labelsize)
         ax.spines['bottom'].set_color('0.5')
 
     if kind == 'kde' and values.dtype.kind == 'f':

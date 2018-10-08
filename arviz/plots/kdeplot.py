@@ -37,9 +37,10 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     figsize : tuple
-        Size of figure in inches. Defaults to (12, 8)
-    textsize : float
-        Size of text on figure.
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -109,7 +110,7 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     if figsize is None and ax:
         figsize = ax.get_figure().get_size_inches()
 
-    figsize, textsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, *_, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)

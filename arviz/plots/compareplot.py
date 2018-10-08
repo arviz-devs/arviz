@@ -25,8 +25,9 @@ def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_d
         Defaults to True
     figsize : tuple, optional
         If None, size is (6, num of models) inches
-    textsize: int
-        Text size for labels. If None it will be autoscaled based on figsize.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     plot_kwargs : dict, optional
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
@@ -41,7 +42,7 @@ def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_d
     if figsize is None:
         figsize = (6, len(comp_df))
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -104,9 +105,9 @@ def plot_compare(comp_df, insample_dev=True, plot_standard_error=True, plot_ic_d
                ls=plot_kwargs.get('ls_min_ic', '--'),
                color=plot_kwargs.get('color_ls_min_ic', 'grey'), lw=linewidth)
 
-    ax.set_xlabel('Deviance', fontsize=textsize)
+    ax.set_xlabel('Deviance', fontsize=ax_labelsize)
     ax.set_yticklabels(yticks_labels)
     ax.set_ylim(-1 + step, 0 - step)
-    ax.tick_params(labelsize=textsize)
+    ax.tick_params(labelsize=xt_labelsize)
 
     return ax

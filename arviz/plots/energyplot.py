@@ -23,8 +23,8 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         Type of plot to display (kde or histogram)
     bfmi : bool
         If True add to the plot the value of the estimated Bayesian fraction of missing information
-    figsize : figure size tuple
-        If None, size is (8 x 6)
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     legend : bool
         Flag for plotting legend (defaults to True)
     fill_alpha : tuple of floats
@@ -37,8 +37,9 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy). Only works if `kind='kde'`
-    textsize: int
-        Text size for labels
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     fill_kwargs : dicts, optional
         Additional keywords passed to `arviz.plot_kde` (to control the shade)
     plot_kwargs : dicts, optional
@@ -61,14 +62,11 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     if plot_kwargs is None:
         plot_kwargs = {}
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
-    series = zip(
-        fill_alpha,
-        fill_color,
-        ('Marginal Energy', 'Energy transition'),
-        (energy - energy.mean(), np.diff(energy))
-    )
+    series = zip(fill_alpha,
+                 fill_color, ('Marginal Energy', 'Energy transition'),
+                 (energy - energy.mean(), np.diff(energy)))
 
     if kind == 'kde':
         for alpha, color, label, value in series:
@@ -77,7 +75,7 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
             plot_kwargs.setdefault('color', color)
             plot_kwargs.setdefault('alpha', 0)
             plot_kwargs.setdefault('linewidth', linewidth)
-            plot_kde(value, bw=bw, label=label, textsize=textsize,
+            plot_kde(value, bw=bw, label=label, textsize=xt_labelsize,
                      plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
 
     elif kind == 'hist':

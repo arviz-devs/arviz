@@ -21,10 +21,11 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
         Opacity of posterior predictive density curves
     mean : bool
         Whether or not to plot the mean posterior predictive distribution. Defaults to True
-    figsize : figure size tuple
-        If None, size is (6, 5)
-    textsize: int
-        Text size for labels. If None it will be auto-scaled based on figsize.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     data_pairs : dict
         Dictionary containing relations between observed data and posterior predictive data.
         Dictionary structure:
@@ -52,7 +53,9 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
 
     rows, cols = default_grid(len(observed.data_vars))
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, _, xt_labelsize,
+     linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+
     _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
 
     for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
@@ -113,8 +116,8 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
                 xlabel = var_name
-            ax.set_xlabel(xlabel, fontsize=textsize)
-            ax.tick_params(labelsize=textsize)
+            ax.set_xlabel(xlabel, fontsize=ax_labelsize)
+            ax.tick_params(labelsize=xt_labelsize)
             ax.set_yticks([])
 
         elif kind == 'cumulative':
@@ -162,9 +165,9 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
                 xlabel = var_name
-            ax.set_xlabel(var_name, fontsize=textsize)
+            ax.set_xlabel(var_name, fontsize=ax_labelsize)
             ax.set_yticks([0, 0.5, 1])
-        ax.legend(fontsize=textsize)
+        ax.legend(fontsize=xt_labelsize)
     return axes
 
 
