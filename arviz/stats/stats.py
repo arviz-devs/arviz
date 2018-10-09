@@ -574,7 +574,7 @@ def r2_score(y_true, y_pred):
     )
 
 
-def summary(data, var_names=None, include_circ=None, stat_funcs=None,
+def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None,
             extend=True, credible_interval=0.94, batches=None):
     """Create a data frame with summary statistics.
 
@@ -587,6 +587,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
         Names of variables to include in summary
     include_circ : bool
         Whether to include circular statistics
+    fmt : {'wide', 'long', 'xarray'}
+        Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
@@ -606,7 +608,7 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
     Returns
     -------
-    pd.DataFrame
+    pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
         `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. `n_eff` and `Rhat` are only computed
         for traces with 2 or more chains.
@@ -617,8 +619,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         >>> az.summary(trace, ['mu'])
                mean    sd  hpd_3  hpd_97  mc_error  n_eff  Rhat
-        mu__0  0.10  0.06  -0.02    0.23      0.00  487.0  1.00
-        mu__1 -0.04  0.06  -0.17    0.08      0.00  379.0  1.00
+        mu[0]  0.10  0.06  -0.02    0.23      0.00  487.0  1.00
+        mu[1] -0.04  0.06  -0.17    0.08      0.00  379.0  1.00
 
     Other statistics can be calculated by passing a list of functions.
 
@@ -633,36 +635,22 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
         ...
         >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
                  sd     5    50    95
-        mu__0  0.06  0.00  0.10  0.21
-        mu__1  0.07 -0.16 -0.04  0.06
+        mu[0]  0.06  0.00  0.10  0.21
+        mu[1]  0.07 -0.16 -0.04  0.06
     """
     posterior = convert_to_dataset(data, group="posterior")
-
-    if var_names is None:
-        var_names = list(posterior.data_vars)
+    posterior = posterior if var_names is None else posterior[var_names]
 
     if batches is None:
         batches = min([100, posterior.draw.size])
 
+    fmt_group = ("wide", "long", "xarray")
+    if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
+        raise TypeError(
+            "Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group)
+        )
+
     alpha = 1 - credible_interval
-
-    def make_stat_ufunc(func, **kwargs):
-        def circ_ufunc(ary):
-            return func(ary.reshape(*ary.shape[:-2], -1), **kwargs, axis=-1)
-
-        return circ_ufunc
-
-    def make_mc_error_ufunc(**kwargs):
-        def mc_error_ufunc(ary):
-            return _mc_error(ary.reshape(*ary.shape[:-2], -1).T, **kwargs)
-
-        return mc_error_ufunc
-
-    def make_hpd_ufunc(idx, **kwargs):
-        def hpd_ufunc(ary):
-            return hpd(ary.reshape(*ary.shape[:-2], -1).T, **kwargs)[..., idx]
-
-        return hpd_ufunc
 
     metrics = []
     metric_names = []
@@ -671,24 +659,24 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
         for stat_func in stat_funcs:
             metrics.append(
                 xr.apply_ufunc(
-                    make_stat_ufunc(stat_func),
-                    posterior[var_names],
+                    _make_ufunc(stat_func),
+                    posterior,
                     input_core_dims=(("chain", "draw"),),
                 )
             )
             metric_names.append(stat_func.__name__)
 
     if extend:
-        metrics.append(posterior[var_names].mean(dim=("chain", "draw")))
+        metrics.append(posterior.mean(dim=("chain", "draw")))
         metric_names.append("mean")
 
-        metrics.append(posterior[var_names].std(dim=("chain", "draw")))
+        metrics.append(posterior.std(dim=("chain", "draw")))
         metric_names.append("standard deviation")
 
         metrics.append(
             xr.apply_ufunc(
-                make_mc_error_ufunc(),
-                posterior[var_names],
+                _make_ufunc(_mc_error),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -696,8 +684,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_hpd_ufunc(0, credible_interval=credible_interval),
-                posterior[var_names],
+                _make_ufunc(hpd, index=0, credible_interval=credible_interval),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -705,8 +693,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_hpd_ufunc(1, credible_interval=credible_interval),
-                posterior[var_names],
+                _make_ufunc(hpd, index=1, credible_interval=credible_interval),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -715,8 +703,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
     if include_circ:
         metrics.append(
             xr.apply_ufunc(
-                make_stat_ufunc(st.circmean, high=np.pi, low=-np.pi),
-                posterior[var_names],
+                _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -724,8 +712,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_stat_ufunc(st.circmean, high=np.pi, low=-np.pi),
-                posterior[var_names],
+                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -733,8 +721,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_mc_error_ufunc(circular=True),
-                posterior[var_names],
+                _make_ufunc(_mc_error, circular=True),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -742,8 +730,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_hpd_ufunc(0, credible_interval=credible_interval, circular=True),
-                posterior[var_names],
+                _make_ufunc(hpd, index=0, credible_interval=credible_interval, circular=True),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -751,8 +739,8 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
 
         metrics.append(
             xr.apply_ufunc(
-                make_hpd_ufunc(1, credible_interval=credible_interval, circular=True),
-                posterior[var_names],
+                _make_ufunc(hpd, index=1, credible_interval=credible_interval, circular=True),
+                posterior,
                 input_core_dims=(("chain", "draw"),),
             )
         )
@@ -765,7 +753,40 @@ def summary(data, var_names=None, include_circ=None, stat_funcs=None,
     metric_names.append("gelman-rubin statistic")
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
-    return joined
+
+    if fmt.lower() == 'wide':
+        dfs = []
+        for var_name, values in joined.data_vars.items():
+            if len(values.shape[1:]):
+                metric = list(values.metric.values)
+                data_dict = {}
+                for idx in np.ndindex(values.shape[1:]):
+                    ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
+                    key = '{}[{}]'.format(var_name, ",".join(map(str, idx)))
+                    data_dict[key] = ser
+                df = pd.DataFrame.from_dict(data_dict, orient='index')
+            else:
+                df = values.to_dataframe()
+                df.index = list(df.index)
+                df = df.T
+            dfs.append(df)
+        return pd.concat(dfs)
+    elif fmt.lower() == 'long':
+        df = joined.to_dataframe().reset_index().set_index('metric')
+        df.index = list(df.index)
+        return df
+    else:
+        return joined
+
+
+def _make_ufunc(func, index=Ellipsis, **kwargs):
+    """Make ufunc from function."""
+    def _ufunc(ary):
+        target = np.empty(ary.shape[:-2])
+        for idx in np.ndindex(target.shape):
+            target[idx] = np.asarray(func(ary[idx].ravel(), **kwargs))[index]
+        return target
+    return _ufunc
 
 
 def _mc_error(x, batches=5, circular=False):

@@ -60,6 +60,15 @@ def test_summary(include_circ):
     centered = load_arviz_data('centered_eight')
     summary(centered, include_circ=include_circ)
 
+@pytest.mark.parametrize('fmt', ['wide', 'long', 'xarray'])
+def test_summary_fmt(fmt):
+    centered = load_arviz_data('centered_eight')
+    summary(centered, fmt=fmt)
+
+def test_summary_bad_fmt():
+    centered = load_arviz_data('centered_eight')
+    with pytest.raises(TypeError):
+        summary(centered, fmt='bad_fmt')
 
 def test_waic():
     """Test widely available information criterion calculation"""

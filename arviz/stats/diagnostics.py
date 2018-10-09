@@ -1,5 +1,4 @@
 """Diagnostic functions for ArviZ."""
-import itertools
 import warnings
 
 import numpy as np
@@ -28,7 +27,7 @@ def effective_n(data, *, var_names=None):
 
     Returns
     -------
-    n_eff : dictionary of floats (MultiTrace) or float (trace object)
+    n_eff : xarray.Dataset
         Return the effective sample size, :math:`\hat{n}_{eff}`
 
     Notes
@@ -50,12 +49,21 @@ def effective_n(data, *, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_neff(data)
-
     dataset = convert_to_dataset(data, group='posterior')
-    if var_names is None:
-        var_names = list(dataset.data_vars)
-    dataset = dataset[var_names]
+    dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
+
+
+def _neff_ufunc(ary):
+    """Ufunc for computing effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_neff(ary[idx])
+    return target
 
 
 def _get_neff(sample_array):
@@ -102,20 +110,6 @@ def _get_neff(sample_array):
         t += 2
     ess = (n_chain * n_draws) / (-1. + 2. * np.sum(rho_hat_t))
     return ess
-
-
-def _neff_ufunc(ary):
-    """Ufunc for computing effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
-        idxs = list(idxs)
-        idxs.append(Ellipsis)
-        target[tuple(idxs)] = _get_neff(ary[tuple(idxs)])
-    return target
 
 
 def autocorr(x):
@@ -180,7 +174,7 @@ def gelman_rubin(data, var_names=None):
 
     Returns
     -------
-    r_hat : dict of floats (MultiTrace) or float (trace object)
+    r_hat : xarray.Dataset
       Returns dictionary of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
@@ -201,12 +195,21 @@ def gelman_rubin(data, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_rhat(data)
-
     dataset = convert_to_dataset(data, group='posterior')
-    if var_names is None:
-        var_names = list(dataset.data_vars)
-    dataset = dataset[var_names]
+    dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
+
+
+def _rhat_ufunc(ary):
+    """Ufunc for computing effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_rhat(ary[idx])
+    return target
 
 
 def _get_rhat(values, round_to=2):
@@ -225,19 +228,6 @@ def _get_rhat(values, round_to=2):
              between_chain_variance / num_samples)
 
     return round((v_hat / within_chain_variance)**0.5, round_to)
-
-def _rhat_ufunc(ary):
-    """Ufunc for computing effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
-        idxs = list(idxs)
-        idxs.append(Ellipsis)
-        target[tuple(idxs)] = _get_rhat(ary[tuple(idxs)])
-    return target
 
 
 def geweke(values, first=.1, last=.5, intervals=20):
