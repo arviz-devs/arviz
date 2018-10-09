@@ -139,13 +139,17 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, titlesize, xt_labelsize,
-     linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+     _linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+    kwargs.setdefault('linewidth', _linewidth)
 
     if ax is None:
-        fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+        _, ax = _create_axes_grid(length_plotters, rows, cols,
+                                  figsize=figsize,
+                                  squeeze=False,
+                                  constrained_layout=True)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        _plot_posterior_op(x.flatten(), var_name, selection, ax=ax_, bw=bw, linewidth=linewidth,
+        _plot_posterior_op(x.flatten(), var_name, selection, ax=ax_, bw=bw,
                            bins=bins, kind=kind, point_estimate=point_estimate,
                            round_to=round_to, credible_interval=credible_interval,
                            ref_val=ref_val, rope=rope, ax_labelsize=ax_labelsize,
@@ -153,7 +157,6 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
 
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize)
 
-    fig.tight_layout()
     return ax
 
 
