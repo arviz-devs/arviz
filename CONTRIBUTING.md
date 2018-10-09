@@ -98,13 +98,13 @@ We recommended that your contribution complies with the following guidelines bef
 You can also check for common programming errors with the following
 tools:
 
-* Save plots rendered plots as part of tests. Plots will save to a directory named test_images by default
+* Save plots as part of tests. Plots will save to a directory named test_images by default
 
   ```bash
   $ pytest arviz/tests/<name of test>.py --save
   ```
 
-* Optionally save rendered plots to another directory. Useful for comparing changes across branches
+* Optionally save plots to a user named directory. This is useful for comparing changes across branches
 
   ```bash
   $ pytest arviz/tests/<name of test>.py --save user_defined_directory
@@ -124,11 +124,10 @@ tools:
   $ pylint path/to/module.py
   ```
 
-* No PEP8 warnings, check with:
+* No code style warnings, check with:
 
   ```bash
-  $ pip install pycodestyle
-  $ pycodestyle path/to/module.py
+  $ ./scripts/lint.sh
   ```
 
 ## Developing in Docker
