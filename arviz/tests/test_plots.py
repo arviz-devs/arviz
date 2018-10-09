@@ -104,7 +104,7 @@ def test_plot_density_discrete(discrete_model):
     assert axes.shape[1] == 1
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "emcee_fit", "pyro_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("kwargs", [{},
                                     {"var_names": ["mu", "tau"]},
                                     {"combined":True},
@@ -112,14 +112,13 @@ def test_plot_density_discrete(discrete_model):
                                     {"lines": [("mu", 0)]}
                                     ])
 def test_plot_trace(models, model_fit, kwargs):
-    # has_labels = bool(model_fit in {'pymc3_fit', 'stan_fit', "pyro_fit"})
     obj = getattr(models, model_fit)
-    # if has_labels:
-    #     kwargs = {'var_names': ('mu', 'tau'), 'lines': [('mu', {}, [1, 2])]}
-    # else:
-    #     kwargs = {}
     axes = plot_trace(obj, **kwargs)
+    assert axes.shape
 
+
+def test_plot_trace_emcee(models):
+    axes = plot_trace(models.emcee_fit)
     assert axes.shape
 
 
