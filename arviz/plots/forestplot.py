@@ -20,7 +20,7 @@ def pairwise(iterable):
 
 
 def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combined=False,
-                credible_interval=0.94, quartiles=True, r_hat=True, n_eff=True, colors='cycle',
+                credible_interval=0.94, quartiles=True, eff_n=False, r_hat=False, colors='cycle',
                 textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
                 ridgeplot_overlap=2, figsize=None):
     """Forest plot to compare credible intervals from a number of distributions.
@@ -50,9 +50,9 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
     r_hat : bool, optional
-        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to True
-    n_eff : bool, optional
-        Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to True
+        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to False
+    eff_n : bool, optional
+        Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to False
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the
@@ -80,7 +80,7 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
     """
     ncols, width_ratios = 1, [3]
 
-    if n_eff:
+    if eff_n:
         ncols += 1
         width_ratios.append(1)
 
@@ -107,8 +107,7 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
                              ncols=ncols,
                              figsize=figsize,
                              gridspec_kw={'width_ratios': width_ratios},
-                             sharey=True
-                             )
+                             sharey=True)
 
     axes = np.atleast_1d(axes)
     if kind == 'forestplot':
@@ -122,12 +121,12 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
                         "'ridgeplot' (you provided {})".format(kind))
 
     idx = 1
-    if r_hat:
-        plot_handler.plot_rhat(axes[idx], xt_labelsize, titlesize, markersize)
+    if eff_n:
+        plot_handler.plot_neff(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
-    if n_eff:
-        plot_handler.plot_neff(axes[idx], xt_labelsize, titlesize, markersize)
+    if r_hat:
+        plot_handler.plot_rhat(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
     for ax in axes:
@@ -199,8 +198,7 @@ class PlotHandler():
             plotters[var_name] = VarHandler(var_name, self.data, y,
                                             model_names=self.model_names,
                                             combined=self.combined,
-                                            colors=self.colors,
-                                            )
+                                            colors=self.colors)
             y = plotters[var_name].y_max()
         return plotters
 
@@ -295,12 +293,12 @@ class PlotHandler():
     def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
         """Draw effective n for each plotter."""
         for plotter in self.plotters.values():
-            for y, n_eff, color in plotter.n_eff():
-                if n_eff is not None:
-                    ax.plot(n_eff, y, 'o', color=color, clip_on=False,
+            for y, eff_n, color in plotter.eff_n():
+                if eff_n is not None:
+                    ax.plot(eff_n, y, 'o', color=color, clip_on=False,
                             markersize=markersize, markeredgecolor='k')
         ax.set_xlim(left=0)
-        ax.set_title('Effective n', fontsize=titlesize)
+        ax.set_title('eff_n', fontsize=titlesize)
         ax.tick_params(labelsize=xt_labelsize)
         return ax
 
@@ -313,7 +311,7 @@ class PlotHandler():
         ax.set_xlim(left=0.9, right=2.1)
         ax.set_xticks([1, 2])
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title('R-hat', fontsize=titlesize)
+        ax.set_title('r_hat', fontsize=titlesize)
         return ax
 
     def make_bands(self, ax):
@@ -346,8 +344,7 @@ class PlotHandler():
         """Figure out the height of this plot."""
         # hand-tuned
         return (4 + len(self.data) * len(self.var_names) - 1 +
-                0.1 * sum(1 for j in self.plotters.values() for _ in j.iterator())
-                )
+                0.1 * sum(1 for j in self.plotters.values() for _ in j.iterator()))
 
     def y_max(self):
         """Get maximum y value for the plot."""
@@ -443,7 +440,7 @@ class VarHandler():
             y = y * np.ones_like(x)
             yield x, y, mult * pdf / scaling + y, color
 
-    def n_eff(self):
+    def eff_n(self):
         """Get effective n data for the variable."""
         _, y_vals, values, colors = self.labels_ticks_and_vals()
         for y, value, color in zip(y_vals, values, colors):

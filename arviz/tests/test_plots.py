@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 import xarray as xr
 import numpy as np
-import pymc3 as pm
 import pytest
+import pymc3 as pm
+
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
@@ -130,11 +131,11 @@ def test_plot_trace_discrete(discrete_model):
 
 @pytest.mark.parametrize("model_fits",
                          [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
-@pytest.mark.parametrize("args_expected", [(dict(), (3,)),
-                                           (dict(r_hat=False, quartiles=False), (2,)),
-                                           (dict(var_names=['mu'], colors='C0', n_eff=False,
+@pytest.mark.parametrize("args_expected", [(dict(), (1,)),
+                                           (dict(r_hat=True, quartiles=False), (2,)),
+                                           (dict(var_names=['mu'], colors='C0', eff_n=True,
                                                  combined=True), (2,)),
-                                           (dict(kind='ridgeplot', r_hat=False, n_eff=False), (1,))
+                                           (dict(kind='ridgeplot', r_hat=True, eff_n=True), (3,))
                                            ])
 def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
