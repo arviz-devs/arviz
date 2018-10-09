@@ -588,7 +588,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
     include_circ : bool
         Whether to include circular statistics
     fmt : {'wide', 'long', 'xarray'}
-        Return format is either DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
+        Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
@@ -608,7 +608,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
     Returns
     -------
-    pd.DataFrame
+    pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
         `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. `n_eff` and `Rhat` are only computed
         for traces with 2 or more chains.
@@ -754,7 +754,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
-    if fmt.lower().startswith('wide'):
+    if fmt.lower() == 'wide':
         dfs = []
         for var_name, values in joined.data_vars.items():
             if len(values.shape[1:]):
@@ -771,7 +771,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
                 df = df.T
             dfs.append(df)
         return pd.concat(dfs)
-    elif fmt.lower().startswith('long'):
+    elif fmt.lower() == 'long':
         df = joined.to_dataframe().reset_index().set_index('metric')
         df.index = list(df.index)
         return df
