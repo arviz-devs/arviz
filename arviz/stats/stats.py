@@ -670,13 +670,15 @@ def summary(data, var_names=None, fmt='wide', round_to=2, include_circ=None, sta
         metric_names.append("circular mc error")
 
         metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=0,
-                                                  credible_interval=credible_interval, circular=True),
+                                                  credible_interval=credible_interval,
+                                                  circular=True),
                                       posterior,
                                       input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular hpd {:.2%}".format(alpha / 2))
 
         metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=1,
-                                                  credible_interval=credible_interval, circular=True),
+                                                  credible_interval=credible_interval,
+                                                  circular=True),
                                       posterior,
                                       input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
