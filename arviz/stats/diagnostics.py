@@ -108,7 +108,7 @@ def _get_neff(sample_array):
             rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
-    ess = (n_chain * n_draws) / (-1. + 2. * np.sum(rho_hat_t))
+    ess = int((n_chain * n_draws) / (-1. + 2. * np.sum(rho_hat_t)))
     return ess
 
 

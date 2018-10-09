@@ -579,7 +579,7 @@ def summary(data, var_names=None, fmt='wide', round_to=2, include_circ=None, sta
     -------
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
-        `hpd_3`, `hpd_97`, `mc_error`, `n_eff` and `Rhat`. `n_eff` and `Rhat` are only computed
+        `hpd_3%`, `hpd_97%`, `mc_error`, `eff_n` and `r_hat`. `eff_n` and `r_hat` are only computed
         for traces with 2 or more chains.
 
     Examples
@@ -587,9 +587,9 @@ def summary(data, var_names=None, fmt='wide', round_to=2, include_circ=None, sta
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-               mean    sd  hpd_3  hpd_97  mc_error  n_eff  Rhat
-        mu[0]  0.10  0.06  -0.02    0.23      0.00  487.0  1.00
-        mu[1] -0.04  0.06  -0.17    0.08      0.00  379.0  1.00
+               mean    sd  mc_error  hpd_3  hpd_97  eff_n  r_hat
+        mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0  1.00
+        mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0  1.00
 
     Other statistics can be calculated by passing a list of functions.
 
@@ -685,10 +685,10 @@ def summary(data, var_names=None, fmt='wide', round_to=2, include_circ=None, sta
 
     if len(posterior.chain) > 1:
         metrics.append(effective_n(posterior, var_names=var_names))
-        metric_names.append("effective samples")
+        metric_names.append("eff_n")
 
         metrics.append(gelman_rubin(posterior, var_names=var_names))
-        metric_names.append("gelman-rubin")
+        metric_names.append("r_hat")
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
