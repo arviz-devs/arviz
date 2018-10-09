@@ -104,27 +104,19 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
 
     if ic == "waic":
         ic_func = waic
-        df_comp = pd.DataFrame(
-            index=names,
-            columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning"],
-        )
+        df_comp = pd.DataFrame(index=names, columns=["waic", "pwaic", "dwaic",
+                                                     "weight", "se", "dse", "warning"])
 
     elif ic == "loo":
         ic_func = loo
-        df_comp = pd.DataFrame(
-            index=names,
-            columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning"],
-        )
+        df_comp = pd.DataFrame(index=names, columns=["loo", "ploo", "dloo",
+                                                     "weight", "se", "dse", "warning"])
 
     else:
-        raise NotImplementedError(
-            "The information criterion {} is not supported.".format(ic)
-        )
+        raise NotImplementedError("The information criterion {} is not supported.".format(ic))
 
     if method not in ["stacking", "BB-pseudo-BMA", "pseudo-BMA"]:
-        raise ValueError(
-            "The method {}, to compute weights, is not supported.".format(method)
-        )
+        raise ValueError("The method {}, to compute weights, is not supported.".format(method))
 
     ic_se = "{}_se".format(ic)
     p_ic = "p_{}".format(ic)
@@ -158,25 +150,20 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             grad = np.zeros(last_col)
             for k in range(last_col):
                 for i in range(rows):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
-                        exp_ic_i[i], w_full
-                    )
+                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(exp_ic_i[i],
+                                                                                 w_full)
             return -grad
 
         theta = np.full(last_col, 1. / cols)
         bounds = [(0., 1.) for i in range(last_col)]
-        constraints = [
-            {"type": "ineq", "fun": lambda x: 1. - np.sum(x)},
-            {"type": "ineq", "fun": np.sum},
-        ]
+        constraints = [{"type": "ineq", "fun": lambda x: 1. - np.sum(x)},
+                       {"type": "ineq", "fun": np.sum}]
 
-        weights = minimize(
-            fun=log_score,
-            x0=theta,
-            jac=gradient,
-            bounds=bounds,
-            constraints=constraints,
-        )
+        weights = minimize(fun=log_score,
+                           x0=theta,
+                           jac=gradient,
+                           bounds=bounds,
+                           constraints=constraints)
 
         weights = w_fuller(weights["x"])
         ses = ics[ic_se]
@@ -185,9 +172,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         ic_i_val = ic_i_val * rows
 
-        b_weighting = st.dirichlet.rvs(
-            alpha=[alpha] * rows, size=b_samples, random_state=seed
-        )
+        b_weighting = st.dirichlet.rvs(alpha=[alpha] * rows, size=b_samples, random_state=seed)
         weights = np.zeros((b_samples, cols))
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
@@ -214,15 +199,13 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
             weight = weights[idx]
-            df_comp.at[val] = (
-                res[ic],
-                res[p_ic],
-                d_ic,
-                weight,
-                std_err,
-                d_std_err,
-                res["warning"],
-            )
+            df_comp.at[val] = (res[ic],
+                               res[p_ic],
+                               d_ic,
+                               weight,
+                               std_err,
+                               d_std_err,
+                               res["warning"])
 
     return df_comp.sort_values(by=ic)
 
@@ -236,9 +219,7 @@ def _ic_matrix(ics, ic_i):
     for idx, val in enumerate(ics.index):
         ic = ics.loc[val][ic_i]
         if len(ic) != rows:
-            raise ValueError(
-                "The number of observations should be the same across all models"
-            )
+            raise ValueError("The number of observations should be the same across all models")
         else:
             ic_i_val[:, idx] = ic
 
@@ -289,10 +270,8 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     interval_width = x[interval_idx_inc:] - x[:n_intervals]
 
     if len(interval_width) == 0:
-        raise ValueError(
-            "Too few elements for interval calculation."
-            " Check that credible_interval meets condition 0 =< credible_interval < 1"
-        )
+        raise ValueError("Too few elements for interval calculation. "
+                         "Check that credible_interval meets condition 0 =< credible_interval < 1")
 
     min_idx = np.argmin(interval_width)
     hdi_min = x[min_idx]
@@ -336,9 +315,8 @@ def loo(data, pointwise=False, reff=None):
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
         if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data!".format(group=group)
-            )
+            raise TypeError("Must be able to extract a {group}"
+                            "group from data!".format(group=group))
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
@@ -354,10 +332,8 @@ def loo(data, pointwise=False, reff=None):
         else:
             eff_n = effective_n(posterior)
             # this mean is over all data variables
-            reff = (
-                np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean()
-                / n_samples
-            )
+            reff = (np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean()
+                    / n_samples)
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
@@ -369,8 +345,7 @@ def loo(data, pointwise=False, reff=None):
         one or more samples. You should consider using a more robust model, this is because
         importance sampling is less likely to work well if the marginal posterior and LOO posterior
         are very different. This is more likely to happen with a non-robust model and highly
-        influential observations."""
-        )
+        influential observations.""")
         warn_mg = 1
 
     loo_lppd_i = -2 * logsumexp(log_weights, axis=0)
@@ -382,20 +357,14 @@ def loo(data, pointwise=False, reff=None):
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
-            warnings.warn(
-                """The point-wise LOO is the same with the sum LOO, please double check
-            the Observed RV in your model to make sure it returns element-wise logp.
-            """
-            )
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_i"],
-        )
+            warnings.warn("""The point-wise LOO is the same with the sum LOO, please double check
+                          the Observed RV in your model to make sure it returns element-wise logp.
+                          """)
+        return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
+                            columns=["loo", "loo_se", "p_loo", "warning", "loo_i"])
     else:
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg]],
-            columns=["loo", "loo_se", "p_loo", "warning"],
-        )
+        return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg]],
+                            columns=["loo", "loo_se", "p_loo", "warning"])
 
 
 def psislw(log_weights, reff=1.):
@@ -569,12 +538,10 @@ def r2_score(y_true, y_pred):
 
     r_squared = var_y_est / (var_y_est + var_e)
 
-    return pd.Series(
-        [np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"]
-    )
+    return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
 
 
-def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None,
+def summary(data, var_names=None, fmt='wide', round_to=2, include_circ=None, stat_funcs=None,
             extend=True, credible_interval=0.94, batches=None):
     """Create a data frame with summary statistics.
 
@@ -589,6 +556,8 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
         Whether to include circular statistics
     fmt : {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
+    round_to : int
+        Number of decimals used to round results. Defaults to 2.
     stat_funcs : None or list
         A list of functions used to calculate statistics. By default, the mean, standard deviation,
         simulation standard error, and highest posterior density intervals are included.
@@ -646,9 +615,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
-        raise TypeError(
-            "Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group)
-        )
+        raise TypeError("Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group))
 
     alpha = 1 - credible_interval
 
@@ -657,13 +624,9 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
 
     if stat_funcs is not None:
         for stat_func in stat_funcs:
-            metrics.append(
-                xr.apply_ufunc(
-                    _make_ufunc(stat_func),
-                    posterior,
-                    input_core_dims=(("chain", "draw"),),
-                )
-            )
+            metrics.append(xr.apply_ufunc(_make_ufunc(stat_func),
+                                          posterior,
+                                          input_core_dims=(("chain", "draw"))))
             metric_names.append(stat_func.__name__)
 
     if extend:
@@ -671,86 +634,59 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
         metric_names.append("mean")
 
         metrics.append(posterior.std(dim=("chain", "draw")))
-        metric_names.append("standard deviation")
+        metric_names.append("sd")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(_mc_error),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(_mc_error),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("mc error")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
-        metric_names.append("hpd {:.2%}".format(alpha / 2))
+        metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=0,
+                                                  credible_interval=credible_interval),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
+        metric_names.append("hpd {:g}%".format(100 * alpha / 2))
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
-        metric_names.append("hpd {:.2%}".format(1 - alpha / 2))
+        metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=1,
+                                                  credible_interval=credible_interval),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
+        metric_names.append("hpd {:g}%".format(100 * (1 - alpha / 2)))
 
     if include_circ:
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(st.circmean, high=np.pi, low=-np.pi),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular mean")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(st.circstd, high=np.pi, low=-np.pi),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular standard deviation")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(_mc_error, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(_mc_error, circular=True),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular mc error")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=0,
+                                                  credible_interval=credible_interval, circular=True),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular hpd {:.2%}".format(alpha / 2))
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
+        metrics.append(xr.apply_ufunc(_make_ufunc(hpd, index=1,
+                                                  credible_interval=credible_interval, circular=True),
+                                      posterior,
+                                      input_core_dims=(("chain", "draw"),),))
         metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
 
-    metrics.append(effective_n(posterior, var_names=var_names))
-    metric_names.append("effective samples")
+    if len(posterior.chain) > 1:
+        metrics.append(effective_n(posterior, var_names=var_names))
+        metric_names.append("effective samples")
 
-    metrics.append(gelman_rubin(posterior, var_names=var_names))
-    metric_names.append("gelman-rubin statistic")
+        metrics.append(gelman_rubin(posterior, var_names=var_names))
+        metric_names.append("gelman-rubin")
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
@@ -770,13 +706,14 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
                 df.index = list(df.index)
                 df = df.T
             dfs.append(df)
-        return pd.concat(dfs)
+        summary_df = pd.concat(dfs)
     elif fmt.lower() == 'long':
         df = joined.to_dataframe().reset_index().set_index('metric')
         df.index = list(df.index)
-        return df
+        summary_df = df
     else:
-        return joined
+        summary_df = joined
+    return summary_df.round(round_to)
 
 
 def _make_ufunc(func, index=Ellipsis, **kwargs):
