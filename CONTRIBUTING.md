@@ -30,9 +30,9 @@ The preferred workflow for contributing to ArviZ is to fork the [GitHub reposito
 2. Clone your fork of the ArviZ repo from your GitHub account to your local disk, and add the base repository as a remote:
 
    ```bash
-   $ git clone git@github.com:<your GitHub handle>/ArviZ.git
-   $ cd ArviZ
-   $ git remote add upstream git@github.com:arviz-devs/ArviZ.git
+   $ git clone git@github.com:<your GitHub handle>/arviz.git
+   $ cd arviz
+   $ git remote add upstream git@github.com:arviz-devs/arviz.git
    ```
 
 3. Create a ``feature`` branch to hold your development changes:
