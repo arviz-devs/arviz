@@ -645,7 +645,7 @@ def summary(data, var_names=None, fmt='wide', include_circ=None, stat_funcs=None
         batches = min([100, posterior.draw.size])
 
     fmt_group = ("wide", "long", "xarray")
-    if not isinstance(fmt, str) or (fmt not in fmt_group):
+    if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
         raise TypeError(
             "Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group)
         )
