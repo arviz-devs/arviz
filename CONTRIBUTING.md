@@ -11,7 +11,7 @@ There are 4 main ways of contributing to the ArviZ project (in descending order 
 
 # Opening issues
 
-We appreciate being notified of problems with the existing PyMC code. We prefer that issues be filed the on [Github Issue Tracker](https://github.com/arviz-devs/arviz/issues), rather than on social media or by direct email to the developers.
+We appreciate being notified of problems with the existing ArviZ code. We prefer that issues be filed the on [Github Issue Tracker](https://github.com/arviz-devs/arviz/issues), rather than on social media or by direct email to the developers.
 
 Please verify that your issue is not being currently addressed by other issues or pull requests by using the GitHub search tool to look for key words in the project issue tracker.
 
@@ -32,7 +32,7 @@ The preferred workflow for contributing to ArviZ is to fork the [GitHub reposito
    ```bash
    $ git clone git@github.com:<your GitHub handle>/ArviZ.git
    $ cd ArviZ
-   $ git remote add upstream git@github.com:pymc-devs/ArviZ.git
+   $ git remote add upstream git@github.com:arviz-devs/ArviZ.git
    ```
 
 3. Create a ``feature`` branch to hold your development changes:
