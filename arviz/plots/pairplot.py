@@ -71,6 +71,9 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     if plot_kwargs is None:
         plot_kwargs = {}
 
+    if divergences_kwargs is None:
+        divergences_kwargs = {}
+
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group='posterior')
     _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords),
@@ -84,8 +87,6 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                                               combined=True)
         diverging_mask = np.squeeze(diverging_mask)
 
-        if divergences_kwargs is None:
-            divergences_kwargs = {}
 
     if gridsize == 'auto':
         gridsize = int(len(_posterior[0])**0.35)
@@ -97,10 +98,12 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
     (figsize, ax_labelsize, _, xt_labelsize,
      _, markersize) = _scale_fig_size(figsize, textsize, numvars-1, numvars-1)
+    divergences_kwargs.setdefault('s', markersize)
 
     if numvars == 2 and ax is not None:
         if kind == 'scatter':
-            ax.scatter(_posterior[0], _posterior[1], s=markersize, **plot_kwargs)
+            plot_kwargs.setdefault('s', markersize)
+            ax.scatter(_posterior[0], _posterior[1], **plot_kwargs)
         elif kind == 'kde':
             plot_kde(_posterior[0], _posterior[1], contour=contour, fill_last=fill_last, ax=ax,
                      **plot_kwargs)
@@ -114,7 +117,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
         if divergences:
             ax.scatter(_posterior[0][diverging_mask], _posterior[1][diverging_mask],
-                       s=markersize, **divergences_kwargs)
+                       **divergences_kwargs)
 
         ax.set_xlabel('{}'.format(_var_names[0]), fontsize=ax_labelsize)
         ax.set_ylabel('{}'.format(_var_names[1]), fontsize=ax_labelsize)
@@ -134,7 +137,8 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                 ax = fig.add_subplot(gs[j, i])
 
                 if kind == 'scatter':
-                    ax.scatter(var1, var2, s=markersize, **plot_kwargs)
+                    plot_kwargs.setdefault('s', markersize)
+                    ax.scatter(var1, var2, **plot_kwargs)
 
                 elif kind == 'kde':
                     plot_kde(var1, var2, contour=contour, fill_last=fill_last, ax=ax, **plot_kwargs)
@@ -153,8 +157,7 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                         cbar.ax.set_yticklabels(['low', 'high'], fontsize=ax_labelsize)
 
                 if divergences:
-                    ax.scatter(var1[diverging_mask], var2[diverging_mask],
-                               s=markersize, **divergences_kwargs)
+                    ax.scatter(var1[diverging_mask], var2[diverging_mask], **divergences_kwargs)
 
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())
