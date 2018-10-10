@@ -101,7 +101,7 @@ def get_bins(ary, max_bins=50, fenceposts=2):
     return bins
 
 
-def default_grid(n_items, max_cols=4, min_cols=3):
+def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     """Make a grid for subplots.
 
     Tries to get as close to sqrt(n_items) x sqrt(n_items) as it can,

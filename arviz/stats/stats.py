@@ -723,7 +723,7 @@ def summary(
     return summary_df.round(round_to)
 
 
-def _make_ufunc(func, index=Ellipsis, **kwargs):
+def _make_ufunc(func, index=Ellipsis, **kwargs):  # noqa: D202
     """Make ufunc from function."""
 
     def _ufunc(ary):

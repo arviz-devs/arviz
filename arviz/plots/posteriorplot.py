@@ -191,7 +191,7 @@ def _plot_posterior_op(
     ax_labelsize,
     xt_labelsize,
     **kwargs
-):
+):  # noqa: D202
     """Artist to draw posterior."""
 
     def format_as_percent(x, round_to=0):

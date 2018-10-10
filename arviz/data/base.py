@@ -14,7 +14,7 @@ class requires:  # pylint: disable=invalid-name
     def __init__(self, *props):
         self.props = props
 
-    def __call__(self, func):
+    def __call__(self, func):  # noqa: D202
         """Wrap the decorated function."""
 
         def wrapped(cls, *args, **kwargs):
