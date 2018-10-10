@@ -8,9 +8,20 @@ from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size
 
 
-def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alpha=(1, .75),
-                fill_color=('C0', 'C5'), bw=4.5, textsize=None, fill_kwargs=None, plot_kwargs=None,
-                ax=None):
+def plot_energy(
+    data,
+    kind="kde",
+    bfmi=True,
+    figsize=None,
+    legend=True,
+    fill_alpha=(1, 0.75),
+    fill_color=("C0", "C5"),
+    bw=4.5,
+    textsize=None,
+    fill_kwargs=None,
+    plot_kwargs=None,
+    ax=None,
+):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
     This may help to diagnose poor exploration by gradient-based algorithms like HMC or NUTS.
@@ -51,7 +62,7 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
     -------
     ax : matplotlib axes
     """
-    energy = convert_to_dataset(data, group='sample_stats').energy.values
+    energy = convert_to_dataset(data, group="sample_stats").energy.values
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -64,31 +75,37 @@ def plot_energy(data, kind='kde', bfmi=True, figsize=None, legend=True, fill_alp
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
-    series = zip(fill_alpha,
-                 fill_color, ('Marginal Energy', 'Energy transition'),
-                 (energy - energy.mean(), np.diff(energy)))
+    series = zip(
+        fill_alpha, fill_color, ("Marginal Energy", "Energy transition"), (energy - energy.mean(), np.diff(energy))
+    )
 
-    if kind == 'kde':
+    if kind == "kde":
         for alpha, color, label, value in series:
-            fill_kwargs['alpha'] = alpha
-            fill_kwargs['color'] = color
-            plot_kwargs.setdefault('color', color)
-            plot_kwargs.setdefault('alpha', 0)
-            plot_kwargs.setdefault('linewidth', linewidth)
-            plot_kde(value, bw=bw, label=label, textsize=xt_labelsize,
-                     plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs, ax=ax)
+            fill_kwargs["alpha"] = alpha
+            fill_kwargs["color"] = color
+            plot_kwargs.setdefault("color", color)
+            plot_kwargs.setdefault("alpha", 0)
+            plot_kwargs.setdefault("linewidth", linewidth)
+            plot_kde(
+                value,
+                bw=bw,
+                label=label,
+                textsize=xt_labelsize,
+                plot_kwargs=plot_kwargs,
+                fill_kwargs=fill_kwargs,
+                ax=ax,
+            )
 
-    elif kind == 'hist':
+    elif kind == "hist":
         for alpha, color, label, value in series:
-            ax.hist(value.flatten(), bins='auto', density=True, alpha=alpha,
-                    label=label, color=color, **plot_kwargs)
+            ax.hist(value.flatten(), bins="auto", density=True, alpha=alpha, label=label, color=color, **plot_kwargs)
 
     else:
-        raise ValueError('Plot type {} not recognized.'.format(kind))
+        raise ValueError("Plot type {} not recognized.".format(kind))
 
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
-            ax.plot([], label='chain {:>2} BFMI = {:.2f}'.format(idx, val), alpha=0)
+            ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
 
     ax.set_xticks([])
     ax.set_yticks([])

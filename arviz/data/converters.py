@@ -11,7 +11,7 @@ from .io_pystan import from_pystan
 
 
 # pylint: disable=too-many-return-statements
-def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None, **kwargs):
+def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None, **kwargs):
     r"""Convert a supported object to an InferenceData object.
 
     This function sends `obj` to the right conversion function. It is idempotent,
@@ -51,13 +51,13 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
         return obj
     elif isinstance(obj, str):
         return InferenceData.from_netcdf(obj)
-    elif obj.__class__.__name__ == 'StanFit4Model':  # ugly, but doesn't make PyStan a requirement
+    elif obj.__class__.__name__ == "StanFit4Model":  # ugly, but doesn't make PyStan a requirement
         return from_pystan(fit=obj, coords=coords, dims=dims, **kwargs)
-    elif obj.__class__.__name__ == 'MultiTrace':  # ugly, but doesn't make PyMC3 a requirement
+    elif obj.__class__.__name__ == "MultiTrace":  # ugly, but doesn't make PyMC3 a requirement
         return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
-    elif obj.__class__.__name__ == 'EnsembleSampler':  # ugly, but doesn't make emcee a requirement
+    elif obj.__class__.__name__ == "EnsembleSampler":  # ugly, but doesn't make emcee a requirement
         return from_emcee(obj, coords=coords, dims=dims, **kwargs)
-    elif obj.__class__.__name__ == 'MCMC' and obj.__class__.__module__.startswith('pyro'):
+    elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("pyro"):
         return from_pyro(obj, coords=coords, dims=dims, **kwargs)
 
     # Cases that convert to xarray
@@ -66,23 +66,17 @@ def convert_to_inference_data(obj, *, group='posterior', coords=None, dims=None,
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
-        dataset = dict_to_dataset({'x': obj}, coords=coords, dims=dims)
+        dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
     else:
-        allowable_types = (
-            'xarray dataset',
-            'dict',
-            'netcdf file',
-            'numpy array',
-            'pystan fit',
-            'pymc3 trace'
+        allowable_types = ("xarray dataset", "dict", "netcdf file", "numpy array", "pystan fit", "pymc3 trace")
+        raise ValueError(
+            "Can only convert {} to InferenceData, not {}".format(", ".join(allowable_types), obj.__class__.__name__)
         )
-        raise ValueError('Can only convert {} to InferenceData, not {}'.format(
-            ', '.join(allowable_types), obj.__class__.__name__))
 
     return InferenceData(**{group: dataset})
 
 
-def convert_to_dataset(obj, *, group='posterior', coords=None, dims=None):
+def convert_to_dataset(obj, *, group="posterior", coords=None, dims=None):
     """Convert a supported object to an xarray dataset.
 
     This function is idempotent, in that it will return xarray.Dataset functions
@@ -120,6 +114,8 @@ def convert_to_dataset(obj, *, group='posterior', coords=None, dims=None):
     inference_data = convert_to_inference_data(obj, group=group, coords=coords, dims=dims)
     dataset = getattr(inference_data, group, None)
     if dataset is None:
-        raise ValueError('Can not extract {group} from {obj}! See {filename} for other '
-                         'conversion utilities.'.format(group=group, obj=obj, filename=__file__))
+        raise ValueError(
+            "Can not extract {group} from {obj}! See {filename} for other "
+            "conversion utilities.".format(group=group, obj=obj, filename=__file__)
+        )
     return dataset

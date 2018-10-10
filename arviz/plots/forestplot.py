@@ -19,10 +19,24 @@ def pairwise(iterable):
     return zip(first, second)
 
 
-def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combined=False,
-                credible_interval=0.94, quartiles=True, eff_n=False, r_hat=False, colors='cycle',
-                textsize=None, linewidth=None, markersize=None, ridgeplot_alpha=None,
-                ridgeplot_overlap=2, figsize=None):
+def plot_forest(
+    data,
+    kind="forestplot",
+    model_names=None,
+    var_names=None,
+    combined=False,
+    credible_interval=0.94,
+    quartiles=True,
+    eff_n=False,
+    r_hat=False,
+    colors="cycle",
+    textsize=None,
+    linewidth=None,
+    markersize=None,
+    ridgeplot_alpha=None,
+    ridgeplot_overlap=2,
+    figsize=None,
+):
     """Forest plot to compare credible intervals from a number of distributions.
 
     Generates a forest plot of 100*(credible_interval)% credible intervals from
@@ -88,14 +102,12 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
         ncols += 1
         width_ratios.append(1)
 
-    plot_handler = PlotHandler(data, var_names=var_names, model_names=model_names,
-                               combined=combined, colors=colors)
+    plot_handler = PlotHandler(data, var_names=var_names, model_names=model_names, combined=combined, colors=colors)
 
     if figsize is None:
         figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    (figsize, _, titlesize, xt_labelsize,
-     auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
+    (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
 
     if linewidth is None:
         linewidth = auto_linewidth
@@ -103,24 +115,22 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
     if markersize is None:
         markersize = auto_markersize
 
-    fig, axes = plt.subplots(nrows=1,
-                             ncols=ncols,
-                             figsize=figsize,
-                             gridspec_kw={'width_ratios': width_ratios},
-                             sharey=True,
-                             constrained_layout=True,
-                             )
+    fig, axes = plt.subplots(
+        nrows=1,
+        ncols=ncols,
+        figsize=figsize,
+        gridspec_kw={"width_ratios": width_ratios},
+        sharey=True,
+        constrained_layout=True,
+    )
 
     axes = np.atleast_1d(axes)
-    if kind == 'forestplot':
-        plot_handler.forestplot(credible_interval, quartiles, xt_labelsize, titlesize, linewidth,
-                                markersize, axes[0])
-    elif kind == 'ridgeplot':
-        plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha,
-                               axes[0])
+    if kind == "forestplot":
+        plot_handler.forestplot(credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0])
+    elif kind == "ridgeplot":
+        plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
     else:
-        raise TypeError("Argument 'kind' must be one of 'forestplot' or "
-                        "'ridgeplot' (you provided {})".format(kind))
+        raise TypeError("Argument 'kind' must be one of 'forestplot' or " "'ridgeplot' (you provided {})".format(kind))
 
     idx = 1
     if eff_n:
@@ -139,8 +149,8 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
             ticks.tick2On = False
 
         for loc, spine in ax.spines.items():
-            if loc in ['left', 'right']:
-                spine.set_color('none')  # don't draw spine
+            if loc in ["left", "right"]:
+                spine.set_color("none")  # don't draw spine
 
         if len(plot_handler.data) > 1:
             plot_handler.make_bands(ax)
@@ -150,14 +160,14 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
     axes[0].set_yticklabels(labels)
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
-    if kind == 'ridgeplot':  # space at the top
+    if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
 
     return fig, axes
 
 
-class PlotHandler():
+class PlotHandler:
     """Class to handle logic from ForestPlot."""
 
     def __init__(self, data, var_names, model_names, combined, colors):
@@ -165,13 +175,13 @@ class PlotHandler():
             data = [data]
 
         # y-values upside down
-        self.data = [convert_to_dataset(datum, group='posterior') for datum in reversed(data)]
+        self.data = [convert_to_dataset(datum, group="posterior") for datum in reversed(data)]
 
         if model_names is None:
             if len(self.data) > 1:
-                model_names = ['Model {}'.format(idx) for idx, _ in enumerate(self.data)]
+                model_names = ["Model {}".format(idx) for idx, _ in enumerate(self.data)]
             else:
-                model_names = ['']
+                model_names = [""]
         elif len(model_names) != len(self.data):
             raise ValueError("The number of model names does not match the number of models")
 
@@ -184,8 +194,8 @@ class PlotHandler():
 
         self.combined = combined
 
-        if colors == 'cycle':
-            colors = ['C{}'.format(idx) for idx, _ in enumerate(self.data)]
+        if colors == "cycle":
+            colors = ["C{}".format(idx) for idx, _ in enumerate(self.data)]
         elif isinstance(colors, str):
             colors = [colors for _ in self.data]
 
@@ -197,10 +207,9 @@ class PlotHandler():
         """Initialize an object for each variable to be plotted."""
         plotters, y = {}, 0
         for var_name in self.var_names:
-            plotters[var_name] = VarHandler(var_name, self.data, y,
-                                            model_names=self.model_names,
-                                            combined=self.combined,
-                                            colors=self.colors)
+            plotters[var_name] = VarHandler(
+                var_name, self.data, y, model_names=self.model_names, combined=self.combined, colors=self.colors
+            )
             y = plotters[var_name].y_max()
         return plotters
 
@@ -230,16 +239,16 @@ class PlotHandler():
             Axes to draw on
         """
         if alpha is None:
-            alpha = 1.
+            alpha = 1.0
         zorder = 0
         for plotter in self.plotters.values():
             for x, y_min, y_max, color in plotter.ridgeplot(mult):
                 if alpha == 0:
                     border = color
                 else:
-                    border = 'k'
-                ax.plot(x, y_max, '-', linewidth=linewidth, color=border, zorder=zorder)
-                ax.plot(x, y_min, '-', linewidth=linewidth, color=border, zorder=zorder)
+                    border = "k"
+                ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
+                ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
                 ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
 
@@ -247,8 +256,7 @@ class PlotHandler():
 
         return ax
 
-    def forestplot(self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth,
-                   markersize, ax):
+    def forestplot(self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax):
         """Draw forestplot for each plotter.
 
         Parameters
@@ -278,17 +286,12 @@ class PlotHandler():
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
                 mid = len(values) // 2
-                param_iter = zip(
-                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1],
-                    range(mid))
+                param_iter = zip(np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid))
                 for width, j in param_iter:
                     ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
-                ax.plot(values[mid], y, 'o',
-                        mfc=ax.get_facecolor(),
-                        markersize=markersize * 0.75,
-                        color=color)
+                ax.plot(values[mid], y, "o", mfc=ax.get_facecolor(), markersize=markersize * 0.75, color=color)
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title('{:.1%} Credible Interval'.format(credible_interval), fontsize=titlesize)
+        ax.set_title("{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize)
 
         return ax
 
@@ -297,10 +300,9 @@ class PlotHandler():
         for plotter in self.plotters.values():
             for y, eff_n, color in plotter.eff_n():
                 if eff_n is not None:
-                    ax.plot(eff_n, y, 'o', color=color, clip_on=False,
-                            markersize=markersize, markeredgecolor='k')
+                    ax.plot(eff_n, y, "o", color=color, clip_on=False, markersize=markersize, markeredgecolor="k")
         ax.set_xlim(left=0)
-        ax.set_title('eff_n', fontsize=titlesize)
+        ax.set_title("eff_n", fontsize=titlesize)
         ax.tick_params(labelsize=xt_labelsize)
         return ax
 
@@ -309,11 +311,11 @@ class PlotHandler():
         for plotter in self.plotters.values():
             for y, r_hat, color in plotter.r_hat():
                 if r_hat is not None:
-                    ax.plot(r_hat, y, 'o', color=color, markersize=markersize, markeredgecolor='k')
+                    ax.plot(r_hat, y, "o", color=color, markersize=markersize, markeredgecolor="k")
         ax.set_xlim(left=0.9, right=2.1)
         ax.set_xticks([1, 2])
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title('r_hat', fontsize=titlesize)
+        ax.set_title("r_hat", fontsize=titlesize)
         return ax
 
     def make_bands(self, ax):
@@ -339,21 +341,25 @@ class PlotHandler():
 
         y_vals.append(y_prev + offset)
         for idx, (y_start, y_stop) in enumerate(pairwise(y_vals)):
-            ax.axhspan(y_start, y_stop, color='k', alpha=0.1 * (idx % 2))
+            ax.axhspan(y_start, y_stop, color="k", alpha=0.1 * (idx % 2))
         return ax
 
     def fig_height(self):
         """Figure out the height of this plot."""
         # hand-tuned
-        return (4 + len(self.data) * len(self.var_names) - 1 +
-                0.1 * sum(1 for j in self.plotters.values() for _ in j.iterator()))
+        return (
+            4
+            + len(self.data) * len(self.var_names)
+            - 1
+            + 0.1 * sum(1 for j in self.plotters.values() for _ in j.iterator())
+        )
 
     def y_max(self):
         """Get maximum y value for the plot."""
         return max(p.y_max() for p in self.plotters.values())
 
 
-class VarHandler():
+class VarHandler:
     """Handle individual variable logic."""
 
     def __init__(self, var_name, data, y_start, model_names, combined, colors):
@@ -373,18 +379,17 @@ class VarHandler():
         """Iterate over models and chains for each variable."""
         if self.combined:
             grouped_data = [[(0, datum)] for datum in self.data]
-            skip_dims = {'chain'}
+            skip_dims = {"chain"}
         else:
-            grouped_data = [datum.groupby('chain') for datum in self.data]
+            grouped_data = [datum.groupby("chain") for datum in self.data]
             skip_dims = set()
 
         label_dict = {}
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
-                datum_iter = xarray_var_iter(sub_data,
-                                             var_names=[self.var_name],
-                                             skip_dims=skip_dims,
-                                             reverse_selections=True)
+                datum_iter = xarray_var_iter(
+                    sub_data, var_names=[self.var_name], skip_dims=skip_dims, reverse_selections=True
+                )
                 for _, selection, values in datum_iter:
                     label = make_label(self.var_name, selection)
                     if label not in label_dict:
@@ -397,7 +402,7 @@ class VarHandler():
         for label, model_data in label_dict.items():
             for model_name, value_list in model_data.items():
                 if model_name:
-                    row_label = '{}: {}'.format(model_name, label)
+                    row_label = "{}: {}".format(model_name, label)
                 else:
                     row_label = label
                 for values in value_list:

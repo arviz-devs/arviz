@@ -3,8 +3,7 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from ..stats.diagnostics import autocorr
-from .plot_utils import (_scale_fig_size, default_grid, make_label, xarray_var_iter,
-                         _create_axes_grid)
+from .plot_utils import _scale_fig_size, default_grid, make_label, xarray_var_iter, _create_axes_grid
 
 
 def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
@@ -36,17 +35,15 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     -------
     axes : matplotlib axes
     """
-    data = convert_to_dataset(data, group='posterior')
+    data = convert_to_dataset(data, group="posterior")
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize,
-                                                                        rows, cols)
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
-    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize,
-                                squeeze=False, sharex=True, sharey=True)
+    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True)
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
@@ -57,10 +54,8 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
 
         y = autocorr(x_prime)
 
-        ax.vlines(x=np.arange(0, max_lag),
-                  ymin=0, ymax=y[0:max_lag],
-                  lw=linewidth)
-        ax.hlines(0, 0, max_lag, 'steelblue')
+        ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
+        ax.hlines(0, 0, max_lag, "steelblue")
         ax.set_title(make_label(var_name, selection), fontsize=titlesize)
         ax.tick_params(labelsize=xt_labelsize)
 

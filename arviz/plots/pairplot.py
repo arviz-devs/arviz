@@ -10,9 +10,23 @@ from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 
 
-def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-              gridsize='auto', contour=True, fill_last=True, divergences=False, colorbar=False,
-              gs=None, ax=None, divergences_kwargs=None, plot_kwargs=None):
+def plot_pair(
+    data,
+    var_names=None,
+    coords=None,
+    figsize=None,
+    textsize=None,
+    kind="scatter",
+    gridsize="auto",
+    contour=True,
+    fill_last=True,
+    divergences=False,
+    colorbar=False,
+    gs=None,
+    ax=None,
+    divergences_kwargs=None,
+    plot_kwargs=None,
+):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
 
@@ -60,10 +74,9 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
     gs : matplotlib gridspec
 
     """
-    valid_kinds = ['scatter', 'kde', 'hexbin']
+    valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
-        raise ValueError(('Plot type {} not recognized.'
-                          'Plot type must be in {}').format(kind, valid_kinds))
+        raise ValueError(("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds))
 
     if coords is None:
         coords = {}
@@ -75,52 +88,46 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
         divergences_kwargs = {}
 
     # Get posterior draws and combine chains
-    posterior_data = convert_to_dataset(data, group='posterior')
-    _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords),
-                                               var_names=var_names, combined=True)
+    posterior_data = convert_to_dataset(data, group="posterior")
+    _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords), var_names=var_names, combined=True)
 
     # Get diverging draws and combine chains
     if divergences:
-        divergent_data = convert_to_dataset(data, group='sample_stats')
-        _, diverging_mask = xarray_to_ndarray(divergent_data,
-                                              var_names=('diverging',),
-                                              combined=True)
+        divergent_data = convert_to_dataset(data, group="sample_stats")
+        _, diverging_mask = xarray_to_ndarray(divergent_data, var_names=("diverging",), combined=True)
         diverging_mask = np.squeeze(diverging_mask)
 
-
-    if gridsize == 'auto':
-        gridsize = int(len(_posterior[0])**0.35)
+    if gridsize == "auto":
+        gridsize = int(len(_posterior[0]) ** 0.35)
 
     numvars = len(_var_names)
 
     if numvars < 2:
-        raise Exception('Number of variables to be plotted must be 2 or greater.')
+        raise Exception("Number of variables to be plotted must be 2 or greater.")
 
-    (figsize, ax_labelsize, _, xt_labelsize,
-     _, markersize) = _scale_fig_size(figsize, textsize, numvars-1, numvars-1)
-    divergences_kwargs.setdefault('s', markersize)
+    (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
+        figsize, textsize, numvars - 1, numvars - 1
+    )
+    divergences_kwargs.setdefault("s", markersize)
 
     if numvars == 2 and ax is not None:
-        if kind == 'scatter':
-            plot_kwargs.setdefault('s', markersize)
+        if kind == "scatter":
+            plot_kwargs.setdefault("s", markersize)
             ax.scatter(_posterior[0], _posterior[1], **plot_kwargs)
-        elif kind == 'kde':
-            plot_kde(_posterior[0], _posterior[1], contour=contour, fill_last=fill_last, ax=ax,
-                     **plot_kwargs)
+        elif kind == "kde":
+            plot_kde(_posterior[0], _posterior[1], contour=contour, fill_last=fill_last, ax=ax, **plot_kwargs)
         else:
-            hexbin = ax.hexbin(_posterior[0], _posterior[1], mincnt=1, gridsize=gridsize,
-                               **plot_kwargs)
+            hexbin = ax.hexbin(_posterior[0], _posterior[1], mincnt=1, gridsize=gridsize, **plot_kwargs)
             ax.grid(False)
             if colorbar:
                 cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
-                cbar.ax.set_yticklabels(['low', 'high'], fontsize=ax_labelsize)
+                cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
         if divergences:
-            ax.scatter(_posterior[0][diverging_mask], _posterior[1][diverging_mask],
-                       **divergences_kwargs)
+            ax.scatter(_posterior[0][diverging_mask], _posterior[1][diverging_mask], **divergences_kwargs)
 
-        ax.set_xlabel('{}'.format(_var_names[0]), fontsize=ax_labelsize)
-        ax.set_ylabel('{}'.format(_var_names[1]), fontsize=ax_labelsize)
+        ax.set_xlabel("{}".format(_var_names[0]), fontsize=ax_labelsize)
+        ax.set_ylabel("{}".format(_var_names[1]), fontsize=ax_labelsize)
         ax.tick_params(labelsize=xt_labelsize)
 
     if gs is None and ax is None:
@@ -136,25 +143,24 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
 
                 ax = fig.add_subplot(gs[j, i])
 
-                if kind == 'scatter':
-                    plot_kwargs.setdefault('s', markersize)
+                if kind == "scatter":
+                    plot_kwargs.setdefault("s", markersize)
                     ax.scatter(var1, var2, **plot_kwargs)
 
-                elif kind == 'kde':
+                elif kind == "kde":
                     plot_kde(var1, var2, contour=contour, fill_last=fill_last, ax=ax, **plot_kwargs)
 
                 else:
                     ax.grid(False)
                     hexbin = ax.hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                     divider = make_axes_locatable(ax)
-                    divider.append_axes('right', size='1%').set_axis_off()
-                    divider.append_axes('top', size='1%').set_axis_off()
+                    divider.append_axes("right", size="1%").set_axis_off()
+                    divider.append_axes("top", size="1%").set_axis_off()
 
                     if i == j == 0 and colorbar:
-                        cax = divider.append_axes('right', size='7%')
-                        cbar = fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax],
-                                            cax=cax)
-                        cbar.ax.set_yticklabels(['low', 'high'], fontsize=ax_labelsize)
+                        cax = divider.append_axes("right", size="7%")
+                        cbar = fig.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], cax=cax)
+                        cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
                 if divergences:
                     ax.scatter(var1[diverging_mask], var2[diverging_mask], **divergences_kwargs)
@@ -162,11 +168,11 @@ def plot_pair(data, var_names=None, coords=None, figsize=None, textsize=None, ki
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_xlabel('{}'.format(_var_names[i]), fontsize=ax_labelsize)
+                    ax.set_xlabel("{}".format(_var_names[i]), fontsize=ax_labelsize)
                 if i != 0:
                     ax.axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_ylabel('{}'.format(_var_names[j + 1]), fontsize=ax_labelsize)
+                    ax.set_ylabel("{}".format(_var_names[j + 1]), fontsize=ax_labelsize)
 
                 ax.tick_params(labelsize=xt_labelsize)
                 axs.append(ax)

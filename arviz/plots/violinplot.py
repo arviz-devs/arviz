@@ -8,8 +8,19 @@ from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label
 
 
-def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, shade=0.35,
-                bw=4.5, sharey=True, figsize=None, textsize=None, ax=None, kwargs_shade=None):
+def plot_violin(
+    data,
+    var_names=None,
+    quartiles=True,
+    credible_interval=0.94,
+    shade=0.35,
+    bw=4.5,
+    sharey=True,
+    figsize=None,
+    textsize=None,
+    ax=None,
+    kwargs_shade=None,
+):
     """Plot posterior of traces as violin plot.
 
     Notes
@@ -50,14 +61,13 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
     -------
     ax : matplotlib axes
     """
-    data = convert_to_dataset(data, group='posterior')
+    data = convert_to_dataset(data, group="posterior")
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    (figsize, ax_labelsize, _, xt_labelsize,
-     linewidth, _) = _scale_fig_size(figsize, textsize, 1, len(plotters))
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, len(plotters))
     ax_labelsize *= 2
 
     if ax is None:
@@ -70,7 +80,7 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
 
     for axind, (var_name, selection, x) in enumerate(plotters):
         val = x.flatten()
-        if val[0].dtype.kind == 'i':
+        if val[0].dtype.kind == "i":
             cat_hist(val, shade, ax[axind], **kwargs_shade)
         else:
             _violinplot(val, shade, bw, ax[axind], **kwargs_shade)
@@ -79,14 +89,14 @@ def plot_violin(data, var_names=None, quartiles=True, credible_interval=0.94, sh
         hpd_intervals = hpd(val, credible_interval)
 
         if quartiles:
-            ax[axind].plot([0, 0], per[:2], lw=linewidth*3, color='k', solid_capstyle='round')
-        ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color='k', solid_capstyle='round')
-        ax[axind].plot(0, per[-1], 'wo', ms=linewidth*1.5)
+            ax[axind].plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")
+        ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color="k", solid_capstyle="round")
+        ax[axind].plot(0, per[-1], "wo", ms=linewidth * 1.5)
 
         ax[axind].set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
         ax[axind].set_xticks([])
         ax[axind].tick_params(labelsize=xt_labelsize)
-        ax[axind].grid(None, axis='x')
+        ax[axind].grid(None, axis="x")
 
     if sharey:
         fig.subplots_adjust(wspace=0)
@@ -113,8 +123,8 @@ def cat_hist(val, shade, ax, **kwargs_shade):
     binned_d, _ = np.histogram(val, bins=bins, normed=True)
 
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
-    centers = .5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
+    centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
     heights = np.diff(bin_edges)
 
-    lefts = - .5 * binned_d
+    lefts = -0.5 * binned_d
     ax.barh(centers, binned_d, height=heights, left=lefts, alpha=shade, **kwargs_shade)

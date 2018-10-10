@@ -14,7 +14,7 @@ def make_2d(ary):
     dimensions after the first.
     """
     dim_0, *_ = np.atleast_1d(ary).shape
-    return ary.reshape(dim_0, -1, order='F')
+    return ary.reshape(dim_0, -1, order="F")
 
 
 def _scale_fig_size(figsize, textsize, rows=1, cols=1):
@@ -43,12 +43,12 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
         markersize
     """
     params = mpl.rcParams
-    rc_width, rc_height = tuple(params['figure.figsize'])
-    rc_ax_labelsize = params['axes.labelsize']
-    rc_titlesize = params['axes.titlesize']
-    rc_xt_labelsize = params['xtick.labelsize']
-    rc_linewidth = params['lines.linewidth']
-    rc_markersize = params['lines.markersize']
+    rc_width, rc_height = tuple(params["figure.figsize"])
+    rc_ax_labelsize = params["axes.labelsize"]
+    rc_titlesize = params["axes.titlesize"]
+    rc_xt_labelsize = params["xtick.labelsize"]
+    rc_linewidth = params["lines.linewidth"]
+    rc_markersize = params["lines.markersize"]
     if isinstance(rc_ax_labelsize, str):
         rc_ax_labelsize = 15
     if isinstance(rc_titlesize, str):
@@ -60,14 +60,14 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
         width, height = rc_width, rc_height
         sff = 1 if (rows == cols == 1) else 1.15
         width = width * cols * sff
-        height = height * rows  * sff
+        height = height * rows * sff
     else:
         width, height = figsize
 
     if textsize is not None:
         scale_factor = textsize / rc_xt_labelsize
     elif rows == cols == 1:
-        scale_factor = ((width * height) / (rc_width * rc_height))**0.5
+        scale_factor = ((width * height) / (rc_width * rc_height)) ** 0.5
     else:
         scale_factor = 1
 
@@ -121,6 +121,7 @@ def default_grid(n_items, max_cols=4, min_cols=3):
     (int, int)
         Rows and columns, so that rows * columns >= n_items
     """
+
     def in_bounds(val):
         return np.clip(val, min_cols, max_cols)
 
@@ -157,7 +158,7 @@ def _create_axes_grid(length_plotters, rows, cols, **kwargs):
     ax = np.ravel(ax)
     extra = (rows * cols) - length_plotters
     if extra:
-        for i in range(1, extra+1):
+        for i in range(1, extra + 1):
             ax[-i].set_axis_off()
         ax = ax[:-extra]
     return fig, ax
@@ -175,7 +176,7 @@ def selection_to_string(selection):
     str
         key1: value1, key2: value2, ...
     """
-    return ', '.join(['{}'.format(v) for _, v in selection.items()])
+    return ", ".join(["{}".format(v) for _, v in selection.items()])
 
 
 def make_label(var_name, selection):
@@ -195,8 +196,8 @@ def make_label(var_name, selection):
         A text representation of the label
     """
     if selection:
-        return '{}\n({})'.format(var_name, selection_to_string(selection))
-    return '{}'.format(var_name)
+        return "{}\n({})".format(var_name, selection_to_string(selection))
+    return "{}".format(var_name)
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
@@ -232,9 +233,9 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         skip_dims = set()
 
     if combined:
-        skip_dims = skip_dims.union({'chain', 'draw'})
+        skip_dims = skip_dims.union({"chain", "draw"})
     else:
-        skip_dims.add('draw')
+        skip_dims.add("draw")
 
     if var_names is None:
         if isinstance(data, xr.Dataset):
@@ -281,8 +282,7 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     unpacked_data, unpacked_var_names, = [], []
 
     # Merge chains and variables
-    for var_name, selection, data_array in xarray_var_iter(data, var_names=var_names,
-                                                           combined=combined):
+    for var_name, selection, data_array in xarray_var_iter(data, var_names=var_names, combined=combined):
         unpacked_data.append(data_array.flatten())
         unpacked_var_names.append(make_label(var_name, selection))
 
@@ -313,6 +313,10 @@ def get_coords(data, coords):
         raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
 
     except KeyError as err:
-        raise KeyError(("Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
-                        "Check that coords structure is correct and"
-                        " dimensions are valid. {}").format(err))
+        raise KeyError(
+            (
+                "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
+                "Check that coords structure is correct and"
+                " dimensions are valid. {}"
+            ).format(err)
+        )

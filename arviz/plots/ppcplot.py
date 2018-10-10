@@ -4,8 +4,7 @@ from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import _scale_fig_size, _create_axes_grid, default_grid
 
 
-def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=None,
-             data_pairs=None):
+def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None):
     """
     Plot for Posterior Predictive checks.
 
@@ -37,12 +36,11 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
     -------
     axes : matplotlib axes
     """
-    for group in ('posterior_predictive', 'observed_data'):
+    for group in ("posterior_predictive", "observed_data"):
         if not hasattr(data, group):
-            raise TypeError(
-                '`data` argument must have the group "{group}" for ppcplot'.format(group=group))
+            raise TypeError('`data` argument must have the group "{group}" for ppcplot'.format(group=group))
 
-    if kind.lower() not in ('density', 'cumulative'):
+    if kind.lower() not in ("density", "cumulative"):
         raise TypeError("`kind` argument must be either `density` or `cumulative`")
 
     if data_pairs is None:
@@ -53,65 +51,77 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
 
     rows, cols = default_grid(len(observed.data_vars))
 
-    (figsize, ax_labelsize, _, xt_labelsize,
-     linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
 
     for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
         dtype = observed[var_name].dtype.kind
-        if kind == 'density':
-            if dtype == 'f':
-                plot_kde(observed[var_name].values.flatten(), label='Observed {}'.format(var_name),
-                         plot_kwargs={'color': 'k', 'linewidth': linewidth, 'zorder': 3},
-                         fill_kwargs={'alpha': 0},
-                         ax=ax)
+        if kind == "density":
+            if dtype == "f":
+                plot_kde(
+                    observed[var_name].values.flatten(),
+                    label="Observed {}".format(var_name),
+                    plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
+                    fill_kwargs={"alpha": 0},
+                    ax=ax,
+                )
             else:
                 vals = observed[var_name].values.flatten()
-                nbins = round(len(vals)**0.5)
+                nbins = round(len(vals) ** 0.5)
                 hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                 hist = np.concatenate((hist[:1], hist))
-                ax.plot(bin_edges, hist, label='Observed {}'.format(var_name),
-                        color='k', linewidth=linewidth, zorder=3, drawstyle='steps-pre')
+                ax.plot(
+                    bin_edges,
+                    hist,
+                    label="Observed {}".format(var_name),
+                    color="k",
+                    linewidth=linewidth,
+                    zorder=3,
+                    drawstyle="steps-pre",
+                )
             pp_var_name = data_pairs.get(var_name, var_name)
             # run plot_kde manually with one plot call
             pp_densities = []
-            for _, chain_vals in posterior_predictive[pp_var_name].groupby('chain'):
-                for _, vals in chain_vals.groupby('draw'):
-                    if dtype == 'f':
+            for _, chain_vals in posterior_predictive[pp_var_name].groupby("chain"):
+                for _, vals in chain_vals.groupby("draw"):
+                    if dtype == "f":
                         pp_density, lower, upper = _fast_kde(vals)
                         pp_x = np.linspace(lower, upper, len(pp_density))
                         pp_densities.extend([pp_x, pp_density])
                     else:
-                        nbins = round(len(vals)**0.5)
+                        nbins = round(len(vals) ** 0.5)
                         hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                         hist = np.concatenate((hist[:1], hist))
                         pp_densities.extend([bin_edges, hist])
-            plot_kwargs = {'color': 'C5',
-                           'alpha': alpha,
-                           'linewidth': 0.5 * linewidth}
-            if dtype == 'i':
-                plot_kwargs['drawstyle'] = 'steps-pre'
+            plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
+            if dtype == "i":
+                plot_kwargs["drawstyle"] = "steps-pre"
             ax.plot(*pp_densities, **plot_kwargs)
-            ax.plot([], color='C5', label='Posterior predictive {}'.format(pp_var_name))
+            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
             if mean:
-                if dtype == 'f':
-                    plot_kde(posterior_predictive[pp_var_name].values.flatten(),
-                             plot_kwargs={'color': 'C0',
-                                          'linestyle': '--',
-                                          'linewidth': linewidth,
-                                          'zorder': 2},
-                             label='Posterior predictive mean {}'.format(pp_var_name),
-                             ax=ax)
+                if dtype == "f":
+                    plot_kde(
+                        posterior_predictive[pp_var_name].values.flatten(),
+                        plot_kwargs={"color": "C0", "linestyle": "--", "linewidth": linewidth, "zorder": 2},
+                        label="Posterior predictive mean {}".format(pp_var_name),
+                        ax=ax,
+                    )
                 else:
                     vals = posterior_predictive[pp_var_name].values.flatten()
-                    nbins = round(len(vals)**0.5)
+                    nbins = round(len(vals) ** 0.5)
                     hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                     hist = np.concatenate((hist[:1], hist))
-                    ax.plot(bin_edges, hist, color='C0', linewidth=linewidth,
-                            label='Posterior predictive mean {}'.format(pp_var_name),
-                            zorder=2, linestyle='--',
-                            drawstyle='steps-pre')
+                    ax.plot(
+                        bin_edges,
+                        hist,
+                        color="C0",
+                        linewidth=linewidth,
+                        label="Posterior predictive mean {}".format(pp_var_name),
+                        zorder=2,
+                        linestyle="--",
+                        drawstyle="steps-pre",
+                    )
             if var_name != pp_var_name:
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
@@ -120,47 +130,54 @@ def plot_ppc(data, kind='density', alpha=0.2, mean=True, figsize=None, textsize=
             ax.tick_params(labelsize=xt_labelsize)
             ax.set_yticks([])
 
-        elif kind == 'cumulative':
-            if dtype == 'f':
-                ax.plot(*_empirical_cdf(observed[var_name].values.flatten()),
-                        color='k',
-                        linewidth=linewidth,
-                        label='Observed {}'.format(var_name),
-                        zorder=3)
+        elif kind == "cumulative":
+            if dtype == "f":
+                ax.plot(
+                    *_empirical_cdf(observed[var_name].values.flatten()),
+                    color="k",
+                    linewidth=linewidth,
+                    label="Observed {}".format(var_name),
+                    zorder=3
+                )
             else:
-                ax.plot(*_empirical_cdf(observed[var_name].values.flatten()),
-                        color='k',
-                        linewidth=linewidth,
-                        label='Observed {}'.format(var_name),
-                        drawstyle='steps-pre',
-                        zorder=3)
+                ax.plot(
+                    *_empirical_cdf(observed[var_name].values.flatten()),
+                    color="k",
+                    linewidth=linewidth,
+                    label="Observed {}".format(var_name),
+                    drawstyle="steps-pre",
+                    zorder=3
+                )
             pp_var_name = data_pairs.get(var_name, var_name)
             # run plot_kde manually with one plot call
             pp_densities = []
-            for _, chain_vals in posterior_predictive[pp_var_name].groupby('chain'):
-                for _, vals in chain_vals.groupby('draw'):
+            for _, chain_vals in posterior_predictive[pp_var_name].groupby("chain"):
+                for _, vals in chain_vals.groupby("draw"):
                     pp_x, pp_density = _empirical_cdf(vals)
                     pp_densities.extend([pp_x, pp_density])
-            if dtype == 'f':
-                ax.plot(*pp_densities, alpha=alpha, color='C5', linewidth=linewidth)
+            if dtype == "f":
+                ax.plot(*pp_densities, alpha=alpha, color="C5", linewidth=linewidth)
             else:
-                ax.plot(*pp_densities, alpha=alpha, color='C5', drawstyle='steps-pre',
-                        linewidth=linewidth)
-            ax.plot([], color='C5', label='Posterior predictive {}'.format(pp_var_name))
+                ax.plot(*pp_densities, alpha=alpha, color="C5", drawstyle="steps-pre", linewidth=linewidth)
+            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
             if mean:
-                if dtype == 'f':
-                    ax.plot(*_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
-                            color='C0',
-                            linestyle='--',
-                            linewidth=linewidth,
-                            label='Posterior predictive mean {}'.format(pp_var_name))
+                if dtype == "f":
+                    ax.plot(
+                        *_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
+                        color="C0",
+                        linestyle="--",
+                        linewidth=linewidth,
+                        label="Posterior predictive mean {}".format(pp_var_name)
+                    )
                 else:
-                    ax.plot(*_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
-                            color='C0',
-                            linestyle='--',
-                            linewidth=linewidth,
-                            drawstyle='steps-pre',
-                            label='Posterior predictive mean {}'.format(pp_var_name))
+                    ax.plot(
+                        *_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
+                        color="C0",
+                        linestyle="--",
+                        linewidth=linewidth,
+                        drawstyle="steps-pre",
+                        label="Posterior predictive mean {}".format(pp_var_name)
+                    )
             if var_name != pp_var_name:
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
