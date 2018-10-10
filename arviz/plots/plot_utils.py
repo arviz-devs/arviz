@@ -68,7 +68,7 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
         scale_factor = textsize / rc_xt_labelsize
     elif rows == cols == 1:
         scale_factor = ((width * height) / (rc_width * rc_height))**0.5
-    elif rows > 1 or cols > 1:
+    else:
         scale_factor = 1
 
     ax_labelsize = rc_ax_labelsize * scale_factor

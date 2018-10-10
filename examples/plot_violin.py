@@ -8,5 +8,5 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-non_centered = az.load_arviz_data('non_centered_eight')
-az.plot_violin(non_centered, var_names=["mu", "tau"], textsize=8)
+data = az.load_arviz_data('non_centered_eight')
+az.plot_violin(data, var_names=['mu', 'tau'])
