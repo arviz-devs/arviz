@@ -67,7 +67,9 @@ def plot_violin(
     if kwargs_shade is None:
         kwargs_shade = {}
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, len(plotters))
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+        figsize, textsize, 1, len(plotters)
+    )
     ax_labelsize *= 2
 
     if ax is None:

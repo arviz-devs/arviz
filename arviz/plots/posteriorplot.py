@@ -5,7 +5,14 @@ from scipy.stats import mode
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import plot_kde, _fast_kde
-from .plot_utils import xarray_var_iter, _scale_fig_size, make_label, default_grid, _create_axes_grid, get_coords
+from .plot_utils import (
+    xarray_var_iter,
+    _scale_fig_size,
+    make_label,
+    default_grid,
+    _create_axes_grid,
+    get_coords,
+)
 
 
 def plot_posterior(
@@ -144,11 +151,15 @@ def plot_posterior(
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
     kwargs.setdefault("linewidth", _linewidth)
 
     if ax is None:
-        _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True)
+        _, ax = _create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
+        )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(
@@ -216,7 +227,9 @@ def _plot_posterior_op(
         less_than_ref_probability = (values < val).mean()
         greater_than_ref_probability = (values >= val).mean()
         ref_in_posterior = "{} <{:g}< {}".format(
-            format_as_percent(less_than_ref_probability, 1), val, format_as_percent(greater_than_ref_probability, 1)
+            format_as_percent(less_than_ref_probability, 1),
+            val,
+            format_as_percent(greater_than_ref_probability, 1),
         )
         ax.axvline(val, ymin=0.05, ymax=0.75, color="C1", lw=linewidth, alpha=0.65)
         ax.text(
@@ -280,12 +293,22 @@ def _plot_posterior_op(
             point_value = np.median(values)
         point_text = "{}={:.{}f}".format(point_estimate, point_value, round_to)
 
-        ax.text(point_value, plot_height * 0.8, point_text, size=ax_labelsize, horizontalalignment="center")
+        ax.text(
+            point_value,
+            plot_height * 0.8,
+            point_text,
+            size=ax_labelsize,
+            horizontalalignment="center",
+        )
 
     def display_hpd():
         hpd_intervals = hpd(values, credible_interval=credible_interval)
         ax.plot(
-            hpd_intervals, (plot_height * 0.02, plot_height * 0.02), lw=linewidth * 2, color="k", solid_capstyle="round"
+            hpd_intervals,
+            (plot_height * 0.02, plot_height * 0.02),
+            lw=linewidth * 2,
+            color="k",
+            solid_capstyle="round",
         )
         ax.text(
             hpd_intervals[0],
@@ -316,7 +339,9 @@ def _plot_posterior_op(
         ax.spines["left"].set_visible(False)
         ax.spines["bottom"].set_visible(True)
         ax.xaxis.set_ticks_position("bottom")
-        ax.tick_params(axis="x", direction="out", width=1, length=3, color="0.5", labelsize=xt_labelsize)
+        ax.tick_params(
+            axis="x", direction="out", width=1, length=3, color="0.5", labelsize=xt_labelsize
+        )
         ax.spines["bottom"].set_color("0.5")
 
     if kind == "kde" and values.dtype.kind == "f":

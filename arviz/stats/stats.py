@@ -101,11 +101,15 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
 
     if ic == "waic":
         ic_func = waic
-        df_comp = pd.DataFrame(index=names, columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning"])
+        df_comp = pd.DataFrame(
+            index=names, columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning"]
+        )
 
     elif ic == "loo":
         ic_func = loo
-        df_comp = pd.DataFrame(index=names, columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning"])
+        df_comp = pd.DataFrame(
+            index=names, columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning"]
+        )
 
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
@@ -145,14 +149,21 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             grad = np.zeros(last_col)
             for k in range(last_col):
                 for i in range(rows):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(exp_ic_i[i], w_full)
+                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
+                        exp_ic_i[i], w_full
+                    )
             return -grad
 
         theta = np.full(last_col, 1.0 / cols)
         bounds = [(0.0, 1.0) for i in range(last_col)]
-        constraints = [{"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)}, {"type": "ineq", "fun": np.sum}]
+        constraints = [
+            {"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)},
+            {"type": "ineq", "fun": np.sum},
+        ]
 
-        weights = minimize(fun=log_score, x0=theta, jac=gradient, bounds=bounds, constraints=constraints)
+        weights = minimize(
+            fun=log_score, x0=theta, jac=gradient, bounds=bounds, constraints=constraints
+        )
 
         weights = w_fuller(weights["x"])
         ses = ics[ic_se]
@@ -235,7 +246,12 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     """
     if x.ndim > 1:
         return np.array(
-            [hpd(row, credible_interval=credible_interval, transform=transform, circular=circular) for row in x.T]
+            [
+                hpd(
+                    row, credible_interval=credible_interval, transform=transform, circular=circular
+                )
+                for row in x.T
+            ]
         )
     # Make a copy of trace
     x = transform(x.copy())
@@ -299,7 +315,9 @@ def loo(data, pointwise=False, reff=None):
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
         if not hasattr(inference_data, group):
-            raise TypeError("Must be able to extract a {group}" "group from data!".format(group=group))
+            raise TypeError(
+                "Must be able to extract a {group}" "group from data!".format(group=group)
+            )
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
@@ -315,7 +333,9 @@ def loo(data, pointwise=False, reff=None):
         else:
             eff_n = effective_n(posterior)
             # this mean is over all data variables
-            reff = np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
+            reff = (
+                np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
+            )
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
@@ -350,7 +370,9 @@ def loo(data, pointwise=False, reff=None):
             columns=["loo", "loo_se", "p_loo", "warning", "loo_i"],
         )
     else:
-        return pd.DataFrame([[loo_lppd, loo_lppd_se, p_loo, warn_mg]], columns=["loo", "loo_se", "p_loo", "warning"])
+        return pd.DataFrame(
+            [[loo_lppd, loo_lppd_se, p_loo, warn_mg]], columns=["loo", "loo_se", "p_loo", "warning"]
+        )
 
 
 def psislw(log_weights, reff=1.0):
@@ -619,7 +641,11 @@ def summary(
 
     if stat_funcs is not None:
         for stat_func in stat_funcs:
-            metrics.append(xr.apply_ufunc(_make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"))))
+            metrics.append(
+                xr.apply_ufunc(
+                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"))
+                )
+            )
             metric_names.append(stat_func.__name__)
 
     if extend:
@@ -629,7 +655,9 @@ def summary(
         metrics.append(posterior.std(dim=("chain", "draw")))
         metric_names.append("sd")
 
-        metrics.append(xr.apply_ufunc(_make_ufunc(_mc_error), posterior, input_core_dims=(("chain", "draw"),)))
+        metrics.append(
+            xr.apply_ufunc(_make_ufunc(_mc_error), posterior, input_core_dims=(("chain", "draw"),))
+        )
         metric_names.append("mc error")
 
         metrics.append(
@@ -653,20 +681,28 @@ def summary(
     if include_circ:
         metrics.append(
             xr.apply_ufunc(
-                _make_ufunc(st.circmean, high=np.pi, low=-np.pi), posterior, input_core_dims=(("chain", "draw"),)
+                _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
+                posterior,
+                input_core_dims=(("chain", "draw"),),
             )
         )
         metric_names.append("circular mean")
 
         metrics.append(
             xr.apply_ufunc(
-                _make_ufunc(st.circstd, high=np.pi, low=-np.pi), posterior, input_core_dims=(("chain", "draw"),)
+                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
+                posterior,
+                input_core_dims=(("chain", "draw"),),
             )
         )
         metric_names.append("circular standard deviation")
 
         metrics.append(
-            xr.apply_ufunc(_make_ufunc(_mc_error, circular=True), posterior, input_core_dims=(("chain", "draw"),))
+            xr.apply_ufunc(
+                _make_ufunc(_mc_error, circular=True),
+                posterior,
+                input_core_dims=(("chain", "draw"),),
+            )
         )
         metric_names.append("circular mc error")
 
@@ -816,7 +852,9 @@ def waic(data, pointwise=False):
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
         if not hasattr(inference_data, group):
-            raise TypeError("Must be able to extract a {group} group from data!".format(group=group))
+            raise TypeError(
+                "Must be able to extract a {group} group from data!".format(group=group)
+            )
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     log_likelihood = inference_data.sample_stats.log_likelihood
@@ -850,7 +888,10 @@ def waic(data, pointwise=False):
             """
             )
         return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, waic_i]], columns=["waic", "waic_se", "p_waic", "warning", "waic_i"]
+            [[waic_sum, waic_se, p_waic, warn_mg, waic_i]],
+            columns=["waic", "waic_se", "p_waic", "warning", "waic_i"],
         )
     else:
-        return pd.DataFrame([[waic_sum, waic_se, p_waic, warn_mg]], columns=["waic", "waic_se", "p_waic", "warning"])
+        return pd.DataFrame(
+            [[waic_sum, waic_se, p_waic, warn_mg]], columns=["waic", "waic_se", "p_waic", "warning"]
+        )

@@ -224,7 +224,10 @@ def _get_rhat(values, round_to=2):
     # Calculate within-chain variance
     within_chain_variance = np.mean(np.var(values, axis=1, ddof=1), axis=0)
     # Estimate of marginal posterior variance
-    v_hat = within_chain_variance * (num_samples - 1) / num_samples + between_chain_variance / num_samples
+    v_hat = (
+        within_chain_variance * (num_samples - 1) / num_samples
+        + between_chain_variance / num_samples
+    )
 
     return round((v_hat / within_chain_variance) ** 0.5, round_to)
 
@@ -319,9 +322,9 @@ def ks_summary(pareto_tail_indices):
     """
     kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
-    df_k = pd.DataFrame(dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)).rename(
-        index={0: "(-Inf, 0.5]", 1: " (0.5, 0.7]", 2: "   (0.7, 1]", 3: "   (1, Inf)"}
-    )
+    df_k = pd.DataFrame(
+        dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
+    ).rename(index={0: "(-Inf, 0.5]", 1: " (0.5, 0.7]", 2: "   (0.7, 1]", 3: "   (1, Inf)"})
 
     if np.sum(kcounts[1:]) == 0:
         warnings.warn("All Pareto k estimates are good (k < 0.5)")

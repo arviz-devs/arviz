@@ -72,7 +72,10 @@ class PyroConverter:
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         return InferenceData(
-            **{"posterior": self.posterior_to_xarray(), "observed_data": self.observed_data_to_xarray()}
+            **{
+                "posterior": self.posterior_to_xarray(),
+                "observed_data": self.observed_data_to_xarray(),
+            }
         )
 
 

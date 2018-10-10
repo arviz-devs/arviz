@@ -4,7 +4,9 @@ from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import _scale_fig_size, _create_axes_grid, default_grid
 
 
-def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None):
+def plot_ppc(
+    data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None
+):
     """
     Plot for Posterior Predictive checks.
 
@@ -38,7 +40,9 @@ def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=
     """
     for group in ("posterior_predictive", "observed_data"):
         if not hasattr(data, group):
-            raise TypeError('`data` argument must have the group "{group}" for ppcplot'.format(group=group))
+            raise TypeError(
+                '`data` argument must have the group "{group}" for ppcplot'.format(group=group)
+            )
 
     if kind.lower() not in ("density", "cumulative"):
         raise TypeError("`kind` argument must be either `density` or `cumulative`")
@@ -51,7 +55,9 @@ def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=
 
     rows, cols = default_grid(len(observed.data_vars))
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
 
     _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
 
@@ -103,7 +109,12 @@ def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=
                 if dtype == "f":
                     plot_kde(
                         posterior_predictive[pp_var_name].values.flatten(),
-                        plot_kwargs={"color": "C0", "linestyle": "--", "linewidth": linewidth, "zorder": 2},
+                        plot_kwargs={
+                            "color": "C0",
+                            "linestyle": "--",
+                            "linewidth": linewidth,
+                            "zorder": 2,
+                        },
                         label="Posterior predictive mean {}".format(pp_var_name),
                         ax=ax,
                     )
@@ -158,7 +169,13 @@ def plot_ppc(data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=
             if dtype == "f":
                 ax.plot(*pp_densities, alpha=alpha, color="C5", linewidth=linewidth)
             else:
-                ax.plot(*pp_densities, alpha=alpha, color="C5", drawstyle="steps-pre", linewidth=linewidth)
+                ax.plot(
+                    *pp_densities,
+                    alpha=alpha,
+                    color="C5",
+                    drawstyle="steps-pre",
+                    linewidth=linewidth
+                )
             ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
             if mean:
                 if dtype == "f":

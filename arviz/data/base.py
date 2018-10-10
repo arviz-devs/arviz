@@ -57,7 +57,9 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     if len([dim for dim in dims if dim not in default_dims]) > len(shape):
         warnings.warn(
             "More dims ({dims_len}) given than exists ({shape_len}). "
-            "Passed array should have shape (chains, draws, *shape)".format(dims_len=len(dims), shape_len=len(shape)),
+            "Passed array should have shape (chains, draws, *shape)".format(
+                dims_len=len(dims), shape_len=len(shape)
+            ),
             SyntaxWarning,
         )
     if coords is None:
@@ -115,11 +117,15 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
     if n_chains > n_samples:
         warnings.warn(
             "More chains ({n_chains}) than draws ({n_samples}). "
-            "Passed array should have shape (chains, draws, *shape)".format(n_chains=n_chains, n_samples=n_samples),
+            "Passed array should have shape (chains, draws, *shape)".format(
+                n_chains=n_chains, n_samples=n_samples
+            ),
             SyntaxWarning,
         )
 
-    dims, coords = generate_dims_coords(shape, var_name, dims=dims, coords=coords, default_dims=default_dims)
+    dims, coords = generate_dims_coords(
+        shape, var_name, dims=dims, coords=coords, default_dims=default_dims
+    )
 
     # reversed order for default dims: 'chain', 'draw'
     if "draw" not in dims:
@@ -168,7 +174,9 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
     data_vars = {}
     for key, values in data.items():
-        data_vars[key] = numpy_to_data_array(values, var_name=key, coords=coords, dims=dims.get(key))
+        data_vars[key] = numpy_to_data_array(
+            values, var_name=key, coords=coords, dims=dims.get(key)
+        )
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
 

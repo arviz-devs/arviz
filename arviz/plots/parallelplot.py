@@ -64,7 +64,9 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    _var_names, _posterior = xarray_to_ndarray(get_coords(posterior_data, coords), var_names=var_names, combined=True)
+    _var_names, _posterior = xarray_to_ndarray(
+        get_coords(posterior_data, coords), var_names=var_names, combined=True
+    )
 
     if len(_var_names) < 2:
         raise ValueError("This plot needs at least two variables")

@@ -76,7 +76,10 @@ def plot_energy(
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     series = zip(
-        fill_alpha, fill_color, ("Marginal Energy", "Energy transition"), (energy - energy.mean(), np.diff(energy))
+        fill_alpha,
+        fill_color,
+        ("Marginal Energy", "Energy transition"),
+        (energy - energy.mean(), np.diff(energy)),
     )
 
     if kind == "kde":
@@ -98,7 +101,15 @@ def plot_energy(
 
     elif kind == "hist":
         for alpha, color, label, value in series:
-            ax.hist(value.flatten(), bins="auto", density=True, alpha=alpha, label=label, color=color, **plot_kwargs)
+            ax.hist(
+                value.flatten(),
+                bins="auto",
+                density=True,
+                alpha=alpha,
+                label=label,
+                color=color,
+                **plot_kwargs
+            )
 
     else:
         raise ValueError("Plot type {} not recognized.".format(kind))

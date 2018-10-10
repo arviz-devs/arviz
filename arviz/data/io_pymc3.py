@@ -9,7 +9,9 @@ from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 class PyMC3Converter:
     """Encapsulate PyMC3 specific logic."""
 
-    def __init__(self, *_, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None):
+    def __init__(
+        self, *_, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
+    ):
         self.trace = trace
         self.prior = prior
         self.posterior_predictive = posterior_predictive
@@ -114,7 +116,9 @@ class PyMC3Converter:
         for name, vals in observations.items():
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
-            val_dims, coords = generate_dims_coords(vals.shape, name, dims=val_dims, coords=self.coords)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, name, dims=val_dims, coords=self.coords
+            )
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
@@ -141,5 +145,9 @@ class PyMC3Converter:
 def from_pymc3(*, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
-        trace=trace, prior=prior, posterior_predictive=posterior_predictive, coords=coords, dims=dims
+        trace=trace,
+        prior=prior,
+        posterior_predictive=posterior_predictive,
+        coords=coords,
+        dims=dims,
     ).to_inference_data()

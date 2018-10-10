@@ -282,7 +282,9 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     unpacked_data, unpacked_var_names, = [], []
 
     # Merge chains and variables
-    for var_name, selection, data_array in xarray_var_iter(data, var_names=var_names, combined=combined):
+    for var_name, selection, data_array in xarray_var_iter(
+        data, var_names=var_names, combined=combined
+    ):
         unpacked_data.append(data_array.flatten())
         unpacked_var_names.append(make_label(var_name, selection))
 

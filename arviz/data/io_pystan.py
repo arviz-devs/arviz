@@ -227,7 +227,9 @@ class PyStanConverter:
             for key, vals in self.observed_data.items():
                 vals = np.atleast_1d(vals)
                 val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(vals.shape, key, dims=val_dims, coords=self.coords)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
                 observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         else:
             if isinstance(self.observed_data, str):
@@ -238,7 +240,9 @@ class PyStanConverter:
             for key in observed_names:
                 vals = np.atleast_1d(self.fit.data[key])
                 val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(vals.shape, key, dims=val_dims, coords=self.coords)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
                 observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pystan))
 
@@ -256,10 +260,14 @@ class PyStanConverter:
         stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
         stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
         stan_ws = r"\s*"  # 0 or more whitespace
-        pattern_int = re.compile("".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE)
+        pattern_int = re.compile(
+            "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
+        )
         stan_code = self.fit.get_stancode()
         # remove deprecated comments
-        stan_code = "\n".join(line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines())
+        stan_code = "\n".join(
+            line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
+        )
         stan_code = re.sub(pattern_remove_comments, "", stan_code)
         stan_code = stan_code.split("generated quantities")[-1]
         dtypes = re.findall(pattern_int, stan_code)
@@ -316,7 +324,14 @@ def unpermute(ary, idx, nchain):
 
 
 def from_pystan(
-    *, fit=None, prior=None, posterior_predictive=None, observed_data=None, log_likelihood=None, coords=None, dims=None
+    *,
+    fit=None,
+    prior=None,
+    posterior_predictive=None,
+    observed_data=None,
+    log_likelihood=None,
+    coords=None,
+    dims=None
 ):
     """Convert PyStan data into an InferenceData object.
 

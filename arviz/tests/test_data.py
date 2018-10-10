@@ -4,7 +4,14 @@ import numpy as np
 import pymc3 as pm
 import pytest
 
-from arviz import convert_to_inference_data, convert_to_dataset, from_cmdstan, from_pymc3, from_pystan, from_emcee
+from arviz import (
+    convert_to_inference_data,
+    convert_to_dataset,
+    from_cmdstan,
+    from_pymc3,
+    from_pystan,
+    from_emcee,
+)
 from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
 
 
@@ -317,11 +324,19 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             ],
             "no_warmup_glob": os.path.join(data_directory, "cmdstan/output_no_warmup[0-9].csv"),
             "warmup_glob": os.path.join(data_directory, "cmdstan/output_warmup[0-9].csv"),
-            "combined_no_warmup": [os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")],
+            "combined_no_warmup": [
+                os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
+            ],
             "combined_warmup": [os.path.join(data_directory, "cmdstan/combined_output_warmup.csv")],
-            "combined_no_warmup_glob": os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv"),
-            "combined_warmup_glob": os.path.join(data_directory, "cmdstan/combined_output_warmup.csv"),
-            "eight_schools_glob": os.path.join(data_directory, "cmdstan/eight_schools_output[0-9].csv"),
+            "combined_no_warmup_glob": os.path.join(
+                data_directory, "cmdstan/combined_output_no_warmup.csv"
+            ),
+            "combined_warmup_glob": os.path.join(
+                data_directory, "cmdstan/combined_output_warmup.csv"
+            ),
+            "eight_schools_glob": os.path.join(
+                data_directory, "cmdstan/eight_schools_output[0-9].csv"
+            ),
             "eight_schools": [
                 os.path.join(data_directory, "cmdstan/eight_schools_output1.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output2.csv"),
@@ -461,7 +476,12 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
                 observed_data_var=["y"],
                 log_likelihood="log_lik",
                 coords={"school": np.arange(8), "log_lik_dim_0": np.arange(8)},
-                dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "theta_tilde": ["school"]},
+                dims={
+                    "theta": ["school"],
+                    "y": ["school"],
+                    "y_hat": ["school"],
+                    "theta_tilde": ["school"],
+                },
             )
             assert hasattr(inference_data, "posterior")
             assert hasattr(inference_data, "sample_stats")
@@ -529,7 +549,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             One variable as str
         """
         path = self.observed_data_paths[1]
-        inference_data = self.get_inference_data(output=None, observed_data=path, observed_data_var="x")
+        inference_data = self.get_inference_data(
+            output=None, observed_data=path, observed_data_var="x"
+        )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 1
         assert inference_data.observed_data["x"].shape == (1,)
@@ -540,7 +562,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             One variable as a list
         """
         path = self.observed_data_paths[1]
-        inference_data = self.get_inference_data(output=None, observed_data=path, observed_data_var=["x"])
+        inference_data = self.get_inference_data(
+            output=None, observed_data=path, observed_data_var=["x"]
+        )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 1
         assert inference_data.observed_data["x"].shape == (1,)
@@ -551,7 +575,9 @@ class TestCmdStanNetCDFUtils(BaseArvizTest):
             Many variables as list
         """
         path = self.observed_data_paths[1]
-        inference_data = self.get_inference_data(output=None, observed_data=path, observed_data_var=["y", "Z"])
+        inference_data = self.get_inference_data(
+            output=None, observed_data=path, observed_data_var=["y", "Z"]
+        )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 2
         assert inference_data.observed_data["y"].shape == (3,)

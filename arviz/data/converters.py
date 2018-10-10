@@ -68,9 +68,18 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
     else:
-        allowable_types = ("xarray dataset", "dict", "netcdf file", "numpy array", "pystan fit", "pymc3 trace")
+        allowable_types = (
+            "xarray dataset",
+            "dict",
+            "netcdf file",
+            "numpy array",
+            "pystan fit",
+            "pymc3 trace",
+        )
         raise ValueError(
-            "Can only convert {} to InferenceData, not {}".format(", ".join(allowable_types), obj.__class__.__name__)
+            "Can only convert {} to InferenceData, not {}".format(
+                ", ".join(allowable_types), obj.__class__.__name__
+            )
         )
 
     return InferenceData(**{group: dataset})

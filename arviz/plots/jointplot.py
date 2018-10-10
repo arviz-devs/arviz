@@ -58,7 +58,9 @@ def plot_joint(
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
-        raise ValueError(("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds))
+        raise ValueError(
+            ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
+        )
 
     data = convert_to_dataset(data, group="posterior")
 
@@ -68,7 +70,9 @@ def plot_joint(
     plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 
     if len(plotters) != 2:
-        raise Exception("Number of variables to be plotted must 2 (you supplied {})".format(len(plotters)))
+        raise Exception(
+            "Number of variables to be plotted must 2 (you supplied {})".format(len(plotters))
+        )
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
@@ -115,10 +119,15 @@ def plot_joint(
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
 
-    for val, ax, orient, rotate in ((x, ax_hist_x, "vertical", False), (y, ax_hist_y, "horizontal", True)):
+    for val, ax, orient, rotate in (
+        (x, ax_hist_x, "vertical", False),
+        (y, ax_hist_y, "horizontal", True),
+    ):
         if val.dtype.kind == "i":
             bins = get_bins(val)
-            ax.hist(val, bins=bins, align="left", density=True, orientation=orient, **marginal_kwargs)
+            ax.hist(
+                val, bins=bins, align="left", density=True, orientation=orient, **marginal_kwargs
+            )
         else:
             marginal_kwargs.setdefault("plot_kwargs", {})
             marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth

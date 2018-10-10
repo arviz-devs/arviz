@@ -36,12 +36,16 @@ def _verify_names(sampler, var_names, arg_names):
 
     if len(var_names) != num_vars:
         raise ValueError(
-            "The sampler has {} variables, but only {} var_names were provided!".format(num_vars, len(var_names))
+            "The sampler has {} variables, but only {} var_names were provided!".format(
+                num_vars, len(var_names)
+            )
         )
 
     if len(arg_names) != num_args:
         raise ValueError(
-            "The sampler has {} args, but only {} arg_names were provided!".format(num_args, len(arg_names))
+            "The sampler has {} args, but only {} arg_names were provided!".format(
+                num_args, len(arg_names)
+            )
         )
     return var_names, arg_names
 
@@ -77,7 +81,10 @@ class EmceeConverter:
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         return InferenceData(
-            **{"posterior": self.posterior_to_xarray(), "observed_data": self.observed_data_to_xarray()}
+            **{
+                "posterior": self.posterior_to_xarray(),
+                "observed_data": self.observed_data_to_xarray(),
+            }
         )
 
 

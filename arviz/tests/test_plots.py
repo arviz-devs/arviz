@@ -127,7 +127,13 @@ def test_plot_density_discrete(discrete_model):
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize(
     "kwargs",
-    [{}, {"var_names": ["mu", "tau"]}, {"combined": True}, {"lines": [("mu", {}, [1, 2])]}, {"lines": [("mu", 0)]}],
+    [
+        {},
+        {"var_names": ["mu", "tau"]},
+        {"combined": True},
+        {"lines": [("mu", {}, [1, 2])]},
+        {"lines": [("mu", 0)]},
+    ],
 )
 def test_plot_trace(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
@@ -145,7 +151,9 @@ def test_plot_trace_discrete(discrete_model):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]])
+@pytest.mark.parametrize(
+    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
+)
 @pytest.mark.parametrize(
     "args_expected",
     [
@@ -199,14 +207,21 @@ def test_plot_joint_discrete(discrete_model):
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"contour": True, "fill_last": False}, {"contour": False}]
+    "kwargs",
+    [
+        {"plot_kwargs": {"linestyle": "-"}},
+        {"contour": True, "fill_last": False},
+        {"contour": False},
+    ],
 )
 def test_plot_kde(discrete_model, kwargs):
     axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"cumulative": True}, {"rug": True}])
+@pytest.mark.parametrize(
+    "kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"cumulative": True}, {"rug": True}]
+)
 def test_plot_kde_cumulative(discrete_model, kwargs):
     axes = plot_kde(discrete_model["x"], **kwargs)
     assert axes
@@ -254,7 +269,9 @@ def test_plot_pair(models, model_fit, kwargs):
     assert ax
 
 
-@pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin", "colorbar": True}])
+@pytest.mark.parametrize(
+    "kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin", "colorbar": True}]
+)
 def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     _, ax = fig_ax
     ax, _ = plot_pair(discrete_model, ax=ax, **kwargs)
@@ -360,7 +377,9 @@ def test_point_estimates(models, model_fit, point_estimate):
     assert axes.shape == (2,)
 
 
-@pytest.mark.parametrize("kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}])
+@pytest.mark.parametrize(
+    "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
+)
 def test_plot_compare(models, kwargs):
 
     # Pymc3 models create loglikelihood on InferenceData automatically

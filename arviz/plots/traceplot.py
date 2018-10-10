@@ -108,7 +108,9 @@ def plot_trace(
 
     hist_kwargs.setdefault("alpha", 0.35)
 
-    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, len(plotters), 2)
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
+        figsize, textsize, len(plotters), 2
+    )
     trace_kwargs.setdefault("linewidth", linewidth)
     kde_kwargs.setdefault("plot_kwargs", {"linewidth": linewidth})
 
@@ -139,9 +141,15 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-            axes[i, 0].vlines(line_values, *axes[i, 0].get_ylim(), colors=colors, linewidth=1.5, alpha=0.75)
+            axes[i, 0].vlines(
+                line_values, *axes[i, 0].get_ylim(), colors=colors, linewidth=1.5, alpha=0.75
+            )
             axes[i, 1].hlines(
-                line_values, *axes[i, 1].get_xlim(), colors=colors, linewidth=1.5, alpha=trace_kwargs["alpha"]
+                line_values,
+                *axes[i, 1].get_xlim(),
+                colors=colors,
+                linewidth=1.5,
+                alpha=trace_kwargs["alpha"]
             )
         axes[i, 0].set_ylim(bottom=0)
     fig.tight_layout()

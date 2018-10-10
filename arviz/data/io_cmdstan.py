@@ -34,13 +34,17 @@ class CmdStanConverter:
     ):
         self.output = sorted(glob(output)) if isinstance(output, str) else output
         if isinstance(output, str) and len(self.output) > 1:
-            msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(self.output, 1))
+            msg = "\n".join(
+                "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(self.output, 1)
+            )
             print("glob found {} files for 'output':\n{}".format(len(self.output), msg))
         if isinstance(prior, str):
             prior_glob = glob(prior)
             if len(prior_glob) > 1:
                 prior = sorted(prior_glob)
-                msg = "\n".join("{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1))
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
+                )
                 print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
         self.prior = prior
         if isinstance(posterior_predictive, str):
@@ -48,7 +52,8 @@ class CmdStanConverter:
             if len(posterior_predictive_glob) > 1:
                 posterior_predictive = sorted(posterior_predictive_glob)
                 msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(posterior_predictive, 1)
+                    "{}: {}".format(i, os.path.normpath(path))
+                    for i, path in enumerate(posterior_predictive, 1)
                 )
                 len_pp = len(posterior_predictive)
                 print("glob found {} files for 'posterior_predictive':\n{}".format(len_pp, msg))
@@ -97,7 +102,9 @@ class CmdStanConverter:
         elif isinstance(post_pred, str):
             post_pred = [col for col in columns if post_pred == col.split(".")[0]]
         else:
-            post_pred = [col for col in columns if any(item == col.split(".")[0] for item in post_pred)]
+            post_pred = [
+                col for col in columns if any(item == col.split(".")[0] for item in post_pred)
+            ]
 
         log_lik = self.log_likelihood
         if log_lik is None:
@@ -122,7 +129,9 @@ class CmdStanConverter:
         sampler_params = self.sample_stats
         log_likelihood = self.log_likelihood
         if isinstance(log_likelihood, str):
-            log_likelihood_cols = [col for col in self.posterior[0].columns if log_likelihood == col.split(".")[0]]
+            log_likelihood_cols = [
+                col for col in self.posterior[0].columns if log_likelihood == col.split(".")[0]
+            ]
             log_likelihood_vals = [item[log_likelihood_cols] for item in self.posterior]
 
             # Add log_likelihood to sampler_params
@@ -136,12 +145,18 @@ class CmdStanConverter:
             if log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
 
-            log_likelihood_dims = np.array([list(map(int, col.split(".")[1:])) for col in log_likelihood_cols])
+            log_likelihood_dims = np.array(
+                [list(map(int, col.split(".")[1:])) for col in log_likelihood_cols]
+            )
             max_dims = log_likelihood_dims.max(0)
             max_dims = max_dims if hasattr(max_dims, "__iter__") else (max_dims,)
             default_dim_names, _ = generate_dims_coords(shape=max_dims, var_name=log_likelihood)
-            log_likelihood_dim_names, _ = generate_dims_coords(shape=max_dims, var_name="log_likelihood")
-            for default_dim_name, log_likelihood_dim_name in zip(default_dim_names, log_likelihood_dim_names):
+            log_likelihood_dim_names, _ = generate_dims_coords(
+                shape=max_dims, var_name="log_likelihood"
+            )
+            for default_dim_name, log_likelihood_dim_name in zip(
+                default_dim_names, log_likelihood_dim_names
+            ):
                 if default_dim_name in coords:
                     coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
 
@@ -178,7 +193,9 @@ class CmdStanConverter:
         else:
             if isinstance(ppred, str):
                 ppred = [ppred]
-            ppred_cols = [col for col in self.posterior[0] if any(item == col.split(".")[0] for item in ppred)]
+            ppred_cols = [
+                col for col in self.posterior[0] if any(item == col.split(".")[0] for item in ppred)
+            ]
             data = _unpack_dataframes([item[ppred_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -207,7 +224,9 @@ class CmdStanConverter:
                 continue
             vals = np.atleast_1d(vals)
             val_dims = self.dims.get(key)
-            val_dims, coords = generate_dims_coords(vals.shape, key, dims=val_dims, coords=self.coords)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
 
@@ -245,7 +264,12 @@ def _process_configuration(comments):
         elif comment.startswith("thin"):
             thin = int(comment.strip("thin = ").strip("(Default)"))
 
-    return {"num_samples": num_samples, "num_warmup": num_warmup, "save_warmup": save_warmup, "thin": thin}
+    return {
+        "num_samples": num_samples,
+        "num_warmup": num_warmup,
+        "save_warmup": save_warmup,
+        "thin": thin,
+    }
 
 
 def _read_output(path):
@@ -331,7 +355,11 @@ def _read_output(path):
             num_of_samples = df.shape[0]
             header_count = 1
             last_line_num = (
-                configuration_info_len + adaptation_info_len + timing_info_len + num_of_samples + header_count
+                configuration_info_len
+                + adaptation_info_len
+                + timing_info_len
+                + num_of_samples
+                + header_count
             )
         else:
             # header location found in the dataframe (not first)
@@ -389,7 +417,11 @@ def _read_output(path):
                     break
             no_elapsed_time = not any("elapsed time" in row.lower() for row in timing_info)
             if raise_timing_error or no_elapsed_time:
-                msg = "Invalid input file. " "Header information missing from combined csv. " "Timing: {}".format(path)
+                msg = (
+                    "Invalid input file. "
+                    "Header information missing from combined csv. "
+                    "Timing: {}".format(path)
+                )
                 raise ValueError(msg)
 
             last_line_num = reading_line

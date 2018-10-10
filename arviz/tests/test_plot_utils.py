@@ -15,7 +15,8 @@ def sample_dataset():
     draws = [0, 1, 2]
 
     data = xr.Dataset(
-        {"mu": (["chain", "draw"], mu), "tau": (["chain", "draw"], tau)}, coords={"draw": draws, "chain": chain}
+        {"mu": (["chain", "draw"], mu), "tau": (["chain", "draw"], tau)},
+        coords={"draw": draws, "chain": chain},
     )
 
     return mu, tau, data
@@ -59,7 +60,12 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
 
     assert len(var_names) == 4
     for var_name in var_names:
-        assert var_name in [("mu", {"chain": 0}), ("mu", {"chain": 1}), ("tau", {"chain": 0}), ("tau", {"chain": 1})]
+        assert var_name in [
+            ("mu", {"chain": 0}),
+            ("mu", {"chain": 1}),
+            ("tau", {"chain": 0}),
+            ("tau", {"chain": 1}),
+        ]
 
 
 class TestCoordsExceptions:

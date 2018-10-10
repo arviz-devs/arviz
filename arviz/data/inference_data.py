@@ -32,7 +32,9 @@ class InferenceData:
 
     def __repr__(self):
         """Make string representation of object."""
-        return "Inference data with groups:\n\t> {options}".format(options="\n\t> ".join(self._groups))
+        return "Inference data with groups:\n\t> {options}".format(
+            options="\n\t> ".join(self._groups)
+        )
 
     @staticmethod
     def from_netcdf(filename):

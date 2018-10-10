@@ -102,12 +102,16 @@ def plot_forest(
         ncols += 1
         width_ratios.append(1)
 
-    plot_handler = PlotHandler(data, var_names=var_names, model_names=model_names, combined=combined, colors=colors)
+    plot_handler = PlotHandler(
+        data, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+    )
 
     if figsize is None:
         figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
+    (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(
+        figsize, textsize, 1.1, 1
+    )
 
     if linewidth is None:
         linewidth = auto_linewidth
@@ -126,11 +130,16 @@ def plot_forest(
 
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
-        plot_handler.forestplot(credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0])
+        plot_handler.forestplot(
+            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0]
+        )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
     else:
-        raise TypeError("Argument 'kind' must be one of 'forestplot' or " "'ridgeplot' (you provided {})".format(kind))
+        raise TypeError(
+            "Argument 'kind' must be one of 'forestplot' or "
+            "'ridgeplot' (you provided {})".format(kind)
+        )
 
     idx = 1
     if eff_n:
@@ -208,7 +217,12 @@ class PlotHandler:
         plotters, y = {}, 0
         for var_name in self.var_names:
             plotters[var_name] = VarHandler(
-                var_name, self.data, y, model_names=self.model_names, combined=self.combined, colors=self.colors
+                var_name,
+                self.data,
+                y,
+                model_names=self.model_names,
+                combined=self.combined,
+                colors=self.colors,
             )
             y = plotters[var_name].y_max()
         return plotters
@@ -256,7 +270,9 @@ class PlotHandler:
 
         return ax
 
-    def forestplot(self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax):
+    def forestplot(
+        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax
+    ):
         """Draw forestplot for each plotter.
 
         Parameters
@@ -286,10 +302,19 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
                 mid = len(values) // 2
-                param_iter = zip(np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid))
+                param_iter = zip(
+                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
+                )
                 for width, j in param_iter:
                     ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
-                ax.plot(values[mid], y, "o", mfc=ax.get_facecolor(), markersize=markersize * 0.75, color=color)
+                ax.plot(
+                    values[mid],
+                    y,
+                    "o",
+                    mfc=ax.get_facecolor(),
+                    markersize=markersize * 0.75,
+                    color=color,
+                )
         ax.tick_params(labelsize=xt_labelsize)
         ax.set_title("{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize)
 
@@ -300,7 +325,15 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, eff_n, color in plotter.eff_n():
                 if eff_n is not None:
-                    ax.plot(eff_n, y, "o", color=color, clip_on=False, markersize=markersize, markeredgecolor="k")
+                    ax.plot(
+                        eff_n,
+                        y,
+                        "o",
+                        color=color,
+                        clip_on=False,
+                        markersize=markersize,
+                        markeredgecolor="k",
+                    )
         ax.set_xlim(left=0)
         ax.set_title("eff_n", fontsize=titlesize)
         ax.tick_params(labelsize=xt_labelsize)
@@ -388,7 +421,10 @@ class VarHandler:
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
-                    sub_data, var_names=[self.var_name], skip_dims=skip_dims, reverse_selections=True
+                    sub_data,
+                    var_names=[self.var_name],
+                    skip_dims=skip_dims,
+                    reverse_selections=True,
                 )
                 for _, selection, values in datum_iter:
                     label = make_label(self.var_name, selection)
