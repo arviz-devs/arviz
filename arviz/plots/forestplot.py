@@ -107,7 +107,9 @@ def plot_forest(data, kind='forestplot', model_names=None, var_names=None, combi
                              ncols=ncols,
                              figsize=figsize,
                              gridspec_kw={'width_ratios': width_ratios},
-                             sharey=True)
+                             sharey=True,
+                             constrained_layout=True,
+                             )
 
     axes = np.atleast_1d(axes)
     if kind == 'forestplot':
