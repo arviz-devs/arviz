@@ -5,7 +5,6 @@ ipython
 nbsphinx
 numpydoc
 pydocstyle
-pylint
 pyro-ppl
 pytest
 pytest-cov
