@@ -109,7 +109,7 @@ tools:
   ```bash
   $ pytest arviz/tests/<name of test>.py --save user_defined_directory
   ```
-  
+
 * Code with good test **coverage** (at least 80%), check with:
 
   ```bash
@@ -117,11 +117,11 @@ tools:
   $ pytest --cov=arviz arviz/tests/<name of test>.py
   ```
 
-* No `pylint` warnings, check with:
+* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6
 
   ```bash
-  $ pip install pylint 
-  $ pylint path/to/module.py
+  $ pip install black
+  $ black arviz/
   ```
 
 * No code style warnings, check with:
@@ -144,7 +144,7 @@ You may also use it to run the test suite, with
 
 ```bash
 $  docker exec -it arviz  bash # logon to the container
-$  cd ~/arviz  
+$  cd ~/arviz
 $  . ./scripts/test.sh # takes a while!
 ```
 
