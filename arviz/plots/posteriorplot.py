@@ -68,29 +68,22 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
         :context: close-figs
 
         >>> import arviz as az
-        >>> non_centered = az.load_arviz_data('non_centered_eight')
-        >>> az.plot_posterior(non_centered)
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_posterior(data)
 
     Plot subset variables by specifying variable name exactly
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=("mu",), textsize=11)
-
-    Plot subset of variables by matching start of variable name
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_posterior(non_centered, var_names=("mu", "theta_tilde"))
+        >>> az.plot_posterior(data, var_names=['mu'])
 
     Plot Region of Practical Equivalence (rope) for all distributions
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=("mu", 'theta_tilde',), rope=(-1, 1))
+        >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=(-1, 1))
 
     Plot Region of Practical Equivalence for selected distributions
 
@@ -98,7 +91,7 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
         :context: close-figs
 
         >>> rope = {'mu': [{'rope': (-2, 2)}], 'theta': [{'school': 'Choate', 'rope': (2, 4)}]}
-        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), rope=rope)
+        >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=rope)
 
 
     Add reference lines
@@ -106,28 +99,28 @@ def plot_posterior(data, var_names=None, coords=None, figsize=None, textsize=Non
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), ref_val=0)
+        >>> az.plot_posterior(data, var_names=['mu', 'theta_tilde'], ref_val=0)
 
     Show point estimate of distribution
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), point_estimate="mode")
+        >>> az.plot_posterior(data, var_names=['mu', 'theta_tilde'], point_estimate='mode')
 
     Plot posterior as a histogram
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), kind="hist")
+        >>> az.plot_posterior(data, var_names=['mu'], kind='hist')
 
     Change size of credible interval
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(non_centered, var_names=('mu', 'theta_tilde',), credible_interval=.94)
+        >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
     data = convert_to_dataset(data, group='posterior')
 
