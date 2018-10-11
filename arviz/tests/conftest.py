@@ -6,8 +6,7 @@ import pytest
 
 def pytest_addoption(parser):
     """Definition for command line option to save figures from tests."""
-    parser.addoption("--save", nargs="?", const="test_images",
-                     help="Save images rendered by plot")
+    parser.addoption("--save", nargs="?", const="test_images", help="Save images rendered by plot")
 
 
 @pytest.fixture(scope="session")

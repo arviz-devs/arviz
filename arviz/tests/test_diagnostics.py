@@ -4,13 +4,13 @@ from arviz import load_arviz_data
 from ..stats import gelman_rubin, effective_n, geweke
 
 
-class TestDiagnostics():
+class TestDiagnostics:
     good_rhat = 1.1
 
     @classmethod
     def setup_class(cls):
-        inference_data = load_arviz_data('centered_eight')
-        cls.data = inference_data.posterior #pylint:disable=no-member
+        inference_data = load_arviz_data("centered_eight")
+        cls.data = inference_data.posterior  # pylint:disable=no-member
 
     def test_gelman_rubin(self):
         """Confirm Gelman-Rubin statistic is close to 1 for a large number of samples.
@@ -22,9 +22,7 @@ class TestDiagnostics():
 
     def test_gelman_rubin_bad(self):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
-        rhat = gelman_rubin(np.hstack([
-            20 + np.random.randn(100, 1),
-            np.random.randn(100, 1)]))
+        rhat = gelman_rubin(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
         assert 1 / self.good_rhat > rhat or self.good_rhat < rhat
 
     def test_effective_n_array(self):
@@ -34,8 +32,7 @@ class TestDiagnostics():
 
     def test_effective_n_dataset(self):
         eff_n = effective_n(self.data)
-        assert eff_n.mu > 100 # This might break if the data is regenerated
-
+        assert eff_n.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):
         first = 0.1

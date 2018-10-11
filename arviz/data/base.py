@@ -8,21 +8,24 @@ import pkg_resources
 import xarray as xr
 
 
-class requires: # pylint: disable=invalid-name
+class requires:  # pylint: disable=invalid-name
     """Decorator to return None if an object does not have the required attribute."""
 
     def __init__(self, *props):
         self.props = props
 
-    def __call__(self, func):
+    def __call__(self, func):  # noqa: D202
         """Wrap the decorated function."""
+
         def wrapped(cls, *args, **kwargs):
             """Return None if not all props are available."""
             for prop in self.props:
                 if getattr(cls, prop) is None:
                     return None
             return func(cls, *args, **kwargs)
+
         return wrapped
+
 
 def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=None):
     """Generate default dimensions and coordinates for a variable.
@@ -52,9 +55,13 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     if dims is None:
         dims = []
     if len([dim for dim in dims if dim not in default_dims]) > len(shape):
-        warnings.warn('More dims ({dims_len}) given than exists ({shape_len}). '
-                      'Passed array should have shape (chains, draws, *shape)'.format(
-                          dims_len=len(dims), shape_len=len(shape)), SyntaxWarning)
+        warnings.warn(
+            "More dims ({dims_len}) given than exists ({shape_len}). "
+            "Passed array should have shape (chains, draws, *shape)".format(
+                dims_len=len(dims), shape_len=len(shape)
+            ),
+            SyntaxWarning,
+        )
     if coords is None:
         coords = {}
 
@@ -62,8 +69,8 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     dims = deepcopy(dims)
 
     for idx, dim_len in enumerate(shape):
-        if (len(dims) < idx+1) or (dims[idx] is None):
-            dim_name = '{var_name}_dim_{idx}'.format(var_name=var_name, idx=idx)
+        if (len(dims) < idx + 1) or (dims[idx] is None):
+            dim_name = "{var_name}_dim_{idx}".format(var_name=var_name, idx=idx)
             if len(dims) < idx + 1:
                 dims.append(dim_name)
             else:
@@ -71,14 +78,11 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
         dim_name = dims[idx]
         if dim_name not in coords:
             coords[dim_name] = np.arange(dim_len)
-    coords = {
-        key : coord for key, coord in coords.items() \
-        if any(key == dim for dim in dims)
-    }
+    coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
     return dims, coords
 
 
-def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
+def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
     """Convert a numpy array to an xarray.DataArray.
 
     The first two dimensions will be (chain, draw), and any remaining
@@ -111,25 +115,28 @@ def numpy_to_data_array(ary, *, var_name='data', coords=None, dims=None):
     ary = np.atleast_2d(ary)
     n_chains, n_samples, *shape = ary.shape
     if n_chains > n_samples:
-        warnings.warn('More chains ({n_chains}) than draws ({n_samples}). '
-                      'Passed array should have shape (chains, draws, *shape)'.format(
-                          n_chains=n_chains, n_samples=n_samples), SyntaxWarning)
+        warnings.warn(
+            "More chains ({n_chains}) than draws ({n_samples}). "
+            "Passed array should have shape (chains, draws, *shape)".format(
+                n_chains=n_chains, n_samples=n_samples
+            ),
+            SyntaxWarning,
+        )
 
-    dims, coords = generate_dims_coords(shape, var_name,
-                                        dims=dims,
-                                        coords=coords,
-                                        default_dims=default_dims)
+    dims, coords = generate_dims_coords(
+        shape, var_name, dims=dims, coords=coords, default_dims=default_dims
+    )
 
     # reversed order for default dims: 'chain', 'draw'
-    if 'draw' not in dims:
-        dims = ['draw'] + dims
-    if 'chain' not in dims:
-        dims = ['chain'] + dims
+    if "draw" not in dims:
+        dims = ["draw"] + dims
+    if "chain" not in dims:
+        dims = ["chain"] + dims
 
-    if 'chain' not in coords:
-        coords['chain'] = np.arange(n_chains)
-    if 'draw' not in coords:
-        coords['draw'] = np.arange(n_samples)
+    if "chain" not in coords:
+        coords["chain"] = np.arange(n_chains)
+    if "draw" not in coords:
+        coords["draw"] = np.arange(n_samples)
 
     # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
@@ -167,10 +174,9 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
     data_vars = {}
     for key, values in data.items():
-        data_vars[key] = numpy_to_data_array(values,
-                                             var_name=key,
-                                             coords=coords,
-                                             dims=dims.get(key))
+        data_vars[key] = numpy_to_data_array(
+            values, var_name=key, coords=coords, dims=dims.get(key)
+        )
     return xr.Dataset(data_vars=data_vars, attrs=make_attrs(attrs=attrs, library=library))
 
 
@@ -187,15 +193,13 @@ def make_attrs(attrs=None, library=None):
     dict
         attrs
     """
-    default_attrs = {
-        'created_at': datetime.datetime.utcnow().isoformat(),
-    }
+    default_attrs = {"created_at": datetime.datetime.utcnow().isoformat()}
     if library is not None:
         library_name = library.__name__
-        default_attrs['inference_library'] = library_name
+        default_attrs["inference_library"] = library_name
         try:
             version = pkg_resources.get_distribution(library_name).version
-            default_attrs['inference_library_version'] = version
+            default_attrs["inference_library_version"] = version
         except pkg_resources.DistributionNotFound:
             pass
 

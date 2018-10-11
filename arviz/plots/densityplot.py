@@ -9,9 +9,20 @@ from .plot_utils import _scale_fig_size, make_label, xarray_var_iter
 
 
 # pylint:disable-msg=too-many-function-args
-def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
-                 point_estimate='mean', colors='cycle', outline=True, hpd_markers='', shade=0.,
-                 bw=4.5, figsize=None, textsize=None):
+def plot_density(
+    data,
+    data_labels=None,
+    var_names=None,
+    credible_interval=0.94,
+    point_estimate="mean",
+    colors="cycle",
+    outline=True,
+    hpd_markers="",
+    shade=0.0,
+    bw=4.5,
+    figsize=None,
+    textsize=None,
+):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
     Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
@@ -61,28 +72,30 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
     ax : Matplotlib axes
     """
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, group='posterior')]
+        datasets = [convert_to_dataset(data, group="posterior")]
     else:
-        datasets = [convert_to_dataset(d, group='posterior') for d in data]
+        datasets = [convert_to_dataset(d, group="posterior") for d in data]
 
-    if point_estimate not in ('mean', 'median', None):
-        raise ValueError("Point estimate should be 'mean',"
-                         "median' or None, not {}".format(point_estimate))
+    if point_estimate not in ("mean", "median", None):
+        raise ValueError(
+            "Point estimate should be 'mean'," "median' or None, not {}".format(point_estimate)
+        )
 
     n_data = len(datasets)
 
     if data_labels is None:
         if n_data > 1:
-            data_labels = ['{}'.format(idx) for idx in range(n_data)]
+            data_labels = ["{}".format(idx) for idx in range(n_data)]
         else:
-            data_labels = ['']
+            data_labels = [""]
     elif len(data_labels) != n_data:
-        raise ValueError('The number of names for the models ({}) '
-                         'does not match the number of models ({})'.format(len(data_labels),
-                                                                           n_data))
+        raise ValueError(
+            "The number of names for the models ({}) "
+            "does not match the number of models ({})".format(len(data_labels), n_data)
+        )
 
-    if colors == 'cycle':
-        colors = ['C{}'.format(idx % 10) for idx in range(n_data)]
+    if colors == "cycle":
+        colors = ["C{}".format(idx % 10) for idx in range(n_data)]
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
@@ -92,8 +105,9 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
         for var_name, selection, _ in plotters:
             all_labels.add(make_label(var_name, selection))
 
-    (figsize, _, titlesize, xt_labelsize,
-     linewidth, markersize) = _scale_fig_size(figsize, textsize, len(all_labels), 1)
+    (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, len(all_labels), 1
+    )
 
     fig, axes = plt.subplots(len(all_labels), 1, squeeze=False, figsize=figsize)
     axis_map = {label: ax for label, ax in zip(all_labels, axes.flatten())}
@@ -101,9 +115,22 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
-            _d_helper(values.flatten(), label, colors[m_idx], bw, titlesize, xt_labelsize,
-                      linewidth, markersize, credible_interval, point_estimate, hpd_markers,
-                      outline, shade, axis_map[label])
+            _d_helper(
+                values.flatten(),
+                label,
+                colors[m_idx],
+                bw,
+                titlesize,
+                xt_labelsize,
+                linewidth,
+                markersize,
+                credible_interval,
+                point_estimate,
+                hpd_markers,
+                outline,
+                shade,
+                axis_map[label],
+            )
 
     if n_data > 1:
         ax = axes.flatten()[0]
@@ -116,8 +143,22 @@ def plot_density(data, data_labels=None, var_names=None, credible_interval=0.94,
     return axes
 
 
-def _d_helper(vec, vname, color, bw, titlesize, xt_labelsize, linewidth, markersize,
-              credible_interval, point_estimate, hpd_markers, outline, shade, ax):
+def _d_helper(
+    vec,
+    vname,
+    color,
+    bw,
+    titlesize,
+    xt_labelsize,
+    linewidth,
+    markersize,
+    credible_interval,
+    point_estimate,
+    hpd_markers,
+    outline,
+    shade,
+    ax,
+):
     """Plot an individual dimension.
 
     Parameters
@@ -149,7 +190,7 @@ def _d_helper(vec, vname, color, bw, titlesize, xt_labelsize, linewidth, markers
         (opaque). Defaults to 0.
     ax : matplotlib axes
     """
-    if vec.dtype.kind == 'f':
+    if vec.dtype.kind == "f":
         density, lower, upper = _fast_kde(vec, bw=bw)
         x = np.linspace(lower, upper, len(density))
         hpd_ = hpd(vec, credible_interval)
@@ -162,8 +203,8 @@ def _d_helper(vec, vname, color, bw, titlesize, xt_labelsize, linewidth, markers
 
         if outline:
             ax.plot(x[cut], density[cut], color=color, lw=linewidth)
-            ax.plot([xmin, xmin], [-ymin/100, ymin], color=color, ls='-', lw=linewidth)
-            ax.plot([xmax, xmax], [-ymax/100, ymax], color=color, ls='-', lw=linewidth)
+            ax.plot([xmin, xmin], [-ymin / 100, ymin], color=color, ls="-", lw=linewidth)
+            ax.plot([xmax, xmax], [-ymax / 100, ymax], color=color, ls="-", lw=linewidth)
 
         if shade:
             ax.fill_between(x, density, where=cut, color=color, alpha=shade)
@@ -172,23 +213,23 @@ def _d_helper(vec, vname, color, bw, titlesize, xt_labelsize, linewidth, markers
         xmin, xmax = hpd(vec, credible_interval)
         bins = range(xmin, xmax + 2)
         if outline:
-            ax.hist(vec, bins=bins, color=color, histtype='step', align='left')
+            ax.hist(vec, bins=bins, color=color, histtype="step", align="left")
         if shade:
             ax.hist(vec, bins=bins, color=color, alpha=shade)
 
     if hpd_markers:
-        ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor='k', markersize=markersize)
-        ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor='k', markersize=markersize)
+        ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
+        ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
 
     if point_estimate is not None:
-        if point_estimate == 'mean':
+        if point_estimate == "mean":
             est = np.mean(vec)
-        elif point_estimate == 'median':
+        elif point_estimate == "median":
             est = np.median(vec)
-        ax.plot(est, -0.001, 'o', color=color, markeredgecolor='k', markersize=markersize)
+        ax.plot(est, -0.001, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])
     ax.set_title(vname, fontsize=titlesize)
-    for pos in ['left', 'right', 'top']:
+    for pos in ["left", "right", "top"]:
         ax.spines[pos].set_visible(0)
     ax.tick_params(labelsize=xt_labelsize)

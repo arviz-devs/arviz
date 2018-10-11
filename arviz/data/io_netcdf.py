@@ -16,7 +16,7 @@ def load_data(filename):
     return InferenceData.from_netcdf(filename)
 
 
-def save_data(data, filename, *, group='posterior', coords=None, dims=None):
+def save_data(data, filename, *, group="posterior", coords=None, dims=None):
     """Save dataset as a netcdf file.
 
     WARNING: Only idempotent in case `data` is InferenceData
@@ -59,28 +59,28 @@ def load_arviz_data(dataset):
     InferenceData
     """
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path = os.path.join(here, 'data', '_datasets')
+    data_path = os.path.join(here, "data", "_datasets")
     datasets_available = {
-        'centered_eight': {
-            'description': '''
+        "centered_eight": {
+            "description": """
                 Centered eight schools model.  Four chains, 500 draws each, fit with
                 NUTS in PyMC3.  Features named coordinates for each of the eight schools.
-            ''',
-            'path': os.path.join(data_path, 'centered_eight.nc')
+            """,
+            "path": os.path.join(data_path, "centered_eight.nc"),
         },
-        'non_centered_eight': {
-            'description': '''
+        "non_centered_eight": {
+            "description": """
                 Non-centered eight schools model.  Four chains, 500 draws each, fit with
                 NUTS in PyMC3.  Features named coordinates for each of the eight schools.
-            ''',
-            'path': os.path.join(data_path, 'non_centered_eight.nc')
+            """,
+            "path": os.path.join(data_path, "non_centered_eight.nc"),
         },
     }
     if dataset in datasets_available:
-        return InferenceData.from_netcdf(datasets_available[dataset]['path'])
+        return InferenceData.from_netcdf(datasets_available[dataset]["path"])
     else:
-        msg = ['\'dataset\' must be one of the following options:']
+        msg = ["'dataset' must be one of the following options:"]
         for key, value in sorted(datasets_available.items()):
-            msg.append('{key}: {description}'.format(key=key, description=value['description']))
+            msg.append("{key}: {description}".format(key=key, description=value["description"]))
 
-        raise ValueError('\n'.join(msg))
+        raise ValueError("\n".join(msg))

@@ -3,7 +3,7 @@ import netCDF4 as nc
 import xarray as xr
 
 
-class InferenceData():
+class InferenceData:
     """Container for accessing netCDF files using xarray."""
 
     def __init__(self, *_, **kwargs):
@@ -23,15 +23,17 @@ class InferenceData():
             if dataset is None:
                 continue
             elif not isinstance(dataset, xr.Dataset):
-                raise ValueError('Arguments to InferenceData must be xarray Datasets '
-                                 '(argument "{}" was type "{}")'.format(key, type(dataset)))
+                raise ValueError(
+                    "Arguments to InferenceData must be xarray Datasets "
+                    '(argument "{}" was type "{}")'.format(key, type(dataset))
+                )
             setattr(self, key, dataset)
             self._groups.append(key)
 
     def __repr__(self):
         """Make string representation of object."""
-        return 'Inference data with groups:\n\t> {options}'.format(
-            options='\n\t> '.join(self._groups)
+        return "Inference data with groups:\n\t> {options}".format(
+            options="\n\t> ".join(self._groups)
         )
 
     @staticmethod
@@ -50,7 +52,7 @@ class InferenceData():
         InferenceData object
         """
         groups = {}
-        with nc.Dataset(filename, mode='r') as data:
+        with nc.Dataset(filename, mode="r") as data:
             data_groups = list(data.groups)
 
         for group in data_groups:
@@ -74,13 +76,13 @@ class InferenceData():
         str
             Location of netcdf file
         """
-        mode = 'w' # overwrite first, then append
+        mode = "w"  # overwrite first, then append
         for group in self._groups:
             data = getattr(self, group)
             kwargs = {}
             if compress:
-                kwargs['encoding'] = {var_name: {'zlib': True} for var_name in data.variables}
+                kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
             data.to_netcdf(filename, mode=mode, group=group, **kwargs)
             data.close()
-            mode = 'a'
+            mode = "a"
         return filename

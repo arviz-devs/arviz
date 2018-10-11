@@ -6,9 +6,19 @@ from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
 
 
-def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, kind='scatter',
-               gridsize='auto', contour=True, fill_last=True, joint_kwargs=None,
-               marginal_kwargs=None):
+def plot_joint(
+    data,
+    var_names=None,
+    coords=None,
+    figsize=None,
+    textsize=None,
+    kind="scatter",
+    gridsize="auto",
+    contour=True,
+    fill_last=True,
+    joint_kwargs=None,
+    marginal_kwargs=None,
+):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
@@ -46,12 +56,13 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
     """
-    valid_kinds = ['scatter', 'kde', 'hexbin']
+    valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
-        raise ValueError(('Plot type {} not recognized.'
-                          'Plot type must be in {}').format(kind, valid_kinds))
+        raise ValueError(
+            ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
+        )
 
-    data = convert_to_dataset(data, group='posterior')
+    data = convert_to_dataset(data, group="posterior")
 
     if coords is None:
         coords = {}
@@ -60,7 +71,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
 
     if len(plotters) != 2:
         raise Exception(
-            'Number of variables to be plotted must 2 (you supplied {})'.format(len(plotters))
+            "Number of variables to be plotted must 2 (you supplied {})".format(len(plotters))
         )
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
@@ -73,7 +84,7 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
 
     # Instantiate figure and grid
     fig, _ = plt.subplots(0, 0, figsize=figsize)
-    grid = plt.GridSpec(4, 4, hspace=.1, wspace=.1)
+    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1)
 
     # Set up main plot
     axjoin = fig.add_subplot(grid[1:, :-1])
@@ -98,25 +109,28 @@ def plot_joint(data, var_names=None, coords=None, figsize=None, textsize=None, k
     x = plotters[0][2].flatten()
     y = plotters[1][2].flatten()
 
-    if kind == 'scatter':
+    if kind == "scatter":
         axjoin.scatter(x, y, **joint_kwargs)
-    elif kind == 'kde':
+    elif kind == "kde":
         plot_kde(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
     else:
-        if gridsize == 'auto':
-            gridsize = int(len(x)**0.35)
+        if gridsize == "auto":
+            gridsize = int(len(x) ** 0.35)
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
 
-    for val, ax, orient, rotate in ((x, ax_hist_x, 'vertical', False),
-                                    (y, ax_hist_y, 'horizontal', True)):
-        if val.dtype.kind == 'i':
+    for val, ax, orient, rotate in (
+        (x, ax_hist_x, "vertical", False),
+        (y, ax_hist_y, "horizontal", True),
+    ):
+        if val.dtype.kind == "i":
             bins = get_bins(val)
-            ax.hist(val, bins=bins, align='left', density=True,
-                    orientation=orient, **marginal_kwargs)
+            ax.hist(
+                val, bins=bins, align="left", density=True, orientation=orient, **marginal_kwargs
+            )
         else:
-            marginal_kwargs.setdefault('plot_kwargs', {})
-            marginal_kwargs['plot_kwargs']['linewidth'] = linewidth
+            marginal_kwargs.setdefault("plot_kwargs", {})
+            marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
             plot_kde(val, rotated=rotate, ax=ax, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
