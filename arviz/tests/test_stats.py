@@ -48,8 +48,16 @@ class TestCompare:
         assert_almost_equal(np.sum(weight), 1.0)
 
 
+@pytest.mark.parametrize("var_names_expected", ((None, 10), ("mu", 1), (["mu", "tau"], 2)))
+def test_summary_var_names(var_names_expected):
+    var_names, expected = var_names_expected
+    centered = load_arviz_data("centered_eight")
+    summary_df = summary(centered, var_names=var_names)
+    assert len(summary_df.index) == expected
+
+
 @pytest.mark.parametrize("include_circ", [True, False])
-def test_summary(include_circ):
+def test_summary_include_circ(include_circ):
     centered = load_arviz_data("centered_eight")
     summary(centered, include_circ=include_circ)
 

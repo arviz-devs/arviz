@@ -6,7 +6,8 @@ import pandas as pd
 from scipy.signal import fftconvolve
 import xarray as xr
 
-from arviz import convert_to_dataset
+from ..data import convert_to_dataset
+from ..utils import _var_names
 
 
 __all__ = ["effective_n", "gelman_rubin", "geweke", "autocorr"]
@@ -49,7 +50,10 @@ def effective_n(data, *, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_neff(data)
+
+    var_names = _var_names(var_names)
     dataset = convert_to_dataset(data, group="posterior")
+
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
@@ -195,7 +199,9 @@ def gelman_rubin(data, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_rhat(data)
+    var_names = _var_names(var_names)
     dataset = convert_to_dataset(data, group="posterior")
+
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from ..utils import _var_names
 
 
 def plot_joint(
@@ -27,7 +28,7 @@ def plot_joint(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
+    var_names : Iter of 2 e.g. (var_1, var_2)
         Variables to be plotted, two variables are required.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
@@ -56,6 +57,7 @@ def plot_joint(
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
     """
+
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
         raise ValueError(

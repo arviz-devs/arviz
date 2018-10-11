@@ -10,6 +10,7 @@ from ..stats import hpd
 from ..stats.diagnostics import _get_neff, _get_rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
+from ..utils import _var_names
 
 
 def pairwise(iterable):
@@ -70,7 +71,7 @@ def plot_forest(
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the
-        matyplolibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
+        matplotlibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
         for all models. Defauls to 'cycle'.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
@@ -92,6 +93,8 @@ def plot_forest(
     gridspec : matplotlib GridSpec
 
     """
+    var_names = _var_names(var_names)
+
     ncols, width_ratios = 1, [3]
 
     if eff_n:

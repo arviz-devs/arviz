@@ -1,3 +1,5 @@
+"""Test Diagnostic methods"""
+import pytest
 import numpy as np
 
 from arviz import load_arviz_data
@@ -12,13 +14,17 @@ class TestDiagnostics:
         inference_data = load_arviz_data("centered_eight")
         cls.data = inference_data.posterior  # pylint:disable=no-member
 
-    def test_gelman_rubin(self):
+    @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+    def test_gelman_rubin(self, var_names):
         """Confirm Gelman-Rubin statistic is close to 1 for a large number of samples.
         Also checks the correct shape"""
-        rhat_data = gelman_rubin(self.data)
+        rhat_data = gelman_rubin(self.data, var_names=var_names)
         for rhat in rhat_data.data_vars.values():
             assert ((1 / self.good_rhat < rhat.values) | (rhat.values < self.good_rhat)).all()
-        assert list(rhat_data.data_vars) == list(self.data.data_vars)
+
+        # In None case check that all varnames from rhat_data match input data
+        if var_names is None:
+            assert list(rhat_data.data_vars) == list(self.data.data_vars)
 
     def test_gelman_rubin_bad(self):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
@@ -30,8 +36,9 @@ class TestDiagnostics:
         assert eff_n > 100
         assert eff_n < 800
 
-    def test_effective_n_dataset(self):
-        eff_n = effective_n(self.data)
+    @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+    def test_effective_n_dataset(self, var_names):
+        eff_n = effective_n(self.data, var_names=var_names)
         assert eff_n.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):

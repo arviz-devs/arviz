@@ -6,6 +6,7 @@ from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label
+from ..utils import _var_names
 
 
 def plot_violin(
@@ -62,6 +63,8 @@ def plot_violin(
     ax : matplotlib axes
     """
     data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names)
+
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if kwargs_shade is None:

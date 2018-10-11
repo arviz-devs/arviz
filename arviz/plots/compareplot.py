@@ -47,6 +47,7 @@ def plot_compare(
     -------
     ax : matplotlib axes
     """
+
     if figsize is None:
         figsize = (6, len(comp_df))
 
