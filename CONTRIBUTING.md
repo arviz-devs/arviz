@@ -124,6 +124,13 @@ tools:
   $ black arviz/
   ```
 
+* Your code passes pylint
+
+  ```bash
+  $ pip install pylint
+  $ pylint arviz/
+  ```
+
 * No code style warnings, check with:
 
   ```bash

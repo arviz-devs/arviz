@@ -11,3 +11,7 @@ echo "Success!"
 echo "Checking code style with black..."
 python -m black -l 100 --check arviz/
 echo "Success!"
+
+echo "Checking code style with pylint..."
+python -m pylint arviz/
+echo "Success!"
