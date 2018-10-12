@@ -10,6 +10,7 @@ from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
 
+
 def plot_pair(
     data,
     var_names=None,
