@@ -9,9 +9,10 @@ command -v conda >/dev/null 2>&1 || {
 
 # if no python specified, use Travis version, or else 3.6
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
+PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv${PYTHON_VERSION}"
+    ENVNAME="testenv${PYTHON_VERSION}_PYSTAN${PYSTAN_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -29,6 +30,12 @@ if [ "$PYTHON_VERSION" = "3.5" ]; then
     pip install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
 else
     pip install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+fi
+
+if [ "$PYSTAN_VERSION" = "latest" ]; then
+    pip install pystan
+else
+    pip install pystan==${PYSTAN_VERSION}
 fi
 
 conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython xarray netcdf4 mkl-service
