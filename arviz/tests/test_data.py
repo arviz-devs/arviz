@@ -262,7 +262,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
 
     def get_inference_data(self):
         """log_likelihood as a var."""
-        prior = pystan_extract_unpermuted(fit)["theta"]
+        prior = pystan_extract_unpermuted(self.obj)["theta"]
         prior = {"theta_test": prior["theta"]}
         return from_pystan(
             fit=self.obj,
@@ -285,7 +285,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         # dictionary
         observed_data = {"y_hat": self.data["y"]}
         # ndarray
-        log_likelihood = pystan_extract_unpermuted(obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_unpermuted(self.obj, "log_lik")["log_lik"]
         return from_pystan(
             fit=self.obj,
             posterior_predictive=["y_hat"],
@@ -303,10 +303,8 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
 
     def get_inference_data3(self):
         """log_likelihood as a ndarray."""
-        # dictionary
-        observed_data = {"y_hat": self.data["y"]}
         # ndarray
-        log_likelihood = pystan_extract_unpermuted(obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_unpermuted(self.obj, "log_lik")["log_lik"]
         return from_pystan(
             fit=self.obj,
             posterior_predictive=["y_hat"],
