@@ -10,6 +10,7 @@ from .plot_utils import (
     xarray_var_iter,
     _create_axes_grid,
 )
+from ..utils import _var_names
 
 
 def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
@@ -42,6 +43,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     axes : matplotlib axes
     """
     data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names)
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

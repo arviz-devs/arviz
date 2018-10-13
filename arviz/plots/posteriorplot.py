@@ -13,6 +13,7 @@ from .plot_utils import (
     _create_axes_grid,
     get_coords,
 )
+from ..utils import _var_names
 
 
 def plot_posterior(
@@ -142,6 +143,8 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
+    var_names = _var_names(var_names)
+
     data = convert_to_dataset(data, group="posterior")
 
     if coords is None:

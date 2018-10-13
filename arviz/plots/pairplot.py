@@ -8,6 +8,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
+from ..utils import _var_names
 
 
 def plot_pair(
@@ -74,6 +75,8 @@ def plot_pair(
     gs : matplotlib gridspec
 
     """
+    var_names = _var_names(var_names)
+
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
         raise ValueError(
@@ -91,7 +94,7 @@ def plot_pair(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    _var_names, _posterior = xarray_to_ndarray(
+    flat_var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
 
@@ -106,7 +109,7 @@ def plot_pair(
     if gridsize == "auto":
         gridsize = int(len(_posterior[0]) ** 0.35)
 
-    numvars = len(_var_names)
+    numvars = len(flat_var_names)
 
     if numvars < 2:
         raise Exception("Number of variables to be plotted must be 2 or greater.")
@@ -143,8 +146,8 @@ def plot_pair(
                 _posterior[0][diverging_mask], _posterior[1][diverging_mask], **divergences_kwargs
             )
 
-        ax.set_xlabel("{}".format(_var_names[0]), fontsize=ax_labelsize)
-        ax.set_ylabel("{}".format(_var_names[1]), fontsize=ax_labelsize)
+        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize)
+        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize)
         ax.tick_params(labelsize=xt_labelsize)
 
     if gs is None and ax is None:
@@ -187,11 +190,11 @@ def plot_pair(
                 if j + 1 != numvars - 1:
                     ax.axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_xlabel("{}".format(_var_names[i]), fontsize=ax_labelsize)
+                    ax.set_xlabel("{}".format(flat_var_names[i]), fontsize=ax_labelsize)
                 if i != 0:
                     ax.axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax.set_ylabel("{}".format(_var_names[j + 1]), fontsize=ax_labelsize)
+                    ax.set_ylabel("{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize)
 
                 ax.tick_params(labelsize=xt_labelsize)
                 axs.append(ax)

@@ -129,6 +129,7 @@ def test_plot_density_discrete(discrete_model):
     "kwargs",
     [
         {},
+        {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
         {"combined": True},
         {"lines": [("mu", {}, [1, 2])]},
@@ -157,17 +158,18 @@ def test_plot_trace_discrete(discrete_model):
 @pytest.mark.parametrize(
     "args_expected",
     [
-        (dict(), (1,)),
-        (dict(r_hat=True, quartiles=False), (2,)),
-        (dict(var_names=["mu"], colors="C0", eff_n=True, combined=True), (2,)),
-        (dict(kind="ridgeplot", r_hat=True, eff_n=True), (3,)),
+        ({}, 1),
+        ({"var_names": "mu"}, 1),
+        ({"r_hat": True, "quartiles": False}, 2),
+        ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
+        ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
     ],
 )
 def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
-    assert axes.shape == expected
+    assert axes.shape == (expected,)
 
 
 def test_plot_forest_single_value():
@@ -188,9 +190,15 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_parallel_exception(models, model_fit):
+def test_plot_parallel(models, model_fit):
     obj = getattr(models, model_fit)
-    assert plot_parallel(obj)
+    assert plot_parallel(obj, var_names=["mu", "tau"])
+
+
+def test_plot_parallel_exception(models):
+    """Ensure that correct exception is raised when one variable is passed."""
+    with pytest.raises(ValueError):
+        assert plot_parallel(models.pymc3_fit, var_names="mu")
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
@@ -240,7 +248,7 @@ def test_plot_khat():
     "kwargs",
     [
         {
-            "var_names": ["theta"],
+            "var_names": "theta",
             "divergences": True,
             "coords": {"theta_dim_0": [0, 1]},
             "plot_kwargs": {"marker": "x"},
@@ -250,7 +258,7 @@ def test_plot_khat():
             "divergences": True,
             "plot_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C"},
-            "var_names": ["theta"],
+            "var_names": ["theta", "mu"],
         },
         {"kind": "kde", "var_names": ["theta"]},
         {
@@ -301,10 +309,11 @@ def test_plot_ppc_discrete(kind):
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_violin(models, model_fit):
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_violin(models, model_fit, var_names):
     obj = getattr(models, model_fit)
-    axes = plot_violin(obj)
-    assert axes.shape[0] >= 10
+    axes = plot_violin(obj, var_names=var_names)
+    assert axes.shape
 
 
 def test_plot_violin_discrete(discrete_model):
@@ -342,10 +351,17 @@ def test_plot_autocorr_combined(models, model_fit):
     )
 
 
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_autocorr_var_names(models, var_names):
+    axes = plot_autocorr(models.pymc3_fit, var_names=var_names, combined=True)
+    assert axes.shape
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
         {},
+        {"var_names": "mu"},
         {"var_names": ("mu", "tau")},
         {"rope": (-2, 2)},
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},

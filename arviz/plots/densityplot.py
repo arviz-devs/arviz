@@ -6,6 +6,7 @@ from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ..utils import _var_names
 
 
 # pylint:disable-msg=too-many-function-args
@@ -71,6 +72,8 @@ def plot_density(
     -------
     ax : Matplotlib axes
     """
+    var_names = _var_names(var_names)
+
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group="posterior")]
     else:

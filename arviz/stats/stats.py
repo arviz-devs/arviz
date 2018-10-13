@@ -8,8 +8,9 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from arviz.data import convert_to_inference_data, convert_to_dataset
+from ..data import convert_to_inference_data, convert_to_dataset
 from .diagnostics import effective_n, gelman_rubin
+from ..utils import _var_names
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
 
@@ -625,6 +626,7 @@ def summary(
         mu[1]  0.07 -0.16 -0.04  0.06
     """
     posterior = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names)
     posterior = posterior if var_names is None else posterior[var_names]
 
     if batches is None:

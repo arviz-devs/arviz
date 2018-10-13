@@ -4,6 +4,7 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
+from ..utils import _var_names
 
 
 def plot_parallel(
@@ -54,6 +55,8 @@ def plot_parallel(
     -------
     ax : matplotlib axes
     """
+    var_names = _var_names(var_names)
+
     if coords is None:
         coords = {}
 
@@ -64,11 +67,11 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    _var_names, _posterior = xarray_to_ndarray(
+    var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
 
-    if len(_var_names) < 2:
+    if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
@@ -82,8 +85,8 @@ def plot_parallel(
         ax.plot(_posterior[:, diverging_mask], color=colord, lw=1)
 
     ax.tick_params(labelsize=textsize)
-    ax.set_xticks(range(len(_var_names)))
-    ax.set_xticklabels(_var_names)
+    ax.set_xticks(range(len(var_names)))
+    ax.set_xticklabels(var_names)
 
     if legend:
         ax.plot([], color=colornd, label="non-divergent")

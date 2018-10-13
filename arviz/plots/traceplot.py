@@ -5,6 +5,7 @@ import numpy as np
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from ..utils import _var_names
 
 
 def plot_trace(
@@ -83,6 +84,7 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
     data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names)
 
     if coords is None:
         coords = {}
