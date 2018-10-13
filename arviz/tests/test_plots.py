@@ -193,7 +193,7 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_parallel(models, model_fit, var_names):
     obj = getattr(models, model_fit)
-    assert plot_parallel(obj)
+    assert plot_parallel(obj, var_names=var_names)
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
@@ -348,7 +348,7 @@ def test_plot_autocorr_combined(models, model_fit):
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_autocorr_var_names(models, var_names):
-    axes = plot_autocorr(models.pymc3_fit, combined=True)
+    axes = plot_autocorr(models.pymc3_fit, var_names=var_names, combined=True)
     assert axes.shape
 
 

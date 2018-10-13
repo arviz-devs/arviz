@@ -1,10 +1,8 @@
-"""
-General utilities
-"""
+"""General utilities."""
 
 
 def _var_names(var_names):
-    """Handles var_names input across arviz
+    """Handle var_names input across arviz.
 
     Parameters
     ----------
