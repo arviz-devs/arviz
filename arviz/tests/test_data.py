@@ -17,6 +17,7 @@ from .helpers import (
     load_cached_models,
     BaseArvizTest,
     pystan_extract_unpermuted,
+    pystan_extract_normal,
 )
 
 
