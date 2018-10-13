@@ -262,7 +262,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
 
     def get_inference_data(self):
         """log_likelihood as a var."""
-        prior = pystan_extract_unpermuted(self.obj)["theta"]
+        prior = pystan_extract_unpermuted(self.obj)
         prior = {"theta_test": prior["theta"]}
         return from_pystan(
             fit=self.obj,
@@ -329,6 +329,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         inference_data2 = self.get_inference_data2()
         inference_data3 = self.get_inference_data2()
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
+        assert hasattr(inference_data1.prior, "theta_test")
         assert hasattr(inference_data1.observed_data, "y")
         assert hasattr(inference_data2.sample_stats, "log_likelihood")
         assert hasattr(inference_data2.observed_data, "y_hat")
