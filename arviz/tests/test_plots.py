@@ -190,10 +190,15 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def test_plot_parallel(models, model_fit, var_names):
+def test_plot_parallel(models, model_fit):
     obj = getattr(models, model_fit)
-    assert plot_parallel(obj, var_names=var_names)
+    assert plot_parallel(obj, var_names=["mu", "tau"])
+
+
+def test_plot_parallel_exception(models):
+    """Ensure that correct exception is raised when one variable is passed."""
+    with pytest.raises(ValueError):
+        assert plot_parallel(models.pymc3_fit, var_names="mu")
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
