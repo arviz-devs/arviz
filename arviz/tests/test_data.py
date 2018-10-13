@@ -327,7 +327,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
     def test_inference_data(self):
         inference_data1 = self.get_inference_data()
         inference_data2 = self.get_inference_data2()
-        inference_data3 = self.get_inference_data2()
+        inference_data3 = self.get_inference_data3()
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
         assert hasattr(inference_data1.prior, "theta_test")
         assert hasattr(inference_data1.observed_data, "y")
