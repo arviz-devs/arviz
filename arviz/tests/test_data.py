@@ -17,6 +17,7 @@ from .helpers import (
     load_cached_models,
     BaseArvizTest,
     pystan_extract_unpermuted,
+    pystan_extract_normal,
 )
 
 
@@ -285,7 +286,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         # dictionary
         observed_data = {"y_hat": self.data["y"]}
         # ndarray
-        log_likelihood = pystan_extract_unpermuted(self.obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_normal(self.obj, "log_lik")["log_lik"]
         return from_pystan(
             fit=self.obj,
             posterior_predictive=["y_hat"],
@@ -304,7 +305,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
     def get_inference_data3(self):
         """log_likelihood as a ndarray."""
         # ndarray
-        log_likelihood = pystan_extract_unpermuted(self.obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_normal(self.obj, "log_lik")["log_lik"]
         return from_pystan(
             fit=self.obj,
             posterior_predictive=["y_hat"],

@@ -261,3 +261,16 @@ def pystan_extract_unpermuted(fit, var_names=None):
             ary = ary.reshape((-1, nchain, *ary_shape), order="F")
             extract[key] = ary
     return extract
+
+
+def pystan_extract_normal(fit, var_names=None):
+    """Extract PyStan samples unpermuted.
+
+    Function return everything as a float.
+    """
+    if var_names is None:
+        var_names = fit.model_pars
+    extract = fit.extract(var_names, permuted=False)
+    if not isinstance(extract, dict):
+        extract = fit.extract(var_names, permuted=True)
+    return extract
