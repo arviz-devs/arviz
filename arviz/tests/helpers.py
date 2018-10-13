@@ -2,6 +2,7 @@
 import os
 import pickle
 import sys
+import pytest
 
 import emcee
 import matplotlib.pyplot as plt
@@ -105,6 +106,7 @@ def emcee_linear_model(data, draws, chains):
     return sampler
 
 
+@pytest.fixture(scope="function")
 def eight_schools_params():
     """Share setup for eight schools."""
     return {

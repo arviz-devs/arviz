@@ -21,6 +21,16 @@ from .helpers import (
 )
 
 
+@pytest.fixture(scope="class")
+def draws():
+    return 500
+
+
+@pytest.fixture(scope="class")
+def chains():
+    return 2
+
+
 class TestNumpyToDataArray:
     def test_1d_dataset(self):
         size = 100
@@ -61,18 +71,22 @@ class TestNumpyToDataArray:
 
 
 class TestConvertToDataset:
-    def setup_method(self):
+
+    @pytest.fixture(scope="class")
+    def data(self):
         # pylint: disable=attribute-defined-outside-init
-        self.datadict = {
-            "a": np.random.randn(100),
-            "b": np.random.randn(1, 100, 10),
-            "c": np.random.randn(1, 100, 3, 4),
-        }
-        self.coords = {"c1": np.arange(3), "c2": np.arange(4), "b1": np.arange(10)}
-        self.dims = {"b": ["b1"], "c": ["c1", "c2"]}
+        class Data:
+            datadict = {
+                "a": np.random.randn(100),
+                "b": np.random.randn(1, 100, 10),
+                "c": np.random.randn(1, 100, 3, 4),
+            }
+            coords = {"c1": np.arange(3), "c2": np.arange(4), "b1": np.arange(10)}
+            dims = {"b": ["b1"], "c": ["c1", "c2"]}
+        return Data
 
-    def test_use_all(self):
-        dataset = convert_to_dataset(self.datadict, coords=self.coords, dims=self.dims)
+    def test_use_all(self, data):
+        dataset = convert_to_dataset(data.datadict, coords=data.coords, dims=data.dims)
         assert set(dataset.data_vars) == {"a", "b", "c"}
         assert set(dataset.coords) == {"chain", "draw", "c1", "c2", "b1"}
 
@@ -80,8 +94,8 @@ class TestConvertToDataset:
         assert set(dataset.b.coords) == {"chain", "draw", "b1"}
         assert set(dataset.c.coords) == {"chain", "draw", "c1", "c2"}
 
-    def test_missing_coords(self):
-        dataset = convert_to_dataset(self.datadict, coords=None, dims=self.dims)
+    def test_missing_coords(self, data):
+        dataset = convert_to_dataset(data.datadict, coords=None, dims=data.dims)
         assert set(dataset.data_vars) == {"a", "b", "c"}
         assert set(dataset.coords) == {"chain", "draw", "c1", "c2", "b1"}
 
@@ -89,10 +103,10 @@ class TestConvertToDataset:
         assert set(dataset.b.coords) == {"chain", "draw", "b1"}
         assert set(dataset.c.coords) == {"chain", "draw", "c1", "c2"}
 
-    def test_missing_dims(self):
+    def test_missing_dims(self, data):
         # missing dims
         coords = {"c_dim_0": np.arange(3), "c_dim_1": np.arange(4), "b_dim_0": np.arange(10)}
-        dataset = convert_to_dataset(self.datadict, coords=coords, dims=None)
+        dataset = convert_to_dataset(data.datadict, coords=coords, dims=None)
         assert set(dataset.data_vars) == {"a", "b", "c"}
         assert set(dataset.coords) == {"chain", "draw", "c_dim_0", "c_dim_1", "b_dim_0"}
 
@@ -100,10 +114,10 @@ class TestConvertToDataset:
         assert set(dataset.b.coords) == {"chain", "draw", "b_dim_0"}
         assert set(dataset.c.coords) == {"chain", "draw", "c_dim_0", "c_dim_1"}
 
-    def test_skip_dim_0(self):
+    def test_skip_dim_0(self, data):
         dims = {"c": [None, "c2"]}
         coords = {"c_dim_0": np.arange(3), "c2": np.arange(4), "b_dim_0": np.arange(10)}
-        dataset = convert_to_dataset(self.datadict, coords=coords, dims=dims)
+        dataset = convert_to_dataset(data.datadict, coords=coords, dims=dims)
         assert set(dataset.data_vars) == {"a", "b", "c"}
         assert set(dataset.coords) == {"chain", "draw", "c_dim_0", "c2", "b_dim_0"}
 
@@ -156,47 +170,48 @@ def test_convert_to_dataset_bad(tmpdir):
 
 
 class TestDictNetCDFUtils(BaseArvizTest):
-    @classmethod
-    def setup_class(cls):
+
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
         # Data of the Eight Schools Model
-        cls.data = eight_schools_params()
-        cls.draws, cls.chains = 500, 2
-        _, stan_fit = load_cached_models(cls.draws, cls.chains)["pystan"]
-        stan_dict = pystan_extract_unpermuted(stan_fit)
-        cls.obj = {}
-        for name, vals in stan_dict.items():
-            if name not in {"y_hat", "log_lik"}:  # extra vars
-                cls.obj[name] = np.swapaxes(vals, 0, 1)
+
+        class Data:
+            _, stan_fit = load_cached_models(draws, chains)["pystan"]
+            stan_dict = pystan_extract_unpermuted(stan_fit)
+            obj = {}
+            for name, vals in stan_dict.items():
+                if name not in {"y_hat", "log_lik"}:  # extra vars
+                    obj[name] = np.swapaxes(vals, 0, 1)
+        return Data
 
     def check_var_names_coords_dims(self, dataset):
         assert set(dataset.data_vars) == {"mu", "tau", "theta_tilde", "theta"}
-
         assert set(dataset.coords) == {"chain", "draw", "school"}
 
-    def test_convert_to_inference_data(self):
-        inference_data = self.get_inference_data()
+    def get_inference_data(self, data, eight_schools_params):
+        return convert_to_inference_data(
+            data.obj,
+            group="posterior",
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "theta_tilde": ["school"]},
+        )
+
+    def test_convert_to_inference_data(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior")
         self.check_var_names_coords_dims(inference_data.posterior)
 
-    def test_convert_to_dataset(self):
-        data = convert_to_dataset(
-            self.obj,
+    def test_convert_to_dataset(self, eight_schools_params, draws, chains, data):
+        dataset = convert_to_dataset(
+            data.obj,
             group="posterior",
-            coords={"school": np.arange(self.data["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "theta_tilde": ["school"]},
         )
-        assert data.draw.shape == (self.draws,)
-        assert data.chain.shape == (self.chains,)
-        assert data.school.shape == (self.data["J"],)
-        assert data.theta.shape == (self.chains, self.draws, self.data["J"])
-
-    def get_inference_data(self):
-        return convert_to_inference_data(
-            self.obj,
-            group="posterior",
-            coords={"school": np.arange(self.data["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
-        )
+        assert dataset.draw.shape == (draws,)
+        assert dataset.chain.shape == (chains,)
+        assert dataset.school.shape == (eight_schools_params["J"],)
+        assert dataset.theta.shape == (chains, draws, eight_schools_params["J"])
 
 
 class TestEmceeNetCDFUtils(BaseArvizTest):
