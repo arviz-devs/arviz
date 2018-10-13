@@ -559,7 +559,6 @@ def summary(
     stat_funcs=None,
     extend=True,
     credible_interval=0.94,
-    batches=None,
 ):
     """Create a data frame with summary statistics.
 
@@ -628,9 +627,6 @@ def summary(
     posterior = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names)
     posterior = posterior if var_names is None else posterior[var_names]
-
-    if batches is None:
-        batches = min([100, posterior.draw.size])
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
