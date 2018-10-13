@@ -233,3 +233,31 @@ def load_cached_models(draws, chains):
         with open(path, "rb") as buff:
             models[library.__name__] = pickle.load(buff)
     return models
+
+
+def pystan_extract_unpermuted(fit, var_names=None):
+    """Extract PyStan samples unpermuted.
+
+    Function return everything as a float.
+    """
+    if var_names is None:
+        var_names = fit.model_pars
+    extract = fit.extract(var_names, permuted=False)
+    if not isinstance(extract, dict):
+        extract_permuted = fit.extract(var_names, permuted=True)
+        permutation_order = fit.sim["permutation"]
+        ary_order = []
+        for order in permutation_order:
+            order = np.argsort(order) + len(ary_order)
+            ary_order.extend(list(order))
+        nchain = fit.sim["chains"]
+        extract = {}
+        for key, ary in extract_permuted.items():
+            ary = np.asarray(ary)[ary_order]
+            if ary.shape:
+                ary_shape = ary.shape[1:]
+            else:
+                ary_shape = ary.shape
+            ary = ary.reshape((-1, nchain, *ary_shape), order="F")
+            extract[key] = ary
+    return extract

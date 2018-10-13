@@ -12,7 +12,12 @@ from arviz import (
     from_pystan,
     from_emcee,
 )
-from .helpers import eight_schools_params, load_cached_models, BaseArvizTest
+from .helpers import (
+    eight_schools_params,
+    load_cached_models,
+    BaseArvizTest,
+    pystan_extract_unpermuted,
+)
 
 
 class TestNumpyToDataArray:
@@ -156,7 +161,7 @@ class TestDictNetCDFUtils(BaseArvizTest):
         cls.data = eight_schools_params()
         cls.draws, cls.chains = 500, 2
         _, stan_fit = load_cached_models(cls.draws, cls.chains)["pystan"]
-        stan_dict = stan_fit.extract(stan_fit.model_pars, permuted=False)
+        stan_dict = pystan_extract_unpermuted(stan_fit)
         cls.obj = {}
         for name, vals in stan_dict.items():
             if name not in {"y_hat", "log_lik"}:  # extra vars
@@ -256,8 +261,12 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)["pystan"]
 
     def get_inference_data(self):
+        """log_likelihood as a var."""
+        prior = pystan_extract_unpermuted(fit)["theta"]
+        prior = {"theta_test": prior["theta"]}
         return from_pystan(
             fit=self.obj,
+            prior=prior,
             posterior_predictive="y_hat",
             observed_data=["y"],
             log_likelihood="log_lik",
@@ -272,14 +281,36 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         )
 
     def get_inference_data2(self):
+        """log_likelihood as a ndarray."""
         # dictionary
         observed_data = {"y_hat": self.data["y"]}
         # ndarray
-        log_likelihood = self.obj.extract("log_lik", permuted=False)["log_lik"]
+        log_likelihood = pystan_extract_unpermuted(obj, "log_lik")["log_lik"]
         return from_pystan(
             fit=self.obj,
-            posterior_predictive="y_hat",
+            posterior_predictive=["y_hat"],
             observed_data=observed_data,
+            log_likelihood=log_likelihood,
+            coords={"school": np.arange(self.data["J"])},
+            dims={
+                "theta": ["school"],
+                "y": ["school"],
+                "log_lik": ["school"],
+                "y_hat": ["school"],
+                "theta_tilde": ["school"],
+            },
+        )
+
+    def get_inference_data3(self):
+        """log_likelihood as a ndarray."""
+        # dictionary
+        observed_data = {"y_hat": self.data["y"]}
+        # ndarray
+        log_likelihood = pystan_extract_unpermuted(obj, "log_lik")["log_lik"]
+        return from_pystan(
+            fit=self.obj,
+            posterior_predictive=["y_hat"],
+            observed_data=["y"],
             log_likelihood=log_likelihood,
             coords={"school": np.arange(self.data["J"])},
             dims={
@@ -298,10 +329,13 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
     def test_inference_data(self):
         inference_data1 = self.get_inference_data()
         inference_data2 = self.get_inference_data2()
+        inference_data3 = self.get_inference_data2()
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
         assert hasattr(inference_data1.observed_data, "y")
         assert hasattr(inference_data2.sample_stats, "log_likelihood")
         assert hasattr(inference_data2.observed_data, "y_hat")
+        assert hasattr(inference_data3.sample_stats, "log_likelihood")
+        assert hasattr(inference_data3.observed_data, "y")
 
 
 class TestCmdStanNetCDFUtils(BaseArvizTest):
