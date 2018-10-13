@@ -588,9 +588,6 @@ def summary(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
-    batches : None or int
-        Batch size for calculating standard deviation for non-independent samples. Defaults to the
-        smaller of 100 or the number of samples. This is only meaningful when `stat_funcs` is None.
 
     Returns
     -------
