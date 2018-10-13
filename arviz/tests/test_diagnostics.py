@@ -1,35 +1,33 @@
 """Test Diagnostic methods"""
 import pytest
 import numpy as np
+import pytest
 
-from arviz import load_arviz_data
+from ..data import load_arviz_data
 from ..stats import gelman_rubin, effective_n, geweke
+
+GOOD_RHAT = 1.1
+
+
+@pytest.fixture(scope="session")
+def data():
+    centered_eight = load_arviz_data("centered_eight")
+    return centered_eight.posterior
 
 
 class TestDiagnostics:
-    good_rhat = 1.1
-
-    @classmethod
-    def setup_class(cls):
-        inference_data = load_arviz_data("centered_eight")
-        cls.data = inference_data.posterior  # pylint:disable=no-member
-
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_gelman_rubin(self, var_names):
+    def test_gelman_rubin(self, data, var_names):
         """Confirm Gelman-Rubin statistic is close to 1 for a large number of samples.
         Also checks the correct shape"""
-        rhat_data = gelman_rubin(self.data, var_names=var_names)
+        rhat_data = gelman_rubin(data, var_names=var_names)
         for rhat in rhat_data.data_vars.values():
-            assert ((1 / self.good_rhat < rhat.values) | (rhat.values < self.good_rhat)).all()
+            assert ((1 / GOOD_RHAT < rhat.values) | (rhat.values < GOOD_RHAT)).all()
 
-        # In None case check that all varnames from rhat_data match input data
-        if var_names is None:
-            assert list(rhat_data.data_vars) == list(self.data.data_vars)
-
-    def test_gelman_rubin_bad(self):
+    def test_gelman_rubin_bad(self, data):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
         rhat = gelman_rubin(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
-        assert 1 / self.good_rhat > rhat or self.good_rhat < rhat
+        assert 1 / GOOD_RHAT > rhat or GOOD_RHAT < rhat
 
     def test_effective_n_array(self):
         eff_n = effective_n(np.random.randn(4, 100))
@@ -37,8 +35,8 @@ class TestDiagnostics:
         assert eff_n < 800
 
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_effective_n_dataset(self, var_names):
-        eff_n = effective_n(self.data, var_names=var_names)
+    def test_effective_n_dataset(self, data, var_names):
+        eff_n = effective_n(data, var_names=var_names)
         assert eff_n.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):
