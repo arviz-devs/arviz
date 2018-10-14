@@ -24,7 +24,11 @@ class TestDiagnostics:
         for rhat in rhat_data.data_vars.values():
             assert ((1 / GOOD_RHAT < rhat.values) | (rhat.values < GOOD_RHAT)).all()
 
-    def test_gelman_rubin_bad(self, data):
+        # In None case check that all varnames from rhat_data match input data
+        if var_names is None:
+            assert list(rhat_data.data_vars) == list(data.data_vars)
+
+    def test_gelman_rubin_bad(self):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
         rhat = gelman_rubin(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
         assert 1 / GOOD_RHAT > rhat or GOOD_RHAT < rhat
