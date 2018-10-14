@@ -1,4 +1,4 @@
-# pylint: disable=no-member,invalid-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name
 import os
 import numpy as np
 import pymc3 as pm
@@ -12,7 +12,7 @@ from arviz import (
     from_pystan,
     from_emcee,
 )
-from .helpers import (
+from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
@@ -70,7 +70,6 @@ class TestNumpyToDataArray:
 
 
 class TestConvertToDataset:
-
     @pytest.fixture(scope="class")
     def data(self):
         # pylint: disable=attribute-defined-outside-init
@@ -82,6 +81,7 @@ class TestConvertToDataset:
             }
             coords = {"c1": np.arange(3), "c2": np.arange(4), "b1": np.arange(10)}
             dims = {"b": ["b1"], "c": ["c1", "c2"]}
+
         return Data
 
     def test_use_all(self, data):
@@ -169,7 +169,6 @@ def test_convert_to_dataset_bad(tmpdir):
 
 
 class TestDictNetCDFUtils:
-
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         # Data of the Eight Schools Model
@@ -181,6 +180,7 @@ class TestDictNetCDFUtils:
             for name, vals in stan_dict.items():
                 if name not in {"y_hat", "log_lik"}:  # extra vars
                     obj[name] = np.swapaxes(vals, 0, 1)
+
         return Data
 
     def check_var_names_coords_dims(self, dataset):
@@ -214,7 +214,6 @@ class TestDictNetCDFUtils:
 
 
 class TestEmceeNetCDFUtils:
-
     @pytest.fixture(scope="class")
     def obj(self, draws):
         fake_chains = 2  # emcee uses lots of walkers
@@ -238,6 +237,7 @@ class TestPyMC3NetCDFUtils:
     def data(self, draws, chains):
         class Data:
             model, obj = load_cached_models(draws, chains)["pymc3"]
+
         return Data
 
     def get_inference_data(self, data, eight_schools_params):
@@ -267,11 +267,11 @@ class TestPyMC3NetCDFUtils:
 
 
 class TestPyStanNetCDFUtils:
-
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
             model, obj = load_cached_models(draws, chains)["pystan"]
+
         return Data
 
     def get_inference_data(self, data, eight_school_params):
@@ -352,7 +352,6 @@ class TestPyStanNetCDFUtils:
 
 
 class TestCmdStanNetCDFUtils:
-
     @pytest.fixture(scope="session")
     def data_directory(self):
         here = os.path.dirname(os.path.abspath(__file__))
@@ -581,10 +580,10 @@ class TestCmdStanNetCDFUtils:
 
     def test_inference_data_bad_csv(self, paths):
         """Check ValueError for csv with missing headers"""
-        for key, paths in paths.items():
+        for key, _paths in paths.items():
             if "missing" not in key:
                 continue
-            for path in paths:
+            for path in _paths:
                 with pytest.raises(ValueError):
                     self.get_inference_data(output=path)
 

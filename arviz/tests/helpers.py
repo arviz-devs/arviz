@@ -5,7 +5,6 @@ import sys
 import pytest
 
 import emcee
-import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import pyro

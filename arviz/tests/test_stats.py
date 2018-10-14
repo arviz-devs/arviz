@@ -1,9 +1,11 @@
+# pylint: disable=redefined-outer-name
+
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
 import pytest
 from scipy.stats import linregress
 
-from arviz import load_arviz_data
+from ..data import load_arviz_data
 from ..stats import bfmi, compare, hpd, r2_score, waic, psislw, summary
 
 
@@ -38,7 +40,7 @@ def test_r2_score():
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
-def test_compare_same(centered_eight, non_centered_eight, method):
+def test_compare_same(centered_eight, method):
     data_dict = {"first": centered_eight, "second": centered_eight}
 
     weight = compare(data_dict, method=method)["weight"]

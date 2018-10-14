@@ -1,5 +1,5 @@
 """Test Diagnostic methods"""
-import pytest
+# pylint: disable=redefined-outer-name, no-member
 import numpy as np
 import pytest
 
