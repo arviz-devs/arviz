@@ -16,34 +16,6 @@ import scipy.optimize as op
 import torch
 
 
-class BaseArvizTest:
-    """Base class for running arviz tests."""
-
-    @classmethod
-    def setup_class(cls):
-        """Run once for the class.
-
-        This has to exist so subclasses can inherit.
-        """
-        pass
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown at end of tests.
-
-        This has to exist so subclasses can inherit.
-        """
-        pass
-
-    def setup_method(self):
-        """Run for every test."""
-        np.random.seed(1)
-
-    def teardown_method(self):
-        """Run for every test."""
-        plt.close("all")
-
-
 def _emcee_neg_lnlike(theta, x, y, yerr):
     """Proper function to allow pickling."""
     slope, intercept, lnf = theta

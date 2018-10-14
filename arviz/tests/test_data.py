@@ -15,7 +15,6 @@ from arviz import (
 from .helpers import (
     eight_schools_params,
     load_cached_models,
-    BaseArvizTest,
     pystan_extract_unpermuted,
     pystan_extract_normal,
 )
@@ -169,7 +168,7 @@ def test_convert_to_dataset_bad(tmpdir):
         convert_to_dataset(filename, group="bar")
 
 
-class TestDictNetCDFUtils(BaseArvizTest):
+class TestDictNetCDFUtils:
 
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
@@ -234,7 +233,7 @@ class TestEmceeNetCDFUtils:
             from_emcee(obj, arg_names=["not", "enough"])
 
 
-class TestPyMC3NetCDFUtils(BaseArvizTest):
+class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
@@ -267,7 +266,7 @@ class TestPyMC3NetCDFUtils(BaseArvizTest):
         assert hasattr(inference_data, "prior")
 
 
-class TestPyStanNetCDFUtils(BaseArvizTest):
+class TestPyStanNetCDFUtils:
 
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
@@ -352,7 +351,7 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
         assert hasattr(inference_data3.observed_data, "y")
 
 
-class TestCmdStanNetCDFUtils(BaseArvizTest):
+class TestCmdStanNetCDFUtils:
 
     @pytest.fixture(scope="session")
     def data_directory(self):
