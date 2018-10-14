@@ -214,24 +214,24 @@ class TestDictNetCDFUtils(BaseArvizTest):
         assert dataset.theta.shape == (chains, draws, eight_schools_params["J"])
 
 
-class TestEmceeNetCDFUtils(BaseArvizTest):
-    @classmethod
-    def setup_class(cls):
-        cls.draws, cls.chains = 500, 20
-        fake_chains = cls.chains // 10  # emcee uses lots of walkers
-        cls.obj = load_cached_models(cls.draws, fake_chains)["emcee"]
+class TestEmceeNetCDFUtils:
 
-    def get_inference_data(self):
+    @pytest.fixture(scope="class")
+    def obj(self, draws):
+        fake_chains = 2  # emcee uses lots of walkers
+        obj = load_cached_models(draws, fake_chains)["emcee"]
+        return obj
 
-        return from_emcee(self.obj, var_names=["ln(f)", "b", "m"])
+    def get_inference_data(self, obj):
+        return from_emcee(obj, var_names=["ln(f)", "b", "m"])
 
-    def test__verify_var_names(self):
+    def test__verify_var_names(self, obj):
         with pytest.raises(ValueError):
-            from_emcee(self.obj, var_names=["not", "enough"])
+            from_emcee(obj, var_names=["not", "enough"])
 
-    def test__verify_arg_names(self):
+    def test__verify_arg_names(self, obj):
         with pytest.raises(ValueError):
-            from_emcee(self.obj, arg_names=["not", "enough"])
+            from_emcee(obj, arg_names=["not", "enough"])
 
 
 class TestPyMC3NetCDFUtils(BaseArvizTest):
