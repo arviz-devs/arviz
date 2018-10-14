@@ -78,16 +78,18 @@ Alternatively, there is a script to create a docker environment for development.
 
 We recommended that your contribution complies with the following guidelines before you submit a pull request:
 
-*  If your pull request addresses an issue, please use the pull request title to describe the issue and mention the issue number in the pull request description. This will make sure a link back to the original issue is created.
+* If your pull request addresses an issue, please use the pull request title to describe the issue and mention the issue number in the pull request description. This will make sure a link back to the original issue is created.
 
-*  All public methods must have informative docstrings with sample usage when appropriate.
+* All public methods must have informative docstrings with sample usage when appropriate.
 
-*  Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
+* Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
 
-*  All other tests pass when everything is rebuilt from scratch.  See
+* All other tests pass when everything is rebuilt from scratch.  See
 [Developing in Docker](#Developing-in-Docker) for information on running the test suite locally.
 
-*  When adding additional functionality, provide at least one example script or Jupyter Notebook in the ``arviz/examples/`` folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
+* When adding additional functionality, provide at least one example script or Jupyter Notebook in the ``arviz/examples/`` folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
+
+* Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture)
 
 * Documentation and high-coverage tests are necessary for enhancements to be accepted.
 
@@ -109,6 +111,7 @@ tools:
   ```bash
   $ pytest arviz/tests/<name of test>.py --save user_defined_directory
   ```
+
 
 * Code with good test **coverage** (at least 80%), check with:
 
