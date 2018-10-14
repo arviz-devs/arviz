@@ -235,36 +235,35 @@ class TestEmceeNetCDFUtils:
 
 
 class TestPyMC3NetCDFUtils(BaseArvizTest):
-    @classmethod
-    def setup_class(cls):
-        # Data of the Eight Schools Model
-        cls.data = eight_schools_params()
-        cls.draws, cls.chains = 500, 2
-        cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)["pymc3"]
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            model, obj = load_cached_models(draws, chains)["pymc3"]
+        return Data
 
-    def get_inference_data(self):
-        with self.model:
+    def get_inference_data(self, data, eight_schools_params):
+        with data.model:
             prior = pm.sample_prior_predictive()
-            posterior_predictive = pm.sample_posterior_predictive(self.obj)
+            posterior_predictive = pm.sample_posterior_predictive(data.obj)
 
         return from_pymc3(
-            trace=self.obj,
+            trace=data.obj,
             prior=prior,
             posterior_predictive=posterior_predictive,
-            coords={"school": np.arange(self.data["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "theta_tilde": ["school"]},
         )
 
-    def test_sampler_stats(self):
-        inference_data = self.get_inference_data()
+    def test_sampler_stats(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "sample_stats")
 
-    def test_posterior_predictive(self):
-        inference_data = self.get_inference_data()
+    def test_posterior_predictive(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior_predictive")
 
-    def test_prior(self):
-        inference_data = self.get_inference_data()
+    def test_prior(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "prior")
 
 
