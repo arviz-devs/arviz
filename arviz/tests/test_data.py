@@ -268,24 +268,24 @@ class TestPyMC3NetCDFUtils(BaseArvizTest):
 
 
 class TestPyStanNetCDFUtils(BaseArvizTest):
-    @classmethod
-    def setup_class(cls):
-        # Data of the Eight Schools Model
-        cls.data = eight_schools_params()
-        cls.draws, cls.chains = 500, 2
-        cls.model, cls.obj = load_cached_models(cls.draws, cls.chains)["pystan"]
 
-    def get_inference_data(self):
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            model, obj = load_cached_models(draws, chains)["pystan"]
+        return Data
+
+    def get_inference_data(self, data, eight_school_params):
         """log_likelihood as a var."""
-        prior = pystan_extract_unpermuted(self.obj)
+        prior = pystan_extract_unpermuted(data.obj)
         prior = {"theta_test": prior["theta"]}
         return from_pystan(
-            fit=self.obj,
+            fit=data.obj,
             prior=prior,
             posterior_predictive="y_hat",
             observed_data=["y"],
             log_likelihood="log_lik",
-            coords={"school": np.arange(self.data["J"])},
+            coords={"school": np.arange(eight_school_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
@@ -295,18 +295,18 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
             },
         )
 
-    def get_inference_data2(self):
+    def get_inference_data2(self, data, eight_schools_params):
         """log_likelihood as a ndarray."""
         # dictionary
-        observed_data = {"y_hat": self.data["y"]}
+        observed_data = {"y_hat": eight_schools_params["y"]}
         # ndarray
-        log_likelihood = pystan_extract_normal(self.obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_normal(data.obj, "log_lik")["log_lik"]
         return from_pystan(
-            fit=self.obj,
+            fit=data.obj,
             posterior_predictive=["y_hat"],
             observed_data=observed_data,
             log_likelihood=log_likelihood,
-            coords={"school": np.arange(self.data["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
@@ -316,16 +316,16 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
             },
         )
 
-    def get_inference_data3(self):
+    def get_inference_data3(self, data, eight_schools_params):
         """log_likelihood as a ndarray."""
         # ndarray
-        log_likelihood = pystan_extract_normal(self.obj, "log_lik")["log_lik"]
+        log_likelihood = pystan_extract_normal(data.obj, "log_lik")["log_lik"]
         return from_pystan(
-            fit=self.obj,
+            fit=data.obj,
             posterior_predictive=["y_hat"],
             observed_data=["y"],
             log_likelihood=log_likelihood,
-            coords={"school": np.arange(self.data["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
@@ -335,14 +335,14 @@ class TestPyStanNetCDFUtils(BaseArvizTest):
             },
         )
 
-    def test_sampler_stats(self):
-        inference_data = self.get_inference_data()
+    def test_sampler_stats(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "sample_stats")
 
-    def test_inference_data(self):
-        inference_data1 = self.get_inference_data()
-        inference_data2 = self.get_inference_data2()
-        inference_data3 = self.get_inference_data3()
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data1 = self.get_inference_data(data, eight_schools_params)
+        inference_data2 = self.get_inference_data2(data, eight_schools_params)
+        inference_data3 = self.get_inference_data3(data, eight_schools_params)
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
         assert hasattr(inference_data1.prior, "theta_test")
         assert hasattr(inference_data1.observed_data, "y")
