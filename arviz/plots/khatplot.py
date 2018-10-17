@@ -37,12 +37,12 @@ def plot_khat(
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, autoscaled_markersize) = _scale_fig_size(
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
         figsize, textsize
     )
 
     if markersize is None:
-        markersize = autoscaled_markersize
+        markersize = scaled_markersize
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize)
