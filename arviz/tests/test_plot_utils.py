@@ -6,7 +6,7 @@ import pytest
 from ..plots.plot_utils import xarray_to_ndarray, xarray_var_iter, get_coords
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def sample_dataset():
     mu = np.arange(1, 7).reshape(2, 3)
     tau = np.arange(7, 13).reshape(2, 3)
@@ -14,8 +14,10 @@ def sample_dataset():
     chain = [0, 1]
     draws = [0, 1, 2]
 
-    data = xr.Dataset({"mu": (["chain", "draw"], mu), "tau": (["chain", "draw"], tau)},
-                      coords={"draw": draws, "chain": chain})
+    data = xr.Dataset(
+        {"mu": (["chain", "draw"], mu), "tau": (["chain", "draw"], tau)},
+        coords={"draw": draws, "chain": chain},
+    )
 
     return mu, tau, data
 
@@ -38,7 +40,7 @@ def test_dataset_to_numpy_combined(sample_dataset):
     var_names, data = xarray_to_ndarray(data, combined=True)
 
     assert len(var_names) == 2
-    if var_names[0] == 'tau':
+    if var_names[0] == "tau":
         data = data[::-1]
     assert (data[0] == mu.reshape(1, 6)).all()
     assert (data[1] == tau.reshape(1, 6)).all()
@@ -58,8 +60,12 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
 
     assert len(var_names) == 4
     for var_name in var_names:
-        assert var_name in [("mu", {"chain": 0}), ("mu", {"chain": 1}),
-                            ("tau", {"chain": 0}), ("tau", {"chain": 1})]
+        assert var_name in [
+            ("mu", {"chain": 0}),
+            ("mu", {"chain": 1}),
+            ("tau", {"chain": 0}),
+            ("tau", {"chain": 1}),
+        ]
 
 
 class TestCoordsExceptions:

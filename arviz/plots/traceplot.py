@@ -5,10 +5,21 @@ import numpy as np
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from ..utils import _var_names
 
 
-def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, lines=None,
-               combined=False, kde_kwargs=None, hist_kwargs=None, trace_kwargs=None):
+def plot_trace(
+    data,
+    var_names=None,
+    coords=None,
+    figsize=None,
+    textsize=None,
+    lines=None,
+    combined=False,
+    kde_kwargs=None,
+    hist_kwargs=None,
+    trace_kwargs=None,
+):
     """Plot samples histograms and values.
 
     Parameters
@@ -21,9 +32,10 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple
-        If None, size is (8, 8)
-    textsize: int
-        Text size for labels
+        If None, size is (12, variables * 2)
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -71,7 +83,8 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
-    data = convert_to_dataset(data, group='posterior')
+    data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names)
 
     if coords is None:
         coords = {}
@@ -87,7 +100,7 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
     if trace_kwargs is None:
         trace_kwargs = {}
 
-    trace_kwargs.setdefault('alpha', 0.35)
+    trace_kwargs.setdefault("alpha", 0.35)
 
     if kde_kwargs is None:
         kde_kwargs = {}
@@ -95,11 +108,13 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
     if hist_kwargs is None:
         hist_kwargs = {}
 
-    hist_kwargs.setdefault('alpha', 0.35)
+    hist_kwargs.setdefault("alpha", 0.35)
 
-    figsize, textsize, linewidth, _ = _scale_fig_size(figsize, textsize, len(plotters), 2)
-    trace_kwargs.setdefault('linewidth', linewidth)
-    kde_kwargs.setdefault('plot_kwargs', {'linewidth': linewidth})
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
+        figsize, textsize, len(plotters), 2
+    )
+    trace_kwargs.setdefault("linewidth", linewidth)
+    kde_kwargs.setdefault("plot_kwargs", {"linewidth": linewidth})
 
     fig, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
 
@@ -111,27 +126,33 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
         for row in value:
             axes[i, 1].plot(np.arange(len(row)), row, **trace_kwargs)
             colors.append(axes[i, 1].get_lines()[-1].get_color())
-            kde_kwargs.setdefault('plot_kwargs', {})
-            kde_kwargs['plot_kwargs']['color'] = colors[-1]
-            if row.dtype.kind == 'i':
+            kde_kwargs.setdefault("plot_kwargs", {})
+            kde_kwargs["plot_kwargs"]["color"] = colors[-1]
+            if row.dtype.kind == "i":
                 _histplot_op(axes[i, 0], row, **hist_kwargs)
             else:
-                plot_kde(row, textsize=textsize, ax=axes[i, 0], **kde_kwargs)
+                plot_kde(row, textsize=xt_labelsize, ax=axes[i, 0], **kde_kwargs)
 
         axes[i, 0].set_yticks([])
         for idx in (0, 1):
-            axes[i, idx].set_title(make_label(var_name, selection), fontsize=textsize)
-            axes[i, idx].tick_params(labelsize=textsize)
+            axes[i, idx].set_title(make_label(var_name, selection), fontsize=titlesize)
+            axes[i, idx].tick_params(labelsize=xt_labelsize)
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-            axes[i, 0].vlines(line_values, *axes[i, 0].get_ylim(), colors=colors,
-                              linewidth=1.5, alpha=0.75)
-            axes[i, 1].hlines(line_values, *axes[i, 1].get_xlim(), colors=colors,
-                              linewidth=1.5, alpha=trace_kwargs['alpha'])
+            axes[i, 0].vlines(
+                line_values, *axes[i, 0].get_ylim(), colors=colors, linewidth=1.5, alpha=0.75
+            )
+            axes[i, 1].hlines(
+                line_values,
+                *axes[i, 1].get_xlim(),
+                colors=colors,
+                linewidth=1.5,
+                alpha=trace_kwargs["alpha"]
+            )
         axes[i, 0].set_ylim(bottom=0)
     fig.tight_layout()
     return axes
@@ -140,7 +161,7 @@ def plot_trace(data, var_names=None, coords=None, figsize=None, textsize=None, l
 def _histplot_op(ax, data, **kwargs):
     """Add a histogram for the data to the axes."""
     bins = get_bins(data)
-    ax.hist(data, bins=bins, align='left', density=True, **kwargs)
+    ax.hist(data, bins=bins, align="left", density=True, **kwargs)
     xticks = get_bins(data, max_bins=10, fenceposts=1)
     ax.set_xticks(xticks)
     return ax

@@ -287,7 +287,7 @@ class ExampleGenerator(object):
         pngfile = op.join(self.target_dir, self.pngfilename)
         thumbfile = op.join("example_thumbs", self.thumbfilename)
         self.html = "<img src=../%s>" % self.pngfilename
-        fig.savefig(pngfile, dpi=75, bbox_inches="tight")
+        fig.savefig(pngfile, dpi=75)
 
         cx, cy = self.thumbloc
         create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
@@ -343,7 +343,8 @@ def main(app):
     contents = "\n\n"
 
     # Write individual example files
-    for filename in glob.glob(op.join(source_dir, "*.py")):
+    files = sorted(glob.glob(op.join(source_dir, "*.py")))
+    for filename in files:
 
         ex = ExampleGenerator(filename, target_dir)
 

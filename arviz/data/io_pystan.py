@@ -6,14 +6,23 @@ import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords
+from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 
 class PyStanConverter:
     """Encapsulate PyStan specific logic."""
 
-    def __init__(self, *_, fit=None, prior=None, posterior_predictive=None,
-                 observed_data=None, log_likelihood=None, coords=None, dims=None):
+    def __init__(
+        self,
+        *_,
+        fit=None,
+        prior=None,
+        posterior_predictive=None,
+        observed_data=None,
+        log_likelihood=None,
+        coords=None,
+        dims=None
+    ):
         self.fit = fit
         self.prior = prior
         self.posterior_predictive = posterior_predictive
@@ -22,8 +31,11 @@ class PyStanConverter:
         self.coords = coords
         self.dims = dims
         self._var_names = fit.model_pars
+        import pystan
 
-    @requires('fit')
+        self.pystan = pystan
+
+    @requires("fit")
     def posterior_to_xarray(self):
         """Extract posterior samples from fit."""
         dtypes = self.infer_dtypes()
@@ -54,7 +66,7 @@ class PyStanConverter:
             log_lik = [log_lik]
 
         for var_name, values in var_dict.items():
-            if var_name in post_pred+log_lik:
+            if var_name in post_pred + log_lik:
                 continue
             if len(values.shape) == 0:
                 values = np.atleast_2d(values)
@@ -64,20 +76,16 @@ class PyStanConverter:
                 else:
                     values = np.expand_dims(values, 0)
             data[var_name] = np.swapaxes(values, 0, 1)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires('fit')
+    @requires("fit")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from fit."""
-        dtypes = {
-            'divergent__' :  bool,
-            'n_leapfrog__' : np.int64,
-            'treedepth__' :  np.int64,
-        }
+        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
         nchain = self.fit.sim["chains"]
         sampler_params = self.fit.get_sampler_params(inc_warmup=False)
-        stat_lp = self.fit.extract('lp__', permuted=False)
+        stat_lp = self.fit.extract("lp__", permuted=False)
         log_likelihood = self.log_likelihood
         if log_likelihood is not None:
             if isinstance(log_likelihood, str):
@@ -92,7 +100,7 @@ class PyStanConverter:
                 reorder = np.argsort(i_permutation_order) + len(original_order)
                 original_order.extend(list(reorder))
             nchain = self.fit.sim["chains"]
-            stat_lp = self.fit.extract('lp__', permuted=True)['lp__']
+            stat_lp = self.fit.extract("lp__", permuted=True)["lp__"]
             stat_lp = unpermute(stat_lp, original_order, nchain)
             if log_likelihood is not None:
                 if isinstance(log_likelihood, str):
@@ -101,7 +109,7 @@ class PyStanConverter:
                 log_likelihood_vals = unpermute(log_likelihood_vals, original_order, nchain)
         else:
             # PyStan version 2.18+
-            stat_lp = stat_lp['lp__']
+            stat_lp = stat_lp["lp__"]
             if len(stat_lp.shape) == 0:
                 stat_lp = np.atleast_2d(stat_lp)
             elif len(stat_lp.shape) == 1:
@@ -127,12 +135,12 @@ class PyStanConverter:
 
         # Add lp to sampler_params
         for i, _ in enumerate(sampler_params):
-            sampler_params[i]['lp__'] = stat_lp[i]
+            sampler_params[i]["lp__"] = stat_lp[i]
         if log_likelihood is not None:
             # Add log_likelihood to sampler_params
             for i, _ in enumerate(sampler_params):
                 # slice log_likelihood to keep dimensions
-                sampler_params[i]['log_likelihood'] = log_likelihood_vals[i:i+1]
+                sampler_params[i]["log_likelihood"] = log_likelihood_vals[i : i + 1]
             # change dims and coords for log_likelihood if defined
             if isinstance(log_likelihood, str) and log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
@@ -140,13 +148,13 @@ class PyStanConverter:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
         data = {}
         for key in sampler_params[0]:
-            name = re.sub('__$', "", key)
-            name = "diverging" if name == 'divergent' else name
+            name = re.sub("__$", "", key)
+            name = "diverging" if name == "divergent" else name
             data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires('fit')
-    @requires('posterior_predictive')
+    @requires("fit")
+    @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         nchain = self.fit.sim["chains"]
@@ -186,10 +194,10 @@ class PyStanConverter:
                     else:
                         values = np.expand_dims(values, 0)
                 data[var_name] = np.swapaxes(values, 0, 1)
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires('fit')
-    @requires('prior')
+    @requires("fit")
+    @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
         nchain = self.fit.sim["chains"]
@@ -204,10 +212,10 @@ class PyStanConverter:
                     values = np.expand_dims(values, 0)
             values = np.swapaxes(values, 0, 1)
             data[key] = values
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires('fit')
-    @requires('observed_data')
+    @requires("fit")
+    @requires("observed_data")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         if self.dims is None:
@@ -219,8 +227,9 @@ class PyStanConverter:
             for key, vals in self.observed_data.items():
                 vals = np.atleast_1d(vals)
                 val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(vals.shape, key,
-                                                        dims=val_dims, coords=self.coords)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
                 observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         else:
             if isinstance(self.observed_data, str):
@@ -231,12 +240,13 @@ class PyStanConverter:
             for key in observed_names:
                 vals = np.atleast_1d(self.fit.data[key])
                 val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(vals.shape, key,
-                                                        dims=val_dims, coords=self.coords)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
                 observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data)
+        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pystan))
 
-    @requires('fit')
+    @requires("fit")
     def infer_dtypes(self):
         """Infer dtypes from Stan model code.
 
@@ -244,26 +254,24 @@ class PyStanConverter:
         dtypes after stripping out comments inside the block.
         """
         pattern_remove_comments = re.compile(
-            r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-            re.DOTALL|re.MULTILINE
+            r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
         )
         stan_integer = r"int"
-        stan_limits = r"(?:\<[^\>]+\>)*" # ignore group: 0 or more <....>
-        stan_param = r"([^;=\s\[]+)" # capture group: ends= ";", "=", "[" or whitespace
-        stan_ws = r"\s*" # 0 or more whitespace
+        stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
+        stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
+        stan_ws = r"\s*"  # 0 or more whitespace
         pattern_int = re.compile(
-            "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)),
-            re.IGNORECASE
+            "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
         )
         stan_code = self.fit.get_stancode()
         # remove deprecated comments
-        stan_code = "\n".join(\
-                line if "#" not in line else line[:line.find("#")]\
-                for line in stan_code.splitlines())
+        stan_code = "\n".join(
+            line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
+        )
         stan_code = re.sub(pattern_remove_comments, "", stan_code)
         stan_code = stan_code.split("generated quantities")[-1]
         dtypes = re.findall(pattern_int, stan_code)
-        dtypes = {item.strip() : 'int' for item in dtypes if item.strip() in self._var_names}
+        dtypes = {item.strip(): "int" for item in dtypes if item.strip() in self._var_names}
         return dtypes
 
     def to_inference_data(self):
@@ -273,13 +281,15 @@ class PyStanConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        return InferenceData(**{
-            'posterior': self.posterior_to_xarray(),
-            'sample_stats': self.sample_stats_to_xarray(),
-            'posterior_predictive' : self.posterior_predictive_to_xarray(),
-            'prior' : self.prior_to_xarray(),
-            'observed_data' : self.observed_data_to_xarray(),
-        })
+        return InferenceData(
+            **{
+                "posterior": self.posterior_to_xarray(),
+                "sample_stats": self.sample_stats_to_xarray(),
+                "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "prior": self.prior_to_xarray(),
+                "observed_data": self.observed_data_to_xarray(),
+            }
+        )
 
 
 def unpermute(ary, idx, nchain):
@@ -309,12 +319,20 @@ def unpermute(ary, idx, nchain):
         ary_shape = ary.shape[1:]
     else:
         ary_shape = ary.shape
-    ary = ary.reshape((-1, nchain, *ary_shape), order='F')
+    ary = ary.reshape((-1, nchain, *ary_shape), order="F")
     return ary
 
 
-def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
-                observed_data=None, log_likelihood=None, coords=None, dims=None):
+def from_pystan(
+    *,
+    fit=None,
+    prior=None,
+    posterior_predictive=None,
+    observed_data=None,
+    log_likelihood=None,
+    coords=None,
+    dims=None
+):
     """Convert PyStan data into an InferenceData object.
 
     Parameters
@@ -405,4 +423,5 @@ def from_pystan(*, fit=None, prior=None, posterior_predictive=None,
         observed_data=observed_data,
         log_likelihood=log_likelihood,
         coords=coords,
-        dims=dims).to_inference_data()
+        dims=dims,
+    ).to_inference_data()

@@ -8,9 +8,24 @@ from scipy.stats import entropy
 from .plot_utils import _scale_fig_size
 
 
-def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4.5, rotated=False,
-             contour=True, fill_last=True, figsize=None, textsize=None, plot_kwargs=None,
-             fill_kwargs=None, rug_kwargs=None, contour_kwargs=None, ax=None):
+def plot_kde(
+    values,
+    values2=None,
+    cumulative=False,
+    rug=False,
+    label=None,
+    bw=4.5,
+    rotated=False,
+    contour=True,
+    fill_last=True,
+    figsize=None,
+    textsize=None,
+    plot_kwargs=None,
+    fill_kwargs=None,
+    rug_kwargs=None,
+    contour_kwargs=None,
+    ax=None,
+):
     """1D or 2D KDE plot taking into account boundary conditions.
 
     Parameters
@@ -37,9 +52,10 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     figsize : tuple
-        Size of figure in inches. Defaults to (12, 8)
-    textsize : float
-        Size of text on figure.
+        Figure size. If None it will be defined automatically.
+    textsize: float
+        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
+        on figsize.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -109,7 +125,7 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     if figsize is None and ax:
         figsize = ax.get_figure().get_size_inches()
 
-    figsize, textsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, *_, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -117,23 +133,23 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}
-        plot_kwargs.setdefault('color', 'C0')
+        plot_kwargs.setdefault("color", "C0")
 
-        default_color = plot_kwargs.get('color')
+        default_color = plot_kwargs.get("color")
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault('alpha', 0)
-        fill_kwargs.setdefault('color', default_color)
+        fill_kwargs.setdefault("alpha", 0)
+        fill_kwargs.setdefault("color", default_color)
 
         if rug_kwargs is None:
             rug_kwargs = {}
-        rug_kwargs.setdefault('marker', '_' if rotated else '|')
-        rug_kwargs.setdefault('linestyle', 'None')
-        rug_kwargs.setdefault('color', default_color)
+        rug_kwargs.setdefault("marker", "_" if rotated else "|")
+        rug_kwargs.setdefault("linestyle", "None")
+        rug_kwargs.setdefault("color", default_color)
 
-        plot_kwargs.setdefault('linewidth', linewidth)
-        rug_kwargs.setdefault('markersize', 2 * markersize)
+        plot_kwargs.setdefault("linewidth", linewidth)
+        rug_kwargs.setdefault("markersize", 2 * markersize)
 
         density, lower, upper = _fast_kde(values, cumulative, bw)
         x = np.linspace(lower, upper, len(density))
@@ -159,7 +175,7 @@ def plot_kde(values, values2=None, cumulative=False, rug=False, label=None, bw=4
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
-        contour_kwargs.setdefault('colors', '0.5')
+        contour_kwargs.setdefault("colors", "0.5")
 
         gridsize = (128, 128) if contour else (256, 256)
 
@@ -209,7 +225,7 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
     std_x = entropy(x - xmin) * bw
 
-    n_bins = min(int(len_x**(1/3) * std_x * 2), 200)
+    n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
     grid, _ = np.histogram(x, bins=n_bins)
     d_x = (xmax - xmin) / (n_bins - 1)
 
@@ -218,8 +234,8 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     kernel = gaussian(kern_nx, scotts_factor * std_x)
 
     npad = min(n_bins, 2 * kern_nx)
-    grid = np.concatenate([grid[npad: 0: -1], grid, grid[n_bins: n_bins - npad: -1]])
-    density = convolve(grid, kernel, mode='same')[npad: npad + n_bins]
+    grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
+    density = convolve(grid, kernel, mode="same")[npad : npad + n_bins]
 
     norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
 
@@ -290,10 +306,10 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
 
-    boundary = 'wrap' if circular else 'symm'
+    boundary = "wrap" if circular else "symm"
 
     grid = coo_matrix((weights, xyi), shape=(n_x, n_y)).toarray()
-    grid = convolve2d(grid, kernel, mode='same', boundary=boundary)
+    grid = convolve2d(grid, kernel, mode="same", boundary=boundary)
 
     norm_factor = np.linalg.det(2 * np.pi * cov * scotts_factor ** 2)
     norm_factor = len_x * d_x * d_y * norm_factor ** 0.5

@@ -2,6 +2,10 @@ ArviZ: Exploratory analysis of Bayesian models
 ==============================================
 |Build Status|
 |Coverage Status|
+|black|
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
 
 .. raw:: html
 
@@ -14,7 +18,7 @@ ArviZ: Exploratory analysis of Bayesian models
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
 
-The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
+The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects. See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ.
 
 
 **ArviZ is under heavy development.**
@@ -25,9 +29,10 @@ Installation with pip is recommended
 
     pip install arviz
 
-ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <http://docs.pymc.io/>`_ and
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_ objects. Support for PyMC4, TensorFlow Probability, Pyro, Edward2, and Edward are on the
-roadmap.
+ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
+`PyStan <https://pystan.readthedocs.io/en/latest/>`_,
+`Pyro <http://pyro.ai/>`_, and
+`emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
 
 Contributions and issue reports are very welcome at
 `the github repository <https://github.com/arviz-devs/arviz>`_.
@@ -38,7 +43,7 @@ Contributions and issue reports are very welcome at
 
    Quickstart<notebooks/Introduction>
    Example Gallery<examples/index>
-   Current Roadmap<roadmap>
+   Cookbook<notebooks/InferenceDataCookbook>
    api
    about
 
@@ -73,9 +78,9 @@ Contributions and issue reports are very welcome at
                 <img src="_static/plot_posterior_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_violin.html">
+            <a href="examples/plot_kde_2d.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_violin_thumb.png">
+                <img src="_static/plot_kde_2d_thumb.png">
             </div>
             </a>
             <a href="examples/plot_forest_ridge.html">

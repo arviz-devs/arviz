@@ -8,6 +8,8 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-non_centered = az.load_arviz_data('non_centered_eight')
+data = az.load_arviz_data('centered_eight')
 
-az.plot_posterior(non_centered, var_names=("mu", 'theta_tilde',), rope=(-1, 1))
+coords = {'school': ['Choate']}
+az.plot_posterior(data, var_names=['mu', 'theta'], coords=coords, rope=(-1, 1))
+

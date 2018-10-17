@@ -2,6 +2,7 @@
 from .inference_data import InferenceData
 from .base import dict_to_dataset
 
+
 def _verify_names(sampler, var_names, arg_names):
     """Make sure var_names and arg_names are assigned reasonably.
 
@@ -29,18 +30,23 @@ def _verify_names(sampler, var_names, arg_names):
     num_args = len(sampler.args)
 
     if var_names is None:
-        var_names = ['var_{}'.format(idx) for idx in range(num_vars)]
+        var_names = ["var_{}".format(idx) for idx in range(num_vars)]
     if arg_names is None:
-        arg_names = ['arg_{}'.format(idx) for idx in range(num_args)]
+        arg_names = ["arg_{}".format(idx) for idx in range(num_args)]
 
     if len(var_names) != num_vars:
         raise ValueError(
-            'The sampler has {} variables, but only {} var_names were provided!'.format(
-                num_vars, len(var_names)))
+            "The sampler has {} variables, but only {} var_names were provided!".format(
+                num_vars, len(var_names)
+            )
+        )
 
     if len(arg_names) != num_args:
-        raise ValueError('The sampler has {} args, but only {} arg_names were provided!'.format(
-            num_args, len(arg_names)))
+        raise ValueError(
+            "The sampler has {} args, but only {} arg_names were provided!".format(
+                num_args, len(arg_names)
+            )
+        )
     return var_names, arg_names
 
 
@@ -54,27 +60,32 @@ class EmceeConverter:
         self.arg_names = arg_names
         self.coords = coords
         self.dims = dims
+        import emcee
+
+        self.emcee = emcee
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = {}
         for idx, var_name in enumerate(self.var_names):
             data[var_name] = self.sampler.chain[(..., idx)]
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         data = {}
         for idx, var_name in enumerate(self.arg_names):
             data[var_name] = self.sampler.args[idx]
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
-        return InferenceData(**{
-            'posterior': self.posterior_to_xarray(),
-            'observed_data': self.observed_data_to_xarray(),
-        })
+        return InferenceData(
+            **{
+                "posterior": self.posterior_to_xarray(),
+                "observed_data": self.observed_data_to_xarray(),
+            }
+        )
 
 
 def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=None):
@@ -94,8 +105,5 @@ def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=Non
         Map variable names to their coordinates
     """
     return EmceeConverter(
-        sampler,
-        var_names=var_names,
-        arg_names=arg_names,
-        coords=coords,
-        dims=dims).to_inference_data()
+        sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
+    ).to_inference_data()

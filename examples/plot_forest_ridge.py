@@ -13,9 +13,7 @@ fig, axes = az.plot_forest(non_centered_data,
                            kind='ridgeplot',
                            var_names=['theta'],
                            combined=True,
-                           textsize=11,
                            ridgeplot_overlap=3,
                            colors='white',
-                           r_hat=False,
-                           n_eff=False)
-axes[0].set_title('Estimated theta for eight schools model', fontsize=11)
+                           figsize=(9, 7))
+axes[0].set_title('Estimated theta for 8 schools model')

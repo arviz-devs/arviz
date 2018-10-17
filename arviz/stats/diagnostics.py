@@ -1,5 +1,4 @@
 """Diagnostic functions for ArviZ."""
-import itertools
 import warnings
 
 import numpy as np
@@ -7,10 +6,11 @@ import pandas as pd
 from scipy.signal import fftconvolve
 import xarray as xr
 
-from arviz import convert_to_dataset
+from ..data import convert_to_dataset
+from ..utils import _var_names
 
 
-__all__ = ['effective_n', 'gelman_rubin', 'geweke', 'autocorr']
+__all__ = ["effective_n", "gelman_rubin", "geweke", "autocorr"]
 
 
 def effective_n(data, *, var_names=None):
@@ -28,7 +28,7 @@ def effective_n(data, *, var_names=None):
 
     Returns
     -------
-    n_eff : dictionary of floats (MultiTrace) or float (trace object)
+    n_eff : xarray.Dataset
         Return the effective sample size, :math:`\hat{n}_{eff}`
 
     Notes
@@ -51,42 +51,54 @@ def effective_n(data, *, var_names=None):
     if isinstance(data, np.ndarray):
         return _get_neff(data)
 
-    dataset = convert_to_dataset(data, group='posterior')
-    if var_names is None:
-        var_names = list(dataset.data_vars)
-    dataset = dataset[var_names]
-    return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
+    var_names = _var_names(var_names)
+    dataset = convert_to_dataset(data, group="posterior")
+
+    dataset = dataset if var_names is None else dataset[var_names]
+    return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(("chain", "draw"),))
+
+
+def _neff_ufunc(ary):
+    """Ufunc for computing effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_neff(ary[idx])
+    return target
 
 
 def _get_neff(sample_array):
     """Compute the effective sample size for a 2D array."""
     shape = sample_array.shape
     if len(shape) != 2:
-        raise TypeError('Effective sample size calculation requires 2 dimensional arrays.')
+        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
     n_chain, n_draws = shape
     if n_chain <= 1:
-        raise TypeError('Effective sample size calculation requires multiple chains.')
+        raise TypeError("Effective sample size calculation requires multiple chains.")
 
     acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
 
     chain_mean = sample_array.mean(axis=1)
-    chain_var = acov[:, 0] * n_draws / (n_draws - 1.)
-    acov_t = acov[:, 1] * n_draws / (n_draws - 1.)
+    chain_var = acov[:, 0] * n_draws / (n_draws - 1.0)
+    acov_t = acov[:, 1] * n_draws / (n_draws - 1.0)
     mean_var = np.mean(chain_var)
-    var_plus = mean_var * (n_draws - 1.) / n_draws
+    var_plus = mean_var * (n_draws - 1.0) / n_draws
     var_plus += np.var(chain_mean, ddof=1)
 
     rho_hat_t = np.zeros(n_draws)
-    rho_hat_even = 1.
+    rho_hat_even = 1.0
     rho_hat_t[0] = rho_hat_even
-    rho_hat_odd = 1. - (mean_var - np.mean(acov_t)) / var_plus
+    rho_hat_odd = 1.0 - (mean_var - np.mean(acov_t)) / var_plus
     rho_hat_t[1] = rho_hat_odd
     # Geyer's initial positive sequence
     max_t = 1
     t = 1
-    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.:
-        rho_hat_even = 1. - (mean_var - np.mean(acov[:, t + 1])) / var_plus
-        rho_hat_odd = 1. - (mean_var - np.mean(acov[:, t + 2])) / var_plus
+    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
+        rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
+        rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
         if (rho_hat_even + rho_hat_odd) >= 0:
             rho_hat_t[t + 1] = rho_hat_even
             rho_hat_t[t + 2] = rho_hat_odd
@@ -97,25 +109,11 @@ def _get_neff(sample_array):
     t = 3
     while t <= max_t - 2:
         if (rho_hat_t[t + 1] + rho_hat_t[t + 2]) > (rho_hat_t[t - 1] + rho_hat_t[t]):
-            rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.
+            rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
-    ess = (n_chain * n_draws) / (-1. + 2. * np.sum(rho_hat_t))
+    ess = int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
     return ess
-
-
-def _neff_ufunc(ary):
-    """Ufunc for computing effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
-        idxs = list(idxs)
-        idxs.append(Ellipsis)
-        target[tuple(idxs)] = _get_neff(ary[tuple(idxs)])
-    return target
 
 
 def autocorr(x):
@@ -135,7 +133,7 @@ def autocorr(x):
     y = x - x.mean()
     len_y = len(y)
     result = fftconvolve(y, y[::-1])
-    acorr = result[len(result) // 2:]
+    acorr = result[len(result) // 2 :]
     acorr /= np.arange(len_y, 0, -1)
     acorr /= acorr[0]
     return acorr
@@ -180,7 +178,7 @@ def gelman_rubin(data, var_names=None):
 
     Returns
     -------
-    r_hat : dict of floats (MultiTrace) or float (trace object)
+    r_hat : xarray.Dataset
       Returns dictionary of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
@@ -201,30 +199,12 @@ def gelman_rubin(data, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_rhat(data)
+    var_names = _var_names(var_names)
+    dataset = convert_to_dataset(data, group="posterior")
 
-    dataset = convert_to_dataset(data, group='posterior')
-    if var_names is None:
-        var_names = list(dataset.data_vars)
-    dataset = dataset[var_names]
-    return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(('chain', 'draw',),))
+    dataset = dataset if var_names is None else dataset[var_names]
+    return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
-
-def _get_rhat(values, round_to=2):
-    """Compute the rhat for a 2d array."""
-    shape = values.shape
-    if len(shape) != 2:
-        raise TypeError('Effective sample size calculation requires 2 dimensional arrays.')
-    _, num_samples = shape
-
-    # Calculate between-chain variance
-    between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
-    # Calculate within-chain variance
-    within_chain_variance = np.mean(np.var(values, axis=1, ddof=1), axis=0)
-    # Estimate of marginal posterior variance
-    v_hat = (within_chain_variance * (num_samples - 1) / num_samples +
-             between_chain_variance / num_samples)
-
-    return round((v_hat / within_chain_variance)**0.5, round_to)
 
 def _rhat_ufunc(ary):
     """Ufunc for computing effective sample size.
@@ -233,14 +213,32 @@ def _rhat_ufunc(ary):
     `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
     """
     target = np.empty(ary.shape[:-2])
-    for idxs in itertools.product(*[np.arange(d) for d in target.shape]):
-        idxs = list(idxs)
-        idxs.append(Ellipsis)
-        target[tuple(idxs)] = _get_rhat(ary[tuple(idxs)])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_rhat(ary[idx])
     return target
 
 
-def geweke(values, first=.1, last=.5, intervals=20):
+def _get_rhat(values, round_to=2):
+    """Compute the rhat for a 2d array."""
+    shape = values.shape
+    if len(shape) != 2:
+        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
+    _, num_samples = shape
+
+    # Calculate between-chain variance
+    between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
+    # Calculate within-chain variance
+    within_chain_variance = np.mean(np.var(values, axis=1, ddof=1), axis=0)
+    # Estimate of marginal posterior variance
+    v_hat = (
+        within_chain_variance * (num_samples - 1) / num_samples
+        + between_chain_variance / num_samples
+    )
+
+    return round((v_hat / within_chain_variance) ** 0.5, round_to)
+
+
+def geweke(values, first=0.1, last=0.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
 
     Compare the mean of the first % of series with the mean of the last % of series. x is divided
@@ -301,8 +299,8 @@ def geweke(values, first=.1, last=.5, intervals=20):
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
-        first_slice = values[start: start + int(first * (end - start))]
-        last_slice = values[int(end - last * (end - start)):]
+        first_slice = values[start : start + int(first * (end - start))]
+        last_slice = values[int(end - last * (end - start)) :]
 
         z_score = first_slice.mean() - last_slice.mean()
         z_score /= np.sqrt(first_slice.var() + last_slice.var())
@@ -328,15 +326,11 @@ def ks_summary(pareto_tail_indices):
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
-    kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, .5, .7, 1, np.Inf])
-    kprop = kcounts/len(pareto_tail_indices)*100
-    df_k = (pd.DataFrame(dict(_=['(good)', '(ok)', '(bad)', '(very bad)'],
-                              Count=kcounts,
-                              Pct=kprop))
-            .rename(index={0: '(-Inf, 0.5]',
-                           1: ' (0.5, 0.7]',
-                           2: '   (0.7, 1]',
-                           3: '   (1, Inf)'}))
+    kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    kprop = kcounts / len(pareto_tail_indices) * 100
+    df_k = pd.DataFrame(
+        dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
+    ).rename(index={0: "(-Inf, 0.5]", 1: " (0.5, 0.7]", 2: "   (0.7, 1]", 3: "   (1, Inf)"})
 
     if np.sum(kcounts[1:]) == 0:
         warnings.warn("All Pareto k estimates are good (k < 0.5)")
