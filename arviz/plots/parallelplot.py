@@ -77,7 +77,7 @@ def plot_parallel(
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+        _, ax = plt.subplots(figsize=figsize)
 
     ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
 

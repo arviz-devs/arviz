@@ -1,6 +1,4 @@
-"""
-Base IO code for all datasets. Heavily influenced by scikit-learn's implementation.
-"""
+"""Base IO code for all datasets. Heavily influenced by scikit-learn's implementation."""
 from collections import namedtuple
 import hashlib
 import itertools
@@ -121,6 +119,28 @@ def _sha256(path):
 
 
 def load_arviz_data(dataset=None, data_home=None):
+    """Load a local or remote pre-made dataset.
+
+    Run with no parameters to get a list of all available models.
+
+    The directory to save to can also be set with the environement
+    variable `ARVIZ_HOME`. The checksum of the dataset is checked against a
+    hardcoded value to watch for data corruption.
+
+    Run `az.clear_data_home` to clear the data directory.
+
+    Parameters
+    ----------
+    dataset : str
+        Name of dataset to load.
+
+    data_home : str, optional
+        Where to save remote datasets
+
+    Returns
+    -------
+    xarray.Dataset
+    """
     if dataset in LOCAL_DATASETS:
         resource = LOCAL_DATASETS[dataset]
         return load_data(resource.filename)
@@ -148,6 +168,7 @@ def load_arviz_data(dataset=None, data_home=None):
 
 
 def list_datasets():
+    """Get a string representation of all available datasets with descriptions."""
     lines = []
     for name, resource in itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()):
 
