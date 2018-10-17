@@ -2,9 +2,9 @@
 import os
 import pickle
 import sys
+import pytest
 
 import emcee
-import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import pyro
@@ -13,34 +13,6 @@ from pyro.infer.mcmc import MCMC, NUTS
 import pystan
 import scipy.optimize as op
 import torch
-
-
-class BaseArvizTest:
-    """Base class for running arviz tests."""
-
-    @classmethod
-    def setup_class(cls):
-        """Run once for the class.
-
-        This has to exist so subclasses can inherit.
-        """
-        pass
-
-    @classmethod
-    def teardown_class(cls):
-        """Teardown at end of tests.
-
-        This has to exist so subclasses can inherit.
-        """
-        pass
-
-    def setup_method(self):
-        """Run for every test."""
-        np.random.seed(1)
-
-    def teardown_method(self):
-        """Run for every test."""
-        plt.close("all")
 
 
 def _emcee_neg_lnlike(theta, x, y, yerr):
@@ -105,6 +77,7 @@ def emcee_linear_model(data, draws, chains):
     return sampler
 
 
+@pytest.fixture(scope="function")
 def eight_schools_params():
     """Share setup for eight schools."""
     return {
