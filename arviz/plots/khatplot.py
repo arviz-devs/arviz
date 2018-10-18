@@ -21,7 +21,8 @@ def plot_khat(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     markersize: int
-        markersize for scatter plot. Defaults to `None` in which case it will be chosen based on autoscaling for figsize.
+        markersize for scatter plot. Defaults to `None` in which case it will
+        be chosen based on autoscaling for figsize.
     ax: axes, opt
       Matplotlib axes
     hlines_kwargs: dictionary
