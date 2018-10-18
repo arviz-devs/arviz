@@ -1,5 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import os
+from urllib.parse import urlunsplit
+
 import numpy as np
 import pymc3 as pm
 import pytest
@@ -15,7 +17,7 @@ from arviz import (
     list_datasets,
     clear_data_home,
 )
-from arviz.data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
+from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
@@ -35,23 +37,33 @@ def chains():
 
 
 @pytest.fixture(autouse=True)
-def no_remote_data(tmpdir):
+def no_remote_data(monkeypatch, tmpdir):
     """Delete all remote data and replace it with a local dataset."""
     keys = list(REMOTE_DATASETS)
     for key in keys:
-        del REMOTE_DATASETS[key]
+        monkeypatch.delitem(REMOTE_DATASETS, key)
 
     centered = LOCAL_DATASETS["centered_eight"]
     filename = os.path.join(str(tmpdir), os.path.basename(centered.filename))
-    url = "file://" + centered.filename
-    REMOTE_DATASETS["test_remote"] = RemoteFileMetadata(
-        filename=filename,
-        url=url,
-        checksum="9ae00c83654b3f061d32c882ec0a270d10838fa36515ecb162b89a290e014849",
-        description=centered.description,
+
+    url = urlunsplit(("file", "", centered.filename, "", ""))
+
+    monkeypatch.setitem(
+        REMOTE_DATASETS,
+        "test_remote",
+        RemoteFileMetadata(
+            filename=filename,
+            url=url,
+            checksum="9ae00c83654b3f061d32c882ec0a270d10838fa36515ecb162b89a290e014849",
+            description=centered.description,
+        ),
     )
-    REMOTE_DATASETS["bad_checksum"] = RemoteFileMetadata(
-        filename=filename, url=url, checksum="bad!", description=centered.description
+    monkeypatch.setitem(
+        REMOTE_DATASETS,
+        "bad_checksum",
+        RemoteFileMetadata(
+            filename=filename, url=url, checksum="bad!", description=centered.description
+        ),
     )
 
 
@@ -83,9 +95,10 @@ def test_missing_dataset():
 
 
 def test_list_datasets():
-    datasets = list_datasets()
+    dataset_string = list_datasets()
+    # make sure all the names of the data sets are in the dataset description
     for key in ("centered_eight", "non_centered_eight", "test_remote", "bad_checksum"):
-        assert key in datasets
+        assert key in dataset_string
 
 
 class TestNumpyToDataArray:
