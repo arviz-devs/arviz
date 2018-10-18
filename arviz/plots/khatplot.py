@@ -6,7 +6,7 @@ from .plot_utils import _scale_fig_size
 
 
 def plot_khat(
-    khats, figsize=None, textsize=None, markersize=5, ax=None, hlines_kwargs=None, **kwargs
+    khats, figsize=None, textsize=None, markersize=None, ax=None, hlines_kwargs=None, **kwargs
 ):
     """
     Plot Pareto tail indices.
@@ -21,7 +21,8 @@ def plot_khat(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     markersize: int
-        markersize for scatter plot. Defaults to 5
+        markersize for scatter plot. Defaults to `None` in which case it will
+        be chosen based on autoscaling for figsize.
     ax: axes, opt
       Matplotlib axes
     hlines_kwargs: dictionary
@@ -37,9 +38,12 @@ def plot_khat(
     if hlines_kwargs is None:
         hlines_kwargs = {}
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
         figsize, textsize
     )
+
+    if markersize is None:
+        markersize = scaled_markersize
 
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize)
