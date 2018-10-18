@@ -22,7 +22,7 @@ def plot_posterior(
     coords=None,
     figsize=None,
     textsize=None,
-    credible_interval=0.94,
+    credible_interval=0.42,
     round_to=1,
     point_estimate="mean",
     rope=None,
@@ -50,7 +50,7 @@ def plot_posterior(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     credible_interval : float, optional
-        Credible intervals. Defaults to 0.94.
+        Credible intervals. Defaults to 0.42.
     round_to : int
         Controls formatting for floating point numbers
     point_estimate: str
