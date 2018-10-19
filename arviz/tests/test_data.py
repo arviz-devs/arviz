@@ -1,5 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import os
+from urllib.parse import urlunsplit
+
 import numpy as np
 import pymc3 as pm
 import pytest
@@ -11,7 +13,11 @@ from arviz import (
     from_pymc3,
     from_pystan,
     from_emcee,
+    load_arviz_data,
+    list_datasets,
+    clear_data_home,
 )
+from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
@@ -28,6 +34,71 @@ def draws():
 @pytest.fixture(scope="class")
 def chains():
     return 2
+
+
+@pytest.fixture(autouse=True)
+def no_remote_data(monkeypatch, tmpdir):
+    """Delete all remote data and replace it with a local dataset."""
+    keys = list(REMOTE_DATASETS)
+    for key in keys:
+        monkeypatch.delitem(REMOTE_DATASETS, key)
+
+    centered = LOCAL_DATASETS["centered_eight"]
+    filename = os.path.join(str(tmpdir), os.path.basename(centered.filename))
+
+    url = urlunsplit(("file", "", centered.filename, "", ""))
+
+    monkeypatch.setitem(
+        REMOTE_DATASETS,
+        "test_remote",
+        RemoteFileMetadata(
+            filename=filename,
+            url=url,
+            checksum="9ae00c83654b3f061d32c882ec0a270d10838fa36515ecb162b89a290e014849",
+            description=centered.description,
+        ),
+    )
+    monkeypatch.setitem(
+        REMOTE_DATASETS,
+        "bad_checksum",
+        RemoteFileMetadata(
+            filename=filename, url=url, checksum="bad!", description=centered.description
+        ),
+    )
+
+
+def test_load_local_arviz_data():
+    assert load_arviz_data("centered_eight")
+
+
+def test_clear_data_home():
+    resource = REMOTE_DATASETS["test_remote"]
+    assert not os.path.exists(resource.filename)
+    load_arviz_data("test_remote")
+    assert os.path.exists(resource.filename)
+    clear_data_home(data_home=os.path.dirname(resource.filename))
+    assert not os.path.exists(resource.filename)
+
+
+def test_load_remote_arviz_data():
+    assert load_arviz_data("test_remote")
+
+
+def test_bad_checksum():
+    with pytest.raises(IOError):
+        load_arviz_data("bad_checksum")
+
+
+def test_missing_dataset():
+    with pytest.raises(ValueError):
+        load_arviz_data("does not exist")
+
+
+def test_list_datasets():
+    dataset_string = list_datasets()
+    # make sure all the names of the data sets are in the dataset description
+    for key in ("centered_eight", "non_centered_eight", "test_remote", "bad_checksum"):
+        assert key in dataset_string
 
 
 class TestNumpyToDataArray:
