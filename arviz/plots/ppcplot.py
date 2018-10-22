@@ -37,6 +37,25 @@ def plot_ppc(
     Returns
     -------
     axes : matplotlib axes
+
+    Examples
+    --------
+    Plot the observed data KDE overlaid on posterior predictive KDEs.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('radon')
+        >>> az.plot_ppc(data)
+
+    Plot the overlay with empirical CDFs.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ppc(data, kind='cumulative')
+
     """
     for group in ("posterior_predictive", "observed_data"):
         if not hasattr(data, group):
