@@ -4,8 +4,10 @@ import numpy as np
 from .inference_data import InferenceData
 from .base import dict_to_dataset
 
+
 class TfpConverter:
     """Encapsulate tfp specific logic."""
+
     def __init__(self, posterior, *_, var_names=None, coords=None, dims=None):
         self.posterior = posterior
 
@@ -30,8 +32,6 @@ class TfpConverter:
             data[var_name] = np.expand_dims(self.posterior[i], axis=0)
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
-
-    """Encapsulate tfp specific logic."""
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -39,17 +39,11 @@ class TfpConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        return InferenceData(
-            **{
-                "posterior": self.posterior_to_xarray()
-            }
-        )
+        return InferenceData(**{"posterior": self.posterior_to_xarray()})
+
 
 def from_tfp(posterior, var_names=None, *, coords=None, dims=None):
     """Convert tfp data into an InferenceData object."""
     return TfpConverter(
-        posterior = posterior,
-        var_names = var_names,
-        coords=coords,
-        dims=dims
+        posterior=posterior, var_names=var_names, coords=coords, dims=dims
     ).to_inference_data()

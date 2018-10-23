@@ -42,7 +42,7 @@ def models():
         pymc3_model, pymc3_fit = models["pymc3"]
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
-        pyro_fit = models['pyro']
+        pyro_fit = models["pyro"]
         tfp_fit = models["tensorflow_probability"]
 
     return Models()
@@ -114,7 +114,9 @@ def fig_ax():
     ],
 )
 def test_plot_density_float(models, kwargs):
-    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]]
+    obj = [
+        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
+    ]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
     assert axes.shape[1] == 1
@@ -154,7 +156,8 @@ def test_plot_trace_discrete(discrete_model):
 
 
 @pytest.mark.parametrize(
-    "model_fits", [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
+    "model_fits",
+    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
 )
 @pytest.mark.parametrize(
     "args_expected",
