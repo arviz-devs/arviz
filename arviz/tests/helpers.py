@@ -137,15 +137,15 @@ def tfp_noncentered_schools(data, draws, chains):
     del chains
 
     def schools_model(num_schools, treatment_stddevs):
-        avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu` above
-        avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)` above
+        avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu`
+        avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
         school_effects_standard = ed.Normal(
             loc=tf.zeros(num_schools), scale=tf.ones(num_schools), name="school_effects_standard"
-        )  # `theta_prime` above
-        school_effects = avg_effect + tf.exp(avg_stddev) * school_effects_standard  # `theta` above
+        )  # `theta_tilde`
+        school_effects = avg_effect + tf.exp(avg_stddev) * school_effects_standard  # `theta`
         treatment_effects = ed.Normal(
             loc=school_effects, scale=treatment_stddevs, name="treatment_effects"
-        )  # `y` above
+        )  # `y`
         return treatment_effects
 
     log_joint = ed.make_log_joint_fn(schools_model)
@@ -177,7 +177,7 @@ def tfp_noncentered_schools(data, draws, chains):
     with tf.Session() as sess:
         [states_, _] = sess.run([states, kernel_results])
 
-    data = from_tfp(states_, var_names=["mu", "tau"])
+    data = from_tfp(states_, var_names=["mu", "tau", "theta_tilde"])
     return data
 
 

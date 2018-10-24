@@ -337,7 +337,7 @@ def test_plot_autocorr_uncombined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 2
+        or axes.shape[1] == 10
         and model_fit == "tfp_fit"
     )
 
@@ -354,7 +354,7 @@ def test_plot_autocorr_combined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 2
+        or axes.shape[1] == 10
         and model_fit == "tfp_fit"
     )
 
