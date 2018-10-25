@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.special import logsumexp
 import scipy.stats as st
+from scipy.signal import savgol_filter
 from scipy.optimize import minimize
 import xarray as xr
 
@@ -221,7 +222,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
+def hpd(x, credible_interval=0.94, smooth=False, transform=lambda x: x, circular=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -236,6 +237,8 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
         Credible interval to plot. Defaults to 0.94.
     transform : callable
         Function to transform data (defaults to identity)
+    smooth : boolean
+        If True the result will be smoothed using the Savitzky-Golay filter. Defaults to False.
     circular : bool, optional
         Whether to compute the error taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
@@ -246,7 +249,7 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
         lower and upper value of the interval.
     """
     if x.ndim > 1:
-        return np.array(
+        hpd_array = np.array(
             [
                 hpd(
                     row, credible_interval=credible_interval, transform=transform, circular=circular
@@ -254,6 +257,16 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
                 for row in x.T
             ]
         )
+        if smooth:
+            window = x.shape[1] // 3
+            order = min(3, window - 1)
+            if window % 2 == 0:
+                window += 1
+
+            hpd_array = savgol_filter(
+                x=hpd_array, window_length=window, polyorder=order, mode="mirror", axis=0
+            )
+        return hpd_array
     # Make a copy of trace
     x = transform(x.copy())
     len_x = len(x)
