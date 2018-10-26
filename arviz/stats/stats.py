@@ -249,9 +249,9 @@ def hpd(
     circular : bool, optional
         Whether to compute the error taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-    smooth_kwargs : dicts, optional
-        Additional keywords modifying the Savitzky-Golay filter. Only works if smooth is True.
-        Currently accepts window_length, polyorder and mode. See Scipy's documentation for details
+    smooth_kwargs : dict, optional
+        Additional keywords modifying the Savitzky-Golay filter. See Scipy's documentation for
+        details
 
     Returns
     -------
@@ -274,13 +274,11 @@ def hpd(
             order = min(3, window - 1)
             if window % 2 == 0:
                 window += 1
-            hpd_array = savgol_filter(
-                x=hpd_array,
-                window_length=smooth_kwargs.get("window_length", window),
-                polyorder=smooth_kwargs.get("polyorder", order),
-                mode=smooth_kwargs.get("mode", "mirror"),
-                axis=0,
-            )
+            smooth_kwargs.setdefault("window_length", window)
+            smooth_kwargs.setdefault("polyorder", order)
+            smooth_kwargs.setdefault("mode", "mirror")
+            smooth_kwargs.setdefault("axis", 0)
+            hpd_array = savgol_filter(x=hpd_array, **smooth_kwargs)
         return hpd_array
     # Make a copy of trace
     x = transform(x.copy())
