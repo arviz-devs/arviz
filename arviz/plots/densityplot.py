@@ -1,6 +1,5 @@
 """KDE and histogram plots for multiple variables."""
 import numpy as np
-import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from ..stats import hpd
