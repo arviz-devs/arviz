@@ -5,7 +5,13 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import _fast_kde
-from .plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from .plot_utils import (
+    _scale_fig_size,
+    make_label,
+    xarray_var_iter,
+    default_grid,
+    _create_axes_grid,
+)
 from ..utils import _var_names
 
 
@@ -103,17 +109,25 @@ def plot_density(
         colors = [colors for _ in range(n_data)]
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
-    all_labels = set()
+    all_labels = []
+    length_plotters = []
     for plotters in to_plot:
+        length_plotters.append(len(plotters))
         for var_name, selection, _ in plotters:
-            all_labels.add(make_label(var_name, selection))
+            all_labels.append(make_label(var_name, selection))
+
+    length_plotters = max(length_plotters)
+    rows, cols = default_grid(length_plotters, max_cols=3)
 
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, len(all_labels), 1
+        figsize, textsize, rows, cols
     )
 
-    fig, axes = plt.subplots(len(all_labels), 1, squeeze=False, figsize=figsize)
-    axis_map = {label: ax for label, ax in zip(all_labels, axes.flatten())}
+    fig, ax = _create_axes_grid(
+        length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
+    )
+
+    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
 
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
@@ -136,14 +150,13 @@ def plot_density(
             )
 
     if n_data > 1:
-        ax = axes.flatten()[0]
         for m_idx, label in enumerate(data_labels):
-            ax.plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax.legend(fontsize=xt_labelsize)
+            ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
+        ax[0].legend(fontsize=xt_labelsize)
 
     fig.tight_layout()
 
-    return axes
+    return ax
 
 
 def _d_helper(

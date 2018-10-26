@@ -116,12 +116,11 @@ def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
-    assert axes.shape[1] == 1
 
 
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=0.9)
-    assert axes.shape[1] == 1
+    assert axes.shape[0] == 2
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
