@@ -222,7 +222,14 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(x, credible_interval=0.94, smooth=False, transform=lambda x: x, circular=False):
+def hpd(
+    x,
+    credible_interval=0.94,
+    smooth=False,
+    transform=lambda x: x,
+    circular=False,
+    smooth_kwargs=None,
+):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -242,6 +249,9 @@ def hpd(x, credible_interval=0.94, smooth=False, transform=lambda x: x, circular
     circular : bool, optional
         Whether to compute the error taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
+    smooth_kwargs : dicts, optional
+        Additional keywords modifying the Savitzky-Golay filter. Only works if smooth is True.
+        Currently accepts window_length, polyorder and mode. See Scipy's documentation for details
 
     Returns
     -------
@@ -258,13 +268,18 @@ def hpd(x, credible_interval=0.94, smooth=False, transform=lambda x: x, circular
             ]
         )
         if smooth:
+            if smooth_kwargs is None:
+                smooth_kwargs = {}
             window = x.shape[1] // 3
             order = min(3, window - 1)
             if window % 2 == 0:
                 window += 1
-
             hpd_array = savgol_filter(
-                x=hpd_array, window_length=window, polyorder=order, mode="mirror", axis=0
+                x=hpd_array,
+                window_length=smooth_kwargs.get("window_length", window),
+                polyorder=smooth_kwargs.get("polyorder", order),
+                mode=smooth_kwargs.get("mode", "mirror"),
+                axis=0,
             )
         return hpd_array
     # Make a copy of trace
