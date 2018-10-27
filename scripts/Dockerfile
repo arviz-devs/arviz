@@ -1,16 +1,29 @@
-FROM jupyter/minimal-notebook
+FROM conda/miniconda3
+
+
+MAINTAINER Ravin Kumar
 
 ARG SRC_DIR
 
-MAINTAINER Austin Rochford <austin.rochford@gmail.com>
+ARG PYTHON_VERSION
+ARG PYSTAN_VERSION
 
-ADD --chown=jovyan:users $SRC_DIR /home/jovyan/
-RUN /bin/bash /home/jovyan/scripts/create_testenv.sh --global
-ENV MKL_THREADING_LAYER GNU
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+ENV PYSTAN_VERSION=${PYSTAN_VERSION}
 
-ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
-ENV MPLBACKEND=Agg
-# Import matplotlib the first time to build the font cache.
-RUN python -c "import matplotlib.pyplot"
+RUN echo ${PYTHON_VERSION}
+RUN apt-get update && apt-get install -y git gcc g++ gfortran && rm -rf /var/lib/apt/lists/*
 
-ENV PYTHONPATH $PYTHONPATH:"$HOME"
+COPY  $SRC_DIR /opt/arviz
+
+WORKDIR /opt/arviz
+# Clear any cached models from copied from host filesystem
+RUN rm arviz/tests/saved_models/*.pkl
+RUN find -type d -name __pycache__ -exec rm -rf {} +
+
+# Create conda environment. Defaults to Python 3.6
+RUN  ./scripts/create_testenv.sh
+
+RUN conda clean --all
+
+CMD ["/bin/bash", "-c", "source /root/.bashrc && pytest -vv arviz/tests"]
