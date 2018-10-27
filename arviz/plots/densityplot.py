@@ -113,7 +113,9 @@ def plot_density(
     for plotters in to_plot:
         length_plotters.append(len(plotters))
         for var_name, selection, _ in plotters:
-            all_labels.append(make_label(var_name, selection))
+            label = make_label(var_name, selection)
+            if label not in all_labels:
+                all_labels.append(label)
 
     length_plotters = max(length_plotters)
     rows, cols = default_grid(length_plotters, max_cols=3)
@@ -122,9 +124,7 @@ def plot_density(
         figsize, textsize, rows, cols
     )
 
-    fig, ax = _create_axes_grid(
-        length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
-    )
+    fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
 
