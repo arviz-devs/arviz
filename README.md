@@ -5,23 +5,23 @@
 
 # ArviZ
 
-  ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
-  Includes functions for posterior analysis, model checking, comparison and diagnostics.
+ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
+Includes functions for posterior analysis, model checking, comparison and diagnostics.
 
 ## Documentation
 
-  The official Arviz documentation can be found here
-  https://arviz-devs.github.io/arviz/index.html
+The official Arviz documentation can be found here
+https://arviz-devs.github.io/arviz/index.html
 
 ## Installation
 
-  The latest version can be installed from the master branch using pip:
+The latest version can be installed from the master branch using pip:
 
   ```
   pip install git+git://github.com/arviz-devs/arviz.git
   ```
 
-  Another option is to clone the repository and install using `python setup.py install`.
+Another option is to clone the repository and install using `python setup.py install`.
 
 -------------------------------------------------------------------------------
 ## [Gallery](https://arviz-devs.github.io/arviz/examples/index.html)
@@ -125,23 +125,23 @@
 
 ## Dependencies
 
-  Arviz is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and MatplotLib.
+Arviz is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and MatplotLib.
 
 ## Developing
 
-  A typical development workflow is:
+A typical development workflow is:
 
-  1. Install project requirements: `pip install requirements.txt`
-  2. Install additional testing requirements: `pip install requirements-dev.txt`
-  3. Write helpful code and tests.
-  4. Verify code style: `./scripts/lint.sh`
-  5. Run test suite: `pytest arviz/tests`
-  6. Make a pull request.
+1. Install project requirements: `pip install requirements.txt`
+2. Install additional testing requirements: `pip install requirements-dev.txt`
+3. Write helpful code and tests.
+4. Verify code style: `./scripts/lint.sh`
+5. Run test suite: `pytest arviz/tests`
+6. Make a pull request.
 
-  There is also a Dockerfile which helps for isolating build problems and local development.
+There is also a Dockerfile which helps for isolating build problems and local development.
 
-  1. Install Docker for your operating system
-  2. Clone this repo,
-  3. Run `./scripts/start_container.sh`
+1. Install Docker for your operating system
+2. Clone this repo,
+3. Run `./scripts/start_container.sh`
 
-   This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
+This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
