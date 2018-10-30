@@ -14,25 +14,30 @@ def plot_ppc(
 
     Parameters
     ----------
-    data : Array-like
-        Observed values
+    data : az.InferenceData object
+        InferenceData object containing the observed and posterior
+        predictive data.
     kind : str
-        Type of plot to display (density or cumulative)
+        Type of plot to display (density or cumulative). Defaults to density.
     alpha : float
-        Opacity of posterior predictive density curves
+        Opacity of posterior predictive density curves. Defaults to 0.2.
     mean : bool
         Whether or not to plot the mean posterior predictive distribution. Defaults to True
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        Text size scaling factor for labels, titles and lines. If None it will be
+        autoscaled based on figsize.
     data_pairs : dict
         Dictionary containing relations between observed data and posterior predictive data.
         Dictionary structure:
             Key = data var_name
+
             Value = posterior predictive var_name
         Example: `data_pairs = {'y' : 'y_hat'}`
+
+        If None, it will assume that the observed data and the posterior
+        predictive data have the same variable name.
 
     Returns
     -------
