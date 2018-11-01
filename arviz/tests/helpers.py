@@ -196,8 +196,8 @@ def load_cached_models(draws, chains):
     models = {}
     for library, func in supported:
         py_version = sys.version_info
-        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}.pkl".format(
-            py_version, library, draws, chains
+        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
+            py_version, library, sys.platform, draws, chains
         )
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
