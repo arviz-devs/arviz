@@ -35,8 +35,12 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     -------
     figsize : float or None
         Size of figure in inches
-    fontsize : int
-        fontsize
+    ax_labelsize : int
+        fontsize for axes label
+    titlesize : int
+        fontsize for title
+    xt_labelsize : int
+        fontsize for axes ticks
     linewidth : int
         linewidth
     markersize : int
