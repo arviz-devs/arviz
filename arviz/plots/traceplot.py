@@ -89,7 +89,6 @@ def plot_trace(
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
-
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
@@ -175,22 +174,28 @@ def plot_trace(
                 div_idxs = np.arange(len(chain_divs))[chain_divs]
                 if div_idxs.size > 0:
                     values = value[chain, div_idxs]
-                    axes[idx, 1].vlines(
+                    axes[idx, 1].plot(
                         div_idxs,
-                        *ylims[1],
-                        colors=colors[idx][chain],
-                        linestyles="dashed",
+                        np.zeros_like(div_idxs) + ylims[1][0],
+                        marker="|",
+                        color="black",
+                        markeredgewidth=1.5,
+                        markersize=30,
+                        linestyle="None",
                         alpha=hist_kwargs["alpha"],
-                        zorder=-5
+                        zorder=-5,
                     )
                     axes[idx, 1].set_ylim(*ylims[1])
-                    axes[idx, 0].vlines(
+                    axes[idx, 0].plot(
                         values,
-                        *ylims[1],
-                        colors=colors[idx][chain],
-                        linestyles="dashed",
+                        np.zeros_like(values),
+                        marker="|",
+                        color="black",
+                        markeredgewidth=1.5,
+                        markersize=30,
+                        linestyle="None",
                         alpha=trace_kwargs["alpha"],
-                        zorder=-5
+                        zorder=-5,
                     )
                     axes[idx, 0].set_ylim(*ylims[0])
 
