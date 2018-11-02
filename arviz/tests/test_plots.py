@@ -131,6 +131,7 @@ def test_plot_density_discrete(discrete_model):
         {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
         {"combined": True},
+        {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", 0)]},
     ],
