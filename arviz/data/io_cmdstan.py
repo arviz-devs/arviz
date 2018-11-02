@@ -23,30 +23,23 @@ class CmdStanConverter:
     def __init__(
         self,
         *,
-        output=None,
-        prior=None,
+        posterior=None,
         posterior_predictive=None,
+        prior=None,
+        prior_predictive=None,
         observed_data=None,
         observed_data_var=None,
         log_likelihood=None,
         coords=None,
         dims=None
     ):
-        self.output = sorted(glob(output)) if isinstance(output, str) else output
-        if isinstance(output, str) and len(self.output) > 1:
+        self.posterior_ = sorted(glob(posterior)) if isinstance(posterior, str) else posterior
+        if isinstance(posterior, str) and len(self.posterior_) > 1:
             msg = "\n".join(
-                "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(self.output, 1)
+                "{}: {}".format(i, os.path.normpath(path))
+                for i, path in enumerate(self.posterior_, 1)
             )
-            print("glob found {} files for 'output':\n{}".format(len(self.output), msg))
-        if isinstance(prior, str):
-            prior_glob = glob(prior)
-            if len(prior_glob) > 1:
-                prior = sorted(prior_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
-                )
-                print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
-        self.prior = prior
+            print("glob found {} files for 'output':\n{}".format(len(self.posterior_), msg))
         if isinstance(posterior_predictive, str):
             posterior_predictive_glob = glob(posterior_predictive)
             if len(posterior_predictive_glob) > 1:
@@ -57,7 +50,27 @@ class CmdStanConverter:
                 )
                 len_pp = len(posterior_predictive)
                 print("glob found {} files for 'posterior_predictive':\n{}".format(len_pp, msg))
+        if isinstance(prior, str):
+            prior_glob = glob(prior)
+            if len(prior_glob) > 1:
+                prior = sorted(prior_glob)
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
+                )
+                print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
+        if isinstance(prior_predictive, str):
+            prior_predictive_glob = glob(prior_predictive)
+            if len(prior_predictive_glob) > 1:
+                prior_predictive = sorted(prior_predictive_glob)
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path))
+                    for i, path in enumerate(prior_predictive, 1)
+                )
+                len_pp = len(prior_predictive)
+                print("glob found {} files for 'posterior_predictive':\n{}".format(len_pp, msg))
         self.posterior_predictive = posterior_predictive
+        self.prior_ = prior
+        self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.observed_data_var = observed_data_var
         if isinstance(log_likelihood, (list, tuple)):
@@ -66,16 +79,20 @@ class CmdStanConverter:
         self.log_likelihood = log_likelihood
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
-        self.sample_stats = None
         self.posterior = None
-        # populate posterior and sample_Stats
-        self._parse_output()
+        self.sample_stats = None
+        self.prior = None
+        self.sample_stats_prior = None
 
-    @requires("output")
-    def _parse_output(self):
+        # populate posterior and sample_Stats
+        self._parse_posterior()
+        self._parse_prior()
+
+    @requires("posterior_")
+    def _parse_posterior(self):
         """Read csv paths to list of dataframes."""
         chain_data = []
-        for path in self.output:
+        for path in self.posterior_:
             parsed_output = _read_output(path)
             for sample, sample_stats, config, adaptation, timing in parsed_output:
                 chain_data.append(
@@ -90,29 +107,55 @@ class CmdStanConverter:
         self.posterior = [item["sample"] for item in chain_data]
         self.sample_stats = [item["sample_stats"] for item in chain_data]
 
+    @requires("prior_")
+    def _parse_prior(self):
+        """Read csv paths to list of dataframes."""
+        chain_data = []
+        for path in self.prior_:
+            parsed_output = _read_output(path)
+            for sample, sample_stats, config, adaptation, timing in parsed_output:
+                chain_data.append(
+                    {
+                        "sample": sample,
+                        "sample_stats": sample_stats,
+                        "configuration_info": config,
+                        "adaptation_info": adaptation,
+                        "timing_info": timing,
+                    }
+                )
+        self.prior = [item["sample"] for item in chain_data]
+        self.sample_stats_prior = [item["sample_stats"] for item in chain_data]
+
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
         columns = self.posterior[0].columns
 
         # filter posterior_predictive and log_likelihood
-        post_pred = self.posterior_predictive
-        if post_pred is None or (isinstance(post_pred, str) and post_pred.lower().endswith(".csv")):
-            post_pred = []
-        elif isinstance(post_pred, str):
-            post_pred = [col for col in columns if post_pred == col.split(".")[0]]
+        posterior_predictive = self.posterior_predictive
+        if posterior_predictive is None or (
+            isinstance(posterior_predictive, str) and posterior_predictive.lower().endswith(".csv")
+        ):
+            posterior_predictive = []
+        elif isinstance(posterior_predictive, str):
+            posterior_predictive = [
+                col for col in columns if posterior_predictive == col.split(".")[0]
+            ]
         else:
-            post_pred = [
-                col for col in columns if any(item == col.split(".")[0] for item in post_pred)
+            posterior_predictive = [
+                col
+                for col in columns
+                if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
 
-        log_lik = self.log_likelihood
-        if log_lik is None:
-            log_lik = []
+        log_likelihood = self.log_likelihood
+        if log_likelihood is None:
+            log_likelihood = []
         else:
-            log_lik = [col for col in columns if log_lik == col.split(".")[0]]
+            log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
 
-        valid_cols = [col for col in columns if col not in post_pred + log_lik]
+        invalid_cols = posterior_predictive + log_likelihood
+        valid_cols = [col for col in columns if col not in invalid_cols]
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
@@ -176,39 +219,107 @@ class CmdStanConverter:
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        ppred = self.posterior_predictive
-
+        posterior_predictive = self.posterior_predictive
+        columns = self.posterior[0].columns
         if (
-            isinstance(ppred, (tuple, list))
-            and ppred[0].endswith(".csv")
-            or isinstance(ppred, str)
-            and ppred.endswith(".csv")
+            isinstance(posterior_predictive, (tuple, list))
+            and posterior_predictive[0].endswith(".csv")
+            or isinstance(posterior_predictive, str)
+            and posterior_predictive.endswith(".csv")
         ):
+            if isinstance(posterior_predictive, str):
+                posterior_predictive = [posterior_predictive]
             chain_data = []
-            for path in ppred:
+            for path in posterior_predictive:
                 parsed_output = _read_output(path)
                 for sample, *_ in parsed_output:
                     chain_data.append(sample)
             data = _unpack_dataframes(chain_data)
         else:
-            if isinstance(ppred, str):
-                ppred = [ppred]
-            ppred_cols = [
-                col for col in self.posterior[0] if any(item == col.split(".")[0] for item in ppred)
+            if isinstance(posterior_predictive, str):
+                posterior_predictive = [posterior_predictive]
+            posterior_predictive_cols = [
+                col
+                for col in columns
+                if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
-            data = _unpack_dataframes([item[ppred_cols] for item in self.posterior])
+            data = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
-    @requires("posterior")
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        chains = []
-        for path in self.prior:
-            parsed_output = _read_output(path)
-            for prior, *_ in parsed_output:
-                chains.append(prior)
-        data = _unpack_dataframes(chains)
+        # filter prior_predictive
+        prior_predictive = self.prior_predictive
+        columns = self.prior[0].columns
+        if prior_predictive is None or (
+            isinstance(prior_predictive, str) and prior_predictive.lower().endswith(".csv")
+        ):
+            prior_predictive = []
+        elif isinstance(prior_predictive, str):
+            prior_predictive = [col for col in columns if prior_predictive == col.split(".")[0]]
+        else:
+            prior_predictive = [
+                col
+                for col in columns
+                if any(item == col.split(".")[0] for item in prior_predictive)
+            ]
+
+        invalid_cols = prior_predictive
+        valid_cols = [col for col in columns if col not in invalid_cols]
+        data = _unpack_dataframes([item[valid_cols] for item in self.prior])
+        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+
+    @requires("prior")
+    @requires("sample_stats_prior")
+    def sample_stats_prior_to_xarray(self):
+        """Extract sample_stats from fit."""
+        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+
+        # copy dims and coords
+        dims = deepcopy(self.dims) if self.dims is not None else {}
+        coords = deepcopy(self.coords) if self.coords is not None else {}
+
+        sampler_params = self.sample_stats_prior
+        for j, s_params in enumerate(sampler_params):
+            rename_dict = {}
+            for key in s_params:
+                key_, *end = key.split(".")
+                name = re.sub("__$", "", key_)
+                name = "diverging" if name == "divergent" else name
+                rename_dict[key] = ".".join((name, *end))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+            sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
+        data = _unpack_dataframes(sampler_params)
+        return dict_to_dataset(data, coords=coords, dims=dims)
+
+    @requires("prior")
+    @requires("prior_predictive")
+    def prior_predictive_to_xarray(self):
+        """Convert prior_predictive samples to xarray."""
+        prior_predictive = self.prior_predictive
+
+        if (
+            isinstance(prior_predictive, (tuple, list))
+            and prior_predictive[0].endswith(".csv")
+            or isinstance(prior_predictive, str)
+            and prior_predictive.endswith(".csv")
+        ):
+            chain_data = []
+            for path in prior_predictive:
+                parsed_output = _read_output(path)
+                for sample, *_ in parsed_output:
+                    chain_data.append(sample)
+            data = _unpack_dataframes(chain_data)
+        else:
+            if isinstance(prior_predictive, str):
+                prior_predictive = [prior_predictive]
+            prior_predictive_cols = [
+                col
+                for col in self.prior[0].columns
+                if any(item == col.split(".")[0] for item in prior_predictive)
+            ]
+            data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires("observed_data")
@@ -243,6 +354,8 @@ class CmdStanConverter:
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
+                "sample_stats_prior": self.sample_stats_prior_to_xarray(),
+                "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
             }
         )
@@ -545,9 +658,10 @@ def _unpack_dataframes(dfs):
 
 def from_cmdstan(
     *,
-    output=None,
-    prior=None,
+    posterior=None,
     posterior_predictive=None,
+    prior=None,
+    prior_predictive=None,
     observed_data=None,
     observed_data_var=None,
     log_likelihood=None,
@@ -558,20 +672,22 @@ def from_cmdstan(
 
     Parameters
     ----------
-    output : List[str]
+    posterior : List[str]
         List of paths to output.csv files.
         CSV file can be stacked csv containing all the chains
 
-            cat output*.csv > combined_output.CSV
+            cat output*.csv > combined_output.csv
 
+    posterior_predictive : str, List[Str]
+        Posterior predictive samples for the fit. If endswith ".csv" assumes file.
     prior : List[str]
         List of paths to output.csv files
         CSV file can be stacked csv containing all the chains.
 
-            cat output*.csv > combined_output.CSV
+            cat output*.csv > combined_output.csv
 
-    posterior_predictive : str, List[Str]
-        Posterior predictive samples for the fit. If endswith ".csv" assumes file.
+    prior_predictive : str, List[Str]
+        Prior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : str
         Observed data used in the sampling. Path to data file in Rdump format.
     observed_data_var : str, List[str]
@@ -590,9 +706,10 @@ def from_cmdstan(
     InferenceData object
     """
     return CmdStanConverter(
-        output=output,
-        prior=prior,
+        posterior=posterior,
         posterior_predictive=posterior_predictive,
+        prior=prior,
+        prior_predictive=prior_predictive,
         observed_data=observed_data,
         observed_data_var=observed_data_var,
         log_likelihood=log_likelihood,
