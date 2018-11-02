@@ -22,7 +22,6 @@ from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
-    pystan_extract_normal,
 )
 
 
@@ -346,14 +345,13 @@ class TestPyStanNetCDFUtils:
         return Data
 
     def get_inference_data(self, data, eight_school_params):
-        """log_likelihood as a var."""
-        prior = pystan_extract_unpermuted(data.obj)
-        prior = {"theta_test": prior["theta"]}
+        """vars as str."""
         return from_pystan(
-            fit=data.obj,
-            prior=prior,
+            posterior=data.obj,
             posterior_predictive="y_hat",
-            observed_data=["y"],
+            prior=data.obj,
+            prior_predictive="y_hat",
+            observed_data="y",
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_school_params["J"])},
             dims={
@@ -366,43 +364,54 @@ class TestPyStanNetCDFUtils:
         )
 
     def get_inference_data2(self, data, eight_schools_params):
-        """log_likelihood as a ndarray."""
-        # dictionary
-        observed_data = {"y_hat": eight_schools_params["y"]}
-        # ndarray
-        log_likelihood = pystan_extract_normal(data.obj, "log_lik")["log_lik"]
+        """vars as lists."""
         return from_pystan(
-            fit=data.obj,
+            posterior=data.obj,
             posterior_predictive=["y_hat"],
-            observed_data=observed_data,
-            log_likelihood=log_likelihood,
+            prior=data.obj,
+            prior_predictive=["y_hat"],
+            observed_data="y",
+            log_likelihood="log_lik",
+            coords={
+                "school": np.arange(eight_schools_params["J"]),
+                "log_likelihood_dim": np.arange(eight_schools_params["J"]),
+            },
+            dims={
+                "theta": ["school"],
+                "y": ["school"],
+                "y_hat": ["school"],
+                "theta_tilde": ["school"],
+                "log_lik": ["log_likelihood_dim"],
+            },
+        )
+
+    def get_inference_data3(self, data, eight_schools_params):
+        """multiple vars as lists."""
+        return from_pystan(
+            posterior=data.obj,
+            posterior_predictive=["y_hat", "log_lik"],
+            prior=data.obj,
+            prior_predictive=["y_hat", "log_lik"],
+            observed_data="y",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
-                "log_lik": ["school"],
                 "y_hat": ["school"],
                 "theta_tilde": ["school"],
             },
         )
 
-    def get_inference_data3(self, data, eight_schools_params):
-        """log_likelihood as a ndarray."""
-        # ndarray
-        log_likelihood = pystan_extract_normal(data.obj, "log_lik")["log_lik"]
+    def get_inference_data4(self, data):
+        """multiple vars as lists."""
         return from_pystan(
-            fit=data.obj,
-            posterior_predictive=["y_hat"],
-            observed_data=["y"],
-            log_likelihood=log_likelihood,
-            coords={"school": np.arange(eight_schools_params["J"])},
-            dims={
-                "theta": ["school"],
-                "y": ["school"],
-                "log_lik": ["school"],
-                "y_hat": ["school"],
-                "theta_tilde": ["school"],
-            },
+            posterior=data.obj,
+            posterior_predictive=None,
+            prior=data.obj,
+            prior_predictive=None,
+            observed_data="y",
+            coords=None,
+            dims=None,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -413,13 +422,23 @@ class TestPyStanNetCDFUtils:
         inference_data1 = self.get_inference_data(data, eight_schools_params)
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
+        inference_data4 = self.get_inference_data4(data)
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
-        assert hasattr(inference_data1.prior, "theta_test")
+        assert hasattr(inference_data1.posterior, "theta")
+        assert hasattr(inference_data1.prior, "theta")
         assert hasattr(inference_data1.observed_data, "y")
-        assert hasattr(inference_data2.sample_stats, "log_likelihood")
-        assert hasattr(inference_data2.observed_data, "y_hat")
-        assert hasattr(inference_data3.sample_stats, "log_likelihood")
+        assert hasattr(inference_data2.posterior_predictive, "y_hat")
+        assert hasattr(inference_data2.prior_predictive, "y_hat")
+        assert hasattr(inference_data2.sample_stats, "lp")
+        assert hasattr(inference_data2.sample_stats_prior, "lp")
+        assert hasattr(inference_data2.observed_data, "y")
+        assert hasattr(inference_data3.posterior_predictive, "y_hat")
+        assert hasattr(inference_data3.prior_predictive, "y_hat")
+        assert hasattr(inference_data3.sample_stats, "lp")
+        assert hasattr(inference_data3.sample_stats_prior, "lp")
         assert hasattr(inference_data3.observed_data, "y")
+        assert hasattr(inference_data4.posterior, "theta")
+        assert hasattr(inference_data4.prior, "theta")
 
 
 class TestCmdStanNetCDFUtils:
@@ -483,8 +502,8 @@ class TestCmdStanNetCDFUtils:
 
         return observed_data_paths
 
-    def get_inference_data(self, output, **kwargs):
-        return from_cmdstan(output=output, **kwargs)
+    def get_inference_data(self, posterior, **kwargs):
+        return from_cmdstan(posterior=posterior, **kwargs)
 
     def test_sample_stats(self, paths):
         for key, path in paths.items():
@@ -520,9 +539,9 @@ class TestCmdStanNetCDFUtils:
     def test_inference_data_input_types1(self, paths, observed_data_paths):
         """Check input types
 
-            output --> str, list of str
+            posterior --> str, list of str
             prior --> str, list of str
-            posterior_predictive --> str, variable in output
+            posterior_predictive --> str, variable in posterior
             observed_data --> Rdump format
             observed_data_var --> str, variable
             log_likelihood --> str
@@ -533,9 +552,10 @@ class TestCmdStanNetCDFUtils:
             if "eight" not in key:
                 continue
             inference_data = self.get_inference_data(
-                output=path,
-                prior=path,
+                posterior=path,
                 posterior_predictive="y_hat",
+                prior=path,
+                prior_predictive="y_hat",
                 observed_data=observed_data_paths[0],
                 observed_data_var="y",
                 log_likelihood="log_lik",
@@ -557,16 +577,17 @@ class TestCmdStanNetCDFUtils:
     def test_inference_data_input_types2(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
 
-            posterior_predictive --> List[str], variable in output
+            posterior_predictive --> List[str], variable in posterior
             observed_data_var --> List[str], variable
         """
         for key, path in paths.items():
             if "eight" not in key:
                 continue
             inference_data = self.get_inference_data(
-                output=path,
-                prior=path,
+                posterior=path,
                 posterior_predictive=["y_hat"],
+                prior=path,
+                prior_predictive=["y_hat"],
                 observed_data=observed_data_paths[0],
                 observed_data_var=["y"],
                 log_likelihood="log_lik",
@@ -597,9 +618,10 @@ class TestCmdStanNetCDFUtils:
                 continue
             post_pred = paths["eight_schools_glob"]
             inference_data = self.get_inference_data(
-                output=path,
-                prior=path,
+                posterior=path,
                 posterior_predictive=post_pred,
+                prior=path,
+                prior_predictive=post_pred,
                 observed_data=observed_data_paths[0],
                 observed_data_var=["y"],
                 log_likelihood="log_lik",
@@ -617,20 +639,46 @@ class TestCmdStanNetCDFUtils:
             assert hasattr(inference_data, "posterior_predictive")
             assert hasattr(inference_data, "observed_data")
 
-    def test_inference_data_input_types4(self, paths, observed_data_paths):
+    def test_inference_data_input_types4(self, paths):
         """Check input types (change, see earlier)
 
             coords --> one to many + one to one (non-default dim)
             dims --> one to many + one to one
         """
+
+        path = paths["combined_no_warmup"]
+        for path in [path, path[0]]:
+            inference_data = self.get_inference_data(
+                posterior=path,
+                posterior_predictive=path,
+                prior=path,
+                prior_predictive=path,
+                observed_data=None,
+                observed_data_var=None,
+                coords={"rand": np.arange(3)},
+                dims={"x": ["rand"]},
+            )
+            assert hasattr(inference_data, "posterior")
+            assert hasattr(inference_data, "sample_stats")
+            assert hasattr(inference_data, "posterior_predictive")
+            assert hasattr(inference_data, "prior")
+            assert hasattr(inference_data, "sample_stats_prior")
+            assert hasattr(inference_data, "prior_predictive")
+
+    def test_inference_data_input_types5(self, paths, observed_data_paths):
+        """Check input types (change, see earlier)
+
+            posterior_predictive is None
+            prior_predictive is None
+        """
         for key, path in paths.items():
             if "eight" not in key:
                 continue
-            post_pred = paths["eight_schools"]
             inference_data = self.get_inference_data(
-                output=path,
+                posterior=path,
+                posterior_predictive=None,
                 prior=path,
-                posterior_predictive=post_pred,
+                prior_predictive=None,
                 observed_data=observed_data_paths[0],
                 observed_data_var=["y"],
                 log_likelihood=["log_lik"],
@@ -646,7 +694,6 @@ class TestCmdStanNetCDFUtils:
             assert hasattr(inference_data, "posterior")
             assert hasattr(inference_data, "sample_stats")
             assert hasattr(inference_data.sample_stats, "log_likelihood")
-            assert hasattr(inference_data, "posterior_predictive")
             assert hasattr(inference_data, "observed_data")
 
     def test_inference_data_bad_csv(self, paths):
@@ -656,7 +703,7 @@ class TestCmdStanNetCDFUtils:
                 continue
             for path in _paths:
                 with pytest.raises(ValueError):
-                    self.get_inference_data(output=path)
+                    self.get_inference_data(posterior=path)
 
     def test_inference_data_observed_data1(self, observed_data_paths):
         """Read Rdump, check shapes are correct
@@ -664,7 +711,7 @@ class TestCmdStanNetCDFUtils:
             All variables
         """
         path = observed_data_paths[1]
-        inference_data = self.get_inference_data(output=None, observed_data=path)
+        inference_data = self.get_inference_data(posterior=None, observed_data=path)
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 3
         assert inference_data.observed_data["x"].shape == (1,)
@@ -678,7 +725,7 @@ class TestCmdStanNetCDFUtils:
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(
-            output=None, observed_data=path, observed_data_var="x"
+            posterior=None, observed_data=path, observed_data_var="x"
         )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 1
@@ -691,7 +738,7 @@ class TestCmdStanNetCDFUtils:
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(
-            output=None, observed_data=path, observed_data_var=["x"]
+            posterior=None, observed_data=path, observed_data_var=["x"]
         )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 1
@@ -704,7 +751,7 @@ class TestCmdStanNetCDFUtils:
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(
-            output=None, observed_data=path, observed_data_var=["y", "Z"]
+            posterior=None, observed_data=path, observed_data_var=["y", "Z"]
         )
         assert hasattr(inference_data, "observed_data")
         assert len(inference_data.observed_data.data_vars) == 2

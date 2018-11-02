@@ -52,7 +52,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     elif isinstance(obj, str):
         return InferenceData.from_netcdf(obj)
     elif obj.__class__.__name__ == "StanFit4Model":  # ugly, but doesn't make PyStan a requirement
-        return from_pystan(fit=obj, coords=coords, dims=dims, **kwargs)
+        return from_pystan(posterior=obj, coords=coords, dims=dims, **kwargs)
     elif obj.__class__.__name__ == "MultiTrace":  # ugly, but doesn't make PyMC3 a requirement
         return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
     elif obj.__class__.__name__ == "EnsembleSampler":  # ugly, but doesn't make emcee a requirement

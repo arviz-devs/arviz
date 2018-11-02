@@ -91,15 +91,16 @@ class PyStanConverter:
 
         # log_likelihood
         log_likelihood = self.log_likelihood
-        log_likelihood_data = get_draws(posterior, vars=log_likelihood)
-        data["log_likelihood"] = log_likelihood_data[log_likelihood]
-        if isinstance(log_likelihood, str) and log_likelihood in dims:
-            dims["log_likelihood"] = dims.pop(log_likelihood)
-        if isinstance(log_likelihood, str) and log_likelihood in coords:
-            coords["log_likelihood"] = coords.pop(log_likelihood)
+        if log_likelihood is not None:
+            log_likelihood_data = get_draws(posterior, variables=log_likelihood)
+            data["log_likelihood"] = log_likelihood_data[log_likelihood]
+            if isinstance(log_likelihood, str) and log_likelihood in dims:
+                dims["log_likelihood"] = dims.pop(log_likelihood)
+            if isinstance(log_likelihood, str) and log_likelihood in coords:
+                coords["log_likelihood"] = coords.pop(log_likelihood)
 
         # lp__
-        stat_lp = get_draws(posterior, vars="lp__")
+        stat_lp = get_draws(posterior, variables="lp__")
         data["lp"] = stat_lp["lp__"]
 
         return dict_to_dataset(data, library=self.pystan, coords=coords, dims=dims)
@@ -110,7 +111,7 @@ class PyStanConverter:
         """Convert posterior_predictive samples to xarray."""
         posterior = self.posterior
         posterior_predictive = self.posterior_predictive
-        data = get_draws(posterior, vars=posterior_predictive)
+        data = get_draws(posterior, variables=posterior_predictive)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -155,7 +156,7 @@ class PyStanConverter:
             data[name] = values
 
         # lp__
-        stat_lp = get_draws(prior, vars="lp__")
+        stat_lp = get_draws(prior, variables="lp__")
         data["lp"] = stat_lp["lp__"]
 
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
@@ -163,9 +164,10 @@ class PyStanConverter:
     @requires("prior")
     @requires("prior_predictive")
     def prior_predictive_to_xarray(self):
+        """Convert prior_predictive samples to xarray."""
         prior = self.prior
         prior_predictive = self.prior_predictive
-        data = get_draws(prior, vars=prior_predictive)
+        data = get_draws(prior, variables=prior_predictive)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -210,9 +212,8 @@ class PyStanConverter:
         )
 
 
-def get_draws(fit, vars=None, ignore=None):
-    from pystan.misc import _remove_empty_pars as remove_empty_pars
-
+def get_draws(fit, variables=None, ignore=None):
+    """Extract draws from PyStan fit."""
     if ignore is None:
         ignore = []
     if fit.mode == 1:
@@ -223,14 +224,16 @@ def get_draws(fit, vars=None, ignore=None):
         raise AttributeError(msg)
 
     dtypes = infer_dtypes(fit)
-    nchain = fit.sim["chains"]
 
-    if vars is None:
-        vars = fit.sim["pars_oi"]
-    elif isinstance(vars, str):
-        vars = [vars]
-    dims = fit.sim["dims_oi"]
-    vars = remove_empty_pars(vars, vars, dims)
+    if variables is None:
+        variables = fit.sim["pars_oi"]
+    elif isinstance(variables, str):
+        variables = [variables]
+    variables = list(variables)
+
+    for var, dim in zip(fit.sim["pars_oi"], fit.sim["dims_oi"]):
+        if var in variables and np.prod(dim) == 0:
+            del variables[variables.index(var)]
 
     ndraws = [s - w for s, w in zip(fit.sim["n_save"], fit.sim["warmup2"])]
 
@@ -243,11 +246,11 @@ def get_draws(fit, vars=None, ignore=None):
 
     shapes = dict(zip(fit.sim["pars_oi"], fit.sim["dims_oi"]))
 
-    vars = [var for var in vars if var not in ignore]
+    variables = [var for var in variables if var not in ignore]
 
     data = OrderedDict()
 
-    for var in vars:
+    for var in variables:
         keys = var_keys.get(var, [var])
         var_draws = []
         shape = shapes.get(var, [])

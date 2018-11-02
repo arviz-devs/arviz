@@ -33,13 +33,17 @@ class CmdStanConverter:
         coords=None,
         dims=None
     ):
-        self.posterior_ = sorted(glob(posterior)) if isinstance(posterior, str) else posterior
-        if isinstance(posterior, str) and len(self.posterior_) > 1:
-            msg = "\n".join(
-                "{}: {}".format(i, os.path.normpath(path))
-                for i, path in enumerate(self.posterior_, 1)
-            )
-            print("glob found {} files for 'output':\n{}".format(len(self.posterior_), msg))
+        if isinstance(posterior, str):
+            posterior_glob = glob(posterior)
+            if len(posterior_glob) > 1:
+                posterior = sorted(posterior_glob)
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path))
+                    for i, path in enumerate(posterior, 1)
+                )
+                len_p = len(posterior)
+                print("glob found {} files for 'posterior':\n{}".format(len_p, msg))
+        self.posterior_ = posterior
         if isinstance(posterior_predictive, str):
             posterior_predictive_glob = glob(posterior_predictive)
             if len(posterior_predictive_glob) > 1:
@@ -67,7 +71,7 @@ class CmdStanConverter:
                     for i, path in enumerate(prior_predictive, 1)
                 )
                 len_pp = len(prior_predictive)
-                print("glob found {} files for 'posterior_predictive':\n{}".format(len_pp, msg))
+                print("glob found {} files for 'prior_predictive':\n{}".format(len_pp, msg))
         self.posterior_predictive = posterior_predictive
         self.prior_ = prior
         self.prior_predictive = prior_predictive
@@ -91,8 +95,11 @@ class CmdStanConverter:
     @requires("posterior_")
     def _parse_posterior(self):
         """Read csv paths to list of dataframes."""
+        paths = self.posterior_
+        if isinstance(paths, str):
+            paths = [paths]
         chain_data = []
-        for path in self.posterior_:
+        for path in paths:
             parsed_output = _read_output(path)
             for sample, sample_stats, config, adaptation, timing in parsed_output:
                 chain_data.append(
@@ -110,8 +117,11 @@ class CmdStanConverter:
     @requires("prior_")
     def _parse_prior(self):
         """Read csv paths to list of dataframes."""
+        paths = self.prior_
+        if isinstance(paths, str):
+            paths = [paths]
         chain_data = []
-        for path in self.prior_:
+        for path in paths:
             parsed_output = _read_output(path)
             for sample, sample_stats, config, adaptation, timing in parsed_output:
                 chain_data.append(
@@ -224,9 +234,7 @@ class CmdStanConverter:
         if (
             isinstance(posterior_predictive, (tuple, list))
             and posterior_predictive[0].endswith(".csv")
-            or isinstance(posterior_predictive, str)
-            and posterior_predictive.endswith(".csv")
-        ):
+        ) or (isinstance(posterior_predictive, str) and posterior_predictive.endswith(".csv")):
             if isinstance(posterior_predictive, str):
                 posterior_predictive = [posterior_predictive]
             chain_data = []
