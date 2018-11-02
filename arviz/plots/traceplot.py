@@ -99,9 +99,6 @@ def plot_trace(
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names)
 
-    if var_names is None:
-        var_names = list(data.data_vars)
-
     if coords is None:
         coords = {}
 
