@@ -8,9 +8,6 @@ command -v conda >/dev/null 2>&1 || {
 }
 
 # if no python specified, use Travis version, or else 3.6
-echo ${PYTHON_VERSION}
-echo ${PYSTAN_VERSION}
-
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 
@@ -32,6 +29,7 @@ if [[ $* != *--global* ]]; then
 
     if [ "$DOCKER_BUILD" = true ] ; then
         # Also add it to root bash settings to set default if used later
+        echo "Creating .bashrc profile for docker image"
         echo "set env=${ENVNAME}" > /root/.bashrc
         echo "source activate ${ENVNAME}" >> /root/.bashrc
     fi
