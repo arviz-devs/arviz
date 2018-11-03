@@ -12,7 +12,7 @@ def plot_trace(
     data,
     var_names=None,
     coords=None,
-    divergences=True,
+    divergences="bottom",
     figsize=None,
     textsize=None,
     lines=None,
@@ -35,8 +35,8 @@ def plot_trace(
         Variables to be plotted, two variables are required.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    divergences : bool
-        Plot location of divergences on the traceplots
+    divergences : {"bottom", "top", None, False}
+        Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     textsize: float
@@ -173,10 +173,14 @@ def plot_trace(
             for chain, chain_divs in enumerate(divs):
                 div_idxs = np.arange(len(chain_divs))[chain_divs]
                 if div_idxs.size > 0:
+                    if divergences == "top":
+                        ylocs = [ylim[1] for ylim in ylims]
+                    else:
+                        ylocs = [ylim[0] for ylim in ylims]
                     values = value[chain, div_idxs]
                     axes[idx, 1].plot(
                         div_idxs,
-                        np.zeros_like(div_idxs) + ylims[1][0],
+                        np.zeros_like(div_idxs) + ylocs[1],
                         marker="|",
                         color="black",
                         markeredgewidth=1.5,
@@ -188,7 +192,7 @@ def plot_trace(
                     axes[idx, 1].set_ylim(*ylims[1])
                     axes[idx, 0].plot(
                         values,
-                        np.zeros_like(values),
+                        np.zeros_like(values) + ylocs[0],
                         marker="|",
                         color="black",
                         markeredgewidth=1.5,
