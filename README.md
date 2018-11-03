@@ -142,6 +142,8 @@ There is also a Dockerfile which helps for isolating build problems and local de
 
 1. Install Docker for your operating system
 2. Clone this repo,
-3. Run `./scripts/start_container.sh`
+3. Run `./scripts/container.sh --build`
 
- This should start a local docker container called arviz, as well as a Jupyter notebook server running on port 8888. The notebook should be opened in your browser automatically (you can disable this by passing --no-browser). The container will be running the code from your local copy of arviz, so you can test your changes.
+This will build a local docker container called arviz container and install all the dependences. 
+After building an image tests can be executing by running `docker run arviz`.
+A shell can be started by running `docker run arviz /bin/bash`
