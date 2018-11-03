@@ -1,5 +1,7 @@
 """PyStan-specific conversion code."""
+from collections import OrderedDict
 from copy import deepcopy
+from operator import itemgetter
 import re
 
 import numpy as np
@@ -15,264 +17,180 @@ class PyStanConverter:
     def __init__(
         self,
         *_,
-        fit=None,
-        prior=None,
+        posterior=None,
         posterior_predictive=None,
+        prior=None,
+        prior_predictive=None,
         observed_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
     ):
-        self.fit = fit
-        self.prior = prior
+        self.posterior = posterior
         self.posterior_predictive = posterior_predictive
+        self.prior = prior
+        self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
-        self._var_names = fit.model_pars
         import pystan
 
         self.pystan = pystan
 
-    @requires("fit")
+    @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from fit."""
-        dtypes = self.infer_dtypes()
-        nchain = self.fit.sim["chains"]
-        data = {}
-        var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=False)
-        if not isinstance(var_dict, dict):
-            # PyStan version < 2.18
-            var_dict = self.fit.extract(self._var_names, dtypes=dtypes, permuted=True)
-            permutation_order = self.fit.sim["permutation"]
-            original_order = []
-            for i_permutation_order in permutation_order:
-                reorder = np.argsort(i_permutation_order) + len(original_order)
-                original_order.extend(list(reorder))
-            nchain = self.fit.sim["chains"]
-            for key, values in var_dict.items():
-                var_dict[key] = unpermute(values, original_order, nchain)
+        posterior = self.posterior
         # filter posterior_predictive and log_likelihood
-        post_pred = self.posterior_predictive
-        if post_pred is None or isinstance(post_pred, dict):
-            post_pred = []
-        elif isinstance(post_pred, str):
-            post_pred = [post_pred]
-        log_lik = self.log_likelihood
-        if not isinstance(log_lik, str):
-            log_lik = []
+        posterior_predictive = self.posterior_predictive
+        if posterior_predictive is None:
+            posterior_predictive = []
+        elif isinstance(posterior_predictive, str):
+            posterior_predictive = [posterior_predictive]
+        log_likelihood = self.log_likelihood
+        if not isinstance(log_likelihood, str):
+            log_likelihood = []
         else:
-            log_lik = [log_lik]
+            log_likelihood = [log_likelihood]
 
-        for var_name, values in var_dict.items():
-            if var_name in post_pred + log_lik:
-                continue
-            if len(values.shape) == 0:
-                values = np.atleast_2d(values)
-            elif len(values.shape) == 1:
-                if nchain == 1:
-                    values = np.expand_dims(values, -1)
-                else:
-                    values = np.expand_dims(values, 0)
-            data[var_name] = np.swapaxes(values, 0, 1)
+        ignore = posterior_predictive + log_likelihood + ["lp__"]
+
+        data = get_draws(posterior, ignore=ignore)
+
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires("fit")
+    @requires("posterior")
     def sample_stats_to_xarray(self):
-        """Extract sample_stats from fit."""
+        """Extract sample_stats from posterior."""
+        posterior = self.posterior
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
-        nchain = self.fit.sim["chains"]
-        sampler_params = self.fit.get_sampler_params(inc_warmup=False)
-        stat_lp = self.fit.extract("lp__", permuted=False)
-        log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            if isinstance(log_likelihood, str):
-                log_likelihood_vals = self.fit.extract(log_likelihood, permuted=False)
-            else:
-                log_likelihood_vals = np.asarray(log_likelihood)
-        if not isinstance(stat_lp, dict):
-            # PyStan version < 2.18
-            permutation_order = self.fit.sim["permutation"]
-            original_order = []
-            for i_permutation_order in permutation_order:
-                reorder = np.argsort(i_permutation_order) + len(original_order)
-                original_order.extend(list(reorder))
-            nchain = self.fit.sim["chains"]
-            stat_lp = self.fit.extract("lp__", permuted=True)["lp__"]
-            stat_lp = unpermute(stat_lp, original_order, nchain)
-            if log_likelihood is not None:
-                if isinstance(log_likelihood, str):
-                    log_likelihood_vals = self.fit.extract(log_likelihood, permuted=True)
-                    log_likelihood_vals = log_likelihood_vals[log_likelihood]
-                log_likelihood_vals = unpermute(log_likelihood_vals, original_order, nchain)
-        else:
-            # PyStan version 2.18+
-            stat_lp = stat_lp["lp__"]
-            if len(stat_lp.shape) == 0:
-                stat_lp = np.atleast_2d(stat_lp)
-            elif len(stat_lp.shape) == 1:
-                if nchain == 1:
-                    stat_lp = np.expand_dims(stat_lp, -1)
-                else:
-                    stat_lp = np.expand_dims(stat_lp, 0)
-            stat_lp = np.swapaxes(stat_lp, 0, 1)
-            if log_likelihood is not None:
-                if isinstance(log_likelihood, str):
-                    log_likelihood_vals = log_likelihood_vals[log_likelihood]
-                elif len(log_likelihood_vals.shape) == 1:
-                    if len(log_likelihood_vals.shape) == 0:
-                        log_likelihood_vals = np.atleast_2d(log_likelihood_vals)
-                    elif nchain == 1:
-                        log_likelihood_vals = np.expand_dims(log_likelihood, 0)
-                    else:
-                        log_likelihood_vals = np.expand_dims(log_likelihood, -1)
-                log_likelihood_vals = np.swapaxes(log_likelihood_vals, 0, 1)
+        ndraws = [s - w for s, w in zip(posterior.sim["n_save"], posterior.sim["warmup2"])]
+
+        extraction = {}
+        for pyholder, ndraws in zip(posterior.sim["samples"], ndraws):
+            sampler_dict = dict(zip(pyholder["sampler_param_names"], pyholder["sampler_params"]))
+            for key, values in sampler_dict.items():
+                if key not in extraction:
+                    extraction[key] = []
+                extraction[key].append(values)
+
+        data = OrderedDict()
+        for key, values in extraction.items():
+            values = np.stack(values, axis=0)
+            dtype = dtypes.get(key)
+            values = values.astype(dtype)
+            name = re.sub("__$", "", key)
+            name = "diverging" if name == "divergent" else name
+            data[name] = values
+
         # copy dims and coords
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
-        # Add lp to sampler_params
-        for i, _ in enumerate(sampler_params):
-            sampler_params[i]["lp__"] = stat_lp[i]
+        # log_likelihood
+        log_likelihood = self.log_likelihood
         if log_likelihood is not None:
-            # Add log_likelihood to sampler_params
-            for i, _ in enumerate(sampler_params):
-                # slice log_likelihood to keep dimensions
-                sampler_params[i]["log_likelihood"] = log_likelihood_vals[i : i + 1]
-            # change dims and coords for log_likelihood if defined
+            log_likelihood_data = get_draws(posterior, variables=log_likelihood)
+            data["log_likelihood"] = log_likelihood_data[log_likelihood]
             if isinstance(log_likelihood, str) and log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
             if isinstance(log_likelihood, str) and log_likelihood in coords:
                 coords["log_likelihood"] = coords.pop(log_likelihood)
-        data = {}
-        for key in sampler_params[0]:
-            name = re.sub("__$", "", key)
-            name = "diverging" if name == "divergent" else name
-            data[name] = np.vstack([j[key].astype(dtypes.get(key)) for j in sampler_params])
-        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires("fit")
+        # lp__
+        stat_lp = get_draws(posterior, variables="lp__")
+        data["lp"] = stat_lp["lp__"]
+
+        return dict_to_dataset(data, library=self.pystan, coords=coords, dims=dims)
+
+    @requires("posterior")
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        nchain = self.fit.sim["chains"]
-        if isinstance(self.posterior_predictive, dict):
-            data = {}
-            for key, values in self.posterior_predictive.items():
-                if len(values.shape) == 0:
-                    values = np.atleast_2d(values)
-                elif len(values.shape) == 1:
-                    if nchain == 1:
-                        values = np.expand_dims(values, -1)
-                    else:
-                        values = np.expand_dims(values, 0)
-                values = np.swapaxes(values, 0, 1)
-                data[key] = values
-        else:
-            dtypes = self.infer_dtypes()
-            data = {}
-            var_dict = self.fit.extract(self.posterior_predictive, dtypes=dtypes, permuted=False)
-            if not isinstance(var_dict, dict):
-                # PyStan version < 2.18
-                var_dict = self.fit.extract(self.posterior_predictive, dtypes=dtypes, permuted=True)
-                permutation_order = self.fit.sim["permutation"]
-                original_order = []
-                for i_permutation_order in permutation_order:
-                    reorder = np.argsort(i_permutation_order) + len(original_order)
-                    original_order.extend(list(reorder))
-                nchain = self.fit.sim["chains"]
-                for key, values in var_dict.items():
-                    var_dict[key] = unpermute(values, original_order, nchain)
-            for var_name, values in var_dict.items():
-                if len(values.shape) == 0:
-                    values = np.atleast_2d(values)
-                elif len(values.shape) == 1:
-                    if nchain == 1:
-                        values = np.expand_dims(values, -1)
-                    else:
-                        values = np.expand_dims(values, 0)
-                data[var_name] = np.swapaxes(values, 0, 1)
+        posterior = self.posterior
+        posterior_predictive = self.posterior_predictive
+        data = get_draws(posterior, variables=posterior_predictive)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires("fit")
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
-        nchain = self.fit.sim["chains"]
-        data = {}
-        for key, values in self.prior.items():
-            if len(values.shape) == 0:
-                values = np.atleast_2d(values)
-            elif len(values.shape) == 1:
-                if nchain == 1:
-                    values = np.expand_dims(values, -1)
-                else:
-                    values = np.expand_dims(values, 0)
-            values = np.swapaxes(values, 0, 1)
-            data[key] = values
+        prior = self.prior
+        # filter posterior_predictive and log_likelihood
+        prior_predictive = self.prior_predictive
+        if prior_predictive is None:
+            prior_predictive = []
+        elif isinstance(prior_predictive, str):
+            prior_predictive = [prior_predictive]
+
+        ignore = prior_predictive + ["lp__"]
+
+        data = get_draws(prior, ignore=ignore)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
-    @requires("fit")
+    @requires("prior")
+    def sample_stats_prior_to_xarray(self):
+        """Extract sample_stats_prior from prior."""
+        prior = self.prior
+        dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
+
+        ndraws = [s - w for s, w in zip(prior.sim["n_save"], prior.sim["warmup2"])]
+
+        extraction = {}
+        for pyholder, ndraws in zip(prior.sim["samples"], ndraws):
+            sampler_dict = dict(zip(pyholder["sampler_param_names"], pyholder["sampler_params"]))
+            for key, values in sampler_dict.items():
+                if key not in extraction:
+                    extraction[key] = []
+                extraction[key].append(values)
+
+        data = OrderedDict()
+        for key, values in extraction.items():
+            values = np.stack(values, axis=0)
+            dtype = dtypes.get(key)
+            values = values.astype(dtype)
+            name = re.sub("__$", "", key)
+            name = "diverging" if name == "divergent" else name
+            data[name] = values
+
+        # lp__
+        stat_lp = get_draws(prior, variables="lp__")
+        data["lp"] = stat_lp["lp__"]
+
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+
+    @requires("prior")
+    @requires("prior_predictive")
+    def prior_predictive_to_xarray(self):
+        """Convert prior_predictive samples to xarray."""
+        prior = self.prior
+        prior_predictive = self.prior_predictive
+        data = get_draws(prior, variables=prior_predictive)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
     @requires("observed_data")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
+        posterior = self.posterior
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
-        if isinstance(self.observed_data, dict):
-            observed_data = {}
-            for key, vals in self.observed_data.items():
-                vals = np.atleast_1d(vals)
-                val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(
-                    vals.shape, key, dims=val_dims, coords=self.coords
-                )
-                observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        else:
-            if isinstance(self.observed_data, str):
-                observed_names = [self.observed_data]
-            else:
-                observed_names = self.observed_data
-            observed_data = {}
-            for key in observed_names:
-                vals = np.atleast_1d(self.fit.data[key])
-                val_dims = dims.get(key)
-                val_dims, coords = generate_dims_coords(
-                    vals.shape, key, dims=val_dims, coords=self.coords
-                )
-                observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        observed_names = self.observed_data
+        if isinstance(observed_names, str):
+            observed_names = [observed_names]
+        observed_data = OrderedDict()
+        for key in observed_names:
+            vals = np.atleast_1d(posterior.data[key])
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pystan))
-
-    @requires("fit")
-    def infer_dtypes(self):
-        """Infer dtypes from Stan model code.
-
-        Function strips out generated quantities block and searchs for `int`
-        dtypes after stripping out comments inside the block.
-        """
-        pattern_remove_comments = re.compile(
-            r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
-        )
-        stan_integer = r"int"
-        stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
-        stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
-        stan_ws = r"\s*"  # 0 or more whitespace
-        pattern_int = re.compile(
-            "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
-        )
-        stan_code = self.fit.get_stancode()
-        # remove deprecated comments
-        stan_code = "\n".join(
-            line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
-        )
-        stan_code = re.sub(pattern_remove_comments, "", stan_code)
-        stan_code = stan_code.split("generated quantities")[-1]
-        dtypes = re.findall(pattern_int, stan_code)
-        dtypes = {item.strip(): "int" for item in dtypes if item.strip() in self._var_names}
-        return dtypes
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -287,47 +205,104 @@ class PyStanConverter:
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
+                "sample_stats_prior": self.sample_stats_prior_to_xarray(),
+                "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
             }
         )
 
 
-def unpermute(ary, idx, nchain):
-    """Unpermute permuted sample.
+def get_draws(fit, variables=None, ignore=None):
+    """Extract draws from PyStan fit."""
+    if ignore is None:
+        ignore = []
+    if fit.mode == 1:
+        msg = "Model in mode 'test_grad'. Sampling is not conducted."
+        raise AttributeError(msg)
+    elif fit.mode == 2 or fit.sim.get("samples") is None:
+        msg = "Fit doesn't contain samples."
+        raise AttributeError(msg)
 
-    Returns output compatible with PyStan 2.18+
-    fit.extract(par, permuted=False)[par]
+    dtypes = infer_dtypes(fit)
 
-    Parameters
-    ----------
-    ary : list
-        Permuted sample
-    idx : list
-        list containing reorder indexes.
-        `idx = np.argsort(permutation_order)`
-    nchain : int
-        number of chains used
-        `fit.sim['chains']`
+    if variables is None:
+        variables = fit.sim["pars_oi"]
+    elif isinstance(variables, str):
+        variables = [variables]
+    variables = list(variables)
 
-    Returns
-    -------
-    numpy.ndarray
-        Unpermuted sample
+    for var, dim in zip(fit.sim["pars_oi"], fit.sim["dims_oi"]):
+        if var in variables and np.prod(dim) == 0:
+            del variables[variables.index(var)]
+
+    ndraws = [s - w for s, w in zip(fit.sim["n_save"], fit.sim["warmup2"])]
+
+    var_keys = OrderedDict()
+    for key in fit.sim["fnames_oi"]:
+        var, *_ = key.split("[")
+        if var not in var_keys:
+            var_keys[var] = []
+        var_keys[var].append(key)
+
+    shapes = dict(zip(fit.sim["pars_oi"], fit.sim["dims_oi"]))
+
+    variables = [var for var in variables if var not in ignore]
+
+    data = OrderedDict()
+
+    for var in variables:
+        keys = var_keys.get(var, [var])
+        var_draws = []
+        shape = shapes.get(var, [])
+        dtype = dtypes.get(var)
+        for pyholder, ndraw in zip(fit.sim["samples"], ndraws):
+            ary = itemgetter(*keys)(pyholder.chains)
+            if shape:
+                ary = np.column_stack(ary)
+            ary = ary[-ndraw:]
+            ary = ary.reshape((-1, *shape), order="F")
+            var_draws.append(ary)
+        ary = np.stack(var_draws, axis=0)
+        ary = ary.astype(dtype)
+        data[var] = ary
+
+    return data
+
+
+def infer_dtypes(fit):
+    """Infer dtypes from Stan model code.
+
+    Function strips out generated quantities block and searchs for `int`
+    dtypes after stripping out comments inside the block.
     """
-    ary = np.asarray(ary)[idx]
-    if ary.shape:
-        ary_shape = ary.shape[1:]
-    else:
-        ary_shape = ary.shape
-    ary = ary.reshape((-1, nchain, *ary_shape), order="F")
-    return ary
+    pattern_remove_comments = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"', re.DOTALL | re.MULTILINE
+    )
+    stan_integer = r"int"
+    stan_limits = r"(?:\<[^\>]+\>)*"  # ignore group: 0 or more <....>
+    stan_param = r"([^;=\s\[]+)"  # capture group: ends= ";", "=", "[" or whitespace
+    stan_ws = r"\s*"  # 0 or more whitespace
+    pattern_int = re.compile(
+        "".join((stan_integer, stan_ws, stan_limits, stan_ws, stan_param)), re.IGNORECASE
+    )
+    stan_code = fit.get_stancode()
+    # remove deprecated comments
+    stan_code = "\n".join(
+        line if "#" not in line else line[: line.find("#")] for line in stan_code.splitlines()
+    )
+    stan_code = re.sub(pattern_remove_comments, "", stan_code)
+    stan_code = stan_code.split("generated quantities")[-1]
+    dtypes = re.findall(pattern_int, stan_code)
+    dtypes = {item.strip(): "int" for item in dtypes if item.strip() in fit.model_pars}
+    return dtypes
 
 
 def from_pystan(
     *,
-    fit=None,
-    prior=None,
+    posterior=None,
     posterior_predictive=None,
+    prior=None,
+    prior_predictive=None,
     observed_data=None,
     log_likelihood=None,
     coords=None,
@@ -337,75 +312,20 @@ def from_pystan(
 
     Parameters
     ----------
-    fit : StanFit4Model
-        PyStan fit object.
-    prior : dict
-        A dictionary containing prior samples extracted from PyStan fit object.
-
-        Example: dict for PyStan 2.18+:
-
-            prior_dict = prior_fit.extract(pars=prior_vars, permuted=False)
-
-        Example: dict for PyStan 2.17 and earlier:
-
-            prior_dict = prior_fit.extract(pars=prior_vars)
-            permutation_order = prior_fit.sim["permutation"]
-            nchain = prior_fit.sim["chains"]
-            original_order = []
-            for i_permutation_order in permutation_order:
-                reorder = np.argsort(i_permutation_order) + len(original_order)
-                original_order.extend(list(reorder))
-            unpermute = az.data.io_pystan.unpermute
-            for key, values in prior_dict.items():
-                prior_dict[key] = unpermute(values, original_order, nchain)
-
-    posterior_predictive : str, a list of str or dict
-        Posterior predictive samples for the fit. If given string or a list of strings
-        function extracts values from the fit object. Else a dictionary of posterior samples
-        is assumed in PyStan extract format.
-
-        Example: dict for PyStan 2.18+:
-
-            pp_dict = posterior_predictive_fit.extract(pars=pp_vars, permuted=False)
-
-        Example: dict for PyStan 2.17 and earlier:
-
-            pp_dict = posterior_predictive_fit.extract(pars=pp_vars)
-            permutation_order = posterior_predictive_fit.sim["permutation"]
-            nchain = posterior_predictive_fit.sim["chains"]
-            original_order = []
-            for i_permutation_order in permutation_order:
-                reorder = np.argsort(i_permutation_order) + len(original_order)
-                original_order.extend(list(reorder))
-            unpermute = az.data.io_pystan.unpermute
-            for key, values in pp_dict.items():
-                pp_dict[key] = unpermute(values, original_order, nchain)
-
-    observed_data : str or a list of str or a dictionary
-        observed data used in the sampling. If a str or a list of str is given, observed data is
-         extracted from the `fit.data`. Else a dictionary is assumed containing observed data.
-    log_likelihood : str or np.ndarray
-        Pointwise log_likelihood for the data. If a string is given, log_likelihood is
-        extracted from the fit object. Else a ndarray containing pointwise log_likelihood is
-        assumed in PyStan extract format.
-
-        Example: ndarray for PyStan 2.18+:
-
-            log_likelihood = log_likelihood_fit.extract(pars=log_likelihood_var, permuted=False)
-            log_likelihood = log_likelihood[log_likelihood_var]
-
-        Example: ndarray for PyStan 2.17 and earlier:
-
-            log_likelihood = log_likelihood_fit.extract(pars=log_likelihood_var)
-            permutation_order = log_likelihood_fit.sim["permutation"]
-            nchain = log_likelihood_fit.sim["chains"]
-            original_order = []
-            for i_permutation_order in permutation_order:
-                reorder = np.argsort(i_permutation_order) + len(original_order)
-                original_order.extend(list(reorder))
-            unpermute = az.data.io_pystan.unpermute
-            log_likelihood = unpermute(log_likelihood['log_likelihood_var'], original_order, nchain)
-
+    posterior : StanFit4Model
+        PyStan fit object for posterior.
+    posterior_predictive : str, a list of str
+        Posterior predictive samples for the posterior.
+    prior : StanFit4Model
+        PyStan fit object for prior.
+    prior_predictive : str, a list of str
+        Posterior predictive samples for the prior.
+    observed_data : str or a list of str
+        observed data used in the sampling.
+        Observed data is extracted from the `posterior.data`.
+    log_likelihood : str
+        Pointwise log_likelihood for the data.
+        log_likelihood is extracted from the posterior.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -417,9 +337,10 @@ def from_pystan(
     InferenceData object
     """
     return PyStanConverter(
-        fit=fit,
-        prior=prior,
+        posterior=posterior,
         posterior_predictive=posterior_predictive,
+        prior=prior,
+        prior_predictive=prior_predictive,
         observed_data=observed_data,
         log_likelihood=log_likelihood,
         coords=coords,
