@@ -61,7 +61,8 @@ class CmdStanConverter:
                 msg = "\n".join(
                     "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
                 )
-                print("glob found {} files for 'prior':\n{}".format(len(prior), msg))
+                len_p = len(prior)
+                print("glob found {} files for 'prior':\n{}".format(len_p, msg))
         if isinstance(prior_predictive, str):
             prior_predictive_glob = glob(prior_predictive)
             if len(prior_predictive_glob) > 1:
@@ -308,11 +309,10 @@ class CmdStanConverter:
         prior_predictive = self.prior_predictive
 
         if (
-            isinstance(prior_predictive, (tuple, list))
-            and prior_predictive[0].endswith(".csv")
-            or isinstance(prior_predictive, str)
-            and prior_predictive.endswith(".csv")
-        ):
+            isinstance(prior_predictive, (tuple, list)) and prior_predictive[0].endswith(".csv")
+        ) or (isinstance(prior_predictive, str) and prior_predictive.endswith(".csv")):
+            if isinstance(prior_predictive, str):
+                prior_predictive = [prior_predictive]
             chain_data = []
             for path in prior_predictive:
                 parsed_output = _read_output(path)
