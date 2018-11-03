@@ -30,9 +30,11 @@ if [[ $* != *--global* ]]; then
     # Activate environment immediately
     source activate ${ENVNAME}
 
-    # Also add it to root bash settings to set default if used later
-    echo "set env=${ENVNAME}" > /root/.bashrc
-    echo "source activate ${ENVNAME}" >> /root/.bashrc
+    if [ "$DOCKER_BUILD" = true ] ; then
+        # Also add it to root bash settings to set default if used later
+        echo "set env=${ENVNAME}" > /root/.bashrc
+        echo "source activate ${ENVNAME}" >> /root/.bashrc
+    fi
 fi
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
