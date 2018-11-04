@@ -19,7 +19,7 @@ COPY $SRC_DIR /opt/arviz
 WORKDIR /opt/arviz
 
 # Clear any cached models from copied from host filesystem
-RUN rm arviz/tests/saved_models/*.pkl
+RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
 
 # Create conda environment. Defaults to Python 3.6
