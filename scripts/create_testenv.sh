@@ -49,11 +49,9 @@ else
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
 fi
 
-conda install --yes numpy cython scipy pandas matplotlib pytest pylint sphinx numpydoc ipython netcdf4 mkl-service
-conda clean --all --yes
-
 pip install --upgrade pip
 
 #  Install editable using the setup.py
 pip install  --no-cache-dir -e .
+pip install  --no-cache-dir -r requirements.txt
 pip install  --no-cache-dir -r requirements-dev.txt

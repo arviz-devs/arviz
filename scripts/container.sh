@@ -10,6 +10,5 @@ if [[ $* == *--build* ]]; then
         --build-arg SRC_DIR=. $SRC_DIR \
         --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
         --build-arg PYSTAN_VERSION=${PYSTAN_VERSION}\
-        --rm \
-        --no-cache
+        --rm
 fi

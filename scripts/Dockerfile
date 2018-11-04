@@ -12,7 +12,8 @@ ENV PYTHON_VERSION=${PYTHON_VERSION}
 ENV PYSTAN_VERSION=${PYSTAN_VERSION}
 ENV DOCKER_BUILD=true
 
-RUN apt-get update && apt-get install -y git gcc g++ gfortran && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY $SRC_DIR /opt/arviz
 WORKDIR /opt/arviz
@@ -26,4 +27,4 @@ RUN ./scripts/create_testenv.sh
 
 RUN conda clean --all
 
-CMD ["/bin/bash", "-c", "source /root/.bashrc && pytest -vv arviz/tests"]
+CMD ["/bin/bash", "-c", "source /root/.bashrc && pytest -vv arviz/tests && echo Finished Testing"]
