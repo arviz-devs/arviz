@@ -259,7 +259,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
     for var_name in var_names:
         if var_name in data:
             new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
-            vals = [data[var_name][dim].values for dim in new_dims]
+            vals = [set(data[var_name][dim].values) for dim in new_dims]
             dims = [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
             if reverse_selections:
                 dims = reversed(dims)
