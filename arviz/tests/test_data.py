@@ -422,6 +422,21 @@ class TestPyStanNetCDFUtils:
         assert hasattr(inference_data3.observed_data, "y")
 
 
+class TestTfpNetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            obj = load_cached_models(draws, chains)["tensorflow_probability"]
+
+        return Data
+
+    def get_inference_data(self, data, eight_school_params):
+        return data.obj
+
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data1 = self.get_inference_data(data, eight_schools_params)
+
+
 class TestCmdStanNetCDFUtils:
     @pytest.fixture(scope="session")
     def data_directory(self):
