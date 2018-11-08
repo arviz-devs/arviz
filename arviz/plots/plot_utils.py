@@ -202,13 +202,14 @@ def make_label(var_name, selection, position="below"):
         A text representation of the label
     """
     if selection:
+        sel = selection_to_string(selection)
         if position == "below":
-            label = "{}\n({})".format(var_name, selection_to_string(selection))
+            sep = "\n"
         elif position == "beside":
-            label = "{} ({})".format(var_name, selection_to_string(selection))
+            sep = " "
     else:
-        label = "{}".format(var_name)
-    return label
+        sep = sel = ""
+    return "{}{}{}".format(var_name, sep, sel)
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
