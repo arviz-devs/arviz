@@ -156,7 +156,7 @@ def plot_kde(
 
         density, lower, upper = _fast_kde(values, cumulative, bw)
 
-        rug_space = max(density) * rug_kwargs.get("space")
+        rug_space = max(density) * rug_kwargs.pop("space")
 
         x = np.linspace(lower, upper, len(density))
         fill_func = ax.fill_between
@@ -174,7 +174,6 @@ def plot_kde(
             rug_x, rug_y = values, np.zeros_like(values) - rug_space
 
         if rug:
-            del rug_kwargs["space"]
             ax.plot(rug_x, rug_y, **rug_kwargs)
         fill_func(fill_x, fill_y, **fill_kwargs)
         if label:
