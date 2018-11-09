@@ -183,7 +183,7 @@ def selection_to_string(selection):
     return ", ".join(["{}".format(v) for _, v in selection.items()])
 
 
-def make_label(var_name, selection):
+def make_label(var_name, selection, position="below"):
     """Consistent labelling for plots.
 
     Parameters
@@ -193,15 +193,23 @@ def make_label(var_name, selection):
 
     selection : dict[Any] -> Any
         Coordinates of the variable
+    position : whether to position the coordinates' label "below" (default) or "beside" the name
+               of the variable
 
     Returns
     -------
-    str
+    label
         A text representation of the label
     """
     if selection:
-        return "{}\n({})".format(var_name, selection_to_string(selection))
-    return "{}".format(var_name)
+        sel = selection_to_string(selection)
+        if position == "below":
+            sep = "\n"
+        elif position == "beside":
+            sep = " "
+    else:
+        sep = sel = ""
+    return "{}{}{}".format(var_name, sep, sel)
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
