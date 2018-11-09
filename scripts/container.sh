@@ -12,3 +12,14 @@ if [[ $* == *--build* ]]; then
         --build-arg PYSTAN_VERSION=${PYSTAN_VERSION}\
         --rm
 fi
+
+if [[ $* == *--clear_cache* ]]; then
+    echo "Removing cached files and models"
+    find -type d -name __pycache__ -exec rm -rf {} +
+    rm -f arviz/tests/saved_models/*.pkl
+fi
+
+if [[ $* == *--test* ]]; then
+    echo "Testing Arviz"
+    docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ arviz:latest
+fi
