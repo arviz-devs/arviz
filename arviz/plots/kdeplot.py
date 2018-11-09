@@ -63,6 +63,8 @@ def plot_kde(
         Ignored for 2D KDE
     rug_kwargs : dict
         Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
+        Use `space` keyword (float) to control the position of the rugplot. The larger this number
+        the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE
     ax : matplotlib axes
@@ -147,11 +149,15 @@ def plot_kde(
         rug_kwargs.setdefault("marker", "_" if rotated else "|")
         rug_kwargs.setdefault("linestyle", "None")
         rug_kwargs.setdefault("color", default_color)
+        rug_kwargs.setdefault("space", 0.2)
 
         plot_kwargs.setdefault("linewidth", linewidth)
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
         density, lower, upper = _fast_kde(values, cumulative, bw)
+
+        rug_space = max(density) * rug_kwargs.get("space")
+
         x = np.linspace(lower, upper, len(density))
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
@@ -162,12 +168,13 @@ def plot_kde(
         ax.plot(x, density, label=label, **plot_kwargs)
         if rotated:
             ax.set_xlim(0, auto=True)
-            rug_x, rug_y = np.zeros_like(values), values
+            rug_x, rug_y = np.zeros_like(values) - rug_space, values
         else:
             ax.set_ylim(0, auto=True)
-            rug_x, rug_y = values, np.zeros_like(values)
+            rug_x, rug_y = values, np.zeros_like(values) - rug_space
 
         if rug:
+            del rug_kwargs["space"]
             ax.plot(rug_x, rug_y, **rug_kwargs)
         fill_func(fill_x, fill_y, **fill_kwargs)
         if label:
