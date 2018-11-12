@@ -16,4 +16,3 @@ if not logging.root.handlers:
 from .data import *
 from .plots import *
 from .stats import *
-
