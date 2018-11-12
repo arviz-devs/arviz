@@ -1,7 +1,6 @@
 """PyStan-specific conversion code."""
 from collections import OrderedDict
 from copy import deepcopy
-from operator import itemgetter
 import re
 
 import numpy as np
@@ -236,13 +235,17 @@ def get_draws(fit, variables=None, ignore=None):
             del variables[variables.index(var)]
 
     ndraws = [s - w for s, w in zip(fit.sim["n_save"], fit.sim["warmup2"])]
+    nchain = len(fit.sim["samples"])
 
-    var_keys = OrderedDict()
+    var_keys = OrderedDict((var, []) for var in fit.sim["pars_oi"])
     for key in fit.sim["fnames_oi"]:
-        var, *_ = key.split("[")
-        if var not in var_keys:
-            var_keys[var] = []
-        var_keys[var].append(key)
+        var, *tails = key.split("[")
+        loc = [Ellipsis]
+        for tail in tails:
+            loc = []
+            for i in tail[:-1].split(","):
+                loc.append(int(i) - 1)
+        var_keys[var].append((key, loc))
 
     shapes = dict(zip(fit.sim["pars_oi"], fit.sim["dims_oi"]))
 
@@ -251,19 +254,20 @@ def get_draws(fit, variables=None, ignore=None):
     data = OrderedDict()
 
     for var in variables:
-        keys = var_keys.get(var, [var])
-        var_draws = []
+        if var in data:
+            continue
+        keys_locs = var_keys.get(var, [(var, [Ellipsis])])
         shape = shapes.get(var, [])
         dtype = dtypes.get(var)
-        for pyholder, ndraw in zip(fit.sim["samples"], ndraws):
-            ary = itemgetter(*keys)(pyholder.chains)
-            if shape:
-                ary = np.column_stack(ary)
-            ary = ary[-ndraw:]
-            ary = ary.reshape((-1, *shape), order="F")
-            var_draws.append(ary)
-        ary = np.stack(var_draws, axis=0)
-        ary = ary.astype(dtype)
+
+        ndraw = max(ndraws)
+        ary_shape = [nchain, ndraw] + shape
+        ary = np.empty(ary_shape, dtype=dtype, order="F")
+        for chain, (pyholder, ndraw) in enumerate(zip(fit.sim["samples"], ndraws)):
+            axes = [chain, slice(None)]
+            for key, loc in keys_locs:
+                ary_slice = tuple(axes + loc)
+                ary[ary_slice] = pyholder.chains[key][-ndraw:]
         data[var] = ary
 
     return data
