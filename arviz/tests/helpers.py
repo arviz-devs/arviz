@@ -14,6 +14,10 @@ import pystan
 import scipy.optimize as op
 import torch
 
+import logging
+
+_log = logging.getLogger(__name__)
+
 
 def _emcee_neg_lnlike(theta, x, y, yerr):
     """Proper function to allow pickling."""
@@ -183,7 +187,7 @@ def pymc3_noncentered_schools(data, draws, chains):
 
 
 def load_cached_models(draws, chains):
-    """Load pymc3, pystan, and emcee models from pickle."""
+    """Load pymc3, pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     data = eight_schools_params()
     supported = (
@@ -201,9 +205,13 @@ def load_cached_models(draws, chains):
         )
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
+
             with open(path, "wb") as buff:
+                _log.info("Generating and caching %s" % fname)
                 pickle.dump(func(data, draws, chains), buff)
+
         with open(path, "rb") as buff:
+
             models[library.__name__] = pickle.load(buff)
     return models
 
