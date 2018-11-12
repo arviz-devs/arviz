@@ -2,6 +2,7 @@
 import os
 import pickle
 import sys
+import logging
 import pytest
 
 import emcee
@@ -14,7 +15,6 @@ import pystan
 import scipy.optimize as op
 import torch
 
-import logging
 
 _log = logging.getLogger(__name__)
 
@@ -198,21 +198,24 @@ def load_cached_models(draws, chains):
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}
+
     for library, func in supported:
         py_version = sys.version_info
         fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
             py_version, library, sys.platform, draws, chains
         )
+
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
 
             with open(path, "wb") as buff:
-                _log.info("Generating and caching %s" % fname)
+                _log.info("Generating and caching %s", fname)
                 pickle.dump(func(data, draws, chains), buff)
 
         with open(path, "rb") as buff:
-
+            _log.info("Loading %s from cache", fname)
             models[library.__name__] = pickle.load(buff)
+
     return models
 
 

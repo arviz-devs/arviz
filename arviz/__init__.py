@@ -6,7 +6,7 @@ import logging
 from matplotlib.pyplot import style
 
 # Configure logging before importing arviz internals
-_log = logging.getLogger(__name__)
+_log = logging.getLogger("arviz")
 
 if not logging.root.handlers:
     handler = logging.StreamHandler()
