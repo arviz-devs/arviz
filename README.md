@@ -10,7 +10,7 @@ Includes functions for posterior analysis, model checking, comparison and diagno
 
 ## Documentation
 
-The official Arviz documentation can be found here
+The official ArviZ documentation can be found here
 https://arviz-devs.github.io/arviz/index.html
 
 ## Installation
@@ -125,9 +125,13 @@ Another option is to clone the repository and install using `python setup.py ins
 
 ## Dependencies
 
-Arviz is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
-## Developing
+## Contributions
+ArviZ is a community project and welcomes contributions. 
+Additional information can be found in the [Contributing Readme](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md)
+
+### Developing
 
 A typical development workflow is:
 
@@ -147,3 +151,9 @@ There is also a Dockerfile which helps for isolating build problems and local de
 This will build a local image with the tag `arviz`. 
 After building the image tests can be executing by running `docker run arviz`.
 A shell can be started by running `docker run arviz /bin/bash`. The correct conda environment will be activated automatically.
+
+
+## Code of Conduct
+ArviZ wishes to maintain a positive community. Additional details
+can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/Code_of_Conduct.md)
+
