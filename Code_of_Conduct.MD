@@ -1,6 +1,6 @@
 # ArviZ Community Code of Conduct
 
-ArviZ adopts the NumFocus Code of Conduct directly. In other words, we
+ArviZ adopts the NumFOCUS Code of Conduct directly. In other words, we
 expect our community to treat others with kindness and understanding.
 
 
@@ -11,9 +11,9 @@ or exclusionary jokes are not appropriate.
 
 All communication should be appropriate for a professional audience
 including people of many different backgrounds. Sexual language and
-imagery is not appropriate.
+imagery are not appropriate.
 
-We are dedicated to providing a harassment-free community for everyone,
+ArviZ is dedicated to providing a harassment-free community for everyone,
 regardless of gender, sexual orientation, gender identity, and
 expression, disability, physical appearance, body size, race,
 or religion. We do not tolerate harassment of community members
