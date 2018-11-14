@@ -137,13 +137,13 @@ class PyStanConverter:
 
         ndraws = [s - w for s, w in zip(prior.sim["n_save"], prior.sim["warmup2"])]
 
-        extraction = {}
-        for pyholder, ndraws in zip(prior.sim["samples"], ndraws):
-            sampler_dict = dict(zip(pyholder["sampler_param_names"], pyholder["sampler_params"]))
-            for key, values in sampler_dict.items():
-                if key not in extraction:
+        extraction = OrderedDict()
+        for chain, (pyholder, ndraws) in enumerate(zip(prior.sim["samples"], ndraws)):
+            if chain == 0:
+                for key in pyholder["sampler_param_names"]:
                     extraction[key] = []
-                extraction[key].append(values)
+            for key, values in zip(pyholder["sampler_param_names"], pyholder["sampler_params"]):
+                extraction[key].append(values[-ndraws:])
 
         data = OrderedDict()
         for key, values in extraction.items():
