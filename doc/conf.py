@@ -130,6 +130,7 @@ html_theme_options = {
         ('Quickstart', 'notebooks/Introduction'),
         ('Cookbook', 'notebooks/InferenceDataCookbook'),
         ('API', 'api'),
+        ('Usage', 'usage'),
     ],
 }
 

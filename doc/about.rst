@@ -3,10 +3,10 @@ About
 *****
 
 
-Contact
-=======
+Reporting Issues
+================
 
-To ask a question regarding usage of ArviZ or to report an issue please use the `issue tracker <https://github.com/arviz-devs/arviz/issues>`__.
+To report an issue please use the `issue tracker <https://github.com/arviz-devs/arviz/issues>`__.
 
 
 License
