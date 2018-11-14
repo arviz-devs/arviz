@@ -28,6 +28,7 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
+    group="posterior",
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -42,6 +43,10 @@ def plot_density(
     data_labels : list[str]
         List with names for the samples in the list of datasets. Useful when
         plotting more than one trace.
+    group: str, optional
+        Which sort of data should be plotted?  Defaults to 'posterior'.  Alternative
+        values include 'prior' and any other strings used as dataset keys in the
+        InferenceData.
     var_names: list, optional
         List of variables to plot (defaults to None, which results in all
         variables plotted).
@@ -80,9 +85,9 @@ def plot_density(
     var_names = _var_names(var_names)
 
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, group="posterior")]
+        datasets = [convert_to_dataset(data, group=group)]
     else:
-        datasets = [convert_to_dataset(d, group="posterior") for d in data]
+        datasets = [convert_to_dataset(d, group=group) for d in data]
 
     if point_estimate not in ("mean", "median", None):
         raise ValueError(
