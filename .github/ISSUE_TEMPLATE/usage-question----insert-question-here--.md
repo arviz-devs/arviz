@@ -8,7 +8,7 @@ about: General Questions about ArviZ Usage
 Let us know what you're trying to do and we can point you in the right direction
 
 ## Code Example or link
-Please insert an example of demonstrating what you're trying to do. Ideally it would be a link to a notebook or code repository that can be run on another user's computer
+Please insert an example demonstrating what you're trying to do. Ideally it would be a link to a notebook or code repository that can be run on another user's computer
 
 ## Relevant documentation or public examples
-Please insert any documentation or public examples which may be similar to your question
+Please insert any documentation or public examples which may be relevant to your question
