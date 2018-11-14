@@ -45,8 +45,8 @@ def plot_density(
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
     group: Optional[str]
-        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.  Alternative
-        values include 'prior' and any other strings used as dataset keys in the
+        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Alternative values include 'prior' and any other strings used as dataset keys in the
         InferenceData.
     var_names: Optional[List[str]]
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
