@@ -46,8 +46,7 @@ def plot_density(
         List of variables to plot (defaults to None, which results in all
         variables plotted).
     credible_interval : float
-        Credible intervals. Should be in the interval (0, 1]. For values larger than 0.999 it will
-        be approximated as 1. Defaults to 0.94.
+        Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : str or None
         Plot point estimate per variable. Values should be 'mean', 'median' or None.
         Defaults to 'mean'.
@@ -210,7 +209,7 @@ def _d_helper(
     ax : matplotlib axes
     """
     if vec.dtype.kind == "f":
-        if credible_interval < 0.999:
+        if credible_interval != 1:
             hpd_ = hpd(vec, credible_interval)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
