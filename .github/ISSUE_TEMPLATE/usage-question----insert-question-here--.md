@@ -13,4 +13,4 @@ Please provide a minimal, self-contained, and reproducible example demonstrating
 Also include the ArviZ version and version of any other relevant packages.
 
 ## Relevant documentation or public examples
-Please provide any documentation, public examples, or any additional information which may be relevant to your question
+Please provide documentation, public examples, or any additional information which may be relevant to your question
