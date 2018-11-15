@@ -41,8 +41,9 @@ For questions not answered by the documentation we offer the following avenues.
 
 Github Issues
 ####################
-A Github Issue can be created with the (insert link to issue template here).
-
+A Github issue can be created for general purpose questions. Please use the template provided
+`here <https://github.com/arviz-devs/arviz/issues/new?labels=&template=usage-question----insert-question-here--.md>`_
+Please also use the label **question**.
 
 PyMC and Stan Discourse Forums
 ##############################
