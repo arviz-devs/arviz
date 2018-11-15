@@ -46,7 +46,7 @@ def plot_density(
         List of variables to plot (defaults to None, which results in all
         variables plotted).
     credible_interval : float
-        Credible intervals. Defaults to 0.94.
+        Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : str or None
         Plot point estimate per variable. Values should be 'mean', 'median' or None.
         Defaults to 'mean'.
@@ -106,6 +106,9 @@ def plot_density(
         colors = ["C{}".format(idx % 10) for idx in range(n_data)]
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
+
+    if not 1 >= credible_interval > 0:
+        raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -206,23 +209,25 @@ def _d_helper(
     ax : matplotlib axes
     """
     if vec.dtype.kind == "f":
-        density, lower, upper = _fast_kde(vec, bw=bw)
-        x = np.linspace(lower, upper, len(density))
-        hpd_ = hpd(vec, credible_interval)
-        cut = (x >= hpd_[0]) & (x <= hpd_[1])
+        if credible_interval != 1:
+            hpd_ = hpd(vec, credible_interval)
+            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+        else:
+            new_vec = vec
 
-        xmin = x[cut][0]
-        xmax = x[cut][-1]
-        ymin = density[cut][0]
-        ymax = density[cut][-1]
+        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        density *= credible_interval
+        x = np.linspace(xmin, xmax, len(density))
+        ymin = density[0]
+        ymax = density[-1]
 
         if outline:
-            ax.plot(x[cut], density[cut], color=color, lw=linewidth)
+            ax.plot(x, density, color=color, lw=linewidth)
             ax.plot([xmin, xmin], [-ymin / 100, ymin], color=color, ls="-", lw=linewidth)
             ax.plot([xmax, xmax], [-ymax / 100, ymax], color=color, ls="-", lw=linewidth)
 
         if shade:
-            ax.fill_between(x, density, where=cut, color=color, alpha=shade)
+            ax.fill_between(x, density, color=color, alpha=shade)
 
     else:
         xmin, xmax = hpd(vec, credible_interval)
@@ -241,7 +246,7 @@ def _d_helper(
             est = np.mean(vec)
         elif point_estimate == "median":
             est = np.median(vec)
-        ax.plot(est, -0.001, "o", color=color, markeredgecolor="k", markersize=markersize)
+        ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])
     ax.set_title(vname, fontsize=titlesize)
