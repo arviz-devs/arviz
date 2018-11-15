@@ -131,6 +131,7 @@ html_theme_options = {
         ('Cookbook', 'notebooks/InferenceDataCookbook'),
         ('API', 'api'),
         ('Usage', 'usage'),
+        ('About', 'about'),
     ],
 }
 
