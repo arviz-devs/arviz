@@ -1,12 +1,23 @@
+.. about:
+
+
 *****
 About
 *****
 
 
-Contact
-=======
+Reporting Issues
+================
 
-To ask a question regarding usage of ArviZ or to report an issue please use the `issue tracker <https://github.com/arviz-devs/arviz/issues>`__.
+To report an issue please use the `issue tracker <https://github.com/arviz-devs/arviz/issues>`__.
+Please include any supporting information, in particular the version of ArviZ that you are using.
+
+
+Feature Requests
+================
+
+To request a feature please use the
+`issue tracker <https://github.com/arviz-devs/arviz/issues>`__. and add the label "Feature Request"
 
 
 License
