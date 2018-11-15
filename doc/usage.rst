@@ -44,12 +44,3 @@ Github Issues
 A Github issue can be created for general purpose questions. Please use the template provided
 `here <https://github.com/arviz-devs/arviz/issues/new?labels=&template=usage-question----insert-question-here--.md>`_
 Please also use the label **question**.
-
-PyMC and Stan Discourse Forums
-##############################
-The PyMC project and Pystan project have both adopted ArviZ as their plotting libraries.
-If you are using either library for Bayesian modeling you're welcome to post questions in
-the appropriate discourse board with the ArviZ tag.
-
-- `Stan Discourse <https://discourse.mc-stan.org/>`_
-- `PyMC Discourse <https://discourse.pymc.io/>`_
