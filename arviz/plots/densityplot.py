@@ -212,9 +212,11 @@ def _d_helper(
     if vec.dtype.kind == "f":
         if credible_interval < 0.999:
             hpd_ = hpd(vec, credible_interval)
-            vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+        else:
+            new_vec = vec
 
-        density, xmin, xmax = _fast_kde(vec, bw=bw)
+        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
         density *= credible_interval
         x = np.linspace(xmin, xmax, len(density))
         ymin = density[0]
