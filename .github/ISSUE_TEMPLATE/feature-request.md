@@ -8,7 +8,7 @@ about: Suggest an idea for this project
 
 The more specific the better. You can assume you have access to any combination of datasets defined in the schema. When considering an implementation, keep in mind that
 
-- models in ArviZ can have one, or lots of random variables,
+- models in ArviZ can have one, or lots, of random variables,
 - each random variable can have very few or millions of draws,
 - each random variable can have 0 or many dimensions.
 
