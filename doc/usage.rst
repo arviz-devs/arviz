@@ -42,5 +42,5 @@ For questions not answered by the documentation we offer the following avenues.
 Github Issues
 #############
 A Github issue can be created for general purpose questions. Please use the
-`provided template. <https://github.com/arviz-devs/arviz/issues/new?labels=&template=usage-question----insert-question-here--.md>`_
- with the label **question**.
+`provided template <https://github.com/arviz-devs/arviz/issues/new?labels=&template=usage-question----insert-question-here--.md>`_
+with the label **question**.
