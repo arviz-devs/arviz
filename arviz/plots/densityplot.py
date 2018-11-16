@@ -17,6 +17,7 @@ from ..utils import _var_names
 # pylint:disable-msg=too-many-function-args
 def plot_density(
     data,
+    group="posterior",
     data_labels=None,
     var_names=None,
     credible_interval=0.94,
@@ -28,7 +29,6 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
-    group="posterior",
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -41,13 +41,13 @@ def plot_density(
         Any object that can be converted to an az.InferenceData object, or an Iterator returning
         a sequence of such objects.
         Refer to documentation of az.convert_to_dataset for details about such objects.
-    data_labels : Optional[List[str]]
-        List with names for the datasets passed as "data." Useful when plotting more than one
-        dataset.  Must be the same shape as the data parameter.  Defaults to None.
     group: Optional[str]
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
         Alternative values include 'prior' and any other strings used as dataset keys in the
         InferenceData.
+    data_labels : Optional[List[str]]
+        List with names for the datasets passed as "data." Useful when plotting more than one
+        dataset.  Must be the same shape as the data parameter.  Defaults to None.
     var_names: Optional[List[str]]
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
