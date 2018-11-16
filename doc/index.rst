@@ -39,13 +39,14 @@ Contributions and issue reports are very welcome at
 
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   Quickstart<notebooks/Introduction>
-   Example Gallery<examples/index>
-   Cookbook<notebooks/InferenceDataCookbook>
-   api
-   about
+    Quickstart<notebooks/Introduction>
+    Example Gallery<examples/index>
+    Cookbook<notebooks/InferenceDataCookbook>
+    api
+    usage
+    about
 
 
 .. raw:: html
