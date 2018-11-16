@@ -17,6 +17,7 @@ from ..utils import _var_names
 # pylint:disable-msg=too-many-function-args
 def plot_density(
     data,
+    group="posterior",
     data_labels=None,
     var_names=None,
     credible_interval=0.94,
@@ -36,40 +37,46 @@ def plot_density(
 
     Parameters
     ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-    data_labels : list[str]
-        List with names for the samples in the list of datasets. Useful when
-        plotting more than one trace.
-    var_names: list, optional
-        List of variables to plot (defaults to None, which results in all
-        variables plotted).
+    data : Union[Object, Iterator[Object]]
+        Any object that can be converted to an az.InferenceData object, or an Iterator returning
+        a sequence of such objects.
+        Refer to documentation of az.convert_to_dataset for details about such objects.
+    group: Optional[str]
+        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Alternative values include 'prior' and any other strings used as dataset keys in the
+        InferenceData.
+    data_labels : Optional[List[str]]
+        List with names for the datasets passed as "data." Useful when plotting more than one
+        dataset.  Must be the same shape as the data parameter.  Defaults to None.
+    var_names: Optional[List[str]]
+        List of variables to plot.  If multiple datasets are supplied and var_names is not None,
+        will print the same set of variables for each dataset.  Defaults to None, which results in
+        all the variables being plotted.
     credible_interval : float
         Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
-    point_estimate : str or None
+    point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median' or None.
         Defaults to 'mean'.
-    colors : list or string, optional
+    colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplolib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
         models. Defaults to `cycle`.
-    outline : boolean
+    outline : bool
         Use a line to draw KDEs and histograms. Default to True
     hpd_markers : str
         A valid `matplotlib.markers` like 'v', used to indicate the limits of the hpd interval.
         Defaults to empty string (no marker).
-    shade : float
+    shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
-    bw : float
+    bw : Optional[float]
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy).
-    figsize : tuple
+    figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
 
@@ -80,9 +87,9 @@ def plot_density(
     var_names = _var_names(var_names)
 
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, group="posterior")]
+        datasets = [convert_to_dataset(data, group=group)]
     else:
-        datasets = [convert_to_dataset(d, group="posterior") for d in data]
+        datasets = [convert_to_dataset(d, group=group) for d in data]
 
     if point_estimate not in ("mean", "median", None):
         raise ValueError(
