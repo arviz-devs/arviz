@@ -10,9 +10,10 @@ Includes functions for posterior analysis, model checking, comparison and diagno
 
 ## Documentation
 
-The ArviZ documentation can be found in the [official docs](https://arviz-devs.github.io/arviz/index.html) First time users may find the [quickstart](https://arviz-devs.github.io/arviz/notebooks/Introduction.html).
+The ArviZ documentation can be found in the [official docs](https://arviz-devs.github.io/arviz/index.html).
+First time users may find the [quickstart](https://arviz-devs.github.io/arviz/notebooks/Introduction.html)
 to be helpful. Additional guidance can be found in the
-[usage documentation](https://arviz-devs.github.io/arviz/usage.html)
+[usage documentation](https://arviz-devs.github.io/arviz/usage.html).
 
 
 ## Installation
