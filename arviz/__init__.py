@@ -10,7 +10,6 @@ from matplotlib.pyplot import style
 arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
 style.core.USER_LIBRARY_PATHS.append(arviz_style_path)
 style.core.reload_library()
-print(arviz_style_path)
 
 # Configure logging before importing arviz internals
 _log = logging.getLogger("arviz")
