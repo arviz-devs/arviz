@@ -1,11 +1,20 @@
 """Posterior predictive plot."""
 import numpy as np
 from .kdeplot import plot_kde, _fast_kde
-from .plot_utils import _scale_fig_size, _create_axes_grid, default_grid
+from .plot_utils import (
+    xarray_var_iter,
+    _scale_fig_size,
+    default_grid,
+    make_label,
+    _create_axes_grid,
+    get_coords,
+)
+from ..utils import _var_names
 
 
 def plot_ppc(
-    data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None
+    data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None,
+    var_names=None, coords=None, flatten=None
 ):
     """
     Plot for Posterior Predictive checks.
@@ -38,6 +47,17 @@ def plot_ppc(
 
         If None, it will assume that the observed data and the posterior
         predictive data have the same variable name.
+    var_names : list
+        List of variables to be plotted. Defaults to all observed variables in the
+        model if None.
+    coords : dict
+        Dictionary mapping dimensions to selected coordinates to be plotted.
+        Dimensions without a mapping specified will include all coordinates for
+        that dimension. Defaults to including all coordinates for all
+        dimensions if None.
+    flatten : list
+        List of dimensions to flatten. Only flattens across the coordinates
+        specified in the coords argument. Defaults to flattening all of the dimensions.
 
     Returns
     -------
@@ -77,29 +97,63 @@ def plot_ppc(
     observed = data.observed_data
     posterior_predictive = data.posterior_predictive
 
-    rows, cols = default_grid(len(observed.data_vars))
+    #TODO: validate inputs for new parameters
+    if var_names is None:
+        var_names = observed.data_vars;
+    var_names = _var_names(var_names)
+    pp_var_names = [data_pairs.get(var, var) for var in var_names]
+
+    if flatten is None:
+      flatten = list(observed.dims.keys())
+
+    if coords is None:
+        coords = {}
+
+    #TODO: confirm appropriate way to index coordinates
+    for key in coords.keys():
+        coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
+
+    obs_plotters = list(xarray_var_iter(observed.isel(coords),
+                                        skip_dims=set(flatten),
+                                        var_names=var_names,
+                                        combined=True))
+    pp_plotters = list(xarray_var_iter(posterior_predictive.isel(coords),
+                                       var_names=pp_var_names,
+                                       skip_dims=set(flatten),
+                                       combined=True))
+    length_plotters = len(obs_plotters)
+    rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
 
-    _, axes = _create_axes_grid(len(observed.data_vars), rows, cols, figsize=figsize)
+    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
 
-    for ax, var_name in zip(np.atleast_1d(axes), observed.data_vars):
+    #TODO: Fix legends?
+    for i, ax in enumerate(axes):
+        var_name, selection, obs_vals = obs_plotters[i]
+        pp_var_name, _, pp_vals = pp_plotters[i]
         dtype = observed[var_name].dtype.kind
+
+        # flatten non-specified dimensions
+        obs_vals = obs_vals.flatten()
+        pp_vals = pp_vals.squeeze()
+        if len(pp_vals.shape) > 2:
+            pp_vals = pp_vals.reshape((pp_vals.shape[0], np.prod(pp_vals.shape[1:])))
+
         if kind == "density":
             if dtype == "f":
                 plot_kde(
-                    observed[var_name].values.flatten(),
+                    obs_vals,
                     label="Observed {}".format(var_name),
                     plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
                     fill_kwargs={"alpha": 0},
                     ax=ax,
                 )
             else:
-                vals = observed[var_name].values.flatten()
-                nbins = round(len(vals) ** 0.5)
-                hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                nbins = round(len(obs_vals) ** 0.5)
+                hist, bin_edges = np.histogram(obs_vals, bins=nbins, density=True)
                 hist = np.concatenate((hist[:1], hist))
                 ax.plot(
                     bin_edges,
@@ -110,20 +164,18 @@ def plot_ppc(
                     zorder=3,
                     drawstyle="steps-pre",
                 )
-            pp_var_name = data_pairs.get(var_name, var_name)
             # run plot_kde manually with one plot call
             pp_densities = []
-            for _, chain_vals in posterior_predictive[pp_var_name].groupby("chain"):
-                for _, vals in chain_vals.groupby("draw"):
-                    if dtype == "f":
-                        pp_density, lower, upper = _fast_kde(vals)
-                        pp_x = np.linspace(lower, upper, len(pp_density))
-                        pp_densities.extend([pp_x, pp_density])
-                    else:
-                        nbins = round(len(vals) ** 0.5)
-                        hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
-                        hist = np.concatenate((hist[:1], hist))
-                        pp_densities.extend([bin_edges, hist])
+            for vals in pp_vals:
+                if dtype == "f":
+                    pp_density, lower, upper = _fast_kde(vals)
+                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_densities.extend([pp_x, pp_density])
+                else:
+                    nbins = round(len(vals) ** 0.5)
+                    hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                    hist = np.concatenate((hist[:1], hist))
+                    pp_densities.extend([bin_edges, hist])
             plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
@@ -132,7 +184,7 @@ def plot_ppc(
             if mean:
                 if dtype == "f":
                     plot_kde(
-                        posterior_predictive[pp_var_name].values.flatten(),
+                        pp_vals.flatten(),
                         plot_kwargs={
                             "color": "C0",
                             "linestyle": "--",
@@ -143,7 +195,7 @@ def plot_ppc(
                         ax=ax,
                     )
                 else:
-                    vals = posterior_predictive[pp_var_name].values.flatten()
+                    vals = pp_vals.flatten()
                     nbins = round(len(vals) ** 0.5)
                     hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                     hist = np.concatenate((hist[:1], hist))
@@ -161,14 +213,14 @@ def plot_ppc(
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
                 xlabel = var_name
-            ax.set_xlabel(xlabel, fontsize=ax_labelsize)
+            ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
             ax.tick_params(labelsize=xt_labelsize)
             ax.set_yticks([])
 
         elif kind == "cumulative":
             if dtype == "f":
                 ax.plot(
-                    *_empirical_cdf(observed[var_name].values.flatten()),
+                    *_empirical_cdf(obs_vals),
                     color="k",
                     linewidth=linewidth,
                     label="Observed {}".format(var_name),
@@ -176,20 +228,18 @@ def plot_ppc(
                 )
             else:
                 ax.plot(
-                    *_empirical_cdf(observed[var_name].values.flatten()),
+                    *_empirical_cdf(obs_vals),
                     color="k",
                     linewidth=linewidth,
                     label="Observed {}".format(var_name),
                     drawstyle="steps-pre",
                     zorder=3
                 )
-            pp_var_name = data_pairs.get(var_name, var_name)
             # run plot_kde manually with one plot call
             pp_densities = []
-            for _, chain_vals in posterior_predictive[pp_var_name].groupby("chain"):
-                for _, vals in chain_vals.groupby("draw"):
-                    pp_x, pp_density = _empirical_cdf(vals)
-                    pp_densities.extend([pp_x, pp_density])
+            for vals in pp_vals:
+                pp_x, pp_density = _empirical_cdf(vals)
+                pp_densities.extend([pp_x, pp_density])
             if dtype == "f":
                 ax.plot(*pp_densities, alpha=alpha, color="C5", linewidth=linewidth)
             else:
@@ -204,7 +254,7 @@ def plot_ppc(
             if mean:
                 if dtype == "f":
                     ax.plot(
-                        *_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
+                        *_empirical_cdf(pp_vals.flatten()),
                         color="C0",
                         linestyle="--",
                         linewidth=linewidth,
@@ -212,7 +262,7 @@ def plot_ppc(
                     )
                 else:
                     ax.plot(
-                        *_empirical_cdf(posterior_predictive[pp_var_name].values.flatten()),
+                        *_empirical_cdf(pp_vals.flatten()),
                         color="C0",
                         linestyle="--",
                         linewidth=linewidth,
@@ -223,7 +273,8 @@ def plot_ppc(
                 xlabel = "{} / {}".format(var_name, pp_var_name)
             else:
                 xlabel = var_name
-            ax.set_xlabel(var_name, fontsize=ax_labelsize)
+            ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
+            ax.set_xlabel(xlabel, fontsize=ax_labelsize)
             ax.set_yticks([0, 0.5, 1])
         ax.legend(fontsize=xt_labelsize)
     return axes
