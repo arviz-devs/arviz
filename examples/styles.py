@@ -4,6 +4,11 @@ Styles
 
 _thumb: .8, .8
 """
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+import arviz as az
+
 x = np.linspace(0, 1, 100)
 dist = stats.beta(2, 5).pdf(x)
 
@@ -14,7 +19,7 @@ style_list = ['default',
               'arviz-white']
 
 for style in style_list:
-    with plt.style.context(style):
+    with az.style.context(style):
         plt.figure()
         for i in range(10):
             plt.plot(x, dist - i, f'C{i}', label=f'C{i}')
