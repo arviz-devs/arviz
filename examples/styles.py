@@ -18,12 +18,14 @@ style_list = ['default',
               'arviz-whitegrid',
               'arviz-white']
 
-for style in style_list:
+fig = plt.figure(figsize=(12, 12))
+for idx, style in enumerate(style_list):
     with az.style.context(style):
-        plt.figure()
+        ax = fig.add_subplot(3,2, idx+1, label=idx)
         for i in range(10):
-            plt.plot(x, dist - i, f'C{i}', label=f'C{i}')
-        plt.title(style)
-        plt.xlabel('x')
-        plt.ylabel('f(x)', rotation=0, labelpad=15)
-        plt.legend(bbox_to_anchor=(1, 1))
+            ax.plot(x, dist - i, f'C{i}', label=f'C{i}')
+        ax.set_title(style)
+        ax.set_xlabel('x')
+        ax.set_ylabel('f(x)', rotation=0, labelpad=15)
+        ax.legend(bbox_to_anchor=(1, 1))
+plt.tight_layout()
