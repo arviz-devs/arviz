@@ -19,6 +19,16 @@ import torch
 _log = logging.getLogger(__name__)
 
 
+@pytest.fixture(scope="module")
+def eight_schools_params():
+    """Share setup for eight schools."""
+    return {
+        "J": 8,
+        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+    }
+
+
 def _emcee_neg_lnlike(theta, x, y, yerr):
     """Proper function to allow pickling."""
     slope, intercept, lnf = theta
@@ -79,17 +89,6 @@ def emcee_linear_model(data, draws, chains):
 
     sampler.run_mcmc(pos, draws)
     return sampler
-
-
-@pytest.fixture(scope="function")
-def eight_schools_params():
-    """Share setup for eight schools."""
-    return {
-        "J": 8,
-        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-    }
-
 
 # pylint:disable=no-member,no-value-for-parameter
 def _pyro_centered_model(sigma):
@@ -186,10 +185,9 @@ def pymc3_noncentered_schools(data, draws, chains):
     return model, trace
 
 
-def load_cached_models(draws, chains):
+def load_cached_models(eight_school_params, draws, chains):
     """Load pymc3, pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
-    data = eight_schools_params()
     supported = (
         (pystan, pystan_noncentered_schools),
         (pm, pymc3_noncentered_schools),
@@ -210,7 +208,7 @@ def load_cached_models(draws, chains):
 
             with open(path, "wb") as buff:
                 _log.info("Generating and caching %s", fname)
-                pickle.dump(func(data, draws, chains), buff)
+                pickle.dump(func(eight_school_params, draws, chains), buff)
 
         with open(path, "rb") as buff:
             _log.info("Loading %s from cache", fname)
