@@ -90,6 +90,7 @@ def emcee_linear_model(data, draws, chains):
     sampler.run_mcmc(pos, draws)
     return sampler
 
+
 # pylint:disable=no-member,no-value-for-parameter
 def _pyro_centered_model(sigma):
     """Centered model setup."""
