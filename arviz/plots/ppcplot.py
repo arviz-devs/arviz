@@ -19,15 +19,13 @@ def plot_ppc(
     """
     Plot for Posterior Predictive checks.
 
-    Note that this plot will flatten out any dimensions in the posterior predictive variables.
-
     Parameters
     ----------
     data : az.InferenceData object
         InferenceData object containing the observed and posterior
         predictive data.
     kind : str
-        Type of plot to display (density or cumulative). Defaults to density.
+        Type of plot to display (density, cumulative, or scatter). Defaults to density.
     alpha : float
         Opacity of posterior predictive density curves. Defaults to 0.2.
     mean : bool
@@ -88,8 +86,8 @@ def plot_ppc(
                 '`data` argument must have the group "{group}" for ppcplot'.format(group=group)
             )
 
-    if kind.lower() not in ("density", "cumulative"):
-        raise TypeError("`kind` argument must be either `density` or `cumulative`")
+    if kind.lower() not in ("density", "cumulative", "scatter"):
+        raise TypeError("`kind` argument must be either `density`, `cumulative`, or `scatter`")
 
     if data_pairs is None:
         data_pairs = {}
@@ -124,13 +122,12 @@ def plot_ppc(
     length_plotters = len(obs_plotters)
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
 
     _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
 
-    #TODO: Fix legends?
     for i, ax in enumerate(axes):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
@@ -209,11 +206,6 @@ def plot_ppc(
                         linestyle="--",
                         drawstyle="steps-pre",
                     )
-            if var_name != pp_var_name:
-                xlabel = "{} / {}".format(var_name, pp_var_name)
-            else:
-                xlabel = var_name
-            ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
             ax.tick_params(labelsize=xt_labelsize)
             ax.set_yticks([])
 
@@ -269,14 +261,64 @@ def plot_ppc(
                         drawstyle="steps-pre",
                         label="Posterior predictive mean {}".format(pp_var_name)
                     )
-            if var_name != pp_var_name:
-                xlabel = "{} / {}".format(var_name, pp_var_name)
-            else:
-                xlabel = var_name
-            ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
-            ax.set_xlabel(xlabel, fontsize=ax_labelsize)
             ax.set_yticks([0, 0.5, 1])
-        ax.legend(fontsize=xt_labelsize)
+
+        elif kind == "scatter":
+            ax.plot(obs_vals, np.zeros_like(obs_vals), "o", color="C0",
+                    markersize=markersize, label="Observed {}".format(var_name))
+
+            if mean:
+                if dtype == "f":
+                    plot_kde(
+                        pp_vals.flatten(),
+                        plot_kwargs={
+                            "color": "C0",
+                            "linestyle": "--",
+                            "linewidth": linewidth,
+                            "zorder": 2,
+                        },
+                        label="Posterior predictive mean {}".format(pp_var_name),
+                        ax=ax,
+                    )
+                else:
+                    vals = pp_vals.flatten()
+                    nbins = round(len(vals) ** 0.5)
+                    hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                    hist = np.concatenate((hist[:1], hist))
+                    ax.plot(
+                        bin_edges,
+                        hist,
+                        color="C0",
+                        linewidth=linewidth,
+                        label="Posterior predictive mean {}".format(pp_var_name),
+                        zorder=2,
+                        linestyle="--",
+                        drawstyle="steps-pre",
+                    )
+
+            # TODO: make num_pp_samples parameter?
+            num_pp_samples = 30
+            limit = ax.get_ylim()[1] * 1.05
+            ys = np.linspace(0, limit, num_pp_samples)
+            for j, y in enumerate(ys[1:]):
+                vals = np.array(pp_vals[-j]).flatten()
+                ax.plot(vals, [y] * len(vals), "o", zorder=1, color="C5",
+                        markersize=markersize)
+            ax.scatter([], [], color="C5", label="Posterior predictive {}".format(pp_var_name))
+
+            ax.set_yticks([])
+
+        if var_name != pp_var_name:
+            xlabel = "{} / {}".format(var_name, pp_var_name)
+        else:
+            xlabel = var_name
+        ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
+
+        if i == 0:
+            ax.legend(fontsize=xt_labelsize)
+        else:
+            ax.legend([])
+
     return axes
 
 
