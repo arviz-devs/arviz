@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from scipy.special import logsumexp
 import scipy.stats as st
-from scipy.signal import savgol_filter
 from scipy.optimize import minimize
 import xarray as xr
 
