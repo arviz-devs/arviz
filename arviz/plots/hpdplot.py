@@ -1,4 +1,4 @@
-"Plot hpd intervals for regression data"
+"""Plot hpd intervals for regression data."""
 import numpy as np
 from matplotlib.pyplot import gca
 from scipy.interpolate import griddata
