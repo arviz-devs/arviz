@@ -25,12 +25,12 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def draws():
     return 500
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def chains():
     return 2
 
@@ -240,11 +240,11 @@ def test_convert_to_dataset_bad(tmpdir):
 
 class TestDictNetCDFUtils:
     @pytest.fixture(scope="class")
-    def data(self, draws, chains):
+    def data(self, eight_schools_params, draws, chains):
         # Data of the Eight Schools Model
 
         class Data:
-            _, stan_fit = load_cached_models(draws, chains)["pystan"]
+            _, stan_fit = load_cached_models(eight_schools_params, draws, chains)["pystan"]
             stan_dict = pystan_extract_unpermuted(stan_fit)
             obj = {}
             for name, vals in stan_dict.items():
@@ -287,7 +287,7 @@ class TestEmceeNetCDFUtils:
     @pytest.fixture(scope="class")
     def obj(self, draws):
         fake_chains = 2  # emcee uses lots of walkers
-        obj = load_cached_models(draws, fake_chains)["emcee"]
+        obj = load_cached_models(eight_schools_params, draws, fake_chains)["emcee"]
         return obj
 
     def get_inference_data(self, obj):
@@ -306,7 +306,7 @@ class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
-            model, obj = load_cached_models(draws, chains)["pymc3"]
+            model, obj = load_cached_models(eight_schools_params, draws, chains)["pymc3"]
 
         return Data
 
@@ -340,7 +340,7 @@ class TestPyStanNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
-            model, obj = load_cached_models(draws, chains)["pystan"]
+            model, obj = load_cached_models(eight_schools_params, draws, chains)["pystan"]
 
         return Data
 
