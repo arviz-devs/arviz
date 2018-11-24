@@ -1,3 +1,4 @@
+"Plot hpd intervals for regression data"
 import numpy as np
 from matplotlib.pyplot import gca
 from scipy.interpolate import griddata
@@ -44,7 +45,7 @@ def plot_hpd(
     fill_kwargs : dict
         Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
     plot_kwargs : dict
-        Keywords passed to HPD limits 
+        Keywords passed to HPD limits
     ax : matplotlib axes
 
     Returns
@@ -63,22 +64,22 @@ def plot_hpd(
     if ax is None:
         ax = gca()
 
-    hpd_ = hpd(y, credible_interval=credible_interval)
+    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular)
 
     if smooth:
         if smooth_kwargs is None:
             smooth_kwargs = {}
         smooth_kwargs.setdefault("window_length", 55)
         smooth_kwargs.setdefault("polyorder", 3)
-        x_ = np.linspace(x.min(), x.max(), 200)
-        hpd_interp = griddata(x, hpd_, x_)
-        y_ = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
+        x_data = np.linspace(x.min(), x.max(), 200)
+        hpd_interp = griddata(x, hpd_, x_data)
+        y_data = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
     else:
         idx = np.argsort(x)
-        x_ = x[idx]
-        y_ = hpd_[idx]
+        x_data = x[idx]
+        y_data = hpd_[idx]
 
-    ax.plot(x_, y_, **plot_kwargs)
-    ax.fill_between(x_, y_[:, 0], y_[:, 1], **fill_kwargs)
+    ax.plot(x_data, y_data, **plot_kwargs)
+    ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)
 
     return ax
