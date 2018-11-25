@@ -27,7 +27,8 @@ def _verify_names(sampler, var_names, arg_names):
         Defaults for var_names and arg_names
     """
     num_vars = sampler.chain.shape[-1]
-    num_args = len(sampler.args) if hasattr(sampler,'args') else len(sampler.log_prob_fn.args)
+    # Get emcee version 2 sampler args, else get emcee version 3
+    num_args = len(sampler.args) if hasattr(sampler, "args") else len(sampler.log_prob_fn.args)
 
     if var_names is None:
         var_names = ["var_{}".format(idx) for idx in range(num_vars)]
@@ -75,7 +76,12 @@ class EmceeConverter:
         """Convert observed data to xarray."""
         data = {}
         for idx, var_name in enumerate(self.arg_names):
-            data[var_name] = self.sampler.args[idx] if hasattr(self.sampler,'args') else self.sampler.log_prob_fn.args[idx]
+            # Get emcee version 2 sampler args, else get emcee version 3
+            data[var_name] = (
+                self.sampler.args[idx]
+                if hasattr(self.sampler, "args")
+                else self.sampler.log_prob_fn.args[idx]
+            )
         return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
