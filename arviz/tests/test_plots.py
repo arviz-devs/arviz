@@ -417,6 +417,6 @@ def test_plot_compare(models, kwargs):
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
     ],
 )
-def test_plot_hpd(models, model_fit, kwargs):
+def test_plot_hpd(models, model_fit, data, kwargs):
     obj = getattr(models, model_fit)
-    plot_hpd(data()["y"], obj["theta"], **kwargs)
+    plot_hpd(data["y"], obj["theta"], **kwargs)
