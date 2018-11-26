@@ -419,4 +419,4 @@ def test_plot_compare(models, kwargs):
 )
 def test_plot_hpd(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
-    plot_hpd(eight_schools_params()["y"], obj["theta"], **kwargs)
+    plot_hpd(data()["y"], obj["theta"], **kwargs)
