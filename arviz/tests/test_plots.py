@@ -28,6 +28,7 @@ from ..plots import (
     plot_compare,
     plot_kde,
     plot_khat,
+    plot_hpd,
 )
 
 from ..stats import psislw
@@ -404,3 +405,18 @@ def test_plot_compare(models, kwargs):
 
     axes = plot_compare(model_compare, **kwargs)
     assert axes
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"color": "0.5", "circular": True},
+        {"fill_kwargs": {"alpha": 0}},
+        {"plot_kwargs": {"alpha": 0}},
+        {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
+    ],
+)
+def test_plot_hpd(models, model_fit, kwargs):
+    obj = getattr(models, model_fit)
+    plot_hpd(eight_schools_params()["y"], obj["theta"], **kwargs)
