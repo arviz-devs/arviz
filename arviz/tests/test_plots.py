@@ -12,7 +12,7 @@ import pymc3 as pm
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
-from .helpers import eight_schools_params, load_cached_models
+from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
