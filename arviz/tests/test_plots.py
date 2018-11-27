@@ -80,8 +80,8 @@ def pymc3_sample_ppc(models):
 
 
 @pytest.fixture(scope="module")
-def data():
-    data = eight_schools_params()
+def data(eight_schools_params):
+    data = eight_schools_params
     return data
 
 
