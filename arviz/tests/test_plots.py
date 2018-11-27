@@ -12,7 +12,7 @@ import pymc3 as pm
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
-from .helpers import eight_schools_params, load_cached_models
+from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -28,6 +28,7 @@ from ..plots import (
     plot_compare,
     plot_kde,
     plot_khat,
+    plot_hpd,
 )
 
 from ..stats import psislw
@@ -79,8 +80,8 @@ def pymc3_sample_ppc(models):
 
 
 @pytest.fixture(scope="module")
-def data():
-    data = eight_schools_params()
+def data(eight_schools_params):
+    data = eight_schools_params
     return data
 
 
@@ -404,3 +405,18 @@ def test_plot_compare(models, kwargs):
 
     axes = plot_compare(model_compare, **kwargs)
     assert axes
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"color": "0.5", "circular": True},
+        {"fill_kwargs": {"alpha": 0}},
+        {"plot_kwargs": {"alpha": 0}},
+        {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
+    ],
+)
+def test_plot_hpd(models, model_fit, data, kwargs):
+    obj = getattr(models, model_fit)
+    plot_hpd(data["y"], obj["theta"], **kwargs)
