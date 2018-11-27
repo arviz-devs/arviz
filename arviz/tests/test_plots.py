@@ -12,7 +12,7 @@ import pymc3 as pm
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
-from .helpers import eight_schools_params, load_cached_models
+from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -37,9 +37,9 @@ np.random.seed(0)
 
 
 @pytest.fixture(scope="module")
-def models():
+def models(eight_schools_params):
     class Models:
-        models = load_cached_models(draws=500, chains=2)
+        models = load_cached_models(eight_schools_params, draws=500, chains=2)
         pymc3_model, pymc3_fit = models["pymc3"]
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
@@ -80,8 +80,8 @@ def pymc3_sample_ppc(models):
 
 
 @pytest.fixture(scope="module")
-def data():
-    data = eight_schools_params()
+def data(eight_schools_params):
+    data = eight_schools_params
     return data
 
 
