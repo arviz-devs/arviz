@@ -32,13 +32,6 @@ def test_hpd():
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
-def test_hpd_smooth():
-    normal_sample = np.random.randn(500, 50)
-    hpd_s = hpd(normal_sample, smooth=True).var(0)
-    hpd_ns = hpd(normal_sample, smooth=False).var(0)
-    np.testing.assert_array_less(hpd_s, hpd_ns)
-
-
 def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
