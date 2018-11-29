@@ -44,7 +44,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
 
     Examples
     --------
-    Plot default autocorrelation plot
+    Plot default autocorrelation
 
     .. plot::
         :context: close-figs
