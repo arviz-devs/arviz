@@ -182,29 +182,25 @@ def plot_pair(
 
                 elif kind == "kde":
                     plot_kde(
-                        var1,
-                        var2,
-                        contour=contour,
-                        fill_last=fill_last,
-                        ax=ax[j, i],
-                        **plot_kwargs
+                        var1, var2, contour=contour, fill_last=fill_last, ax=ax[j, i], **plot_kwargs
                     )
 
                 else:
                     ax[j, i].grid(False)
-                    hexbin = ax[j, i].hexbin(
-                        var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs
-                    )
+                    hexbin = ax[j, i].hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
                 if kind == "hexbin" and colorbar:
                     hexbin_values.append(hexbin.norm.vmin)
                     hexbin_values.append(hexbin.norm.vmax)
-                    if j == i == 0:
-                        hexbin_first = hexbin
+                    if j == i == 0 and colorbar:
+                        divider = make_axes_locatable(ax[0, 1])
+                        cax = divider.append_axes("left", size="7%")
+                        cbar = fig.colorbar(
+                            hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], cax=cax
+                        )
+                        cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
                 if divergences:
-                    ax[j, i].plot(
-                        var1[diverging_mask], var2[diverging_mask], **divergences_kwargs
-                    )
+                    ax[j, i].plot(var1[diverging_mask], var2[diverging_mask], **divergences_kwargs)
 
                 if j + 1 != numvars - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
@@ -213,19 +209,9 @@ def plot_pair(
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize
-                    )
+                    ax[j, i].set_ylabel("{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
                 axs.append(ax)
-
-        if kind == "hexbin" and colorbar:
-            divider = make_axes_locatable(ax[0, 1])
-            cax = divider.append_axes("left", size="7%")
-            cbar = fig.colorbar(
-                hexbin_first, ticks=[min(hexbin_values), max(hexbin_values)], cax=cax
-            )
-            cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
     return axs
