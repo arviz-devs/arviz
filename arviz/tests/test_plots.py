@@ -275,7 +275,7 @@ def test_plot_khat():
 )
 def test_plot_pair(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
-    ax, _ = plot_pair(obj, **kwargs)
+    ax = plot_pair(obj, **kwargs)
     assert ax
 
 
@@ -284,7 +284,7 @@ def test_plot_pair(models, model_fit, kwargs):
 )
 def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     _, ax = fig_ax
-    ax, _ = plot_pair(discrete_model, ax=ax, **kwargs)
+    ax = plot_pair(discrete_model, ax=ax, **kwargs)
     assert ax
 
 
