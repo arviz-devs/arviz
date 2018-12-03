@@ -445,15 +445,19 @@ class TestTfpNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
-            obj = load_cached_models(draws, chains)["tensorflow_probability"]
+            obj = load_cached_models({}, draws, chains)[  # pylint: disable=E1120
+                "tensorflow_probability"
+            ]
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):
+    def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
         return data.obj
 
     def test_inference_data(self, data, eight_schools_params):
-        inference_data1 = self.get_inference_data(data, eight_schools_params)
+        inference_data1 = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
 
 
 class TestCmdStanNetCDFUtils:

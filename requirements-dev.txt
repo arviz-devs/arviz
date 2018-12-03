@@ -7,6 +7,7 @@ numpydoc
 pydocstyle
 pylint
 pyro-ppl
+tensorflow
 tensorflow-probability
 pytest
 pytest-cov
