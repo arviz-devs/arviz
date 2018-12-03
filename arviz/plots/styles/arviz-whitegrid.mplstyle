@@ -1,10 +1,9 @@
 # This style is based on Seaborn-whitegrid parameters, the main differences are
 # Default matplotlib font (no problem using Greek letters!)
 # Larger font size for several elements
-# Colorblind friendly color cycle 
-# .15 = dark_gray
-# .8 = light_gray
+# Colorblind friendly color cycle
 figure.figsize: 7.2, 4.8
+figure.dpi: 100.0
 figure.facecolor: white
 text.color: .15
 axes.labelcolor: .15

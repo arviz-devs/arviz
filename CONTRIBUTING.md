@@ -23,7 +23,35 @@ Contributors are also encouraged to contribute new code to enhance ArviZ's funct
 
 The preferred workflow for contributing to ArviZ is to fork the [GitHub repository](https://github.com/arviz-devs/arviz/), clone it to your local machine, and develop on a feature branch.
 
-## Steps:
+## Style guides
+
+
+### Code Formatting
+For code generally follow the
+[TensorFlow's style guide](https://www.tensorflow.org/versions/master/how_tos/style_guide.html)
+or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)
+Both more or less follows PEP 8.
+
+Final formatting is done with [black](https://github.com/ambv/black). 
+For more detailed steps on a typical development workflow see the
+[Pull request checklist](#pull-request-checklist)
+
+
+### Docstring formatting
+Docstrings should follow the
+[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+Please reasonably document any additions or changes to the codebase,
+when in doubt, add a docstring.
+
+#### Documentation for user facing methods
+If changes are made to a method documented in the
+[ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+please consider adding inline documentation examples. 
+`az.plot_posterior` is a particularly 
+[good example](https://arviz-devs.github.io/arviz/generated/arviz.plot_posterior.html#arviz.plot_posterior).
+
+
+## Steps
 
 1. Fork the [project repository](https://github.com/arviz-devs/arviz/) by clicking on the 'Fork' button near the top right of the main repository page. This creates a copy of the code under your GitHub user account.
 
@@ -92,6 +120,8 @@ We recommended that your contribution complies with the following guidelines bef
 * Added tests follow the [pytest fixture pattern](https://docs.pytest.org/en/latest/fixture.html#fixture)
 
 * Documentation and high-coverage tests are necessary for enhancements to be accepted.
+
+* Documentation follows Numpy style guide
 
 * Run any of the pre-existing examples in ``docs/source/notebooks`` that contain analyses that would be affected by your changes to ensure that nothing breaks. This is a useful opportunity to not only check your work for bugs that might not be revealed by unit test, but also to show how your contribution improves ArviZ for end users.
 
@@ -167,10 +197,5 @@ accessed with
 ```
 docker exec -it arviz jupyter notebook list
 ```
-
-## Style guide
-
-Follow [TensorFlow's style guide](https://www.tensorflow.org/versions/master/how_tos/style_guide.html) or the [Google style guide](https://google.github.io/styleguide/pyguide.html) for writing code, which more or less follows PEP 8.
-
 
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)

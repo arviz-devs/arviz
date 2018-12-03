@@ -221,7 +221,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
+def hpd(x, credible_interval=0.94, circular=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -233,11 +233,9 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
     x : Numpy array
         An array containing posterior samples
     credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.94.
-    transform : callable
-        Function to transform data (defaults to identity)
+        Credible interval to compute. Defaults to 0.94.
     circular : bool, optional
-        Whether to compute the error taking into account `x` is a circular variable
+        Whether to compute the hpd taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
 
     Returns
@@ -246,16 +244,12 @@ def hpd(x, credible_interval=0.94, transform=lambda x: x, circular=False):
         lower and upper value of the interval.
     """
     if x.ndim > 1:
-        return np.array(
-            [
-                hpd(
-                    row, credible_interval=credible_interval, transform=transform, circular=circular
-                )
-                for row in x.T
-            ]
+        hpd_array = np.array(
+            [hpd(row, credible_interval=credible_interval, circular=circular) for row in x.T]
         )
+        return hpd_array
     # Make a copy of trace
-    x = transform(x.copy())
+    x = x.copy()
     len_x = len(x)
 
     if circular:

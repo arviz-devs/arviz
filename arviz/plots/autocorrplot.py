@@ -41,6 +41,40 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     Returns
     -------
     axes : matplotlib axes
+
+    Examples
+    --------
+    Plot default autocorrelation
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_autocorr(data)
+
+    Plot subset variables by specifying variable name exactly
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_autocorr(data, var_names=['mu', 'tau'] )
+
+
+    Combine chains collapsing by variable
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_autocorr(data, var_names=['mu', 'tau'], combined=True)
+
+
+    Specify maximum lag (x axis bound)
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_autocorr(data, var_names=['mu', 'tau'], max_lag=200, combined=True)
     """
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names)

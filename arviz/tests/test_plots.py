@@ -12,7 +12,7 @@ import pymc3 as pm
 
 from ..data import from_pymc3, InferenceData
 from ..stats import compare
-from .helpers import eight_schools_params, load_cached_models
+from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -28,6 +28,7 @@ from ..plots import (
     plot_compare,
     plot_kde,
     plot_khat,
+    plot_hpd,
 )
 
 from ..stats import psislw
@@ -36,9 +37,9 @@ np.random.seed(0)
 
 
 @pytest.fixture(scope="module")
-def models():
+def models(eight_schools_params):
     class Models:
-        models = load_cached_models(draws=500, chains=2)
+        models = load_cached_models(eight_schools_params, draws=500, chains=2)
         pymc3_model, pymc3_fit = models["pymc3"]
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
@@ -80,8 +81,8 @@ def pymc3_sample_ppc(models):
 
 
 @pytest.fixture(scope="module")
-def data():
-    data = eight_schools_params()
+def data(eight_schools_params):
+    data = eight_schools_params
     return data
 
 
@@ -119,12 +120,11 @@ def test_plot_density_float(models, kwargs):
     ]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
-    assert axes.shape[1] == 1
 
 
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=0.9)
-    assert axes.shape[1] == 1
+    assert axes.shape[0] == 2
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
@@ -135,6 +135,8 @@ def test_plot_density_discrete(discrete_model):
         {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
         {"combined": True},
+        {"divergences": "top"},
+        {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", 0)]},
     ],
@@ -277,7 +279,7 @@ def test_plot_khat():
 )
 def test_plot_pair(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
-    ax, _ = plot_pair(obj, **kwargs)
+    ax = plot_pair(obj, **kwargs)
     assert ax
 
 
@@ -286,7 +288,7 @@ def test_plot_pair(models, model_fit, kwargs):
 )
 def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     _, ax = fig_ax
-    ax, _ = plot_pair(discrete_model, ax=ax, **kwargs)
+    ax = plot_pair(discrete_model, ax=ax, **kwargs)
     assert ax
 
 
@@ -411,3 +413,18 @@ def test_plot_compare(models, kwargs):
 
     axes = plot_compare(model_compare, **kwargs)
     assert axes
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"color": "0.5", "circular": True},
+        {"fill_kwargs": {"alpha": 0}},
+        {"plot_kwargs": {"alpha": 0}},
+        {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
+    ],
+)
+def test_plot_hpd(models, model_fit, data, kwargs):
+    obj = getattr(models, model_fit)
+    plot_hpd(data["y"], obj["theta"], **kwargs)

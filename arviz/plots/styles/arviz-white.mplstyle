@@ -1,4 +1,4 @@
-# This style is based on Seaborn-darkgrid parameters, the main differences are
+# This style is based on Seaborn-white parameters, the main differences are
 # Default matplotlib font (no problem using Greek letters!)
 # Larger font size for several elements
 # Colorblind friendly color cycle
@@ -15,7 +15,6 @@ ytick.direction: out
 xtick.color: .15
 ytick.color: .15
 axes.axisbelow: True
-grid.linestyle: -
 lines.solid_capstyle: round
 
 axes.labelsize: 15
@@ -24,11 +23,12 @@ xtick.labelsize: 14
 ytick.labelsize: 14
 legend.fontsize: 14
 
-axes.grid: True
-axes.facecolor: eeeeee
-axes.edgecolor: white
-axes.linewidth: 0
-grid.color: white
+axes.grid: False
+axes.facecolor: white
+axes.edgecolor: 0
+axes.linewidth: 1
+axes.spines.top: False
+axes.spines.right: False
 xtick.major.size: 0
 ytick.major.size: 0
 xtick.minor.size: 0

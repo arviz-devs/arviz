@@ -12,6 +12,7 @@ def plot_trace(
     data,
     var_names=None,
     coords=None,
+    divergences="bottom",
     figsize=None,
     textsize=None,
     lines=None,
@@ -22,6 +23,9 @@ def plot_trace(
 ):
     """Plot samples histograms and values.
 
+    If `divergences` data is available in `sample_stats`, will plot the location of divergences as
+    dashed vertical lines.
+
     Parameters
     ----------
     data : obj
@@ -31,6 +35,8 @@ def plot_trace(
         Variables to be plotted, two variables are required.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    divergences : {"bottom", "top", None, False}
+        Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     textsize: float
@@ -83,6 +89,12 @@ def plot_trace(
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
     """
+    if divergences:
+        try:
+            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
+        except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
+            divergences = False
+
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names)
 
@@ -111,50 +123,104 @@ def plot_trace(
     hist_kwargs.setdefault("alpha", 0.35)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
-        figsize, textsize, len(plotters), 2
+        figsize, textsize, rows=len(plotters), cols=2
     )
     trace_kwargs.setdefault("linewidth", linewidth)
     kde_kwargs.setdefault("plot_kwargs", {"linewidth": linewidth})
 
-    fig, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize)
+    _, axes = plt.subplots(
+        len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
+    )
 
-    for i, (var_name, selection, value) in enumerate(plotters):
+    colors = {}
+    for idx, (var_name, selection, value) in enumerate(plotters):
+        colors[idx] = []
         if combined:
             value = value.flatten()
         value = np.atleast_2d(value)
-        colors = []
-        for row in value:
-            axes[i, 1].plot(np.arange(len(row)), row, **trace_kwargs)
-            colors.append(axes[i, 1].get_lines()[-1].get_color())
-            kde_kwargs.setdefault("plot_kwargs", {})
-            kde_kwargs["plot_kwargs"]["color"] = colors[-1]
-            if row.dtype.kind == "i":
-                _histplot_op(axes[i, 0], row, **hist_kwargs)
-            else:
-                plot_kde(row, textsize=xt_labelsize, ax=axes[i, 0], **kde_kwargs)
 
-        axes[i, 0].set_yticks([])
-        for idx in (0, 1):
-            axes[i, idx].set_title(make_label(var_name, selection), fontsize=titlesize)
-            axes[i, idx].tick_params(labelsize=xt_labelsize)
+        for row in value:
+            axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
+
+            colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
+            kde_kwargs.setdefault("plot_kwargs", {})
+            kde_kwargs["plot_kwargs"]["color"] = colors[idx][-1]
+            if row.dtype.kind == "i":
+                _histplot_op(axes[idx, 0], row, **hist_kwargs)
+            else:
+                plot_kde(row, textsize=xt_labelsize, ax=axes[idx, 0], **kde_kwargs)
+
+            axes[idx, 0].set_yticks([])
+            for col in (0, 1):
+                axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize)
+                axes[idx, col].tick_params(labelsize=xt_labelsize)
+
+    for idx, (var_name, selection, value) in enumerate(plotters):
+        if combined:
+            value = value.flatten()
+        value = np.atleast_2d(value)
+
+        xlims = [ax.get_xlim() for ax in axes[idx, :]]
+        ylims = [ax.get_ylim() for ax in axes[idx, :]]
+
+        if divergences:
+            div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
+            divs = divergence_data.sel(**div_selection).values
+            if combined:
+                divs = divs.flatten()
+            divs = np.atleast_2d(divs)
+
+            for chain, chain_divs in enumerate(divs):
+                div_idxs = np.arange(len(chain_divs))[chain_divs]
+                if div_idxs.size > 0:
+                    if divergences == "top":
+                        ylocs = [ylim[1] for ylim in ylims]
+                    else:
+                        ylocs = [ylim[0] for ylim in ylims]
+                    values = value[chain, div_idxs]
+                    axes[idx, 1].plot(
+                        div_idxs,
+                        np.zeros_like(div_idxs) + ylocs[1],
+                        marker="|",
+                        color="black",
+                        markeredgewidth=1.5,
+                        markersize=30,
+                        linestyle="None",
+                        alpha=hist_kwargs["alpha"],
+                        zorder=-5,
+                    )
+                    axes[idx, 1].set_ylim(*ylims[1])
+                    axes[idx, 0].plot(
+                        values,
+                        np.zeros_like(values) + ylocs[0],
+                        marker="|",
+                        color="black",
+                        markeredgewidth=1.5,
+                        markersize=30,
+                        linestyle="None",
+                        alpha=trace_kwargs["alpha"],
+                        zorder=-5,
+                    )
+                    axes[idx, 0].set_ylim(*ylims[0])
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-            axes[i, 0].vlines(
-                line_values, *axes[i, 0].get_ylim(), colors=colors, linewidth=1.5, alpha=0.75
+            axes[idx, 0].vlines(
+                line_values, *ylims[0], colors=colors[idx][0], linewidth=1.5, alpha=0.75
             )
-            axes[i, 1].hlines(
+            axes[idx, 1].hlines(
                 line_values,
-                *axes[i, 1].get_xlim(),
-                colors=colors,
+                *xlims[1],
+                colors=colors[idx][0],
                 linewidth=1.5,
                 alpha=trace_kwargs["alpha"]
             )
-        axes[i, 0].set_ylim(bottom=0)
-    fig.tight_layout()
+        axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
+        axes[idx, 1].set_xlim(left=0, right=data.draw.max())
+        axes[idx, 1].set_ylim(*ylims[1])
     return axes
 
 

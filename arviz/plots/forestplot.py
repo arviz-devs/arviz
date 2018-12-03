@@ -430,7 +430,7 @@ class VarHandler:
                     reverse_selections=True,
                 )
                 for _, selection, values in datum_iter:
-                    label = make_label(self.var_name, selection)
+                    label = make_label(self.var_name, selection, position="beside")
                     if label not in label_dict:
                         label_dict[label] = {}
                     if name not in label_dict[label]:

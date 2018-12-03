@@ -2,6 +2,7 @@
 import os
 import pickle
 import sys
+import logging
 import pytest
 
 import emcee
@@ -17,6 +18,19 @@ import scipy.optimize as op
 import torch
 import tensorflow as tf
 from ..data import from_tfp
+
+
+_log = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope="module")
+def eight_schools_params():
+    """Share setup for eight schools."""
+    return {
+        "J": 8,
+        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+    }
 
 
 def _emcee_neg_lnlike(theta, x, y, yerr):
@@ -79,16 +93,6 @@ def emcee_linear_model(data, draws, chains):
 
     sampler.run_mcmc(pos, draws)
     return sampler
-
-
-@pytest.fixture(scope="function")
-def eight_schools_params():
-    """Share setup for eight schools."""
-    return {
-        "J": 8,
-        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-    }
 
 
 # pylint:disable=no-member,no-value-for-parameter
@@ -235,10 +239,9 @@ def pymc3_noncentered_schools(data, draws, chains):
     return model, trace
 
 
-def load_cached_models(draws, chains):
-    """Load pymc3, pystan, and emcee models from pickle."""
+def load_cached_models(eight_school_params, draws, chains):
+    """Load pymc3, pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
-    data = eight_schools_params()
     supported = (
         (tfp, tfp_noncentered_schools),
         (pystan, pystan_noncentered_schools),
@@ -248,24 +251,31 @@ def load_cached_models(draws, chains):
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}
+
     for library, func in supported:
         py_version = sys.version_info
-        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}.pkl".format(
-            py_version, library, draws, chains
+        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
+            py_version, library, sys.platform, draws, chains
         )
+
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
+
             with open(path, "wb") as buff:
-                pickle.dump(func(data, draws, chains), buff)
+                _log.info("Generating and caching %s", fname)
+                pickle.dump(func(eight_school_params, draws, chains), buff)
+
         with open(path, "rb") as buff:
+            _log.info("Loading %s from cache", fname)
             models[library.__name__] = pickle.load(buff)
+
     return models
 
 
 def pystan_extract_unpermuted(fit, var_names=None):
     """Extract PyStan samples unpermuted.
 
-    Function return everything as a float.
+    Function returns everything as a float.
     """
     if var_names is None:
         var_names = fit.model_pars
@@ -287,17 +297,4 @@ def pystan_extract_unpermuted(fit, var_names=None):
                 ary_shape = ary.shape
             ary = ary.reshape((-1, nchain, *ary_shape), order="F")
             extract[key] = ary
-    return extract
-
-
-def pystan_extract_normal(fit, var_names=None):
-    """Extract PyStan samples unpermuted.
-
-    Function return everything as a float.
-    """
-    if var_names is None:
-        var_names = fit.model_pars
-    extract = fit.extract(var_names, permuted=False)
-    if not isinstance(extract, dict):
-        extract = fit.extract(var_names, permuted=True)
     return extract

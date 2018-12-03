@@ -18,7 +18,6 @@ def plot_kde(
     rotated=False,
     contour=True,
     fill_last=True,
-    figsize=None,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -51,8 +50,6 @@ def plot_kde(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
-    figsize : tuple
-        Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
@@ -63,6 +60,8 @@ def plot_kde(
         Ignored for 2D KDE
     rug_kwargs : dict
         Keywords passed to the rug plot. Ignored if rug=False or for 2D KDE
+        Use `space` keyword (float) to control the position of the rugplot. The larger this number
+        the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE
     ax : matplotlib axes
@@ -122,13 +121,12 @@ def plot_kde(
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
 
     """
-    if figsize is None and ax:
-        figsize = ax.get_figure().get_size_inches()
-
-    figsize, *_, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
-
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
+        ax = plt.gca()
+
+    figsize = ax.get_figure().get_size_inches()
+
+    figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
     if values2 is None:
         if plot_kwargs is None:
@@ -147,11 +145,15 @@ def plot_kde(
         rug_kwargs.setdefault("marker", "_" if rotated else "|")
         rug_kwargs.setdefault("linestyle", "None")
         rug_kwargs.setdefault("color", default_color)
+        rug_kwargs.setdefault("space", 0.2)
 
         plot_kwargs.setdefault("linewidth", linewidth)
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
         density, lower, upper = _fast_kde(values, cumulative, bw)
+
+        rug_space = max(density) * rug_kwargs.pop("space")
+
         x = np.linspace(lower, upper, len(density))
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
@@ -159,13 +161,15 @@ def plot_kde(
             x, density = density, x
             fill_func = ax.fill_betweenx
 
+        ax.tick_params(labelsize=xt_labelsize)
+
         ax.plot(x, density, label=label, **plot_kwargs)
         if rotated:
             ax.set_xlim(0, auto=True)
-            rug_x, rug_y = np.zeros_like(values), values
+            rug_x, rug_y = np.zeros_like(values) - rug_space, values
         else:
             ax.set_ylim(0, auto=True)
-            rug_x, rug_y = values, np.zeros_like(values)
+            rug_x, rug_y = values, np.zeros_like(values) - rug_space
 
         if rug:
             ax.plot(rug_x, rug_y, **rug_kwargs)
@@ -190,7 +194,9 @@ def plot_kde(
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True)
             if not fill_last:
                 qcfs.collections[0].set_alpha(0)
-            ax.contour(x_x, y_y, density, **contour_kwargs)
+            qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
+            if not fill_last:
+                qcs.collections[0].set_alpha(0)
         else:
             ax.pcolormesh(x_x, y_y, density)
 
