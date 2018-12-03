@@ -138,8 +138,8 @@ Additional information can be found in the [Contributing Readme](https://github.
 
 A typical development workflow is:
 
-1. Install project requirements: `pip install requirements.txt`
-2. Install additional testing requirements: `pip install requirements-dev.txt`
+1. Install project requirements: `pip install -r requirements.txt`
+2. Install additional testing requirements: `pip install -r requirements-dev.txt`
 3. Write helpful code and tests.
 4. Verify code style: `./scripts/lint.sh`
 5. Run test suite: `pytest arviz/tests`
