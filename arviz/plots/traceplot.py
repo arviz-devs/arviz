@@ -143,22 +143,17 @@ def plot_trace(
             axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
 
             colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
-            kde_kwargs.setdefault("plot_kwargs", {})
             kde_kwargs["plot_kwargs"]["color"] = colors[idx][-1]
             if row.dtype.kind == "i":
                 _histplot_op(axes[idx, 0], row, **hist_kwargs)
             else:
                 plot_kde(row, textsize=xt_labelsize, ax=axes[idx, 0], **kde_kwargs)
 
-            axes[idx, 0].set_yticks([])
-            for col in (0, 1):
-                axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize)
-                axes[idx, col].tick_params(labelsize=xt_labelsize)
-
-    for idx, (var_name, selection, value) in enumerate(plotters):
-        if combined:
-            value = value.flatten()
-        value = np.atleast_2d(value)
+        axes[idx, 0].set_yticks([])
+        for col in (0, 1):
+            print()
+            axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+            axes[idx, col].tick_params(labelsize=xt_labelsize)
 
         xlims = [ax.get_xlim() for ax in axes[idx, :]]
         ylims = [ax.get_ylim() for ax in axes[idx, :]]
