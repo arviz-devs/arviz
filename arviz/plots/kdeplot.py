@@ -23,6 +23,7 @@ def plot_kde(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
     ax=None,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -180,6 +181,8 @@ def plot_kde(
         if contour_kwargs is None:
             contour_kwargs = {}
         contour_kwargs.setdefault("colors", "0.5")
+        if contourf_kwargs is None:
+            contourf_kwargs = {}
 
         gridsize = (128, 128) if contour else (256, 256)
 
@@ -191,7 +194,7 @@ def plot_kde(
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
         if contour:
-            qcfs = ax.contourf(x_x, y_y, density, antialiased=True)
+            qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             if not fill_last:
                 qcfs.collections[0].set_alpha(0)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
