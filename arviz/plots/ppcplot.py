@@ -14,7 +14,7 @@ from ..utils import _var_names
 
 def plot_ppc(
     data, kind="density", alpha=0.2, mean=True, figsize=None, textsize=None, data_pairs=None,
-    var_names=None, coords=None, flatten=None
+    var_names=None, coords=None, flatten=None, num_pp_samples=None, random_seed=None,
 ):
     """
     Plot for Posterior Predictive checks.
@@ -56,6 +56,16 @@ def plot_ppc(
     flatten : list
         List of dimensions to flatten. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
+    num_pp_samples : int
+        The number of posterior predictive samples to plot. A separate density
+        or scatter plot will be plotted for each using a random sample.
+        It defaults to 30 samples for  `kind`='scatter'. Otherwise it defaults
+        to all provided samples.
+    random_seed : int
+        Random number generator seed passed to numpy.random.seed to allow
+        reproducibility of the plot. By default, no seed will be provided
+        and the plot will change each call if a random sample is specified
+        by `num_pp_samples`.
 
     Returns
     -------
@@ -107,6 +117,25 @@ def plot_ppc(
     if coords is None:
         coords = {}
 
+    if random_seed is not None:
+        np.random.seed(random_seed)
+
+    total_pp_samples = posterior_predictive.sizes["chain"] * \
+                       posterior_predictive.sizes["draw"]
+    if num_pp_samples is None:
+        if kind == "scatter":
+            num_pp_samples = 30
+        else:
+            num_pp_samples = total_pp_samples
+
+    if not isinstance(num_pp_samples, int) or not num_pp_samples >= 1 or \
+        not num_pp_samples <= total_pp_samples:
+        raise TypeError("`num_pp_samples` must be an integer between 1 and" +
+                        "{limit}.".format(limit=total_pp_samples))
+
+    pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples,
+                                    replace=False)
+
     #TODO: confirm appropriate way to index coordinates
     for key in coords.keys():
         coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
@@ -138,6 +167,7 @@ def plot_ppc(
         pp_vals = pp_vals.squeeze()
         if len(pp_vals.shape) > 2:
             pp_vals = pp_vals.reshape((pp_vals.shape[0], np.prod(pp_vals.shape[1:])))
+        pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "density":
             if dtype == "f":
@@ -163,7 +193,7 @@ def plot_ppc(
                 )
             # run plot_kde manually with one plot call
             pp_densities = []
-            for vals in pp_vals:
+            for vals in pp_sampled_vals:
                 if dtype == "f":
                     pp_density, lower, upper = _fast_kde(vals)
                     pp_x = np.linspace(lower, upper, len(pp_density))
@@ -229,7 +259,7 @@ def plot_ppc(
                 )
             # run plot_kde manually with one plot call
             pp_densities = []
-            for vals in pp_vals:
+            for vals in pp_sampled_vals:
                 pp_x, pp_density = _empirical_cdf(vals)
                 pp_densities.extend([pp_x, pp_density])
             if dtype == "f":
@@ -296,12 +326,10 @@ def plot_ppc(
                         drawstyle="steps-pre",
                     )
 
-            # TODO: make num_pp_samples parameter?
-            num_pp_samples = 30
             limit = ax.get_ylim()[1] * 1.05
             ys = np.linspace(0, limit, num_pp_samples)
-            for j, y in enumerate(ys[1:]):
-                vals = np.array(pp_vals[-j]).flatten()
+            for pp_sample, y in zip(pp_sampled_vals, ys[1:]):
+                vals = np.array(pp_sample).flatten()
                 ax.plot(vals, [y] * len(vals), "o", zorder=1, color="C5",
                         markersize=markersize)
             ax.scatter([], [], color="C5", label="Posterior predictive {}".format(pp_var_name))
