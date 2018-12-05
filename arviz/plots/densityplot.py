@@ -83,6 +83,54 @@ def plot_density(
     Returns
     -------
     ax : Matplotlib axes
+
+
+    Examples
+    --------
+    Plot default density plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> centered = az.load_arviz_data('centered_eight')
+        >>> non_centered = az.load_arviz_data('non_centered_eight')
+        >>> az.plot_density([centered, non_centered])
+
+    Plot subset variables by specifying variable name exactly
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], var_names=["mu"])
+
+    Plot a specific `az.InferenceData` group
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
+
+    Specify credible interval
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], credible_interval=.5)
+
+    Shade plots and/or remove outlines
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], outline=False, shade=.8)
+
+    Specify binwidth for kernel density estimation
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
     var_names = _var_names(var_names)
 
