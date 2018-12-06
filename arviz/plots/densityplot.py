@@ -304,7 +304,7 @@ def _d_helper(
         ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])
-    ax.set_title(vname, fontsize=titlesize)
+    ax.set_title(vname, fontsize=titlesize, wrap=True)
     for pos in ["left", "right", "top"]:
         ax.spines[pos].set_visible(0)
     ax.tick_params(labelsize=xt_labelsize)
