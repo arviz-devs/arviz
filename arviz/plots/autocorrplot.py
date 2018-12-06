@@ -102,7 +102,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
 
         ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
         ax.hlines(0, 0, max_lag, "steelblue")
-        ax.set_title(make_label(var_name, selection), fontsize=titlesize)
+        ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
     if axes.size > 0:
