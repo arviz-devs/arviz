@@ -9,7 +9,7 @@ from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
 from .io_emcee import from_emcee
 from .io_pyro import from_pyro
-
+from .io_tfp import from_tfp
 
 __all__ = [
     "InferenceData",
@@ -27,4 +27,5 @@ __all__ = [
     "from_emcee",
     "from_cmdstan",
     "from_pyro",
+    "from_tfp",
 ]
