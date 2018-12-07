@@ -292,14 +292,14 @@ def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     assert ax
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative"])
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 def test_plot_ppc(models, pymc3_sample_ppc, kind):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
     axes = plot_ppc(data, kind=kind)
     assert axes
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative"])
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 def test_plot_ppc_discrete(kind):
     data = MagicMock(spec=InferenceData)
     observed_data = xr.Dataset({"obs": (["obs_dim_0"], [9, 9])}, coords={"obs_dim_0": [1, 2]})
@@ -314,7 +314,17 @@ def test_plot_ppc_discrete(kind):
     assert axes
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+def test_plot_ppc_grid(models, pymc3_sample_ppc):
+    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+    axes = plot_ppc(data, kind="scatter", flatten=[])
+    assert len(axes) == 8
+    axes = plot_ppc(data, kind="scatter", flatten=[], coords={"obs_dim_0": [1, 2, 3]})
+    assert len(axes) == 3
+    axes = plot_ppc(data, kind="scatter", flatten=["obs_dim_0"], coords={"obs_dim_0": [1, 2, 3]})
+    assert len(axes) == 1
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, model_fit, var_names):
     obj = getattr(models, model_fit)
