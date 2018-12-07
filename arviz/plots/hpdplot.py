@@ -55,6 +55,7 @@ def plot_hpd(
     if plot_kwargs is None:
         plot_kwargs = {}
     plot_kwargs.setdefault("color", color)
+    plot_kwargs.setdefault("alpha", 0)
 
     if fill_kwargs is None:
         fill_kwargs = {}
