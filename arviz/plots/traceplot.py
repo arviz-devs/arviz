@@ -151,7 +151,6 @@ def plot_trace(
 
         axes[idx, 0].set_yticks([])
         for col in (0, 1):
-            print()
             axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
             axes[idx, col].tick_params(labelsize=xt_labelsize)
 
