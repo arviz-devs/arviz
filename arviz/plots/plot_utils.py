@@ -158,6 +158,7 @@ def _create_axes_grid(length_plotters, rows, cols, **kwargs):
     fig : matplotlib figure
     ax : matplotlib axes
     """
+    kwargs.setdefault("constrained_layout", True)
     fig, ax = plt.subplots(rows, cols, **kwargs)
     ax = np.ravel(ax)
     extra = (rows * cols) - length_plotters

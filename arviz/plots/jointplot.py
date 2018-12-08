@@ -83,7 +83,7 @@ def plot_joint(
         marginal_kwargs = {}
 
     # Instantiate figure and grid
-    fig, _ = plt.subplots(0, 0, figsize=figsize)
+    fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
     grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1)
 
     # Set up main plot
