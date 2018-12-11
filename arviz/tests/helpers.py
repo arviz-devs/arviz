@@ -185,7 +185,10 @@ def tfp_noncentered_schools(data, draws, chains):
         [states_, _] = sess.run([states, kernel_results])
 
     data = from_tfp(
-        states_, var_names=["mu", "tau", "theta_tilde"], model_fn=model_fn, observed=data["y"].astype(np.float32)
+        states_,
+        var_names=["mu", "tau", "theta_tilde"],
+        model_fn=model_fn,
+        observed=data["y"].astype(np.float32),
     )
     return data
 
