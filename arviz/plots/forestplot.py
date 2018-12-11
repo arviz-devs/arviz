@@ -326,7 +326,7 @@ class PlotHandler:
                     color=color,
                 )
         if rope is not None and len(rope) == 2:
-            ax.axvspan(rope[0], rope[1], 0, values[-1], color='C2', alpha=rope_alpha)
+            ax.axvspan(rope[0], rope[1], 0, len(values), color='C2', alpha=rope_alpha)
         elif rope is not None:
             raise ValueError('Argument `rope` must be None or an '
                              'iterable of length 2')
