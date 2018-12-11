@@ -38,7 +38,7 @@ def plot_forest(
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
     rope_alpha=.5,
-    figsize=None,
+    figsize=None
 ):
     """Forest plot to compare credible intervals from a number of distributions.
 
