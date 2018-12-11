@@ -28,6 +28,7 @@ def plot_forest(
     combined=False,
     credible_interval=0.94,
     quartiles=True,
+    rope=None,
     eff_n=False,
     r_hat=False,
     colors="cycle",
@@ -36,6 +37,7 @@ def plot_forest(
     markersize=None,
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
+    rope_alpha=.5,
     figsize=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
@@ -64,6 +66,8 @@ def plot_forest(
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
+    rope: tuple
+        Lower and upper values of the Region Of Practical Equivalence defined for all displayed variables
     r_hat : bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
     eff_n : bool, optional
@@ -85,6 +89,8 @@ def plot_forest(
         a black outline is used.
     ridgeplot_overlap : float
         Overlap height for ridgeplots.
+    rope_alpha : float
+        Transparency for rope interval.
     figsize : tuple
         Figure size. If None it will be defined automatically.
 
@@ -134,7 +140,8 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0]
+            credible_interval, quartiles, xt_labelsize, titlesize, linewidth,
+            markersize, axes[0], rope, rope_alpha
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
@@ -274,7 +281,7 @@ class PlotHandler:
         return ax
 
     def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax
+        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope, rope_alpha
     ):
         """Draw forestplot for each plotter.
 
@@ -318,6 +325,11 @@ class PlotHandler:
                     markersize=markersize * 0.75,
                     color=color,
                 )
+        if rope is not None and len(rope) == 2:
+            ax.axvspan(rope[0], rope[1], 0, values[-1], color='C2', alpha=rope_alpha)
+        elif rope is not None:
+            raise ValueError('Argument `rope` must be None or an '
+                             'iterable of length 2')
         ax.tick_params(labelsize=xt_labelsize)
         ax.set_title(
             "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
