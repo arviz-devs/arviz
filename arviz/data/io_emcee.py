@@ -54,13 +54,25 @@ def _verify_names(sampler, var_names, arg_names):
 class EmceeConverter:
     """Encapsulate emcee specific logic."""
 
-    def __init__(self, sampler, *_, var_names=None, arg_names=None, coords=None, dims=None):
+    def __init__(
+        self,
+        sampler,
+        *_,
+        var_names=None,
+        arg_names=None,
+        coords=None,
+        dims=None,
+        discard=None,
+        thin=1
+    ):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
         self.var_names = var_names
         self.arg_names = arg_names
         self.coords = coords
         self.dims = dims
+        self.discard = discard
+        self.thin = thin
         import emcee
 
         self.emcee = emcee
@@ -69,7 +81,7 @@ class EmceeConverter:
         """Convert the posterior to an xarray dataset."""
         data = {}
         for idx, var_name in enumerate(self.var_names):
-            data[var_name] = self.sampler.chain[(..., idx)]
+            data[var_name] = self.sampler.chain[:, self.discard :: self.thin, idx]
         return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -94,7 +106,9 @@ class EmceeConverter:
         )
 
 
-def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=None):
+def from_emcee(
+    sampler, *, var_names=None, arg_names=None, coords=None, dims=None, discard=None, thin=1
+):
     """Convert emcee data into an InferenceData object.
 
     Parameters
@@ -109,7 +123,17 @@ def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=Non
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
+    discard : int
+        Discard the first `discard` steps in the chain as burn-in
+    thin : int
+        Take only every `thin` steps from the chain. (default: 1)
     """
     return EmceeConverter(
-        sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
+        sampler,
+        var_names=var_names,
+        arg_names=arg_names,
+        coords=coords,
+        dims=dims,
+        discard=discard,
+        thin=thin,
     ).to_inference_data()
