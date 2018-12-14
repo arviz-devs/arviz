@@ -123,7 +123,7 @@ def plot_pair(
         )
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
+            fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 
         if kind == "scatter":
             ax.plot(_posterior[0], _posterior[1], **plot_kwargs)
@@ -151,8 +151,8 @@ def plot_pair(
                 _posterior[0][diverging_mask], _posterior[1][diverging_mask], **divergences_kwargs
             )
 
-        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize)
-        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize)
+        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
+        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
         axs = ax
 
@@ -205,11 +205,15 @@ def plot_pair(
                 if j + 1 != numvars - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax[j, i].set_xlabel("{}".format(flat_var_names[i]), fontsize=ax_labelsize)
+                    ax[j, i].set_xlabel(
+                        "{}".format(flat_var_names[i]), fontsize=ax_labelsize, wrap=True
+                    )
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
-                    ax[j, i].set_ylabel("{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize)
+                    ax[j, i].set_ylabel(
+                        "{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize, wrap=True
+                    )
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
                 axs.append(ax)

@@ -319,7 +319,9 @@ class PlotHandler:
                     color=color,
                 )
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title("{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize)
+        ax.set_title(
+            "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
+        )
 
         return ax
 
@@ -338,7 +340,7 @@ class PlotHandler:
                         markeredgecolor="k",
                     )
         ax.set_xlim(left=0)
-        ax.set_title("eff_n", fontsize=titlesize)
+        ax.set_title("eff_n", fontsize=titlesize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
         return ax
 
@@ -351,7 +353,7 @@ class PlotHandler:
         ax.set_xlim(left=0.9, right=2.1)
         ax.set_xticks([1, 2])
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title("r_hat", fontsize=titlesize)
+        ax.set_title("r_hat", fontsize=titlesize, wrap=True)
         return ax
 
     def make_bands(self, ax):

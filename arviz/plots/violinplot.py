@@ -76,7 +76,9 @@ def plot_violin(
     ax_labelsize *= 2
 
     if ax is None:
-        fig, ax = plt.subplots(1, len(plotters), figsize=figsize, sharey=sharey)
+        fig, ax = plt.subplots(
+            1, len(plotters), figsize=figsize, sharey=sharey, constrained_layout=True
+        )
 
     else:
         fig = ax.figure

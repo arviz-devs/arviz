@@ -183,7 +183,7 @@ def plot_posterior(
             **kwargs
         )
 
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize)
+        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
 
     return ax
 
