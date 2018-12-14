@@ -65,7 +65,7 @@ def plot_energy(
     energy = convert_to_dataset(data, group="sample_stats").energy.values
 
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
+        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 
     if fill_kwargs is None:
         fill_kwargs = {}

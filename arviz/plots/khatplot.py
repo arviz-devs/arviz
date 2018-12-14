@@ -46,7 +46,7 @@ def plot_khat(
         markersize = scaled_markersize
 
     if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize)
+        _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
     ax.hlines(
         [0, 0.5, 0.7, 1],

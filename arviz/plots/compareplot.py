@@ -53,7 +53,7 @@ def plot_compare(
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
+        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 
     if plot_kwargs is None:
         plot_kwargs = {}
