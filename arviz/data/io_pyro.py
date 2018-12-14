@@ -60,7 +60,7 @@ class PyroConverter:
                     sites=self.latent_vars
                 ).empirical.items()
             }
-        except AttributeError:
+        except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.latent_vars:
                 samples = EmpiricalMarginal(
@@ -80,7 +80,7 @@ class PyroConverter:
                     sites=self.observed_vars
                 ).empirical.items()
             }
-        except AttributeError:
+        except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.observed_vars:
                 samples = EmpiricalMarginal(
