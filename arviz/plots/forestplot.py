@@ -259,8 +259,9 @@ class PlotHandler:
         )
         text_props = {"size": xt_labelsize, "horizontalalignment": "center", "color": "C2"}
         if rope_values:
-            ax.text(vals[0], y+.08, vals[0])#, **text_props)
-            ax.text(vals[1], y+.08, vals[1])#, **text_props)
+            ax.text(vals[0], y+.08, vals[0], **text_props)
+            ax.text(vals[1], y+.08, vals[1], **text_props)
+        return ax
 
 
     def ridgeplot(self, mult, xt_labelsize, linewidth, alpha, ax):
@@ -292,10 +293,6 @@ class PlotHandler:
                 ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
                 ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
-
-        ax.tick_params(labelsize=xt_labelsize)
-
-        return ax
 
     def forestplot(
         self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope, rope_values
@@ -329,6 +326,8 @@ class PlotHandler:
         label, ticks = self.labels_and_ticks()
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
+                if isinstance(rope, dict):
+                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0],markersize, rope_values,xt_labelsize)
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
@@ -343,8 +342,10 @@ class PlotHandler:
                     markersize=markersize * 0.75,
                     color=color,
                 )
-                if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0],markersize, rope_values,xt_labelsize)
+        ax.tick_params(labelsize=xt_labelsize)
+        ax.set_title(
+            "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
+        )
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:
@@ -355,10 +356,7 @@ class PlotHandler:
                 '{"var_name": {"rope": (lo, hi)}}, or an '
                 "iterable of length 2"
             )
-        ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title(
-            "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
-        )
+
 
         return ax
 
