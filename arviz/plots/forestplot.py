@@ -28,7 +28,6 @@ def plot_forest(
     combined=False,
     credible_interval=0.94,
     rope=None,
-    rope_values=True,
     quartiles=True,
     eff_n=False,
     r_hat=False,
@@ -66,8 +65,6 @@ def plot_forest(
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list with one interval only is provided, the ROPE will be displayed across the y-axis. If more than one interval is provided the
         length of the list should match the number of variables.
-    rope_values : bool, optional
-        Flag for plotting lower and upper values of the Region Of Practical Equivalence as text
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
@@ -141,7 +138,7 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope, rope_values
+            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
@@ -246,7 +243,7 @@ class PlotHandler:
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var,markersize, rope_values,xt_labelsize):
+    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var,markersize,xt_labelsize):
         vals = dict(rope[rope_var][0])["rope"]
         ax.plot(
             vals,
@@ -257,10 +254,6 @@ class PlotHandler:
             zorder=0,
             alpha=0.7,
         )
-        text_props = {"size": xt_labelsize, "horizontalalignment": "center", "color": "C2"}
-        if rope_values:
-            ax.text(vals[0], y+.08, vals[0], **text_props)
-            ax.text(vals[1], y+.08, vals[1], **text_props)
         return ax
 
 
@@ -295,7 +288,7 @@ class PlotHandler:
                 zorder -= 1
 
     def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope, rope_values
+        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
 
@@ -327,7 +320,7 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
                 if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0],markersize, rope_values,xt_labelsize)
+                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0],markersize, xt_labelsize)
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
