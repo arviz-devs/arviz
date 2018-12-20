@@ -243,7 +243,8 @@ class PlotHandler:
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var,markersize,xt_labelsize):
+    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
+        """ Displays ROPE when more than one interval is provided"""
         vals = dict(rope[rope_var][0])["rope"]
         ax.plot(
             vals,
@@ -257,7 +258,7 @@ class PlotHandler:
         return ax
 
 
-    def ridgeplot(self, mult, xt_labelsize, linewidth, alpha, ax):
+    def ridgeplot(self, mult, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
@@ -316,11 +317,11 @@ class PlotHandler:
         else:
             qlist = [endpoint, 50, 100 - endpoint]
 
-        label, ticks = self.labels_and_ticks()
         for plotter in self.plotters.values():
             for y, values, color in plotter.treeplot(qlist, credible_interval):
                 if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0],markersize, xt_labelsize)
+                    label, ticks = self.labels_and_ticks()
+                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0])
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
