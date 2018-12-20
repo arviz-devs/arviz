@@ -1,7 +1,3 @@
-# ArviZ a unified library for exploratory analysis of Bayesian models in Python
-
-----------
-
 title: ArviZ a unified library for exploratory analysis of Bayesian models in Python
 tags:
 
