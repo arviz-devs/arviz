@@ -1,35 +1,32 @@
 ---
 title: ArviZ a unified library for exploratory analysis of Bayesian models in Python
 tags:
-
 - Bayesian statistics
 - Visualization
 - Probabilistic programming
 - Python
-
 authors:
-
 - name: Ravin Kumar
-- orcid: 0000-0003-0501-6098
+  orcid: 0000-0003-0501-6098
+  affiliation: 4
 - name: Colin Carroll
-- orcid: 0000-0001-6977-0861
-- affiliation: 1
+  orcid: 0000-0001-6977-0861
+  affiliation: 1
 - name: Ari Hartikainen
-- orcid: 0000-0002-4569-569X
-- affiliation: 2
+  orcid: 0000-0002-4569-569X
+  affiliation: 2
 - name: Osvaldo Martin
-- orcid: 0000-0001-7419-8978
-- affiliation: 3
-
+  orcid: 0000-0001-7419-8978
+  affiliation: 3
 affiliations:
-
 - name: Freebird Inc.
-- index: 1
+  index: 1
 - name: Aalto University, Department of Civil Engineering, Espoo, Finland
-- index: 2
+  index: 2
 - name: Instituto de Matemática Aplicada San Luis, UNSL-CONICET. Ejército de los Andes 950, 5700 San Luis, Argentina
-- index: 3
-
+  index: 3
+- name: None
+  index: 4
 date: 21 November 2018
 bibliography: paper.bib
 --- 
