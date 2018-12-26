@@ -95,8 +95,10 @@ def plot_compare(
         if information_criterion in comp_df.columns:
             break
     else:
-        raise ValueError("comp_df must contain one of the following"
-                         " information criterion: {}".format(_information_criterion))
+        raise ValueError(
+            "comp_df must contain one of the following"
+            " information criterion: {}".format(_information_criterion)
+        )
 
     if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]
