@@ -30,12 +30,12 @@ def plot_compare(
     comp_df: pd.DataFrame
         Result of the `az.compare()` method
     insample_dev : bool, optional
-        Plot in-sample deviance, that is the value of the Information Criteria without the
+        Plot in-sample deviance, that is the value of the information criteria without the
         penalization given by the effective number of parameters (pIC). Defaults to True
     plot_standard_error : bool, optional
-        Plot the standard error of the IC estimate. Defaults to True
+        Plot the standard error of the information criteria estimate. Defaults to True
     plot_ic_diff : bool, optional
-        Plot standard error of the difference in Information Criteria between each model
+        Plot standard error of the difference in information criteria between each model
          and the top-ranked model. Defaults to True
     figsize : tuple, optional
         If None, size is (6, num of models) inches
@@ -52,6 +52,27 @@ def plot_compare(
     Returns
     -------
     ax : matplotlib axes
+
+
+    Examples
+    --------
+    Show default compare plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> model_compare = az.compare({'Centered 8 schools': az.load_arviz_data('centered_eight'),
+        >>>                  'Non-centered 8 schools': az.load_arviz_data('non_centered_eight')})
+        >>> az.plot_compare(model_compare)
+
+    Plot standard error and information criteria difference only
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_compare(model_compare, insample_dev=False)
+
     """
     if figsize is None:
         figsize = (6, len(comp_df))
@@ -69,9 +90,13 @@ def plot_compare(
 
     yticks_labels = [""] * len(yticks_pos)
 
-    information_criterion = "waic"
-    if information_criterion not in comp_df.columns:
-        information_criterion = "loo"
+    _information_criterion = ["waic", "loo"]
+    for information_criterion in _information_criterion:
+        if information_criterion in comp_df.columns:
+            break
+    else:
+        raise ValueError("comp_df must contain one of the following"
+                         " information criterion: {}".format(_information_criterion))
 
     if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]
