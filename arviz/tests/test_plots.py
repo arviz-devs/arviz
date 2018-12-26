@@ -8,7 +8,6 @@ import xarray as xr
 import numpy as np
 import pytest
 import pymc3 as pm
-import pandas as pd
 
 
 from ..data import from_pymc3, InferenceData
