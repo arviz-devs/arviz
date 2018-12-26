@@ -16,21 +16,27 @@ def plot_compare(
 ):
     """Summary plot for model comparison.
 
-    This plot is in the style of the one used in the book Statistical Rethinking
+    This plot is in the style of the one used in the book Statistical Rethinking (Chapter 6)
     by Richard McElreath.
+
+    Note
+    ----
+    Defaults to comparing Widely Accepted Information Criterion (WAIC) if present in comp_df column,
+    otherwise compares Leave-one-out (loo)
+
 
     Parameters
     ----------
-    comp_df: DataFrame
-        the result of the `compare()` function
+    comp_df: pd.DataFrame
+        Result of the `az.compare()` method
     insample_dev : bool, optional
-        plot the in-sample deviance, that is the value of the IC without the penalization given by
-        the effective number of parameters (pIC). Defaults to True
+        Plot in-sample deviance, that is the value of the Information Criteria without the
+        penalization given by the effective number of parameters (pIC). Defaults to True
     plot_standard_error : bool, optional
-        plot the standard error of the IC estimate. Defaults to True
+        Plot the standard error of the IC estimate. Defaults to True
     plot_ic_diff : bool, optional
-        plot standard error of the difference in IC between each model and the top-ranked model.
-        Defaults to True
+        Plot standard error of the difference in Information Criteria between each model
+         and the top-ranked model. Defaults to True
     figsize : tuple, optional
         If None, size is (6, num of models) inches
     textsize: float
