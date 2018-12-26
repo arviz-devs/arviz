@@ -53,9 +53,12 @@ class PyroConverter:
         # Do not make pyro a requirement
         from pyro.infer import EmpiricalMarginal
 
+        def expand_if_single_chain(x):
+            return np.expand_dims(x, 0) if self.posterior.num_chains == 1 else x
+
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support(), 0)
+                name: expand_if_single_chain(samples.enumerate_support())
                 for name, samples in self.posterior.marginal(
                     sites=self.latent_vars
                 ).empirical.items()
@@ -66,7 +69,7 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
+                data[var_name] = expand_if_single_chain(samples.numpy().squeeze())
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
