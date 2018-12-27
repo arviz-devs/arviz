@@ -10,6 +10,7 @@ from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 
+# pylint disable=too-many-instance-attributes, import-error
 class PyStanConverter:
     """Encapsulate PyStan specific logic."""
 
@@ -23,8 +24,8 @@ class PyStanConverter:
         observed_data=None,
         log_likelihood=None,
         coords=None,
-        dims=None,
-    ):
+        dims=None
+    ):  # pylint: disable=too-many-instance-attributes
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
         self.prior = prior
@@ -34,7 +35,7 @@ class PyStanConverter:
         self.coords = coords
         self.dims = dims
 
-        import pystan
+        import pystan  # pylint: disable=import-error
 
         self.pystan = pystan
 
@@ -167,7 +168,7 @@ class PyStanConverter:
 class PyStan3Converter:
     """Encapsulate PyStan3 specific logic."""
 
-    # pylint disable=too-many-instance-attributes, import-error
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         *_,
@@ -180,7 +181,7 @@ class PyStan3Converter:
         observed_data=None,
         log_likelihood=None,
         coords=None,
-        dims=None,
+        dims=None
     ):
         self.posterior = posterior
         self.posterior_model = posterior_model
@@ -193,7 +194,7 @@ class PyStan3Converter:
         self.coords = coords
         self.dims = dims
 
-        import stan
+        import stan  # pylint: disable=import-error
 
         self.stan = stan
 
@@ -449,9 +450,13 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
             continue
         dtype = dtypes.get(var)
 
-        # todo: correct number of draws if fit.save_warmup is True
-        new_shape = *fit.dims[fit.param_names.index(var)], -1, fit.num_chains
-        values = fit._draws[fit._parameter_indexes(var), :]
+        # in future fix the correct number of draws if fit.save_warmup is True
+        new_shape = (
+            *fit.dims[fit.param_names.index(var)],
+            -1,
+            fit.num_chains,
+        )  # pylint: disable=protected-access
+        values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
         values = values.astype(dtype)
@@ -460,7 +465,6 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     return data
 
 
-# pylint disable=protected-access
 def get_sample_stats_stan3(fit, model=None, log_likelihood=None):
     """Extract sample stats from PyStan3 fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
@@ -468,7 +472,7 @@ def get_sample_stats_stan3(fit, model=None, log_likelihood=None):
     data = OrderedDict()
     for key in fit.sample_and_sampler_param_names:
         new_shape = -1, fit.num_chains
-        values = fit._draws[fit._parameter_indexes(key)]
+        values = fit._draws[fit._parameter_indexes(key)]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
         dtype = dtypes.get(key)
@@ -530,7 +534,7 @@ def from_pystan(
     coords=None,
     dims=None,
     posterior_model=None,
-    prior_model=None,
+    prior_model=None
 ):
     """Convert PyStan data into an InferenceData object.
 
