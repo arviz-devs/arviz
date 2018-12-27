@@ -54,6 +54,9 @@ class TfpConverter:
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
+        if self.observed is None:
+            return None
+
         observed_data = {}
         if isinstance(self.observed, tf.Tensor):
             with tf.Session() as sess:
@@ -87,6 +90,9 @@ class TfpConverter:
 
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
+        if self.model_fn is None:
+            return None
+
         posterior_preds = []
         sample_size = self.posterior[0].shape[0]
 
@@ -112,6 +118,9 @@ class TfpConverter:
 
     def sample_stats_to_xarray(self):
         """Extract sample_stats from tfp trace."""
+        if self.model_fn is None or self.observed is None:
+            return None
+
         log_likelihood = []
         sample_size = self.posterior[0].shape[0]
 
