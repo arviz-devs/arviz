@@ -164,7 +164,7 @@ def plot_density(
 
     if not 1 >= credible_interval > 0:
         raise ValueError("The value of credible_interval should be in the interval (0, 1]")
-
+    print(data)
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
     length_plotters = []
@@ -172,9 +172,10 @@ def plot_density(
         length_plotters.append(len(plotters))
         for var_name, selection, _ in plotters:
             label = make_label(var_name, selection)
+            print([label], var_name, selection)
             if label not in all_labels:
                 all_labels.append(label)
-
+    print(all_labels)
     length_plotters = max(length_plotters)
     rows, cols = default_grid(length_plotters, max_cols=3)
 
@@ -185,10 +186,13 @@ def plot_density(
     fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
-
+    print(rows, cols)
+    print(len(all_labels))
+    print(axis_map)
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
+            print([label], var_name, selection)
             _d_helper(
                 values.flatten(),
                 label,
