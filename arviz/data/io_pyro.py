@@ -65,6 +65,7 @@ class PyroConverter:
         except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.latent_vars:
+                # pylint: disable=no-member
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
@@ -85,6 +86,7 @@ class PyroConverter:
         except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.observed_vars:
+                # pylint: disable=no-member
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
