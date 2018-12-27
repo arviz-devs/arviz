@@ -276,16 +276,21 @@ def load_cached_models(eight_school_params, draws, chains):
             py_version, library, sys.platform, draws, chains
         )
 
-        path = os.path.join(data_directory, fname)
-        if not os.path.exists(path):
+        if STAN_VERSION == 2:
+            path = os.path.join(data_directory, fname)
+            if not os.path.exists(path):
 
-            with open(path, "wb") as buff:
-                _log.info("Generating and caching %s", fname)
-                pickle.dump(func(eight_school_params, draws, chains), buff)
+                with open(path, "wb") as buff:
+                    _log.info("Generating and caching %s", fname)
+                    pickle.dump(func(eight_school_params, draws, chains), buff)
 
-        with open(path, "rb") as buff:
-            _log.info("Loading %s from cache", fname)
-            models[library.__name__] = pickle.load(buff)
+            with open(path, "rb") as buff:
+                _log.info("Loading %s from cache", fname)
+                models[library.__name__] = pickle.load(buff)
+        else:
+            # Currently, PyStan 3 doesn't support pickling
+            _log.info("Generating and loading %s", fname)
+            models[library.__name__] = func(eight_school_params, draws, chains)
 
     return models
 
