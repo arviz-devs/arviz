@@ -69,7 +69,7 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = expand_if_single_chain(samples.numpy().squeeze())
+                data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
