@@ -2,13 +2,20 @@ dist: xenial
 
 language: python
 
-python:
-  - "3.6"
-  - "3.5"
-
-env:
-  - PYSTAN_VERSION=2.17
-  - PYSTAN_VERSION=latest
+matrix:
+  include:
+  - name: "Python 3.6 Unit Test"
+    python: 3.6
+    env: PYSTAN_VERSION=latest NAME="UNIT"
+  - name: "Python 3.5 Unit Test"
+    python: 3.5
+    env: PYSTAN_VERSION=latest NAME="UNIT"
+  - name: "Python 3.6 Lint"
+    python: 3.6
+    env: PYSTAN_VERSION=latest NAME="LINT"
+  - name: "Python 3.6 Sphinx"
+    python: 3.6
+    env: PYSTAN_VERSION=latest NAME="SPHINX"
 
 addons:
   apt_packages:
@@ -20,11 +27,11 @@ cache:
     - $HOME/miniconda
 
 install:
-  - sudo apt-get update
+  - sudo apt-get -qq update
   - . ./scripts/install_miniconda.sh
   - conda info -a
   - . ./scripts/create_testenv.sh
-  - pip install coveralls
+  - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
 
 before_script:
 - "export DISPLAY=:99.0"
@@ -33,10 +40,10 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then . ./scripts/lint.sh ; fi
-  - pytest -v arviz/tests/ --cov=arviz/
-  - travis-sphinx build --nowarn --source=doc
+  - if [[ $NAME == LINT ]]; then . ./scripts/lint.sh ; fi
+  - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
+  - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
 after_success:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then travis-sphinx deploy; fi
-  - coveralls
+  - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  - if [[ $NAME == UNIT ]]; then coveralls ; fi
