@@ -11,7 +11,19 @@ import pymc3 as pm
 import pyro
 import pyro.distributions as dist
 from pyro.infer.mcmc import MCMC, NUTS
-import pystan
+
+# pylint: disable=try-except-raise
+try:
+    import pystan
+
+    STAN = 2
+except ImportError:
+    import stan
+
+    STAN = 3
+except:
+    raise
+
 import tensorflow_probability as tfp
 import tensorflow_probability.python.edward2 as ed
 import scipy.optimize as op
@@ -224,8 +236,12 @@ def pystan_noncentered_schools(data, draws, chains):
             }
         }
     """
-    stan_model = pystan.StanModel(model_code=schools_code)
-    fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
+    if STAN == 2:
+        stan_model = pystan.StanModel(model_code=schools_code)
+        fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
+    else:
+        stan_model = stan.build(schools_code, data=data)
+        fit = stan_model.sample(num_chains=chains, num_samples=draws, num_warmup=0)
     return stan_model, fit
 
 
