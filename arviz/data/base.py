@@ -201,7 +201,9 @@ def make_attrs(attrs=None, library=None):
             version = pkg_resources.get_distribution(library_name).version
             default_attrs["inference_library_version"] = version
         except pkg_resources.DistributionNotFound:
-            pass
+            if hasattr(library, "__version__"):
+                version = library.__version__
+                default_attrs["inference_library_version"] = version
 
     if attrs is not None:
         default_attrs.update(attrs)
