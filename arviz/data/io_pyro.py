@@ -53,12 +53,10 @@ class PyroConverter:
         # Do not make pyro a requirement
         from pyro.infer import EmpiricalMarginal
 
-        def expand_if_single_chain(x):
-            return np.expand_dims(x, 0) if self.posterior.num_chains == 1 else x
-
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: expand_if_single_chain(samples.enumerate_support())
+                name: np.expand_dims(samples.enumerate_support(), 0)
+                if self.posterior.num_chains == 1 else samples.enumerate_support()
                 for name, samples in self.posterior.marginal(
                     sites=self.latent_vars
                 ).empirical.items()
