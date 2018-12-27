@@ -5,8 +5,12 @@ Autocorrelation Plot
 _thumb: .8, .8
 """
 import arviz as az
+import matplotlib.pyplot as plt
 
-az.style.use('arviz-darkgrid')
+# close all the figures, if open from previous commands
+plt.close("all")
 
-data = az.load_arviz_data('centered_eight')
-az.plot_autocorr(data, var_names=('tau', 'mu'))
+az.style.use("arviz-darkgrid")
+
+data = az.load_arviz_data("centered_eight")
+az.plot_autocorr(data, var_names=("tau", "mu"))

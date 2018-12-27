@@ -5,11 +5,14 @@ Posterior Plot
 _thumb: .5, .8
 """
 import arviz as az
+import matplotlib.pyplot as plt
 
-az.style.use('arviz-darkgrid')
+# close all the figures, if open from previous commands
+plt.close("all")
 
-data = az.load_arviz_data('centered_eight')
+az.style.use("arviz-darkgrid")
 
-coords = {'school': ['Choate']}
-az.plot_posterior(data, var_names=['mu', 'theta'], coords=coords, rope=(-1, 1))
+data = az.load_arviz_data("centered_eight")
 
+coords = {"school": ["Choate"]}
+az.plot_posterior(data, var_names=["mu", "theta"], coords=coords, rope=(-1, 1))

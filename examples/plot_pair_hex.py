@@ -5,11 +5,21 @@ Hexbin PairPlot
 _thumb: .2, .5
 """
 import arviz as az
+import matplotlib.pyplot as plt
 
-az.style.use('arviz-darkgrid')
+# close all the figures, if open from previous commands
+plt.close("all")
 
-centered = az.load_arviz_data('centered_eight')
+az.style.use("arviz-darkgrid")
 
-coords = {'school': ['Choate', 'Deerfield']}
-az.plot_pair(centered, var_names=['theta', "mu", "tau"], kind='hexbin', coords=coords,
-             colorbar=True, divergences=True)
+centered = az.load_arviz_data("centered_eight")
+
+coords = {"school": ["Choate", "Deerfield"]}
+az.plot_pair(
+    centered,
+    var_names=["theta", "mu", "tau"],
+    kind="hexbin",
+    coords=coords,
+    colorbar=True,
+    divergences=True,
+)

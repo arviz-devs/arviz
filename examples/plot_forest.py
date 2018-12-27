@@ -5,12 +5,16 @@ Forest Plot
 _thumb: .5, .8
 """
 import arviz as az
+import matplotlib.pyplot as plt
 
-az.style.use('arviz-darkgrid')
+# close all the figures, if open from previous commands
+plt.close("all")
 
-centered_data = az.load_arviz_data('centered_eight')
-non_centered_data = az.load_arviz_data('non_centered_eight')
-_, axes = az.plot_forest([centered_data, non_centered_data],
-                         model_names=['Centered', 'Non Centered'],
-                         var_names=['mu'])
-axes[0].set_title('Estimated theta for eight schools model')
+az.style.use("arviz-darkgrid")
+
+centered_data = az.load_arviz_data("centered_eight")
+non_centered_data = az.load_arviz_data("non_centered_eight")
+_, axes = az.plot_forest(
+    [centered_data, non_centered_data], model_names=["Centered", "Non Centered"], var_names=["mu"]
+)
+axes[0].set_title("Estimated theta for eight schools model")

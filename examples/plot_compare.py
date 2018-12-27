@@ -5,10 +5,18 @@ Compare Plot
 _thumb: .5, .5
 """
 import arviz as az
+import matplotlib.pyplot as plt
 
-az.style.use('arviz-darkgrid')
+# close all the figures, if open from previous commands
+plt.close("all")
+
+az.style.use("arviz-darkgrid")
 
 
-model_compare = az.compare({'Centered 8 schools': az.load_arviz_data('centered_eight'),
-                           'Non-centered 8 schools': az.load_arviz_data('non_centered_eight')})
+model_compare = az.compare(
+    {
+        "Centered 8 schools": az.load_arviz_data("centered_eight"),
+        "Non-centered 8 schools": az.load_arviz_data("non_centered_eight"),
+    }
+)
 az.plot_compare(model_compare, figsize=(12, 4))
