@@ -171,7 +171,8 @@ def plot_density(
     for plotters in to_plot:
         length_plotters.append(len(plotters))
         for var_name, selection, _ in plotters:
-            label = make_label(var_name, selection).replace("\n", "_")
+            label = make_label(var_name, selection)
+            print([label], var_name, selection)
             if label not in all_labels:
                 all_labels.append(label)
     length_plotters = max(length_plotters)
@@ -182,11 +183,14 @@ def plot_density(
     )
 
     fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
-
+    print(all_labels)
+    print(len(all_labels), len(ax.flatten()))
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
+    print(axis_map.keys())
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
+            print([label], var_name, selection)
             _d_helper(
                 values.flatten(),
                 label,
@@ -201,7 +205,7 @@ def plot_density(
                 hpd_markers,
                 outline,
                 shade,
-                axis_map[label.replace("\n", "_")],
+                axis_map[label],
             )
 
     if n_data > 1:
