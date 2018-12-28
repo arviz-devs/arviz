@@ -235,7 +235,9 @@ def pystan_noncentered_schools(data, draws, chains):
         fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
     else:
         stan_model = pystan.build(schools_code, data=data)
-        fit = stan_model.sample(num_chains=chains, num_samples=draws, num_warmup=0)
+        fit = stan_model.sample(
+            num_chains=chains, num_samples=draws, num_warmup=100, save_warmup=False
+        )
     return stan_model, fit
 
 
