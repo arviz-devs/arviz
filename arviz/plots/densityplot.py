@@ -171,7 +171,7 @@ def plot_density(
     for plotters in to_plot:
         length_plotters.append(len(plotters))
         for var_name, selection, _ in plotters:
-            label = make_label(var_name, selection).replace("\n", "_")
+            label = make_label(var_name, selection)
             if label not in all_labels:
                 all_labels.append(label)
     length_plotters = max(length_plotters)
@@ -201,7 +201,7 @@ def plot_density(
                 hpd_markers,
                 outline,
                 shade,
-                axis_map[label.replace("\n", "_")],
+                axis_map[label],
             )
 
     if n_data > 1:
