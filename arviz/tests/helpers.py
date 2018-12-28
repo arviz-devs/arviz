@@ -153,7 +153,7 @@ def tfp_noncentered_schools(data, draws, chains):
         avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
         school_effects_standard = ed.Normal(
             loc=tf.zeros(num_schools), scale=tf.ones(num_schools), name="school_effects_standard"
-        )  # `theta_tilde`
+        )  # `eta`
         school_effects = avg_effect + tf.exp(avg_stddev) * school_effects_standard  # `theta`
         treatment_effects = ed.Normal(
             loc=school_effects, scale=treatment_stddevs, name="treatment_effects"
@@ -189,7 +189,7 @@ def tfp_noncentered_schools(data, draws, chains):
     with tf.Session() as sess:
         [states_, _] = sess.run([states, kernel_results])
 
-    data = from_tfp(states_, var_names=["mu", "tau", "theta_tilde"])
+    data = from_tfp(states_, var_names=["mu", "tau", "eta"])
     return data
 
 
@@ -205,19 +205,19 @@ def pystan_noncentered_schools(data, draws, chains):
         parameters {
             real mu;
             real<lower=0> tau;
-            real theta_tilde[J];
+            real eta[J];
         }
 
         transformed parameters {
             real theta[J];
             for (j in 1:J)
-                theta[j] = mu + tau * theta_tilde[j];
+                theta[j] = mu + tau * eta[j];
         }
 
         model {
             mu ~ normal(0, 5);
             tau ~ cauchy(0, 5);
-            theta_tilde ~ normal(0, 1);
+            eta ~ normal(0, 1);
             y ~ normal(theta, sigma);
         }
 
@@ -246,8 +246,8 @@ def pymc3_noncentered_schools(data, draws, chains):
     with pm.Model() as model:
         mu = pm.Normal("mu", mu=0, sd=5)
         tau = pm.HalfCauchy("tau", beta=5)
-        theta_tilde = pm.Normal("theta_tilde", mu=0, sd=1, shape=data["J"])
-        theta = pm.Deterministic("theta", mu + tau * theta_tilde)
+        eta = pm.Normal("eta", mu=0, sd=1, shape=data["J"])
+        theta = pm.Deterministic("theta", mu + tau * eta)
         pm.Normal("obs", mu=theta, sd=data["sigma"], observed=data["y"])
         trace = pm.sample(draws, chains=chains)
     return model, trace
