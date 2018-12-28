@@ -153,7 +153,7 @@ There is also a Dockerfile which helps for isolating build problems and local de
 
 This will build a local image with the tag `arviz`. 
 After building the image tests can be executing by running `docker run arviz`.
-A shell can be started by running `docker run arviz /bin/bash`. The correct conda environment will be activated automatically.
+An interactive shell can be started by running `docker run -it arviz /bin/bash`. The correct conda environment will be activated automatically.
 
 
 ## Code of Conduct
