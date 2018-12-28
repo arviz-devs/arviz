@@ -78,7 +78,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support(), 0)
+                name: np.expand_dims(samples.enumerate_support().squeeze(), 0)
                 for name, samples in self.posterior.marginal(
                     sites=self.observed_vars
                 ).empirical.items()
