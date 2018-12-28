@@ -4,6 +4,7 @@ import pickle
 import sys
 import logging
 import pytest
+from collections import OrderedDict
 
 import emcee
 import numpy as np
@@ -12,17 +13,10 @@ import pyro
 import pyro.distributions as dist
 from pyro.infer.mcmc import MCMC, NUTS
 
-# pylint: disable=try-except-raise
 try:
     import pystan
-
-    STAN = 2
 except ImportError:
-    import stan
-
-    STAN = 3
-except:
-    raise
+    import stan as pystan
 
 import tensorflow_probability as tfp
 import tensorflow_probability.python.edward2 as ed
@@ -236,7 +230,7 @@ def pystan_noncentered_schools(data, draws, chains):
             }
         }
     """
-    if STAN == 2:
+    if pystan.__version__.startswith("2"):
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
     else:
@@ -271,26 +265,27 @@ def load_cached_models(eight_school_params, draws, chains):
     models = {}
 
     for library, func in supported:
+        if library.__name__ == "stan":
+            # PyStan3 does not support pickling
+            # httpstan caches models automatically
+            _log.info("Generating and loading stan model")
+            models["pystan"] = func(eight_school_params, draws, chains)
+            continue
+
         py_version = sys.version_info
         fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
             py_version, library, sys.platform, draws, chains
         )
 
-        if STAN_VERSION == 2:
-            path = os.path.join(data_directory, fname)
-            if not os.path.exists(path):
+        path = os.path.join(data_directory, fname)
+        if not os.path.exists(path):
+            with open(path, "wb") as buff:
+                _log.info("Generating and caching %s", fname)
+                pickle.dump(func(eight_school_params, draws, chains), buff)
 
-                with open(path, "wb") as buff:
-                    _log.info("Generating and caching %s", fname)
-                    pickle.dump(func(eight_school_params, draws, chains), buff)
-
-            with open(path, "rb") as buff:
-                _log.info("Loading %s from cache", fname)
-                models[library.__name__] = pickle.load(buff)
-        else:
-            # Currently, PyStan 3 doesn't support pickling
-            _log.info("Generating and loading %s", fname)
-            models[library.__name__] = func(eight_school_params, draws, chains)
+        with open(path, "rb") as buff:
+            _log.info("Loading %s from cache", fname)
+            models[library.__name__] = pickle.load(buff)
 
     return models
 
@@ -321,3 +316,35 @@ def pystan_extract_unpermuted(fit, var_names=None):
             ary = ary.reshape((-1, nchain, *ary_shape), order="F")
             extract[key] = ary
     return extract
+
+
+def stan_extract_dict(fit, var_names=None):
+    """Extract draws from PyStan3 fit.
+
+    Function returns everything as a float.
+    """
+    if var_names is None:
+        var_names = fit.param_names
+    elif isinstance(var_names, str):
+        var_names = [var_names]
+    var_names = list(var_names)
+
+    data = OrderedDict()
+
+    for var in var_names:
+        if var in data:
+            continue
+        dtype = dtypes.get(var)
+
+        # in future fix the correct number of draws if fit.save_warmup is True
+        new_shape = (
+            *fit.dims[fit.param_names.index(var)],
+            -1,
+            fit.num_chains,
+        )  # pylint: disable=protected-access
+        values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
+        values = values.reshape(new_shape, order="F")
+        values = np.moveaxis(values, [-2, -1], [1, 0])
+        data[var] = values
+
+    return data

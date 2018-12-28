@@ -22,6 +22,7 @@ from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
+    stan_extract_dict,
 )
 
 
@@ -245,11 +246,18 @@ class TestDictNetCDFUtils:
 
         class Data:
             _, stan_fit = load_cached_models(eight_schools_params, draws, chains)["pystan"]
-            stan_dict = pystan_extract_unpermuted(stan_fit)
-            obj = {}
-            for name, vals in stan_dict.items():
-                if name not in {"y_hat", "log_lik"}:  # extra vars
-                    obj[name] = np.swapaxes(vals, 0, 1)
+            try:
+                stan_dict = pystan_extract_unpermuted(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = np.swapaxes(vals, 0, 1)
+            except:
+                stan_dict = stan_extract_dict(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = vals
 
         return Data
 
@@ -348,8 +356,10 @@ class TestPyStanNetCDFUtils:
         """vars as str."""
         return from_pystan(
             posterior=data.obj,
+            posterior_model=data.model,
             posterior_predictive="y_hat",
             prior=data.obj,
+            prior_model=data.model,
             prior_predictive="y_hat",
             observed_data="y",
             log_likelihood="log_lik",
