@@ -1,10 +1,10 @@
 """Test helper functions."""
+from collections import OrderedDict
 import os
 import pickle
 import sys
 import logging
 import pytest
-from collections import OrderedDict
 
 import emcee
 import numpy as np
@@ -336,7 +336,6 @@ def stan_extract_dict(fit, var_names=None):
     for var in var_names:
         if var in data:
             continue
-        dtype = dtypes.get(var)
 
         # in future fix the correct number of draws if fit.save_warmup is True
         new_shape = (
