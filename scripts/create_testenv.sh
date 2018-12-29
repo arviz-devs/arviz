@@ -48,6 +48,8 @@ if [ "$PYSTAN_VERSION" = "latest" ]; then
     pip --no-cache-dir install pystan
 else
   if [ "$PYSTAN_VERSION" = "preview" ]; then
+    # try to skip other pre-releases than pystan
+    pip --no-cache-dir install numpy uvloop marshmallow PyYAML
     pip --no-cache-dir install --pre pystan
   else
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
