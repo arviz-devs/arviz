@@ -54,7 +54,7 @@ script:
     fi
 
 ## Awkward line spacing to avoid travis-ci errors
-  - if [[ $NAME == SPHINX ]]; then docker run -env TRAVIS_BRANCH --name arviz_sphinx arviz:latest /bin/bash -c \
+  - if [[ $NAME == SPHINX ]]; then docker run -e TRAVIS_BRANCH --name arviz_sphinx arviz:latest /bin/bash -c \
                                               "source /root/.bashrc && conda env list && travis-sphinx build --nowarn --source=doc";
     fi
 
@@ -63,5 +63,5 @@ after_success:
   - if [[ $NAME == SPHINX ]]; then docker start arviz_sphinx && docker exec arviz_sphinx /bin/bash -c \
                                            "source /root/.bashrc && travis-sphinx deploy"; fi
   # - if [[ $NAME == UNIT ]]; then coveralls ; fi
-  - if [[ $NAME == UNIT ]]; then docker run --rm -env COVERALLS_REPO_TOKEN arviz:latest /bin/bash -c \
+  - if [[ $NAME == UNIT ]]; then docker run --rm -e COVERALLS_REPO_TOKEN arviz:latest /bin/bash -c \
                                 "source /root/.bashrc && pip install coveralls && coveralls" ; fi
