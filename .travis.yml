@@ -56,8 +56,8 @@ script:
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
   - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx \
-                              -e "LC_ALL=C.UTF-8" \
-                              -e "LANG=C.UTF-8" \
+                              -e LC_ALL="C.UTF-8" \
+                              -e LANG="C.UTF-8" \
                               arviz:latest /bin/bash -c \
                               "source /root/.bashrc && \
                                travis-sphinx build --nowarn --source=doc";
