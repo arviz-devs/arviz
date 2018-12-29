@@ -2,6 +2,9 @@ dist: xenial
 
 language: python
 
+services:
+  - docker
+
 matrix:
   include:
   - name: "Python 3.6 Unit Test"
@@ -21,17 +24,15 @@ addons:
   apt_packages:
     - pandoc
 
-cache:
-  directories:
-    - $HOME/.theano
-    - $HOME/miniconda
+before_install:
+  - docker pull conda/miniconda3
 
 install:
   - sudo apt-get -qq update
-  - . ./scripts/install_miniconda.sh
-  - conda info -a
-  - . ./scripts/create_testenv.sh
-  - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - . ./scripts/container.sh --build
+  - docker exec arviz conda info -a
+  -
+  # - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
 
 before_script:
 - "export DISPLAY=:99.0"
@@ -41,7 +42,8 @@ before_script:
 
 script:
   - if [[ $NAME == LINT ]]; then . ./scripts/lint.sh ; fi
-  - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
+  # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
+  - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
   - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
 after_success:
