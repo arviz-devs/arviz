@@ -45,7 +45,7 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $NAME == LINT ]]; then docker run --rm -it arviz:latest /bin/bash -c "./scripts/lint.sh" ; fi
+  - if [[ $NAME == LINT ]]; then docker run --rm -it arviz:latest /bin/bash -c " source /root/.bashrc &&./scripts/lint.sh" ; fi
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
   - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
