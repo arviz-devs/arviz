@@ -36,7 +36,7 @@ install:
   - docker run --rm arviz:latest /bin/bash -c "conda info -a"
 
   # Print conda environment details
-  - docker run --rm arviz:latest /bin/bash -c "conda list"
+  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list"
 
   # - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
 
@@ -55,9 +55,8 @@ script:
 
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
-  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz /bin/bash -c \
-                                              "source /root/.bashrc && \
-                                               travis-sphinx build --nowarn --source=doc";
+  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc && conda env list && travis-sphinx build --nowarn --source=doc";
     fi
 
 after_success:
