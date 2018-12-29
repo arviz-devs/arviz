@@ -34,4 +34,5 @@ COPY $SRC_DIR /opt/arviz
 RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
 
-CMD ["/bin/bash", "-c", "source /root/.bashrc && pytest -vv arviz/tests && echo Finished Testing"]
+CMD ["/bin/bash", "-c", "source /root/.bashrc && pytest -vv arviz/tests --cov=arviz/ && \
+                         echo Finished Testing"]
