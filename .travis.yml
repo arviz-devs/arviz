@@ -30,8 +30,12 @@ before_install:
 install:
   - sudo apt-get -qq update
   - . ./scripts/container.sh --build
-  - docker exec arviz conda info -a
-  -
+  # Print conda details
+  - docker run --rm -it arviz:latest /bin/bash -c "conda info -a"
+
+  # Print conda environment details
+  - docker run --rm -it arviz:latest /bin/bash -c "conda list"
+
   # - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
 
 before_script:
@@ -41,7 +45,7 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $NAME == LINT ]]; then . ./scripts/lint.sh ; fi
+  - if [[ $NAME == LINT ]]; then docker run --rm -it arviz:latest /bin/bash -c "./scripts/lint.sh" ; fi
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
   - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
