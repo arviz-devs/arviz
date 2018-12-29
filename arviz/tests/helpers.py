@@ -230,7 +230,7 @@ def pystan_noncentered_schools(data, draws, chains):
             }
         }
     """
-    if pystan.__version__.startswith("2"):
+    if pystan_version() == 2:
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
     else:
@@ -349,3 +349,7 @@ def stan_extract_dict(fit, var_names=None):
         data[var] = values
 
     return data
+
+
+def pystan_version():
+    return int(pystan.__version__[0])
