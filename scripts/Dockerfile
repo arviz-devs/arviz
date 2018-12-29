@@ -12,6 +12,10 @@ ENV PYTHON_VERSION=${PYTHON_VERSION}
 ENV PYSTAN_VERSION=${PYSTAN_VERSION}
 ENV DOCKER_BUILD=true
 
+# For Sphinx documentation builds
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
 RUN apt-get update && apt-get install -y git build-essential pandoc \
     && rm -rf /var/lib/apt/lists/*
 
