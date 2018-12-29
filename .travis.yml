@@ -31,10 +31,10 @@ install:
   - sudo apt-get -qq update
   - . ./scripts/container.sh --build
   # Print conda details
-  - docker run --rm -it arviz:latest /bin/bash -c "conda info -a"
+  - docker run --rm arviz:latest /bin/bash -c "conda info -a"
 
   # Print conda environment details
-  - docker run --rm -it arviz:latest /bin/bash -c "conda list"
+  - docker run --rm arviz:latest /bin/bash -c "conda list"
 
   # - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
 
@@ -45,11 +45,17 @@ before_script:
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $NAME == LINT ]]; then docker run --rm -it arviz:latest /bin/bash -c " source /root/.bashrc &&./scripts/lint.sh" ; fi
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
-  - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
+  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
+                            "source /root/.bashrc &&./scripts/lint.sh" ; fi
+  # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
+  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
+                              "source /root/.bashrc && travis-sphinx build --nowarn --source=doc";
+    fi
 after_success:
-  - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  - if [[ $NAME == SPHINX ]]; then docker exec /bin/bash -c \
+                              "source /root/.bashrc && travis-sphinx deploy"; fi
   - if [[ $NAME == UNIT ]]; then coveralls ; fi
