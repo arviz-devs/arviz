@@ -352,7 +352,7 @@ def stan_extract_dict(fit, var_names=None):
 
 
 def pystan_version():
-    """Check PyStan versionself.
+    """Check PyStan version.
 
     Returns
     -------
