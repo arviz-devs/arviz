@@ -234,6 +234,13 @@ def pystan_noncentered_schools(data, draws, chains):
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
     else:
+        # hard code schools data
+        # bug in PyStan3 preview. It modify data in-place
+        data = {
+            "J": 8,
+            "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+            "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+        }
         stan_model = pystan.build(schools_code, data=data)
         fit = stan_model.sample(
             num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False
