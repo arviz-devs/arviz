@@ -27,6 +27,7 @@ addons:
 
 before_install:
   - docker pull conda/miniconda3
+  - docker --version
 
 install:
   - sudo apt-get -qq update
