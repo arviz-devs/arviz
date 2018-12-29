@@ -357,10 +357,8 @@ class TestPyStanNetCDFUtils:
         """vars as str."""
         return from_pystan(
             posterior=data.obj,
-            posterior_model=data.model,
             posterior_predictive="y_hat",
             prior=data.obj,
-            prior_model=data.model,
             prior_predictive="y_hat",
             observed_data="y",
             log_likelihood="log_lik",
@@ -372,6 +370,8 @@ class TestPyStanNetCDFUtils:
                 "y_hat": ["school"],
                 "eta": ["school"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data2(self, data, eight_schools_params):
@@ -394,6 +394,8 @@ class TestPyStanNetCDFUtils:
                 "eta": ["school"],
                 "log_lik": ["log_likelihood_dim"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data3(self, data, eight_schools_params):
@@ -406,6 +408,8 @@ class TestPyStanNetCDFUtils:
             observed_data="y",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data4(self, data):
@@ -418,6 +422,8 @@ class TestPyStanNetCDFUtils:
             observed_data="y",
             coords=None,
             dims=None,
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
