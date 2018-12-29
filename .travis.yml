@@ -60,8 +60,7 @@ script:
 
 after_success:
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == SPHINX ]]; then docker start arviz_sphinx && \
-                                   docker exec arviz_sphinx /bin/bash -c \
+  - if [[ $NAME == SPHINX ]]; then docker start arviz_sphinx && docker exec arviz_sphinx /bin/bash -c \
                                            "source /root/.bashrc && travis-sphinx deploy"; fi
   # - if [[ $NAME == UNIT ]]; then coveralls ; fi
   - if [[ $NAME == UNIT ]]; then docker run arviz:latest /bin/bash -c \
