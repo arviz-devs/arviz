@@ -48,7 +48,9 @@ script:
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
   - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
-                            "source /root/.bashrc &&./scripts/lint.sh" ; fi
+                            "source /root/.bashrc &&./scripts/lint.sh" ;
+    fi
+
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
   - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
@@ -57,6 +59,7 @@ script:
                                export LANG=C.UTF-8 && \
                                travis-sphinx build --nowarn --source=doc"
     fi
+
 after_success:
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
   - if [[ $NAME == SPHINX ]]; then docker exec arviz_sphinx /bin/bash -c \
