@@ -10,7 +10,6 @@ from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 
-# pylint disable=too-many-instance-attributes, import-error
 class PyStanConverter:
     """Encapsulate PyStan specific logic."""
 
@@ -25,7 +24,7 @@ class PyStanConverter:
         log_likelihood=None,
         coords=None,
         dims=None
-    ):  # pylint: disable=too-many-instance-attributes
+    ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
         self.prior = prior
