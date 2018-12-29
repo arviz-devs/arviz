@@ -21,8 +21,9 @@ matrix:
     env: PYSTAN_VERSION=latest NAME="SPHINX"
 
 addons:
-  apt_packages:
-    - pandoc
+  apt:
+    packages:
+      - docker-ce
 
 before_install:
   - docker pull conda/miniconda3
