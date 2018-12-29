@@ -54,7 +54,7 @@ script:
     fi
 
 ## Awkward line spacing to avoid travis-ci errors
-  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
+  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest -e TRAVIS_BRANCH=$TRAVIS_BRANCH /bin/bash -c \
                                               "source /root/.bashrc && conda env list && travis-sphinx build --nowarn --source=doc";
     fi
 
