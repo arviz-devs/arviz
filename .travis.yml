@@ -50,12 +50,12 @@ script:
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
   - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
-                            "source /root/.bashrc &&./scripts/lint.sh" ;
+                            "source /root/.bashrc && ./scripts/lint.sh" ;
     fi
 
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
 
-  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
+  - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz /bin/bash -c \
                                               "source /root/.bashrc && \
                                                travis-sphinx build --nowarn --source=doc";
     fi
