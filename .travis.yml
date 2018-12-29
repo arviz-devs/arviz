@@ -53,16 +53,16 @@ script:
                             "source /root/.bashrc && ./scripts/lint.sh" ;
     fi
 
-  # - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
-
+## Awkward line spacing to avoid travis-ci errors
   - if [[ $NAME == SPHINX ]]; then docker run --name arviz_sphinx arviz:latest /bin/bash -c \
                                               "source /root/.bashrc && conda env list && travis-sphinx build --nowarn --source=doc";
     fi
 
 after_success:
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == SPHINX ]]; then docker exec arviz_sphinx /bin/bash -c \
-                               "travis-sphinx deploy"; fi
+  - if [[ $NAME == SPHINX ]]; then docker start arviz_sphinx && \
+                                   docker exec arviz_sphinx /bin/bash -c \
+                                           "source /root/.bashrc && travis-sphinx deploy"; fi
   # - if [[ $NAME == UNIT ]]; then coveralls ; fi
   - if [[ $NAME == UNIT ]]; then docker run arviz:latest /bin/bash -c \
                                 "source /root/.bashrc && coveralls" ; fi
