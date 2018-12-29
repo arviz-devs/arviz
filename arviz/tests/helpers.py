@@ -133,6 +133,8 @@ def pyro_centered_schools(data, draws, chains):
     posterior.kernel = None
     posterior.run = None
     posterior.logger = None
+    if hasattr(posterior, "sampler"):
+        posterior.sampler = None
     return posterior
 
 
