@@ -65,4 +65,4 @@ after_success:
                                            "source /root/.bashrc && travis-sphinx deploy"; fi
   # - if [[ $NAME == UNIT ]]; then coveralls ; fi
   - if [[ $NAME == UNIT ]]; then docker run arviz:latest /bin/bash -c \
-                                "source /root/.bashrc && coveralls" ; fi
+                                "source /root/.bashrc && pip install coveralls && coveralls" ; fi
