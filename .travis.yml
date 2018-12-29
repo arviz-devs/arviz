@@ -57,5 +57,8 @@ script:
 after_success:
   # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
   - if [[ $NAME == SPHINX ]]; then docker exec /bin/bash -c \
-                              "source /root/.bashrc && travis-sphinx deploy"; fi
+                              "source /root/.bashrc
+                               && export LC_ALL=C.UTF-8
+                               &&export LANG=C.UTF-8
+                               && travis-sphinx deploy"; fi
   - if [[ $NAME == UNIT ]]; then coveralls ; fi
