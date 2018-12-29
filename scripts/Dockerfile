@@ -12,7 +12,7 @@ ENV PYTHON_VERSION=${PYTHON_VERSION}
 ENV PYSTAN_VERSION=${PYSTAN_VERSION}
 ENV DOCKER_BUILD=true
 
-RUN apt-get update && apt-get install -y git build-essential pandoc \
+RUN apt-get update && apt-get install -y git build-essential pandoc export \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and environment installation scripts

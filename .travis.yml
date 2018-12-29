@@ -59,7 +59,7 @@ script:
                                               "source /root/.bashrc && \
                                               export LC_ALL=C.UTF-8 && \
                                               export LANG=C.UTF-8 && \
-                                              travis-sphinx build --nowarn --source=doc"
+                                              travis-sphinx build --nowarn --source=doc";
     fi
 
 after_success:
