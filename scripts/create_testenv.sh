@@ -30,7 +30,7 @@ if [[ $* != *--global* ]]; then
     if [ "$DOCKER_BUILD" = true ] ; then
         # Also add it to root bash settings to set default if used later
         echo "Creating .bashrc profile for docker image"
-        echo "set env=${ENVNAME}" > /root/.bashrc
+        echo "set conda_env=${ENVNAME}" > /root/.bashrc
         echo "source activate ${ENVNAME}" >> /root/.bashrc
     fi
 fi

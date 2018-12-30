@@ -2,6 +2,9 @@ dist: xenial
 
 language: python
 
+services:
+  - docker
+
 matrix:
   include:
   - name: "Python 3.6 Unit Test"
@@ -18,32 +21,53 @@ matrix:
     env: PYSTAN_VERSION=latest NAME="SPHINX"
 
 addons:
-  apt_packages:
-    - pandoc
+  apt:
+    packages:
+      - docker-ce
 
-cache:
-  directories:
-    - $HOME/.theano
-    - $HOME/miniconda
+before_install:
+  - docker pull conda/miniconda3
+  - docker --version
 
 install:
-  - sudo apt-get -qq update
-  - . ./scripts/install_miniconda.sh
-  - conda info -a
-  - . ./scripts/create_testenv.sh
+  # Build docker image
+  - . ./scripts/container.sh --build
+
+  # Print conda details
+  - docker run --rm arviz:latest /bin/bash -c "conda info -a"
+
+  # Print conda environment details
+  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list"
+
+  # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
 before_script:
+  # Doesn't affect testing anymore but leaving for reference
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $NAME == LINT ]]; then . ./scripts/lint.sh ; fi
-  - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
-  - if [[ $NAME == SPHINX ]]; then travis-sphinx build --nowarn --source=doc ; fi
+
+  # Tests command is default in dockerfile cmd
+  - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc && pytest -v arviz/tests/ --cov=arviz/";
+    fi
+
+  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
+                            "source /root/.bashrc && ./scripts/lint.sh";
+    fi
+
+  # Awkward line spacing to avoid travis-ci errors
+  - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
+    fi
 
 after_success:
+  - echo $(pwd)
+  - ls -la
   - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == UNIT ]]; then coveralls ; fi
+  - if [[ $NAME == UNIT ]]; then sudo cp -r ../arviz /opt && coveralls; fi
