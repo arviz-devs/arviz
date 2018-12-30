@@ -9,19 +9,19 @@ matrix:
   include:
   - name: "Python 3.6 Unit Test"
     python: 3.6
-    env: PYSTAN_VERSION=latest NAME="UNIT"
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
   - name: "Python 3.6 Unit Test - PyStan preview"
     python: 3.6
-    env: PYSTAN_VERSION=preview NAME="UNIT"
+    env: PYSTAN_VERSION=preview PYRO_VERSION=latest NAME="UNIT"
   - name: "Python 3.5 Unit Test"
     python: 3.5
-    env: PYSTAN_VERSION=latest NAME="UNIT"
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
   - name: "Python 3.6 Lint"
     python: 3.6
-    env: PYSTAN_VERSION=latest NAME="LINT"
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="LINT"
   - name: "Python 3.6 Sphinx"
     python: 3.6
-    env: PYSTAN_VERSION=latest NAME="SPHINX"
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="SPHINX"
 
 addons:
   apt:
