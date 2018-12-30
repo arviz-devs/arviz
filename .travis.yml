@@ -40,7 +40,7 @@ install:
   - docker run --rm arviz:latest /bin/bash -c "conda info -a"
 
   # Print conda environment details
-  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list"
+  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list && pip freeze"
 
   # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
@@ -73,4 +73,5 @@ after_success:
   - echo $(pwd)
   - ls -la
   - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == UNIT ]]; then sudo cp -r ../arviz /opt && coveralls; fi
+  - if [[ $NAME == UNIT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
+  - if [[ $NAME == UNIT ]]; then coveralls; fi
