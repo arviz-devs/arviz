@@ -550,7 +550,7 @@ def from_pystan(
     observed_data : str or a list of str
         observed data used in the sampling.
         Observed data is extracted from the `posterior.data`.
-        PyStan3 needs model object for the extraction. 
+        PyStan3 needs model object for the extraction.
         See `posterior_model`.
     log_likelihood : str
         Pointwise log_likelihood for the data.
