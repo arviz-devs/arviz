@@ -67,6 +67,7 @@ script:
     fi
 
 after_success:
+  - echo $(pwd)
   - ls -la
   - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == UNIT ]]; then cp ../arviz /opt/arviz && coveralls ; fi
+  - if [[ $NAME == UNIT ]]; then cp -r ../arviz /opt && coveralls ; fi
