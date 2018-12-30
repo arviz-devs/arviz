@@ -13,7 +13,7 @@ PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv${PYTHON_VERSION}_PYSTAN${PYSTAN_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -21,7 +21,6 @@ if [[ $* != *--global* ]]; then
     else
         echo "Creating environment ${ENVNAME}"
         conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
-
     fi
 
     # Activate environment immediately
@@ -35,6 +34,8 @@ if [[ $* != *--global* ]]; then
     fi
 fi
 
+pip install --upgrade pip
+
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The first is the Python 3.5 wheel, the second is 3.6.
 if [ "$PYTHON_VERSION" = "3.5" ]; then
@@ -46,10 +47,14 @@ fi
 if [ "$PYSTAN_VERSION" = "latest" ]; then
     pip --no-cache-dir install pystan
 else
+  if [ "$PYSTAN_VERSION" = "preview" ]; then
+    # try to skip other pre-releases than pystan
+    pip --no-cache-dir install numpy uvloop marshmallow PyYAML
+    pip --no-cache-dir install --pre pystan
+  else
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
+  fi
 fi
-
-pip install --upgrade pip
 
 #  Install editable using the setup.py
 pip install  --no-cache-dir -r requirements.txt

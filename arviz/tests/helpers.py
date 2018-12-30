@@ -1,4 +1,5 @@
 """Test helper functions."""
+from collections import OrderedDict
 import os
 import pickle
 import sys
@@ -11,7 +12,12 @@ import pymc3 as pm
 import pyro
 import pyro.distributions as dist
 from pyro.infer.mcmc import MCMC, NUTS
-import pystan
+
+try:
+    import pystan
+except ImportError:
+    import stan as pystan
+
 import tensorflow_probability as tfp
 import tensorflow_probability.python.edward2 as ed
 import scipy.optimize as op
@@ -147,7 +153,7 @@ def tfp_noncentered_schools(data, draws, chains):
         avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
         school_effects_standard = ed.Normal(
             loc=tf.zeros(num_schools), scale=tf.ones(num_schools), name="school_effects_standard"
-        )  # `theta_tilde`
+        )  # `eta`
         school_effects = avg_effect + tf.exp(avg_stddev) * school_effects_standard  # `theta`
         treatment_effects = ed.Normal(
             loc=school_effects, scale=treatment_stddevs, name="treatment_effects"
@@ -183,7 +189,7 @@ def tfp_noncentered_schools(data, draws, chains):
     with tf.Session() as sess:
         [states_, _] = sess.run([states, kernel_results])
 
-    data = from_tfp(states_, var_names=["mu", "tau", "theta_tilde"])
+    data = from_tfp(states_, var_names=["mu", "tau", "eta"])
     return data
 
 
@@ -199,19 +205,19 @@ def pystan_noncentered_schools(data, draws, chains):
         parameters {
             real mu;
             real<lower=0> tau;
-            real theta_tilde[J];
+            real eta[J];
         }
 
         transformed parameters {
             real theta[J];
             for (j in 1:J)
-                theta[j] = mu + tau * theta_tilde[j];
+                theta[j] = mu + tau * eta[j];
         }
 
         model {
             mu ~ normal(0, 5);
             tau ~ cauchy(0, 5);
-            theta_tilde ~ normal(0, 1);
+            eta ~ normal(0, 1);
             y ~ normal(theta, sigma);
         }
 
@@ -224,8 +230,21 @@ def pystan_noncentered_schools(data, draws, chains):
             }
         }
     """
-    stan_model = pystan.StanModel(model_code=schools_code)
-    fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
+    if pystan_version() == 2:
+        stan_model = pystan.StanModel(model_code=schools_code)
+        fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
+    else:
+        # hard code schools data
+        # bug in PyStan3 preview. It modify data in-place
+        data = {
+            "J": 8,
+            "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+            "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+        }
+        stan_model = pystan.build(schools_code, data=data)
+        fit = stan_model.sample(
+            num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False
+        )
     return stan_model, fit
 
 
@@ -234,8 +253,8 @@ def pymc3_noncentered_schools(data, draws, chains):
     with pm.Model() as model:
         mu = pm.Normal("mu", mu=0, sd=5)
         tau = pm.HalfCauchy("tau", beta=5)
-        theta_tilde = pm.Normal("theta_tilde", mu=0, sd=1, shape=data["J"])
-        theta = pm.Deterministic("theta", mu + tau * theta_tilde)
+        eta = pm.Normal("eta", mu=0, sd=1, shape=data["J"])
+        theta = pm.Deterministic("theta", mu + tau * eta)
         pm.Normal("obs", mu=theta, sd=data["sigma"], observed=data["y"])
         trace = pm.sample(draws, chains=chains)
     return model, trace
@@ -255,6 +274,13 @@ def load_cached_models(eight_school_params, draws, chains):
     models = {}
 
     for library, func in supported:
+        if library.__name__ == "stan":
+            # PyStan3 does not support pickling
+            # httpstan caches models automatically
+            _log.info("Generating and loading stan model")
+            models["pystan"] = func(eight_school_params, draws, chains)
+            continue
+
         py_version = sys.version_info
         fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
             py_version, library, sys.platform, draws, chains
@@ -262,7 +288,6 @@ def load_cached_models(eight_school_params, draws, chains):
 
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
-
             with open(path, "wb") as buff:
                 _log.info("Generating and caching %s", fname)
                 pickle.dump(func(eight_school_params, draws, chains), buff)
@@ -300,3 +325,45 @@ def pystan_extract_unpermuted(fit, var_names=None):
             ary = ary.reshape((-1, nchain, *ary_shape), order="F")
             extract[key] = ary
     return extract
+
+
+def stan_extract_dict(fit, var_names=None):
+    """Extract draws from PyStan3 fit.
+
+    Function returns everything as a float.
+    """
+    if var_names is None:
+        var_names = fit.param_names
+    elif isinstance(var_names, str):
+        var_names = [var_names]
+    var_names = list(var_names)
+
+    data = OrderedDict()
+
+    for var in var_names:
+        if var in data:
+            continue
+
+        # in future fix the correct number of draws if fit.save_warmup is True
+        new_shape = (
+            *fit.dims[fit.param_names.index(var)],
+            -1,
+            fit.num_chains,
+        )  # pylint: disable=protected-access
+        values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
+        values = values.reshape(new_shape, order="F")
+        values = np.moveaxis(values, [-2, -1], [1, 0])
+        data[var] = values
+
+    return data
+
+
+def pystan_version():
+    """Check PyStan version.
+
+    Returns
+    -------
+    int
+        Major version number
+    """
+    return int(pystan.__version__[0])
