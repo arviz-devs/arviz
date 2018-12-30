@@ -38,7 +38,8 @@ install:
   # Print conda environment details
   - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list"
 
-  # - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
 before_script:
 - "export DISPLAY=:99.0"
@@ -48,22 +49,19 @@ before_script:
 
 script:
   # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
+
+  # Tests command is default in dockerfile cmd
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
+
   - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
-                            "source /root/.bashrc && ./scripts/lint.sh" ;
+                            "source /root/.bashrc && ./scripts/lint.sh";
     fi
 
 ## Awkward line spacing to avoid travis-ci errors
-  - if [[ $NAME == SPHINX ]]; then docker run  --name arviz_sphinx arviz:latest /bin/bash -c \
-                                              "source /root/.bashrc && conda env list && travis-sphinx build --nowarn --source=doc";
+  - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
     fi
 
 after_success:
-  # - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
-  - if [[ $NAME == SPHINX ]]; then docker start arviz_sphinx && docker exec -e TRAVIS_BRANCH -e TRAVIS_PULL_REQUEST -e GH_TOKEN -e GH_REPO_SLUG -e TRAVIS_REPO_SLUG -e TRAVIS_TAG\
-                                                                            arviz_sphinx /bin/bash -c \
-                                                                            "source /root/.bashrc && travis-sphinx deploy"; fi
-  # - if [[ $NAME == UNIT ]]; then coveralls ; fi
-  - echo $COVERALLS_REPO_TOKEN
-  - if [[ $NAME == UNIT ]]; then docker run --rm -e COVERALLS_REPO_TOKEN arviz:latest /bin/bash -c \
-                                "source /root/.bashrc && pip install coveralls && export COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN && coveralls" ; fi
+  - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  - if [[ $NAME == UNIT ]]; then coveralls ; fi
