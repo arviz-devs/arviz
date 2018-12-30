@@ -550,6 +550,8 @@ def from_pystan(
     observed_data : str or a list of str
         observed data used in the sampling.
         Observed data is extracted from the `posterior.data`.
+        PyStan3 needs model object for the extraction. 
+        See `posterior_model`.
     log_likelihood : str
         Pointwise log_likelihood for the data.
         log_likelihood is extracted from the posterior.
@@ -559,9 +561,10 @@ def from_pystan(
     dims : dict[str, List(str)]
         A mapping from variables to a list of coordinate names for the variable.
     posterior_model : stan.model.Model
-        PyStan3 specific model object.
+        PyStan3 specific model object. Needed for automatic dtype parsing
+        and for the extraction of observed data.
     prior_model : stan.model.Model
-        PyStan3 specific model object.
+        PyStan3 specific model object. Needed for automatic dtype parsing.
 
     Returns
     -------
