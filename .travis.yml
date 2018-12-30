@@ -10,9 +10,9 @@ matrix:
   - name: "Python 3.6 Unit Test"
     python: 3.6
     env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
-  - name: "Python 3.6 Unit Test - PyStan preview"
+  - name: "Python 3.6 Unit Test - PyStan=preview Pyro=0.2.1"
     python: 3.6
-    env: PYSTAN_VERSION=preview PYRO_VERSION=latest NAME="UNIT"
+    env: PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 NAME="UNIT"
   - name: "Python 3.5 Unit Test"
     python: 3.5
     env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
