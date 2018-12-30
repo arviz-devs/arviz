@@ -53,7 +53,9 @@ before_script:
 script:
 
   # Tests command is default in dockerfile cmd
-  - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
+  - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc && pytest -v arviz/tests/ --cov=arviz/";
+    fi
 
   - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
                             "source /root/.bashrc && ./scripts/lint.sh";
