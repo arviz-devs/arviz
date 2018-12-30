@@ -30,25 +30,27 @@ before_install:
   - docker --version
 
 install:
-  - sudo apt-get -qq update
+  # Build docker image
   - . ./scripts/container.sh --build
+
   # Print conda details
   - docker run --rm arviz:latest /bin/bash -c "conda info -a"
 
   # Print conda environment details
   - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list"
 
+  # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
   - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
 before_script:
+  # Doesn't affect testing anymore but leaving for reference
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  # - if [[ $NAME == UNIT ]]; then pytest -v arviz/tests/ --cov=arviz/ ; fi
 
   # Tests command is default in dockerfile cmd
   - if [[ $NAME == UNIT ]]; then . ./scripts/container.sh --test ; fi
@@ -57,7 +59,7 @@ script:
                             "source /root/.bashrc && ./scripts/lint.sh";
     fi
 
-## Awkward line spacing to avoid travis-ci errors
+  # Awkward line spacing to avoid travis-ci errors
   - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
                                               "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
     fi
