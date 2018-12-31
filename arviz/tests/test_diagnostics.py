@@ -21,8 +21,8 @@ class TestDiagnostics:
         """Confirm Split R-hat statistic is close to 1 for a large number of samples.
         Also checks the correct shape"""
         rhat_data = rhat(data, var_names=var_names)
-        for rhat in rhat_data.data_vars.values():
-            assert ((1 / GOOD_RHAT < rhat.values) | (rhat.values < GOOD_RHAT)).all()
+        for r_hat in rhat_data.data_vars.values():
+            assert ((1 / GOOD_RHAT < r_hat.values) | (r_hat.values < GOOD_RHAT)).all()
 
         # In None case check that all varnames from rhat_data match input data
         if var_names is None:
@@ -30,8 +30,8 @@ class TestDiagnostics:
 
     def test_rhat_bad(self):
         """Confirm Split R-hat statistic is far from 1 for a small number of samples."""
-        rhat = rhat(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
-        assert 1 / GOOD_RHAT > rhat or GOOD_RHAT < rhat
+        r_hat = rhat(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
+        assert 1 / GOOD_RHAT > r_hat or GOOD_RHAT < r_hat
 
     def test_effective_n_array(self):
         eff_n = effective_n(np.random.randn(4, 100))
