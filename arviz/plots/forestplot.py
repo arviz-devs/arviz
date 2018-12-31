@@ -350,6 +350,7 @@ class PlotHandler:
         elif len(rope) == 2:
             ax.axvspan(rope[0], rope[1], 0, self.y_max(), color="C2", alpha=0.5)
         else:
+            # pylint: disable=inconsistent-return-statements
             raise ValueError(
                 "Argument `rope` must be None, a dictionary like"
                 '{"var_name": {"rope": (lo, hi)}}, or an '
