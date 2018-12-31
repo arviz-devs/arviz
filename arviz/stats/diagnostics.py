@@ -10,7 +10,7 @@ from ..data import convert_to_dataset
 from ..utils import _var_names
 
 
-__all__ = ["effective_n", "gelman_rubin", "geweke", "autocorr"]
+__all__ = ["effective_n", "rhat", "geweke", "autocorr"]
 
 
 def effective_n(data, *, var_names=None):
@@ -157,10 +157,10 @@ def _autocov(x):
     return acov
 
 
-def gelman_rubin(data, var_names=None):
+def rhat(data, var_names=None):
     r"""Compute estimate of R-hat for a set of traces.
 
-    The Gelman-Rubin diagnostic tests for lack of convergence by comparing the variance between
+    The R-hat diagnostic tests for lack of convergence by comparing the variance between
     multiple chains to the variance within each chain. If convergence has been achieved, the
     between-chain and within-chain variances should be identical. To be most effective in
     detecting evidence for nonconvergence, each chain should have been initialized to starting
