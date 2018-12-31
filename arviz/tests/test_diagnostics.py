@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from ..data import load_arviz_data
-from ..stats import gelman_rubin, effective_n, geweke
+from ..stats import rhat, effective_n, geweke
 
 GOOD_RHAT = 1.1
 
@@ -17,10 +17,10 @@ def data():
 
 class TestDiagnostics:
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_gelman_rubin(self, data, var_names):
+    def test_rhat(self, data, var_names):
         """Confirm Gelman-Rubin statistic is close to 1 for a large number of samples.
         Also checks the correct shape"""
-        rhat_data = gelman_rubin(data, var_names=var_names)
+        rhat_data = rhat(data, var_names=var_names)
         for rhat in rhat_data.data_vars.values():
             assert ((1 / GOOD_RHAT < rhat.values) | (rhat.values < GOOD_RHAT)).all()
 
@@ -28,9 +28,9 @@ class TestDiagnostics:
         if var_names is None:
             assert list(rhat_data.data_vars) == list(data.data_vars)
 
-    def test_gelman_rubin_bad(self):
+    def test_rhat_bad(self):
         """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
-        rhat = gelman_rubin(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
+        rhat = rhat(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
         assert 1 / GOOD_RHAT > rhat or GOOD_RHAT < rhat
 
     def test_effective_n_array(self):

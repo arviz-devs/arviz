@@ -14,7 +14,7 @@ __all__ = [
     "summary",
     "waic",
     "effective_n",
-    "gelman_rubin",
+    "rhat",
     "geweke",
     "autocorr",
 ]

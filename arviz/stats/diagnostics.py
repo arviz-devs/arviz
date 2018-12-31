@@ -158,9 +158,9 @@ def _autocov(x):
 
 
 def rhat(data, var_names=None):
-    r"""Compute estimate of R-hat for a set of traces.
+    r"""Compute estimate of Split R-hat for a set of traces.
 
-    The R-hat diagnostic tests for lack of convergence by comparing the variance between
+    The Split R-hat diagnostic tests for lack of convergence by comparing the variance between
     multiple chains to the variance within each chain. If convergence has been achieved, the
     between-chain and within-chain variances should be identical. To be most effective in
     detecting evidence for nonconvergence, each chain should have been initialized to starting
@@ -194,11 +194,12 @@ def rhat(data, var_names=None):
 
     References
     ----------
+    Gelman, Carlin, Stern, Dunson, Vehtari, Rubin (2013)
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """
     if isinstance(data, np.ndarray):
-        return _get_rhat(data)
+        return _get_split_rhat(data)
     var_names = _var_names(var_names)
     dataset = convert_to_dataset(data, group="posterior")
 
@@ -214,28 +215,35 @@ def _rhat_ufunc(ary):
     """
     target = np.empty(ary.shape[:-2])
     for idx in np.ndindex(target.shape):
-        target[idx] = _get_rhat(ary[idx])
+        target[idx] = _get_split_rhat(ary[idx])
     return target
 
 
-def _get_rhat(values, round_to=2):
-    """Compute the rhat for a 2d array."""
+def _get_split_rhat(values, round_to=2):
+    """Compute the split-rhat for a 2d array."""
     shape = values.shape
     if len(shape) != 2:
         raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
     _, num_samples = shape
-
+    num_split = num_samples // 2
+    # Calculate split chain mean
+    split_chain_mean1 = np.mean(values[:, :num_split], axis=1)
+    split_chain_mean2 = np.mean(values[:, num_split:], axis=1)
+    split_chain_mean = np.concatenate((split_chain_mean1, split_chain_mean2))
+    # Calculate split chain variance
+    split_chain_var1 = np.var(values[:, :num_split], axis=1, ddof=1)
+    split_chain_var2 = np.var(values[:, num_split:], axis=1, ddof=1)
+    split_chain_var = np.concatenate((split_chain_var1, split_chain_var2))
     # Calculate between-chain variance
-    between_chain_variance = num_samples * np.var(np.mean(values, axis=1), axis=0, ddof=1)
+    between_chain_variance = num_samples / 2 * np.var(split_chain_mean, ddof=1)
     # Calculate within-chain variance
-    within_chain_variance = np.mean(np.var(values, axis=1, ddof=1), axis=0)
+    within_chain_variance = np.mean(split_chain_var)
     # Estimate of marginal posterior variance
-    v_hat = (
-        within_chain_variance * (num_samples - 1) / num_samples
-        + between_chain_variance / num_samples
+    split_rhat = np.sqrt(
+        (between_chain_variance / within_chain_variance + num_samples / -1) / (num_samples / 2)
     )
 
-    return round((v_hat / within_chain_variance) ** 0.5, round_to)
+    return round(split_rhat, round_to)
 
 
 def geweke(values, first=0.1, last=0.5, intervals=20):
