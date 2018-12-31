@@ -189,7 +189,12 @@ def tfp_noncentered_schools(data, draws, chains):
     with tf.Session() as sess:
         [states_, _] = sess.run([states, kernel_results])
 
-    data = from_tfp(states_, var_names=["mu", "tau", "eta"])
+    data = from_tfp(
+        states_,
+        var_names=["mu", "tau", "eta"],
+        model_fn=lambda: schools_model(data["J"], data["sigma"].astype(np.float32)),
+        observed=data["y"].astype(np.float32),
+    )
     return data
 
 

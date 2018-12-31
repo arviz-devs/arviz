@@ -1,14 +1,29 @@
 """Tfp-specific conversion code."""
 import numpy as np
+import xarray as xr
+import tensorflow as tf
+import tensorflow_probability.python.edward2 as ed
 
 from .inference_data import InferenceData
-from .base import dict_to_dataset
+from .base import dict_to_dataset, generate_dims_coords, make_attrs
 
 
 class TfpConverter:
     """Encapsulate tfp specific logic."""
 
-    def __init__(self, posterior, *_, var_names=None, coords=None, dims=None):
+    def __init__(
+        self,
+        posterior,
+        *,
+        var_names=None,
+        model_fn=None,
+        feed_dict=None,
+        posterior_predictive_samples=100,
+        posterior_predictive_size=1,
+        observed=None,
+        coords=None,
+        dims=None
+    ):
         self.posterior = posterior
 
         if var_names is None:
@@ -18,6 +33,11 @@ class TfpConverter:
         else:
             self.var_names = var_names
 
+        self.model_fn = model_fn
+        self.feed_dict = feed_dict
+        self.posterior_predictive_samples = posterior_predictive_samples
+        self.posterior_predictive_size = posterior_predictive_size
+        self.observed = observed
         self.coords = coords
         self.dims = dims
 
@@ -32,6 +52,99 @@ class TfpConverter:
             data[var_name] = np.expand_dims(self.posterior[i], axis=0)
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
+    def observed_data_to_xarray(self):
+        """Convert observed data to xarray."""
+        if self.observed is None:
+            return None
+
+        observed_data = {}
+        if isinstance(self.observed, tf.Tensor):
+            with tf.Session() as sess:
+                vals = sess.run(self.observed, feed_dict=self.feed_dict)
+        else:
+            vals = self.observed
+
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+
+        name = "obs"
+        val_dims = dims.get(name)
+        vals = np.atleast_1d(vals)
+        val_dims, coords = generate_dims_coords(vals.shape, name, dims=val_dims, coords=self.coords)
+        coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
+
+        observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.tfp))
+
+    def _value_setter(self, variables):
+        def interceptor(rv_constructor, *rv_args, **rv_kwargs):
+            """Replace prior on effects with empirical posterior mean from MCMC."""
+            name = rv_kwargs.pop("name")
+            if name in variables:
+                rv_kwargs["value"] = variables[name]
+            return rv_constructor(*rv_args, **rv_kwargs)
+
+        return interceptor
+
+    def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
+        if self.model_fn is None:
+            return None
+
+        posterior_preds = []
+        sample_size = self.posterior[0].shape[0]
+
+        for i in np.arange(0, sample_size, int(sample_size / self.posterior_predictive_samples)):
+            variables = {}
+            for var_i, var_name in enumerate(self.var_names):
+                variables[var_name] = self.posterior[var_i][i]
+
+            with ed.interception(self._value_setter(variables)):
+                if self.posterior_predictive_size > 1:
+                    posterior_preds.append(
+                        [self.model_fn() for _ in range(self.posterior_predictive_size)]
+                    )
+                else:
+                    posterior_preds.append(self.model_fn())
+
+        data = {}
+        with tf.Session() as sess:
+            data["obs"] = np.expand_dims(
+                sess.run(posterior_preds, feed_dict=self.feed_dict), axis=0
+            )
+        return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
+
+    def sample_stats_to_xarray(self):
+        """Extract sample_stats from tfp trace."""
+        if self.model_fn is None or self.observed is None:
+            return None
+
+        log_likelihood = []
+        sample_size = self.posterior[0].shape[0]
+
+        for i in range(sample_size):
+            variables = {}
+            for var_i, var_name in enumerate(self.var_names):
+                variables[var_name] = self.posterior[var_i][i]
+
+            with ed.interception(self._value_setter(variables)):
+                log_likelihood.append((self.model_fn().distribution.log_prob(self.observed)))
+
+        data = {}
+        if self.dims is not None:
+            coord_name = self.dims.get("obs")
+        else:
+            coord_name = None
+        dims = {"log_likelihood": coord_name}
+
+        with tf.Session() as sess:
+            data["log_likelihood"] = np.expand_dims(
+                sess.run(log_likelihood, feed_dict=self.feed_dict), axis=0
+            )
+        return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=dims)
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -39,11 +152,37 @@ class TfpConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        return InferenceData(**{"posterior": self.posterior_to_xarray()})
+        return InferenceData(
+            **{
+                "posterior": self.posterior_to_xarray(),
+                "sample_stats": self.sample_stats_to_xarray(),
+                "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "observed_data": self.observed_data_to_xarray(),
+            }
+        )
 
 
-def from_tfp(posterior, var_names=None, *, coords=None, dims=None):
+def from_tfp(
+    posterior,
+    *,
+    var_names=None,
+    model_fn=None,
+    feed_dict=None,
+    posterior_predictive_samples=100,
+    posterior_predictive_size=1,
+    observed=None,
+    coords=None,
+    dims=None
+):
     """Convert tfp data into an InferenceData object."""
     return TfpConverter(
-        posterior=posterior, var_names=var_names, coords=coords, dims=dims
+        posterior=posterior,
+        var_names=var_names,
+        model_fn=model_fn,
+        feed_dict=feed_dict,
+        posterior_predictive_samples=posterior_predictive_samples,
+        posterior_predictive_size=posterior_predictive_size,
+        observed=observed,
+        coords=coords,
+        dims=dims,
     ).to_inference_data()
