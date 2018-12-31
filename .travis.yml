@@ -33,8 +33,7 @@ before_script:
 script:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then . ./scripts/lint.sh ; fi
   - pytest -v arviz/tests/ --cov=arviz/
-  - travis-sphinx build -b html doc _build
-  - travis-sphinx build --nowarn --source=doc
+  - travis-sphinx build --source=doc --verbose
 
 after_success:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then travis-sphinx deploy; fi
