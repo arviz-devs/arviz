@@ -9,7 +9,8 @@ if [[ $* == *--build* ]]; then
         -f $SRC_DIR/scripts/Dockerfile \
         --build-arg SRC_DIR=. $SRC_DIR \
         --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
-        --build-arg PYSTAN_VERSION=${PYSTAN_VERSION}\
+        --build-arg PYSTAN_VERSION=${PYSTAN_VERSION} \
+        --build-arg PYRO_VERSION=${PYRO_VERSION} \
         --rm
 fi
 

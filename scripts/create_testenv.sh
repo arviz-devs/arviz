@@ -10,10 +10,11 @@ command -v conda >/dev/null 2>&1 || {
 # if no python specified, use Travis version, or else 3.6
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
+PYRO_VERSION=${PYRO_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -45,7 +46,7 @@ else
 fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
-    pip --no-cache-dir install pystan
+  pip --no-cache-dir install pystan
 else
   if [ "$PYSTAN_VERSION" = "preview" ]; then
     # try to skip other pre-releases than pystan
@@ -54,6 +55,12 @@ else
   else
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
   fi
+fi
+
+if [ "$PYRO_VERSION" = "latest" ]; then
+  pip --no-cache-dir install pyro-ppl
+else
+  pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
 fi
 
 #  Install editable using the setup.py
