@@ -158,5 +158,5 @@ An interactive shell can be started by running `docker run -it arviz /bin/bash`.
 
 ## Code of Conduct
 ArviZ wishes to maintain a positive community. Additional details
-can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/Code_of_Conduct.md)
+can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/Code_of_Conduct.MD)
 
