@@ -140,7 +140,7 @@ def plot_forest(
             credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope
         )
     elif kind == "ridgeplot":
-        plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
+        plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
     else:
         raise TypeError(
             "Argument 'kind' must be one of 'forestplot' or "
@@ -264,8 +264,6 @@ class PlotHandler:
         ----------
         mult : float
             How much to multiply height by. Set this to greater than 1 to have some overlap.
-        xt_labelsize : float
-            Size of tick text
         linewidth : float
             Width of line on border of ridges
         alpha : float
