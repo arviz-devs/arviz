@@ -15,6 +15,7 @@ def plot_kde(
     rug=False,
     label=None,
     bw=4.5,
+    quartiles=False,
     rotated=False,
     contour=True,
     fill_last=True,
@@ -44,6 +45,8 @@ def plot_kde(
         Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
         rule of thumb (the default rule used by SciPy).
+    quartiles : bool
+        If True the 1D kde will be segmented into quartiles. Defaults to False
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
@@ -137,7 +140,6 @@ def plot_kde(
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault("alpha", 0)
         fill_kwargs.setdefault("color", default_color)
 
         if rug_kwargs is None:
@@ -163,7 +165,6 @@ def plot_kde(
 
         ax.tick_params(labelsize=xt_labelsize)
 
-        ax.plot(x, density, label=label, **plot_kwargs)
         if rotated:
             ax.set_xlim(0, auto=True)
             rug_x, rug_y = np.zeros_like(values) - rug_space, values
@@ -173,7 +174,23 @@ def plot_kde(
 
         if rug:
             ax.plot(rug_x, rug_y, **rug_kwargs)
-        fill_func(fill_x, fill_y, **fill_kwargs)
+
+        if quartiles:
+            fill_kwargs.setdefault("alpha", 0.75)
+
+            perct = np.percentile(values, [0, 25.0, 50.0, 75.0, 100])
+
+            x_range = np.linspace(lower, upper, len(density))
+            idx0 = 0
+            for p in perct:
+                idx1 = np.argsort(np.abs(x_range - p))[0]
+                fill_func(fill_x[idx0:idx1], fill_y[idx0:idx1], **fill_kwargs)
+                idx0 = idx1
+        else:
+            fill_kwargs.setdefault("alpha", 0)
+            ax.plot(x, density, label=label, **plot_kwargs)
+            fill_func(fill_x, fill_y, **fill_kwargs)
+
         if label:
             ax.legend()
     else:
