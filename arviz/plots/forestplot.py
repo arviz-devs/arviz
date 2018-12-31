@@ -192,9 +192,9 @@ def plot_forest(
 
 class PlotHandler:
     """Class to handle logic from ForestPlot."""
-    
+
     # pylint: disable=inconsistent-return-statements
-    
+
     def __init__(self, data, var_names, model_names, combined, colors):
         if not isinstance(data, (list, tuple)):
             data = [data]
