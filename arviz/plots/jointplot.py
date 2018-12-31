@@ -84,7 +84,7 @@ def plot_joint(
 
     # Instantiate figure and grid
     fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
-    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1)
+    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
     # Set up main plot
     axjoin = fig.add_subplot(grid[1:, :-1])
