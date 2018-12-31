@@ -63,8 +63,9 @@ def plot_forest(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94.
     rope: tuple or dictionary of tuples
-        Lower and upper values of the Region Of Practical Equivalence. If a list with one interval only is provided, the ROPE will be displayed across the y-axis. If more than one interval is provided the
-        length of the list should match the number of variables.
+        Lower and upper values of the Region Of Practical Equivalence. If a list with one
+        interval only is provided, the ROPE will be displayed across the y-axis. If more than one
+        interval is provided the length of the list should match the number of variables.
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
@@ -290,6 +291,7 @@ class PlotHandler:
                 ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
                 ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
+        return ax
 
     def forestplot(
         self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
