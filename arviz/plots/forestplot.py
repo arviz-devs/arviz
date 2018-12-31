@@ -65,7 +65,7 @@ def plot_forest(
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
     r_hat : bool, optional
-        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to False
+        Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
     eff_n : bool, optional
         Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to False
     colors : list or string, optional

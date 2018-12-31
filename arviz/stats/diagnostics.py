@@ -194,7 +194,7 @@ def rhat(data, var_names=None):
 
     References
     ----------
-    Gelman, Carlin, Stern, Dunson, Vehtari, Rubin (2013)
+    Gelman et al. BDA (2014)
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """

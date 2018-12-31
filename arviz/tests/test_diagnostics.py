@@ -18,7 +18,7 @@ def data():
 class TestDiagnostics:
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_rhat(self, data, var_names):
-        """Confirm Gelman-Rubin statistic is close to 1 for a large number of samples.
+        """Confirm Split R-hat statistic is close to 1 for a large number of samples.
         Also checks the correct shape"""
         rhat_data = rhat(data, var_names=var_names)
         for rhat in rhat_data.data_vars.values():
@@ -29,7 +29,7 @@ class TestDiagnostics:
             assert list(rhat_data.data_vars) == list(data.data_vars)
 
     def test_rhat_bad(self):
-        """Confirm Gelman-Rubin statistic is far from 1 for a small number of samples."""
+        """Confirm Split R-hat statistic is far from 1 for a small number of samples."""
         rhat = rhat(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
         assert 1 / GOOD_RHAT > rhat or GOOD_RHAT < rhat
 
