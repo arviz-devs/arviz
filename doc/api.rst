@@ -53,7 +53,7 @@ Diagnostics
     :toctree: generated/
 
     effective_n
-    gelman_rubin
+    rhat
     geweke
 
 
