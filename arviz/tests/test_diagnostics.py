@@ -30,7 +30,7 @@ class TestDiagnostics:
 
     def test_rhat_bad(self):
         """Confirm Split R-hat statistic is far from 1 for a small number of samples."""
-        r_hat = rhat(np.hstack([20 + np.random.randn(100, 1), np.random.randn(100, 1)]))
+        r_hat = rhat(np.vstack([20 + np.random.randn(1, 100), np.random.randn(1, 100)]))
         assert 1 / GOOD_RHAT > r_hat or GOOD_RHAT < r_hat
 
     def test_effective_n_array(self):

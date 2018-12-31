@@ -173,6 +173,7 @@ def rhat(data, var_names=None):
         Refer to documentation of az.convert_to_dataset for details
         At least 2 posterior chains are needed to compute this diagnostic of one or more
         stochastic parameters.
+        For ndarray: shape = (chain, draw).
     var_names : list
       Names of variables to include in the rhat report
 
