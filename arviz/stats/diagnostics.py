@@ -240,7 +240,7 @@ def _get_split_rhat(values, round_to=2):
     within_chain_variance = np.mean(split_chain_var)
     # Estimate of marginal posterior variance
     split_rhat = np.sqrt(
-        (between_chain_variance / within_chain_variance + num_samples / -1) / (num_samples / 2)
+        (between_chain_variance / within_chain_variance + num_samples / 2 - 1) / (num_samples / 2)
     )
 
     return round(split_rhat, round_to)
