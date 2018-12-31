@@ -10,10 +10,11 @@ command -v conda >/dev/null 2>&1 || {
 # if no python specified, use Travis version, or else 3.6
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
+PYRO_VERSION=${PYRO_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv${PYTHON_VERSION}_PYSTAN${PYSTAN_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -21,7 +22,6 @@ if [[ $* != *--global* ]]; then
     else
         echo "Creating environment ${ENVNAME}"
         conda create -n ${ENVNAME} --yes pip python=${PYTHON_VERSION}
-
     fi
 
     # Activate environment immediately
@@ -30,10 +30,12 @@ if [[ $* != *--global* ]]; then
     if [ "$DOCKER_BUILD" = true ] ; then
         # Also add it to root bash settings to set default if used later
         echo "Creating .bashrc profile for docker image"
-        echo "set env=${ENVNAME}" > /root/.bashrc
+        echo "set conda_env=${ENVNAME}" > /root/.bashrc
         echo "source activate ${ENVNAME}" >> /root/.bashrc
     fi
 fi
+
+pip install --upgrade pip
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The first is the Python 3.5 wheel, the second is 3.6.
@@ -44,12 +46,22 @@ else
 fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
-    pip --no-cache-dir install pystan
+  pip --no-cache-dir install pystan
 else
+  if [ "$PYSTAN_VERSION" = "preview" ]; then
+    # try to skip other pre-releases than pystan
+    pip --no-cache-dir install numpy uvloop marshmallow PyYAML
+    pip --no-cache-dir install --pre pystan
+  else
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
+  fi
 fi
 
-pip install --upgrade pip
+if [ "$PYRO_VERSION" = "latest" ]; then
+  pip --no-cache-dir install pyro-ppl
+else
+  pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
+fi
 
 #  Install editable using the setup.py
 pip install  --no-cache-dir -r requirements.txt

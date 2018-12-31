@@ -123,7 +123,7 @@ def plot_pair(
         )
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
+            fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 
         if kind == "scatter":
             ax.plot(_posterior[0], _posterior[1], **plot_kwargs)

@@ -22,6 +22,8 @@ from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
+    stan_extract_dict,
+    pystan_version,
 )
 
 
@@ -245,16 +247,23 @@ class TestDictNetCDFUtils:
 
         class Data:
             _, stan_fit = load_cached_models(eight_schools_params, draws, chains)["pystan"]
-            stan_dict = pystan_extract_unpermuted(stan_fit)
-            obj = {}
-            for name, vals in stan_dict.items():
-                if name not in {"y_hat", "log_lik"}:  # extra vars
-                    obj[name] = np.swapaxes(vals, 0, 1)
+            if pystan_version() == 2:
+                stan_dict = pystan_extract_unpermuted(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = np.swapaxes(vals, 0, 1)
+            else:
+                stan_dict = stan_extract_dict(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = vals
 
         return Data
 
     def check_var_names_coords_dims(self, dataset):
-        assert set(dataset.data_vars) == {"mu", "tau", "theta_tilde", "theta"}
+        assert set(dataset.data_vars) == {"mu", "tau", "eta", "theta"}
         assert set(dataset.coords) == {"chain", "draw", "school"}
 
     def get_inference_data(self, data, eight_schools_params):
@@ -262,7 +271,7 @@ class TestDictNetCDFUtils:
             data.obj,
             group="posterior",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
 
     def test_convert_to_inference_data(self, data, eight_schools_params):
@@ -275,7 +284,7 @@ class TestDictNetCDFUtils:
             data.obj,
             group="posterior",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
         assert dataset.draw.shape == (draws,)
         assert dataset.chain.shape == (chains,)
@@ -320,7 +329,7 @@ class TestPyMC3NetCDFUtils:
             prior=prior,
             posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -359,8 +368,10 @@ class TestPyStanNetCDFUtils:
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "theta_tilde": ["school"],
+                "eta": ["school"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data2(self, data, eight_schools_params):
@@ -380,9 +391,11 @@ class TestPyStanNetCDFUtils:
                 "theta": ["school"],
                 "y": ["school"],
                 "y_hat": ["school"],
-                "theta_tilde": ["school"],
+                "eta": ["school"],
                 "log_lik": ["log_likelihood_dim"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data3(self, data, eight_schools_params):
@@ -394,12 +407,9 @@ class TestPyStanNetCDFUtils:
             prior_predictive=["y_hat", "log_lik"],
             observed_data="y",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={
-                "theta": ["school"],
-                "y": ["school"],
-                "y_hat": ["school"],
-                "theta_tilde": ["school"],
-            },
+            dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data4(self, data):
@@ -412,6 +422,8 @@ class TestPyStanNetCDFUtils:
             observed_data="y",
             coords=None,
             dims=None,
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -584,7 +596,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["school"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")
@@ -616,7 +628,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["school"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")
@@ -645,12 +657,7 @@ class TestCmdStanNetCDFUtils:
                 observed_data_var=["y"],
                 log_likelihood="log_lik",
                 coords={"school": np.arange(8), "log_lik_dim_0": np.arange(8)},
-                dims={
-                    "theta": ["school"],
-                    "y": ["school"],
-                    "y_hat": ["school"],
-                    "theta_tilde": ["school"],
-                },
+                dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
             )
             assert hasattr(inference_data, "posterior")
             assert hasattr(inference_data, "sample_stats")
@@ -707,7 +714,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["log_lik_dim"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")

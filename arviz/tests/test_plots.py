@@ -425,6 +425,19 @@ def test_plot_compare(models, kwargs):
     assert axes
 
 
+def test_plot_compare_no_ic(models):
+    """Check exception is raised if model_compare doesn't contain a valid information criterion"""
+    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+
+    # Drop column needed for plotting
+    model_compare = model_compare.drop("waic", axis=1)
+    with pytest.raises(ValueError) as err:
+        plot_compare(model_compare)
+
+    assert "comp_df must contain one of the following" in str(err)
+    assert "['waic', 'loo']" in str(err)
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize(
     "kwargs",
