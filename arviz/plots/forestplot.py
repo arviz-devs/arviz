@@ -95,7 +95,6 @@ def plot_forest(
     Returns
     -------
     gridspec : matplotlib GridSpec
-
     """
     var_names = _var_names(var_names)
 
@@ -244,7 +243,7 @@ class PlotHandler:
         return np.concatenate(labels), np.concatenate(idxs)
 
     def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
-        """ Displays ROPE when more than one interval is provided"""
+        """ Display ROPE when more than one interval is provided."""
         vals = dict(rope[rope_var][0])["rope"]
         ax.plot(
             vals,
