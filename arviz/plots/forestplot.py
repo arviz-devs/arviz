@@ -243,7 +243,7 @@ class PlotHandler:
         return np.concatenate(labels), np.concatenate(idxs)
 
     def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
-        """ Display ROPE when more than one interval is provided."""
+        """Display ROPE when more than one interval is provided."""
         vals = dict(rope[rope_var][0])["rope"]
         ax.plot(
             vals,
@@ -255,7 +255,6 @@ class PlotHandler:
             alpha=0.7,
         )
         return ax
-
 
     def ridgeplot(self, mult, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
@@ -347,8 +346,6 @@ class PlotHandler:
                 '{"var_name": {"rope": (lo, hi)}}, or an '
                 "iterable of length 2"
             )
-
-
         return ax
 
     def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
