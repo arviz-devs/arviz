@@ -137,7 +137,14 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope
+            credible_interval,
+            quartiles,
+            xt_labelsize,
+            titlesize,
+            linewidth,
+            markersize,
+            axes[0],
+            rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
@@ -247,7 +254,7 @@ class PlotHandler:
         vals = dict(rope[rope_var][0])["rope"]
         ax.plot(
             vals,
-            (y+.05, y+.05),
+            (y + 0.05, y + 0.05),
             lw=linewidth * 2,
             color="C2",
             solid_capstyle="round",
@@ -317,7 +324,7 @@ class PlotHandler:
             for y, values, color in plotter.treeplot(qlist, credible_interval):
                 if isinstance(rope, dict):
                     label, ticks = self.labels_and_ticks()
-                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks==y][0])
+                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks == y][0])
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
@@ -339,7 +346,7 @@ class PlotHandler:
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:
-            ax.axvspan(rope[0], rope[1], 0, self.y_max(), color='C2', alpha=.5)
+            ax.axvspan(rope[0], rope[1], 0, self.y_max(), color="C2", alpha=0.5)
         else:
             raise ValueError(
                 "Argument `rope` must be None, a dictionary like"
