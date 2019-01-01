@@ -157,6 +157,7 @@ def plot_kde(
         rug_space = max(density) * rug_kwargs.pop("space")
 
         x = np.linspace(lower, upper, len(density))
+        x_q = x
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
         if rotated:
@@ -178,14 +179,16 @@ def plot_kde(
         if quartiles:
             fill_kwargs.setdefault("alpha", 0.75)
 
-            perct = np.percentile(values, [0, 25.0, 50.0, 75.0, 100])
+            perct = np.percentile(values, [25.0, 50.0, 75.0])
 
-            x_range = np.linspace(lower, upper, len(density))
-            idx0 = 0
-            for p in perct:
-                idx1 = np.argsort(np.abs(x_range - p))[0]
-                fill_func(fill_x[idx0:idx1], fill_y[idx0:idx1], **fill_kwargs)
-                idx0 = idx1
+            idx = [np.argsort(np.abs(x_q - perct_i))[0] for perct_i in perct]
+
+            fill_func(
+                fill_x,
+                fill_y,
+                where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
+                **fill_kwargs
+            )
         else:
             fill_kwargs.setdefault("alpha", 0)
             ax.plot(x, density, label=label, **plot_kwargs)
