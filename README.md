@@ -18,13 +18,28 @@ to be helpful. Additional guidance can be found in the
 
 ## Installation
 
-The latest version can be installed from the master branch using pip:
+### Stable
+ArviZ is available for installation from [PyPI](https://pypi.org/project/arviz/).
+The latest stable version can be installed using pip:
+
+```
+pip install arviz
+```
+
+### Development
+The latest development version can be installed from the master branch using pip:
 
 ```
 pip install git+git://github.com/arviz-devs/arviz.git
 ```
 
-Another option is to clone the repository and install using `python setup.py install`.
+Another option is to clone the repository and install using git and setuptools:
+
+```
+git clone https://github.com/arviz-devs/arviz.git
+cd arviz
+python setup.py install
+```
 
 -------------------------------------------------------------------------------
 ## [Gallery](https://arviz-devs.github.io/arviz/examples/index.html)
