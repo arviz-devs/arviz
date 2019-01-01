@@ -19,13 +19,13 @@ authors:
   orcid: 0000-0001-7419-8978
   affiliation: 3
 affiliations:
-- name: Freebird Inc.
+- name: Freebird Inc., United States
   index: 1
 - name: Aalto University, Department of Civil Engineering, Espoo, Finland
   index: 2
 - name: Instituto de Matemática Aplicada San Luis, UNSL-CONICET. Ejército de los Andes 950, 5700 San Luis, Argentina
   index: 3
-- name: None
+- name: Carbon IT LLC, United States
   index: 4
 date: 21 November 2018
 bibliography: paper.bib
