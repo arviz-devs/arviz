@@ -98,8 +98,7 @@ Work by Osvaldo Martin was supported by CONICET-Argentina and ANPCyT-Argentina (
 # Acknowledgments
 
 We thank the PyMC3 Community — especially Adrian Seyboldt, Junpeng Lao, and Thomas Wiecki — as well
-as the Stan community — especially Allen Riddell . We also would like to extend thanks to the open
-source ArviZ contributors, and the contributors to the libraries used to build ArviZ
+as the Stan community — especially Allen Riddell . We also would like to extend thanks to all the ArviZ contributors, and the contributors of the libraries used to build ArviZ
 — particularly xarray, matplotlib, pandas, and numpy.
 
 # References
