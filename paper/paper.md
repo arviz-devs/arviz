@@ -78,7 +78,18 @@ and a parallel coordinate plot [@GabryVisualizationBayesianworkflow2017]. Additi
 a number of statistical checks, such as calculating the effective sample size, the r-hat statistic,
 Pareto-smoothed importance sampling leave-one-out cross validation (PSIS-LOO-CV)
 [@VehtariPracticalBayesianModel2015], and widely applicable information criterion (WAIC)
-[@watanabe_widely_2013].
+[@watanabe_widely_2013].  
+
+# Example plots  
+Some sample plots are shown in Figure 2 through Figure 5.  
+![Bivariate hexbin plot with marginal distributions](plot_joint.png)  
+
+![2D Kernel Density estimation](plot_kde_2d.png)  
+
+![Markov Chain Monte Carlo Trace Plot](plot_trace.png)  
+
+![John Kruschke styled posterior distribution plots](plot_posterior.png)  
+
 
 # Funding
 
