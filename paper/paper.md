@@ -82,7 +82,6 @@ Pareto-smoothed importance sampling leave-one-out cross validation (PSIS-LOO-CV)
 
 # Example plots  
 A portion of ArviZ's functionality is shown in Figure 2. 
-ArviZ supports more plotting and inference diagnostics, in addition to the ones shown here.
 Additional examples can be found in the ArviZ documentation. 
 
 ![Sample plots from ArviZ gallery](example_gallery.png)  
