@@ -46,7 +46,8 @@ def plot_kde(
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
         rule of thumb (the default rule used by SciPy).
     quantiles : list
-        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles. Defaults to None.
+        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+        Defaults to None.
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
@@ -255,7 +256,6 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
     grid, _ = np.histogram(x, bins=n_bins)
-    d_x = (xmax - xmin) / (n_bins - 1)
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
