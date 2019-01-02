@@ -15,7 +15,7 @@ def plot_kde(
     rug=False,
     label=None,
     bw=4.5,
-    quartiles=False,
+    quantiles=None,
     rotated=False,
     contour=True,
     fill_last=True,
@@ -45,8 +45,8 @@ def plot_kde(
         Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
         rule of thumb (the default rule used by SciPy).
-    quartiles : bool
-        If True the 1D kde will be segmented into quartiles. Defaults to False
+    quantiles : list
+        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles. Defaults to None.
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
@@ -157,7 +157,11 @@ def plot_kde(
         rug_space = max(density) * rug_kwargs.pop("space")
 
         x = np.linspace(lower, upper, len(density))
-        x_q = x
+
+        if cumulative:
+            density_q = density
+        else:
+            density_q = np.cumsum(density)
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
         if rotated:
@@ -176,12 +180,10 @@ def plot_kde(
         if rug:
             ax.plot(rug_x, rug_y, **rug_kwargs)
 
-        if quartiles:
+        if quantiles is not None:
             fill_kwargs.setdefault("alpha", 0.75)
 
-            perct = np.percentile(values, [25.0, 50.0, 75.0])
-
-            idx = [np.argsort(np.abs(x_q - perct_i))[0] for perct_i in perct]
+            idx = [np.sum(density_q < quant) for quant in quantiles]
 
             fill_func(
                 fill_x,
@@ -263,13 +265,10 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same")[npad : npad + n_bins]
 
-    norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
-
-    density = density / norm_factor
+    density /= np.sum(density)
 
     if cumulative:
-        cs_density = np.cumsum(density)
-        density = cs_density / cs_density[-1]
+        density = np.cumsum(density)
 
     return density, xmin, xmax
 
