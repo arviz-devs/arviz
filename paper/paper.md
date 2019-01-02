@@ -80,20 +80,26 @@ Pareto-smoothed importance sampling leave-one-out cross validation (PSIS-LOO-CV)
 [@VehtariPracticalBayesianModel2015], and widely applicable information criterion (WAIC)
 [@watanabe_widely_2013].  
 
-# Example plots  
-Some sample plots are shown in Figure 2 through Figure 5.  
-![Bivariate hexbin plot with marginal distributions](plot_joint.png)  
-
-![2D Kernel Density estimation](plot_kde_2d.png)  
-
-![Markov Chain Monte Carlo Trace Plot](plot_trace.png)  
-
-![John Kruschke styled posterior distribution plots](plot_posterior.png)  
-
-
 # Funding
 
 Work by Osvaldo Martin was supported by CONICET-Argentina and ANPCyT-Argentina (PICT-0218).
+
+
+# Example plots  
+
+A portion of ArviZ's functionality is shown in Figure 2 through Figure 5.  
+
+![Bivariate hexbin plot with marginal distributions](plot_joint.png)  
+
+
+![2D Kernel Density estimation](plot_kde_2d.png)  
+
+ 
+![Markov Chain Monte Carlo Trace Plot](plot_trace.png)  
+
+
+![John Kruschke styled posterior distribution plots](plot_posterior.png)  
+
 
 # Acknowledgments
 
