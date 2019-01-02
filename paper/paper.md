@@ -81,23 +81,10 @@ Pareto-smoothed importance sampling leave-one-out cross validation (PSIS-LOO-CV)
 [@watanabe_widely_2013].  
 
 # Example plots  
-A portion of ArviZ's functionality is shown in Figure 2 through Figure 5.  
-ArviZ supports more plotting and inference diagnostics, in addition to the ones shown here.
-Additional examples can be found ArviZ documentation gallery
+A portion of ArviZ's functionality is shown in Figure 2. 
+Additional examples can be found in the ArviZ documentation. 
 
-## Plots
-![Bivariate hexbin plot with marginal distributions](plot_joint.png)  
-
-
-![2D Kernel Density estimation](plot_kde_2d.png)  
-
- 
-![Markov Chain Monte Carlo Trace Plot](plot_trace.png)  
-
-
-![John Kruschke styled posterior distribution plots](plot_posterior.png)  
-
-## 
+![Sample plots from ArviZ gallery](example_gallery.png)  
 
 # Funding
 
