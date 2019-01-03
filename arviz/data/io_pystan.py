@@ -15,7 +15,7 @@ class PyStanConverter:
 
     def __init__(
         self,
-        *_,
+        *,
         posterior=None,
         posterior_predictive=None,
         prior=None,
@@ -170,7 +170,7 @@ class PyStan3Converter:
     # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
-        *_,
+        *,
         posterior=None,
         posterior_model=None,
         posterior_predictive=None,
@@ -523,8 +523,8 @@ def infer_dtypes(fit, model=None):
 
 # pylint disable=too-many-instance-attributes
 def from_pystan(
-    *,
     posterior=None,
+    *,
     posterior_predictive=None,
     prior=None,
     prior_predictive=None,
@@ -539,11 +539,11 @@ def from_pystan(
 
     Parameters
     ----------
-    posterior : StanFit4Model
+    posterior : StanFit4Model or stan.fit.Fit
         PyStan fit object for posterior.
     posterior_predictive : str, a list of str
         Posterior predictive samples for the posterior.
-    prior : StanFit4Model
+    prior : StanFit4Model or stan.fit.Fit
         PyStan fit object for prior.
     prior_predictive : str, a list of str
         Posterior predictive samples for the prior.

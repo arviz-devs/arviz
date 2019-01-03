@@ -28,7 +28,7 @@ def _get_var_names(posterior):
 class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
-    def __init__(self, posterior, *_, coords=None, dims=None):
+    def __init__(self, *, posterior, coords=None, dims=None):
         """Convert pyro data into an InferenceData object.
 
         Parameters

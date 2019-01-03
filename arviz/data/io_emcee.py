@@ -54,7 +54,7 @@ def _verify_names(sampler, var_names, arg_names):
 class EmceeConverter:
     """Encapsulate emcee specific logic."""
 
-    def __init__(self, sampler, *_, var_names=None, arg_names=None, coords=None, dims=None):
+    def __init__(self, *, sampler, var_names=None, arg_names=None, coords=None, dims=None):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
         self.var_names = var_names

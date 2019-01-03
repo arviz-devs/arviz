@@ -13,8 +13,8 @@ class TfpConverter:
 
     def __init__(
         self,
-        posterior,
         *,
+        posterior,
         var_names=None,
         model_fn=None,
         feed_dict=None,

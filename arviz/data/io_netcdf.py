@@ -39,3 +39,7 @@ def save_data(data, filename, *, group="posterior", coords=None, dims=None):
     """
     inference_data = convert_to_inference_data(data, group=group, coords=coords, dims=dims)
     return inference_data.to_netcdf(filename)
+
+
+from_netcdf = load_data
+to_netcdf = save_data
