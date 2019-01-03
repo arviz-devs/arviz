@@ -41,5 +41,5 @@ def save_data(data, filename, *, group="posterior", coords=None, dims=None):
     return inference_data.to_netcdf(filename)
 
 
-from_netcdf = load_data
-to_netcdf = save_data
+from_netcdf = load_data  # pylint: disable=invalid-name
+to_netcdf = save_data  # pylint: disable=invalid-name

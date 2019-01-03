@@ -314,8 +314,8 @@ class TestEmceeNetCDFUtils:
             from_emcee(obj, arg_names=["not", "enough"])
 
     def test_inference_data(self, obj):
-        inference_data = get_inference_data(obj)
-        assert hasattr(obj, "posterior")
+        inference_data = self.get_inference_data(obj)
+        assert hasattr(inference_data, "posterior")
 
 
 class TestIONetCDFUtils:
@@ -352,13 +352,13 @@ class TestIONetCDFUtils:
         if os.path.exists(filepath):
             os.remove(filepath)
         # az -function
-        az.to_netcdf(inference_data, filepath)
+        to_netcdf(inference_data, filepath)
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
-        inference_data2 = az.from_netcdf(filepath)
+        inference_data2 = from_netcdf(filepath)
         assert hasattr(inference_data2, "posterior")
         os.remove(filepath)
-        assert os.path.exists(filepath) == False
+        assert not os.path.exists(filepath)
 
     def test_io_method(self, data, eight_schools_params):
         inference_data = self.get_inference_data(  # pylint: disable=W0612
@@ -379,7 +379,7 @@ class TestIONetCDFUtils:
         inference_data2 = InferenceData.from_netcdf(filepath)
         assert hasattr(inference_data2, "posterior")
         os.remove(filepath)
-        assert os.path.exists(filepath) == False
+        assert not os.path.exists(filepath)
 
 
 class TestPyMC3NetCDFUtils:
@@ -428,11 +428,11 @@ class TestPyroNetCDFUtils:
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):
+    def get_inference_data(self, data):
         return from_pyro(posterior=data.obj)
 
-    def test_inference_data(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
+    def test_inference_data(self, data):
+        inference_data = self.get_inference_data(data)
         assert hasattr(inference_data, "posterior")
 
 
@@ -558,13 +558,11 @@ class TestTfpNetCDFUtils:
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
+    def get_inference_data(self, data):  # pylint: disable=W0613
         return from_tfp(posterior=data.obj)
 
-    def test_inference_data(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(  # pylint: disable=W0612
-            data, eight_schools_params
-        )
+    def test_inference_data(self, data):
+        inference_data = self.get_inference_data(data)  # pylint: disable=W0612
         assert hasattr(inference_data, "posterior")
 
 
