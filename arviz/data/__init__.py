@@ -28,4 +28,6 @@ __all__ = [
     "from_cmdstan",
     "from_pyro",
     "from_tfp",
+    "from_netcdf",
+    "to_netcdf",
 ]
