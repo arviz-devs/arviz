@@ -13,9 +13,12 @@ from arviz import (
     from_pymc3,
     from_pystan,
     from_emcee,
+    from_netcdf,
+    to_netcdf,
     load_arviz_data,
     list_datasets,
     clear_data_home,
+    InferenceData,
 )
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
@@ -310,6 +313,74 @@ class TestEmceeNetCDFUtils:
         with pytest.raises(ValueError):
             from_emcee(obj, arg_names=["not", "enough"])
 
+    def test_inference_data(self, obj):
+        inference_data = get_inference_data(obj)
+        assert hasattr(obj, "posterior")
+
+
+class TestIONetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            model, obj = load_cached_models(eight_schools_params, draws, chains)[
+                "pymc3"
+            ]  # pylint: disable=E1120
+
+        return Data
+
+    def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
+        with data.model:
+            prior = pm.sample_prior_predictive()
+            posterior_predictive = pm.sample_posterior_predictive(data.obj)
+
+        return from_pymc3(
+            trace=data.obj,
+            prior=prior,
+            posterior_predictive=posterior_predictive,
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
+
+    def test_io_function(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
+        assert hasattr(inference_data, "posterior")
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "io_function_testfile.nc")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        # az -function
+        az.to_netcdf(inference_data, filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data2 = az.from_netcdf(filepath)
+        assert hasattr(inference_data2, "posterior")
+        os.remove(filepath)
+        assert os.path.exists(filepath) == False
+
+    def test_io_method(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
+        assert hasattr(inference_data, "posterior")
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "io_method_testfile.nc")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        # InferenceData method
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        inference_data.to_netcdf(filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data2 = InferenceData.from_netcdf(filepath)
+        assert hasattr(inference_data2, "posterior")
+        os.remove(filepath)
+        assert os.path.exists(filepath) == False
+
 
 class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")
@@ -332,6 +403,10 @@ class TestPyMC3NetCDFUtils:
             dims={"theta": ["school"], "eta": ["school"]},
         )
 
+    def test_posterior(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
+
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "sample_stats")
@@ -343,6 +418,22 @@ class TestPyMC3NetCDFUtils:
     def test_prior(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "prior")
+
+
+class TestPyroNetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            obj = load_cached_models(eight_schools_params, draws, chains)["pyro"]
+
+        return Data
+
+    def get_inference_data(self, data, eight_school_params):
+        return from_pyro(posterior=data.obj)
+
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
 
 
 class TestPyStanNetCDFUtils:
@@ -435,20 +526,24 @@ class TestPyStanNetCDFUtils:
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data)
+        # inference_data 1
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
         assert hasattr(inference_data1.posterior, "theta")
         assert hasattr(inference_data1.prior, "theta")
         assert hasattr(inference_data1.observed_data, "y")
+        # inference_data 2
         assert hasattr(inference_data2.posterior_predictive, "y_hat")
         assert hasattr(inference_data2.prior_predictive, "y_hat")
         assert hasattr(inference_data2.sample_stats, "lp")
         assert hasattr(inference_data2.sample_stats_prior, "lp")
         assert hasattr(inference_data2.observed_data, "y")
+        # inference_data 3
         assert hasattr(inference_data3.posterior_predictive, "y_hat")
         assert hasattr(inference_data3.prior_predictive, "y_hat")
         assert hasattr(inference_data3.sample_stats, "lp")
         assert hasattr(inference_data3.sample_stats_prior, "lp")
         assert hasattr(inference_data3.observed_data, "y")
+        # inference_data 4
         assert hasattr(inference_data4.posterior, "theta")
         assert hasattr(inference_data4.prior, "theta")
 
@@ -464,12 +559,13 @@ class TestTfpNetCDFUtils:
         return Data
 
     def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
-        return data.obj
+        return from_tfp(posterior=data.obj)
 
     def test_inference_data(self, data, eight_schools_params):
-        inference_data1 = self.get_inference_data(  # pylint: disable=W0612
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
+        assert hasattr(inference_data, "posterior")
 
 
 class TestCmdStanNetCDFUtils:

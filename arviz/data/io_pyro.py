@@ -103,7 +103,7 @@ class PyroConverter:
         )
 
 
-def from_pyro(posterior, *, coords=None, dims=None):
+def from_pyro(posterior=None, *, coords=None, dims=None):
     """Convert pyro data into an InferenceData object.
 
     Parameters

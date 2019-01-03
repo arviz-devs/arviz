@@ -163,7 +163,7 @@ class TfpConverter:
 
 
 def from_tfp(
-    posterior,
+    posterior=None,
     *,
     var_names=None,
     model_fn=None,
