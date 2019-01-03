@@ -1,13 +1,12 @@
 """Tfp-specific conversion code."""
 import numpy as np
 import xarray as xr
-import tensorflow as tf
-import tensorflow_probability.python.edward2 as ed
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
 
 
+# pylint: disable=too-many-instance-attributes
 class TfpConverter:
     """Encapsulate tfp specific logic."""
 
@@ -24,6 +23,7 @@ class TfpConverter:
         coords=None,
         dims=None
     ):
+
         self.posterior = posterior
 
         if var_names is None:
@@ -42,8 +42,12 @@ class TfpConverter:
         self.dims = dims
 
         import tensorflow_probability as tfp
+        import tensorflow as tf
+        import tensorflow_probability.python.edward2 as ed
 
         self.tfp = tfp
+        self.tf = tf  # pylint: disable=invalid-name
+        self.ed = ed  # pylint: disable=invalid-name
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
@@ -58,8 +62,8 @@ class TfpConverter:
             return None
 
         observed_data = {}
-        if isinstance(self.observed, tf.Tensor):
-            with tf.Session() as sess:
+        if isinstance(self.observed, self.tf.Tensor):
+            with self.tf.Session() as sess:
                 vals = sess.run(self.observed, feed_dict=self.feed_dict)
         else:
             vals = self.observed
@@ -101,7 +105,7 @@ class TfpConverter:
             for var_i, var_name in enumerate(self.var_names):
                 variables[var_name] = self.posterior[var_i][i]
 
-            with ed.interception(self._value_setter(variables)):
+            with self.ed.interception(self._value_setter(variables)):
                 if self.posterior_predictive_size > 1:
                     posterior_preds.append(
                         [self.model_fn() for _ in range(self.posterior_predictive_size)]
@@ -110,7 +114,7 @@ class TfpConverter:
                     posterior_preds.append(self.model_fn())
 
         data = {}
-        with tf.Session() as sess:
+        with self.tf.Session() as sess:
             data["obs"] = np.expand_dims(
                 sess.run(posterior_preds, feed_dict=self.feed_dict), axis=0
             )
@@ -129,7 +133,7 @@ class TfpConverter:
             for var_i, var_name in enumerate(self.var_names):
                 variables[var_name] = self.posterior[var_i][i]
 
-            with ed.interception(self._value_setter(variables)):
+            with self.ed.interception(self._value_setter(variables)):
                 log_likelihood.append((self.model_fn().distribution.log_prob(self.observed)))
 
         data = {}
@@ -139,7 +143,7 @@ class TfpConverter:
             coord_name = None
         dims = {"log_likelihood": coord_name}
 
-        with tf.Session() as sess:
+        with self.tf.Session() as sess:
             data["log_likelihood"] = np.expand_dims(
                 sess.run(log_likelihood, feed_dict=self.feed_dict), axis=0
             )
