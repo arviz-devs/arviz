@@ -322,13 +322,11 @@ class TestIONetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
-            model, obj = load_cached_models(eight_schools_params, draws, chains)[
-                "pymc3"
-            ]  # pylint: disable=E1120
+            model, obj = load_cached_models(eight_schools_params, draws, chains)["pymc3"]
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
+    def get_inference_data(self, data, eight_schools_params):  # pylint: disable=W0613
         with data.model:
             prior = pm.sample_prior_predictive()
             posterior_predictive = pm.sample_posterior_predictive(data.obj)
