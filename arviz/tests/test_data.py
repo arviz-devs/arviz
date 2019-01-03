@@ -13,7 +13,6 @@ from arviz import (
     from_pymc3,
     from_pystan,
     from_pyro,
-    from_tfp,
     from_emcee,
     from_netcdf,
     to_netcdf,
@@ -552,6 +551,7 @@ class TestTfpNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
+            # Returns result of from_tfp
             obj = load_cached_models({}, draws, chains)[  # pylint: disable=E1120
                 "tensorflow_probability"
             ]
@@ -559,7 +559,7 @@ class TestTfpNetCDFUtils:
         return Data
 
     def get_inference_data(self, data):  # pylint: disable=W0613
-        return from_tfp(posterior=data.obj)
+        return data.obj
 
     def test_inference_data(self, data):
         inference_data = self.get_inference_data(data)  # pylint: disable=W0612
