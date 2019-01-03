@@ -462,11 +462,11 @@ class TestPyStanNetCDFUtils:
                 "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
             }
             fit_test_grad = model.sampling(
-                data=model_data, test_grad=True, check_hcm_diagnostics=False
+                data=model_data, test_grad=True, check_hmc_diagnostics=False
             )
             with pytest.raises(AttributeError):
                 _ = from_pystan(posterior=fit_test_grad)
-            fit = model.sampling(data=model_data, iter=100, chains=1, check_hcm_diagnostics=False)
+            fit = model.sampling(data=model_data, iter=100, chains=1, check_hmc_diagnostics=False)
             del fit.sim["samples"]
             with pytest.raises(AttributeError):
                 _ = from_pystan(posterior=fit)
@@ -485,7 +485,7 @@ class TestPyStanNetCDFUtils:
             from pystan import StanModel
 
             model = StanModel(model_code=model_code)
-            fit = model.sampling(iter=10, chains=2, check_hcm_diagnostics=False)
+            fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
             posterior = from_pystan(posterior=fit)
             assert hasattr(posterior, "posterior")
             assert hasattr(posterior.posterior, "y")
