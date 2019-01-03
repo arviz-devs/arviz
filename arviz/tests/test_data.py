@@ -12,6 +12,8 @@ from arviz import (
     from_cmdstan,
     from_pymc3,
     from_pystan,
+    from_pyro,
+    from_tfp,
     from_emcee,
     from_netcdf,
     to_netcdf,
