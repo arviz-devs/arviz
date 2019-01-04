@@ -59,9 +59,9 @@ class PyMC3Converter:
     @requires("trace")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        var_names = self.pymc3.utils.get_default_varnames(  # pylint: disable=no-member
+        var_names = self.pymc3.utils.get_default_varnames(
             self.trace.varnames, include_transformed=False
-        )
+        )  # pylint: disable=no-member
         data = {}
         for var_name in var_names:
             data[var_name] = np.array(self.trace.get_values(var_name, combine=False, squeeze=False))

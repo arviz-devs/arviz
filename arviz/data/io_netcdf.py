@@ -55,7 +55,10 @@ def load_data(filename):
     This function is deprecated and will be removed in 0.4.
     Use `from_netcdf` instead.
     """
-    warnings.warn("The 'load_data' function is deprecated as of 0.3.2, use 'from_netcdf' instead", DeprecationWarning)
+    warnings.warn(
+        "The 'load_data' function is deprecated as of 0.3.2, use 'from_netcdf' instead",
+        DeprecationWarning,
+    )
     return from_netcdf(filename=filename)
 
 
@@ -87,5 +90,8 @@ def save_data(data, filename, *, group="posterior", coords=None, dims=None):
     This function is deprecated and will be removed in 0.4.
     Use `to_netcdf` instead.
     """
-    warnings.warn("The 'save_data' function is deprecated as of 0.3.2, use 'to_netcdf' instead", DeprecationWarning)
-    return to_netcdf(data=data, filename=filename, *, group=group, coords=coords, dims=dims)
+    warnings.warn(
+        "The 'save_data' function is deprecated as of 0.3.2, use 'to_netcdf' instead",
+        DeprecationWarning,
+    )
+    return to_netcdf(data=data, filename=filename, group=group, coords=coords, dims=dims)
