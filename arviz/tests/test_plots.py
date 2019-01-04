@@ -180,6 +180,13 @@ def test_plot_trace_discrete(discrete_model):
         ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True, "ridgeplot_alpha": 0}, 3),
+        (
+            {
+                "var_names": ["mu", "tau"],
+                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+            },
+            1,
+        ),
     ],
 )
 def test_plot_forest(models, model_fits, args_expected):
