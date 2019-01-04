@@ -80,12 +80,6 @@ Pareto-smoothed importance sampling leave-one-out cross validation (PSIS-LOO-CV)
 [@VehtariPracticalBayesianModel2015], and widely applicable information criterion (WAIC)
 [@watanabe_widely_2013].  
 
-# Example plots  
-A portion of ArviZ's functionality is shown in Figure 2. 
-Additional examples can be found in the ArviZ documentation. 
-
-![Sample plots from ArviZ gallery](example_gallery.png)  
-
 # Funding
 
 Work by Osvaldo Martin was supported by CONICET-Argentina and ANPCyT-Argentina (PICT-0218).
@@ -95,6 +89,18 @@ Work by Osvaldo Martin was supported by CONICET-Argentina and ANPCyT-Argentina (
 We thank the PyMC3 Community — especially Adrian Seyboldt, Junpeng Lao, and Thomas Wiecki — as well
 as the Stan community — especially Allen Riddell . We also would like to extend thanks to all the ArviZ contributors, and the contributors of the libraries used to build ArviZ
 — particularly xarray, matplotlib, pandas, and numpy.
+
+# Example Plots  
+Examples of ArviZ's plotting functionality are shown in Figure 2 through Figure 5. 
+Additional examples can be found in the ArviZ documentation.
+
+![Bivariate Hexbin Plot with marginal distributions](plot_joint.png){width=80%}
+
+![2D Kernel Density Estimation](plot_kde_2d.png){width=80%}
+
+![Markov Chain Monte Carlo Trace](plot_trace.png){width=80%}  
+
+![John Kruschke styled Posterior Distribution](plot_posterior.png){width=80%} 
 
 # References
 
