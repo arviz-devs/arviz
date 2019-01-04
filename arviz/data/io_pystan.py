@@ -74,8 +74,6 @@ class PyStanConverter:
         if log_likelihood is not None:
             if isinstance(log_likelihood, str) and log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
-            if isinstance(log_likelihood, str) and log_likelihood in coords:
-                coords["log_likelihood"] = coords.pop(log_likelihood)
 
         data = get_sample_stats(posterior, log_likelihood)
 
@@ -234,8 +232,6 @@ class PyStan3Converter:
         if log_likelihood is not None:
             if isinstance(log_likelihood, str) and log_likelihood in dims:
                 dims["log_likelihood"] = dims.pop(log_likelihood)
-            if isinstance(log_likelihood, str) and log_likelihood in coords:
-                coords["log_likelihood"] = coords.pop(log_likelihood)
 
         data = get_sample_stats_stan3(
             posterior, model=posterior_model, log_likelihood=log_likelihood

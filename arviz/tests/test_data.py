@@ -23,6 +23,7 @@ from arviz import (
     clear_data_home,
     InferenceData,
 )
+from ..data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
@@ -451,7 +452,7 @@ class TestPyStanNetCDFUtils:
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):
+    def get_inference_data(self, data, eight_schools_params):
         """vars as str."""
         return from_pystan(
             posterior=data.obj,
@@ -460,7 +461,7 @@ class TestPyStanNetCDFUtils:
             prior_predictive="y_hat",
             observed_data="y",
             log_likelihood="log_lik",
-            coords={"school": np.arange(eight_school_params["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
@@ -554,23 +555,70 @@ class TestPyStanNetCDFUtils:
         assert hasattr(inference_data4.posterior, "theta")
         assert hasattr(inference_data4.prior, "theta")
 
+    def test_invalid_fit(self, data):
+        if pystan_version() == 2:
+            model = data.model
+            model_data = {
+                "J": 8,
+                "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+                "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+            }
+            fit_test_grad = model.sampling(
+                data=model_data, test_grad=True, check_hmc_diagnostics=False
+            )
+            with pytest.raises(AttributeError):
+                _ = from_pystan(posterior=fit_test_grad)
+            fit = model.sampling(data=model_data, iter=100, chains=1, check_hmc_diagnostics=False)
+            del fit.sim["samples"]
+            with pytest.raises(AttributeError):
+                _ = from_pystan(posterior=fit)
+
+    def test_empty_parameter(self):
+        if pystan_version() == 2:
+            model_code = """
+                parameters {
+                    real y;
+                    vector[0] z;
+                }
+                model {
+                    y ~ normal(0,1);
+                }
+            """
+            from pystan import StanModel
+
+            model = StanModel(model_code=model_code)
+            fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
+            posterior = from_pystan(posterior=fit)
+            assert hasattr(posterior, "posterior")
+            assert hasattr(posterior.posterior, "y")
+            assert not hasattr(posterior.posterior, "z")
+
+    def test_get_draws(self, data):
+        fit = data.obj
+        if pystan_version() == 2:
+            draws = get_draws(fit, variables=["theta", "theta"])
+            assert draws.get("theta") is not None
+        else:
+            draws = get_draws_stan3(fit, variables=["theta", "theta"])
+            assert draws.get("theta") is not None
+
 
 class TestTfpNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
             # Returns result of from_tfp
-            obj = load_cached_models({}, draws, chains)[  # pylint: disable=E1120
+            obj = load_cached_models({}, draws, chains)[  # pylint: disable=no-value-for-parameter
                 "tensorflow_probability"
             ]
 
         return Data
 
-    def get_inference_data(self, data):  # pylint: disable=W0613
+    def get_inference_data(self, data):
         return data.obj
 
     def test_inference_data(self, data):
-        inference_data = self.get_inference_data(data)  # pylint: disable=W0612
+        inference_data = self.get_inference_data(data)
         assert hasattr(inference_data, "posterior")
 
 
