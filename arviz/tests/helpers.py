@@ -128,9 +128,9 @@ def pyro_centered_schools(data, draws, chains):
     sigma = torch.Tensor(data["sigma"]).type(torch.Tensor)
 
     nuts_kernel = NUTS(_pyro_conditioned_model, adapt_step_size=True)
-    posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=500).run(
-        _pyro_centered_model, sigma, y
-    )  # pylint:disable=not-callable
+    posterior = MCMC(  # pylint:disable=not-callable
+        nuts_kernel, num_samples=draws, warmup_steps=500
+    ).run(_pyro_centered_model, sigma, y)
 
     # This block lets the posterior be pickled
     for trace in posterior.exec_traces:
@@ -350,11 +350,7 @@ def stan_extract_dict(fit, var_names=None):
             continue
 
         # in future fix the correct number of draws if fit.save_warmup is True
-        new_shape = (
-            *fit.dims[fit.param_names.index(var)],
-            -1,
-            fit.num_chains,
-        )  # pylint: disable=protected-access
+        new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
         values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])
