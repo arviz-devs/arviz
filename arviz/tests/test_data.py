@@ -16,6 +16,8 @@ from arviz import (
     from_emcee,
     from_netcdf,
     to_netcdf,
+    load_data,
+    save_data,
     load_arviz_data,
     list_datasets,
     clear_data_home,
@@ -348,14 +350,20 @@ class TestIONetCDFUtils:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_function_testfile.nc")
-        if os.path.exists(filepath):
-            os.remove(filepath)
         # az -function
         to_netcdf(inference_data, filepath)
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
         inference_data2 = from_netcdf(filepath)
         assert hasattr(inference_data2, "posterior")
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+        # Test deprecated functions
+        save_data(inference_data, filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data3 = load_data(filepath)
+        assert hasattr(inference_data3, "posterior")
         os.remove(filepath)
         assert not os.path.exists(filepath)
 

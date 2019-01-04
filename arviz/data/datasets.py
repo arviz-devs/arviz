@@ -6,7 +6,7 @@ import os
 import shutil
 from urllib.request import urlretrieve
 
-from .io_netcdf import load_data
+from .io_netcdf import from_netcdf
 
 LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
 
@@ -143,7 +143,7 @@ def load_arviz_data(dataset=None, data_home=None):
     """
     if dataset in LOCAL_DATASETS:
         resource = LOCAL_DATASETS[dataset]
-        return load_data(resource.filename)
+        return from_netcdf(resource.filename)
 
     elif dataset in REMOTE_DATASETS:
         remote = REMOTE_DATASETS[dataset]
@@ -158,7 +158,7 @@ def load_arviz_data(dataset=None, data_home=None):
                 "file may be corrupted. Run `arviz.clear_data_home()` and try "
                 "again, or please open an issue.".format(file_path, checksum, remote.checksum)
             )
-        return load_data(file_path)
+        return from_netcdf(file_path)
     else:
         raise ValueError(
             "Dataset {} not found! The following are available:\n{}".format(
