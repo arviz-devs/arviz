@@ -44,6 +44,7 @@ install:
 
   # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - if [[ $NAME == LINT ]]; then pip install coveralls ; fi
   - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
 before_script:
@@ -64,6 +65,12 @@ script:
                             "source /root/.bashrc && ./scripts/lint.sh";
     fi
 
+  # Tests saving plots and deleting files
+  - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc && pytest -v arviz/tests/ --save -k plot_forest && pytest -v arviz/tests/ --save -k plot_forest --cov=arviz/";
+    fi
+
+
   # Awkward line spacing to avoid travis-ci errors
   - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
                                               "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
@@ -75,3 +82,6 @@ after_success:
   - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
   - if [[ $NAME == UNIT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
   - if [[ $NAME == UNIT ]]; then coveralls; fi
+
+  - if [[ $NAME == LINT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
+  - if [[ $NAME == LINT ]]; then coveralls; fi

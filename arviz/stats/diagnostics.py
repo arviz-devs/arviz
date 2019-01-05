@@ -320,10 +320,7 @@ def geweke(values, first=0.1, last=0.5, intervals=20):
 
         zscores.append([start, z_score])
 
-    if intervals is None:
-        return np.array(zscores[0])
-    else:
-        return np.array(zscores)
+    return np.array(zscores)
 
 
 def ks_summary(pareto_tail_indices):

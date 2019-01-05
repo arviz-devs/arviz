@@ -1,4 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=too-many-lines
+from collections import namedtuple
 import os
 from urllib.parse import urlunsplit
 
@@ -23,9 +25,12 @@ from arviz import (
     clear_data_home,
     InferenceData,
 )
+from ..data.base import generate_dims_coords, make_attrs
 from ..data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
+    _emcee_lnprior as emcee_lnprior,
+    _emcee_lnprob as emcee_lnprob,
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
@@ -73,6 +78,19 @@ def no_remote_data(monkeypatch, tmpdir):
             filename=filename, url=url, checksum="bad!", description=centered.description
         ),
     )
+    UnknownFileMetaData = namedtuple(
+        "UnknownFileMetaData", ["filename", "url", "checksum", "description"]
+    )
+    monkeypatch.setitem(
+        REMOTE_DATASETS,
+        "test_unknown",
+        UnknownFileMetaData(
+            filename=filename,
+            url=url,
+            checksum="9ae00c83654b3f061d32c882ec0a270d10838fa36515ecb162b89a290e014849",
+            description="Test bad REMOTE_DATASET",
+        ),
+    )
 
 
 def test_load_local_arviz_data():
@@ -105,8 +123,45 @@ def test_missing_dataset():
 def test_list_datasets():
     dataset_string = list_datasets()
     # make sure all the names of the data sets are in the dataset description
-    for key in ("centered_eight", "non_centered_eight", "test_remote", "bad_checksum"):
+    for key in (
+        "centered_eight",
+        "non_centered_eight",
+        "test_remote",
+        "bad_checksum",
+        "test_unknown",
+    ):
         assert key in dataset_string
+
+
+def test_dims_coords():
+    shape = 4, 20, 5
+    var_name = "x"
+    dims, coords = generate_dims_coords(shape, var_name)
+    assert "x_dim_0" in dims
+    assert "x_dim_1" in dims
+    assert "x_dim_2" in dims
+    assert len(coords["x_dim_0"]) == 4
+    assert len(coords["x_dim_1"]) == 20
+    assert len(coords["x_dim_2"]) == 5
+
+
+def test_dims_coords_extra_dims():
+    shape = 4, 20
+    var_name = "x"
+    with pytest.warns(SyntaxWarning):
+        dims, coords = generate_dims_coords(shape, var_name, dims=["xx", "xy", "xz"])
+    assert "xx" in dims
+    assert "xy" in dims
+    assert "xz" in dims
+    assert len(coords["xx"]) == 4
+    assert len(coords["xy"]) == 20
+
+
+def test_make_attrs():
+    extra_attrs = {"key": "Value"}
+    attrs = make_attrs(attrs=extra_attrs)
+    assert "key" in attrs
+    assert attrs["key"] == "Value"
 
 
 class TestNumpyToDataArray:
@@ -138,6 +193,20 @@ class TestNumpyToDataArray:
     def test_nd_to_inference_data(self):
         shape = (1, 2, 3, 4, 5)
         inference_data = convert_to_inference_data(np.random.randn(*shape), group="foo")
+        assert hasattr(inference_data, "foo")
+        assert len(inference_data.foo.data_vars) == 1
+        var_name = list(inference_data.foo.data_vars)[0]
+
+        assert len(inference_data.foo.coords) == len(shape)
+        assert inference_data.foo.chain.shape == shape[:1]
+        assert inference_data.foo.draw.shape == shape[1:2]
+        assert inference_data.foo[var_name].shape == shape
+        assert repr(inference_data).startswith("Inference data with groups")
+
+    def test_more_chains_than_draws(self):
+        shape = (10, 4)
+        with pytest.warns(SyntaxWarning):
+            inference_data = convert_to_inference_data(np.random.randn(*shape), group="foo")
         assert hasattr(inference_data, "foo")
         assert len(inference_data.foo.data_vars) == 1
         var_name = list(inference_data.foo.data_vars)[0]
@@ -247,6 +316,11 @@ def test_convert_to_dataset_bad(tmpdir):
         convert_to_dataset(filename, group="bar")
 
 
+def test_bad_inference_data():
+    with pytest.raises(ValueError):
+        InferenceData(posterior=[1, 2, 3])
+
+
 class TestDictNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):
@@ -281,6 +355,20 @@ class TestDictNetCDFUtils:
             dims={"theta": ["school"], "eta": ["school"]},
         )
 
+    def test_testing_extract(self, data):
+        if pystan_version() == 2:
+            extract_func = pystan_extract_unpermuted
+            parameters = data.stan_fit.model_pars
+        else:
+            extract_func = stan_extract_dict
+            parameters = data.stan_fit.param_names
+        assert isinstance(extract_func(data.stan_fit, var_names=None), dict)
+        assert isinstance(extract_func(data.stan_fit, var_names=parameters[0]), dict)
+        assert isinstance(extract_func(data.stan_fit, var_names=parameters), dict)
+        assert isinstance(
+            extract_func(data.stan_fit, var_names=[parameters[0], parameters[0]]), dict
+        )
+
     def test_convert_to_inference_data(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior")
@@ -301,25 +389,35 @@ class TestDictNetCDFUtils:
 
 class TestEmceeNetCDFUtils:
     @pytest.fixture(scope="class")
-    def obj(self, draws):
-        fake_chains = 2  # emcee uses lots of walkers
-        obj = load_cached_models(eight_schools_params, draws, fake_chains)["emcee"]
-        return obj
+    def data(self, draws, chains):
+        class Data:
+            # chains are not used
+            # emcee uses lots of walkers
+            obj = load_cached_models(eight_schools_params, draws, chains)["emcee"]
 
-    def get_inference_data(self, obj):
-        return from_emcee(obj, var_names=["ln(f)", "b", "m"])
+        return Data
 
-    def test__verify_var_names(self, obj):
-        with pytest.raises(ValueError):
-            from_emcee(obj, var_names=["not", "enough"])
+    def get_inference_data(self, data):
+        return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
 
-    def test__verify_arg_names(self, obj):
-        with pytest.raises(ValueError):
-            from_emcee(obj, arg_names=["not", "enough"])
-
-    def test_inference_data(self, obj):
-        inference_data = self.get_inference_data(obj)
+    def test_inference_data(self, data):
+        inference_data = self.get_inference_data(data)
         assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "ln(f)")
+        assert hasattr(inference_data.posterior, "b")
+        assert hasattr(inference_data.posterior, "m")
+
+    def test_verify_var_names(self, data):
+        with pytest.raises(ValueError):
+            from_emcee(data.obj, var_names=["not", "enough"])
+
+    def test_verify_arg_names(self, data):
+        with pytest.raises(ValueError):
+            from_emcee(data.obj, arg_names=["not", "enough"])
+
+    def test_ln_funcs_for_infinity(self):
+        assert np.isinf(emcee_lnprior([1000, 10000, 1_000_000]))
+        assert np.isinf(emcee_lnprob([1000, 10000, 1_000_000], 0, 0, 0))
 
 
 class TestIONetCDFUtils:
@@ -376,11 +474,8 @@ class TestIONetCDFUtils:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_method_testfile.nc")
-        if os.path.exists(filepath):
-            os.remove(filepath)
+        assert not os.path.exists(filepath)
         # InferenceData method
-        if os.path.exists(filepath):
-            os.remove(filepath)
         inference_data.to_netcdf(filepath)
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
@@ -528,6 +623,8 @@ class TestPyStanNetCDFUtils:
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "sample_stats")
+        assert hasattr(inference_data.sample_stats, "lp")
+        assert hasattr(inference_data.sample_stats, "diverging")
 
     def test_inference_data(self, data, eight_schools_params):
         inference_data1 = self.get_inference_data(data, eight_schools_params)

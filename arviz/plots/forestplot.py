@@ -360,7 +360,6 @@ class PlotHandler:
         """Draw shaded horizontal bands for each plotter."""
         y_vals, y_prev, is_zero = [0], None, False
         prev_color_index = 0
-        plotter = None  # To make sure it is defined
         for plotter in self.plotters.values():
             for y, _, _, color in plotter.iterator():
                 if self.colors.index(color) < prev_color_index:
@@ -372,10 +371,7 @@ class PlotHandler:
                 prev_color_index = self.colors.index(color)
                 y_prev = y
 
-        if plotter is None:
-            offset = 1
-        else:
-            offset = plotter.group_offset
+        offset = plotter.group_offset  # pylint: disable=undefined-loop-variable
 
         y_vals.append(y_prev + offset)
         for idx, (y_start, y_stop) in enumerate(pairwise(y_vals)):
