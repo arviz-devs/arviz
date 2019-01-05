@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import effective_n, gelman_rubin
+from .diagnostics import effective_n, rhat
 from ..utils import _var_names
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
@@ -717,7 +717,7 @@ def summary(
         metrics.append(effective_n(posterior, var_names=var_names))
         metric_names.append("eff_n")
 
-        metrics.append(gelman_rubin(posterior, var_names=var_names))
+        metrics.append(rhat(posterior, var_names=var_names))
         metric_names.append("r_hat")
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)

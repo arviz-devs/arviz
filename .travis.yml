@@ -1,40 +1,77 @@
+dist: xenial
+
 language: python
 
-python:
-  - "3.6"
-  - "3.5"
+services:
+  - docker
 
-env:
-  - PYSTAN_VERSION=2.17
-  - PYSTAN_VERSION=latest
+matrix:
+  include:
+  - name: "Python 3.6 Unit Test"
+    python: 3.6
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
+  - name: "Python 3.6 Unit Test - PyStan=preview Pyro=0.2.1"
+    python: 3.6
+    env: PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 NAME="UNIT"
+  - name: "Python 3.5 Unit Test"
+    python: 3.5
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
+  - name: "Python 3.6 Lint"
+    python: 3.6
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="LINT"
+  - name: "Python 3.6 Sphinx"
+    python: 3.6
+    env: PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="SPHINX"
 
 addons:
-  apt_packages:
-    - pandoc
+  apt:
+    packages:
+      - docker-ce
 
-cache:
-  directories:
-    - $HOME/.theano
-    - $HOME/miniconda
+before_install:
+  - docker pull conda/miniconda3
+  - docker --version
 
 install:
-  - sudo apt-get update
-  - . ./scripts/install_miniconda.sh
-  - conda info -a
-  - . ./scripts/create_testenv.sh
-  - pip install coveralls
+  # Build docker image
+  - . ./scripts/container.sh --build
+
+  # Print conda details
+  - docker run --rm arviz:latest /bin/bash -c "conda info -a"
+
+  # Print conda environment details
+  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list && pip freeze"
+
+  # Install packages needed for service integration
+  - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
+  - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
 before_script:
+  # Doesn't affect testing anymore but leaving for reference
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3
 - export MKL_THREADING_LAYER=GNU
 
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then . ./scripts/lint.sh ; fi
-  - pytest -v arviz/tests/ --cov=arviz/
-  - travis-sphinx build --nowarn --source=doc
+
+  # Tests command is default in dockerfile cmd
+  - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc && pytest -v arviz/tests/ --cov=arviz/";
+    fi
+
+  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
+                            "source /root/.bashrc && ./scripts/lint.sh";
+    fi
+
+  # Awkward line spacing to avoid travis-ci errors
+  - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
+                                              "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
+    fi
 
 after_success:
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then travis-sphinx deploy; fi
-  - coveralls
+  - echo $(pwd)
+  - ls -la
+  - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  - if [[ $NAME == UNIT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
+  - if [[ $NAME == UNIT ]]; then coveralls; fi

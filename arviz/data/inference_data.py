@@ -6,7 +6,7 @@ import xarray as xr
 class InferenceData:
     """Container for accessing netCDF files using xarray."""
 
-    def __init__(self, *_, **kwargs):
+    def __init__(self, **kwargs):
         """Initialize InferenceData object from keyword xarray datasets.
 
         Examples

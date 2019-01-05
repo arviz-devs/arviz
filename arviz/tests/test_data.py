@@ -12,16 +12,25 @@ from arviz import (
     from_cmdstan,
     from_pymc3,
     from_pystan,
+    from_pyro,
     from_emcee,
+    from_netcdf,
+    to_netcdf,
+    load_data,
+    save_data,
     load_arviz_data,
     list_datasets,
     clear_data_home,
+    InferenceData,
 )
+from ..data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
+    stan_extract_dict,
+    pystan_version,
 )
 
 
@@ -245,16 +254,23 @@ class TestDictNetCDFUtils:
 
         class Data:
             _, stan_fit = load_cached_models(eight_schools_params, draws, chains)["pystan"]
-            stan_dict = pystan_extract_unpermuted(stan_fit)
-            obj = {}
-            for name, vals in stan_dict.items():
-                if name not in {"y_hat", "log_lik"}:  # extra vars
-                    obj[name] = np.swapaxes(vals, 0, 1)
+            if pystan_version() == 2:
+                stan_dict = pystan_extract_unpermuted(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = np.swapaxes(vals, 0, 1)
+            else:
+                stan_dict = stan_extract_dict(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = vals
 
         return Data
 
     def check_var_names_coords_dims(self, dataset):
-        assert set(dataset.data_vars) == {"mu", "tau", "theta_tilde", "theta"}
+        assert set(dataset.data_vars) == {"mu", "tau", "eta", "theta"}
         assert set(dataset.coords) == {"chain", "draw", "school"}
 
     def get_inference_data(self, data, eight_schools_params):
@@ -262,7 +278,7 @@ class TestDictNetCDFUtils:
             data.obj,
             group="posterior",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
 
     def test_convert_to_inference_data(self, data, eight_schools_params):
@@ -275,7 +291,7 @@ class TestDictNetCDFUtils:
             data.obj,
             group="posterior",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
         assert dataset.draw.shape == (draws,)
         assert dataset.chain.shape == (chains,)
@@ -301,6 +317,78 @@ class TestEmceeNetCDFUtils:
         with pytest.raises(ValueError):
             from_emcee(obj, arg_names=["not", "enough"])
 
+    def test_inference_data(self, obj):
+        inference_data = self.get_inference_data(obj)
+        assert hasattr(inference_data, "posterior")
+
+
+class TestIONetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            model, obj = load_cached_models(eight_schools_params, draws, chains)["pymc3"]
+
+        return Data
+
+    def get_inference_data(self, data, eight_schools_params):  # pylint: disable=W0613
+        with data.model:
+            prior = pm.sample_prior_predictive()
+            posterior_predictive = pm.sample_posterior_predictive(data.obj)
+
+        return from_pymc3(
+            trace=data.obj,
+            prior=prior,
+            posterior_predictive=posterior_predictive,
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
+
+    def test_io_function(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
+        assert hasattr(inference_data, "posterior")
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "io_function_testfile.nc")
+        # az -function
+        to_netcdf(inference_data, filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data2 = from_netcdf(filepath)
+        assert hasattr(inference_data2, "posterior")
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+        # Test deprecated functions
+        save_data(inference_data, filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data3 = load_data(filepath)
+        assert hasattr(inference_data3, "posterior")
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
+    def test_io_method(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(  # pylint: disable=W0612
+            data, eight_schools_params
+        )
+        assert hasattr(inference_data, "posterior")
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "io_method_testfile.nc")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        # InferenceData method
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        inference_data.to_netcdf(filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath) > 0
+        inference_data2 = InferenceData.from_netcdf(filepath)
+        assert hasattr(inference_data2, "posterior")
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
 
 class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")
@@ -320,8 +408,12 @@ class TestPyMC3NetCDFUtils:
             prior=prior,
             posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "theta_tilde": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]},
         )
+
+    def test_posterior(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
 
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
@@ -336,6 +428,22 @@ class TestPyMC3NetCDFUtils:
         assert hasattr(inference_data, "prior")
 
 
+class TestPyroNetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            obj = load_cached_models(eight_schools_params, draws, chains)["pyro"]
+
+        return Data
+
+    def get_inference_data(self, data):
+        return from_pyro(posterior=data.obj)
+
+    def test_inference_data(self, data):
+        inference_data = self.get_inference_data(data)
+        assert hasattr(inference_data, "posterior")
+
+
 class TestPyStanNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
@@ -344,7 +452,7 @@ class TestPyStanNetCDFUtils:
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):
+    def get_inference_data(self, data, eight_schools_params):
         """vars as str."""
         return from_pystan(
             posterior=data.obj,
@@ -353,14 +461,16 @@ class TestPyStanNetCDFUtils:
             prior_predictive="y_hat",
             observed_data="y",
             log_likelihood="log_lik",
-            coords={"school": np.arange(eight_school_params["J"])},
+            coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
-                "theta_tilde": ["school"],
+                "eta": ["school"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data2(self, data, eight_schools_params):
@@ -380,9 +490,11 @@ class TestPyStanNetCDFUtils:
                 "theta": ["school"],
                 "y": ["school"],
                 "y_hat": ["school"],
-                "theta_tilde": ["school"],
+                "eta": ["school"],
                 "log_lik": ["log_likelihood_dim"],
             },
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data3(self, data, eight_schools_params):
@@ -394,12 +506,9 @@ class TestPyStanNetCDFUtils:
             prior_predictive=["y_hat", "log_lik"],
             observed_data="y",
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={
-                "theta": ["school"],
-                "y": ["school"],
-                "y_hat": ["school"],
-                "theta_tilde": ["school"],
-            },
+            dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def get_inference_data4(self, data):
@@ -412,6 +521,8 @@ class TestPyStanNetCDFUtils:
             observed_data="y",
             coords=None,
             dims=None,
+            posterior_model=data.model,
+            prior_model=data.model,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -423,41 +534,92 @@ class TestPyStanNetCDFUtils:
         inference_data2 = self.get_inference_data2(data, eight_schools_params)
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data)
+        # inference_data 1
         assert hasattr(inference_data1.sample_stats, "log_likelihood")
         assert hasattr(inference_data1.posterior, "theta")
         assert hasattr(inference_data1.prior, "theta")
         assert hasattr(inference_data1.observed_data, "y")
+        # inference_data 2
         assert hasattr(inference_data2.posterior_predictive, "y_hat")
         assert hasattr(inference_data2.prior_predictive, "y_hat")
         assert hasattr(inference_data2.sample_stats, "lp")
         assert hasattr(inference_data2.sample_stats_prior, "lp")
         assert hasattr(inference_data2.observed_data, "y")
+        # inference_data 3
         assert hasattr(inference_data3.posterior_predictive, "y_hat")
         assert hasattr(inference_data3.prior_predictive, "y_hat")
         assert hasattr(inference_data3.sample_stats, "lp")
         assert hasattr(inference_data3.sample_stats_prior, "lp")
         assert hasattr(inference_data3.observed_data, "y")
+        # inference_data 4
         assert hasattr(inference_data4.posterior, "theta")
         assert hasattr(inference_data4.prior, "theta")
+
+    def test_invalid_fit(self, data):
+        if pystan_version() == 2:
+            model = data.model
+            model_data = {
+                "J": 8,
+                "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+                "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+            }
+            fit_test_grad = model.sampling(
+                data=model_data, test_grad=True, check_hmc_diagnostics=False
+            )
+            with pytest.raises(AttributeError):
+                _ = from_pystan(posterior=fit_test_grad)
+            fit = model.sampling(data=model_data, iter=100, chains=1, check_hmc_diagnostics=False)
+            del fit.sim["samples"]
+            with pytest.raises(AttributeError):
+                _ = from_pystan(posterior=fit)
+
+    def test_empty_parameter(self):
+        if pystan_version() == 2:
+            model_code = """
+                parameters {
+                    real y;
+                    vector[0] z;
+                }
+                model {
+                    y ~ normal(0,1);
+                }
+            """
+            from pystan import StanModel
+
+            model = StanModel(model_code=model_code)
+            fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
+            posterior = from_pystan(posterior=fit)
+            assert hasattr(posterior, "posterior")
+            assert hasattr(posterior.posterior, "y")
+            assert not hasattr(posterior.posterior, "z")
+
+    def test_get_draws(self, data):
+        fit = data.obj
+        if pystan_version() == 2:
+            draws = get_draws(fit, variables=["theta", "theta"])
+            assert draws.get("theta") is not None
+        else:
+            draws = get_draws_stan3(fit, variables=["theta", "theta"])
+            assert draws.get("theta") is not None
 
 
 class TestTfpNetCDFUtils:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
-            obj = load_cached_models({}, draws, chains)[  # pylint: disable=E1120
+            # Returns result of from_tfp
+            obj = load_cached_models({}, draws, chains)[  # pylint: disable=no-value-for-parameter
                 "tensorflow_probability"
             ]
 
         return Data
 
-    def get_inference_data(self, data, eight_school_params):  # pylint: disable=W0613
+    def get_inference_data(self, data):
         return data.obj
 
-    def test_inference_data(self, data, eight_schools_params):
-        inference_data1 = self.get_inference_data(  # pylint: disable=W0612
-            data, eight_schools_params
-        )
+    def test_inference_data(self, data):
+        inference_data = self.get_inference_data(data)
+        assert hasattr(inference_data, "posterior")
 
 
 class TestCmdStanNetCDFUtils:
@@ -584,7 +746,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["school"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")
@@ -616,7 +778,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["school"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")
@@ -645,12 +807,7 @@ class TestCmdStanNetCDFUtils:
                 observed_data_var=["y"],
                 log_likelihood="log_lik",
                 coords={"school": np.arange(8), "log_lik_dim_0": np.arange(8)},
-                dims={
-                    "theta": ["school"],
-                    "y": ["school"],
-                    "y_hat": ["school"],
-                    "theta_tilde": ["school"],
-                },
+                dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
             )
             assert hasattr(inference_data, "posterior")
             assert hasattr(inference_data, "sample_stats")
@@ -707,7 +864,7 @@ class TestCmdStanNetCDFUtils:
                     "y": ["school"],
                     "log_lik": ["log_lik_dim"],
                     "y_hat": ["school"],
-                    "theta_tilde": ["school"],
+                    "eta": ["school"],
                 },
             )
             assert hasattr(inference_data, "posterior")

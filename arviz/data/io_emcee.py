@@ -54,7 +54,7 @@ def _verify_names(sampler, var_names, arg_names):
 class EmceeConverter:
     """Encapsulate emcee specific logic."""
 
-    def __init__(self, sampler, *_, var_names=None, arg_names=None, coords=None, dims=None):
+    def __init__(self, *, sampler, var_names=None, arg_names=None, coords=None, dims=None):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
         self.var_names = var_names
@@ -94,7 +94,7 @@ class EmceeConverter:
         )
 
 
-def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=None):
+def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dims=None):
     """Convert emcee data into an InferenceData object.
 
     Parameters
@@ -111,5 +111,5 @@ def from_emcee(sampler, *, var_names=None, arg_names=None, coords=None, dims=Non
         Map variable names to their coordinates
     """
     return EmceeConverter(
-        sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
+        sampler=sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
     ).to_inference_data()

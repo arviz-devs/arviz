@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from ..stats import hpd
-from ..stats.diagnostics import _get_neff, _get_rhat
+from ..stats.diagnostics import _get_neff, _get_split_rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
 from ..utils import _var_names
@@ -65,7 +65,7 @@ def plot_forest(
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
     r_hat : bool, optional
-        Flag for plotting Gelman-Rubin statistics. Requires 2 or more chains. Defaults to False
+        Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
     eff_n : bool, optional
         Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to False
     colors : list or string, optional
@@ -504,7 +504,7 @@ class VarHandler:
             if value.ndim != 2 or value.shape[0] < 2:
                 yield y, None, color
             else:
-                yield y, _get_rhat(value), color
+                yield y, _get_split_rhat(value), color
 
     def y_max(self):
         """Get max y value for the variable."""

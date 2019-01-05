@@ -28,7 +28,7 @@ def _get_var_names(posterior):
 class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
-    def __init__(self, posterior, *_, coords=None, dims=None):
+    def __init__(self, *, posterior, coords=None, dims=None):
         """Convert pyro data into an InferenceData object.
 
         Parameters
@@ -55,7 +55,9 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support(), 0)
+                name: np.expand_dims(samples.enumerate_support().squeeze(), 0)
+                if self.posterior.num_chains == 1
+                else samples.enumerate_support().squeeze()
                 for name, samples in self.posterior.marginal(
                     sites=self.latent_vars
                 ).empirical.items()
@@ -63,6 +65,7 @@ class PyroConverter:
         except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.latent_vars:
+                # pylint: disable=no-member
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
@@ -75,7 +78,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support(), 0)
+                name: np.expand_dims(samples.enumerate_support().squeeze(), 0)
                 for name, samples in self.posterior.marginal(
                     sites=self.observed_vars
                 ).empirical.items()
@@ -83,6 +86,7 @@ class PyroConverter:
         except AttributeError:  # Use pyro<0.3 release syntax
             data = {}
             for var_name in self.observed_vars:
+                # pylint: disable=no-member
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
@@ -99,7 +103,7 @@ class PyroConverter:
         )
 
 
-def from_pyro(posterior, *, coords=None, dims=None):
+def from_pyro(posterior=None, *, coords=None, dims=None):
     """Convert pyro data into an InferenceData object.
 
     Parameters

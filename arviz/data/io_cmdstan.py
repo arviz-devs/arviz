@@ -665,8 +665,8 @@ def _unpack_dataframes(dfs):
 
 
 def from_cmdstan(
-    *,
     posterior=None,
+    *,
     posterior_predictive=None,
     prior=None,
     prior_predictive=None,
