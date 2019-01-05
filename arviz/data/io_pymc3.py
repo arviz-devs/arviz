@@ -10,7 +10,7 @@ class PyMC3Converter:
     """Encapsulate PyMC3 specific logic."""
 
     def __init__(
-        self, *_, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
+        self, *, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
     ):
         self.trace = trace
         self.prior = prior
@@ -142,7 +142,7 @@ class PyMC3Converter:
         )
 
 
-def from_pymc3(*, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None):
+def from_pymc3(trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,

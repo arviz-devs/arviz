@@ -12,8 +12,8 @@ class TfpConverter:
 
     def __init__(
         self,
-        posterior,
         *,
+        posterior,
         var_names=None,
         model_fn=None,
         feed_dict=None,
@@ -167,7 +167,7 @@ class TfpConverter:
 
 
 def from_tfp(
-    posterior,
+    posterior=None,
     *,
     var_names=None,
     model_fn=None,
