@@ -9,7 +9,7 @@ pylint
 pyro-ppl
 tensorflow
 tensorflow-probability
-pytest
+pytest=4.0.2
 pytest-cov
 Sphinx
 sphinx-bootstrap-theme
