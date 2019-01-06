@@ -33,15 +33,15 @@ class TestDiagnostics:
         r_hat = rhat(np.vstack([20 + np.random.randn(1, 100), np.random.randn(1, 100)]))
         assert 1 / GOOD_RHAT > r_hat or GOOD_RHAT < r_hat
 
-    def test_effective_n_array(self):
-        eff_n = effective_s(np.random.randn(4, 100))
-        assert eff_n > 100
-        assert eff_n < 800
+    def test_effective_s_array(self):
+        eff_s = effective_s(np.random.randn(4, 100))
+        assert eff_s > 100
+        assert eff_s < 800
 
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_effective_n_dataset(self, data, var_names):
-        eff_n = effective_s(data, var_names=var_names)
-        assert eff_n.mu > 100  # This might break if the data is regenerated
+    def test_effective_s_dataset(self, data, var_names):
+        eff_s = effective_s(data, var_names=var_names)
+        assert eff_s.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):
         first = 0.1
