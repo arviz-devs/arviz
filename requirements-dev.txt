@@ -9,10 +9,10 @@ pylint
 pyro-ppl
 tensorflow
 tensorflow-probability
-pytest
+pytest == 4.0.2
 pytest-cov
 Sphinx
 sphinx-bootstrap-theme
 sphinx-gallery
-travis-sphinx==2.0.0
+travis-sphinx == 2.0.0
 black; python_version == '3.6'
