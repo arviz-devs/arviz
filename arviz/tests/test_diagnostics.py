@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from ..data import load_arviz_data
-from ..stats import rhat, effective_n, geweke
+from ..stats import rhat, effective_s, geweke
 
 GOOD_RHAT = 1.1
 
@@ -34,13 +34,13 @@ class TestDiagnostics:
         assert 1 / GOOD_RHAT > r_hat or GOOD_RHAT < r_hat
 
     def test_effective_n_array(self):
-        eff_n = effective_n(np.random.randn(4, 100))
+        eff_n = effective_s(np.random.randn(4, 100))
         assert eff_n > 100
         assert eff_n < 800
 
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_n_dataset(self, data, var_names):
-        eff_n = effective_n(data, var_names=var_names)
+        eff_n = effective_s(data, var_names=var_names)
         assert eff_n.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):

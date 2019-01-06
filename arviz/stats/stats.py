@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import effective_n, rhat
+from .diagnostics import effective_s, rhat
 from ..utils import _var_names
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
@@ -326,7 +326,7 @@ def loo(data, pointwise=False, reff=None):
         if n_chains == 1:
             reff = 1.0
         else:
-            eff_n = effective_n(posterior)
+            eff_n = effective_s(posterior)
             # this mean is over all data variables
             reff = (
                 np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
@@ -714,7 +714,7 @@ def summary(
         metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
 
     if len(posterior.chain) > 1:
-        metrics.append(effective_n(posterior, var_names=var_names))
+        metrics.append(effective_s(posterior, var_names=var_names))
         metric_names.append("eff_n")
 
         metrics.append(rhat(posterior, var_names=var_names))

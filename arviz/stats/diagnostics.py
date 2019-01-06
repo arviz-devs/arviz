@@ -10,10 +10,10 @@ from ..data import convert_to_dataset
 from ..utils import _var_names
 
 
-__all__ = ["effective_n", "rhat", "geweke", "autocorr"]
+__all__ = ["effective_s", "rhat", "geweke", "autocorr"]
 
 
-def effective_n(data, *, var_names=None):
+def effective_s(data, *, var_names=None):
     r"""Calculate estimate of the effective sample size.
 
     Parameters
@@ -24,18 +24,19 @@ def effective_n(data, *, var_names=None):
         At least 2 posterior chains are needed to compute this diagnostic of one or more
         stochastic parameters.
     var_names : list
-      Names of variables to include in the effective_n report
+      Names of variables to include in the effective_s report
 
     Returns
     -------
-    n_eff : xarray.Dataset
-        Return the effective sample size, :math:`\hat{n}_{eff}`
+    s_eff : xarray.Dataset
+        Return the effective sample size, :math:`\hat{s}_{eff}`
 
     Notes
     -----
     The diagnostic is computed by:
 
-    .. math:: \hat{n}_{eff} = \frac{mn}{1 + 2 \sum_{t=1}^T \hat{\rho}_t}
+    .. math:: \hat{s}_{eff} = \frac{MN}{\hat{\tau}}
+    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
 
     where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
     is the first odd positive integer for which the sum
@@ -46,19 +47,20 @@ def effective_n(data, *, var_names=None):
 
     References
     ----------
-    Gelman et al. BDA (2014)
+    https://avehtari.github.io/rhat_reff/rhat_reff.html#22_effective_sample_size_(s_{rm_eff})
+    Gelman et al. BDA (2014) Formula 11.8
     """
     if isinstance(data, np.ndarray):
-        return _get_neff(data)
+        return _get_seff(data)
 
     var_names = _var_names(var_names)
     dataset = convert_to_dataset(data, group="posterior")
 
     dataset = dataset if var_names is None else dataset[var_names]
-    return xr.apply_ufunc(_neff_ufunc, dataset, input_core_dims=(("chain", "draw"),))
+    return xr.apply_ufunc(_seff_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
 
-def _neff_ufunc(ary):
+def _seff_ufunc(ary):
     """Ufunc for computing effective sample size.
 
     This can be used on an xarray Dataset, using
@@ -66,11 +68,11 @@ def _neff_ufunc(ary):
     """
     target = np.empty(ary.shape[:-2])
     for idx in np.ndindex(target.shape):
-        target[idx] = _get_neff(ary[idx])
+        target[idx] = _get_seff(ary[idx])
     return target
 
 
-def _get_neff(sample_array):
+def _get_seff(sample_array):
     """Compute the effective sample size for a 2D array."""
     shape = sample_array.shape
     if len(shape) != 2:
@@ -93,6 +95,7 @@ def _get_neff(sample_array):
     rho_hat_t[0] = rho_hat_even
     rho_hat_odd = 1.0 - (mean_var - np.mean(acov_t)) / var_plus
     rho_hat_t[1] = rho_hat_odd
+
     # Geyer's initial positive sequence
     max_t = 1
     t = 1
