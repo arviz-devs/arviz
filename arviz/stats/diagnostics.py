@@ -47,8 +47,7 @@ def effective_sample_size(data, *, var_names=None):
 
     References
     ----------
-    Section 15.4.2
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
+    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
 
     Gelman et al. BDA (2014) Formula 11.8
     """
