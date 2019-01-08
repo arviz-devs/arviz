@@ -97,6 +97,12 @@ def discrete_model():
     return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
 
 
+@pytest.fixture(scope="module")
+def continuous_model():
+    """Simple fixture for random continuous model"""
+    return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
+
+
 @pytest.fixture(scope="function")
 def fig_ax():
     fig, ax = plt.subplots(1, 1)
@@ -228,16 +234,22 @@ def test_plot_joint_discrete(discrete_model):
         {"contour": False},
     ],
 )
-def test_plot_kde(discrete_model, kwargs):
-    axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
+def test_plot_kde(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize("kwargs", [{"cumulative": True}, {"rug": True}])
+def test_plot_kde_cumulative(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], quantiles=[0.25, 0.5, 0.75], **kwargs)
     assert axes
 
 
 @pytest.mark.parametrize(
     "kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"cumulative": True}, {"rug": True}]
 )
-def test_plot_kde_cumulative(discrete_model, kwargs):
-    axes = plot_kde(discrete_model["x"], **kwargs)
+def test_plot_kde_quantiles(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], **kwargs)
     assert axes
 
 
