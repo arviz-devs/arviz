@@ -256,7 +256,7 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     std_x = entropy(x - xmin) * bw
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
-    grid = histogram(x, n_bins)
+    grid = _histogram(x, n_bins)
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
@@ -275,7 +275,7 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
 
 @conditional_jit
-def histogram(x, n_bins):
+def _histogram(x, n_bins):
     grid, _ = np.histogram(x, bins=n_bins)
     return grid
 

@@ -22,11 +22,18 @@ def _var_names(var_names):
         return var_names
 
 
-def conditional_jit(function):
-    "use numba's jit decorator if numba is installed"
-    try:
-        from numba import jit
+def conditional_jit(function=None, **kwargs):
+    """Use numba's jit decorator if numba is installed."""
 
-        return jit(function)
-    except ImportError:
-        return function
+    def wrapper(function):
+        try:
+            from numba import jit
+
+            return jit(**kwargs)(function)
+        except ImportError:
+            return function
+
+    if function:
+        return wrapper(function)
+    else:
+        return wrapper
