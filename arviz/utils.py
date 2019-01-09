@@ -20,3 +20,13 @@ def _var_names(var_names):
 
     else:
         return var_names
+
+
+def conditional_jit(function):
+    "use numba's jit decorator if numba is installed"
+    try:
+        from numba import jit
+
+        return jit(function)
+    except ImportError:
+        return function

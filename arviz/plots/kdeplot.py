@@ -5,6 +5,7 @@ from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-na
 from scipy.sparse import coo_matrix
 from scipy.stats import entropy
 
+from ..utils import conditional_jit
 from .plot_utils import _scale_fig_size
 
 
@@ -255,7 +256,7 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     std_x = entropy(x - xmin) * bw
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
-    grid, _ = np.histogram(x, bins=n_bins)
+    grid = histogram(x, n_bins)
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
@@ -263,7 +264,7 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
     npad = min(n_bins, 2 * kern_nx)
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
-    density = convolve(grid, kernel, mode="same")[npad : npad + n_bins]
+    density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
 
     density /= np.sum(density)
 
@@ -271,6 +272,12 @@ def _fast_kde(x, cumulative=False, bw=4.5):
         density = np.cumsum(density)
 
     return density, xmin, xmax
+
+
+@conditional_jit
+def histogram(x, n_bins):
+    grid, _ = np.histogram(x, bins=n_bins)
+    return grid
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
