@@ -24,7 +24,6 @@ def _var_names(var_names):
 
 def conditional_jit(function=None, **kwargs):
     """Use numba's jit decorator if numba is installed."""
-
     def wrapper(function):
         try:
             from numba import jit
