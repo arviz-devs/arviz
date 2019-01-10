@@ -476,7 +476,7 @@ def test_plot_autocorr_var_names(models, var_names):
         {"point_estimate": False},
         {"ref_val": 0},
         {"ref_val": None},
-        {"ref_val": {"theta": [{"school": "Choate", "ref_val": 1}]}},
+        {"ref_val": {"mu": [{"ref_val": 1}]}},
         {"bins": None, "kind": "hist"},
         {"mu": {"ref_val": (-1, 1)}},
     ],
