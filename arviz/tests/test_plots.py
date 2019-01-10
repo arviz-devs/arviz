@@ -148,8 +148,7 @@ def test_plot_density_bad_kwargs(models):
         {"divergences": "top"},
         {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
-        {"lines": [("theta_t", {"theta_t_dim_0": 0}, 2.4)]},
-        {"lines": [("mu", 0)]},
+        {"lines": [("mu", {}, 8)]},
     ],
 )
 def test_plot_trace(models, model_fit, kwargs):
