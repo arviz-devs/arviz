@@ -237,7 +237,9 @@ def pystan_noncentered_schools(data, draws, chains):
     """
     if pystan_version() == 2:
         stan_model = pystan.StanModel(model_code=schools_code)
-        fit = stan_model.sampling(data=data, iter=draws, warmup=0, chains=chains)
+        fit = stan_model.sampling(
+            data=data, iter=draws, warmup=0, chains=chains, check_hmc_diagnostics=False
+        )
     else:
         # hard code schools data
         # bug in PyStan3 preview. It modify data in-place
@@ -307,34 +309,21 @@ def load_cached_models(eight_school_params, draws, chains):
 def pystan_extract_unpermuted(fit, var_names=None):
     """Extract PyStan samples unpermuted.
 
+    For PyStan 2.18+.
     Function returns everything as a float.
     """
     if var_names is None:
         var_names = fit.model_pars
+    elif isinstance(var_names, str):
+        var_names = [var_names]
     extract = fit.extract(var_names, permuted=False)
-    if not isinstance(extract, dict):
-        extract_permuted = fit.extract(var_names, permuted=True)
-        permutation_order = fit.sim["permutation"]
-        ary_order = []
-        for order in permutation_order:
-            order = np.argsort(order) + len(ary_order)
-            ary_order.extend(list(order))
-        nchain = fit.sim["chains"]
-        extract = {}
-        for key, ary in extract_permuted.items():
-            ary = np.asarray(ary)[ary_order]
-            if ary.shape:
-                ary_shape = ary.shape[1:]
-            else:
-                ary_shape = ary.shape
-            ary = ary.reshape((-1, nchain, *ary_shape), order="F")
-            extract[key] = ary
     return extract
 
 
 def stan_extract_dict(fit, var_names=None):
     """Extract draws from PyStan3 fit.
 
+    For PyStan 3.0a+
     Function returns everything as a float.
     """
     if var_names is None:

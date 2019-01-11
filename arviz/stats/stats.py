@@ -632,7 +632,7 @@ def summary(
         for stat_func in stat_funcs:
             metrics.append(
                 xr.apply_ufunc(
-                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"))
+                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                 )
             )
             metric_names.append(stat_func.__name__)
@@ -796,13 +796,7 @@ def _mc_error(x, batches=5, circular=False):
                 std = np.std(x)
             return std / np.sqrt(len(x))
 
-        try:
-            batched_traces = np.resize(x, (batches, int(len(x) / batches)))
-        except ValueError:
-            # If batches do not divide evenly, trim excess samples
-            resid = len(x) % batches
-            new_shape = (batches, (len(x) - resid) / batches)
-            batched_traces = np.resize(x[:-resid], new_shape)
+        batched_traces = np.resize(x, (batches, int(len(x) / batches)))
 
         if circular:
             means = st.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)

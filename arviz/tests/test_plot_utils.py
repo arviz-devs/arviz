@@ -3,7 +3,7 @@ import numpy as np
 import xarray as xr
 import pytest
 
-from ..plots.plot_utils import xarray_to_ndarray, xarray_var_iter, get_coords
+from ..plots.plot_utils import make_2d, xarray_to_ndarray, xarray_var_iter, get_bins, get_coords
 
 
 @pytest.fixture(scope="function")
@@ -20,6 +20,16 @@ def sample_dataset():
     )
 
     return mu, tau, data
+
+
+def test_make_2d():
+    """Touches code that is hard to reach."""
+    assert len(make_2d(np.array([2, 3, 4])).shape) == 2
+
+
+def test_get_bins():
+    """Touches code that is hard to reach."""
+    assert get_bins(np.array([1, 2, 3, 100]), max_bins=10) is not None
 
 
 def test_dataset_to_numpy_not_combined(sample_dataset):  # pylint: disable=invalid-name
@@ -40,8 +50,6 @@ def test_dataset_to_numpy_combined(sample_dataset):
     var_names, data = xarray_to_ndarray(data, combined=True)
 
     assert len(var_names) == 2
-    if var_names[0] == "tau":
-        data = data[::-1]
     assert (data[0] == mu.reshape(1, 6)).all()
     assert (data[1] == tau.reshape(1, 6)).all()
 
@@ -66,6 +74,16 @@ def test_xarray_var_iter_ordering_uncombined(sample_dataset):  # pylint: disable
             ("tau", {"chain": 0}),
             ("tau", {"chain": 1}),
         ]
+
+
+def test_xarray_var_data_array(sample_dataset):  # pylint: disable=invalid-name
+    """Assert that varname order stays consistent when chains are combined
+
+    Touches code that is hard to reach.
+    """
+    _, _, data = sample_dataset
+    var_names = [var for (var, _, _) in xarray_var_iter(data.mu, var_names=None, combined=True)]
+    assert set(var_names) == {"mu"}
 
 
 class TestCoordsExceptions:

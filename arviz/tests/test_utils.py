@@ -1,5 +1,5 @@
 """
-Tests for arviz.utils
+Tests for arviz.utils.
 """
 import pytest
 from arviz.utils import _var_names
