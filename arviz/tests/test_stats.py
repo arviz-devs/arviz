@@ -113,12 +113,6 @@ def test_summary_fmt(centered_eight, fmt):
     assert summary(centered_eight, fmt=fmt) is not None
 
 
-# Issue with xarray.apply_ufunc
-@pytest.mark.xfail(
-    reason="Issue #507. "
-    "_make_ufunc is broken."
-    "See https://github.com/arviz-devs/arviz/issues/507"
-)
 def test_summary_stat_func(centered_eight):
     assert summary(centered_eight, stat_funcs=[np.var]) is not None
 
