@@ -1,9 +1,9 @@
 """Statistical functions in ArviZ."""
 import warnings
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
-from scipy.special import logsumexp
 import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
@@ -281,6 +281,37 @@ def hpd(x, credible_interval=0.94, circular=False):
     return np.array([hdi_min, hdi_max])
 
 
+def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
+    """stable logsumexp when b>0"""
+    shape = ary.shape
+    shape_len = len(shape)
+    if isinstance(axis, Sequence):
+        axis = tuple(axis_i if axis_i >= 0 else shape_len + axis_i for axis_i in axis)
+    else:
+        axis = (axis if axis >= 0 else shape_len + axis,)
+    shape_max = tuple(1 if i in axis else d for i, d in enumerate(shape))
+    if out is None:
+        if not keepdims:
+            out_shape = tuple(d for i, d in enumerate(shape) if i not in axis)
+        else:
+            out_shape = shape_max
+        out = np.empty(out_shape)
+    ary_max = np.empty(shape_max)
+    ary.max(axis=axis, keepdims=True, out=ary_max)
+    if copy:
+        ary = ary.copy()
+    ary += ary_max
+    np.exp(ary, out=ary)
+    ary.sum(axis=axis, keepdims=keepdims, out=out)
+    np.log(out, out=out)
+    if b_inv is not None:
+        ary_max -= np.log(b_inv)
+    elif b:
+        ary_max += np.log(b)
+    out += ary_max.squeeze() if not keepdims else ary_max
+    return out
+
+
 def loo(data, pointwise=False, reff=None):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
@@ -346,11 +377,11 @@ def loo(data, pointwise=False, reff=None):
         )
         warn_mg = 1
 
-    loo_lppd_i = -2 * logsumexp(log_weights, axis=0)
+    loo_lppd_i = -2 * _logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
-    lppd = np.sum(logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0]))
+    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0]))
     p_loo = lppd + (0.5 * loo_lppd)
 
     if pointwise:
@@ -432,7 +463,7 @@ def psislw(log_weights, reff=1.0):
                 # truncate smoothed values to the largest raw weight 0
                 x[x > 0] = 0
         # renormalize weights
-        x -= logsumexp(x)
+        x -= _logsumexp(x)
         # store tail index k
         kss[i] = k
 
@@ -845,7 +876,7 @@ def waic(data, pointwise=False):
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
-    lppd_i = logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0])
+    lppd_i = _logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0])
 
     vars_lpd = np.var(log_likelihood, axis=0)
     warn_mg = 0
