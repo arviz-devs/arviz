@@ -120,7 +120,7 @@ def test_summary_fmt(centered_eight, fmt):
     "See https://github.com/arviz-devs/arviz/issues/507"
 )
 def test_summary_stat_func(centered_eight):
-    assert summary(centered_eight, stat_funcs=[np.var]) is not None
+    assert summary(centered_eight, stat_funcs=[lambda x: np.var(x, axis=(-1,-2))]) is not None
 
 
 def test_summary_bad_fmt(centered_eight):
