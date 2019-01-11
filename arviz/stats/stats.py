@@ -632,7 +632,7 @@ def summary(
         for stat_func in stat_funcs:
             metrics.append(
                 xr.apply_ufunc(
-                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"))
+                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                 )
             )
             metric_names.append(stat_func.__name__)
