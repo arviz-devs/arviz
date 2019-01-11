@@ -283,6 +283,7 @@ def hpd(x, credible_interval=0.94, circular=False):
 
 def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
     """stable logsumexp when b>0"""
+    ary = np.asarray(ary)
     shape = ary.shape
     shape_len = len(shape)
     if isinstance(axis, Sequence):
@@ -381,7 +382,7 @@ def loo(data, pointwise=False, reff=None):
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
-    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0]))
+    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
     p_loo = lppd + (0.5 * loo_lppd)
 
     if pointwise:
@@ -876,7 +877,7 @@ def waic(data, pointwise=False):
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
-    lppd_i = _logsumexp(log_likelihood, axis=0, b=1.0 / log_likelihood.shape[0])
+    lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
 
     vars_lpd = np.var(log_likelihood, axis=0)
     warn_mg = 0
