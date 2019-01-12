@@ -134,7 +134,7 @@ class DictConverter:
 
 
 # pylint disable=too-many-instance-attributes
-def from_python(
+def from_dict(
     posterior=None,
     *,
     posterior_predictive=None,
