@@ -140,11 +140,6 @@ def test_waic_bad(centered_eight):
         waic(centered_eight)
 
 
-@pytest.mark.xfail(
-    reason="Issue #509. "
-    "Numerical accuracy (logsumexp) prevents function to throw a warning."
-    "See https://github.com/arviz-devs/arviz/issues/509"
-)
 def test_waic_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     centered_eight.sample_stats["log_likelihood"][:, :250, 1] = 10

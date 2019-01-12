@@ -314,7 +314,7 @@ def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, cop
     ary.max(axis=axis, keepdims=True, out=ary_max)
     if copy:
         ary = ary.copy()
-    ary += ary_max
+    ary -= ary_max
     np.exp(ary, out=ary)
     ary.sum(axis=axis, keepdims=keepdims, out=out)
     np.log(out, out=out)
