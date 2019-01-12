@@ -451,11 +451,10 @@ class TestDictIONetCDFUtils:
         }
 
         # log_likelihood to posterior
-        with pytest.warns(UserWarning):
-            from_dict(posterior=log_likelihood)
+        assert from_dict(posterior=log_likelihood) is not None
 
         # dims == None
-        from_dict(observed_data=log_likelihood, dims=None)
+        assert from_dict(observed_data=log_likelihood, dims=None) is not None
 
     def test_inference_data_bad(self):
         # create data
