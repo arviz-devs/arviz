@@ -445,9 +445,9 @@ class TestDictIONetCDFUtils:
 
     def test_inference_data_bad(self):
         # create data
-        x = np.random.randn(4,100)
-        log_likelihood = {"log_likelihood" : np.random.randn(4,100,8)}
-        
+        x = np.random.randn(4, 100)
+        log_likelihood = {"log_likelihood": np.random.randn(4, 100, 8)}
+
         # log_likelihood to posterior
         with pytest.warns(UserWarning):
             from_dict(posterior=log_likelihood)
@@ -467,6 +467,7 @@ class TestDictIONetCDFUtils:
             from_dict(sample_stats_prior=x)
         with pytest.raises(TypeError):
             from_dict(observed_data=x)
+
 
 class TestEmceeNetCDFUtils:
     @pytest.fixture(scope="class")
