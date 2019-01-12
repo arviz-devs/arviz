@@ -288,12 +288,14 @@ def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, cop
     shape_len = len(shape)
     if isinstance(axis, Sequence):
         axis = tuple(axis_i if axis_i >= 0 else shape_len + axis_i for axis_i in axis)
+        agroup = axis
     else:
-        axis = (axis if (axis is None) or (axis >= 0) else shape_len + axis,)
-    shape_max = tuple(1 if i in axis else d for i, d in enumerate(shape))
+        axis = axis if (axis is None) or (axis >= 0) else shape_len + axis
+        agroup = axis,
+    shape_max = tuple(1 if i in agroup else d for i, d in enumerate(shape))
     if out is None:
         if not keepdims:
-            out_shape = tuple(d for i, d in enumerate(shape) if i not in axis)
+            out_shape = tuple(d for i, d in enumerate(shape) if i not in agroup)
         else:
             out_shape = shape_max
         out = np.empty(out_shape)
