@@ -282,14 +282,14 @@ def hpd(x, credible_interval=0.94, circular=False):
 
 
 def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
-    """stable logsumexp when b>0"""
+    """Stable logsumexp when b >= 0."""
     ary = np.asarray(ary)
     shape = ary.shape
     shape_len = len(shape)
     if isinstance(axis, Sequence):
         axis = tuple(axis_i if axis_i >= 0 else shape_len + axis_i for axis_i in axis)
     else:
-        axis = (axis if axis >= 0 else shape_len + axis,)
+        axis = (axis if (axis is None) or (axis >= 0) else shape_len + axis,)
     shape_max = tuple(1 if i in axis else d for i, d in enumerate(shape))
     if out is None:
         if not keepdims:
