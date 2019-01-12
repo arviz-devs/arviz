@@ -284,6 +284,9 @@ def hpd(x, credible_interval=0.94, circular=False):
 def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
     """Stable logsumexp when b >= 0."""
     ary = np.asarray(ary)
+    if ary.dtype.kind == "i":
+        ary = ary.astype(np.float64)
+    dtype = ary.dtype.type
     shape = ary.shape
     shape_len = len(shape)
     if isinstance(axis, Sequence):
@@ -291,15 +294,23 @@ def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, cop
         agroup = axis
     else:
         axis = axis if (axis is None) or (axis >= 0) else shape_len + axis
-        agroup = axis,
-    shape_max = tuple(1 if i in agroup else d for i, d in enumerate(shape))
+        agroup = (axis,)
+    shape_max = (
+        tuple(1 for _ in shape)
+        if axis is None
+        else tuple(1 if i in agroup else d for i, d in enumerate(shape))
+    )
     if out is None:
         if not keepdims:
-            out_shape = tuple(d for i, d in enumerate(shape) if i not in agroup)
+            out_shape = (
+                tuple()
+                if axis is None
+                else tuple(d for i, d in enumerate(shape) if i not in agroup)
+            )
         else:
             out_shape = shape_max
-        out = np.empty(out_shape)
-    ary_max = np.empty(shape_max)
+        out = np.empty(out_shape, dtype=dtype)
+    ary_max = np.empty(shape_max, dtype=dtype)
     ary.max(axis=axis, keepdims=True, out=ary_max)
     if copy:
         ary = ary.copy()
@@ -312,7 +323,7 @@ def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, cop
     elif b:
         ary_max += np.log(b)
     out += ary_max.squeeze() if not keepdims else ary_max
-    return out
+    return out if out.shape else dtype(out)
 
 
 def loo(data, pointwise=False, reff=None):
