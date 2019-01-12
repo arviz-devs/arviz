@@ -100,6 +100,8 @@ class DictConverter:
     def observed_data_to_xarray(self):
         """Convert observed_data to xarray."""
         data = self.observed_data
+        if not isinstance(data, dict):
+            raise TypeError("DictConverter.observed_data is not a dictionary")
         if self.dims is None:
             dims = {}
         else:

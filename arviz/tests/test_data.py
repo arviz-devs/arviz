@@ -443,6 +443,30 @@ class TestDictIONetCDFUtils:
         self.check_var_names_coords_dims(inference_data.prior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats_prior)
 
+    def test_inference_data_bad(self):
+        # create data
+        x = np.random.randn(4,100)
+        log_likelihood = {"log_likelihood" : np.random.randn(4,100,8)}
+        
+        # log_likelihood to posterior
+        with pytest.warns(UserWarning):
+            from_dict(posterior=log_likelihood)
+
+        # input ndarray
+        with pytest.raises(TypeError):
+            from_dict(posterior=x)
+        with pytest.raises(TypeError):
+            from_dict(posterior_predictive=x)
+        with pytest.raises(TypeError):
+            from_dict(sample_stats=x)
+        with pytest.raises(TypeError):
+            from_dict(prior=x)
+        with pytest.raises(TypeError):
+            from_dict(prior_predictive=x)
+        with pytest.raises(TypeError):
+            from_dict(sample_stats_prior=x)
+        with pytest.raises(TypeError):
+            from_dict(observed_data=x)
 
 class TestEmceeNetCDFUtils:
     @pytest.fixture(scope="class")
