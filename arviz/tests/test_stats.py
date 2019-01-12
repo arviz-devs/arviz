@@ -7,7 +7,7 @@ from scipy.stats import linregress
 
 from ..data import load_arviz_data
 from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
-from ..stats.stats import _gpinv, _mc_error
+from ..stats.stats import _gpinv, _mc_error, _logsumexp
 
 
 @pytest.fixture(scope="session")
@@ -212,3 +212,26 @@ def test_gpinv(probs, kappa, sigma):
     else:
         probs = np.array([-0.1, 0.1, 0.1, 0.2, 0.3])
     assert len(_gpinv(probs, kappa, sigma)) == len(probs)
+
+@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.float64))
+@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.float32))
+@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.int32))
+@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.int64))
+@pytest.mark.parametrize("axis" : None)
+@pytest.mark.parametrize("axis" : 0)
+@pytest.mark.parametrize("axis" : 1)
+@pytest.mark.parametrize("axis" : (-2, -1))
+@pytest.mark.parametrize("b" : 0)
+@pytest.mark.parametrize("b" : 1/100)
+@pytest.mark.parametrize("b" : 1/101)
+@pytest.mark.parametrize("b_inv" : None)
+@pytest.mark.parametrize("b_inv" : 100)
+@pytest.mark.parametrize("b_inv" : 101)
+@pytest.mark.parametrize("keepdims" : 1/100)
+@pytest.mark.parametrize("keepdims" : 1/101)
+def test_logsumexp(ary, axis, b, b_inv):
+    assert _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=True) not None
+    ary = ary.copy()
+    assert _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=False) not None
+    out = np.empty(5)
+    assert _logsumexp(ary=np.random.randn(10,5), axis=0)
