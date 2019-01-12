@@ -213,25 +213,20 @@ def test_gpinv(probs, kappa, sigma):
         probs = np.array([-0.1, 0.1, 0.1, 0.2, 0.3])
     assert len(_gpinv(probs, kappa, sigma)) == len(probs)
 
-@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.float64))
-@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.float32))
-@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.int32))
-@pytest.mark.parametrize("ary" : np.random.randn(100,101).astype(np.int64))
-@pytest.mark.parametrize("axis" : None)
-@pytest.mark.parametrize("axis" : 0)
-@pytest.mark.parametrize("axis" : 1)
-@pytest.mark.parametrize("axis" : (-2, -1))
-@pytest.mark.parametrize("b" : 0)
-@pytest.mark.parametrize("b" : 1/100)
-@pytest.mark.parametrize("b" : 1/101)
-@pytest.mark.parametrize("b_inv" : None)
-@pytest.mark.parametrize("b_inv" : 100)
-@pytest.mark.parametrize("b_inv" : 101)
-@pytest.mark.parametrize("keepdims" : 1/100)
-@pytest.mark.parametrize("keepdims" : 1/101)
-def test_logsumexp(ary, axis, b, b_inv):
-    assert _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=True) not None
+
+@pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
+@pytest.mark.parametrize("axis", [None, 0, 1, (-2, -1)])
+@pytest.mark.parametrize("b", [None, 0, 1 / 100, 1 / 101])
+@pytest.mark.parametrize("b_inv", [None, 100, 101])
+@pytest.mark.parametrize("keepdims", [True, False])
+def test_logsumexp(ary_dtype, axis, b, b_inv, keepdims):
+    ary = np.random.randn(100, 101).astype(ary_dtype)
+    assert (
+        _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=True) is not None
+    )
     ary = ary.copy()
-    assert _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=False) not None
+    assert (
+        _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=False) is not None
+    )
     out = np.empty(5)
-    assert _logsumexp(ary=np.random.randn(10,5), axis=0)
+    assert _logsumexp(ary=np.random.randn(10, 5), axis=0, out=out) is not None
