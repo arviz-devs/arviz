@@ -443,14 +443,23 @@ class TestDictIONetCDFUtils:
         self.check_var_names_coords_dims(inference_data.prior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats_prior)
 
-    def test_inference_data_bad(self):
+    def test_inference_data_edge_cases(self):
         # create data
-        x = np.random.randn(4, 100)
-        log_likelihood = {"log_likelihood": np.random.randn(4, 100, 8)}
+        log_likelihood = {
+            "y": np.random.randn(4, 100),
+            "log_likelihood": np.random.randn(4, 100, 8),
+        }
 
         # log_likelihood to posterior
         with pytest.warns(UserWarning):
             from_dict(posterior=log_likelihood)
+
+        # dims == None
+        from_dict(observed_data=log_likelihood, dims=None)
+
+    def test_inference_data_bad(self):
+        # create data
+        x = np.random.randn(4, 100)
 
         # input ndarray
         with pytest.raises(TypeError):
