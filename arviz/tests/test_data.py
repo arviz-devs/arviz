@@ -12,6 +12,7 @@ from arviz import (
     convert_to_inference_data,
     convert_to_dataset,
     from_cmdstan,
+    from_dict,
     from_pymc3,
     from_pystan,
     from_pyro,
@@ -385,6 +386,62 @@ class TestDictNetCDFUtils:
         assert dataset.chain.shape == (chains,)
         assert dataset.school.shape == (eight_schools_params["J"],)
         assert dataset.theta.shape == (chains, draws, eight_schools_params["J"])
+
+
+class TestDictIONetCDFUtils:
+    @pytest.fixture(scope="class")
+    def data(self, eight_schools_params, draws, chains):
+        # Data of the Eight Schools Model
+
+        class Data:
+            _, stan_fit = load_cached_models(eight_schools_params, draws, chains)["pystan"]
+            if pystan_version() == 2:
+                stan_dict = pystan_extract_unpermuted(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = np.swapaxes(vals, 0, 1)
+            else:
+                stan_dict = stan_extract_dict(stan_fit)
+                obj = {}
+                for name, vals in stan_dict.items():
+                    if name not in {"y_hat", "log_lik"}:  # extra vars
+                        obj[name] = vals
+
+        return Data
+
+    def check_var_names_coords_dims(self, dataset):
+        assert set(dataset.data_vars) == {"mu", "tau", "eta", "theta"}
+        assert set(dataset.coords) == {"chain", "draw", "school"}
+
+    def get_inference_data(self, data, eight_schools_params):
+        return from_dict(
+            posterior=data.obj,
+            posterior_predictive=data.obj,
+            sample_stats=data.obj,
+            prior=data.obj,
+            prior_predictive=data.obj,
+            sample_stats_prior=data.obj,
+            observed_data=eight_schools_params,
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
+
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data, "posterior_predictive")
+        assert hasattr(inference_data, "sample_stats")
+        assert hasattr(inference_data, "prior")
+        assert hasattr(inference_data, "prior_predictive")
+        assert hasattr(inference_data, "sample_stats_prior")
+        assert hasattr(inference_data, "observed_data")
+        self.check_var_names_coords_dims(inference_data.posterior)
+        self.check_var_names_coords_dims(inference_data.posterior_predictive)
+        self.check_var_names_coords_dims(inference_data.sample_stats)
+        self.check_var_names_coords_dims(inference_data.prior)
+        self.check_var_names_coords_dims(inference_data.prior_predictive)
+        self.check_var_names_coords_dims(inference_data.sample_stats_prior)
 
 
 class TestEmceeNetCDFUtils:

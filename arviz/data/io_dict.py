@@ -1,6 +1,4 @@
-"""PyStan-specific conversion code."""
-from collections import OrderedDict
-from copy import deepcopy
+"""Dictionary specific conversion code."""
 import logging
 
 import numpy as np
@@ -25,7 +23,6 @@ class DictConverter:
         prior_predictive=None,
         sample_stats_prior=None,
         observed_data=None,
-        log_likelihood=None,
         coords=None,
         dims=None,
     ):
@@ -61,7 +58,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -70,7 +67,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
     @requires("prior")
     def prior_to_xarray(self):
@@ -79,7 +76,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
     @requires("sample_stats_prior")
     def sample_stats_prior_to_xarray(self):
@@ -88,7 +85,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
     @requires("prior_predictive")
     def prior_predictive_to_xarray(self):
@@ -97,7 +94,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -178,7 +175,6 @@ def from_python(
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data=observed_data,
-        log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
     ).to_inference_data()
