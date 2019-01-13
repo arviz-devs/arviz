@@ -26,6 +26,7 @@ def plot_kde(
     rug_kwargs=None,
     contour_kwargs=None,
     ax=None,
+    legend=True,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
 
@@ -70,6 +71,8 @@ def plot_kde(
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE
     ax : matplotlib axes
+    legend : bool
+        Add legend to the figure. By default True.
 
     Returns
     -------
@@ -198,7 +201,7 @@ def plot_kde(
             ax.plot(x, density, label=label, **plot_kwargs)
             fill_func(fill_x, fill_y, **fill_kwargs)
 
-        if label:
+        if legend and label:
             ax.legend()
     else:
         if contour_kwargs is None:

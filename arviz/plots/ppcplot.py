@@ -272,6 +272,7 @@ def plot_ppc(
                         },
                         label="Posterior predictive mean {}".format(pp_var_name),
                         ax=ax,
+                        legend=legend,
                     )
                 else:
                     vals = pp_vals.flatten()
