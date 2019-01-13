@@ -216,9 +216,8 @@ def plot_ppc(
         obs_vals = obs_vals.flatten()
         if 1 in pp_vals.shape[1:]:
             pp_vals = pp_vals.squeeze(axis=tuple(a for a, _ in enumerate(pp_vals.shape[1:], 1)))
-        if len(pp_vals.shape) > 2:
-            pp_vals = pp_vals.reshape(
-                (pp_vals.shape[0] * pp_vals.shape[1], np.prod(pp_vals.shape[2:]))
+        pp_vals = pp_vals.reshape(
+                (np.prod(pp_vals.shape[:2]), np.prod(pp_vals.shape[2:]))
             )
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
