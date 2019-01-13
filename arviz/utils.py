@@ -23,8 +23,9 @@ def _var_names(var_names):
         return var_names
 
 
-def conditional_jit(function=None, **kwargs):
+def conditional_jit(function=None, **kwargs):  # noqa: D202
     """Use numba's jit decorator if numba is installed."""
+
     def wrapper(function):
         try:
             numba = importlib.import_module("numba")

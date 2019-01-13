@@ -1,10 +1,10 @@
 """
 Tests for arviz.utils
 """
-import pytest
+# pylint: disable=redefined-outer-name
 from unittest.mock import Mock
+import pytest
 from arviz.utils import _var_names
-from arviz import utils
 
 
 @pytest.mark.parametrize(
@@ -23,14 +23,19 @@ def utils_with_numba_import_fail(monkeypatch):
     failed_import.side_effect = ImportError
 
     from arviz import utils
-    monkeypatch.setattr(utils.importlib, 'import_module', failed_import)
+
+    monkeypatch.setattr(utils.importlib, "import_module", failed_import)
     return utils
 
 
 def test_utils_fixture(utils_with_numba_import_fail):
     """Meta test of utils fixture to ensure things are mocked out correctly"""
+
+    # If Numba doesn't exist in dev environment this should fail immediately
+    import numba  # pylint: disable=W0612
+
     with pytest.raises(ImportError):
-        utils.importlib.import_module("numba")
+        utils_with_numba_import_fail.importlib.import_module("numba")
 
 
 def test_conditional_jit_decorator_no_numba(utils_with_numba_import_fail):
@@ -39,24 +44,24 @@ def test_conditional_jit_decorator_no_numba(utils_with_numba_import_fail):
     Test can be distinguished from test_conditional_jit__numba_decorator
     by use of debugger or coverage tool
     """
-    utils = utils_with_numba_import_fail
 
-    @utils.conditional_jit
+    @utils_with_numba_import_fail.conditional_jit
     def func():
         return "Numba not used"
 
-    assert "Numba not used" == func()
+    assert func() == "Numba not used"
 
 
-def test_conditional_jit__numba_decorator():
+def test_conditional_jit_numba_decorator():
     """Tests to see if Numba is used when import failure.
 
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
     """
+    from arviz import utils
+
     @utils.conditional_jit
     def func():
         return "Numba used"
 
-    assert "Numba used" == func()
-
+    assert func() == "Numba used"
