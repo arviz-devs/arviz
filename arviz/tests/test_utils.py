@@ -32,7 +32,7 @@ def test_utils_fixture(utils_with_numba_import_fail):
     """Meta test of utils fixture to ensure things are mocked out correctly"""
 
     # If Numba doesn't exist in dev environment this should fail immediately
-    import numba  # pylint: disable=W0612
+    import numba  # pylint: disable=W0611,W0612
 
     with pytest.raises(ImportError):
         utils_with_numba_import_fail.importlib.import_module("numba")
