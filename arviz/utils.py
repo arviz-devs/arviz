@@ -1,4 +1,5 @@
 """General utilities."""
+import importlib
 
 
 def _var_names(var_names):
@@ -24,12 +25,11 @@ def _var_names(var_names):
 
 def conditional_jit(function=None, **kwargs):
     """Use numba's jit decorator if numba is installed."""
-
     def wrapper(function):
         try:
-            from numba import jit
+            numba = importlib.import_module("numba")
+            return numba.jit(**kwargs)(function)
 
-            return jit(**kwargs)(function)
         except ImportError:
             return function
 
