@@ -26,6 +26,7 @@ def plot_ppc(
     num_pp_samples=None,
     random_seed=None,
     jitter=0.1,
+    legend=True,
 ):
     """
     Plot for Posterior Predictive checks.
@@ -79,8 +80,10 @@ def plot_ppc(
         and the plot will change each call if a random sample is specified
         by `num_pp_samples`.
     jitter : float
-        If kind is "scatter", jitter will add random normal noise to the height
-        of the ppc samples and observed data. By default 0.1.
+        If kind is "scatter", jitter will add random uniform noise to the height
+        of the ppc samples and observed data. By default 0.7.
+    legend : bool
+        Add legend to figure. By default True.
 
     Returns
     -------
@@ -214,11 +217,7 @@ def plot_ppc(
 
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()
-        if 1 in pp_vals.shape[1:]:
-            pp_vals = pp_vals.squeeze(axis=tuple(a for a, _ in enumerate(pp_vals.shape[1:], 1)))
-        pp_vals = pp_vals.reshape(
-                (np.prod(pp_vals.shape[:2]), np.prod(pp_vals.shape[2:]))
-            )
+        pp_vals = pp_vals.reshape(total_pp_samples, -1)
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "density":
@@ -378,13 +377,22 @@ def plot_ppc(
                     )
 
             limit = ax.get_ylim()[1] * 1.05
-            y_rows = np.linspace(0, limit, num_pp_samples)
-            jitter_scale = y_rows[1] / 4
-
-            if jitter is None:
-                obs_yvals = np.zeros_like(obs_vals)
+            if jitter:
+                y_rows = np.linspace(0, limit, num_pp_samples + 1)
             else:
-                obs_yvals = np.random.randn(len(obs_vals)) * jitter_scale * jitter
+                y_rows = np.r_[0.0, np.linspace(0, limit, num_pp_samples)]
+
+            jitter_scale = (y_rows[2] - y_rows[1]) / 2
+            scale_low = -jitter_scale
+            scale_high = jitter_scale
+
+            if jitter:
+                obs_yvals = (
+                    y_rows[1]
+                    + np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals)) * jitter
+                )
+            else:
+                obs_yvals = np.zeros_like(obs_vals)
             ax.plot(
                 obs_vals,
                 obs_yvals,
@@ -395,10 +403,12 @@ def plot_ppc(
                 label="Observed {}".format(var_name),
             )
 
-            for vals, y in zip(pp_sampled_vals, y_rows[1:]):
+            for vals, y in zip(pp_sampled_vals, y_rows[2:]):
                 vals = np.array([vals]).flatten()
                 if jitter:
-                    yvals = [y] * len(vals) + np.random.randn(len(vals)) * jitter_scale * jitter
+                    yvals = [y] * len(vals) + np.random.uniform(
+                        low=scale_low, high=scale_high, size=len(vals)
+                    ) * jitter
                 else:
                     yvals = [y] * len(vals)
                 ax.plot(vals, yvals, "o", zorder=1, color="C5", markersize=markersize, alpha=alpha)
@@ -412,10 +422,11 @@ def plot_ppc(
             xlabel = var_name
         ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
 
-        if i == 0:
-            ax.legend(fontsize=xt_labelsize)
-        else:
-            ax.legend([])
+        if legend:
+            if i == 0:
+                ax.legend(fontsize=xt_labelsize)
+            else:
+                ax.legend([])
 
     return axes
 
