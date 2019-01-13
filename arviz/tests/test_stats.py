@@ -3,7 +3,9 @@ from copy import deepcopy
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
 import pytest
+from scipy.special import logsumexp
 from scipy.stats import linregress
+
 
 from ..data import load_arviz_data
 from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
@@ -220,6 +222,12 @@ def test_gpinv(probs, kappa, sigma):
 @pytest.mark.parametrize("b_inv", [None, 100, 101])
 @pytest.mark.parametrize("keepdims", [True, False])
 def test_logsumexp(ary_dtype, axis, b, b_inv, keepdims):
+    """Test ArviZ implementation of logsumexp.
+
+    Test also compares against Scipy implementation.
+    Case where b=0, they are equal.
+    Second case where b=x, and x is 1/(number of elements), they are almost equal.
+    """
     ary = np.random.randn(100, 101).astype(ary_dtype)
     assert (
         _logsumexp(ary=ary, axis=axis, b=b, b_inv=b_inv, keepdims=keepdims, copy=True) is not None
@@ -230,3 +238,16 @@ def test_logsumexp(ary_dtype, axis, b, b_inv, keepdims):
     )
     out = np.empty(5)
     assert _logsumexp(ary=np.random.randn(10, 5), axis=0, out=out) is not None
+
+    # Scipy implementation
+    if b_inv is not None:
+        b_scipy = 1 / b_inv
+    elif b is None:
+        if b_inv is None:
+            b_scipy = 0
+        else:
+            b_scipy = 1 / b_inv
+    scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
+    arviz_results = _logsumexp(ary, b=b, b_inv=b_inv, axis=axis, keepdims=keepdims)
+
+    assert_array_almost_equal(scipy_results, arviz_results)
