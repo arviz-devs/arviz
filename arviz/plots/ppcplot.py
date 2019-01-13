@@ -149,7 +149,9 @@ def plot_ppc(
         else:
             alpha = 0.2
 
-    assert jitter >= 0
+    if jitter is None:
+        jitter = 0.0
+    assert jitter >= 0.0
 
     observed = data.observed_data
     posterior_predictive = data.posterior_predictive
@@ -387,7 +389,7 @@ def plot_ppc(
             scale_low = 0
             scale_high = jitter_scale * jitter
 
-            obs_yvals = np.zeros_like(obs_vals)
+            obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
             if jitter:
                 obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
             ax.plot(
@@ -403,7 +405,7 @@ def plot_ppc(
 
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):
                 vals = np.array([vals]).flatten()
-                yvals = np.full(len(vals), y)
+                yvals = np.full_like(vals, y, dtype=np.float64)
                 if jitter:
                     yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
                 ax.plot(vals, yvals, "o", zorder=1, color="C5", markersize=markersize, alpha=alpha)
