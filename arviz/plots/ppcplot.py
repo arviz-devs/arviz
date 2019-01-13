@@ -72,7 +72,7 @@ def plot_ppc(
     num_pp_samples : int
         The number of posterior predictive samples to plot.
         It defaults to a maximum of 5 samples for `kind` = 'scatter' and
-        will set jitter to 0.1 unless defined otherwise.
+        will set jitter to 0.7 unless defined otherwise.
         Otherwise it defaults to all provided samples.
     random_seed : int
         Random number generator seed passed to numpy.random.seed to allow
@@ -378,12 +378,13 @@ def plot_ppc(
                         color="C0",
                         linewidth=linewidth,
                         label="Posterior predictive mean {}".format(pp_var_name),
-                        zorder=2,
+                        zorder=3,
                         linestyle="--",
                         drawstyle="steps-pre",
                     )
 
-            limit = ax.get_ylim()[1] * 1.05
+            _, limit = ax.get_ylim()
+            limit *= 1.05
             y_rows = np.linspace(0, limit, num_pp_samples + 1)
             jitter_scale = y_rows[1] - y_rows[0]
             scale_low = 0
@@ -400,7 +401,7 @@ def plot_ppc(
                 markersize=markersize,
                 alpha=alpha,
                 label="Observed {}".format(var_name),
-                zorder=3,
+                zorder=4,
             )
 
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):
@@ -408,7 +409,7 @@ def plot_ppc(
                 yvals = np.full_like(vals, y, dtype=np.float64)
                 if jitter:
                     yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
-                ax.plot(vals, yvals, "o", zorder=1, color="C5", markersize=markersize, alpha=alpha)
+                ax.plot(vals, yvals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha)
             ax.scatter([], [], color="C5", label="Posterior predictive {}".format(pp_var_name))
 
             ax.set_yticks([])

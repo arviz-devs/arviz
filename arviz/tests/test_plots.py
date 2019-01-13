@@ -365,11 +365,23 @@ def test_plot_pair_bad(models, model_fit):
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("alpha", [None, 0.2, 1])
 def test_plot_ppc(models, pymc3_sample_ppc, kind):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
     axes = plot_ppc(data, kind=kind, random_seed=3)
     assert axes
 
+
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
+def test_plot_ppc_multichain(models, kind, jitter):
+    np.random.seed(23)
+    data = from_dict(
+        posterior_predictive = {"x" : np.random.randn(4,100,30), "y_hat" : np.random.randn(4,100,3,10)}
+        observed_data = {"x" : np.random.randn(30), y = np.random.randn(3,10)}
+    )
+    axes = plot_ppc(data, kind=kind, data_pairs={"y" : "y_hat"} random_seed=3)
+    assert axes
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 def test_plot_ppc_discrete(kind):
