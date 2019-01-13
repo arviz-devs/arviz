@@ -281,8 +281,11 @@ def hpd(x, credible_interval=0.94, circular=False):
     return np.array([hdi_min, hdi_max])
 
 
-def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
-    """Stable logsumexp when b >= 0."""
+def _logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
+    """Stable logsumexp when b >= 0 and b is scalar.
+
+    b_inv overwrites b unless b_inv is None.
+    """
     # check dimensions for result arrays
     ary = np.asarray(ary)
     if ary.dtype.kind == "i":
@@ -312,6 +315,10 @@ def _logsumexp(ary, *, b=0, b_inv=None, axis=None, keepdims=False, out=None, cop
         else:
             out_shape = shape_max
         out = np.empty(out_shape, dtype=dtype)
+    if b_inv == 0:
+        return np.full_like(out, np.inf, dtype=dtype) if out.shape else np.inf
+    if b_inv is None and b == 0:
+        return np.full_like(out, -np.inf) if out.shape else -np.inf
     ary_max = np.empty(shape_max, dtype=dtype)
     # calculations
     ary.max(axis=axis, keepdims=True, out=ary_max)
