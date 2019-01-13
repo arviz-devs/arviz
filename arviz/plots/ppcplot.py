@@ -380,7 +380,7 @@ def plot_ppc(
 
             limit = ax.get_ylim()[1] * 1.05
             y_rows = np.linspace(0, limit, num_pp_samples)
-            jitter_scale = y_rows[1]
+            jitter_scale = y_rows[1] / 4
 
             if jitter is None:
                 obs_yvals = np.zeros_like(obs_vals)
