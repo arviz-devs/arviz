@@ -46,7 +46,7 @@ def plot_forest(
 
     Parameters
     ----------
-    data : obj
+    data : obj or list[obj]
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
     kind : str
@@ -325,10 +325,8 @@ class PlotHandler:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, y_mean, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
                 if isinstance(rope, dict):
-                    label, ticks = self.labels_and_ticks()
-                    rope_var = label[ticks == y_mean][0]
                     self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
                 mid = len(values) // 2
@@ -397,7 +395,7 @@ class PlotHandler:
         y_vals, y_prev, is_zero = [0], None, False
         prev_color_index = 0
         for plotter in self.plotters.values():
-            for y, _, _, color in plotter.iterator():
+            for y, *_, color in plotter.iterator():
                 if self.colors.index(color) < prev_color_index:
                     if not is_zero and y_prev is not None:
                         y_vals.append((y + y_prev) * 0.5)
@@ -479,7 +477,7 @@ class VarHandler:
                 else:
                     row_label = label
                 for values in value_list:
-                    yield y, row_label, values, self.model_color[model_name]
+                    yield y, row_label, label, values, self.model_color[model_name]
                     y += self.chain_offset
                 y += self.var_offset
             y += self.group_offset
@@ -487,7 +485,7 @@ class VarHandler:
     def labels_ticks_and_vals(self):
         """Get labels, ticks, values, and colors for the variable."""
         y_ticks = defaultdict(list)
-        for y, label, vals, color in self.iterator():
+        for y, label, _, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color))
         labels, ticks, vals, colors = [], [], [], []
         for label, data in y_ticks.items():
@@ -499,16 +497,15 @@ class VarHandler:
 
     def treeplot(self, qlist, credible_interval):
         """Get data for each treeplot for the variable."""
-        for y, _, values, color in self.iterator():
+        for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
-            y_mean = self.y_mean()
-            yield y, y_mean, ntiles, color
+            yield y, label, ntiles, color
 
     def ridgeplot(self, mult):
         """Get data for each ridgeplot for the variable."""
         xvals, yvals, pdfs, colors = [], [], [], []
-        for y, _, values, color in self.iterator():
+        for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
             values = values.flatten()
@@ -547,9 +544,3 @@ class VarHandler:
             end_y += self.group_offset
 
         return end_y + 2 * self.group_offset
-
-    def y_mean(self):
-        """Get max y value for the variable."""
-        mean_y = np.mean(list(y for y, *_ in self.iterator()))
-
-        return mean_y
