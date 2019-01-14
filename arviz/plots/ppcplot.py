@@ -23,6 +23,7 @@ def plot_ppc(
     var_names=None,
     coords=None,
     flatten=None,
+    flatten_pp=None,
     num_pp_samples=None,
     random_seed=None,
     jitter=0.1,
@@ -67,8 +68,13 @@ def plot_ppc(
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
     flatten : list
-        List of dimensions to flatten. Only flattens across the coordinates
+        List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
+    flatten_pp : list
+        List of dimensions to flatten in posterior_predictive. Only flattens across the coordinates
+        specified in the coords argument. Defaults to flattening all of the dimensions.
+        Dimensions should match flatten excluding dimensions for data_pairs parameters.
+        If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
     num_pp_samples : int
         The number of posterior predictive samples to plot.
         It defaults to a maximum of 5 samples for `kind` = 'scatter' and
@@ -161,9 +167,12 @@ def plot_ppc(
     var_names = _var_names(var_names)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
 
+    if flatten_pp is None and flatten is None:
+        flatten_pp = list(posterior_predictive.dims.keys())
+    elif flatten_pp is None:
+        flatten_pp = flatten
     if flatten is None:
         flatten = list(observed.dims.keys())
-        flatten_pp = list(posterior_predictive.dims.keys())
 
     if coords is None:
         coords = {}
