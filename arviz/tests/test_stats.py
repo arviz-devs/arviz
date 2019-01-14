@@ -246,7 +246,7 @@ def test_logsumexp_b(ary_dtype, axis, b, keepdims):
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
 @pytest.mark.parametrize("axis", [None, 0, 1, (-2, -1)])
-@pytest.mark.parametrize("b_inv", [None, 100, 101])
+@pytest.mark.parametrize("b_inv", [None, 0, 100, 101])
 @pytest.mark.parametrize("keepdims", [True, False])
 def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
     """Test ArviZ implementation of logsumexp.
@@ -265,12 +265,13 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
     out = np.empty(5)
     assert _logsumexp(ary=np.random.randn(10, 5), axis=0, out=out) is not None
 
-    # Scipy implementation
-    if b_inv is not None:
-        b_scipy = 1 / b_inv
-    else:
-        b_scipy = None
-    scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
-    arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
+    if b_inv != 0:
+        # Scipy implementation when b_inv != 0
+        if b_inv is not None:
+            b_scipy = 1 / b_inv
+        else:
+            b_scipy = None
+        scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
+        arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
 
-    assert_array_almost_equal(scipy_results, arviz_results)
+        assert_array_almost_equal(scipy_results, arviz_results)
