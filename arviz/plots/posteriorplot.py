@@ -1,4 +1,5 @@
 """Plot posterior densities."""
+from numbers import Number
 import numpy as np
 from scipy.stats import mode
 
@@ -215,18 +216,22 @@ def _plot_posterior_op(
         if ref_val is None:
             return
         elif isinstance(ref_val, dict):
+            val = None
             for sel in ref_val.get(var_name, []):
-                if all(k in selection and selection[k] == v for k, v in sel.items()):
+                if all(
+                    k in selection and selection[k] == v for k, v in sel.items() if k != "ref_val"
+                ):
                     val = sel["ref_val"]
                     break
-        elif np.isscalar(ref_val):
+            if val is None:
+                return
+        elif isinstance(ref_val, Number):
             val = ref_val
         else:
             raise ValueError(
                 "Argument `ref_val` must be None, a constant, or a "
                 'dictionary like {"var_name": {"ref_val": (lo, hi)}}'
             )
-
         less_than_ref_probability = (values < val).mean()
         greater_than_ref_probability = (values >= val).mean()
         ref_in_posterior = "{} <{:g}< {}".format(
@@ -373,7 +378,5 @@ def _plot_posterior_op(
     format_axes()
     display_hpd()
     display_point_estimate()
-    if ref_val is not None:
-        display_ref_val()
-    if rope is not None:
-        display_rope()
+    display_ref_val()
+    display_rope()

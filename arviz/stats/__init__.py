@@ -13,7 +13,7 @@ __all__ = [
     "r2_score",
     "summary",
     "waic",
-    "effective_n",
+    "effective_sample_size",
     "rhat",
     "geweke",
     "autocorr",

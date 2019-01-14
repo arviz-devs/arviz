@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from ..stats import hpd
-from ..stats.diagnostics import _get_neff, _get_split_rhat
+from ..stats.diagnostics import _get_ess, _get_split_rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
 from ..utils import _var_names
@@ -360,7 +360,6 @@ class PlotHandler:
         """Draw shaded horizontal bands for each plotter."""
         y_vals, y_prev, is_zero = [0], None, False
         prev_color_index = 0
-        plotter = None  # To make sure it is defined
         for plotter in self.plotters.values():
             for y, _, _, color in plotter.iterator():
                 if self.colors.index(color) < prev_color_index:
@@ -372,10 +371,7 @@ class PlotHandler:
                 prev_color_index = self.colors.index(color)
                 y_prev = y
 
-        if plotter is None:
-            offset = 1
-        else:
-            offset = plotter.group_offset
+        offset = plotter.group_offset  # pylint: disable=undefined-loop-variable
 
         y_vals.append(y_prev + offset)
         for idx, (y_start, y_stop) in enumerate(pairwise(y_vals)):
@@ -495,7 +491,7 @@ class VarHandler:
             if value.ndim != 2 or value.shape[0] < 2:
                 yield y, None, color
             else:
-                yield y, _get_neff(value), color
+                yield y, _get_ess(value), color
 
     def r_hat(self):
         """Get rhat data for the variable."""

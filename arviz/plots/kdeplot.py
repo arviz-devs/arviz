@@ -15,6 +15,7 @@ def plot_kde(
     rug=False,
     label=None,
     bw=4.5,
+    quantiles=None,
     rotated=False,
     contour=True,
     fill_last=True,
@@ -44,6 +45,9 @@ def plot_kde(
         Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
         rule of thumb (the default rule used by SciPy).
+    quantiles : list
+        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+        Defaults to None.
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
@@ -137,7 +141,6 @@ def plot_kde(
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault("alpha", 0)
         fill_kwargs.setdefault("color", default_color)
 
         if rug_kwargs is None:
@@ -155,6 +158,11 @@ def plot_kde(
         rug_space = max(density) * rug_kwargs.pop("space")
 
         x = np.linspace(lower, upper, len(density))
+
+        if cumulative:
+            density_q = density
+        else:
+            density_q = np.cumsum(density)
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
         if rotated:
@@ -163,7 +171,6 @@ def plot_kde(
 
         ax.tick_params(labelsize=xt_labelsize)
 
-        ax.plot(x, density, label=label, **plot_kwargs)
         if rotated:
             ax.set_xlim(0, auto=True)
             rug_x, rug_y = np.zeros_like(values) - rug_space, values
@@ -173,7 +180,23 @@ def plot_kde(
 
         if rug:
             ax.plot(rug_x, rug_y, **rug_kwargs)
-        fill_func(fill_x, fill_y, **fill_kwargs)
+
+        if quantiles is not None:
+            fill_kwargs.setdefault("alpha", 0.75)
+
+            idx = [np.sum(density_q < quant) for quant in quantiles]
+
+            fill_func(
+                fill_x,
+                fill_y,
+                where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
+                **fill_kwargs
+            )
+        else:
+            fill_kwargs.setdefault("alpha", 0)
+            ax.plot(x, density, label=label, **plot_kwargs)
+            fill_func(fill_x, fill_y, **fill_kwargs)
+
         if label:
             ax.legend()
     else:
@@ -233,7 +256,6 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
     grid, _ = np.histogram(x, bins=n_bins)
-    d_x = (xmax - xmin) / (n_bins - 1)
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
@@ -243,13 +265,10 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same")[npad : npad + n_bins]
 
-    norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
-
-    density = density / norm_factor
+    density /= np.sum(density)
 
     if cumulative:
-        cs_density = np.cumsum(density)
-        density = cs_density / cs_density[-1]
+        density = np.cumsum(density)
 
     return density, xmin, xmax
 

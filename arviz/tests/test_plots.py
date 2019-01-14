@@ -1,6 +1,5 @@
 # pylint: disable=redefined-outer-name
 import os
-import time
 from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -55,19 +54,7 @@ def clean_plots(request, save_figs):
 
     def fin():
         if save_figs is not None:
-
-            # Retry save three times
-            for i in range(3):
-                try:
-                    plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
-
-                except Exception as err:  # pylint: disable=broad-except
-                    if i == 2:
-                        raise err
-                    time.sleep(0.250)
-                else:
-                    break
-
+            plt.savefig("{0}.png".format(os.path.join(save_figs, request.node.name)))
         plt.close("all")
 
     request.addfinalizer(fin)
@@ -97,6 +84,12 @@ def discrete_model():
     return {"x": np.random.randint(10, size=100), "y": np.random.randint(10, size=100)}
 
 
+@pytest.fixture(scope="module")
+def continuous_model():
+    """Simple fixture for random continuous model"""
+    return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
+
+
 @pytest.fixture(scope="function")
 def fig_ax():
     fig, ax = plt.subplots(1, 1)
@@ -108,8 +101,11 @@ def fig_ax():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
+        {"credible_interval": 0.94},
+        {"credible_interval": 1},
         {"outline": True},
         {"colors": ["g", "b", "r", "y"]},
+        {"colors": "k"},
         {"hpd_markers": ["v"]},
         {"shade": 1},
     ],
@@ -127,6 +123,20 @@ def test_plot_density_discrete(discrete_model):
     assert axes.shape[0] == 2
 
 
+def test_plot_density_bad_kwargs(models):
+    obj = [
+        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
+    ]
+    with pytest.raises(ValueError):
+        plot_density(obj, point_estimate="bad_value")
+
+    with pytest.raises(ValueError):
+        plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
+
+    with pytest.raises(ValueError):
+        plot_density(obj, credible_interval=2)
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
 @pytest.mark.parametrize(
     "kwargs",
@@ -138,7 +148,7 @@ def test_plot_density_discrete(discrete_model):
         {"divergences": "top"},
         {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
-        {"lines": [("mu", 0)]},
+        {"lines": [("mu", {}, 8)]},
     ],
 )
 def test_plot_trace(models, model_fit, kwargs):
@@ -169,6 +179,7 @@ def test_plot_trace_discrete(discrete_model):
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
+        ({"kind": "ridgeplot", "r_hat": True, "eff_n": True, "ridgeplot_alpha": 0}, 3),
     ],
 )
 def test_plot_forest(models, model_fits, args_expected):
@@ -183,11 +194,31 @@ def test_plot_forest_single_value():
     assert axes.shape
 
 
+@pytest.mark.parametrize(
+    "model_fits",
+    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
+)
+def test_plot_forest_bad(models, model_fits):
+    obj = [getattr(models, model_fit) for model_fit in model_fits]
+    with pytest.raises(TypeError):
+        plot_forest(obj, kind="bad_kind")
+
+    with pytest.raises(ValueError):
+        plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("kind", ["kde", "hist"])
 def test_plot_energy(models, model_fit, kind):
     obj = getattr(models, model_fit)
     assert plot_energy(obj, kind=kind)
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_energy_bad(models, model_fit):
+    obj = getattr(models, model_fit)
+    with pytest.raises(ValueError):
+        plot_energy(obj, kind="bad_kind")
 
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
@@ -220,6 +251,16 @@ def test_plot_joint_discrete(discrete_model):
     assert axjoin
 
 
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "tfp_fit"])
+def test_plot_joint_bad(models, model_fit):
+    obj = getattr(models, model_fit)
+    with pytest.raises(ValueError):
+        plot_joint(obj, var_names=("mu", "tau"), kind="bad_kind")
+
+    with pytest.raises(Exception):
+        plot_joint(obj, var_names=("mu", "tau", "eta"))
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -228,16 +269,22 @@ def test_plot_joint_discrete(discrete_model):
         {"contour": False},
     ],
 )
-def test_plot_kde(discrete_model, kwargs):
-    axes = plot_kde(discrete_model["x"], discrete_model["y"], **kwargs)
+def test_plot_kde(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize("kwargs", [{"cumulative": True}, {"rug": True}])
+def test_plot_kde_cumulative(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], quantiles=[0.25, 0.5, 0.75], **kwargs)
     assert axes
 
 
 @pytest.mark.parametrize(
     "kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"cumulative": True}, {"rug": True}]
 )
-def test_plot_kde_cumulative(discrete_model, kwargs):
-    axes = plot_kde(discrete_model["x"], **kwargs)
+def test_plot_kde_quantiles(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], **kwargs)
     assert axes
 
 
@@ -267,6 +314,8 @@ def test_plot_khat():
             "var_names": ["theta", "mu"],
         },
         {"kind": "kde", "var_names": ["theta"]},
+        {"kind": "hexbin", "colorbar": False, "var_names": ["theta"]},
+        {"kind": "hexbin", "colorbar": True, "var_names": ["theta"]},
         {
             "kind": "hexbin",
             "var_names": ["theta"],
@@ -292,10 +341,19 @@ def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     assert ax
 
 
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+def test_plot_pair_bad(models, model_fit):
+    obj = getattr(models, model_fit)
+    with pytest.raises(ValueError):
+        plot_pair(obj, kind="bad_kind")
+    with pytest.raises(Exception):
+        plot_pair(obj, var_names=["mu"])
+
+
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 def test_plot_ppc(models, pymc3_sample_ppc, kind):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
-    axes = plot_ppc(data, kind=kind)
+    axes = plot_ppc(data, kind=kind, random_seed=3)
     assert axes
 
 
@@ -324,11 +382,38 @@ def test_plot_ppc_grid(models, pymc3_sample_ppc):
     assert len(axes) == 1
 
 
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+def test_plot_ppc_bad(models, pymc3_sample_ppc, kind):
+    data = from_pymc3(trace=models.pymc3_fit)
+    with pytest.raises(TypeError):
+        plot_ppc(data, kind=kind)
+    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+    with pytest.raises(TypeError):
+        plot_ppc(data, kind="bad_val")
+    with pytest.raises(TypeError):
+        plot_ppc(data, num_pp_samples="bad_val")
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, model_fit, var_names):
     obj = getattr(models, model_fit)
     axes = plot_violin(obj, var_names=var_names)
+    assert axes.shape
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+def test_plot_violin_ax(models, model_fit):
+    obj = getattr(models, model_fit)
+    _, ax = plt.subplots(1)
+    axes = plot_violin(obj, var_names="mu", ax=ax)
+    assert axes.shape
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
+def test_plot_violin_layout(models, model_fit):
+    obj = getattr(models, model_fit)
+    axes = plot_violin(obj, var_names=["mu", "tau"], sharey=False)
     assert axes.shape
 
 
@@ -387,7 +472,10 @@ def test_plot_autocorr_var_names(models, var_names):
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
+        {"point_estimate": False},
         {"ref_val": 0},
+        {"ref_val": None},
+        {"ref_val": {"mu": [{"ref_val": 1}]}},
         {"bins": None, "kind": "hist"},
         {"mu": {"ref_val": (-1, 1)}},
     ],
@@ -403,6 +491,17 @@ def test_plot_posterior(models, model_fit, kwargs):
 def test_plot_posterior_discrete(discrete_model, kwargs):
     axes = plot_posterior(discrete_model, **kwargs)
     assert axes.shape
+
+
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+def test_plot_posterior_bad(models, model_fit):
+    obj = getattr(models, model_fit)
+    with pytest.raises(ValueError):
+        plot_posterior(obj, rope="bad_value")
+    with pytest.raises(ValueError):
+        plot_posterior(obj, ref_val="bad_value")
+    with pytest.raises(ValueError):
+        plot_posterior(obj, point_estimate="bad_value")
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
@@ -446,6 +545,7 @@ def test_plot_compare_no_ic(models):
         {"fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
+        {"smooth": False},
     ],
 )
 def test_plot_hpd(models, model_fit, data, kwargs):

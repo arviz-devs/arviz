@@ -130,6 +130,7 @@ html_theme_options = {
         ("Gallery", "examples/index"),
         ("Quickstart", "notebooks/Introduction"),
         ("Cookbook", "notebooks/InferenceDataCookbook"),
+        ("InferenceData", "notebooks/XarrayforArviZ"),
         ("API", "api"),
         ("Usage", "usage"),
         ("About", "about"),

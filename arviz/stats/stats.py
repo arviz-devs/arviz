@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import effective_n, rhat
+from .diagnostics import effective_sample_size, rhat
 from ..utils import _var_names
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
@@ -326,7 +326,7 @@ def loo(data, pointwise=False, reff=None):
         if n_chains == 1:
             reff = 1.0
         else:
-            eff_n = effective_n(posterior)
+            eff_n = effective_sample_size(posterior)
             # this mean is over all data variables
             reff = (
                 np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
@@ -632,7 +632,7 @@ def summary(
         for stat_func in stat_funcs:
             metrics.append(
                 xr.apply_ufunc(
-                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"))
+                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                 )
             )
             metric_names.append(stat_func.__name__)
@@ -714,7 +714,7 @@ def summary(
         metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
 
     if len(posterior.chain) > 1:
-        metrics.append(effective_n(posterior, var_names=var_names))
+        metrics.append(effective_sample_size(posterior, var_names=var_names))
         metric_names.append("eff_n")
 
         metrics.append(rhat(posterior, var_names=var_names))
@@ -796,13 +796,7 @@ def _mc_error(x, batches=5, circular=False):
                 std = np.std(x)
             return std / np.sqrt(len(x))
 
-        try:
-            batched_traces = np.resize(x, (batches, int(len(x) / batches)))
-        except ValueError:
-            # If batches do not divide evenly, trim excess samples
-            resid = len(x) % batches
-            new_shape = (batches, (len(x) - resid) / batches)
-            batched_traces = np.resize(x[:-resid], new_shape)
+        batched_traces = np.resize(x, (batches, int(len(x) / batches)))
 
         if circular:
             means = st.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
