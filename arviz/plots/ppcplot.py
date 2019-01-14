@@ -163,6 +163,7 @@ def plot_ppc(
 
     if flatten is None:
         flatten = list(observed.dims.keys())
+        flatten_pp = list(posterior_predictive.dims.keys())
 
     if coords is None:
         coords = {}
@@ -201,7 +202,7 @@ def plot_ppc(
         xarray_var_iter(
             posterior_predictive.isel(coords),
             var_names=pp_var_names,
-            skip_dims=set(flatten),
+            skip_dims=set(flatten_pp),
             combined=True,
         )
     )
