@@ -47,13 +47,6 @@ install:
   - if [[ $NAME == LINT ]]; then pip install coveralls ; fi
   - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
 
-before_script:
-  # Doesn't affect testing anymore but leaving for reference
-- "export DISPLAY=:99.0"
-- "sh -e /etc/init.d/xvfb start"
-- sleep 3
-- export MKL_THREADING_LAYER=GNU
-
 script:
 
   # Tests command is default in dockerfile cmd
