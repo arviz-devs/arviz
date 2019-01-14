@@ -50,7 +50,6 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         except ImportError:
             return function
 
-    #
     if function:
         return wrapper(function)
     else:

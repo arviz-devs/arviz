@@ -82,6 +82,8 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
 
     @utils.conditional_jit(keyword_argument="A keyword argument")
     def placeholder_func():
+        """This function does nothing"""
         return
 
+    # pylint: disable=comparison-with-callable
     assert placeholder_func == {"keyword_argument": "A keyword argument"}
