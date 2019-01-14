@@ -384,7 +384,7 @@ def test_plot_ppc_multichain(kind, jitter):
         observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
     )
     axes = plot_ppc(data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, random_seed=3)
-    assert axes
+    assert np.all(axes)
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
