@@ -26,7 +26,7 @@ def plot_ppc(
     flatten_pp=None,
     num_pp_samples=None,
     random_seed=None,
-    jitter=0.1,
+    jitter=None,
     legend=True,
 ):
     """
@@ -87,7 +87,7 @@ def plot_ppc(
         by `num_pp_samples`.
     jitter : float
         If kind is "scatter", jitter will add random uniform noise to the height
-        of the ppc samples and observed data. By default 0.7.
+        of the ppc samples and observed data. By default 0.
     legend : bool
         Add legend to figure. By default True.
 
