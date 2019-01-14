@@ -325,10 +325,12 @@ class PlotHandler:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, y_mean, values, color in plotter.treeplot(qlist, credible_interval):
                 if isinstance(rope, dict):
                     label, ticks = self.labels_and_ticks()
-                    self.display_multiple_ropes(rope, ax, y, linewidth, label[ticks == y][0])
+                    rope_var = label[ticks == y_mean][0]
+                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
@@ -500,7 +502,8 @@ class VarHandler:
         for y, _, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
-            yield y, ntiles, color
+            y_mean = self.y_mean()
+            yield y, y_mean, ntiles, color
 
     def ridgeplot(self, mult):
         """Get data for each ridgeplot for the variable."""
@@ -544,3 +547,7 @@ class VarHandler:
             end_y += self.group_offset
 
         return end_y + 2 * self.group_offset
+
+    def y_mean(self):
+        """Get max y value for the variable."""
+        return np.mean(list(y for y, *_ in self.iterator()))
