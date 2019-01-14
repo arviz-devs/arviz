@@ -65,3 +65,23 @@ def test_conditional_jit_numba_decorator():
         return "Numba used"
 
     assert func() == "Numba used"
+
+
+def test_conditional_jit_numba_decorator_keyword(monkeypatch):
+    """Checks else statement and JIT keyword argument """
+    from arviz import utils
+
+    # Mock import lib to return numba with hit method which returns a function that returns kwargs
+    numba_mock = Mock()
+    monkeypatch.setattr(utils.importlib, "import_module", lambda x: numba_mock)
+
+    def jit(**kwargs):
+        return lambda x: kwargs
+
+    numba_mock.jit = jit
+
+    @utils.conditional_jit(keyword_argument="A keyword argument")
+    def placeholder_func():
+        return
+
+    assert placeholder_func == {"keyword_argument": "A keyword argument"}
