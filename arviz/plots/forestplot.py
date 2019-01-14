@@ -550,4 +550,6 @@ class VarHandler:
 
     def y_mean(self):
         """Get max y value for the variable."""
-        return np.mean(list(y for y, *_ in self.iterator()))
+        mean_y = np.mean(list(y for y, *_ in self.iterator()))
+
+        return mean_y
