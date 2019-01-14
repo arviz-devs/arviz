@@ -36,7 +36,7 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
 
         else called with arguments
 
-        @@conditional_jit(nopython=True)
+        @conditional_jit(nopython=True)
         def my_func():
             return
 
