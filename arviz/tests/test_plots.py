@@ -137,7 +137,7 @@ def test_plot_density_bad_kwargs(models):
 
 
 def test_histogram_without_numba():
-    random_state = np.random.RandomState(seed=17)
+    random_state = np.random.RandomState(seed=17)  # pylint: disable=no-member
     arr = random_state.randn(100)
     numpy_bins, _ = np.histogram(arr, bins=10)
     hist_bins = _histogram(arr, n_bins=10)
