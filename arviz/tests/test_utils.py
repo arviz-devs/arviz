@@ -4,7 +4,7 @@ Tests for arviz.utils.
 # pylint: disable=redefined-outer-name
 from unittest.mock import Mock
 import pytest
-from arviz.utils import _var_names
+from ..utils import _var_names
 
 
 @pytest.mark.parametrize(
@@ -53,9 +53,9 @@ def test_conditional_jit_decorator_no_numba(utils_with_numba_import_fail):
 
 
 def test_conditional_jit_numba_decorator():
-    """Tests to see if Numba is used when import failure.
+    """Tests to see if Numba is used.
 
-    Test can be distinguished from test_conditional_jit_decorator_no_numba
+    Test can be distinguished from test_conditional_jit_numba_decorator
     by use of debugger or coverage tool
     """
     from arviz import utils
