@@ -4,7 +4,7 @@ Tests for arviz.utils.
 # pylint: disable=redefined-outer-name
 from unittest.mock import Mock
 import pytest
-from arviz.utils import _var_names
+from ..utils import _var_names
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test_conditional_jit_decorator_no_numba(utils_with_numba_import_fail):
 
 
 def test_conditional_jit_numba_decorator():
-    """Tests to see if Numba is used when import failure.
+    """Tests to see if Numba is used.
 
     Test can be distinguished from test_conditional_jit_decorator_no_numba
     by use of debugger or coverage tool
@@ -76,14 +76,17 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     monkeypatch.setattr(utils.importlib, "import_module", lambda x: numba_mock)
 
     def jit(**kwargs):
-        return lambda x: kwargs
+        """overwrite numba.jit function"""
+        return lambda x: (x(), kwargs)
 
     numba_mock.jit = jit
 
     @utils.conditional_jit(keyword_argument="A keyword argument")
     def placeholder_func():
         """This function does nothing"""
-        return
+        return "output"
 
-    # pylint: disable=comparison-with-callable
-    assert placeholder_func == {"keyword_argument": "A keyword argument"}
+    # pylint: disable=unpacking-non-sequence
+    function_results, wrapper_result = placeholder_func
+    assert wrapper_result == {"keyword_argument": "A keyword argument"}
+    assert function_results == "output"

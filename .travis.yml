@@ -48,7 +48,7 @@ script:
 
   # Tests command is default in dockerfile cmd
   - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
-                                              "source /root/.bashrc && pytest -v arviz/tests/ --cov=arviz/";
+                                              "source /root/.bashrc && NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
     fi
 
   - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
