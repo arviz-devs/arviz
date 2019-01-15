@@ -2,9 +2,6 @@ dist: xenial
 
 language: python
 
-services:
-  - docker
-
 matrix:
   include:
   - name: "Python 3.6 Unit Test"
