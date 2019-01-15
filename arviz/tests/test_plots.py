@@ -176,10 +176,18 @@ def test_plot_trace_discrete(discrete_model):
     [
         ({}, 1),
         ({"var_names": "mu"}, 1),
+        ({"var_names": "mu", "rope": (-1, 1)}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True, "ridgeplot_alpha": 0}, 3),
+        (
+            {
+                "var_names": ["mu", "tau"],
+                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+            },
+            1,
+        ),
     ],
 )
 def test_plot_forest(models, model_fits, args_expected):
@@ -187,6 +195,12 @@ def test_plot_forest(models, model_fits, args_expected):
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
     assert axes.shape == (expected,)
+
+
+def test_plot_forest_rope_exception():
+    with pytest.raises(ValueError) as err:
+        plot_forest({"x": [1]}, rope="not_correct_format")
+    assert "Argument `rope` must be None, a dictionary like" in str(err)
 
 
 def test_plot_forest_single_value():
