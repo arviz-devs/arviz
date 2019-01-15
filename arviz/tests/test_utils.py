@@ -77,7 +77,7 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
 
     def jit(**kwargs):
         """overwrite numba.jit function"""
-        return lambda x: (lambda: x(), kwargs)
+        return lambda x: (x(), kwargs)
 
     numba_mock.jit = jit
 
@@ -87,6 +87,6 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
         return "output"
 
     # pylint: disable=comparison-with-callable
-    function, wrapper_result = placeholder_func
+    function_results, wrapper_result = placeholder_func
     assert wrapper_result == {"keyword_argument": "A keyword argument"}
-    assert function() == "output"
+    assert function_results == "output"
