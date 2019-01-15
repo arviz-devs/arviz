@@ -10,7 +10,7 @@ import pymc3 as pm
 
 
 from ..data import from_dict, from_pymc3, InferenceData
-from ..stats import compare
+from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -29,8 +29,6 @@ from ..plots import (
     plot_khat,
     plot_hpd,
 )
-
-from ..stats import psislw
 
 np.random.seed(0)
 
