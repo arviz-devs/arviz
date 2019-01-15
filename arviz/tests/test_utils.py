@@ -86,7 +86,6 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
         """This function does nothing"""
         return "output"
 
-    # pylint: disable=comparison-with-callable
     function_results, wrapper_result = placeholder_func
     assert wrapper_result == {"keyword_argument": "A keyword argument"}
     assert function_results == "output"
