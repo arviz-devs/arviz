@@ -87,3 +87,4 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
 
     # pylint: disable=comparison-with-callable
     assert placeholder_func == {"keyword_argument": "A keyword argument"}
+    assert placeholder_func() is None
