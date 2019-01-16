@@ -145,9 +145,35 @@ python setup.py install
 
 ArviZ is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
+
+## Citation
+
+
+If you use ArviZ and want to cite it please use [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143)
+
+Here is the citation in BibTeX format
+
+```
+@article{arviz_2019,
+	title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},
+	author = {Kumar, Ravin and Colin, Carrol and Hartikainen, Ari and Martin, Osvaldo A.},
+	journal = {The Journal of Open Source Software},
+	year = {2019},
+	doi = {10.21105/joss.01143},
+	url = {http://joss.theoj.org/papers/10.21105/joss.01143},
+}
+```
+
+
 ## Contributions
 ArviZ is a community project and welcomes contributions. 
 Additional information can be found in the [Contributing Readme](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md)
+
+
+## Code of Conduct
+ArviZ wishes to maintain a positive community. Additional details
+can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.MD)
+
 
 ### Developing
 
@@ -169,9 +195,4 @@ There is also a Dockerfile which helps for isolating build problems and local de
 This will build a local image with the tag `arviz`. 
 After building the image tests can be executing by running `docker run arviz`.
 An interactive shell can be started by running `docker run -it arviz /bin/bash`. The correct conda environment will be activated automatically.
-
-
-## Code of Conduct
-ArviZ wishes to maintain a positive community. Additional details
-can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.MD)
 
