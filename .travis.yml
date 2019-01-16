@@ -51,7 +51,7 @@ script:
                                               "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
     fi
 
-  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c t"./scripts/lint.sh";
+  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c "./scripts/lint.sh";
     fi
 
   # Tests saving plots and deleting files
