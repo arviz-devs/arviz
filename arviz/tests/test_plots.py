@@ -383,7 +383,9 @@ def test_plot_ppc_multichain(kind, jitter, animated):
         },
         observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
     )
-    axes = plot_ppc(data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, animated=animated, random_seed=3)
+    axes = plot_ppc(
+        data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, animated=animated, random_seed=3
+    )
     if animated:
         assert np.all(axes[0])
         assert np.all(axes[1])

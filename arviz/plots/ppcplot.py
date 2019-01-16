@@ -486,11 +486,10 @@ def _set_animation(
     plot_kwargs=None,
 ):
     if kind == "density":
+        length = len(pp_sampled_vals)
         if dtype == "f":
             y_vals, lower, upper = _fast_kde(pp_sampled_vals[0])
             x_vals = np.linspace(lower, upper, len(y_vals))
-
-            length = len(pp_sampled_vals)
 
             max_max = max([max(_fast_kde(pp_sampled_vals[i])[0]) for i in range(length)])
 
@@ -508,6 +507,15 @@ def _set_animation(
             vals = pp_sampled_vals[0]
             y_vals, x_vals = np.histogram(vals, bins="auto", density=True)
             line, = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
+
+            max_max = max(
+                [
+                    max(np.histogram(pp_sampled_vals[i], bins="auto", density=True)[0])
+                    for i in range(length)
+                ]
+            )
+
+            ax.set_ylim(0, max_max)
 
             def animate(i):
                 y_vals, x_vals = np.histogram(pp_sampled_vals[i], bins="auto", density=True)
