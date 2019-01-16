@@ -29,40 +29,13 @@ if [[ $* != *--global* ]]; then
 
     if [ "$DOCKER_BUILD" = true ] ; then
         # Also add it to root bash settings to set default if used later
+
         echo "Creating .bashrc profile for docker image"
-        echo "set conda_env=${ENVNAME}" > /root/.bashrc
-        echo "source activate ${ENVNAME}" >> /root/.bashrc
+        echo "set conda_env=${ENVNAME}" > /root/activate_conda.sh
+        echo "source activate ${ENVNAME}" >> /root/activate_conda.sh
+
+
     fi
 fi
 
-pip install --upgrade pip
 
-# Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
-# break the build. The first is the Python 3.5 wheel, the second is 3.6.
-if [ "$PYTHON_VERSION" = "3.5" ]; then
-    pip --no-cache-dir install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
-else
-    pip --no-cache-dir install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
-fi
-
-if [ "$PYSTAN_VERSION" = "latest" ]; then
-  pip --no-cache-dir install pystan
-else
-  if [ "$PYSTAN_VERSION" = "preview" ]; then
-    # try to skip other pre-releases than pystan
-    pip --no-cache-dir install numpy uvloop marshmallow PyYAML
-    pip --no-cache-dir install --pre pystan
-  else
-    pip --no-cache-dir install pystan==${PYSTAN_VERSION}
-  fi
-fi
-
-if [ "$PYRO_VERSION" = "latest" ]; then
-  pip --no-cache-dir install pyro-ppl
-else
-  pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
-fi
-
-#  Install editable using the setup.py
-pip install  --no-cache-dir -r requirements.txt
-pip install  --no-cache-dir -r requirements-dev.txt
