@@ -46,6 +46,21 @@ Contributions and issue reports are very welcome at
 `the github repository <https://github.com/arviz-devs/arviz>`_.
 
 
+If you use ArviZ and want to cite it please use |JOSS|
+
+Here is the citation in BibTeX format  
+
+.. code:: bash
+
+    @article{arviz_2019,
+	    title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},  
+	    author = {Kumar, Ravin and Colin, Carrol and Hartikainen, Ari and Martin, Osvaldo A.},  
+	    journal = {The Journal of Open Source Software},  
+	    year = {2019},  
+	    doi = {10.21105/joss.01143},  
+	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},  
+    }
+
 .. toctree::
     :maxdepth: 1
 
