@@ -9,8 +9,8 @@ import pytest
 import pymc3 as pm
 
 
-from ..data import from_pymc3, InferenceData
-from ..stats import compare
+from ..data import from_dict, from_pymc3, InferenceData
+from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -29,8 +29,6 @@ from ..plots import (
     plot_khat,
     plot_hpd,
 )
-
-from ..stats import psislw
 
 np.random.seed(0)
 
@@ -176,10 +174,18 @@ def test_plot_trace_discrete(discrete_model):
     [
         ({}, 1),
         ({"var_names": "mu"}, 1),
+        ({"var_names": "mu", "rope": (-1, 1)}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
         ({"kind": "ridgeplot", "r_hat": True, "eff_n": True, "ridgeplot_alpha": 0}, 3),
+        (
+            {
+                "var_names": ["mu", "tau"],
+                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+            },
+            1,
+        ),
     ],
 )
 def test_plot_forest(models, model_fits, args_expected):
@@ -187,6 +193,12 @@ def test_plot_forest(models, model_fits, args_expected):
     args, expected = args_expected
     _, axes = plot_forest(obj, **args)
     assert axes.shape == (expected,)
+
+
+def test_plot_forest_rope_exception():
+    with pytest.raises(ValueError) as err:
+        plot_forest({"x": [1]}, rope="not_correct_format")
+    assert "Argument `rope` must be None, a dictionary like" in str(err)
 
 
 def test_plot_forest_single_value():
@@ -351,10 +363,26 @@ def test_plot_pair_bad(models, model_fit):
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
-def test_plot_ppc(models, pymc3_sample_ppc, kind):
+@pytest.mark.parametrize("alpha", [None, 0.2, 1])
+def test_plot_ppc(models, pymc3_sample_ppc, kind, alpha):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
-    axes = plot_ppc(data, kind=kind, random_seed=3)
+    axes = plot_ppc(data, kind=kind, alpha=alpha, random_seed=3)
     assert axes
+
+
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
+def test_plot_ppc_multichain(kind, jitter):
+    np.random.seed(23)
+    data = from_dict(
+        posterior_predictive={
+            "x": np.random.randn(4, 100, 30),
+            "y_hat": np.random.randn(4, 100, 3, 10),
+        },
+        observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
+    )
+    axes = plot_ppc(data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, random_seed=3)
+    assert np.all(axes)
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])

@@ -27,6 +27,7 @@ def plot_forest(
     var_names=None,
     combined=False,
     credible_interval=0.94,
+    rope=None,
     quartiles=True,
     eff_n=False,
     r_hat=False,
@@ -45,7 +46,7 @@ def plot_forest(
 
     Parameters
     ----------
-    data : obj
+    data : obj or list[obj]
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
     kind : str
@@ -61,6 +62,10 @@ def plot_forest(
         chains will be plotted separately.
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94.
+    rope: tuple or dictionary of tuples
+        Lower and upper values of the Region Of Practical Equivalence. If a list with one
+        interval only is provided, the ROPE will be displayed across the y-axis. If more than one
+        interval is provided the length of the list should match the number of variables.
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval intervals.
         Defaults to True
@@ -91,7 +96,6 @@ def plot_forest(
     Returns
     -------
     gridspec : matplotlib GridSpec
-
     """
     var_names = _var_names(var_names)
 
@@ -134,10 +138,17 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0]
+            credible_interval,
+            quartiles,
+            xt_labelsize,
+            titlesize,
+            linewidth,
+            markersize,
+            axes[0],
+            rope,
         )
     elif kind == "ridgeplot":
-        plot_handler.ridgeplot(ridgeplot_overlap, xt_labelsize, linewidth, ridgeplot_alpha, axes[0])
+        plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
     else:
         raise TypeError(
             "Argument 'kind' must be one of 'forestplot' or "
@@ -181,6 +192,8 @@ def plot_forest(
 
 class PlotHandler:
     """Class to handle logic from ForestPlot."""
+
+    # pylint: disable=inconsistent-return-statements
 
     def __init__(self, data, var_names, model_names, combined, colors):
         if not isinstance(data, (list, tuple)):
@@ -239,15 +252,27 @@ class PlotHandler:
             idxs.append(sub_idxs)
         return np.concatenate(labels), np.concatenate(idxs)
 
-    def ridgeplot(self, mult, xt_labelsize, linewidth, alpha, ax):
+    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
+        """Display ROPE when more than one interval is provided."""
+        vals = dict(rope[rope_var][0])["rope"]
+        ax.plot(
+            vals,
+            (y + 0.05, y + 0.05),
+            lw=linewidth * 2,
+            color="C2",
+            solid_capstyle="round",
+            zorder=0,
+            alpha=0.7,
+        )
+        return ax
+
+    def ridgeplot(self, mult, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
         ----------
         mult : float
             How much to multiply height by. Set this to greater than 1 to have some overlap.
-        xt_labelsize : float
-            Size of tick text
         linewidth : float
             Width of line on border of ridges
         alpha : float
@@ -268,13 +293,10 @@ class PlotHandler:
                 ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
                 ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
-
-        ax.tick_params(labelsize=xt_labelsize)
-
         return ax
 
     def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax
+        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
 
@@ -303,7 +325,10 @@ class PlotHandler:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+                if isinstance(rope, dict):
+                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+
                 mid = len(values) // 2
                 param_iter = zip(
                     np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
@@ -322,7 +347,16 @@ class PlotHandler:
         ax.set_title(
             "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
         )
-
+        if rope is None or isinstance(rope, dict):
+            return
+        elif len(rope) == 2:
+            ax.axvspan(rope[0], rope[1], 0, self.y_max(), color="C2", alpha=0.5)
+        else:
+            raise ValueError(
+                "Argument `rope` must be None, a dictionary like"
+                '{"var_name": {"rope": (lo, hi)}}, or an '
+                "iterable of length 2"
+            )
         return ax
 
     def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
@@ -361,7 +395,7 @@ class PlotHandler:
         y_vals, y_prev, is_zero = [0], None, False
         prev_color_index = 0
         for plotter in self.plotters.values():
-            for y, _, _, color in plotter.iterator():
+            for y, *_, color in plotter.iterator():
                 if self.colors.index(color) < prev_color_index:
                     if not is_zero and y_prev is not None:
                         y_vals.append((y + y_prev) * 0.5)
@@ -443,7 +477,7 @@ class VarHandler:
                 else:
                     row_label = label
                 for values in value_list:
-                    yield y, row_label, values, self.model_color[model_name]
+                    yield y, row_label, label, values, self.model_color[model_name]
                     y += self.chain_offset
                 y += self.var_offset
             y += self.group_offset
@@ -451,7 +485,7 @@ class VarHandler:
     def labels_ticks_and_vals(self):
         """Get labels, ticks, values, and colors for the variable."""
         y_ticks = defaultdict(list)
-        for y, label, vals, color in self.iterator():
+        for y, label, _, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color))
         labels, ticks, vals, colors = [], [], [], []
         for label, data in y_ticks.items():
@@ -463,15 +497,15 @@ class VarHandler:
 
     def treeplot(self, qlist, credible_interval):
         """Get data for each treeplot for the variable."""
-        for y, _, values, color in self.iterator():
+        for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
-            yield y, ntiles, color
+            yield y, label, ntiles, color
 
     def ridgeplot(self, mult):
         """Get data for each ridgeplot for the variable."""
         xvals, yvals, pdfs, colors = [], [], [], []
-        for y, _, values, color in self.iterator():
+        for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
             values = values.flatten()

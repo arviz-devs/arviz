@@ -16,3 +16,4 @@ sphinx-bootstrap-theme
 sphinx-gallery
 travis-sphinx == 2.0.0
 black; python_version == '3.6'
+numba
