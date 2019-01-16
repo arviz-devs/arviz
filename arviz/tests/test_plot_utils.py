@@ -50,8 +50,8 @@ def test_dataset_to_numpy_combined(sample_dataset):
     var_names, data = xarray_to_ndarray(data, combined=True)
 
     assert len(var_names) == 2
-    assert (data[0] == mu.reshape(1, 6)).all()
-    assert (data[1] == tau.reshape(1, 6)).all()
+    assert (data[var_names.index("mu")] == mu.reshape(1, 6)).all()
+    assert (data[var_names.index("tau")] == tau.reshape(1, 6)).all()
 
 
 def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
