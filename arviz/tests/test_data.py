@@ -506,8 +506,9 @@ class TestEmceeNetCDFUtils:
             from_emcee(data.obj, arg_names=["not", "enough"])
 
     def test_ln_funcs_for_infinity(self):
-        assert np.isinf(emcee_lnprior([1000, 10000, 1_000_000]))
-        assert np.isinf(emcee_lnprob([1000, 10000, 1_000_000], 0, 0, 0))
+        # after dropping Python 3.5 support use underscore 1_000_000
+        assert np.isinf(emcee_lnprior([1000, 10000, 1000000]))
+        assert np.isinf(emcee_lnprob([1000, 10000, 1000000], 0, 0, 0))
 
 
 class TestIONetCDFUtils:
