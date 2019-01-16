@@ -179,11 +179,11 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
             u_weights = np.exp(-0.5 * (z_b - np.min(z_b)))
-            z_bs[i] = z_b
+            z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
         weights = weights.mean(axis=0)
-        ses = pd.Series(z_bs.std(axis=0), index=names)
+        ses = pd.Series(z_bs.std(axis=0), index=names)  # pylint: disable=no-member
 
     elif method == "pseudo-BMA":
         min_ic = ics.iloc[0][ic]
@@ -451,7 +451,7 @@ def psislw(log_weights, reff=1.0):
 
     # precalculate constants
     cutoff_ind = -int(np.ceil(min(rows / 5.0, 3 * (rows / reff) ** 0.5))) - 1
-    cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member
+    cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
     k_min = 1.0 / 3
 
     # loop over sets of log weights
@@ -464,7 +464,7 @@ def psislw(log_weights, reff=1.0):
         xcutoff = max(x[x_sort_ind[cutoff_ind]], cutoffmin)
 
         expxcutoff = np.exp(xcutoff)
-        tailinds, = np.where(x > xcutoff)
+        tailinds, *_ = np.where(x > xcutoff)
         x_tail = x[tailinds]
         tail_len = len(x_tail)
         if tail_len <= 4:
@@ -482,7 +482,9 @@ def psislw(log_weights, reff=1.0):
                 # compute ordered statistic for the fit
                 sti = np.arange(0.5, tail_len) / tail_len
                 smoothed_tail = _gpinv(sti, k, sigma)
-                smoothed_tail = np.log(smoothed_tail + expxcutoff)
+                smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
+                    smoothed_tail + expxcutoff
+                )
                 # place the smoothed tail into the output array
                 x[tailinds[x_tail_si]] = smoothed_tail
                 # truncate smoothed values to the largest raw weight 0
@@ -559,15 +561,17 @@ def _gpinv(probs, kappa, sigma):
         x *= sigma
     else:
         if np.abs(kappa) < np.finfo(float).eps:
-            x[ok] = -np.log1p(-probs[ok])
+            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation
         else:
-            x[ok] = np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
+            x[ok] = (  # pylint: disable=unsupported-assignment-operation
+                np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
+            )
         x *= sigma
         x[probs == 0] = 0
         if kappa >= 0:
-            x[probs == 1] = np.inf
+            x[probs == 1] = np.inf  # pylint: disable=unsupported-assignment-operation
         else:
-            x[probs == 1] = -sigma / kappa
+            x[probs == 1] = -sigma / kappa  # pylint: disable=unsupported-assignment-operation
 
     return x
 
