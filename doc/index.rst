@@ -3,9 +3,17 @@ ArviZ: Exploratory analysis of Bayesian models
 |Build Status|
 |Coverage Status|
 |black|
+|JOSS|
+|Zenodo|
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
+
+.. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01143/status.svg
+   :target: https://doi.org/10.21105/joss.01143
+
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg
+   :target: https://doi.org/10.5281/zenodo.2540945
 
 .. raw:: html
 
