@@ -24,7 +24,7 @@ class DictConverter:
         sample_stats_prior=None,
         observed_data=None,
         coords=None,
-        dims=None,
+        dims=None
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -146,7 +146,7 @@ def from_dict(
     sample_stats_prior=None,
     observed_data=None,
     coords=None,
-    dims=None,
+    dims=None
 ):
     """Convert Dictionary data into an InferenceData object.
 
