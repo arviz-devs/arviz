@@ -156,7 +156,7 @@ Here is the citation in BibTeX format
 ```
 @article{arviz_2019,
 	title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},
-	author = {Kumar, Ravin and Colin, Carrol and Hartikainen, Ari and Martin, Osvaldo A.},
+	author = {Kumar, Ravin and Colin, Carroll and Hartikainen, Ari and Martin, Osvaldo A.},
 	journal = {The Journal of Open Source Software},
 	year = {2019},
 	doi = {10.21105/joss.01143},
