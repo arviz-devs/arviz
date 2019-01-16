@@ -1,7 +1,6 @@
 FROM conda/miniconda3
 
-
-MAINTAINER Ravin Kumar
+LABEL maintainer="SvenDowideit@home.org.au"
 
 ARG SRC_DIR
 ARG PYTHON_VERSION
