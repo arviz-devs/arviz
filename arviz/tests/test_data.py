@@ -9,6 +9,7 @@ import pymc3 as pm
 import pytest
 
 from arviz import (
+    concat,
     convert_to_inference_data,
     convert_to_dataset,
     from_cmdstan,
@@ -163,6 +164,123 @@ def test_make_attrs():
     attrs = make_attrs(attrs=extra_attrs)
     assert "key" in attrs
     assert attrs["key"] == "Value"
+
+
+def test_addition():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = idata1 + idata2
+    assert new_idata is not None
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata, "prior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
+    assert hasattr(new_idata.prior, "C")
+    assert hasattr(new_idata.prior, "D")
+
+
+def test_concat():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat(idata1, idata2)
+    assert new_idata is not None
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata, "prior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
+    assert hasattr(new_idata.prior, "C")
+    assert hasattr(new_idata.prior, "D")
+
+
+def test_concat_inplace():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat(idata1, idata2, inplace=True)
+    assert new_idata is None
+    assert hasattr(idata1, "posterior")
+    assert hasattr(idata1, "prior")
+    assert hasattr(idata1.posterior, "A")
+    assert hasattr(idata1.posterior, "B")
+    assert hasattr(idata1.prior, "C")
+    assert hasattr(idata1.prior, "D")
+
+
+def test_concat_sequency():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat((idata1, idata2))
+    assert new_idata is not None
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata, "prior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
+    assert hasattr(new_idata.prior, "C")
+    assert hasattr(new_idata.prior, "D")
+
+
+def test_concat_copy_True():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat(idata1, idata2, copy=True)
+    assert new_idata is not None
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata, "prior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
+    assert hasattr(new_idata.prior, "C")
+    assert hasattr(new_idata.prior, "D")
+    assert id(new_idata.posterior) != id(idata1.posterior)
+    assert id(new_idata.prior) != id(idata1.prior)
+
+
+def test_concat_copy_False():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat(idata1, idata2, copy=False)
+    assert new_idata is not None
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata, "prior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
+    assert hasattr(new_idata.prior, "C")
+    assert hasattr(new_idata.prior, "D")
+    assert id(new_idata.posterior) == id(idata1.posterior)
+    assert id(new_idata.prior) == id(idata1.prior)
+
+
+def test_concat_sequency_inplace():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    new_idata = concat((idata1, idata2), inplace=True)
+    assert new_idata is None
+    assert hasattr(idata1, "posterior")
+    assert hasattr(idata1, "prior")
+    assert hasattr(idata1.posterior, "A")
+    assert hasattr(idata1.posterior, "B")
+    assert hasattr(idata1.prior, "C")
+    assert hasattr(idata1.prior, "D")
+
+
+def test_concat_bad():
+    with pytest.raises(TypeError):
+        concat("hello", "hello")
+    idata = from_dict(posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)})
+    with pytest.raises(NotImplementedError):
+        concat(idata, idata)
 
 
 class TestNumpyToDataArray:

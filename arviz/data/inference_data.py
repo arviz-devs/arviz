@@ -1,4 +1,7 @@
 """Data structure for using netcdf groups with xarray."""
+from collections import OrderedDict
+from collections.abc import Sequence
+from copy import copy as ccopy, deepcopy
 import netCDF4 as nc
 import xarray as xr
 
@@ -86,3 +89,98 @@ class InferenceData:
             data.close()
             mode = "a"
         return filename
+
+    def __add__(self, other):
+        """Concatenate two InferenceData objects."""
+        return concat(self, other, copy=True, inplace=False)
+
+
+# pylint: disable=protected-access
+def concat(*args, copy=True, inplace=False):
+    """Concatenate InferenceData objects on a group level.
+
+    Supports only concatenating with independent unique groups.
+
+    Parameters
+    ----------
+    *args : InferenceData
+        Variable length InferenceData list or
+        Sequence of InferenceData.
+    copy : bool
+        If True, groups are copied to the new InferenceData object.
+    inplace : bool
+        If True, merge args to first object.
+
+    Returns
+    -------
+    InferenceData
+        A new InferenceData object by default.
+        When `inplace==True` merge args to first arg and return `None`
+    """
+    if len(args) == 1 and isinstance(args, Sequence):
+        args = args[0]
+    if len(args) == 0:
+        return InferenceData()
+    elif len(args) == 1:
+        if isinstance(args[0], InferenceData):
+            if inplace:
+                return args[0]
+            else:
+                return deepcopy(args[0])
+
+    # assert that all args are InferenceData
+    for i, arg in enumerate(args):
+        if not isinstance(arg, InferenceData):
+            raise TypeError(
+                "Concatenating is supported only"
+                "between InferenceData objects. Input arg {} is {}".format(i, type(arg))
+            )
+    # assert that groups are independent
+    first_arg = args[0]
+    first_arg_groups = ccopy(first_arg._groups)
+    args_groups = dict()
+    for arg in args[1:]:
+        for group in arg._groups:
+            if group in args_groups or group in first_arg_groups:
+                raise NotImplementedError("Concatenating with overlapping groups is not supported.")
+            group_data = getattr(arg, group)
+            args_groups[group] = deepcopy(group_data) if copy else group_data
+
+    # add first_arg to args_groups if inplace is False
+    if not inplace:
+        for group in first_arg_groups:
+            group_data = getattr(first_arg, group)
+            args_groups[group] = deepcopy(group_data) if copy else group_data
+
+    basic_order = [
+        "posterior",
+        "posterior_predictive",
+        "sample_stats",
+        "prior",
+        "prior_predictive",
+        "sample_stats_prior",
+        "observed_data",
+    ]
+    other_groups = [group for group in args_groups if group not in basic_order]
+
+    if not inplace:
+        # Keep order for python 3.5
+        inference_data_dict = OrderedDict()
+    for group in basic_order + other_groups:
+        if group not in args_groups:
+            continue
+        if inplace:
+            first_arg._groups.append(group)
+            setattr(first_arg, group, args_groups[group])
+        else:
+            inference_data_dict[group] = args_groups[group]
+    if inplace:
+        other_groups = [
+            group for group in first_arg_groups if group not in basic_order
+        ] + other_groups
+        sorted_groups = [
+            group for group in basic_order + other_groups if group in first_arg._groups
+        ]
+        setattr(first_arg, "_groups", sorted_groups)
+        return None
+    return InferenceData(**inference_data_dict)
