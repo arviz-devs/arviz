@@ -117,10 +117,10 @@ def concat(*args, copy=True, inplace=False):
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
     """
-    if len(args) == 1 and isinstance(args, Sequence):
-        args = args[0]
     if len(args) == 0:
         return InferenceData()
+    if len(args) == 1 and isinstance(args, Sequence):
+        args = args[0]
     elif len(args) == 1:
         if isinstance(args[0], InferenceData):
             if inplace:
