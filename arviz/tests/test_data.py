@@ -232,11 +232,12 @@ def test_concat_edgecases(copy, inplace, sequence):
         new_idata = concat(idata, copy=copy, inplace=inplace)
     if inplace:
         assert new_idata is None
+        mew_idata = idata
     else:
         assert new_idata is not None
-    assert hasattr(idata, "posterior")
-    assert hasattr(idata.posterior, "A")
-    assert hasattr(idata.posterior, "B")
+    assert hasattr(new_idata, "posterior")
+    assert hasattr(new_idata.posterior, "A")
+    assert hasattr(new_idata.posterior, "B")
     if copy:
         assert id(new_idata.posterior) != id(idata.posterior)
     else:
