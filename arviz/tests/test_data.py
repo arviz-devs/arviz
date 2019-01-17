@@ -275,6 +275,25 @@ def test_concat_sequency_inplace():
     assert hasattr(idata1.prior, "D")
 
 
+def test_concat_edgecases():
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+    )
+    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
+    empty = concat()
+    assert empty is not None
+    new_idata = concat(idata1)
+    assert new_idata is not None
+    assert hasattr(idata1, "posterior")
+    assert hasattr(idata1.posterior, "A")
+    assert hasattr(idata1.posterior, "B")
+    new_idata2 = concat(idata2, inplace=True)
+    assert new_idata2 is None
+    assert hasattr(idata2, "prior")
+    assert hasattr(idata2.prior, "C")
+    assert hasattr(idata2.prior, "D")
+
+
 def test_concat_bad():
     with pytest.raises(TypeError):
         concat("hello", "hello")
