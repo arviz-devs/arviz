@@ -237,7 +237,7 @@ def test_concat_edgecases(copy, inplace, sequence):
         new_idata = concat(idata, copy=copy, inplace=inplace)
     if inplace:
         assert new_idata is None
-        mew_idata = idata
+        new_idata = idata
     else:
         assert new_idata is not None
     assert hasattr(new_idata, "posterior")
