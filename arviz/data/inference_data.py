@@ -119,14 +119,17 @@ def concat(*args, copy=True, inplace=False):
     """
     if len(args) == 0:
         return InferenceData()
-    if len(args) == 1 and isinstance(args, Sequence):
+    if len(args) == 1 and isinstance(args[0], Sequence):
         args = args[0]
     elif len(args) == 1:
         if isinstance(args[0], InferenceData):
             if inplace:
-                return args[0]
+                return None
             else:
-                return deepcopy(args[0])
+                if copy:
+                    return deepcopy(args[0])
+                else:
+                    return args[0]
 
     # assert that all args are InferenceData
     for i, arg in enumerate(args):
