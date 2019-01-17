@@ -213,7 +213,7 @@ def test_concat(copy, inplace, sequence):
     assert hasattr(new_idata.observed_data, "F")
     if copy:
         if inplace:
-            assert id(new_idata.posterior) != original_idata1_posterior_id
+            assert id(new_idata.posterior) == original_idata1_posterior_id
         else:
             assert id(new_idata.posterior) != id(idata1.posterior)
         assert id(new_idata.prior) != id(idata2.prior)
