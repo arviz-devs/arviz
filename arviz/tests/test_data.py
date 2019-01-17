@@ -240,7 +240,7 @@ def test_concat_copy_True():
     assert hasattr(new_idata.prior, "C")
     assert hasattr(new_idata.prior, "D")
     assert id(new_idata.posterior) != id(idata1.posterior)
-    assert id(new_idata.prior) != id(idata1.prior)
+    assert id(new_idata.prior) != id(idata2.prior)
 
 
 def test_concat_copy_False():
@@ -257,7 +257,7 @@ def test_concat_copy_False():
     assert hasattr(new_idata.prior, "C")
     assert hasattr(new_idata.prior, "D")
     assert id(new_idata.posterior) == id(idata1.posterior)
-    assert id(new_idata.prior) == id(idata1.prior)
+    assert id(new_idata.prior) == id(idata2.prior)
 
 
 def test_concat_sequency_inplace():
