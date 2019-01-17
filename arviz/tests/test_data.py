@@ -188,6 +188,8 @@ def test_concat(copy, inplace, sequence):
     idata1 = from_dict(
         posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
     )
+    if copy and inplace:
+        original_idata1_posterior_id = id(idata1.posterior)
     idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
     idata3 = from_dict(observed_data={"E": np.random.randn(100), "F": np.random.randn(2, 100)})
     # basic case
@@ -210,7 +212,10 @@ def test_concat(copy, inplace, sequence):
     assert hasattr(new_idata.observed_data, "E")
     assert hasattr(new_idata.observed_data, "F")
     if copy:
-        assert id(new_idata.posterior) != id(idata1.posterior)
+        if inplace:
+            assert id(new_idata.posterior) != original_idata1_posterior_id
+        else:
+            assert id(new_idata.posterior) != id(idata1.posterior)
         assert id(new_idata.prior) != id(idata2.prior)
         assert id(new_idata.observed_data) != id(idata3.observed_data)
     else:
@@ -238,7 +243,7 @@ def test_concat_edgecases(copy, inplace, sequence):
     assert hasattr(new_idata, "posterior")
     assert hasattr(new_idata.posterior, "A")
     assert hasattr(new_idata.posterior, "B")
-    if copy:
+    if copy and not inplace:
         assert id(new_idata.posterior) != id(idata.posterior)
     else:
         assert id(new_idata.posterior) == id(idata.posterior)
