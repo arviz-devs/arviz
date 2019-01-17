@@ -29,12 +29,17 @@ if [[ $* != *--global* ]]; then
 
     if [ "$DOCKER_BUILD" = true ] ; then
         # Also add it to root bash settings to set default if used later
+
         echo "Creating .bashrc profile for docker image"
-        echo "set conda_env=${ENVNAME}" > /root/.bashrc
-        echo "source activate ${ENVNAME}" >> /root/.bashrc
+        echo "set conda_env=${ENVNAME}" > /root/activate_conda.sh
+        echo "source activate ${ENVNAME}" >> /root/activate_conda.sh
+
+
     fi
 fi
 
+
+# Install ArviZ dependencies
 pip install --upgrade pip
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
@@ -65,4 +70,4 @@ fi
 
 #  Install editable using the setup.py
 pip install  --no-cache-dir -r requirements.txt
-pip install  --no-cache-dir -r requirements-dev.txt
+pip install --no-cache-dir -r requirements-dev.txt

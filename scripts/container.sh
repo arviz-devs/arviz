@@ -22,5 +22,6 @@ fi
 
 if [[ $* == *--test* ]]; then
     echo "Testing Arviz"
-    docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ arviz:latest
+    docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ arviz:latest bash -c \
+                                      "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/"
 fi

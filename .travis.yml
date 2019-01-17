@@ -34,10 +34,10 @@ install:
   - . ./scripts/container.sh --build
 
   # Print conda details
-  - docker run --rm arviz:latest /bin/bash -c "conda info -a"
+  - docker run --rm arviz:latest bash -c "conda info -a"
 
   # Print conda environment details
-  - docker run --rm arviz:latest /bin/bash -c "source /root/.bashrc && conda list && pip freeze"
+  - docker run --rm arviz:latest bash -c "conda list && pip freeze"
 
   # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
@@ -47,23 +47,22 @@ install:
 script:
 
   # Tests command is default in dockerfile cmd
-  - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
-                                              "source /root/.bashrc && NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
+  - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+                                              "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
     fi
 
-  - if [[ $NAME == LINT ]]; then docker run arviz:latest /bin/bash -c \
-                            "source /root/.bashrc && ./scripts/lint.sh";
+  - if [[ $NAME == LINT ]]; then docker run arviz:latest bash -c "./scripts/lint.sh";
     fi
 
   # Tests saving plots and deleting files
-  - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest /bin/bash -c \
-                                              "source /root/.bashrc && pytest -v arviz/tests/ --save -k plot_forest && pytest -v arviz/tests/ --save -k plot_forest --cov=arviz/";
+  - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+                                              "pytest -v arviz/tests/ --save -k plot_forest && pytest -v arviz/tests/ --save -k plot_forest --cov=arviz/";
     fi
 
 
   # Awkward line spacing to avoid travis-ci errors
-  - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest /bin/bash -c \
-                                              "source /root/.bashrc  && travis-sphinx build --nowarn --source=doc";
+  - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest bash -c \
+                                              "travis-sphinx build --nowarn --source=doc";
     fi
 
 after_success:
