@@ -3,9 +3,17 @@ ArviZ: Exploratory analysis of Bayesian models
 |Build Status|
 |Coverage Status|
 |black|
+|JOSS|
+|Zenodo|
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
+
+.. |JOSS| image:: http://joss.theoj.org/papers/10.21105/joss.01143/status.svg
+   :target: https://doi.org/10.21105/joss.01143
+
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg
+   :target: https://doi.org/10.5281/zenodo.2540945
 
 .. raw:: html
 
@@ -37,6 +45,21 @@ ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has b
 Contributions and issue reports are very welcome at
 `the github repository <https://github.com/arviz-devs/arviz>`_.
 
+
+If you use ArviZ and want to cite it please use |JOSS|
+
+Here is the citation in BibTeX format  
+
+.. code:: bash
+
+    @article{arviz_2019,
+	    title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},  
+	    author = {Kumar, Ravin and Colin, Carroll and Hartikainen, Ari and Martin, Osvaldo A.},  
+	    journal = {The Journal of Open Source Software},  
+	    year = {2019},  
+	    doi = {10.21105/joss.01143},  
+	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},  
+    }
 
 .. toctree::
     :maxdepth: 1
