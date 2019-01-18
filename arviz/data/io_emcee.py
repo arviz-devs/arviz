@@ -26,9 +26,16 @@ def _verify_names(sampler, var_names, arg_names):
     list[str], list[str]
         Defaults for var_names and arg_names
     """
-    num_vars = sampler.chain.shape[-1]
-    # Get emcee version 2 sampler args, else get emcee version 3
-    num_args = len(sampler.args) if hasattr(sampler, "args") else len(sampler.log_prob_fn.args)
+    # There are 3 possible cases: emcee2, emcee3 and sampler read from h5 file (emcee3 only)
+    if hasattr(sampler, "args"):
+        num_vars = sampler.chain.shape[-1]
+        num_args = len(sampler.args)
+    elif hasattr(sampler, "log_prob_fn"):
+        num_vars = sampler.get_chain().shape[-1]
+        num_args = len(sampler.log_prob_fn.args)
+    else:
+        num_vars = sampler.get_chain().shape[-1]
+        num_args = 0  # emcee only stores the posterior samples
 
     if var_names is None:
         var_names = ["var_{}".format(idx) for idx in range(num_vars)]
@@ -69,18 +76,23 @@ class EmceeConverter:
         """Convert the posterior to an xarray dataset."""
         data = {}
         for idx, var_name in enumerate(self.var_names):
-            data[var_name] = self.sampler.chain[(..., idx)]
+            # Use emcee3 syntax, else use emcee2
+            data[var_name] = (
+                self.sampler.get_chain()[(..., idx)].T
+                if hasattr(self.sampler, "get_chain")
+                else self.sampler.chain[(..., idx)]
+            )
         return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         data = {}
         for idx, var_name in enumerate(self.arg_names):
-            # Get emcee version 2 sampler args, else get emcee version 3
+            # Use emcee3 syntax, else use emcee2
             data[var_name] = (
-                self.sampler.args[idx]
-                if hasattr(self.sampler, "args")
-                else self.sampler.log_prob_fn.args[idx]
+                self.sampler.log_prob_fn.args[idx]
+                if hasattr(self.sampler, "log_prob_fn")
+                else self.sampler.args[idx]
             )
         return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
