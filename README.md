@@ -195,6 +195,10 @@ There is also a Dockerfile which helps for isolating build problems and local de
 3. Run `./scripts/container.sh --build`
 
 This will build a local image with the tag `arviz`. 
-After building the image tests can be executing by running `docker run arviz`.
-An interactive shell can be started by running `docker run -it arviz /bin/bash`. The correct conda environment will be activated automatically.
+After building the image tests can be executing by running  
+`docker run arviz bash pytest arviz/tests`
+ 
+An interactive shell can be started by running  
+`docker run -it arviz /bin/bash`  
+ The correct conda environment will be activated automatically.
 
