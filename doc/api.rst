@@ -52,7 +52,7 @@ Diagnostics
 .. autosummary::
     :toctree: generated/
 
-    effective_n
+    effective_sample_size
     rhat
     geweke
 

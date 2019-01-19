@@ -14,13 +14,14 @@ def plot_compare(
     plot_kwargs=None,
     ax=None,
 ):
-    """Summary plot for model comparison.
+    """
+    Summary plot for model comparison.
 
     This plot is in the style of the one used in the book Statistical Rethinking (Chapter 6)
     by Richard McElreath.
 
-    Note
-    ----
+    Notes
+    -----
     Defaults to comparing Widely Accepted Information Criterion (WAIC) if present in comp_df column,
     otherwise compares Leave-one-out (loo)
 
