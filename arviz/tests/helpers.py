@@ -95,10 +95,28 @@ def emcee_linear_model(data, draws, chains):
     ndim = result["x"].shape[0]
     pos = [result["x"] + 1e-4 * np.random.randn(ndim) for _ in range(chains)]
 
-    sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+    if emcee_version()<3:
+        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+    else:
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "reader_testfile.h5")
+        backend = emcee.backends.HDFBackend(filepath)
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(x, y, yerr), backend=backend)
 
     sampler.run_mcmc(pos, draws)
     return sampler
+
+
+def emcee_version():
+    """Check emcee version.
+
+    Returns
+    -------
+    int
+        Major version number
+    """
+    return int(emcee.__version__[0])
 
 
 # pylint:disable=no-member,no-value-for-parameter

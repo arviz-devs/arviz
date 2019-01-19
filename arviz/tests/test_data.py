@@ -40,6 +40,9 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
+needs_emcee3 = pytest.mark.skipif(emcee.__version__ < '3', reason="emcee3 required")
+
+
 @pytest.fixture(scope="module")
 def draws():
     return 500
@@ -490,8 +493,24 @@ class TestEmceeNetCDFUtils:
     def get_inference_data(self, data):
         return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
 
+    def get_inference_data_reader(self):
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "reader_testfile.h5")
+        reader = emcee.backends.HDFBackend(filepath)
+        os.remove(filepath)
+        return from_emcee(reader, var_names=["ln(f)", "b", "m"])
+
     def test_inference_data(self, data):
         inference_data = self.get_inference_data(data)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "ln(f)")
+        assert hasattr(inference_data.posterior, "b")
+        assert hasattr(inference_data.posterior, "m")
+
+    @needs_emcee3
+    def test_inference_data_reader(self):
+        inference_data = self.get_inference_data_reader()
         assert hasattr(inference_data, "posterior")
         assert hasattr(inference_data.posterior, "ln(f)")
         assert hasattr(inference_data.posterior, "b")
