@@ -492,7 +492,7 @@ class TestEmceeNetCDFUtils:
         return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
 
     def get_inference_data_reader(self):
-        from emcee import backends  # pylint: disable=no-member
+        from emcee import backends  # pylint: disable=no-name-in-module
 
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
