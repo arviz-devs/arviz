@@ -28,6 +28,7 @@ from ..data import from_tfp
 
 _log = logging.getLogger(__name__)
 
+needs_emcee3 = pytest.mark.skipif(emcee.__version__ < '3', reason="emcee3 required")
 
 @pytest.fixture(scope="module")
 def eight_schools_params():
@@ -95,14 +96,14 @@ def emcee_linear_model(data, draws, chains):
     ndim = result["x"].shape[0]
     pos = [result["x"] + 1e-4 * np.random.randn(ndim) for _ in range(chains)]
 
-    if emcee_version()<3:
+    if emcee_version() < 3:
         sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
     else:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
         backend = emcee.backends.HDFBackend(filepath)
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(x, y, yerr), backend=backend)
+        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend)
 
     sampler.run_mcmc(pos, draws)
     return sampler

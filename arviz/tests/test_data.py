@@ -32,15 +32,13 @@ from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
     _emcee_lnprior as emcee_lnprior,
     _emcee_lnprob as emcee_lnprob,
+    needs_emcee3,
     eight_schools_params,
     load_cached_models,
     pystan_extract_unpermuted,
     stan_extract_dict,
     pystan_version,
 )
-
-
-needs_emcee3 = pytest.mark.skipif(emcee.__version__ < '3', reason="emcee3 required")
 
 
 @pytest.fixture(scope="module")
