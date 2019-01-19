@@ -28,8 +28,6 @@ from ..data import from_tfp
 
 _log = logging.getLogger(__name__)
 
-needs_emcee3 = pytest.mark.skipif(emcee.__version__ < "3", reason="emcee3 required")
-
 
 @pytest.fixture(scope="module")
 def eight_schools_params():
@@ -39,6 +37,20 @@ def eight_schools_params():
         "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
         "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
     }
+
+
+def emcee_version():
+    """Check emcee version.
+
+    Returns
+    -------
+    int
+        Major version number
+    """
+    return int(emcee.__version__[0])
+
+
+needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")  # pylint: disable=invalid-name
 
 
 def _emcee_neg_lnlike(theta, x, y, yerr):
@@ -103,24 +115,13 @@ def emcee_linear_model(data, draws, chains):
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
-        backend = emcee.backends.HDFBackend(filepath)
+        backend = emcee.backends.HDFBackend(filepath)  # pylint: disable=no-member
         sampler = emcee.EnsembleSampler(
             chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
-        )
+        )  # pylint: disable=unexpected-keyword-arg
 
     sampler.run_mcmc(pos, draws)
     return sampler
-
-
-def emcee_version():
-    """Check emcee version.
-
-    Returns
-    -------
-    int
-        Major version number
-    """
-    return int(emcee.__version__[0])
 
 
 # pylint:disable=no-member,no-value-for-parameter
