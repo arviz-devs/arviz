@@ -493,6 +493,7 @@ class TestEmceeNetCDFUtils:
 
     def get_inference_data_reader(self):
         from emcee import backends  # pylint: disable=no-member
+
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")

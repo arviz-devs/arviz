@@ -50,7 +50,9 @@ def emcee_version():
     return int(emcee.__version__[0])
 
 
-needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")  # pylint: disable=invalid-name
+needs_emcee3 = pytest.mark.skipif(
+    emcee_version() < 3, reason="emcee3 required"
+)  # pylint: disable=invalid-name
 
 
 def _emcee_neg_lnlike(theta, x, y, yerr):
