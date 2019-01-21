@@ -1,5 +1,7 @@
 """Posterior predictive plot."""
 from numbers import Integral
+import platform
+import warnings
 import numpy as np
 from matplotlib import animation
 from .kdeplot import plot_kde, _fast_kde
@@ -155,8 +157,15 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
+    if animated and platform.system() == "Darwin":
+        warnings.warn(
+            """If you experience problems rendering the animation try setting
+            `animation_kwargs({'blit':False}) or setting the plotting backend to TkAgg."""
+        )
+
     if animation_kwargs is None:
         animation_kwargs = {}
+    animation_kwargs.setdefault("blit", True)
 
     if alpha is None:
         if animated:
@@ -461,12 +470,7 @@ def plot_ppc(
 
     if animated:
         ani = animation.FuncAnimation(
-            fig,
-            animate,
-            np.arange(0, num_pp_samples),
-            init_func=init,
-            blit=True,
-            **animation_kwargs
+            fig, animate, np.arange(0, num_pp_samples), init_func=init, **animation_kwargs
         )
         return axes, ani
     else:
