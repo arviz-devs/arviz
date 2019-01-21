@@ -39,6 +39,21 @@ def eight_schools_params():
     }
 
 
+def emcee_version():
+    """Check emcee version.
+
+    Returns
+    -------
+    int
+        Major version number
+    """
+    return int(emcee.__version__[0])
+
+
+# pylint: disable=invalid-name
+needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")
+
+
 def _emcee_neg_lnlike(theta, x, y, yerr):
     """Proper function to allow pickling."""
     slope, intercept, lnf = theta
@@ -95,7 +110,18 @@ def emcee_linear_model(data, draws, chains):
     ndim = result["x"].shape[0]
     pos = [result["x"] + 1e-4 * np.random.randn(ndim) for _ in range(chains)]
 
-    sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+    if emcee_version() < 3:
+        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+    else:
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "reader_testfile.h5")
+        backend = emcee.backends.HDFBackend(filepath)  # pylint: disable=no-member
+        # pylint: disable=unexpected-keyword-arg
+        sampler = emcee.EnsembleSampler(
+            chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
+        )
+        # pylint: enable=unexpected-keyword-arg
 
     sampler.run_mcmc(pos, draws)
     return sampler
