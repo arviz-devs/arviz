@@ -304,5 +304,5 @@ def _d_helper(
     ax.set_yticks([])
     ax.set_title(vname, fontsize=titlesize, wrap=True)
     for pos in ["left", "right", "top"]:
-        ax.spines[pos].set_visible(0)
+        ax.spines[pos].set_visible(False)
     ax.tick_params(labelsize=xt_labelsize)

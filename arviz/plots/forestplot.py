@@ -173,7 +173,7 @@ def plot_forest(
 
         for loc, spine in ax.spines.items():
             if loc in ["left", "right"]:
-                spine.set_color("none")  # don't draw spine
+                spine.set_visible(False)
 
         if len(plot_handler.data) > 1:
             plot_handler.make_bands(ax)
