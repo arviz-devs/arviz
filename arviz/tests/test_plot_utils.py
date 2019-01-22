@@ -55,10 +55,10 @@ def test_dataset_to_numpy_combined(sample_dataset):
     assert (data[var_names.index("tau")] == tau.reshape(1, 6)).all()
 
 
-def test_xarray_var_iter_ordering(sample_dataset):  # pylint: disable=invalid-name
+def test_xarray_var_iter_ordering():
     """Assert that coordinate names stay the provided order"""
     coords = list("abcd")
-    data = from_dict(
+    data = from_dict(  # pylint: disable=no-member
         {"x": np.random.randn(1, 100, len(coords))},
         coords={"in_order": coords},
         dims={"x": ["in_order"]},
