@@ -20,7 +20,7 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
 # Update container
-RUN apt-get update && apt-get install -y git build-essential pandoc vim \
+RUN apt-get update && apt-get install -y git build-essential pandoc vim procmail \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -48,4 +48,3 @@ COPY $SRC_DIR /opt/arviz
 # Clear any cached models from copied from host filesystem
 RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
-
