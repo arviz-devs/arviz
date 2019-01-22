@@ -3,6 +3,7 @@ import numpy as np
 import xarray as xr
 import pytest
 
+from ..data import from_dict
 from ..plots.plot_utils import make_2d, xarray_to_ndarray, xarray_var_iter, get_bins, get_coords
 
 
@@ -52,6 +53,19 @@ def test_dataset_to_numpy_combined(sample_dataset):
     assert len(var_names) == 2
     assert (data[var_names.index("mu")] == mu.reshape(1, 6)).all()
     assert (data[var_names.index("tau")] == tau.reshape(1, 6)).all()
+
+
+def test_xarray_var_iter_ordering(sample_dataset):  # pylint: disable=invalid-name
+    """Assert that coordinate names stay the provided order"""
+    coords = list("abcd")
+    data = from_dict(
+        {"x": np.random.randn(1, 100, len(coords))},
+        coords={"in_order": coords},
+        dims={"x": ["in_order"]},
+    ).posterior
+
+    coord_names = [sel["in_order"] for _, sel, _ in xarray_var_iter(data)]
+    assert coord_names == coords
 
 
 def test_xarray_var_iter_ordering_combined(sample_dataset):  # pylint: disable=invalid-name
