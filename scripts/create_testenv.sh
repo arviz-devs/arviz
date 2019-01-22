@@ -45,9 +45,9 @@ pip install --upgrade pip
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The first is the Python 3.5 wheel, the second is 3.6.
 if [ "$PYTHON_VERSION" = "3.5" ]; then
-    pip --no-cache-dir install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
+    pip --no-cache-dir install https://download.pytorch.org/whl/cpu/torch-0.4.1-cp35-cp35m-linux_x86_64.whl
 else
-    pip --no-cache-dir install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+    pip --no-cache-dir install https://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
 fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
