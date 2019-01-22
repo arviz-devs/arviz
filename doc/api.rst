@@ -63,10 +63,14 @@ Data
 .. autosummary::
     :toctree: generated/
 
+
     convert_to_inference_data
     load_arviz_data
-    from_pystan
-    from_pymc3
-    from_emcee
+    to_netcdf
+    from_netcdf
     from_cmdstan
+    from_emcee
+    from_netcdf
+    from_pymc3
     from_pyro
+    from_pystan
