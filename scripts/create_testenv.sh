@@ -40,7 +40,7 @@ fi
 
 
 # Install ArviZ dependencies
-pip install --upgrade pip
+pip install --upgrade pip==18.1
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The first is the Python 3.5 wheel, the second is 3.6.
