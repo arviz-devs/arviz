@@ -22,7 +22,7 @@ def save_figs(request):
         print("Directory {} created".format(fig_dir))
 
         # Clear all files from the directory
-        # Does not touch directories
+        # Does not alter or delete directories
         for file in os.listdir(fig_dir):
             full_path = os.path.join(fig_dir, file)
 
