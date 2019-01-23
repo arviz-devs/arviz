@@ -11,7 +11,7 @@ command -v conda >/dev/null 2>&1 || {
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
-EMCEE_VERSION=$(EMCEE_VERSION:2)
+EMCEE_VERSION=$(EMCEE_VERSION:-2)
 
 
 if [[ $* != *--global* ]]; then
