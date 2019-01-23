@@ -123,7 +123,7 @@ def emcee_linear_model(data, draws, chains):
         )
         # pylint: enable=unexpected-keyword-arg
 
-    sampler.run_mcmc(pos, draws)
+    sampler.run_mcmc(pos, draws, store=True)
     return sampler
 
 
