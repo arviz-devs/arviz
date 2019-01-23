@@ -1,6 +1,9 @@
 """Posterior predictive plot."""
 from numbers import Integral
+import platform
+import warnings
 import numpy as np
+from matplotlib import animation
 from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import (
     xarray_var_iter,
@@ -27,6 +30,8 @@ def plot_ppc(
     num_pp_samples=None,
     random_seed=None,
     jitter=None,
+    animated=False,
+    animation_kwargs=None,
     legend=True,
 ):
     """
@@ -76,10 +81,9 @@ def plot_ppc(
         Dimensions should match flatten excluding dimensions for data_pairs parameters.
         If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
     num_pp_samples : int
-        The number of posterior predictive samples to plot.
-        It defaults to a maximum of 5 samples for `kind` = 'scatter' and
-        will set jitter to 0.7 unless defined otherwise.
-        Otherwise it defaults to all provided samples.
+        The number of posterior predictive samples to plot. For `kind` = 'scatter' and
+        `animation = False` if defaults to a maximum of 5 samples and will set jitter to 0.7
+        unless defined otherwise. Otherwise it defaults to all provided samples.
     random_seed : int
         Random number generator seed passed to numpy.random.seed to allow
         reproducibility of the plot. By default, no seed will be provided
@@ -88,6 +92,10 @@ def plot_ppc(
     jitter : float
         If kind is "scatter", jitter will add random uniform noise to the height
         of the ppc samples and observed data. By default 0.
+    animated : bool
+        Create an animation of one posterior predictive sample per frame. Defaults to False.
+    animation_kwargs : dict
+        Keywords passed to `animation.FuncAnimation`.
     legend : bool
         Add legend to figure. By default True.
 
@@ -149,11 +157,24 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
+    if animated and platform.system() == "Darwin":
+        warnings.warn(
+            """If you experience problems rendering the animation try setting
+            `animation_kwargs({'blit':False}) or setting the plotting backend to TkAgg."""
+        )
+
+    if animation_kwargs is None:
+        animation_kwargs = {}
+    animation_kwargs.setdefault("blit", True)
+
     if alpha is None:
-        if kind.lower() == "scatter":
-            alpha = 0.7
+        if animated:
+            alpha = 1
         else:
-            alpha = 0.2
+            if kind.lower() == "scatter":
+                alpha = 0.7
+            else:
+                alpha = 0.2
 
     if jitter is None:
         jitter = 0.0
@@ -182,7 +203,7 @@ def plot_ppc(
 
     total_pp_samples = posterior_predictive.sizes["chain"] * posterior_predictive.sizes["draw"]
     if num_pp_samples is None:
-        if kind == "scatter":
+        if kind == "scatter" and not animated:
             num_pp_samples = min(5, total_pp_samples)
         else:
             num_pp_samples = total_pp_samples
@@ -222,12 +243,12 @@ def plot_ppc(
         figsize, textsize, rows, cols
     )
 
-    _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
+    fig, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
 
     for i, ax in enumerate(axes):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
-        dtype = observed[var_name].dtype.kind
+        dtype = posterior_predictive[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()
@@ -235,6 +256,11 @@ def plot_ppc(
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "density":
+            plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
+            if dtype == "i":
+                plot_kwargs["drawstyle"] = "steps-pre"
+            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+
             if dtype == "f":
                 plot_kde(
                     obs_vals,
@@ -255,26 +281,31 @@ def plot_ppc(
                     color="k",
                     linewidth=linewidth,
                     zorder=3,
-                    drawstyle="steps-pre",
+                    drawstyle=plot_kwargs["drawstyle"],
                 )
-            # run plot_kde manually with one plot call
-            pp_densities = []
-            for vals in pp_sampled_vals:
-                vals = np.array([vals]).flatten()
-                if dtype == "f":
-                    pp_density, lower, upper = _fast_kde(vals)
-                    pp_x = np.linspace(lower, upper, len(pp_density))
-                    pp_densities.extend([pp_x, pp_density])
-                else:
-                    nbins = round(len(vals) ** 0.5)
-                    hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
-                    hist = np.concatenate((hist[:1], hist))
-                    pp_densities.extend([bin_edges, hist])
-            plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
-            if dtype == "i":
-                plot_kwargs["drawstyle"] = "steps-pre"
-            ax.plot(*pp_densities, **plot_kwargs)
-            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+
+            if animated:
+                animate, init = _set_animation(
+                    pp_sampled_vals, ax, dtype=dtype, kind=kind, plot_kwargs=plot_kwargs
+                )
+
+            else:
+                # run plot_kde manually with one plot call
+                pp_densities = []
+                for vals in pp_sampled_vals:
+                    vals = np.array([vals]).flatten()
+                    if dtype == "f":
+                        pp_density, lower, upper = _fast_kde(vals)
+                        pp_x = np.linspace(lower, upper, len(pp_density))
+                        pp_densities.extend([pp_x, pp_density])
+                    else:
+                        nbins = round(len(vals) ** 0.5)
+                        hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                        hist = np.concatenate((hist[:1], hist))
+                        pp_densities.extend([bin_edges, hist])
+
+                ax.plot(*pp_densities, **plot_kwargs)
+
             if mean:
                 if dtype == "f":
                     plot_kde(
@@ -302,64 +333,52 @@ def plot_ppc(
                         label="Posterior predictive mean {}".format(pp_var_name),
                         zorder=2,
                         linestyle="--",
-                        drawstyle="steps-pre",
+                        drawstyle=plot_kwargs["drawstyle"],
                     )
             ax.tick_params(labelsize=xt_labelsize)
             ax.set_yticks([])
 
         elif kind == "cumulative":
-            if dtype == "f":
-                ax.plot(
-                    *_empirical_cdf(obs_vals),
-                    color="k",
-                    linewidth=linewidth,
-                    label="Observed {}".format(var_name),
-                    zorder=3
-                )
-            else:
-                ax.plot(
-                    *_empirical_cdf(obs_vals),
-                    color="k",
-                    linewidth=linewidth,
-                    label="Observed {}".format(var_name),
-                    drawstyle="steps-pre",
-                    zorder=3
-                )
-            # run plot_kde manually with one plot call
-            pp_densities = []
-            for vals in pp_sampled_vals:
-                vals = np.array([vals]).flatten()
-                pp_x, pp_density = _empirical_cdf(vals)
-                pp_densities.extend([pp_x, pp_density])
-            if dtype == "f":
-                ax.plot(*pp_densities, alpha=alpha, color="C5", linewidth=linewidth)
-            else:
-                ax.plot(
-                    *pp_densities,
+            drawstyle = "default" if dtype == "f" else "steps-pre"
+            ax.plot(
+                *_empirical_cdf(obs_vals),
+                color="k",
+                linewidth=linewidth,
+                label="Observed {}".format(var_name),
+                drawstyle=drawstyle,
+                zorder=3
+            )
+            if animated:
+                animate, init = _set_animation(
+                    pp_sampled_vals,
+                    ax,
+                    kind=kind,
                     alpha=alpha,
-                    color="C5",
-                    drawstyle="steps-pre",
-                    linewidth=linewidth
+                    drawstyle=drawstyle,
+                    linewidth=linewidth,
+                )
+
+            else:
+                # run plot_kde manually with one plot call
+                pp_densities = []
+                for vals in pp_sampled_vals:
+                    vals = np.array([vals]).flatten()
+                    pp_x, pp_density = _empirical_cdf(vals)
+                    pp_densities.extend([pp_x, pp_density])
+
+                ax.plot(
+                    *pp_densities, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
                 )
             ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
             if mean:
-                if dtype == "f":
-                    ax.plot(
-                        *_empirical_cdf(pp_vals.flatten()),
-                        color="C0",
-                        linestyle="--",
-                        linewidth=linewidth,
-                        label="Posterior predictive mean {}".format(pp_var_name)
-                    )
-                else:
-                    ax.plot(
-                        *_empirical_cdf(pp_vals.flatten()),
-                        color="C0",
-                        linestyle="--",
-                        linewidth=linewidth,
-                        drawstyle="steps-pre",
-                        label="Posterior predictive mean {}".format(pp_var_name)
-                    )
+                ax.plot(
+                    *_empirical_cdf(pp_vals.flatten()),
+                    color="C0",
+                    linestyle="--",
+                    linewidth=linewidth,
+                    drawstyle=drawstyle,
+                    label="Posterior predictive mean {}".format(pp_var_name)
+                )
             ax.set_yticks([0, 0.5, 1])
 
         elif kind == "scatter":
@@ -414,13 +433,26 @@ def plot_ppc(
                 zorder=4,
             )
 
-            for vals, y in zip(pp_sampled_vals, y_rows[1:]):
-                vals = np.array([vals]).flatten()
-                yvals = np.full_like(vals, y, dtype=np.float64)
-                if jitter:
-                    yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
-                ax.plot(vals, yvals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha)
-            ax.scatter([], [], color="C5", label="Posterior predictive {}".format(pp_var_name))
+            if animated:
+                animate, init = _set_animation(
+                    pp_sampled_vals,
+                    ax,
+                    kind=kind,
+                    height=y_rows.mean() * 0.5,
+                    markersize=markersize,
+                )
+
+            else:
+                for vals, y in zip(pp_sampled_vals, y_rows[1:]):
+                    vals = np.ravel(vals)
+                    yvals = np.full_like(vals, y, dtype=np.float64)
+                    if jitter:
+                        yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
+                    ax.plot(
+                        vals, yvals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
+                    )
+
+            ax.plot([], "C5o", label="Posterior predictive {}".format(pp_var_name))
 
             ax.set_yticks([])
 
@@ -432,11 +464,98 @@ def plot_ppc(
 
         if legend:
             if i == 0:
-                ax.legend(fontsize=xt_labelsize)
+                ax.legend(fontsize=xt_labelsize * 0.75)
             else:
                 ax.legend([])
 
-    return axes
+    if animated:
+        ani = animation.FuncAnimation(
+            fig, animate, np.arange(0, num_pp_samples), init_func=init, **animation_kwargs
+        )
+        return axes, ani
+    else:
+        return axes
+
+
+def _set_animation(
+    pp_sampled_vals,
+    ax,
+    dtype=None,
+    kind="density",
+    alpha=None,
+    drawstyle=None,
+    linewidth=None,
+    height=None,
+    markersize=None,
+    plot_kwargs=None,
+):
+    if kind == "density":
+        length = len(pp_sampled_vals)
+        if dtype == "f":
+            y_vals, lower, upper = _fast_kde(pp_sampled_vals[0])
+            x_vals = np.linspace(lower, upper, len(y_vals))
+
+            max_max = max([max(_fast_kde(pp_sampled_vals[i])[0]) for i in range(length)])
+
+            ax.set_ylim(0, max_max)
+
+            line, = ax.plot(x_vals, y_vals, **plot_kwargs)
+
+            def animate(i):
+                y_vals, lower, upper = _fast_kde(pp_sampled_vals[i])
+                x_vals = np.linspace(lower, upper, len(y_vals))
+                line.set_data(x_vals, y_vals)
+                return line
+
+        else:
+            vals = pp_sampled_vals[0]
+            y_vals, x_vals = np.histogram(vals, bins="auto", density=True)
+            line, = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
+
+            max_max = max(
+                [
+                    max(np.histogram(pp_sampled_vals[i], bins="auto", density=True)[0])
+                    for i in range(length)
+                ]
+            )
+
+            ax.set_ylim(0, max_max)
+
+            def animate(i):
+                y_vals, x_vals = np.histogram(pp_sampled_vals[i], bins="auto", density=True)
+                line.set_data(x_vals[:-1], y_vals)
+                return (line,)
+
+    elif kind == "cumulative":
+        x_vals, y_vals = _empirical_cdf(pp_sampled_vals[0])
+        line, = ax.plot(
+            x_vals, y_vals, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
+        )
+
+        def animate(i):
+            x_vals, y_vals = _empirical_cdf(pp_sampled_vals[i])
+            line.set_data(x_vals, y_vals)
+            return line
+
+    elif kind == "scatter":
+        x_vals = pp_sampled_vals[0]
+        y_vals = np.full_like(x_vals, height, dtype=np.float64)
+        line, = ax.plot(
+            x_vals, y_vals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
+        )
+
+        def animate(i):
+            line.set_xdata(np.ravel(pp_sampled_vals[i]))
+            return line
+
+    def init():
+        if kind != "scatter":
+            line.set_data([], [])
+        else:
+            line.set_xdata([])
+        return line
+
+    return animate, init
 
 
 def _empirical_cdf(data):
