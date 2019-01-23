@@ -20,8 +20,10 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
 # Update container
-RUN apt-get update && apt-get install -y git build-essential pandoc vim util-linux \
+RUN apt-get update && apt-get install -y git build-essential pandoc vim \
     && rm -rf /var/lib/apt/lists/*
+RUN apt-get apt-get install -y util-linux
+RUN flock
 
 
 # Copy requirements and environment installation scripts
