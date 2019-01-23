@@ -59,7 +59,7 @@ script:
                                               "flock arviz/tests/test_images/locked_file.lock";
     fi
 
-- if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+  - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
                                               "pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
     fi
 
