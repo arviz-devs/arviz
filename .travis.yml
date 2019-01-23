@@ -56,7 +56,7 @@ script:
 
   # Tests saving plots and deleting files
   - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-                                              "pytest -v arviz/tests/ --save -k plot_forest && pytest -v arviz/tests/ --save -k plot_forest --cov=arviz/";
+                                              "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
     fi
 
 
