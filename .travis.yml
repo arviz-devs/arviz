@@ -6,19 +6,19 @@ matrix:
   include:
   - name: "Python 3.6 Unit Test"
     python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
-  - name: "Python 3.6 Unit Test - PyStan=preview Pyro=0.2.1"
+    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+  - name: "Python 3.6 Unit Test - PyStan=preview Pyro=0.2.1 Emcee=3"
     python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 NAME="UNIT"
+    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 EMCEE_VERSION=3 NAME="UNIT"
   - name: "Python 3.5 Unit Test"
     python: 3.5
-    env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="UNIT"
+    env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
   - name: "Python 3.6 Lint"
     python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="LINT"
+    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="LINT"
   - name: "Python 3.6 Sphinx"
     python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest NAME="SPHINX"
+    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="SPHINX"
 
 addons:
   apt:
