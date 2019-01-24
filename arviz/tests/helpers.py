@@ -112,6 +112,8 @@ def emcee_linear_model(data, draws, chains):
 
     if emcee_version() < 3:
         sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+        # pylint: enable=unexpected-keyword-arg
+        sampler.run_mcmc(pos, draws)
     else:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
@@ -122,8 +124,7 @@ def emcee_linear_model(data, draws, chains):
             chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
         )
         # pylint: enable=unexpected-keyword-arg
-
-    sampler.run_mcmc(pos, draws, store=True)
+        sampler.run_mcmc(pos, draws, store=True)
     return sampler
 
 
