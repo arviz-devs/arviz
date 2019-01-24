@@ -585,15 +585,15 @@ class TestEmceeNetCDFUtils:
     def get_inference_data(self, data):
         return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
 
-    def get_inference_data_reader(self, data):
-        assert data.obj is not None
+    def get_inference_data_reader(self):
         from emcee import backends  # pylint: disable=no-name-in-module
 
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
+        assert os.path.exists(filepath)
+        assert os.path.getsize()
         reader = backends.HDFBackend(filepath, read_only=True)
-        os.remove(filepath)
         return from_emcee(reader, var_names=["ln(f)", "b", "m"])
 
     def test_inference_data(self, data):
@@ -605,7 +605,7 @@ class TestEmceeNetCDFUtils:
 
     @needs_emcee3
     def test_inference_data_reader(self, data):
-        inference_data = self.get_inference_data_reader(data)
+        inference_data = self.get_inference_data_reader()
         assert hasattr(inference_data, "posterior")
         assert hasattr(inference_data.posterior, "ln(f)")
         assert hasattr(inference_data.posterior, "b")
