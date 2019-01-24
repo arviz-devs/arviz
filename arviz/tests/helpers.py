@@ -112,18 +112,20 @@ def emcee_linear_model(data, draws, chains):
 
     if emcee_version() < 3:
         sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+        # pylint: enable=unexpected-keyword-arg
+        sampler.run_mcmc(pos, draws)
     else:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
         backend = emcee.backends.HDFBackend(filepath)  # pylint: disable=no-member
+        backend.reset(chains, ndim)
         # pylint: disable=unexpected-keyword-arg
         sampler = emcee.EnsembleSampler(
             chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
         )
         # pylint: enable=unexpected-keyword-arg
-
-    sampler.run_mcmc(pos, draws)
+        sampler.run_mcmc(pos, draws, store=True)
     return sampler
 
 

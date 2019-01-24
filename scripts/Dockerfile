@@ -6,11 +6,12 @@ ARG SRC_DIR
 ARG PYTHON_VERSION
 ARG PYSTAN_VERSION
 ARG PYRO_VERSION
+ARG EMCEE_VERSION
 
 ENV PYTHON_VERSION=${PYTHON_VERSION}
 ENV PYSTAN_VERSION=${PYSTAN_VERSION}
 ENV PYRO_VERSION=${PYRO_VERSION}
-
+ENV EMCEE_VERSION=${EMCEE_VERSION}
 
 # Change behavior of create_test.sh script
 ENV DOCKER_BUILD=true
@@ -48,4 +49,3 @@ COPY $SRC_DIR /opt/arviz
 # Clear any cached models from copied from host filesystem
 RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
-

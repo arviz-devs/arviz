@@ -5,6 +5,7 @@ import os
 from urllib.parse import urlunsplit
 
 import numpy as np
+from numpy import ma
 import pymc3 as pm
 import pytest
 
@@ -591,8 +592,9 @@ class TestEmceeNetCDFUtils:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
-        reader = backends.HDFBackend(filepath)
-        os.remove(filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath)
+        reader = backends.HDFBackend(filepath, read_only=True)
         return from_emcee(reader, var_names=["ln(f)", "b", "m"])
 
     def test_inference_data(self, data):
@@ -725,6 +727,41 @@ class TestPyMC3NetCDFUtils:
     def test_prior(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "prior")
+
+    def test_missing_data_model(self):
+        # source pymc3/pymc3/tests/test_missing.py
+        data = ma.masked_values([1, 2, -1, 4, -1], value=-1)
+        model = pm.Model()
+        with model:
+            x = pm.Normal("x", 1, 1)
+            pm.Normal("y", x, 1, observed=data)
+            trace = pm.sample(100, chains=2)
+
+        # make sure that data is really missing
+        y_missing, = model.missing_values
+        assert y_missing.tag.test_value.shape == (2,)
+        inference_data = from_pymc3(trace=trace)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "x")
+        assert hasattr(inference_data.observed_data, "y")
+        assert hasattr(inference_data, "sample_stats")
+        assert hasattr(inference_data.sample_stats, "log_likelihood")
+
+    def test_multiple_observed_rv(self):
+        y1_data = np.random.randn(10)
+        y2_data = np.random.randn(100)
+        with pm.Model():
+            x = pm.Normal("x", 1, 1)
+            pm.Normal("y1", x, 1, observed=y1_data)
+            pm.Normal("y2", x, 1, observed=y2_data)
+            trace = pm.sample(100, chains=2)
+        inference_data = from_pymc3(trace=trace)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "x")
+        assert hasattr(inference_data.observed_data, "y1")
+        assert hasattr(inference_data.observed_data, "y2")
+        assert hasattr(inference_data, "sample_stats")
+        assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
 
 class TestPyroNetCDFUtils:

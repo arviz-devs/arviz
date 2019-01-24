@@ -11,10 +11,11 @@ command -v conda >/dev/null 2>&1 || {
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
+EMCEE_VERSION=${EMCEE_VERSION:-2}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -66,6 +67,12 @@ if [ "$PYRO_VERSION" = "latest" ]; then
   pip --no-cache-dir install pyro-ppl
 else
   pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
+fi
+
+if [ "$EMCEE_VERSION" = "2" ]; then
+  pip --no-cache-dir install emcee
+else
+  pip --no-cache-dir install git+https://github.com/dfm/emcee.git
 fi
 
 #  Install editable using the setup.py
