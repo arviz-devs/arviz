@@ -585,7 +585,8 @@ class TestEmceeNetCDFUtils:
     def get_inference_data(self, data):
         return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
 
-    def get_inference_data_reader(self):
+    def get_inference_data_reader(self, data):
+        assert data.obj is not None
         from emcee import backends  # pylint: disable=no-name-in-module
 
         here = os.path.dirname(os.path.abspath(__file__))
