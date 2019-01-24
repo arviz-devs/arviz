@@ -80,7 +80,7 @@ def plot_kde(
 
     Examples
     --------
-    Plot KDE with Rugplot
+    Plot default KDE
 
     .. plot::
         :context: close-figs
@@ -88,14 +88,14 @@ def plot_kde(
         >>> import arviz as az
         >>> non_centered = az.load_arviz_data('non_centered_eight')
         >>> mu_posterior = np.concatenate(non_centered.posterior["mu"].values)
-        >>> az.plot_kde(mu_posterior, rug=True)
+        >>> az.plot_kde(mu_posterior)
 
-    Default KDE without rugplot
+    Plot KDE with rugplot
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_kde(mu_posterior)
+        >>> az.plot_kde(mu_posterior,rug=True)
 
 
     Plot a cumulative distribution
