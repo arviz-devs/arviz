@@ -593,7 +593,7 @@ class TestEmceeNetCDFUtils:
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "reader_testfile.h5")
         assert os.path.exists(filepath)
-        assert os.path.getsize()
+        assert os.path.getsize(filepath)
         reader = backends.HDFBackend(filepath, read_only=True)
         return from_emcee(reader, var_names=["ln(f)", "b", "m"])
 
