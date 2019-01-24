@@ -90,7 +90,7 @@ def plot_kde(
         >>> mu_posterior = np.concatenate(non_centered.posterior["mu"].values)
         >>> az.plot_kde(mu_posterior, rug=True)
 
-    Default Kde without rugplot
+    Default KDE without rugplot
 
     .. plot::
         :context: close-figs
