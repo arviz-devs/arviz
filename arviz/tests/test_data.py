@@ -731,7 +731,8 @@ class TestPyMC3NetCDFUtils:
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py
         data = ma.masked_values([1, 2, -1, 4, -1], value=-1)
-        with pm.Model():
+        model = pm.Model()
+        with model:
             x = pm.Normal("x", 1, 1)
             pm.Normal("y", x, 1, observed=data)
             trace = pm.sample(100, chains=2)
