@@ -741,7 +741,8 @@ class TestPyMC3NetCDFUtils:
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
         assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data, "y")
+        assert hasattr(inference_data.posterior, "x")
+        assert hasattr(inference_data.observed_data, "y")
         assert hasattr(inference_data, "sample_stats")
         assert hasattr(inference_data.sample_stats, "log_likelihood")
 
@@ -755,7 +756,9 @@ class TestPyMC3NetCDFUtils:
                 trace = pm.sample(100, chains=2)
             inference_data = from_pymc3(trace=trace)
             assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "y")
+            assert hasattr(inference_data.posterior, "x")
+            assert hasattr(inference_data.observed_data, "y1")
+            assert hasattr(inference_data.observed_data, "y2")
             assert hasattr(inference_data, "sample_stats")
             assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
