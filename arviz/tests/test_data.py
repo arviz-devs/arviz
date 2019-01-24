@@ -604,8 +604,8 @@ class TestEmceeNetCDFUtils:
         assert hasattr(inference_data.posterior, "m")
 
     @needs_emcee3
-    def test_inference_data_reader(self):
-        inference_data = self.get_inference_data_reader()
+    def test_inference_data_reader(self, data):
+        inference_data = self.get_inference_data_reader(data)
         assert hasattr(inference_data, "posterior")
         assert hasattr(inference_data.posterior, "ln(f)")
         assert hasattr(inference_data.posterior, "b")
