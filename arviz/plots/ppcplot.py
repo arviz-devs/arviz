@@ -157,7 +157,7 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
-    if animated and platform.system() == "Darwin":
+    if animated and platform.system() in ("Darwin", "Windows"):
         warnings.warn(
             """If you experience problems rendering the animation try setting
             `animation_kwargs({'blit':False}) or setting the plotting backend to TkAgg."""

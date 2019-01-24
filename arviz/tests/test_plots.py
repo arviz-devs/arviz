@@ -368,6 +368,13 @@ def test_plot_pair_bad(models, model_fit):
 def test_plot_ppc(models, pymc3_sample_ppc, kind, alpha, animated):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
     axes = plot_ppc(data, kind=kind, alpha=alpha, animated=animated, random_seed=3)
+    if animated:
+        assert axes[0]
+        assert axes[1]
+        path = "ppc_animation.mp4"
+        axes[1].save(path)
+        assert os.path.exists(path)
+        assert os.path.getsize(path)
     assert axes
 
 
@@ -389,6 +396,10 @@ def test_plot_ppc_multichain(kind, jitter, animated):
     if animated:
         assert np.all(axes[0])
         assert np.all(axes[1])
+        path = "ppc_multichain_animation.mp4"
+        axes[1].save(path)
+        assert os.path.exists(path)
+        assert os.path.getsize(path)
     else:
         assert np.all(axes)
 
@@ -406,6 +417,13 @@ def test_plot_ppc_discrete(kind, animated):
     data.posterior_predictive = posterior_predictive
 
     axes = plot_ppc(data, kind=kind, animated=animated)
+    if animated:
+        assert np.all(axes[0])
+        assert np.all(axes[1])
+        path = "ppc_discrete_animation.mp4"
+        axes[1].save(path)
+        assert os.path.exists(path)
+        assert os.path.getsize(path)
     assert axes
 
 
