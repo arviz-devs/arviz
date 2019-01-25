@@ -20,6 +20,7 @@ from arviz import (
     from_pyro,
     from_emcee,
     from_netcdf,
+    from_tfp,
     to_netcdf,
     load_data,
     save_data,
@@ -946,18 +947,83 @@ class TestTfpNetCDFUtils:
     def data(self, draws, chains):
         class Data:
             # Returns result of from_tfp
-            obj = load_cached_models({}, draws, chains)[  # pylint: disable=no-value-for-parameter
+            model, obj = load_cached_models(
+                {}, draws, chains
+            )[  # pylint: disable=no-value-for-parameter
                 "tensorflow_probability"
             ]
 
         return Data
 
-    def get_inference_data(self, data):
-        return data.obj
+    def get_inference_data(self, data, eight_schools_params):
+        """Normal read with observed and var_names."""
+        inference_data = from_tfp(
+            data.obj,
+            var_names=["mu", "tau", "eta"],
+            model_fn=lambda: data.model(
+                eight_schools_params["J"], eight_schools_params["sigma"].astype(np.float32)
+            ),
+            observed=eight_schools_params["y"].astype(np.float32),
+        )
+        return inference_data
 
-    def test_inference_data(self, data):
-        inference_data = self.get_inference_data(data)
+    def get_inference_data2(self, data):
+        """Fit only."""
+        inference_data = from_tfp(data.obj)
+        return inference_data
+
+    def get_inference_data3(self, data, eight_schools_params):
+        """Read with observed Tensor var_names and dims."""
+        import tensorflow as tf
+
+        inference_data = from_tfp(
+            data.obj,
+            var_names=["mu", "tau", "eta"],
+            model_fn=lambda: data.model(
+                eight_schools_params["J"], eight_schools_params["sigma"].astype(np.float32)
+            ),
+            posterior_predictive_samples=100,
+            posterior_predictive_size=3,
+            observed=tf.convert_to_tensor(
+                np.vstack(
+                    (
+                        eight_schools_params["y"],
+                        eight_schools_params["y"],
+                        eight_schools_params["y"],
+                    )
+                ).astype(np.float32),
+                np.float32,
+            ),
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"eta": ["school"], "obs": ["size_dim", "school"]},
+        )
+        return inference_data
+
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "mu")
+        assert hasattr(inference_data.posterior, "tau")
+        assert hasattr(inference_data.posterior, "eta")
+        assert hasattr(inference_data, "observed_data")
+        assert hasattr(inference_data.observed_data, "obs")
+        assert hasattr(inference_data, "posterior_predictive")
+        assert hasattr(inference_data.posterior_predictive, "obs")
+
+    def test_inference_data2(self, data):
+        inference_data = self.get_inference_data2(data)
+        assert hasattr(inference_data, "posterior")
+
+    def test_inference_data3(self, data, eight_schools_params):
+        inference_data = self.get_inference_data3(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "mu")
+        assert hasattr(inference_data.posterior, "tau")
+        assert hasattr(inference_data.posterior, "eta")
+        assert hasattr(inference_data, "observed_data")
+        assert hasattr(inference_data.observed_data, "obs")
+        assert hasattr(inference_data, "posterior_predictive")
+        assert hasattr(inference_data.posterior_predictive, "obs")
 
 
 class TestCmdStanNetCDFUtils:

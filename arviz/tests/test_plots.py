@@ -7,7 +7,7 @@ import pytest
 import pymc3 as pm
 
 
-from ..data import from_dict, from_pymc3
+from ..data import from_dict, from_pymc3, from_tfp
 from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
@@ -39,7 +39,14 @@ def models(eight_schools_params):
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
         pyro_fit = models["pyro"]
-        tfp_fit = models["tensorflow_probability"]
+        # Explicitly convert tfp result to InferenceData
+        tfp_fit = from_tfp(
+            models["tensorflow_probability"][1],
+            model_fn=lambda: models["tensorflow_probability"][0](
+                eight_schools_params["J"], eight_schools_params["sigma"]
+            ),
+            observed=eight_schools_params["y"].astype(np.float32),
+        )
 
     return Models()
 
