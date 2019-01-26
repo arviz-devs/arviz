@@ -7,7 +7,7 @@ import pytest
 import pymc3 as pm
 
 
-from ..data import from_dict, from_pymc3, from_tfp
+from ..data import from_dict, from_pymc3
 from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
@@ -39,23 +39,6 @@ def models(eight_schools_params):
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
         pyro_fit = models["pyro"]
-        tfp_model, tfp_data = models["tensorflow_probability"]
-        print("model", tfp_model)
-        print("data", len(tfp_data), tfp_data)
-        
-        def tfp_model_fn(self, tfp_model, *args):
-            return (lambda: tfp_model(*args))
-
-        tfp_fit = from_tfp(
-            tfp_data,
-            var_names=["mu", "tau", "eta"],
-            model_fn=tfp_model_fn(
-                tfp_model,
-                eight_schools_params["J"],
-                eight_schools_params["sigma"].astype(np.float32),
-            ),
-            observed=eight_schools_params["y"].astype(np.float32),
-        )
 
     return Models()
 
@@ -123,9 +106,7 @@ def fig_ax():
     ],
 )
 def test_plot_density_float(models, kwargs):
-    obj = [
-        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
-    ]
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
 
@@ -136,9 +117,7 @@ def test_plot_density_discrete(discrete_model):
 
 
 def test_plot_density_bad_kwargs(models):
-    obj = [
-        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
-    ]
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
     with pytest.raises(ValueError):
         plot_density(obj, point_estimate="bad_value")
 
@@ -149,7 +128,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, credible_interval=2)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -180,8 +159,7 @@ def test_plot_trace_discrete(discrete_model):
 
 
 @pytest.mark.parametrize(
-    "model_fits",
-    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
+    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
 )
 @pytest.mark.parametrize(
     "args_expected",
@@ -221,8 +199,7 @@ def test_plot_forest_single_value():
 
 
 @pytest.mark.parametrize(
-    "model_fits",
-    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
+    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
 )
 def test_plot_forest_bad(models, model_fits):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
@@ -264,7 +241,7 @@ def test_plot_parallel_exception(models):
         assert plot_parallel(models.pymc3_fit, var_names="mu")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
 def test_plot_joint(models, model_fit, kind):
     obj = getattr(models, model_fit)
@@ -277,7 +254,7 @@ def test_plot_joint_discrete(discrete_model):
     assert axjoin
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_joint_bad(models, model_fit):
     obj = getattr(models, model_fit)
     with pytest.raises(ValueError):
@@ -563,7 +540,7 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_autocorr_uncombined(models, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=False)
@@ -575,12 +552,10 @@ def test_plot_autocorr_uncombined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 10
-        and model_fit == "tfp_fit"
     )
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_autocorr_combined(models, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=True)
@@ -592,8 +567,6 @@ def test_plot_autocorr_combined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 10
-        and model_fit == "tfp_fit"
     )
 
 
@@ -621,7 +594,7 @@ def test_plot_autocorr_var_names(models, var_names):
         {"mu": {"ref_val": (-1, 1)}},
     ],
 )
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_posterior(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, **kwargs)
@@ -634,7 +607,7 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_posterior_bad(models, model_fit):
     obj = getattr(models, model_fit)
     with pytest.raises(ValueError):
@@ -645,7 +618,7 @@ def test_plot_posterior_bad(models, model_fit):
         plot_posterior(obj, point_estimate="bad_value")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_point_estimates(models, model_fit, point_estimate):
     obj = getattr(models, model_fit)
