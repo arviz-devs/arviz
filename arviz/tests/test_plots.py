@@ -40,9 +40,11 @@ def models(eight_schools_params):
         emcee_fit = models["emcee"]
         pyro_fit = models["pyro"]
         tfp_model, tfp_data = models["tensorflow_probability"]
-
+        print("model", tfp_model)
+        print("data", len(tfp_data), tfp_data)
+        
         def tfp_model_fn(self, tfp_model, *args):
-            return lambda: tfp_model(*args)
+            return (lambda: tfp_model(*args))
 
         tfp_fit = from_tfp(
             tfp_data,
