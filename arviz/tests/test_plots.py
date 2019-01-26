@@ -39,15 +39,14 @@ def models(eight_schools_params):
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
         pyro_fit = models["pyro"]
-        # Explicitly convert tfp result to InferenceData
         tfp_model, tfp_data = models["tensorflow_probability"]
+        J = eight_schools_params["J"]
+        sigma = eight_schools_params["sigma"].astype(np.float32)
         # pylint: disable=unsubscriptable-object
         tfp_fit = from_tfp(
             tfp_data,
             var_names=["mu", "tau", "eta"],
-            model_fn=lambda: tfp_model(
-                eight_schools_params["J"], eight_schools_params["sigma"]
-            ),
+            model_fn=lambda: tfp_model(J, sigma),
             observed=eight_schools_params["y"].astype(np.float32),
         )
 
