@@ -213,6 +213,25 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
+def purge_duplicates(list_in):
+    """Remove duplicates from list while preserving order.
+
+    Parameters
+    ----------
+    list_in: Iterable
+
+    Returns
+    -------
+    list
+        List of first occurences in order
+    """
+    _list = []
+    for item in list_in:
+        if item not in _list:
+            _list.append(item)
+    return _list
+
+
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
     """Convert xarray data to an iterator over vectors.
 
@@ -260,7 +279,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
     for var_name in var_names:
         if var_name in data:
             new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
-            vals = [np.unique(data[var_name][dim].values) for dim in new_dims]
+            vals = [purge_duplicates(data[var_name][dim].values) for dim in new_dims]
             dims = [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
             if reverse_selections:
                 dims = reversed(dims)
