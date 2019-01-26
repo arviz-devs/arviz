@@ -57,7 +57,7 @@ def test_dataset_to_numpy_combined(sample_dataset):
 
 def test_xarray_var_iter_ordering():
     """Assert that coordinate names stay the provided order"""
-    coords = list("abcd")
+    coords = list("dcba")
     data = from_dict(  # pylint: disable=no-member
         {"x": np.random.randn(1, 100, len(coords))},
         coords={"in_order": coords},

@@ -242,6 +242,25 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         The string is the variable name, the dictionary are coordinate names to values,
         and the array are the values of the variable at those coordinates.
     """
+
+    def ordered_unique(l):
+        """Remove duplicates from list while conserving order
+        Required arguments:
+            l: Iterable
+        Returns:
+            First occurences in order
+        """
+    
+        def purge_duplicates(l):
+            seen = set() # for faster lookups than lists
+            for x in l:
+                if x in seen:
+                    continue
+                seen.add(x)
+                yield x
+    
+        return np.array(list(purge_duplicates(l)))
+    
     if skip_dims is None:
         skip_dims = set()
 
@@ -260,7 +279,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
     for var_name in var_names:
         if var_name in data:
             new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
-            vals = [np.unique(data[var_name][dim].values) for dim in new_dims]
+            vals = [ordered_unique(data[var_name][dim].values) for dim in new_dims]
             dims = [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
             if reverse_selections:
                 dims = reversed(dims)
