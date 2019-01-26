@@ -90,12 +90,22 @@ def plot_kde(
         >>> mu_posterior = np.concatenate(non_centered.posterior["mu"].values)
         >>> az.plot_kde(mu_posterior)
 
+
+    Plot KDE with rugplot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, rug=True)
+
+
     Plot a cumulative distribution
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_kde(mu_posterior, cumulative=True)
+
 
 
     Rotate plot 90 degrees
