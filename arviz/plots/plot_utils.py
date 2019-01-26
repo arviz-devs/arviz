@@ -213,6 +213,25 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
+def purge_duplicates(l):
+    """Remove duplicates from list while preserving order.
+
+    Parameters
+    ----------
+    l: Iterable
+
+    Returns
+    -------
+    list
+        List of first occurences in order
+    """
+    _list = []
+    for item in l:
+        if item not in _list:
+            _list.append(item)
+    return _list
+
+
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
     """Convert xarray data to an iterator over vectors.
 
@@ -242,15 +261,6 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         The string is the variable name, the dictionary are coordinate names to values,
         and the array are the values of the variable at those coordinates.
     """
-
-    def purge_duplicates(l):
-        _list = []
-        for item in l:
-            if item not in _list:
-                _list.append(item)
-        return _list
-    
-    
     if skip_dims is None:
         skip_dims = set()
 
