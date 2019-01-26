@@ -213,12 +213,12 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
-def purge_duplicates(l):
+def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.
 
     Parameters
     ----------
-    l: Iterable
+    list_in: Iterable
 
     Returns
     -------
@@ -226,7 +226,7 @@ def purge_duplicates(l):
         List of first occurences in order
     """
     _list = []
-    for item in l:
+    for item in list_in:
         if item not in _list:
             _list.append(item)
     return _list
