@@ -1035,6 +1035,18 @@ class TestTfpNetCDFUtils:
         assert hasattr(inference_data, "posterior_predictive")
         assert hasattr(inference_data.posterior_predictive, "obs")
 
+    def test_inference_data4(self, data, eight_schools_params):
+        inference_data = self.get_inference_data4(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "mu")
+        assert hasattr(inference_data.posterior, "tau")
+        assert hasattr(inference_data.posterior, "eta")
+        assert hasattr(inference_data.posterior, "avg_effect")
+        assert hasattr(inference_data, "observed_data")
+        assert hasattr(inference_data.observed_data, "obs")
+        assert hasattr(inference_data, "posterior_predictive")
+        assert hasattr(inference_data.posterior_predictive, "obs")
+
 
 class TestCmdStanNetCDFUtils:
     @pytest.fixture(scope="session")
