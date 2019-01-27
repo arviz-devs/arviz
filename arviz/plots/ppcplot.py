@@ -157,15 +157,18 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
-    if animated and platform.system() == "Darwin":
-        warnings.warn(
-            """If you experience problems rendering the animation try setting
-            `animation_kwargs({'blit':False}) or setting the plotting backend to TkAgg."""
-        )
-
     if animation_kwargs is None:
         animation_kwargs = {}
-    animation_kwargs.setdefault("blit", True)
+    if platform.system() == "Linux":
+        animation_kwargs.setdefault("blit", True)
+    else:
+        animation_kwargs.setdefault("blit", False)
+
+    if animated and animation_kwargs["blit"] and platform.system() != "Linux":
+        warnings.warn(
+            """If you experience problems rendering the animation try setting
+            `animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)."""
+        )
 
     if alpha is None:
         if animated:

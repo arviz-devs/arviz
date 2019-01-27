@@ -77,7 +77,7 @@ class TfpConverter:
         val_dims = dims.get(name)
         vals = np.atleast_1d(vals)
         val_dims, coords = generate_dims_coords(vals.shape, name, dims=val_dims, coords=self.coords)
-        coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
+        # coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
 
         observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.tfp))

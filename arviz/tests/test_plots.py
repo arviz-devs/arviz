@@ -1,15 +1,13 @@
 # pylint: disable=redefined-outer-name
 import os
-from unittest.mock import MagicMock
 import matplotlib.pyplot as plt
 from pandas import DataFrame
-import xarray as xr
 import numpy as np
 import pytest
 import pymc3 as pm
 
 
-from ..data import from_dict, from_pymc3, InferenceData
+from ..data import from_dict, from_pymc3
 from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
@@ -41,7 +39,6 @@ def models(eight_schools_params):
         stan_model, stan_fit = models["pystan"]
         emcee_fit = models["emcee"]
         pyro_fit = models["pyro"]
-        tfp_fit = models["tensorflow_probability"]
 
     return Models()
 
@@ -109,9 +106,7 @@ def fig_ax():
     ],
 )
 def test_plot_density_float(models, kwargs):
-    obj = [
-        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
-    ]
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
 
@@ -122,9 +117,7 @@ def test_plot_density_discrete(discrete_model):
 
 
 def test_plot_density_bad_kwargs(models):
-    obj = [
-        getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"]
-    ]
+    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
     with pytest.raises(ValueError):
         plot_density(obj, point_estimate="bad_value")
 
@@ -135,7 +128,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, credible_interval=2)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -166,8 +159,7 @@ def test_plot_trace_discrete(discrete_model):
 
 
 @pytest.mark.parametrize(
-    "model_fits",
-    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
+    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
 )
 @pytest.mark.parametrize(
     "args_expected",
@@ -207,8 +199,7 @@ def test_plot_forest_single_value():
 
 
 @pytest.mark.parametrize(
-    "model_fits",
-    [["tfp_fit"], ["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]],
+    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
 )
 def test_plot_forest_bad(models, model_fits):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
@@ -250,7 +241,7 @@ def test_plot_parallel_exception(models):
         assert plot_parallel(models.pymc3_fit, var_names="mu")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
 def test_plot_joint(models, model_fit, kind):
     obj = getattr(models, model_fit)
@@ -263,7 +254,7 @@ def test_plot_joint_discrete(discrete_model):
     assert axjoin
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 def test_plot_joint_bad(models, model_fit):
     obj = getattr(models, model_fit)
     with pytest.raises(ValueError):
@@ -367,7 +358,18 @@ def test_plot_pair_bad(models, model_fit):
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc(models, pymc3_sample_ppc, kind, alpha, animated):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
-    axes = plot_ppc(data, kind=kind, alpha=alpha, animated=animated, random_seed=3)
+    animation_kwargs = {"blit": False}
+    axes = plot_ppc(
+        data,
+        kind=kind,
+        alpha=alpha,
+        animated=animated,
+        animation_kwargs=animation_kwargs,
+        random_seed=3,
+    )
+    if animated:
+        assert axes[0]
+        assert axes[1]
     assert axes
 
 
@@ -383,8 +385,15 @@ def test_plot_ppc_multichain(kind, jitter, animated):
         },
         observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
     )
+    animation_kwargs = {"blit": False}
     axes = plot_ppc(
-        data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, animated=animated, random_seed=3
+        data,
+        kind=kind,
+        data_pairs={"y": "y_hat"},
+        jitter=jitter,
+        animated=animated,
+        animation_kwargs=animation_kwargs,
+        random_seed=3,
     )
     if animated:
         assert np.all(axes[0])
@@ -396,17 +405,89 @@ def test_plot_ppc_multichain(kind, jitter, animated):
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_discrete(kind, animated):
-    data = MagicMock(spec=InferenceData)
-    observed_data = xr.Dataset({"obs": (["obs_dim_0"], [9, 9])}, coords={"obs_dim_0": [1, 2]})
-    posterior_predictive = xr.Dataset(
-        {"obs": (["draw", "chain", "obs_dim_0"], [[[1]], [[1]]])},
-        coords={"obs_dim_0": [1], "chain": [1], "draw": [1, 2]},
+    data = from_dict(
+        observed_data={"obs": np.random.randint(1, 100, 15)},
+        posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
     )
-    data.observed_data = observed_data
-    data.posterior_predictive = posterior_predictive
 
-    axes = plot_ppc(data, kind=kind, animated=animated)
+    animation_kwargs = {"blit": False}
+    axes = plot_ppc(data, kind=kind, animated=animated, animation_kwargs=animation_kwargs)
+    if animated:
+        assert np.all(axes[0])
+        assert np.all(axes[1])
     assert axes
+
+
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+def test_plot_ppc_save_animation(models, pymc3_sample_ppc, kind):
+    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+    animation_kwargs = {"blit": False}
+    axes, anim = plot_ppc(
+        data,
+        kind=kind,
+        animated=True,
+        animation_kwargs=animation_kwargs,
+        num_pp_samples=5,
+        random_seed=3,
+    )
+    assert axes
+    assert anim
+    animations_folder = "saved_animations"
+    os.makedirs(animations_folder, exist_ok=True)
+    path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
+    anim.save(path)
+    assert os.path.exists(path)
+    assert os.path.getsize(path)
+
+
+@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+def test_plot_ppc_discrete_save_animation(kind):
+    data = from_dict(
+        observed_data={"obs": np.random.randint(1, 100, 15)},
+        posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
+    )
+    animation_kwargs = {"blit": False}
+    axes, anim = plot_ppc(
+        data,
+        kind=kind,
+        animated=True,
+        animation_kwargs=animation_kwargs,
+        num_pp_samples=5,
+        random_seed=3,
+    )
+    assert axes
+    assert anim
+    animations_folder = "saved_animations"
+    os.makedirs(animations_folder, exist_ok=True)
+    path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
+    anim.save(path)
+    assert os.path.exists(path)
+    assert os.path.getsize(path)
+
+
+@pytest.mark.parametrize("system", ["Windows", "Darwin"])
+def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system):
+    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+
+    import platform
+
+    def mock_system():
+        return system
+
+    monkeypatch.setattr(platform, "system", mock_system)
+
+    animation_kwargs = {"blit": True}
+    with pytest.warns(UserWarning):
+        axes, anim = plot_ppc(
+            data,
+            kind="density",
+            animated=True,
+            animation_kwargs=animation_kwargs,
+            num_pp_samples=5,
+            random_seed=3,
+        )
+    assert axes
+    assert anim
 
 
 def test_plot_ppc_grid(models, pymc3_sample_ppc):
@@ -459,7 +540,7 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_autocorr_uncombined(models, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=False)
@@ -471,12 +552,10 @@ def test_plot_autocorr_uncombined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 10
-        and model_fit == "tfp_fit"
     )
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_autocorr_combined(models, model_fit):
     obj = getattr(models, model_fit)
     axes = plot_autocorr(obj, combined=True)
@@ -488,8 +567,6 @@ def test_plot_autocorr_combined(models, model_fit):
         and model_fit == "stan_fit"
         or axes.shape[1] == 10
         and model_fit == "pyro_fit"
-        or axes.shape[1] == 10
-        and model_fit == "tfp_fit"
     )
 
 
@@ -517,7 +594,7 @@ def test_plot_autocorr_var_names(models, var_names):
         {"mu": {"ref_val": (-1, 1)}},
     ],
 )
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_posterior(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     axes = plot_posterior(obj, **kwargs)
@@ -530,7 +607,7 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_posterior_bad(models, model_fit):
     obj = getattr(models, model_fit)
     with pytest.raises(ValueError):
@@ -541,7 +618,7 @@ def test_plot_posterior_bad(models, model_fit):
         plot_posterior(obj, point_estimate="bad_value")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit", "tfp_fit"])
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_point_estimates(models, model_fit, point_estimate):
     obj = getattr(models, model_fit)
