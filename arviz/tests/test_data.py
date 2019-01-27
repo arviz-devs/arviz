@@ -947,9 +947,7 @@ class TestTfpNetCDFUtils:
     def data(self, draws, chains):
         class Data:
             # Returns result of from_tfp
-            model, obj = load_cached_models(
-                {}, draws, chains
-            )[  # pylint: disable=no-value-for-parameter
+            model, obj = load_cached_models(eight_schools_params, draws, chains)[
                 "tensorflow_probability"
             ]
 
@@ -999,7 +997,7 @@ class TestTfpNetCDFUtils:
         )
         return inference_data
 
-    def get_inference_data4(self, data):
+    def get_inference_data4(self, data, eight_schools_params):
         """Test setter."""
         inference_data = from_tfp(
             data.obj + [np.ones_like(data.obj[0]).astype(np.float32)],
