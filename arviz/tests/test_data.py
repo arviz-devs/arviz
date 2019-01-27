@@ -999,6 +999,18 @@ class TestTfpNetCDFUtils:
         )
         return inference_data
 
+    def get_inference_data4(self, data):
+        """Test setter."""
+        inference_data = from_tfp(
+            data.obj + [np.ones_like(data.obj[0]).astype(np.float32)],
+            var_names=["mu", "tau", "eta", "avg_effect"],
+            model_fn=lambda: data.model(
+                eight_schools_params["J"], eight_schools_params["sigma"].astype(np.float32)
+            ),
+            observed=eight_schools_params["y"].astype(np.float32),
+        )
+        return inference_data
+
     def test_inference_data(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior")
