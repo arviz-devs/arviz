@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from ..data import convert_to_dataset
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from ..utils import _var_names
 
 
 def plot_joint(
@@ -66,6 +67,8 @@ def plot_joint(
 
     if coords is None:
         coords = {}
+
+    var_names = _var_names(var_names, data)
 
     plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 

@@ -5,15 +5,29 @@ Tests for arviz.utils.
 from unittest.mock import Mock
 import pytest
 from ..utils import _var_names
+from ..data import load_arviz_data
+
+
+@pytest.fixture(scope="session")
+def data():
+    centered_eight = load_arviz_data("centered_eight")
+    return centered_eight.posterior
 
 
 @pytest.mark.parametrize(
-    "var_names_expected", [("mu", ["mu"]), (None, None), (["mu", "tau"], ["mu", "tau"])]
+    "var_names_expected",
+    [
+        ("mu", ["mu"]),
+        (None, None),
+        (["mu", "tau"], ["mu", "tau"]),
+        ("~mu", ["theta", "tau"]),
+        (["~mu"], ["theta", "tau"]),
+    ],
 )
 def test_var_names(var_names_expected):
     """Test var_name handling"""
     var_names, expected = var_names_expected
-    assert _var_names(var_names) == expected
+    assert _var_names(var_names, data()) == expected
 
 
 @pytest.fixture(scope="function")

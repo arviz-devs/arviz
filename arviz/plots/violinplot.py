@@ -63,7 +63,7 @@ def plot_violin(
     ax : matplotlib axes
     """
     data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names)
+    var_names = _var_names(var_names, data)
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 

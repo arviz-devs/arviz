@@ -69,8 +69,6 @@ def plot_pair(
     -------
     ax : matplotlib axes
     """
-    var_names = _var_names(var_names)
-
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
         raise ValueError(
@@ -97,6 +95,7 @@ def plot_pair(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, posterior_data)
     flat_var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )

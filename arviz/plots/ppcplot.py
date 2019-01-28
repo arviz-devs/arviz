@@ -188,7 +188,7 @@ def plot_ppc(
 
     if var_names is None:
         var_names = observed.data_vars
-    var_names = _var_names(var_names)
+    var_names = _var_names(var_names, observed)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
 
     if flatten_pp is None and flatten is None:
