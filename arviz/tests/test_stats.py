@@ -119,6 +119,20 @@ def test_summary_stat_func(centered_eight):
     assert summary(centered_eight, stat_funcs=[np.var]) is not None
 
 
+def test_summary_nan(centered_eight):
+    centered_eight = deepcopy(centered_eight)
+    centered_eight.posterior.theta[:, :, 0] = np.nan
+    summary_xarray = summary(centered_eight)
+    assert summary_xarray is not None
+    assert summary_xarray.loc["theta[0]"].isnull().all()
+    assert (
+        summary_xarray.loc[[ix for ix in summary_xarray.index if ix != "theta[0]"]]
+        .notnull()
+        .all()
+        .all()
+    )
+
+
 def test_summary_bad_fmt(centered_eight):
     with pytest.raises(TypeError):
         summary(centered_eight, fmt="bad_fmt")
