@@ -40,9 +40,9 @@ class TestDiagnostics:
             rhat(np.random.randn(3))
 
     def test_effective_sample_size_array(self):
-        eff_n_hat = effective_sample_size(np.random.randn(4, 100))
-        assert eff_n_hat > 100
-        assert eff_n_hat < 800
+        ess_hat = effective_sample_size(np.random.randn(4, 100))
+        assert ess_hat > 100
+        assert ess_hat < 800
 
     def test_effective_sample_size_bad_shape(self):
         with pytest.raises(TypeError):
@@ -54,8 +54,8 @@ class TestDiagnostics:
 
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_sample_size_dataset(self, data, var_names):
-        eff_n_hat = effective_sample_size(data, var_names=var_names)
-        assert eff_n_hat.mu > 100  # This might break if the data is regenerated
+        ess_hat = effective_sample_size(data, var_names=var_names)
+        assert ess_hat.mu > 100  # This might break if the data is regenerated
 
     def test_geweke(self):
         first = 0.1

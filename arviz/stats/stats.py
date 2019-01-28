@@ -382,11 +382,9 @@ def loo(data, pointwise=False, reff=None):
         if n_chains == 1:
             reff = 1.0
         else:
-            eff_n = effective_sample_size(posterior)
+            ess = effective_sample_size(posterior)
             # this mean is over all data variables
-            reff = (
-                np.hstack([eff_n[v].values.flatten() for v in eff_n.data_vars]).mean() / n_samples
-            )
+            reff = np.hstack([ess[v].values.flatten() for v in ess.data_vars]).mean() / n_samples
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
@@ -647,7 +645,7 @@ def summary(
     -------
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
-        `hpd_3%`, `hpd_97%`, `mc_error`, `eff_n` and `r_hat`. `eff_n` and `r_hat` are only computed
+        `hpd_3%`, `hpd_97%`, `mc_error`, `ess` and `r_hat`. `ess` and `r_hat` are only computed
         for traces with 2 or more chains.
 
     Examples
@@ -655,7 +653,7 @@ def summary(
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-               mean    sd  mc_error  hpd_3  hpd_97  eff_n  r_hat
+               mean    sd  mc_error  hpd_3  hpd_97  ess  r_hat
         mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0  1.00
         mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0  1.00
 
@@ -775,7 +773,7 @@ def summary(
 
     if len(posterior.chain) > 1:
         metrics.append(effective_sample_size(posterior, var_names=var_names))
-        metric_names.append("eff_n")
+        metric_names.append("ess")
 
         metrics.append(rhat(posterior, var_names=var_names))
         metric_names.append("r_hat")
