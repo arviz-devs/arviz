@@ -24,10 +24,10 @@ def data():
         (["~mu"], ["theta", "tau"]),
     ],
 )
-def test_var_names(var_names_expected):
+def test_var_names(var_names_expected, data):
     """Test var_name handling"""
     var_names, expected = var_names_expected
-    assert _var_names(var_names, data()) == expected
+    assert _var_names(var_names, data) == expected
 
 
 @pytest.fixture(scope="function")
