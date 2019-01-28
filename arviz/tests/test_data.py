@@ -947,9 +947,7 @@ class TestTfpNetCDFUtils:
     def data(self, draws, chains):
         class Data:
             # Returns result of from_tfp
-            model, obj = load_cached_models(
-                {}, draws, chains
-            )[  # pylint: disable=no-value-for-parameter
+            model, obj = load_cached_models(eight_schools_params, draws, chains)[
                 "tensorflow_probability"
             ]
 
@@ -999,6 +997,18 @@ class TestTfpNetCDFUtils:
         )
         return inference_data
 
+    def get_inference_data4(self, data, eight_schools_params):
+        """Test setter."""
+        inference_data = from_tfp(
+            data.obj + [np.ones_like(data.obj[0]).astype(np.float32)],
+            var_names=["mu", "tau", "eta", "avg_effect"],
+            model_fn=lambda: data.model(
+                eight_schools_params["J"], eight_schools_params["sigma"].astype(np.float32)
+            ),
+            observed=eight_schools_params["y"].astype(np.float32),
+        )
+        return inference_data
+
     def test_inference_data(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
         assert hasattr(inference_data, "posterior")
@@ -1020,6 +1030,18 @@ class TestTfpNetCDFUtils:
         assert hasattr(inference_data.posterior, "mu")
         assert hasattr(inference_data.posterior, "tau")
         assert hasattr(inference_data.posterior, "eta")
+        assert hasattr(inference_data, "observed_data")
+        assert hasattr(inference_data.observed_data, "obs")
+        assert hasattr(inference_data, "posterior_predictive")
+        assert hasattr(inference_data.posterior_predictive, "obs")
+
+    def test_inference_data4(self, data, eight_schools_params):
+        inference_data = self.get_inference_data4(data, eight_schools_params)
+        assert hasattr(inference_data, "posterior")
+        assert hasattr(inference_data.posterior, "mu")
+        assert hasattr(inference_data.posterior, "tau")
+        assert hasattr(inference_data.posterior, "eta")
+        assert hasattr(inference_data.posterior, "avg_effect")
         assert hasattr(inference_data, "observed_data")
         assert hasattr(inference_data.observed_data, "obs")
         assert hasattr(inference_data, "posterior_predictive")
