@@ -4,6 +4,7 @@ import importlib
 
 def _var_names(var_names, data):
     """Handle var_names input across arviz.
+
     Parameters
     ----------
     var_names: str, list, or None
@@ -28,7 +29,8 @@ def _var_names(var_names, data):
         else:
             all_vars = list(data.data_vars)
 
-        exclude_vars = [i[1:] for i in var_names if i.startswith("~")]
+        exclude_vars = [i[1:] for i in var_names if i.startswith("~") and i not in all_vars]
+
         if exclude_vars:
             var_names = [i for i in all_vars if i not in exclude_vars]
 
