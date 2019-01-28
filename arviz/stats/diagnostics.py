@@ -116,7 +116,11 @@ def _get_ess(sample_array):
             rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
-    ess = int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
+    ess = (
+        int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
+        if not np.any(np.isnan(rho_hat_t))
+        else np.nan
+    )
     return ess
 
 
