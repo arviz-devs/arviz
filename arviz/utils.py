@@ -1,5 +1,6 @@
 """General utilities."""
 import importlib
+import warnings
 
 
 def _var_names(var_names, data):
@@ -29,10 +30,21 @@ def _var_names(var_names, data):
         else:
             all_vars = list(data.data_vars)
 
-        exclude_vars = [i[1:] for i in var_names if i.startswith("~") and i not in all_vars]
+        excluded_vars = [i[1:] for i in var_names if i.startswith("~") and i not in all_vars]
 
-        if exclude_vars:
-            var_names = [i for i in all_vars if i not in exclude_vars]
+        all_vars_tilde = [i for i in all_vars if i.startswith("~")]
+
+        if all_vars_tilde:
+            warnings.warn(
+                """ArviZ treats '~' as a negation character for variable selection.
+                   Your model has variables names starting with '~', {0}. Please double check
+                   your results to ensure all variables are included""".format(
+                    ", ".join(all_vars_tilde)
+                )
+            )
+
+        if excluded_vars:
+            var_names = [i for i in all_vars if i not in excluded_vars]
 
     return var_names
 

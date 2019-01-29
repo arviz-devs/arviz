@@ -1,7 +1,7 @@
 """
 Tests for arviz.utils.
 """
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, no-member
 from unittest.mock import Mock
 import pytest
 from ..utils import _var_names
