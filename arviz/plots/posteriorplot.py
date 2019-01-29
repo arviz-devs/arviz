@@ -144,9 +144,8 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
-    var_names = _var_names(var_names)
-
     data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, data)
 
     if coords is None:
         coords = {}

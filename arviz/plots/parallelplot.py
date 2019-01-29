@@ -55,8 +55,6 @@ def plot_parallel(
     -------
     ax : matplotlib axes
     """
-    var_names = _var_names(var_names)
-
     if coords is None:
         coords = {}
 
@@ -67,6 +65,7 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, posterior_data)
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )

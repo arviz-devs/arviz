@@ -676,7 +676,7 @@ def summary(
         mu[1]  0.07 -0.16 -0.04  0.06
     """
     posterior = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names)
+    var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]
 
     fmt_group = ("wide", "long", "xarray")

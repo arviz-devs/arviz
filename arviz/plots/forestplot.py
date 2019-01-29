@@ -97,7 +97,12 @@ def plot_forest(
     -------
     gridspec : matplotlib GridSpec
     """
-    var_names = _var_names(var_names)
+    if not isinstance(data, (list, tuple)):
+        data = [data]
+
+    datasets = [convert_to_dataset(datum) for datum in reversed(data)]
+
+    var_names = _var_names(var_names, datasets)
 
     ncols, width_ratios = 1, [3]
 
@@ -110,7 +115,7 @@ def plot_forest(
         width_ratios.append(1)
 
     plot_handler = PlotHandler(
-        data, var_names=var_names, model_names=model_names, combined=combined, colors=colors
+        datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
     )
 
     if figsize is None:
@@ -195,12 +200,8 @@ class PlotHandler:
 
     # pylint: disable=inconsistent-return-statements
 
-    def __init__(self, data, var_names, model_names, combined, colors):
-        if not isinstance(data, (list, tuple)):
-            data = [data]
-
-        # y-values upside down
-        self.data = [convert_to_dataset(datum, group="posterior") for datum in reversed(data)]
+    def __init__(self, datasets, var_names, model_names, combined, colors):
+        self.data = datasets
 
         if model_names is None:
             if len(self.data) > 1:

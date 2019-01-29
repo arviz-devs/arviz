@@ -96,7 +96,7 @@ def plot_trace(
             divergences = False
 
     data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names)
+    var_names = _var_names(var_names, data)
 
     if coords is None:
         coords = {}

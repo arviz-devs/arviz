@@ -77,7 +77,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
         >>> az.plot_autocorr(data, var_names=['mu', 'tau'], max_lag=200, combined=True)
     """
     data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names)
+    var_names = _var_names(var_names, data)
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

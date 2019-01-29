@@ -132,12 +132,12 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-    var_names = _var_names(var_names)
-
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
-        datasets = [convert_to_dataset(d, group=group) for d in data]
+        datasets = [convert_to_dataset(datum, group=group) for datum in data]
+
+    var_names = _var_names(var_names, datasets)
 
     if point_estimate not in ("mean", "median", None):
         raise ValueError(

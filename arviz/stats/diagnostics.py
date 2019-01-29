@@ -54,8 +54,8 @@ def effective_sample_size(data, *, var_names=None):
     if isinstance(data, np.ndarray):
         return _get_ess(data)
 
-    var_names = _var_names(var_names)
     dataset = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_ess_ufunc, dataset, input_core_dims=(("chain", "draw"),))
@@ -205,8 +205,9 @@ def rhat(data, var_names=None):
     """
     if isinstance(data, np.ndarray):
         return _get_split_rhat(data)
-    var_names = _var_names(var_names)
+
     dataset = convert_to_dataset(data, group="posterior")
+    var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(("chain", "draw"),))
