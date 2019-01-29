@@ -3,9 +3,10 @@ Tests for arviz.utils.
 """
 # pylint: disable=redefined-outer-name, no-member
 from unittest.mock import Mock
+import numpy as np
 import pytest
 from ..utils import _var_names
-from ..data import load_arviz_data
+from ..data import load_arviz_data, from_dict
 
 
 @pytest.fixture(scope="session")
@@ -28,6 +29,20 @@ def test_var_names(var_names_expected, data):
     """Test var_name handling"""
     var_names, expected = var_names_expected
     assert _var_names(var_names, data) == expected
+
+
+def test_var_names_warning():
+    """Test confusing var_name handling"""
+    data = from_dict(
+        posterior={
+            "~mu": np.random.randn(2, 10),
+            "mu": -np.random.randn(2, 10),
+            "theta": np.random.randn(2, 10, 8),
+        }
+    ).posterior
+    var_names = expected = ["~mu"]
+    with pytest.warns(UserWarning):
+        assert _var_names(var_names, data) == expected
 
 
 @pytest.fixture(scope="function")
