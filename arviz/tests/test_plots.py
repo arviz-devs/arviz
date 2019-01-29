@@ -168,9 +168,9 @@ def test_plot_trace_discrete(discrete_model):
         ({"var_names": "mu"}, 1),
         ({"var_names": "mu", "rope": (-1, 1)}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
-        ({"var_names": ["mu"], "colors": "C0", "eff_n": True, "combined": True}, 2),
-        ({"kind": "ridgeplot", "r_hat": True, "eff_n": True}, 3),
-        ({"kind": "ridgeplot", "r_hat": True, "eff_n": True, "ridgeplot_alpha": 0}, 3),
+        ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
+        ({"kind": "ridgeplot", "r_hat": True, "ess": True}, 3),
+        ({"kind": "ridgeplot", "r_hat": True, "ess": True, "ridgeplot_alpha": 0}, 3),
         (
             {
                 "var_names": ["mu", "tau"],

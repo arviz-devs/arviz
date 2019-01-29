@@ -29,7 +29,7 @@ def plot_forest(
     credible_interval=0.94,
     rope=None,
     quartiles=True,
-    eff_n=False,
+    ess=False,
     r_hat=False,
     colors="cycle",
     textsize=None,
@@ -71,7 +71,7 @@ def plot_forest(
         Defaults to True
     r_hat : bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
-    eff_n : bool, optional
+    ess : bool, optional
         Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to False
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
@@ -106,7 +106,7 @@ def plot_forest(
 
     ncols, width_ratios = 1, [3]
 
-    if eff_n:
+    if ess:
         ncols += 1
         width_ratios.append(1)
 
@@ -161,7 +161,7 @@ def plot_forest(
         )
 
     idx = 1
-    if eff_n:
+    if ess:
         plot_handler.plot_neff(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
@@ -363,10 +363,10 @@ class PlotHandler:
     def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
         """Draw effective n for each plotter."""
         for plotter in self.plotters.values():
-            for y, eff_n, color in plotter.eff_n():
-                if eff_n is not None:
+            for y, ess, color in plotter.ess():
+                if ess is not None:
                     ax.plot(
-                        eff_n,
+                        ess,
                         y,
                         "o",
                         color=color,
@@ -375,7 +375,7 @@ class PlotHandler:
                         markeredgecolor="k",
                     )
         ax.set_xlim(left=0)
-        ax.set_title("eff_n", fontsize=titlesize, wrap=True)
+        ax.set_title("ess", fontsize=titlesize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
         return ax
 
@@ -519,7 +519,7 @@ class VarHandler:
             y = y * np.ones_like(x)
             yield x, y, mult * pdf / scaling + y, color
 
-    def eff_n(self):
+    def ess(self):
         """Get effective n data for the variable."""
         _, y_vals, values, colors = self.labels_ticks_and_vals()
         for y, value, color in zip(y_vals, values, colors):
