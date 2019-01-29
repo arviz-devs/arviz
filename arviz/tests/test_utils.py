@@ -34,12 +34,12 @@ def test_var_names(var_names_expected, data):
 def test_var_names_warning():
     """Test confusing var_name handling"""
     data = from_dict(
-        {
+        posterior={
             "~mu": np.random.randn(2, 10),
             "mu": -np.random.randn(2, 10),
             "theta": np.random.randn(2, 10, 8),
         }
-    )
+    ).posterior
     var_names = expected = ["~mu"]
     with pytest.warns(UserWarning):
         assert _var_names(var_names, data) == expected
