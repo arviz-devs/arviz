@@ -115,6 +115,11 @@ def test_summary_fmt(centered_eight, fmt):
     assert summary(centered_eight, fmt=fmt) is not None
 
 
+@pytest.mark.parametrize("order", ["C", "F"])
+def test_summary_unpack_order(centered_eight, order):
+    assert summary(centered_eight, order=order) is not None
+
+
 def test_summary_stat_func(centered_eight):
     assert summary(centered_eight, stat_funcs=[np.var]) is not None
 
@@ -135,7 +140,16 @@ def test_summary_nan(centered_eight):
 
 def test_summary_bad_fmt(centered_eight):
     with pytest.raises(TypeError):
+        summary(centered_eight, fmt=1)
+    with pytest.raises(TypeError):
         summary(centered_eight, fmt="bad_fmt")
+
+
+def test_summary_bad_unpack_order(centered_eight):
+    with pytest.raises(TypeError):
+        summary(centered_eight, order=1)
+    with pytest.raises(TypeError):
+        summary(centered_eight, order="bad_order")
 
 
 def test_waic(centered_eight):
