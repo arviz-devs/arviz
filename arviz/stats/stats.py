@@ -611,6 +611,7 @@ def summary(
     stat_funcs=None,
     extend=True,
     credible_interval=0.94,
+    order="C",
 ):
     """Create a data frame with summary statistics.
 
@@ -640,6 +641,8 @@ def summary(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
+    order : {"C", "F"}
+        If fmt is "wide", use either C or F unpacking order. Defaults to C.
 
     Returns
     -------
@@ -680,6 +683,12 @@ def summary(
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
         raise TypeError("Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group))
+
+    unpack_order_group = ("C", "F")
+    if not isinstance(order, str) or (order.upper() not in unpack_order_group):
+        raise TypeError(
+            "Invalid order: '{}'! Unpacking options are: {}".format(order, unpack_order_group)
+        )
 
     alpha = 1 - credible_interval
 
@@ -786,7 +795,9 @@ def summary(
             if len(values.shape[1:]):
                 metric = list(values.metric.values)
                 data_dict = {}
-                for idx in np.ndindex(values.shape[1:]):
+                for idx in np.ndindex(values.shape[1:] if order else values.shape[1:][::-1]):
+                    if not order:
+                        idx = list(idx)[::-1]
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
                     key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
                     data_dict[key] = ser
