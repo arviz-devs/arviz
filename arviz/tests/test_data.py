@@ -1,6 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import os
 from urllib.parse import urlunsplit
 
@@ -940,6 +940,26 @@ class TestPyStanNetCDFUtils:
         else:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
             assert draws.get("theta") is not None
+
+    def test_index_order(self, data):
+        """Test 0-indexed data."""
+        fit = deepcopy(data.obj)
+        if pystan.__version__ >= "2.18":
+            # make 1-indexed to 0-indexed
+            for i, holder in enumerate(fit.sim["samples"]):
+            new_chains = OrderedDict()
+            for key, values in holder.chains.items():
+                if "[" in key:
+                    name, *shape = key.replace("]", "").split("[")
+                    shape = [str(int(item)-1) for items in shape for item in items.split(",")]
+                    key = name + "[{}]".format(",".join(shape))
+                new_chains[key] = values
+            setattr(holder, "chains", new_chains)
+        idata = from_pystan(posterior=fit)
+        assert idata is not None
+        for par, dim in zip(fit.sim["pars_oi"], fit.sim["dims_oi"]):
+            if dim:
+                assert idata.posterior[par][]
 
 
 class TestTfpNetCDFUtils:
