@@ -967,7 +967,7 @@ class TestPyStanNetCDFUtils:
             par, *shape = fpar.replace("]", "").split("[")
             assert hasattr(idata.posterior, par)
             if shape:
-                shape = list(map(int, shape))
+                shape = [slice(None), slice(None)] + list(map(int, shape))
                 assert idata.posterior[par][tuple(shape)].values.mean() == float(j)
             else:
                 assert idata.posterior[par].values.mean() == float(j)
