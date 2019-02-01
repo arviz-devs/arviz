@@ -958,6 +958,7 @@ class TestPyStanNetCDFUtils:
                         key = name + "[{}]".format(",".join(shape))
                     new_chains[key] = values.copy()
                 setattr(holder, "chains", new_chains)
+            fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())
         idata = from_pystan(posterior=fit)
         assert idata is not None
         for (par,) in fit.sim["pars_oi"]:
