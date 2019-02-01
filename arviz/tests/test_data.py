@@ -951,7 +951,7 @@ class TestPyStanNetCDFUtils:
                 for key, values in holder.chains.items():
                     if "[" in key:
                         name, *shape = key.replace("]", "").split("[")
-                        shape = [str(int(item)-1) for items in shape for item in items.split(",")]
+                        shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
                         key = name + "[{}]".format(",".join(shape))
                     new_chains[key] = values
                 setattr(holder, "chains", new_chains)
