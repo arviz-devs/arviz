@@ -962,6 +962,8 @@ class TestPyStanNetCDFUtils:
         idata = from_pystan(posterior=fit)
         assert idata is not None
         for par in fit.sim["pars_oi"]:
+            if par == "lp__":
+                continue
             assert hasattr(idata.posterior, par)
 
 
