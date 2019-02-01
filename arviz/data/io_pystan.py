@@ -357,8 +357,8 @@ def get_draws(fit, variables=None, ignore=None):
     if any(fit.sim["dims_oi"]):
         # choose variable with lowest number of dims > 1
         par_idx = min((dim, i) for i, dim in enumerate(fit.sim["dims_oi"]) if dim)[1]
-        offset = sum(map(np.product, fit.sim["dims_oi"][:par_idx]))
-        par_offset = np.product(fit.sim["dims_oi"][par_idx])
+        offset = int(sum(map(np.product, fit.sim["dims_oi"][:par_idx])))
+        par_offset = int(np.product(fit.sim["dims_oi"][par_idx]))
         par_keys = fit.sim["fnames_oi"][offset : offset + par_offset]
         shift = len(par_keys)
         for item in par_keys:
