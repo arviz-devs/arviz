@@ -951,20 +951,26 @@ class TestPyStanNetCDFUtils:
             # make 1-indexed to 0-indexed
             for holder in fit.sim["samples"]:
                 new_chains = OrderedDict()
-                for key, values in holder.chains.items():
+                for i, (key, values) in enumerate(holder.chains.items()):
                     if "[" in key:
                         name, *shape = key.replace("]", "").split("[")
                         shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
                         key = name + "[{}]".format(",".join(shape))
-                    new_chains[key] = values.copy()
+                    new_chains[key] = np.full_like(values, fill_value=float(i))
                 setattr(holder, "chains", new_chains)
             fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())
         idata = from_pystan(posterior=fit)
         assert idata is not None
-        for par in fit.sim["pars_oi"]:
-            if par == "lp__":
+        for j, fpar in enumerate(fit.sim["fnames_oi"]):
+            if fpar == "lp__":
                 continue
+            par, *shape = fpar.replace("]", "").split("[")
             assert hasattr(idata.posterior, par)
+            if shape:
+                shape = list(map(int, shape))
+                assert idata.posterior[par][tuple(shape)].values.mean() == float(j)
+            else:
+                assert idata.posterior[par].values.mean() == float(j)
 
 
 class TestTfpNetCDFUtils:
