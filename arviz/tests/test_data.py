@@ -961,7 +961,7 @@ class TestPyStanNetCDFUtils:
             fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())
         idata = from_pystan(posterior=fit)
         assert idata is not None
-        for (par,) in fit.sim["pars_oi"]:
+        for par in fit.sim["pars_oi"]:
             assert hasattr(idata.posterior, par)
 
 
