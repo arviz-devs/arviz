@@ -941,6 +941,7 @@ class TestPyStanNetCDFUtils:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
             assert draws.get("theta") is not None
 
+    @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
     def test_index_order(self, data, eight_schools_params):
         """Test 0-indexed data."""
         import pystan
@@ -955,13 +956,12 @@ class TestPyStanNetCDFUtils:
                         name, *shape = key.replace("]", "").split("[")
                         shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
                         key = name + "[{}]".format(",".join(shape))
-                    new_chains[key] = values
+                    new_chains[key] = values.copy()
                 setattr(holder, "chains", new_chains)
         idata = from_pystan(posterior=fit)
         assert idata is not None
-        for par, dim in zip(fit.sim["pars_oi"], fit.sim["dims_oi"]):
-            if dim:
-                assert idata.posterior[par]
+        for (par,) in fit.sim["pars_oi"]:
+            assert hasattr(idata.posterior, par)
 
 
 class TestTfpNetCDFUtils:
