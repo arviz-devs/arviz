@@ -946,7 +946,7 @@ class TestPyStanNetCDFUtils:
         fit = deepcopy(data.obj)
         if pystan.__version__ >= "2.18":
             # make 1-indexed to 0-indexed
-            for i, holder in enumerate(fit.sim["samples"]):
+            for holder in fit.sim["samples"]:
                 new_chains = OrderedDict()
                 for key, values in holder.chains.items():
                     if "[" in key:
