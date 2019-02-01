@@ -1,6 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 from collections import namedtuple, OrderedDict
+from copy import deepcopy
 import os
 from urllib.parse import urlunsplit
 
@@ -943,6 +944,8 @@ class TestPyStanNetCDFUtils:
 
     def test_index_order(self, data):
         """Test 0-indexed data."""
+        import pystan
+
         fit = deepcopy(data.obj)
         if pystan.__version__ >= "2.18":
             # make 1-indexed to 0-indexed
