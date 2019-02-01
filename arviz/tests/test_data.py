@@ -1,7 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 from collections import namedtuple, OrderedDict
-from copy import deepcopy
 import os
 from urllib.parse import urlunsplit
 
