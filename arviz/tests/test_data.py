@@ -942,11 +942,11 @@ class TestPyStanNetCDFUtils:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
             assert draws.get("theta") is not None
 
-    def test_index_order(self, data):
+    def test_index_order(self, data, eight_schools_params):
         """Test 0-indexed data."""
         import pystan
 
-        fit = deepcopy(data.obj)
+        fit = data.model.sampling(data=eight_schools_params)
         if pystan.__version__ >= "2.18":
             # make 1-indexed to 0-indexed
             for holder in fit.sim["samples"]:
