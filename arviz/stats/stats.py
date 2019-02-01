@@ -795,8 +795,8 @@ def summary(
             if len(values.shape[1:]):
                 metric = list(values.metric.values)
                 data_dict = {}
-                for idx in np.ndindex(values.shape[1:] if order else values.shape[1:][::-1]):
-                    if not order:
+                for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
+                    if order == "F":
                         idx = list(idx)[::-1]
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
                     key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
