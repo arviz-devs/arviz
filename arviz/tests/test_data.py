@@ -959,7 +959,7 @@ class TestPyStanNetCDFUtils:
         assert idata is not None
         for par, dim in zip(fit.sim["pars_oi"], fit.sim["dims_oi"]):
             if dim:
-                assert idata.posterior[par][]
+                assert idata.posterior[par]
 
 
 class TestTfpNetCDFUtils:

@@ -369,7 +369,7 @@ def get_draws(fit, variables=None, ignore=None):
         # If shift is higher than 1, this will probably mean that Stan
         # has implemented sparse structure (saves only non-zero parts),
         # but let's hope that dims are still corresponding the full shape
-        shift = min(shift, 1)
+        shift = int(min(shift, 1))
 
     var_keys = OrderedDict((var, []) for var in fit.sim["pars_oi"])
     for key in fit.sim["fnames_oi"]:
