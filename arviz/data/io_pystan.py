@@ -352,6 +352,25 @@ def get_draws(fit, variables=None, ignore=None):
     ndraws = [s - w for s, w in zip(fit.sim["n_save"], fit.sim["warmup2"])]
     nchain = len(fit.sim["samples"])
 
+    # check if the values are in 0-based (<=2.17) or 1-based indexing (>=2.18)
+    shift = 1
+    if any(fit.sim["dims_oi"]):
+        # choose variable with lowest number of dims > 1
+        par_idx = min((dim, i) for i, dim in enumerate(fit.sim["dims_oi"]) if dim)[1]
+        offset = int(sum(map(np.product, fit.sim["dims_oi"][:par_idx])))
+        par_offset = int(np.product(fit.sim["dims_oi"][par_idx]))
+        par_keys = fit.sim["fnames_oi"][offset : offset + par_offset]
+        shift = len(par_keys)
+        for item in par_keys:
+            _, shape = item.replace("]", "").split("[")
+            shape_idx_min = min(int(shape_value) for shape_value in shape.split(","))
+            if shape_idx_min < shift:
+                shift = shape_idx_min
+        # If shift is higher than 1, this will probably mean that Stan
+        # has implemented sparse structure (saves only non-zero parts),
+        # but let's hope that dims are still corresponding the full shape
+        shift = int(min(shift, 1))
+
     var_keys = OrderedDict((var, []) for var in fit.sim["pars_oi"])
     for key in fit.sim["fnames_oi"]:
         var, *tails = key.split("[")
@@ -359,7 +378,7 @@ def get_draws(fit, variables=None, ignore=None):
         for tail in tails:
             loc = []
             for i in tail[:-1].split(","):
-                loc.append(int(i) - 1)
+                loc.append(int(i) - shift)
         var_keys[var].append((key, loc))
 
     shapes = dict(zip(fit.sim["pars_oi"], fit.sim["dims_oi"]))
@@ -446,11 +465,7 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
         dtype = dtypes.get(var)
 
         # in future fix the correct number of draws if fit.save_warmup is True
-        new_shape = (
-            *fit.dims[fit.param_names.index(var)],
-            -1,
-            fit.num_chains,
-        )  # pylint: disable=protected-access
+        new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
         values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
         values = np.moveaxis(values, [-2, -1], [1, 0])

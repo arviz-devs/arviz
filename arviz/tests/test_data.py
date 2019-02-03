@@ -1,6 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import os
 from urllib.parse import urlunsplit
 
@@ -940,6 +940,37 @@ class TestPyStanNetCDFUtils:
         else:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
             assert draws.get("theta") is not None
+
+    @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
+    def test_index_order(self, data, eight_schools_params):
+        """Test 0-indexed data."""
+        import pystan
+
+        fit = data.model.sampling(data=eight_schools_params)
+        if pystan.__version__ >= "2.18":
+            # make 1-indexed to 0-indexed
+            for holder in fit.sim["samples"]:
+                new_chains = OrderedDict()
+                for i, (key, values) in enumerate(holder.chains.items()):
+                    if "[" in key:
+                        name, *shape = key.replace("]", "").split("[")
+                        shape = [str(int(item) - 1) for items in shape for item in items.split(",")]
+                        key = name + "[{}]".format(",".join(shape))
+                    new_chains[key] = np.full_like(values, fill_value=float(i))
+                setattr(holder, "chains", new_chains)
+            fit.sim["fnames_oi"] = list(fit.sim["samples"][0].chains.keys())
+        idata = from_pystan(posterior=fit)
+        assert idata is not None
+        for j, fpar in enumerate(fit.sim["fnames_oi"]):
+            if fpar == "lp__":
+                continue
+            par, *shape = fpar.replace("]", "").split("[")
+            assert hasattr(idata.posterior, par)
+            if shape:
+                shape = [slice(None), slice(None)] + list(map(int, shape))
+                assert idata.posterior[par][tuple(shape)].values.mean() == float(j)
+            else:
+                assert idata.posterior[par].values.mean() == float(j)
 
 
 class TestTfpNetCDFUtils:
