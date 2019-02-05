@@ -27,6 +27,8 @@ def plot_kde(
     contour_kwargs=None,
     ax=None,
     legend=True,
+    xmin=None,
+    xmax=None,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
 
@@ -69,10 +71,14 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to the contourplot. Ignored for 1D KDE
+        Keywords passed to the contourplot. Ignored for 1D KDE.
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
+    xmin : float
+        Manually set lower limit for 1D KDE.
+    xmax : float
+        Manually set upper limit for 1D KDE.
 
     Returns
     -------
@@ -167,7 +173,7 @@ def plot_kde(
         plot_kwargs.setdefault("linewidth", linewidth)
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
-        density, lower, upper = _fast_kde(values, cumulative, bw)
+        density, lower, upper = _fast_kde(values, cumulative, bw, xmin=xmin, xmax=xmax)
 
         rug_space = max(density) * rug_kwargs.pop("space")
 
@@ -240,7 +246,7 @@ def plot_kde(
     return ax
 
 
-def _fast_kde(x, cumulative=False, bw=4.5):
+def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
 
     The code was adapted from https://github.com/mfouesneau/faststats
@@ -254,6 +260,10 @@ def _fast_kde(x, cumulative=False, bw=4.5):
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy).
+    xmin : float
+        Manually set lower limit.
+    xmax : float
+        Manually set upper limit.
 
     Returns
     -------
@@ -264,12 +274,18 @@ def _fast_kde(x, cumulative=False, bw=4.5):
     x = np.asarray(x, dtype=float)
     x = x[np.isfinite(x)]
     len_x = len(x)
-    xmin, xmax = np.min(x), np.max(x)
+    if xmin is None:
+        xmin = np.min(x)
+    if xmax is None:
+        xmax = np.max(x)
+
+    assert np.min(x) <= xmin
+    assert np.max(x) >= xmax
 
     std_x = entropy(x - xmin) * bw
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
-    grid = _histogram(x, n_bins)
+    grid = _histogram(x, n_bins, range=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
@@ -288,8 +304,8 @@ def _fast_kde(x, cumulative=False, bw=4.5):
 
 
 @conditional_jit
-def _histogram(x, n_bins):
-    grid, _ = np.histogram(x, bins=n_bins)
+def _histogram(x, n_bins, range=None):
+    grid, _ = np.histogram(x, bins=n_bins, range=range)
     return grid
 
 
