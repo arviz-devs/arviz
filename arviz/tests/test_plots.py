@@ -2,6 +2,7 @@
 import os
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 import pymc3 as pm
@@ -24,6 +25,7 @@ from ..plots import (
     plot_violin,
     plot_compare,
     plot_kde,
+    _fast_kde,
     plot_khat,
     plot_hpd,
 )
@@ -665,3 +667,23 @@ def test_plot_compare_no_ic(models):
 def test_plot_hpd(models, model_fit, data, kwargs):
     obj = getattr(models, model_fit)
     plot_hpd(data["y"], obj["theta"], **kwargs)
+
+
+@pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
+def test_fast_kde_scipy(limits):
+    data = np.random.normal(0, 1, 1000)
+    if limits[0] is None:
+        x = np.linspace(data.min(), data.max(), 200)
+    else:
+        x = np.linspace(*limits, 500)
+    density = gaussian_kde(data).evaluate(x)
+    density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1])[0]
+
+    np.testing.assert_almost_equal(density_fast.sum(), density.sum(), 1)
+
+
+@pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
+def test_fast_kde_cumulative(limits):
+    data = np.random.normal(0, 1, 1000)
+    density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1], cumulative=True)[0]
+    np.testing.assert_almost_equal(round(density_fast[-1], 3), 1)

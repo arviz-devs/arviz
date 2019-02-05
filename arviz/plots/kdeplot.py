@@ -182,7 +182,7 @@ def plot_kde(
         if cumulative:
             density_q = density
         else:
-            density_q = np.cumsum(density)
+            density_q = density.cumsum() / density.sum()
         fill_func = ax.fill_between
         fill_x, fill_y = x, density
         if rotated:
@@ -274,17 +274,20 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     x = np.asarray(x, dtype=float)
     x = x[np.isfinite(x)]
     len_x = len(x)
+    n_points = 200 if (xmin or xmax) is None else 500
+
     if xmin is None:
         xmin = np.min(x)
     if xmax is None:
         xmax = np.max(x)
 
-    assert np.min(x) <= xmin
-    assert np.max(x) >= xmax
+    assert np.min(x) >= xmin
+    assert np.max(x) <= xmax
 
     std_x = entropy(x - xmin) * bw
 
-    n_bins = min(int(len_x ** (1 / 3) * std_x * 2), 200)
+    n_bins = min(int(len_x ** (1 / 3) * std_x * 2), n_points)
+    d_x = (xmax - xmin) / (n_bins - 1)
     grid = _histogram(x, n_bins, range=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
@@ -294,11 +297,12 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     npad = min(n_bins, 2 * kern_nx)
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
+    norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
 
-    density /= np.sum(density)
+    density /= norm_factor
 
     if cumulative:
-        density = np.cumsum(density)
+        density = density.cumsum() / density.sum()
 
     return density, xmin, xmax
 
