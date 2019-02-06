@@ -80,15 +80,20 @@ class InferenceData:
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
-        for group in self._groups:
-            data = getattr(self, group)
-            kwargs = {}
-            if compress:
-                kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
-            data.to_netcdf(filename, mode=mode, group=group, **kwargs)
-            data.close()
-            mode = "a"
-        return filename
+        if self._groups:  # check's whether a group is present or not.
+            for group in self._groups:
+                data = getattr(self, group)
+                kwargs = {}
+                if compress:
+                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                data.to_netcdf(filename, mode=mode, group=group, **kwargs)
+                data.close()
+                mode = "a"
+                return filename
+        else:  # an empty netcdf file is created in case an empty inference data object is encountered.
+            empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
+            empty_netcdf_file.close()
+            return filename
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
