@@ -27,8 +27,6 @@ def plot_kde(
     contour_kwargs=None,
     ax=None,
     legend=True,
-    xmin=None,
-    xmax=None,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
 
@@ -75,10 +73,6 @@ def plot_kde(
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
-    xmin : float
-        Manually set lower limit for 1D KDE.
-    xmax : float
-        Manually set upper limit for 1D KDE.
 
     Returns
     -------
@@ -173,7 +167,7 @@ def plot_kde(
         plot_kwargs.setdefault("linewidth", linewidth)
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
-        density, lower, upper = _fast_kde(values, cumulative, bw, xmin=xmin, xmax=xmax)
+        density, lower, upper = _fast_kde(values, cumulative, bw)
 
         rug_space = max(density) * rug_kwargs.pop("space")
 
@@ -288,7 +282,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
 
     n_bins = min(int(len_x ** (1 / 3) * std_x * 2), n_points)
     d_x = (xmax - xmin) / (n_bins - 1)
-    grid = _histogram(x, n_bins, range=(xmin, xmax))
+    grid = _histogram(x, n_bins, range_hist=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * std_x)
@@ -308,8 +302,8 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
 
 
 @conditional_jit
-def _histogram(x, n_bins, range=None):
-    grid, _ = np.histogram(x, bins=n_bins, range=range)
+def _histogram(x, n_bins, range_hist=None):
+    grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
     return grid
 
 
