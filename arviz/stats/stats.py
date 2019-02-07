@@ -41,7 +41,7 @@ def bfmi(energy):
     return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
 
 
-def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None):
+def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"):
     r"""Compare models based on WAIC or LOO cross validation.
 
     WAIC is Widely applicable information criterion, and LOO is leave-one-out
@@ -52,7 +52,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     ----------
     dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic : string
+    ic : str
         Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
     method : str
         Method used to estimate the weights for each model. Available options are:
@@ -72,9 +72,15 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
     seed : int or np.random.RandomState instance
-           If int or RandomState, use it for seeding Bayesian bootstrap. Only
-           useful when method = 'BB-pseudo-BMA'. Default None the global
-           np.random state is used.
+        If int or RandomState, use it for seeding Bayesian bootstrap. Only
+        useful when method = 'BB-pseudo-BMA'. Default None the global
+        np.random state is used.
+    scale : str
+        Output scale for IC. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `neglog` : -1 * (log-score)
 
     Returns
     -------
@@ -82,6 +88,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     models are passed to this function. The columns are:
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
+        If `scale` is `log` higher IC indicates higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
     dIC : Relative difference between each IC (WAIC or LOO)
     and the lowest IC (WAIC or LOO).
@@ -126,7 +133,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append(ic_func(dataset, pointwise=True))
+        ics = ics.append(ic_func(dataset, pointwise=True, scale=scale))
     ics.index = names
     ics.sort_values(by=ic, inplace=True)
 
@@ -337,11 +344,11 @@ def _logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, 
     return out if out.shape else dtype(out)
 
 
-def loo(data, pointwise=False, reff=None):
+def loo(data, pointwise=False, reff=None, scale="deviance"):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
-    following Vehtari et al. (2015). Cross-validation is computed using Pareto-smoothed
+    following Vehtari et al. (2017). Cross-validation is computed using Pareto-smoothed
     importance sampling (PSIS).
 
     Parameters
@@ -352,6 +359,12 @@ def loo(data, pointwise=False, reff=None):
     reff : float, optional
         Relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
+    scale : str
+        Output scale for loo. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `neglog` : -1 * (log-score)
 
     Returns
     -------
@@ -377,6 +390,15 @@ def loo(data, pointwise=False, reff=None):
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
+    if scale.lower() == "deviance":
+        scale_value = -2
+    elif scale.lower() == "log":
+        scale_value = 1
+    elif scale.lower() == "neglog":
+        scale_value = -1
+    else:
+        raise TypeError('Valid scale values are "deviance", "log", "neglog"')
+
     if reff is None:
         n_chains = len(posterior.chain)
         if n_chains == 1:
@@ -400,12 +422,12 @@ def loo(data, pointwise=False, reff=None):
         )
         warn_mg = 1
 
-    loo_lppd_i = -2 * _logsumexp(log_weights, axis=0)
+    loo_lppd_i = scale_value * _logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
     lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
-    p_loo = lppd + (0.5 * loo_lppd)
+    p_loo = lppd + (1/scale_value * loo_lppd)
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
@@ -866,7 +888,7 @@ def _mc_error(x, batches=5, circular=False):
         return std / np.sqrt(batches)
 
 
-def waic(data, pointwise=False):
+def waic(data, pointwise=False, scale="deviance"):
     """Calculate the widely available information criterion.
 
     Also calculates the WAIC's standard error and the effective number of
@@ -876,9 +898,18 @@ def waic(data, pointwise=False):
 
     Parameters
     ----------
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     pointwise: bool
         if True the pointwise predictive accuracy will be returned.
         Default False
+    scale : str
+        Output scale for loo. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score
+        - `neglog` : -1 * (log-score)
 
     Returns
     -------
@@ -899,6 +930,16 @@ def waic(data, pointwise=False):
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     log_likelihood = inference_data.sample_stats.log_likelihood
+
+    if scale.lower() == "deviance":
+        scale_value = -2
+    elif scale.lower() == "log":
+        scale_value = 1
+    elif scale.lower() == "neglog":
+        scale_value = -1
+    else:
+        raise TypeError('Valid scale values are "deviance", "log", "neglog"')
+
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
@@ -916,7 +957,7 @@ def waic(data, pointwise=False):
         )
         warn_mg = 1
 
-    waic_i = -2 * (lppd_i - vars_lpd)
+    waic_i = scale_value * (lppd_i - vars_lpd)
     waic_se = (len(waic_i) * np.var(waic_i)) ** 0.5
     waic_sum = np.sum(waic_i)
     p_waic = np.sum(vars_lpd)
