@@ -7,7 +7,7 @@ from scipy.special import logsumexp
 from scipy.stats import linregress
 
 
-from ..data import load_arviz_data
+from ..data import load_arviz_data, from_dict
 from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv, _mc_error, _logsumexp
 
@@ -117,7 +117,7 @@ def test_summary_fmt(centered_eight, fmt):
 
 @pytest.mark.parametrize("order", ["C", "F"])
 def test_summary_unpack_order(order):
-    data = az.from_dict({"a": np.random.randn(4, 100, 4, 5, 3)})
+    data = from_dict({"a": np.random.randn(4, 100, 4, 5, 3)})
     az_summary = summary(data, order=order, fmt="wide")
     assert az_summary is not None
     if order != "F":
@@ -133,9 +133,9 @@ def test_summary_unpack_order(order):
         for idx2 in range(second_index):
             for idx3 in range(third_index):
                 if order != "F":
-                    column_order.append("{}[{},{},{}]".format(idx1, idx2, idx3))
+                    column_order.append("a[{},{},{}]".format(idx1, idx2, idx3))
                 else:
-                    column_order.append("{}[{},{},{}]".format(idx3, idx2, idx1))
+                    column_order.append("a[{},{},{}]".format(idx3, idx2, idx1))
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
 
