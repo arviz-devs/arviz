@@ -1,5 +1,6 @@
 """Statistical functions in ArviZ."""
 import warnings
+from collections import OrderedDict
 from collections.abc import Sequence
 
 import numpy as np
@@ -794,7 +795,7 @@ def summary(
         for var_name, values in joined.data_vars.items():
             if len(values.shape[1:]):
                 metric = list(values.metric.values)
-                data_dict = {}
+                data_dict = OrderedDict()
                 for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
                     if order == "F":
                         idx = tuple(idx[::-1])
