@@ -121,13 +121,13 @@ def test_summary_unpack_order(order):
     az_summary = summary(data, order=order, fmt="wide")
     assert az_summary is not None
     if order != "F":
-        first_index = 3
-        second_index = 5
-        third_index = 4
-    else:
         first_index = 4
         second_index = 5
         third_index = 3
+    else:
+        first_index = 3
+        second_index = 5
+        third_index = 4
     column_order = []
     for idx1 in range(first_index):
         for idx2 in range(second_index):
