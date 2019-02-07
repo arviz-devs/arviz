@@ -797,17 +797,18 @@ def summary(
                 data_dict = {}
                 for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
                     if order == "F":
-                        idx = list(idx)[::-1]
+                        idx = tuple(idx[::-1])
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
                     key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
                     data_dict[key] = ser
                 df = pd.DataFrame.from_dict(data_dict, orient="index")
+                df = df.loc[list(data_dict.keys())]
             else:
                 df = values.to_dataframe()
                 df.index = list(df.index)
                 df = df.T
             dfs.append(df)
-        summary_df = pd.concat(dfs)
+        summary_df = pd.concat(dfs, sort=False)
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)
