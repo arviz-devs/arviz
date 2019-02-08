@@ -90,7 +90,7 @@ def compare(
     models are passed to this function. The columns are:
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
-        If `scale` is `log` higher IC indicates higher out-of-sample predictive fit ("better" model).
+        If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
     dIC : Relative difference between each IC (WAIC or LOO)
     and the lowest IC (WAIC or LOO).
