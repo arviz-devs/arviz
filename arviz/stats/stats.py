@@ -437,12 +437,12 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
                           """
             )
         return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_i"],
+            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, scale]],
+            columns=["loo", "loo_se", "p_loo", "warning", "loo_i", "scale"],
         )
     else:
         return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg]], columns=["loo", "loo_se", "p_loo", "warning"]
+            [[loo_lppd, loo_lppd_se, p_loo, scale, warn_mg]], columns=["loo", "loo_se", "p_loo", "scale", "warning"]
         )
 
 
@@ -455,7 +455,7 @@ def psislw(log_weights, reff=1.0):
     log_weights : array
         Array of size (n_samples, n_observations)
     reff : float
-        relative MCMC efficiency, `effective_n / n`
+        relative MCMC efficiency, `ess / n`
 
     Returns
     -------
