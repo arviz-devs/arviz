@@ -41,7 +41,9 @@ def bfmi(energy):
     return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
 
 
-def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"):
+def compare(
+    dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"
+):
     r"""Compare models based on WAIC or LOO cross validation.
 
     WAIC is Widely applicable information criterion, and LOO is leave-one-out
@@ -110,14 +112,18 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     if ic == "waic":
         ic_func = waic
         df_comp = pd.DataFrame(
-            index=names, columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning"]
+            index=names,
+            columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning", "waic_scale"],
         )
+        scale_col = "waic_scale"
 
     elif ic == "loo":
         ic_func = loo
         df_comp = pd.DataFrame(
-            index=names, columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning"]
+            index=names,
+            columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning", "loo_scale"],
         )
+        scale_col = "loo_scale"
 
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
@@ -207,7 +213,16 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
             weight = weights[idx]
-            df_comp.at[val] = (res[ic], res[p_ic], d_ic, weight, std_err, d_std_err, res["warning"])
+            df_comp.at[val] = (
+                res[ic],
+                res[p_ic],
+                d_ic,
+                weight,
+                std_err,
+                d_std_err,
+                res["warning"],
+                res[scale_col],
+            )
 
     return df_comp.sort_values(by=ic)
 
@@ -375,6 +390,8 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     shape_warn: 1 if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
+    kss: array of Pareto tail indices
+    loo_scale: scale of the loo results
     """
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
@@ -427,7 +444,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
     lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
-    p_loo = lppd + (1/scale_value * loo_lppd)
+    p_loo = lppd + (1 / scale_value * loo_lppd)
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
@@ -437,12 +454,13 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
                           """
             )
         return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, scale]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_i", "scale"],
+            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale]],
+            columns=["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
         )
     else:
         return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, scale, warn_mg]], columns=["loo", "loo_se", "p_loo", "scale", "warning"]
+            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale]],
+            columns=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
         )
 
 
@@ -920,6 +938,7 @@ def waic(data, pointwise=False, scale="deviance"):
     var_warn: 1 if posterior variance of the log predictive
          densities exceeds 0.4
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
+    waic_scale: scale of the waic results
     """
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
@@ -970,10 +989,11 @@ def waic(data, pointwise=False, scale="deviance"):
             """
             )
         return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, waic_i]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_i"],
+            [[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale]],
+            columns=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
         )
     else:
         return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg]], columns=["waic", "waic_se", "p_waic", "warning"]
+            [[waic_sum, waic_se, p_waic, warn_mg, scale]],
+            columns=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
         )
