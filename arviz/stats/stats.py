@@ -106,6 +106,7 @@ def compare(
         It's always 0 for the top-ranked model.
     warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
         be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
+    scale : Scale used for the IC.
     """
     names = list(dataset_dict.keys())
 
