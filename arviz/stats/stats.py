@@ -1,5 +1,6 @@
 """Statistical functions in ArviZ."""
 import warnings
+from collections import OrderedDict
 from collections.abc import Sequence
 
 import numpy as np
@@ -611,6 +612,7 @@ def summary(
     stat_funcs=None,
     extend=True,
     credible_interval=0.94,
+    order="C",
 ):
     """Create a data frame with summary statistics.
 
@@ -640,6 +642,8 @@ def summary(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
+    order : {"C", "F"}
+        If fmt is "wide", use either C or F unpacking order. Defaults to C.
 
     Returns
     -------
@@ -680,6 +684,12 @@ def summary(
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
         raise TypeError("Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group))
+
+    unpack_order_group = ("C", "F")
+    if not isinstance(order, str) or (order.upper() not in unpack_order_group):
+        raise TypeError(
+            "Invalid order: '{}'! Unpacking options are: {}".format(order, unpack_order_group)
+        )
 
     alpha = 1 - credible_interval
 
@@ -785,18 +795,21 @@ def summary(
         for var_name, values in joined.data_vars.items():
             if len(values.shape[1:]):
                 metric = list(values.metric.values)
-                data_dict = {}
-                for idx in np.ndindex(values.shape[1:]):
+                data_dict = OrderedDict()
+                for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
+                    if order == "F":
+                        idx = tuple(idx[::-1])
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
                     key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
                     data_dict[key] = ser
                 df = pd.DataFrame.from_dict(data_dict, orient="index")
+                df = df.loc[list(data_dict.keys())]
             else:
                 df = values.to_dataframe()
                 df.index = list(df.index)
                 df = df.T
             dfs.append(df)
-        summary_df = pd.concat(dfs)
+        summary_df = pd.concat(dfs, sort=False)
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)

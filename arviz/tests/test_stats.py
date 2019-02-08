@@ -7,7 +7,7 @@ from scipy.special import logsumexp
 from scipy.stats import linregress
 
 
-from ..data import load_arviz_data
+from ..data import load_arviz_data, from_dict
 from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv, _mc_error, _logsumexp
 
@@ -115,6 +115,31 @@ def test_summary_fmt(centered_eight, fmt):
     assert summary(centered_eight, fmt=fmt) is not None
 
 
+@pytest.mark.parametrize("order", ["C", "F"])
+def test_summary_unpack_order(order):
+    data = from_dict({"a": np.random.randn(4, 100, 4, 5, 3)})
+    az_summary = summary(data, order=order, fmt="wide")
+    assert az_summary is not None
+    if order != "F":
+        first_index = 4
+        second_index = 5
+        third_index = 3
+    else:
+        first_index = 3
+        second_index = 5
+        third_index = 4
+    column_order = []
+    for idx1 in range(first_index):
+        for idx2 in range(second_index):
+            for idx3 in range(third_index):
+                if order != "F":
+                    column_order.append("a[{},{},{}]".format(idx1, idx2, idx3))
+                else:
+                    column_order.append("a[{},{},{}]".format(idx3, idx2, idx1))
+    for col1, col2 in zip(list(az_summary.index), column_order):
+        assert col1 == col2
+
+
 def test_summary_stat_func(centered_eight):
     assert summary(centered_eight, stat_funcs=[np.var]) is not None
 
@@ -133,9 +158,16 @@ def test_summary_nan(centered_eight):
     )
 
 
-def test_summary_bad_fmt(centered_eight):
+@pytest.mark.parametrize("fmt", [1, "bad_fmt"])
+def test_summary_bad_fmt(centered_eight, fmt):
     with pytest.raises(TypeError):
-        summary(centered_eight, fmt="bad_fmt")
+        summary(centered_eight, fmt=fmt)
+
+
+@pytest.mark.parametrize("order", [1, "bad_order"])
+def test_summary_bad_unpack_order(centered_eight, order):
+    with pytest.raises(TypeError):
+        summary(centered_eight, order=order)
 
 
 def test_waic(centered_eight):
