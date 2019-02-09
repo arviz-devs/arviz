@@ -4,10 +4,7 @@ from .inference_data import InferenceData
 from .converters import convert_to_inference_data
 import os
 import netCDF4 as nc
-<<<<<<< HEAD
 
-=======
->>>>>>> 3ca56d9b254ec557b08cf6ab7db36b27252559d9
 
 def from_netcdf(filename):
     """Load netcdf file back into an arviz.InferenceData.
@@ -45,16 +42,7 @@ def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):
     """
     inference_data = convert_to_inference_data(data, group=group, coords=coords, dims=dims)
     file_name = inference_data.to_netcdf(filename)
-<<<<<<< HEAD
     return file_name
-=======
-    if os.path.exists(file_name):
-        return file_name
-    else:
-        empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
-        empty_netcdf_file.close()
-        return filename
->>>>>>> 3ca56d9b254ec557b08cf6ab7db36b27252559d9
 
 
 def load_data(filename):
