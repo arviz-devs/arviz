@@ -149,6 +149,9 @@ def plot_trace(
             else:
                 plot_kde(row, textsize=xt_labelsize, ax=axes[idx, 0], **kde_kwargs)
 
+        if value[0].dtype.kind == "i":
+            xticks = get_bins(value, max_bins=10, fenceposts=1)
+            axes[idx, 0].set_xticks(xticks)
         axes[idx, 0].set_yticks([])
         for col in (0, 1):
             axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
@@ -222,6 +225,4 @@ def _histplot_op(ax, data, **kwargs):
     """Add a histogram for the data to the axes."""
     bins = get_bins(data)
     ax.hist(data, bins=bins, align="left", density=True, **kwargs)
-    xticks = get_bins(data, max_bins=10, fenceposts=1)
-    ax.set_xticks(xticks)
     return ax
