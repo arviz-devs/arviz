@@ -149,7 +149,7 @@ def plot_trace(
             else:
                 plot_kde(row, textsize=xt_labelsize, ax=axes[idx, 0], **kde_kwargs)
 
-        if row.dtype.kind == "i":
+        if value[0].dtype.kind == "i":
             xticks = get_bins(value, max_bins=10, fenceposts=1)
             axes[idx, 0].set_xticks(xticks)
         axes[idx, 0].set_yticks([])
