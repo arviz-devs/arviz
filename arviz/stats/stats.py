@@ -109,6 +109,7 @@ def compare(
     scale : Scale used for the IC.
     """
     names = list(dataset_dict.keys())
+    scale = scale.lower()
 
     if ic == "waic":
         ic_func = waic
@@ -140,13 +141,20 @@ def compare(
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append(ic_func(dataset, pointwise=True, scale=scale))
+        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
     ics.index = names
     ics.sort_values(by=ic, inplace=True)
 
+    if scale.lower() == "log":
+        scale_value = 1
+    elif scale.lower() == "neglog":
+        scale_value = -1
+    else:
+        scale_value = -2
+
     if method == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
-        exp_ic_i = np.exp(-0.5 * ic_i_val)
+        exp_ic_i = np.exp(ic_i_val / scale_value)
         last_col = cols - 1
 
         def w_fuller(weights):
@@ -192,7 +200,7 @@ def compare(
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
-            u_weights = np.exp(-0.5 * (z_b - np.min(z_b)))
+            u_weights = np.exp((z_b - np.min(z_b)) / scale_value)
             z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
@@ -201,7 +209,7 @@ def compare(
 
     elif method == "pseudo-BMA":
         min_ic = ics.iloc[0][ic]
-        z_rv = np.exp(-0.5 * (ics[ic] - min_ic))
+        z_rv = np.exp((ics[ic] - min_ic) / scale_value)
         weights = z_rv / np.sum(z_rv)
         ses = ics[ic_se]
 
@@ -225,7 +233,11 @@ def compare(
                 res[scale_col],
             )
 
-    return df_comp.sort_values(by=ic)
+    if scale == "log":
+        ascending = False
+    else:
+        ascending = True
+    return df_comp.sort_values(by=ic, ascending=ascending)
 
 
 def _ic_matrix(ics, ic_i):
@@ -445,7 +457,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
     lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
-    p_loo = lppd + (1 / scale_value * loo_lppd)
+    p_loo = lppd - (1 / scale_value * loo_lppd)
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
@@ -454,14 +466,23 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
                           the Observed RV in your model to make sure it returns element-wise logp.
                           """
             )
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
+        return pd.Series(
+            dict(
+                zip(
+                    ["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
+                    [loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
+                )
+            )
         )
+
     else:
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
+        return pd.Series(
+            dict(
+                zip(
+                    ["loo", "loo_se", "p_loo", "warning", "loo_scale"],
+                    [loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
+                )
+            )
         )
 
 
