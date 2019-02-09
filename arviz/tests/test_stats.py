@@ -76,9 +76,10 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
 
 @pytest.mark.parametrize("ic", ["waic", "loo"])
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
-def test_compare_different(centered_eight, non_centered_eight, ic, method):
+@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
-    weight = compare(model_dict, ic=ic, method=method)["weight"]
+    weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
     assert weight["non_centered"] > weight["centered"]
     assert_almost_equal(np.sum(weight), 1.0)
 
@@ -138,10 +139,11 @@ def test_summary_bad_fmt(centered_eight):
         summary(centered_eight, fmt="bad_fmt")
 
 
-def test_waic(centered_eight):
+@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+def test_waic(centered_eight, scale):
     """Test widely available information criterion calculation"""
-    assert waic(centered_eight) is not None
-    assert waic(centered_eight, pointwise=True) is not None
+    assert waic(centered_eight, scale=scale) is not None
+    assert waic(centered_eight, pointwise=True, scale=scale) is not None
 
 
 def test_waic_bad(centered_eight):
@@ -154,6 +156,12 @@ def test_waic_bad(centered_eight):
     del centered_eight.sample_stats
     with pytest.raises(TypeError):
         waic(centered_eight)
+
+
+def test_waic_bad_scale(centered_eight):
+    """Test widely available information criterion calculation"""
+    with pytest.raises(TypeError):
+        waic(centered_eight, scale="bad_value")
 
 
 def test_waic_warning(centered_eight):
@@ -178,8 +186,13 @@ def test_loo_one_chain(centered_eight):
     assert loo(centered_eight) is not None
 
 
-def test_loo_pointwise(centered_eight):
-    assert loo(centered_eight, pointwise=True) is not None
+@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+def test_loo_pointwise(centered_eight, scale):
+    loo_results = loo(centered_eight, scale=scale, pointwise=True)
+    assert loo_results is not None
+    assert hasattr(loo_results, "loo_scale")
+    assert hasattr(loo_results, "kss")
+    assert hasattr(loo_results, "loo_i")
 
 
 def test_loo_bad(centered_eight):
@@ -190,6 +203,11 @@ def test_loo_bad(centered_eight):
     del centered_eight.sample_stats["log_likelihood"]
     with pytest.raises(TypeError):
         loo(centered_eight)
+
+
+def test_loo_bad_scale(centered_eight):
+    with pytest.raises(TypeError):
+        loo(centered_eight, scale="bad_scale")
 
 
 def test_loo_warning(centered_eight):
