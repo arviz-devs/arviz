@@ -82,7 +82,7 @@ def compare(
 
         - `deviance` : (default) -2 * (log-score)
         - `log` : 1 * log-score (after Vehtari et al. (2017))
-        - `neglog` : -1 * (log-score)
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
@@ -151,7 +151,7 @@ def compare(
 
     if scale.lower() == "log":
         scale_value = 1
-    elif scale.lower() == "neglog":
+    elif scale.lower() == "negative_log":
         scale_value = -1
     else:
         scale_value = -2
@@ -395,7 +395,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
         - `deviance` : (default) -2 * (log-score)
         - `log` : 1 * log-score (after Vehtari et al. (2017))
-        - `neglog` : -1 * (log-score)
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
@@ -427,10 +427,10 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         scale_value = -2
     elif scale.lower() == "log":
         scale_value = 1
-    elif scale.lower() == "neglog":
+    elif scale.lower() == "negative_log":
         scale_value = -1
     else:
-        raise TypeError('Valid scale values are "deviance", "log", "neglog"')
+        raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     if reff is None:
         n_chains = len(posterior.chain)
@@ -944,7 +944,7 @@ def waic(data, pointwise=False, scale="deviance"):
 
         - `deviance` : (default) -2 * (log-score)
         - `log` : 1 * log-score
-        - `neglog` : -1 * (log-score)
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
@@ -971,10 +971,10 @@ def waic(data, pointwise=False, scale="deviance"):
         scale_value = -2
     elif scale.lower() == "log":
         scale_value = 1
-    elif scale.lower() == "neglog":
+    elif scale.lower() == "negative_log":
         scale_value = -1
     else:
-        raise TypeError('Valid scale values are "deviance", "log", "neglog"')
+        raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
