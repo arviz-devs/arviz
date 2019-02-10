@@ -76,7 +76,7 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
 
 @pytest.mark.parametrize("ic", ["waic", "loo"])
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
-@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
 def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
@@ -139,7 +139,7 @@ def test_summary_bad_fmt(centered_eight):
         summary(centered_eight, fmt="bad_fmt")
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
 def test_waic(centered_eight, scale):
     """Test widely available information criterion calculation"""
     assert waic(centered_eight, scale=scale) is not None
@@ -186,7 +186,7 @@ def test_loo_one_chain(centered_eight):
     assert loo(centered_eight) is not None
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "neglog"])
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
 def test_loo_pointwise(centered_eight, scale):
     loo_results = loo(centered_eight, scale=scale, pointwise=True)
     assert loo_results is not None
