@@ -159,7 +159,7 @@ def test_waic_bad(centered_eight):
 
 
 def test_waic_bad_scale(centered_eight):
-    """Test widely available information criterion calculation"""
+    """Test widely available information criterion calculation with bad scale."""
     with pytest.raises(TypeError):
         waic(centered_eight, scale="bad_value")
 
@@ -188,6 +188,7 @@ def test_loo_one_chain(centered_eight):
 
 @pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
 def test_loo_pointwise(centered_eight, scale):
+    """Test pointwise loo with different scales."""
     loo_results = loo(centered_eight, scale=scale, pointwise=True)
     assert loo_results is not None
     assert hasattr(loo_results, "loo_scale")
@@ -206,6 +207,7 @@ def test_loo_bad(centered_eight):
 
 
 def test_loo_bad_scale(centered_eight):
+    """Test loo with bad scale value."""
     with pytest.raises(TypeError):
         loo(centered_eight, scale="bad_scale")
 

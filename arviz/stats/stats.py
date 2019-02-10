@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 import warnings
 from collections.abc import Sequence
