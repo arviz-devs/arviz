@@ -460,7 +460,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
     lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
-    p_loo = lppd - loo_lppd/scale_value
+    p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
@@ -470,15 +470,15 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
                           """
             )
         return pd.Series(
-                    data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
-                    index=["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
-                )
+            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
+            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
+        )
 
     else:
         return pd.Series(
-                    data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
-                    index=["loo", "loo_se", "p_loo", "warning", "loo_scale"]
-                )
+            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
+            index=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
+        )
 
 
 def psislw(log_weights, reff=1.0):
@@ -535,7 +535,7 @@ def psislw(log_weights, reff=1.0):
             if k >= k_min:
                 # no smoothing if short tail or GPD fit failed
                 # compute ordered statistic for the fit
-                sti = np.arange(0.5, tail_len)/tail_len
+                sti = np.arange(0.5, tail_len) / tail_len
                 smoothed_tail = _gpinv(sti, k, sigma)
                 smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
                     smoothed_tail + expxcutoff
