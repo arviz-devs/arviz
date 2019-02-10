@@ -112,8 +112,13 @@ def compare(
     names = list(dataset_dict.keys())
     scale = scale.lower()
     if scale == "log":
+        scale_value = 1
         ascending = False
     else:
+        if scale == "negative_log":
+            scale_value = -1
+        else:
+            scale_value = -2
         ascending = True
 
     if ic == "waic":
@@ -135,7 +140,7 @@ def compare(
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
 
-    if method not in ["stacking", "BB-pseudo-BMA", "pseudo-BMA"]:
+    if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
         raise ValueError("The method {}, to compute weights, is not supported.".format(method))
 
     ic_se = "{}_se".format(ic)
@@ -150,14 +155,7 @@ def compare(
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
 
-    if scale.lower() == "log":
-        scale_value = 1
-    elif scale.lower() == "negative_log":
-        scale_value = -1
-    else:
-        scale_value = -2
-
-    if method == "stacking":
+    if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         exp_ic_i = np.exp(ic_i_val / scale_value)
         last_col = cols - 1
@@ -183,7 +181,7 @@ def compare(
             return -grad
 
         theta = np.full(last_col, 1.0 / cols)
-        bounds = [(0.0, 1.0) for i in range(last_col)]
+        bounds = [(0.0, 1.0) for _ in range(last_col)]
         constraints = [
             {"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)},
             {"type": "ineq", "fun": np.sum},
@@ -196,7 +194,7 @@ def compare(
         weights = w_fuller(weights["x"])
         ses = ics[ic_se]
 
-    elif method == "BB-pseudo-BMA":
+    elif method.lower() == "bb-pseudo-bma":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         ic_i_val = ic_i_val * rows
 
@@ -212,7 +210,7 @@ def compare(
         weights = weights.mean(axis=0)
         ses = pd.Series(z_bs.std(axis=0), index=names)  # pylint: disable=no-member
 
-    elif method == "pseudo-BMA":
+    elif method.lower() == "pseudo-bma":
         min_ic = ics.iloc[0][ic]
         z_rv = np.exp((ics[ic] - min_ic) / scale_value)
         weights = z_rv / np.sum(z_rv)
