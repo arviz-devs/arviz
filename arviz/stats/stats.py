@@ -125,7 +125,7 @@ def compare(
         ic_func = waic
         df_comp = pd.DataFrame(
             index=names,
-            columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning", "waic_scale"],
+            columns=["waic", "p_waic", "d_waic", "weight", "se", "dse", "warning", "waic_scale"],
         )
         scale_col = "waic_scale"
 
@@ -133,7 +133,7 @@ def compare(
         ic_func = loo
         df_comp = pd.DataFrame(
             index=names,
-            columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning", "loo_scale"],
+            columns=["loo", "p_loo", "d_loo", "weight", "se", "dse", "warning", "loo_scale"],
         )
         scale_col = "loo_scale"
 
@@ -398,14 +398,14 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     Returns
     -------
-    DataFrame with the following columns:
+    pandas.Series with the following columns:
     loo: approximated Leave-one-out cross-validation
     loo_se: standard error of loo
     p_loo: effective number of parameters
     shape_warn: 1 if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
-    kss: array of Pareto tail indices
+    pareto_k: array of Pareto shape values, only if pointwise True
     loo_scale: scale of the loo results
     """
     inference_data = convert_to_inference_data(data)
@@ -470,7 +470,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
             )
         return pd.Series(
             data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
-            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "kss", "loo_scale"],
+            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "pareto_k", "loo_scale"],
         )
 
     else:
