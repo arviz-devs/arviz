@@ -69,8 +69,8 @@ Data
     to_netcdf
     from_netcdf
     from_cmdstan
+    from_dict
     from_emcee
-    from_netcdf
     from_pymc3
     from_pyro
     from_pystan
