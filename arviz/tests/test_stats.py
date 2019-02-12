@@ -140,8 +140,13 @@ def test_summary_unpack_order(order):
         assert col1 == col2
 
 
-def test_summary_stat_func(centered_eight):
-    assert summary(centered_eight, stat_funcs=[np.var]) is not None
+@pytest.mark.parametrize(
+    "stat_funcs", [[np.var], {"var": np.var, "var2": lambda x: np.var(x) ** 2}]
+)
+def test_summary_stat_func(centered_eight, stat_funcs):
+    arviz_summary = summary(centered_eight, stat_funcs=stat_funcs)
+    assert arviz_summary is not None
+    assert hasattr(arviz_summary, "var")
 
 
 def test_summary_nan(centered_eight):

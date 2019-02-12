@@ -629,13 +629,14 @@ def summary(
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     round_to : int
         Number of decimals used to round results. Defaults to 2.
-    stat_funcs : None or list
-        A list of functions used to calculate statistics. By default, the mean, standard deviation,
-        simulation standard error, and highest posterior density intervals are included.
+    stat_funcs : dict
+        A list of functions or a dict of functions with function names as keys used to calculate
+        statistics. By default, the mean, standard deviation, simulation standard error, and
+        highest posterior density intervals are included.
 
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
-        `np.sin`, or `scipy.stats.var` would both work.
+        `np.mean`, or `scipy.stats.var` would both work.
     extend : boolean
         If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
         of, the default statistics. This is only meaningful when `stat_funcs` is not None.
@@ -697,13 +698,22 @@ def summary(
     metric_names = []
 
     if stat_funcs is not None:
-        for stat_func in stat_funcs:
-            metrics.append(
-                xr.apply_ufunc(
-                    _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+        if isinstance(stat_funcs, dict):
+            for stat_func_name, stat_func in stat_funcs.items():
+                metrics.append(
+                    xr.apply_ufunc(
+                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                    )
                 )
-            )
-            metric_names.append(stat_func.__name__)
+                metric_names.append(stat_func_name)
+        else:
+            for stat_func in stat_funcs:
+                metrics.append(
+                    xr.apply_ufunc(
+                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                    )
+                )
+                metric_names.append(stat_func.__name__)
 
     if extend:
         metrics.append(posterior.mean(dim=("chain", "draw")))
