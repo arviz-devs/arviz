@@ -12,7 +12,7 @@ def plot_compare(
     figsize=None,
     textsize=None,
     plot_kwargs=None,
-    ax=None,
+    ax=None
 ):
     """
     Summary plot for model comparison.
@@ -143,7 +143,7 @@ def plot_compare(
 
     if insample_dev:
         ax.plot(
-            comp_df[information_criterion] - (2 * comp_df["p" + information_criterion]),
+            comp_df[information_criterion] - (2 * comp_df["p_" + information_criterion]),
             yticks_pos[::2],
             color=plot_kwargs.get("color_insample_dev", "k"),
             marker=plot_kwargs.get("marker_insample_dev", "o"),
@@ -158,7 +158,12 @@ def plot_compare(
         lw=linewidth,
     )
 
-    ax.set_xlabel("Deviance", fontsize=ax_labelsize)
+    scale_col = information_criterion + "_scale"
+    if scale_col in comp_df:
+        scale = comp_df[scale_col].iloc[0].capitalize()
+    else:
+        scale = "Deviance"
+    ax.set_xlabel(scale, fontsize=ax_labelsize)
     ax.set_yticklabels(yticks_labels)
     ax.set_ylim(-1 + step, 0 - step)
     ax.tick_params(labelsize=xt_labelsize)
