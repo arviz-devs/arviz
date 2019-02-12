@@ -12,7 +12,7 @@ def plot_compare(
     figsize=None,
     textsize=None,
     plot_kwargs=None,
-    ax=None
+    ax=None,
 ):
     """
     Summary plot for model comparison.
