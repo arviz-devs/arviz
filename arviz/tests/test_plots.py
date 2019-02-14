@@ -640,6 +640,17 @@ def test_plot_compare(models, kwargs):
     assert axes
 
 
+def test_plot_compare_manual(models):
+    """Test compare plot without scale column"""
+    # Pymc3 models create loglikelihood on InferenceData automatically
+    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+
+    # remove "scale" column
+    del model_compare["waic_scale"]
+    axes = plot_compare(model_compare)
+    assert axes
+
+
 def test_plot_compare_no_ic(models):
     """Check exception is raised if model_compare doesn't contain a valid information criterion"""
     model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
