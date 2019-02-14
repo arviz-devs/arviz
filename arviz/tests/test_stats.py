@@ -192,7 +192,7 @@ def test_loo_pointwise(centered_eight, scale):
     loo_results = loo(centered_eight, scale=scale, pointwise=True)
     assert loo_results is not None
     assert hasattr(loo_results, "loo_scale")
-    assert hasattr(loo_results, "kss")
+    assert hasattr(loo_results, "pareto_k")
     assert hasattr(loo_results, "loo_i")
 
 
