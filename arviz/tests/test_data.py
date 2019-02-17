@@ -672,6 +672,8 @@ class TestIONetCDFUtils:
         assert hasattr(inference_data3, "posterior")
         os.remove(filepath)
         assert not os.path.exists(filepath)
+     
+        
 
     def test_io_method(self, data, eight_schools_params):
         inference_data = self.get_inference_data(  # pylint: disable=W0612
