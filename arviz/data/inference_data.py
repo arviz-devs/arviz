@@ -94,7 +94,7 @@ class InferenceData:
         """Concatenate two InferenceData objects.
 
 	example
-        --------
+        -------
         A._groups == ["posterior", "posterior_predictive"]
         B._groups == ["prior", "prior_predictive"]
         C=A+B
