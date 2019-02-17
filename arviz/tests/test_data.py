@@ -672,7 +672,7 @@ class TestIONetCDFUtils:
         assert hasattr(inference_data3, "posterior")
         os.remove(filepath)
         assert not os.path.exists(filepath)
-
+     
     def test_io_method(self, data, eight_schools_params):
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
@@ -690,7 +690,19 @@ class TestIONetCDFUtils:
         assert hasattr(inference_data2, "posterior")
         os.remove(filepath)
         assert not os.path.exists(filepath)
-
+    
+    #New test case added for the empty file to be created
+    def test_new_file(self):
+        inference_data=InferenceData()
+        here=os.path.dirname(os.path.abspath(__file__))
+        data_directory=os.path.join(here,"saved_models")
+        filepath=os.path.join(data_directory,"io_new_file.nc")
+        assert not os.path.exists(filepath)
+        to_netcdf(inference_data,filepath)
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath)>0
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
 
 class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")
