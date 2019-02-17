@@ -92,6 +92,7 @@ class InferenceData:
 
     def __add__(self, other):
         """Concatenate two InferenceData objects.
+
 	example
         --------
         A._groups == ["posterior", "posterior_predictive"]
