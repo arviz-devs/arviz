@@ -91,7 +91,14 @@ class InferenceData:
         return filename
 
     def __add__(self, other):
-        """Concatenate two InferenceData objects."""
+        """Concatenate two InferenceData objects.
+        example
+        --------
+        A._groups == ["posterior", "posterior_predictive"]
+        B._groups == ["prior", "prior_predictive"]
+        C=A+B
+        C._groups ==["posterior", "posterior_predictive", "prior", "prior_predictive"]
+        """
         return concat(self, other, copy=True, inplace=False)
 
 
@@ -116,6 +123,19 @@ def concat(*args, copy=True, inplace=False):
     InferenceData
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
+    
+    example
+    -------
+    A._groups == ["posterior", "posterior_predictive"]
+    B._groups == ["prior", "prior_predictive"]
+    C = az.concat(A, B)
+    C._groups ==["posterior", "posterior_predictive", "prior", "prior_predictive"]
+    
+    When inplace=True
+    -----------------
+    az.concat(A, B, inplace=True)
+    A._groups ==["posterior", "posterior_predictive", "prior", "prior_predictive"]
+    
     """
     if len(args) == 0:
         return InferenceData()
