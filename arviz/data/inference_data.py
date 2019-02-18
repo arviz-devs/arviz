@@ -90,7 +90,7 @@ class InferenceData:
                 data.close()
                 mode = "a"
                 return filename
-        else:  # an empty netcdf file is created in case an empty inference data object is encountered.
+        else:  # creates a netcdf file for an empty InferenceData object.
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
             return filename

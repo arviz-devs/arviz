@@ -2,8 +2,6 @@
 import warnings
 from .inference_data import InferenceData
 from .converters import convert_to_inference_data
-import os
-import netCDF4 as nc
 
 
 def from_netcdf(filename):
