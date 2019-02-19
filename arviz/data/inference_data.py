@@ -89,11 +89,10 @@ class InferenceData:
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
-                return filename
         else:  # creates a netcdf file for an empty InferenceData object.
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
-            return filename
+        return filename
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
