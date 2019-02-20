@@ -35,7 +35,10 @@ def plot_dist(
     else:
         hist_kwargs.setdefault("orientation", "vertical")
 
-    if values.dtype.kind == "i" or kind == "hist":
+    if kind == "auto":
+        kind = "hist" if values.dtype.kind == "i" else "density"
+
+    if kind == "hist":
         _histplot_op(
             values=values,
             values2=values2,
@@ -45,8 +48,7 @@ def plot_dist(
             ax=ax,
             hist_kwargs=hist_kwargs,
         )
-
-    elif values.dtype.kind == "f" or kind == "density":
+    elif kind == "density":
         plot_kwargs.setdefault("color", color)
         legend = True if label is not None else False
 
@@ -91,4 +93,6 @@ def _histplot_op(values, values2, color, label, rotated, ax, hist_kwargs):
             ax.set_yticks(bins[:-1])
         else:
             ax.set_xticks(bins[:-1])
+        if label is not None:
+            ax.legend()
     return ax
