@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 import warnings
 from collections import OrderedDict
@@ -42,7 +43,9 @@ def bfmi(energy):
     return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
 
 
-def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None):
+def compare(
+    dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"
+):
     r"""Compare models based on WAIC or LOO cross validation.
 
     WAIC is Widely applicable information criterion, and LOO is leave-one-out
@@ -53,7 +56,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     ----------
     dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic : string
+    ic : str
         Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
     method : str
         Method used to estimate the weights for each model. Available options are:
@@ -73,9 +76,15 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
     seed : int or np.random.RandomState instance
-           If int or RandomState, use it for seeding Bayesian bootstrap. Only
-           useful when method = 'BB-pseudo-BMA'. Default None the global
-           np.random state is used.
+        If int or RandomState, use it for seeding Bayesian bootstrap. Only
+        useful when method = 'BB-pseudo-BMA'. Default None the global
+        np.random state is used.
+    scale : str
+        Output scale for IC. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
@@ -83,6 +92,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     models are passed to this function. The columns are:
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
+        If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
     dIC : Relative difference between each IC (WAIC or LOO)
     and the lowest IC (WAIC or LOO).
@@ -98,25 +108,40 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         It's always 0 for the top-ranked model.
     warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
         be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
+    scale : Scale used for the IC.
     """
     names = list(dataset_dict.keys())
+    scale = scale.lower()
+    if scale == "log":
+        scale_value = 1
+        ascending = False
+    else:
+        if scale == "negative_log":
+            scale_value = -1
+        else:
+            scale_value = -2
+        ascending = True
 
     if ic == "waic":
         ic_func = waic
         df_comp = pd.DataFrame(
-            index=names, columns=["waic", "pwaic", "dwaic", "weight", "se", "dse", "warning"]
+            index=names,
+            columns=["waic", "p_waic", "d_waic", "weight", "se", "dse", "warning", "waic_scale"],
         )
+        scale_col = "waic_scale"
 
     elif ic == "loo":
         ic_func = loo
         df_comp = pd.DataFrame(
-            index=names, columns=["loo", "ploo", "dloo", "weight", "se", "dse", "warning"]
+            index=names,
+            columns=["loo", "p_loo", "d_loo", "weight", "se", "dse", "warning", "loo_scale"],
         )
+        scale_col = "loo_scale"
 
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
 
-    if method not in ["stacking", "BB-pseudo-BMA", "pseudo-BMA"]:
+    if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
         raise ValueError("The method {}, to compute weights, is not supported.".format(method))
 
     ic_se = "{}_se".format(ic)
@@ -127,13 +152,13 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
     names = []
     for name, dataset in dataset_dict.items():
         names.append(name)
-        ics = ics.append(ic_func(dataset, pointwise=True))
+        ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
     ics.index = names
-    ics.sort_values(by=ic, inplace=True)
+    ics.sort_values(by=ic, inplace=True, ascending=ascending)
 
-    if method == "stacking":
+    if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
-        exp_ic_i = np.exp(-0.5 * ic_i_val)
+        exp_ic_i = np.exp(ic_i_val / scale_value)
         last_col = cols - 1
 
         def w_fuller(weights):
@@ -157,7 +182,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
             return -grad
 
         theta = np.full(last_col, 1.0 / cols)
-        bounds = [(0.0, 1.0) for i in range(last_col)]
+        bounds = [(0.0, 1.0) for _ in range(last_col)]
         constraints = [
             {"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)},
             {"type": "ineq", "fun": np.sum},
@@ -170,7 +195,7 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         weights = w_fuller(weights["x"])
         ses = ics[ic_se]
 
-    elif method == "BB-pseudo-BMA":
+    elif method.lower() == "bb-pseudo-bma":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         ic_i_val = ic_i_val * rows
 
@@ -179,16 +204,16 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
-            u_weights = np.exp(-0.5 * (z_b - np.min(z_b)))
+            u_weights = np.exp((z_b - np.min(z_b)) / scale_value)
             z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
         weights = weights.mean(axis=0)
         ses = pd.Series(z_bs.std(axis=0), index=names)  # pylint: disable=no-member
 
-    elif method == "pseudo-BMA":
+    elif method.lower() == "pseudo-bma":
         min_ic = ics.iloc[0][ic]
-        z_rv = np.exp(-0.5 * (ics[ic] - min_ic))
+        z_rv = np.exp((ics[ic] - min_ic) / scale_value)
         weights = z_rv / np.sum(z_rv)
         ses = ics[ic_se]
 
@@ -196,14 +221,26 @@ def compare(dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1,
         min_ic_i_val = ics[ic_i].iloc[0]
         for idx, val in enumerate(ics.index):
             res = ics.loc[val]
-            diff = res[ic_i] - min_ic_i_val
+            if scale_value < 0:
+                diff = res[ic_i] - min_ic_i_val
+            else:
+                diff = min_ic_i_val - res[ic_i]
             d_ic = np.sum(diff)
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
             weight = weights[idx]
-            df_comp.at[val] = (res[ic], res[p_ic], d_ic, weight, std_err, d_std_err, res["warning"])
+            df_comp.at[val] = (
+                res[ic],
+                res[p_ic],
+                d_ic,
+                weight,
+                std_err,
+                d_std_err,
+                res["warning"],
+                res[scale_col],
+            )
 
-    return df_comp.sort_values(by=ic)
+    return df_comp.sort_values(by=ic, ascending=ascending)
 
 
 def _ic_matrix(ics, ic_i):
@@ -338,11 +375,11 @@ def _logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, 
     return out if out.shape else dtype(out)
 
 
-def loo(data, pointwise=False, reff=None):
+def loo(data, pointwise=False, reff=None, scale="deviance"):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
-    following Vehtari et al. (2015). Cross-validation is computed using Pareto-smoothed
+    following Vehtari et al. (2017). Cross-validation is computed using Pareto-smoothed
     importance sampling (PSIS).
 
     Parameters
@@ -353,16 +390,24 @@ def loo(data, pointwise=False, reff=None):
     reff : float, optional
         Relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
+    scale : str
+        Output scale for loo. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
-    DataFrame with the following columns:
+    pandas.Series with the following columns:
     loo: approximated Leave-one-out cross-validation
     loo_se: standard error of loo
     p_loo: effective number of parameters
     shape_warn: 1 if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i: array of pointwise predictive accuracy, only if pointwise True
+    pareto_k: array of Pareto shape values, only if pointwise True
+    loo_scale: scale of the loo results
     """
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
@@ -377,6 +422,15 @@ def loo(data, pointwise=False, reff=None):
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
+
+    if scale.lower() == "deviance":
+        scale_value = -2
+    elif scale.lower() == "log":
+        scale_value = 1
+    elif scale.lower() == "negative_log":
+        scale_value = -1
+    else:
+        raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     if reff is None:
         n_chains = len(posterior.chain)
@@ -401,12 +455,12 @@ def loo(data, pointwise=False, reff=None):
         )
         warn_mg = 1
 
-    loo_lppd_i = -2 * _logsumexp(log_weights, axis=0)
+    loo_lppd_i = scale_value * _logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
     lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
-    p_loo = lppd + (0.5 * loo_lppd)
+    p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():
@@ -415,13 +469,15 @@ def loo(data, pointwise=False, reff=None):
                           the Observed RV in your model to make sure it returns element-wise logp.
                           """
             )
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i]],
-            columns=["loo", "loo_se", "p_loo", "warning", "loo_i"],
+        return pd.Series(
+            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
+            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "pareto_k", "loo_scale"],
         )
+
     else:
-        return pd.DataFrame(
-            [[loo_lppd, loo_lppd_se, p_loo, warn_mg]], columns=["loo", "loo_se", "p_loo", "warning"]
+        return pd.Series(
+            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
+            index=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
         )
 
 
@@ -434,7 +490,7 @@ def psislw(log_weights, reff=1.0):
     log_weights : array
         Array of size (n_samples, n_observations)
     reff : float
-        relative MCMC efficiency, `effective_n / n`
+        relative MCMC efficiency, `ess / n`
 
     Returns
     -------
@@ -889,7 +945,7 @@ def _mc_error(x, batches=5, circular=False):
         return std / np.sqrt(batches)
 
 
-def waic(data, pointwise=False):
+def waic(data, pointwise=False, scale="deviance"):
     """Calculate the widely available information criterion.
 
     Also calculates the WAIC's standard error and the effective number of
@@ -899,9 +955,18 @@ def waic(data, pointwise=False):
 
     Parameters
     ----------
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
     pointwise: bool
         if True the pointwise predictive accuracy will be returned.
         Default False
+    scale : str
+        Output scale for loo. Available options are:
+
+        - `deviance` : (default) -2 * (log-score)
+        - `log` : 1 * log-score
+        - `negative_log` : -1 * (log-score)
 
     Returns
     -------
@@ -912,6 +977,7 @@ def waic(data, pointwise=False):
     var_warn: 1 if posterior variance of the log predictive
          densities exceeds 0.4
     waic_i: and array of the pointwise predictive accuracy, only if pointwise True
+    waic_scale: scale of the waic results
     """
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
@@ -922,6 +988,16 @@ def waic(data, pointwise=False):
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     log_likelihood = inference_data.sample_stats.log_likelihood
+
+    if scale.lower() == "deviance":
+        scale_value = -2
+    elif scale.lower() == "log":
+        scale_value = 1
+    elif scale.lower() == "negative_log":
+        scale_value = -1
+    else:
+        raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
+
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
@@ -939,7 +1015,7 @@ def waic(data, pointwise=False):
         )
         warn_mg = 1
 
-    waic_i = -2 * (lppd_i - vars_lpd)
+    waic_i = scale_value * (lppd_i - vars_lpd)
     waic_se = (len(waic_i) * np.var(waic_i)) ** 0.5
     waic_sum = np.sum(waic_i)
     p_waic = np.sum(vars_lpd)
@@ -952,10 +1028,11 @@ def waic(data, pointwise=False):
             """
             )
         return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, waic_i]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_i"],
+            [[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale]],
+            columns=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
         )
     else:
         return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg]], columns=["waic", "waic_se", "p_waic", "warning"]
+            [[waic_sum, waic_se, p_waic, warn_mg, scale]],
+            columns=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
         )
