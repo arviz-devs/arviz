@@ -691,6 +691,17 @@ class TestIONetCDFUtils:
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
+    def test_empty_inference_data_object(self):
+        inference_data = InferenceData()
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "empty_test_file.nc")
+        assert not os.path.exists(filepath)
+        inference_data.to_netcdf(filepath)
+        assert os.path.exists(filepath)
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
 
 class TestPyMC3NetCDFUtils:
     @pytest.fixture(scope="class")

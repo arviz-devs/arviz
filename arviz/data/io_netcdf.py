@@ -39,7 +39,8 @@ def to_netcdf(data, filename, *, group="posterior", coords=None, dims=None):
         filename saved to
     """
     inference_data = convert_to_inference_data(data, group=group, coords=coords, dims=dims)
-    return inference_data.to_netcdf(filename)
+    file_name = inference_data.to_netcdf(filename)
+    return file_name
 
 
 def load_data(filename):
