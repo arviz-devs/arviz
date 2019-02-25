@@ -123,7 +123,7 @@ def get_bins(values):
 
     width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
 
-    return np.arange(x_min, x_max, width)
+    return np.arange(x_min, x_max + width + 1, width)
 
 
 def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202

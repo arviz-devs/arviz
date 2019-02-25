@@ -2,8 +2,9 @@
 import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
+from .distplot import plot_dist
 from .kdeplot import plot_kde
-from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
 from ..utils import _var_names
 
 
@@ -84,6 +85,8 @@ def plot_joint(
 
     if marginal_kwargs is None:
         marginal_kwargs = {}
+    marginal_kwargs.setdefault("plot_kwargs", {})
+    marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
 
     # Instantiate figure and grid
     fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
@@ -122,19 +125,11 @@ def plot_joint(
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
 
-    for val, ax, orient, rotate in (
-        (x, ax_hist_x, "vertical", False),
-        (y, ax_hist_y, "horizontal", True),
+    for val, ax, rotate in (
+        (x, ax_hist_x, False),
+        (y, ax_hist_y, True),
     ):
-        if val.dtype.kind == "i":
-            bins = get_bins(val)
-            ax.hist(
-                val, bins=bins, align="left", density=True, orientation=orient, **marginal_kwargs
-            )
-        else:
-            marginal_kwargs.setdefault("plot_kwargs", {})
-            marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
-            plot_kde(val, rotated=rotate, ax=ax, **marginal_kwargs)
+        plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())
