@@ -136,9 +136,9 @@ def plot_dist(
         )
     return ax
 
+
 def _histplot_op(values, values2, color, label, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
-
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
     else:
