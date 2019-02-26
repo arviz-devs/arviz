@@ -300,7 +300,7 @@ def test_plot_dist(continuous_model, kwargs):
         {"contour": False},
     ],
 )
-def test_plot_dist_2D_kde(continuous_model, kwargs):
+def test_plot_dist_2d_kde(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
 

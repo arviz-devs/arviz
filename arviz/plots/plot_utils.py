@@ -87,16 +87,16 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
 def get_bins(values):
     """
     Automatically compute the number of bins for discrete variables.
-    
+
     Parameters
     ----------
     values = numpy array
-        values 
-    
+        values
+
     Returns
     -------
     array with the bins
-    
+
     Notes
     -----
     Computes the width of the bins by taking the maximun of the Sturges and the Freedman-Diaconis
@@ -105,7 +105,7 @@ def get_bins(values):
     The Sturges is a very simplistic estimator based on the assumption of normality of the data.
     This estimator has poor performance for non-normal data, which becomes especially obvious for
     large data sets. The estimate depends only on size of the data.
-    
+
     The Freedman-Diaconis rule uses interquartile range (IQR) to estimate the binwidth.
     It is considered a robusts version of the Scott rule as the IQR is less affected by outliers
     than the standard deviation. However, the IQR depends on fewer points than the standard
