@@ -35,5 +35,5 @@ __all__ = [
     "plot_ppc",
     "plot_violin",
     "plot_hpd",
-    "plot_dist"
+    "plot_dist",
 ]

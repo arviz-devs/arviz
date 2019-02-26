@@ -125,10 +125,7 @@ def plot_joint(
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
 
-    for val, ax, rotate in (
-        (x, ax_hist_x, False),
-        (y, ax_hist_y, True),
-    ):
+    for val, ax, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
         plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())

@@ -285,10 +285,12 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], quantiles=[0.25, 0.5, 0.75], **kwargs)
     assert axes
 
-@pytest.mark.parametrize("kwargs", [{"kind":"hist"}, {"kind":"dist"}])
+
+@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "dist"}])
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
     assert axes
+
 
 @pytest.mark.parametrize(
     "kwargs",
