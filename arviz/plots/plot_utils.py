@@ -118,7 +118,7 @@ def get_bins(values):
     bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
 
     # The Freedman-Diaconis histogram bin estimator.
-    iqr = np.subtract(*np.percentile(values, [75, 25]))
+    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
     bins_fd = 2 * iqr * values.size ** (-1 / 3)
 
     width = round(np.max([1, bins_sturges, bins_fd])).astype(int)

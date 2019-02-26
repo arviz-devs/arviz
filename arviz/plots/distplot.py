@@ -113,7 +113,7 @@ def plot_dist(
         )
     elif kind == "density":
         plot_kwargs.setdefault("color", color)
-        legend = True if label is not None else False
+        legend = label is not None
 
         plot_kde(
             values,
