@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 from scipy.stats import entropy
-
+import xarray as xr
+from ..data.inference_data import InferenceData
 from ..utils import conditional_jit
 from .plot_utils import _scale_fig_size
 
@@ -146,6 +147,10 @@ def plot_kde(
 
     figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
+    if isinstance(values, xr.Dataset):
+        raise ValueError("Xarray dataset object detected. Use plot_posterior instead of plot_kde")
+    if isinstance(values, InferenceData):
+        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}

@@ -358,6 +358,7 @@ def _plot_posterior_op(
             fill_kwargs={"alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs={"linewidth": linewidth},
             ax=ax,
+            rug=True,
         )
     else:
         if bins is None:
