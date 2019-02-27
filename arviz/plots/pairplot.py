@@ -68,6 +68,32 @@ def plot_pair(
     Returns
     -------
     ax : matplotlib axes
+
+    Examples
+    --------
+    KDE Pair Plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> centered = az.load_arviz_data('centered_eight')
+        >>> coords = {'school': ['Choate', 'Deerfield']}
+        >>> az.plot_pair(centered, var_names=['theta', 'mu', 'tau'], kind='kde', coords=coords, divergences=True, textsize=22)
+
+    Hexbin pair plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_pair(centered, var_names=['theta', 'mu'], coords=coords, textsize=12, kind='hexbin')
+
+    Pair plot showing divergences
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_pair(centered, var_names=['theta', 'mu', 'tau'], coords=coords, divergences=True, textsize=22)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:

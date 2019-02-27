@@ -56,6 +56,25 @@ def plot_joint(
     axjoin : matplotlib axes, join (central) distribution
     ax_hist_x : matplotlib axes, x (top) distribution
     ax_hist_y : matplotlib axes, y (right) distribution
+
+    Examples
+    --------
+    Hexbin Joint plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('non_centered_eight')
+        >>> az.plot_joint(data, var_names=['theta'], coords={'school': ['Choate', 'Phillips Andover']}, kind='hexbin', figsize=(6, 6))
+
+    KDE Joint plot
+
+    .. plot::
+        :context: close-figs
+        
+        >>> az.plot_joint(data, var_names=['theta'], coords={'school': ['Choate', 'Phillips Andover']}, kind='kde', figsize=(6, 6))
+
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:

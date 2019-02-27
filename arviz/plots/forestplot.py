@@ -96,6 +96,18 @@ def plot_forest(
     Returns
     -------
     gridspec : matplotlib GridSpec
+
+    Examples
+    --------
+    Ridgeplot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> non_centered_data = az.load_arviz_data('non_centered_eight')
+        >>> fig, axes = az.plot_forest(non_centered_data, kind='ridgeplot', var_names=['theta'], combined=True, ridgeplot_overlap=3, colors='white', figsize=(9, 7))
+        >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
     if not isinstance(data, (list, tuple)):
         data = [data]
