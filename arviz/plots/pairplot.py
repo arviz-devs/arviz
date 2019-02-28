@@ -84,7 +84,7 @@ def plot_pair(
         >>>             kind='kde',
         >>>             coords=coords,
         >>>             divergences=True,
-        >>>             textsize=22)
+        >>>             textsize=18)
 
     Hexbin pair plot
 
@@ -94,7 +94,7 @@ def plot_pair(
         >>> az.plot_pair(centered,
         >>>             var_names=['theta', 'mu'],
         >>>             coords=coords,
-        >>>             textsize=12,
+        >>>             textsize=18,
         >>>             kind='hexbin')
 
     Pair plot showing divergences
@@ -106,7 +106,7 @@ def plot_pair(
         ...             var_names=['theta', 'mu', 'tau'],
         ...             coords=coords,
         ...             divergences=True,
-        ...             textsize=22)
+        ...             textsize=18)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:

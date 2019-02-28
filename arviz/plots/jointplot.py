@@ -59,17 +59,29 @@ def plot_joint(
 
     Examples
     --------
-    Hexbin Joint plot
+    Scatter Joint plot
 
     .. plot::
         :context: close-figs
 
         >>> import arviz as az
         >>> data = az.load_arviz_data('non_centered_eight')
-        >>> az.plot_joint(data, var_names=['theta'],
+        >>> az.plot_joint(data,
+        >>>             var_names=['theta'],
+        >>>             coords={'school': ['Choate', 'Phillips Andover']},
+        >>>             kind='scatter',
+        >>>             figsize=(6, 6))
+
+    Hexbin Joint plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_joint(data,
+        >>>             var_names=['theta'],
         >>>             coords={'school': ['Choate', 'Phillips Andover']},
         >>>             kind='hexbin',
-        >>>             figsize=(10, 10))
+        >>>             figsize=(6, 6))
 
     KDE Joint plot
 
@@ -80,7 +92,7 @@ def plot_joint(
         >>>                 var_names=['theta'],
         >>>                 coords={'school': ['Choate', 'Phillips Andover']},
         >>>                 kind='kde',
-        >>>                 figsize=(10, 10))
+        >>>                 figsize=(6, 6))
 
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
