@@ -79,11 +79,11 @@ def plot_pair(
         >>> import arviz as az
         >>> centered = az.load_arviz_data('centered_eight')
         >>> coords = {'school': ['Choate', 'Deerfield']}
-        >>> az.plot_pair(centered, 
-        >>>             var_names=['theta', 'mu', 'tau'], 
-        >>>             kind='kde', 
-        >>>             coords=coords, 
-        >>>             divergences=True, 
+        >>> az.plot_pair(centered,
+        >>>             var_names=['theta', 'mu', 'tau'],
+        >>>             kind='kde',
+        >>>             coords=coords,
+        >>>             divergences=True,
         >>>             textsize=22)
 
     Hexbin pair plot
@@ -91,10 +91,10 @@ def plot_pair(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_pair(centered, 
-        >>>             var_names=['theta', 'mu'], 
-        >>>             coords=coords, 
-        >>>             textsize=12, 
+        >>> az.plot_pair(centered,
+        >>>             var_names=['theta', 'mu'],
+        >>>             coords=coords,
+        >>>             textsize=12,
         >>>             kind='hexbin')
 
     Pair plot showing divergences
@@ -102,11 +102,11 @@ def plot_pair(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_pair(centered, 
-        >>>             var_names=['theta', 'mu', 'tau'], 
-        >>>             coords=coords, 
-        >>>             divergences=True, 
-        >>>             textsize=22)
+        >>> az.plot_pair(centered,
+        ...             var_names=['theta', 'mu', 'tau'],
+        ...             coords=coords,
+        ...             divergences=True,
+        ...             textsize=22)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
