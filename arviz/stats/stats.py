@@ -619,9 +619,7 @@ def _gpinv(probs, kappa, sigma):
         x *= sigma
     else:
         if np.abs(kappa) < np.finfo(float).eps:
-            x[ok] = -np.log1p(  # pylint: disable=unsupported-assignment-operation, E1130
-                -probs[ok]
-            )
+            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation, E1130
         else:
             x[ok] = (  # pylint: disable=unsupported-assignment-operation
                 np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
