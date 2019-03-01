@@ -88,7 +88,13 @@ def plot_dist(
 
     if hist_kwargs is None:
         hist_kwargs = {}
+    hist_kwargs.setdefault("bins", None)
     hist_kwargs.setdefault("cumulative", cumulative)
+    hist_kwargs.setdefault("color", color)
+    hist_kwargs.setdefault("label", label)
+    hist_kwargs.setdefault("rwidth", 0.9)
+    hist_kwargs.setdefault("align", "left")
+    hist_kwargs.setdefault("density", True)
 
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -103,13 +109,7 @@ def plot_dist(
 
     if kind == "hist":
         _histplot_op(
-            values=values,
-            values2=values2,
-            color=color,
-            label=label,
-            rotated=rotated,
-            ax=ax,
-            hist_kwargs=hist_kwargs,
+            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
     elif kind == "density":
         plot_kwargs.setdefault("color", color)
@@ -137,26 +137,19 @@ def plot_dist(
     return ax
 
 
-def _histplot_op(values, values2, color, label, rotated, ax, hist_kwargs):
+def _histplot_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
     else:
-        bins = get_bins(values)
-        ax.hist(
-            values,
-            bins=bins,
-            color=color,
-            label=label,
-            rwidth=0.9,
-            align="left",
-            density=True,
-            **hist_kwargs
-        )
+        bins = hist_kwargs.pop("bins")
+        if bins is None:
+            bins = get_bins(values)
+        ax.hist(values, bins=bins, **hist_kwargs)
         if rotated:
             ax.set_yticks(bins[:-1])
         else:
             ax.set_xticks(bins[:-1])
-        if label is not None:
+        if hist_kwargs["label"] is not None:
             ax.legend()
     return ax

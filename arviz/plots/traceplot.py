@@ -128,8 +128,6 @@ def plot_trace(
         fill_kwargs = {}
     if rug_kwargs is None:
         rug_kwargs = {}
-    if hist_kwargs is None:
-        hist_kwargs = {}
 
     hist_kwargs.setdefault("alpha", 0.35)
 
