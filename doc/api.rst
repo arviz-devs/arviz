@@ -55,7 +55,7 @@ Diagnostics
     effective_sample_size
     rhat
     geweke
-
+    autocorr
 
 Data
 ----
