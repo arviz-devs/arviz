@@ -116,7 +116,7 @@ def plot_pair(
     if numvars < 2:
         raise Exception("Number of variables to be plotted must be 2 or greater.")
 
-    elif numvars == 2:
+    if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )

@@ -333,7 +333,8 @@ def get_draws(fit, variables=None, ignore=None):
     if fit.mode == 1:
         msg = "Model in mode 'test_grad'. Sampling is not conducted."
         raise AttributeError(msg)
-    elif fit.mode == 2 or fit.sim.get("samples") is None:
+
+    if fit.mode == 2 or fit.sim.get("samples") is None:
         msg = "Fit doesn't contain samples."
         raise AttributeError(msg)
 
