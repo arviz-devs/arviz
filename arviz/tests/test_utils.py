@@ -36,7 +36,7 @@ def test_var_names_warning():
     data = from_dict(
         posterior={
             "~mu": np.random.randn(2, 10),
-            "mu": -np.random.randn(2, 10),
+            "mu": -np.random.randn(2, 10),  # pylint: disable=invalid-unary-operand-type
             "theta": np.random.randn(2, 10, 8),
         }
     ).posterior

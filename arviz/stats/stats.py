@@ -613,13 +613,15 @@ def _gpinv(probs, kappa, sigma):
     ok = (probs > 0) & (probs < 1)
     if np.all(ok):
         if np.abs(kappa) < np.finfo(float).eps:
-            x = -np.log1p(-probs)
+            x = -np.log1p(-probs)  # pylint: disable=invalid-unary-operand-type
         else:
             x = np.expm1(-kappa * np.log1p(-probs)) / kappa
         x *= sigma
     else:
         if np.abs(kappa) < np.finfo(float).eps:
-            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation
+            x[ok] = -np.log1p(  # pylint: disable=unsupported-assignment-operation, E1130
+                -probs[ok]
+            )
         else:
             x[ok] = (  # pylint: disable=unsupported-assignment-operation
                 np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
