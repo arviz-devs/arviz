@@ -40,7 +40,9 @@ def bfmi(energy):
         chain in the trace.
     """
     energy_mat = np.atleast_2d(energy)
-    return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
+    return np.square(np.diff(energy_mat, axis=1)).mean(  # pylint: disable=no-member
+        axis=1
+    ) / np.var(energy_mat, axis=1)
 
 
 def compare(
@@ -464,7 +466,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
-        if np.equal(loo_lppd, loo_lppd_i).all():
+        if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise LOO is the same with the sum LOO, please double check
                           the Observed RV in your model to make sure it returns element-wise logp.
@@ -580,7 +582,7 @@ def _gpdfit(x):
     b_ary /= prior_bs * x[int(len_x / 4 + 0.5) - 1]
     b_ary += 1 / x[-1]
 
-    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)
+    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)  # pylint: disable=no-member
     len_scale = len_x * (np.log(-(b_ary / k_ary)) - k_ary - 1)
     weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
 
@@ -595,7 +597,7 @@ def _gpdfit(x):
     # posterior mean for b
     b_post = np.sum(b_ary * weights)
     # estimate for k
-    k_post = np.log1p(-b_post * x).mean()  # pylint: disable=invalid-unary-operand-type
+    k_post = np.log1p(-b_post * x).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
     k_post = (len_x * k_post + prior_k * 0.5) / (len_x + prior_k)
     sigma = -k_post / b_post
@@ -1022,7 +1024,7 @@ def waic(data, pointwise=False, scale="deviance"):
     p_waic = np.sum(vars_lpd)
 
     if pointwise:
-        if np.equal(waic_sum, waic_i).all():
+        if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise WAIC is the same with the sum WAIC, please double check
             the Observed RV in your model to make sure it returns element-wise logp.
