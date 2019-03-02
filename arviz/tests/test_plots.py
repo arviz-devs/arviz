@@ -314,11 +314,7 @@ def test_plot_kde_quantiles(continuous_model, kwargs):
 
 
 def test_plot_kde_inference_data():
-<<<<<<< HEAD
     eight = load_arviz_data("centered_eight")
-=======
-    eight = az.load_arviz_data("centered_eight")
->>>>>>> Added the test
     with pytest.raises(ValueError, match="Inference Data"):
         plot_kde(eight)
     with pytest.raises(ValueError, match="Xarray"):
