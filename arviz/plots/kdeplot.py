@@ -153,7 +153,6 @@ def plot_kde(
             "instead of "
             "plot_kde"
         )
-        raise ValueError("Xarray dataset object detected. Use plot_posterior instead of plot_kde")
     if isinstance(values, InferenceData):
         raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
     if values2 is None:
