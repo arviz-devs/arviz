@@ -148,7 +148,11 @@ def plot_kde(
     figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
     if isinstance(values, xr.Dataset):
-        raise ValueError("Xarray dataset object detected. Use plot_posterior instead of plot_kde")
+        raise ValueError(
+            "Xarray dataset object detected. Use plot_posterior, plot_denstiy, plot_joint or plot_pair  "
+            "instead of "
+            "plot_kde"
+        )
     if isinstance(values, InferenceData):
         raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
     if values2 is None:
