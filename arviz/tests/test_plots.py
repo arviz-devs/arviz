@@ -6,8 +6,8 @@ from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 import pymc3 as pm
-import arviz as az
 
+from ..data import load_arviz_data
 from ..data import from_dict, from_pymc3
 from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
@@ -314,7 +314,7 @@ def test_plot_kde_quantiles(continuous_model, kwargs):
 
 
 def test_plot_kde_inference_data():
-    eight = az.load_arviz_data("centered_eight")
+    eight = load_arviz_data("centered_eight")
     with pytest.raises(ValueError, match="Inference Data"):
         plot_kde(eight)
     with pytest.raises(ValueError, match="Xarray"):
