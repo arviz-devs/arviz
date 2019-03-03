@@ -23,7 +23,7 @@ def bfmi(energy):
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
     values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change.  See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
+    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
 
     Parameters
@@ -40,9 +40,9 @@ def bfmi(energy):
         chain in the trace.
     """
     energy_mat = np.atleast_2d(energy)
-    return np.square(np.diff(energy_mat, axis=1)).mean(  # pylint: disable=no-member
-        axis=1
-    ) / np.var(energy_mat, axis=1)
+    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
+    den = np.var(energy_mat, axis=1)
+    return num / den
 
 
 def compare(
