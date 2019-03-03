@@ -23,7 +23,7 @@ def bfmi(energy):
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
     values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change.  See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
+    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
 
     Parameters
@@ -40,7 +40,9 @@ def bfmi(energy):
         chain in the trace.
     """
     energy_mat = np.atleast_2d(energy)
-    return np.square(np.diff(energy_mat, axis=1)).mean(axis=1) / np.var(energy_mat, axis=1)
+    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
+    den = np.var(energy_mat, axis=1)
+    return num / den
 
 
 def compare(
@@ -251,10 +253,11 @@ def _ic_matrix(ics, ic_i):
 
     for idx, val in enumerate(ics.index):
         ic = ics.loc[val][ic_i]
+
         if len(ic) != rows:
             raise ValueError("The number of observations should be the same across all models")
-        else:
-            ic_i_val[:, idx] = ic
+
+        ic_i_val[:, idx] = ic
 
     return rows, cols, ic_i_val
 
@@ -463,7 +466,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
-        if np.equal(loo_lppd, loo_lppd_i).all():
+        if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise LOO is the same with the sum LOO, please double check
                           the Observed RV in your model to make sure it returns element-wise logp.
@@ -579,7 +582,7 @@ def _gpdfit(x):
     b_ary /= prior_bs * x[int(len_x / 4 + 0.5) - 1]
     b_ary += 1 / x[-1]
 
-    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)
+    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)  # pylint: disable=no-member
     len_scale = len_x * (np.log(-(b_ary / k_ary)) - k_ary - 1)
     weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
 
@@ -594,7 +597,7 @@ def _gpdfit(x):
     # posterior mean for b
     b_post = np.sum(b_ary * weights)
     # estimate for k
-    k_post = np.log1p(-b_post * x).mean()  # pylint: disable=invalid-unary-operand-type
+    k_post = np.log1p(-b_post * x).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
     k_post = (len_x * k_post + prior_k * 0.5) / (len_x + prior_k)
     sigma = -k_post / b_post
@@ -610,13 +613,13 @@ def _gpinv(probs, kappa, sigma):
     ok = (probs > 0) & (probs < 1)
     if np.all(ok):
         if np.abs(kappa) < np.finfo(float).eps:
-            x = -np.log1p(-probs)
+            x = -np.log1p(-probs)  # pylint: disable=invalid-unary-operand-type
         else:
             x = np.expm1(-kappa * np.log1p(-probs)) / kappa
         x *= sigma
     else:
         if np.abs(kappa) < np.finfo(float).eps:
-            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation
+            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation, E1130
         else:
             x[ok] = (  # pylint: disable=unsupported-assignment-operation
                 np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
@@ -1021,7 +1024,7 @@ def waic(data, pointwise=False, scale="deviance"):
     p_waic = np.sum(vars_lpd)
 
     if pointwise:
-        if np.equal(waic_sum, waic_i).all():
+        if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise WAIC is the same with the sum WAIC, please double check
             the Observed RV in your model to make sure it returns element-wise logp.

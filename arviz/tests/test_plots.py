@@ -684,7 +684,7 @@ def test_plot_hpd(models, model_fit, data, kwargs):
 def test_fast_kde_scipy(limits):
     data = np.random.normal(0, 1, 1000)
     if limits[0] is None:
-        x = np.linspace(data.min(), data.max(), 200)
+        x = np.linspace(data.min(), data.max(), 200)  # pylint: disable=no-member
     else:
         x = np.linspace(*limits, 500)
     density = gaussian_kde(data).evaluate(x)
