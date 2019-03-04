@@ -1,9 +1,9 @@
-"""Plot histogram and values from MCMC samples."""
+"""Plot kde or histograms and values from MCMC samples."""
 import matplotlib.pyplot as plt
 import numpy as np
 
 from ..data import convert_to_dataset
-from .kdeplot import plot_kde
+from .distplot import plot_dist
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
 from ..utils import _var_names
 
@@ -17,11 +17,13 @@ def plot_trace(
     textsize=None,
     lines=None,
     combined=False,
-    kde_kwargs=None,
+    plot_kwargs=None,
+    fill_kwargs=None,
+    rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
 ):
-    """Plot samples histograms and values.
+    """Plot distribution (histogram or kernel density estimates) and sampled values.
 
     If `divergences` data is available in `sample_stats`, will plot the location of divergences as
     dashed vertical lines.
@@ -48,10 +50,14 @@ def plot_trace(
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    kde_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_kde`. Only affects continuous variables.
+    plot_kwargs : dict
+        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
+    fill_kwargs : dict
+        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
+    rug_kwargs : dict
+        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     hist_kwargs : dict
-        Extra keyword arguments passed to `plt.hist`. Only affects discrete variables.
+        Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
     Returns
@@ -114,11 +120,14 @@ def plot_trace(
 
     trace_kwargs.setdefault("alpha", 0.35)
 
-    if kde_kwargs is None:
-        kde_kwargs = {}
-
     if hist_kwargs is None:
         hist_kwargs = {}
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
+    if rug_kwargs is None:
+        rug_kwargs = {}
 
     hist_kwargs.setdefault("alpha", 0.35)
 
@@ -126,7 +135,7 @@ def plot_trace(
         figsize, textsize, rows=len(plotters), cols=2
     )
     trace_kwargs.setdefault("linewidth", linewidth)
-    kde_kwargs.setdefault("plot_kwargs", {"linewidth": linewidth})
+    plot_kwargs.setdefault("linewidth", linewidth)
 
     _, axes = plt.subplots(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
@@ -143,15 +152,20 @@ def plot_trace(
             axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
 
             colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
-            kde_kwargs["plot_kwargs"]["color"] = colors[idx][-1]
-            if row.dtype.kind == "i":
-                _histplot_op(axes[idx, 0], row, **hist_kwargs)
-            else:
-                plot_kde(row, textsize=xt_labelsize, ax=axes[idx, 0], **kde_kwargs)
+            plot_kwargs["color"] = colors[idx][-1]
+            plot_dist(
+                row,
+                textsize=xt_labelsize,
+                ax=axes[idx, 0],
+                hist_kwargs=hist_kwargs,
+                plot_kwargs=plot_kwargs,
+                fill_kwargs=fill_kwargs,
+                rug_kwargs=rug_kwargs,
+            )
 
         if value[0].dtype.kind == "i":
-            xticks = get_bins(value, max_bins=10, fenceposts=1)
-            axes[idx, 0].set_xticks(xticks)
+            xticks = get_bins(value)
+            axes[idx, 0].set_xticks(xticks[:-1])
         axes[idx, 0].set_yticks([])
         for col in (0, 1):
             axes[idx, col].set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)

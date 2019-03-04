@@ -30,7 +30,7 @@ def test_make_2d():
 
 def test_get_bins():
     """Touches code that is hard to reach."""
-    assert get_bins(np.array([1, 2, 3, 100]), max_bins=10) is not None
+    assert get_bins(np.array([1, 2, 3, 100])) is not None
 
 
 def test_dataset_to_numpy_not_combined(sample_dataset):  # pylint: disable=invalid-name

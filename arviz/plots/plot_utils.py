@@ -84,25 +84,46 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
 
 
-def get_bins(ary, max_bins=50, fenceposts=2):
-    """Compute number of bins (or ticks).
+def get_bins(values):
+    """
+    Automatically compute the number of bins for discrete variables.
 
     Parameters
     ----------
-    ary : numpy.array
-        array to be binned
-    max_bins : int
-        maximum number of bins
-    fenceposts : int
-        when computing bins, this should be 2, when computing ticks this should be 1.
+    values = numpy array
+        values
+
+    Returns
+    -------
+    array with the bins
+
+    Notes
+    -----
+    Computes the width of the bins by taking the maximun of the Sturges and the Freedman-Diaconis
+    estimators. Acording to numpy `np.histogram` this provides good all around performance.
+
+    The Sturges is a very simplistic estimator based on the assumption of normality of the data.
+    This estimator has poor performance for non-normal data, which becomes especially obvious for
+    large data sets. The estimate depends only on size of the data.
+
+    The Freedman-Diaconis rule uses interquartile range (IQR) to estimate the binwidth.
+    It is considered a robusts version of the Scott rule as the IQR is less affected by outliers
+    than the standard deviation. However, the IQR depends on fewer points than the standard
+    deviation, so it is less accurate, especially for long tailed distributions.
     """
-    x_max, x_min = ary.max(), ary.min()
-    x_range = x_max - x_min
-    if x_range > max_bins:
-        bins = range(x_min, x_max + fenceposts, max(1, int(x_range / 10)))
-    else:
-        bins = range(x_min, x_max + fenceposts)
-    return bins
+    x_min = values.min().astype(int)
+    x_max = values.max().astype(int)
+
+    # Sturges histogram bin estimator
+    bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
+
+    # The Freedman-Diaconis histogram bin estimator.
+    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
+    bins_fd = 2 * iqr * values.size ** (-1 / 3)
+
+    width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
+
+    return np.arange(x_min, x_max + width + 1, width)
 
 
 def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
