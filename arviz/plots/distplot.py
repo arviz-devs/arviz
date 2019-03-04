@@ -141,15 +141,15 @@ def _histplot_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
+
+    bins = hist_kwargs.pop("bins")
+    if bins is None:
+        bins = get_bins(values)
+    ax.hist(values, bins=bins, **hist_kwargs)
+    if rotated:
+        ax.set_yticks(bins[:-1])
     else:
-        bins = hist_kwargs.pop("bins")
-        if bins is None:
-            bins = get_bins(values)
-        ax.hist(values, bins=bins, **hist_kwargs)
-        if rotated:
-            ax.set_yticks(bins[:-1])
-        else:
-            ax.set_xticks(bins[:-1])
-        if hist_kwargs["label"] is not None:
-            ax.legend()
+        ax.set_xticks(bins[:-1])
+    if hist_kwargs["label"] is not None:
+        ax.legend()
     return ax
