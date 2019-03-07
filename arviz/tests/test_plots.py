@@ -7,8 +7,7 @@ import numpy as np
 import pytest
 import pymc3 as pm
 
-
-from ..data import from_dict, from_pymc3
+from ..data import from_dict, from_pymc3, load_arviz_data
 from ..stats import compare, psislw
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
@@ -311,6 +310,18 @@ def test_plot_dist_2d_kde(continuous_model, kwargs):
 def test_plot_kde_quantiles(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], **kwargs)
     assert axes
+
+
+def test_plot_kde_inference_data():
+    """
+    Ensure that an exception is raised when plot_kde
+    is used with an inference data or Xarray dataset object.
+    """
+    eight = load_arviz_data("centered_eight")
+    with pytest.raises(ValueError, match="Inference Data"):
+        plot_kde(eight)
+    with pytest.raises(ValueError, match="Xarray"):
+        plot_kde(eight.posterior)
 
 
 def test_plot_khat():
