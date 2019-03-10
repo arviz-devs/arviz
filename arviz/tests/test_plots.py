@@ -687,7 +687,7 @@ def test_plot_compare_uppercase(models):
     model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
 
     # change column name to upper case
-    model_compare = model_compare.rename(columns={"waic": "WAIC", "pwaic": "p_WAIC"})
+    model_compare = model_compare.rename(columns={"waic": "WAIC", "p_waic": "p_WAIC"})
     axes = plot_compare(model_compare)
     assert axes
 
