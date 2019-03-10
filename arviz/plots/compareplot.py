@@ -91,7 +91,7 @@ def plot_compare(
 
     yticks_labels = [""] * len(yticks_pos)
 
-    _information_criterion = ["waic", "loo"]
+    _information_criterion = ["waic", "loo", "WAIC", "LOO"]
     for information_criterion in _information_criterion:
         if information_criterion in comp_df.columns:
             break
