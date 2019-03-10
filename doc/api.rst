@@ -18,14 +18,15 @@ Plots
     plot_density
     plot_energy
     plot_forest
+    plot_hpd
+    plot_joint
     plot_kde
+    plot_khat
+    plot_pair
     plot_parallel
     plot_posterior
-    plot_trace
-    plot_pair
-    plot_joint
-    plot_khat
     plot_ppc
+    plot_trace
 
 .. _stats_api:
 
