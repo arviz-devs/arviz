@@ -682,6 +682,16 @@ def test_plot_compare_manual(models):
     assert axes
 
 
+def test_plot_compare_uppercase(models):
+    """Check exception is raised if model_compare doesn't contain a valid information criterion"""
+    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+
+    # change column name to upper case
+    model_compare = model_compare.rename(columns={"waic": "WAIC", "pwaic": "p_WAIC"})
+    axes = plot_compare(model_compare)
+    assert axes
+
+
 def test_plot_compare_no_ic(models):
     """Check exception is raised if model_compare doesn't contain a valid information criterion"""
     model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})

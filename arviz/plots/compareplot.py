@@ -91,9 +91,11 @@ def plot_compare(
 
     yticks_labels = [""] * len(yticks_pos)
 
-    _information_criterion = ["waic", "loo", "WAIC", "LOO"]
-    for information_criterion in _information_criterion:
-        if information_criterion in comp_df.columns:
+    _information_criterion = ["waic", "loo"]
+    for ic in _information_criterion:
+        if ic in comp_df.columns.str.lower():
+            information_criterion = comp_df.columns[
+                comp_df.columns.str.lower() == ic].values[0]
             break
     else:
         raise ValueError(
