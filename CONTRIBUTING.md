@@ -182,22 +182,24 @@ tools:
 ## Developing in Docker
 
 We have provided a Dockerfile which helps for isolating build problems, and local development.
-Install [Docker](https://www.docker.com/) for your operating system, clone this repo, then
-run `./scripts/container.sh --build` (you may need root privileges). This should start a local docker image called `arviz`. 
-The repo will be running the code from your local copy of `arviz`, so it is good for development.
+Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
-Afterwards, you can start a container form the image with `docker run -it -p 8888:8888 arviz`, which will open an interactive bash shell. This can be used to run code inside the docker, with the packages listed in the Dockerfile. For instance, to open a terminal, type `jupyter notebook --ip 0.0.0.0 --no-browser --allow-root` inside the docker container. This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
+### Testing in Docker
+Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it). First run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Then run `./scripts/container.sh --clear-cache` and eventually, run the tests in a container with the built image with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
 
-Or to run the tests instead, type `pytest -v arviz/tests/ --cov=arviz/` also inside the docker container.
+### Using the Docker image interactively
+Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. 
 
-This should be quite close to how the tests run on TravisCI.
+To start a bash shell inside Docker, run:
 
-If the container was started without opening the browser, you
-need the notebook instances token to work with the notebook. This token can be
-accessed with
+    $ docker run -it arviz bash
 
-```
-docker exec -it arviz jupyter notebook list
-```
+To start a jupyter notebook, there are two steps, first run:
+
+    $ docker run --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker exec -it jupyter-dock pip install jupyter
+    $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+
+This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)
