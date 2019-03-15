@@ -365,7 +365,7 @@ def test_plot_khat():
 def test_plot_pair(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     ax = plot_pair(obj, **kwargs)
-    assert ax
+    assert np.all(ax)
 
 
 @pytest.mark.parametrize(
