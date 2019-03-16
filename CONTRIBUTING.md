@@ -185,7 +185,8 @@ We have provided a Dockerfile which helps for isolating build problems, and loca
 Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
 ### Testing in Docker
-Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it). First run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Then run `./scripts/container.sh --clear-cache` and eventually run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
+Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it). 
+First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
 
 ### Using the Docker image interactively
 Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. 
