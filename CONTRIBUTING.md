@@ -182,29 +182,25 @@ tools:
 ## Developing in Docker
 
 We have provided a Dockerfile which helps for isolating build problems, and local development.
-Install [Docker](https://www.docker.com/) for your operating system, clone this repo, then
-run `./scripts/start_container.sh`. This should start a local docker container called `arviz`,
-as well as a [`jupyter`](http://jupyter.org/) notebook server running on port 8888. The
-notebook should be opened in your browser automatically (you can disable this by passing
-`--no-browser`). The repo will be running the code from your local copy of `arviz`,
-so it is good for development.
+Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
-You may also use it to run the test suite, with
+### Testing in Docker
+Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it). 
+First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
 
-```bash
-$  docker exec -it arviz  bash # logon to the container
-$  cd ~/arviz
-$  . ./scripts/test.sh # takes a while!
-```
+### Using the Docker image interactively
+Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. 
 
-This should be quite close to how the tests run on TravisCI.
+To start a bash shell inside Docker, run:
 
-If the container was started without opening the browser, you
-need the notebook instances token to work with the notebook. This token can be
-accessed with
+    $ docker run -it arviz bash
 
-```
-docker exec -it arviz jupyter notebook list
-```
+To start a jupyter notebook, there are two steps, first run:
+
+    $ docker run --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker exec -it jupyter-dock pip install jupyter
+    $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+
+This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)
