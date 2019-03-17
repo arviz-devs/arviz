@@ -100,7 +100,7 @@ class InferenceData:
 
 
 # pylint: disable=protected-access
-def concat(*args, copy=True, inplace=False):
+def concat(*args, level="chain", copy=True, inplace=False):
     """Concatenate InferenceData objects on a group or chain level.
 
     Parameters
@@ -108,10 +108,16 @@ def concat(*args, copy=True, inplace=False):
     *args : InferenceData
         Variable length InferenceData list or
         Sequence of InferenceData.
+    level : str
+        Defines subset for which the combination is valid.
+        - "group" Concatenate only unique groups
+        - "chain" Concatenate against chain dimension (default)
+        - "draw" Concatenate against draw dimension
+        - user defined dimension
     copy : bool
         If True, groups are copied to the new InferenceData object.
     inplace : bool
-        If True, merge args to first object.
+        If True and level=="group", merge args to first object.
 
     Returns
     -------
@@ -119,6 +125,11 @@ def concat(*args, copy=True, inplace=False):
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
     """
+    if not isinstance(level, str):
+        raise TypeError("level must be a string object")
+    level = level.lower()
+    if inplace and level != "group":
+        raise TypeError('inplace supported only when level=="group"')
     if len(args) == 0:
         return InferenceData()
     if len(args) == 1 and isinstance(args[0], Sequence):
@@ -140,18 +151,23 @@ def concat(*args, copy=True, inplace=False):
                 "Concatenating is supported only"
                 "between InferenceData objects. Input arg {} is {}".format(i, type(arg))
             )
-    # handle independent and dependent groups
-    first_arg = args[0]
-    first_arg_groups = ccopy(first_arg._groups)
+
+    # extract first argument
+    # and argument groups
+    farg = args[0]
+    farg_groups = ccopy(farg._groups)
     args_groups = defaultdict(list)
-    # add first_arg to args_groups if inplace is False
+    # add first arg to argument groups if inplace is False
     if not inplace:
-        for group in first_arg_groups:
-            group_data = getattr(first_arg, group)
+        for group in farg_groups:
+            group_data = getattr(farg, group)
             args_groups[group].append(deepcopy(group_data) if copy else group_data)
 
+    # handle the rest of the arguments
     for arg in args[1:]:
         for group in arg._groups:
+            if level == "group" and (group in args_groups or group in farg_groups):
+                raise TypeError('Only unique groups supported when level=="group"')
             group_data = getattr(arg, group)
             args_groups[group].append(deepcopy(group_data) if copy else group_data)
 
@@ -173,24 +189,20 @@ def concat(*args, copy=True, inplace=False):
         if group not in args_groups:
             continue
         if inplace:
-            if group not in first_arg._groups:
-                first_arg._groups.append(group)
-                setattr(first_arg, group, args_groups[group])
+            if group not in farg._groups:
+                farg._groups.append(group)
+                setattr(farg, group, args_groups[group])
             else:
                 # violates inplace
-                index = first_arg._groups.index(group)
-                objs = [getattr(first_arg, group)] + args_groups[group]
-                first_arg._groups[index] = xr.concat(objs, dim="chain")
+                index = farg._groups.index(group)
+                objs = [getattr(farg, group)] + args_groups[group]
+                farg._groups[index] = xr.concat(objs, dim=level)
         else:
             objs = args_groups[group]
-            inference_data_dict[group] = xr.concat(objs, dim="chain")
+            inference_data_dict[group] = xr.concat(objs, dim=level)
     if inplace:
-        other_groups = [
-            group for group in first_arg_groups if group not in basic_order
-        ] + other_groups
-        sorted_groups = [
-            group for group in basic_order + other_groups if group in first_arg._groups
-        ]
-        setattr(first_arg, "_groups", sorted_groups)
+        other_groups = [group for group in farg_groups if group not in basic_order] + other_groups
+        sorted_groups = [group for group in basic_order + other_groups if group in farg._groups]
+        setattr(farg, "_groups", sorted_groups)
         return None
     return InferenceData(**inference_data_dict)
