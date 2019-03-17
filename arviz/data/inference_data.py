@@ -1,5 +1,5 @@
 """Data structure for using netcdf groups with xarray."""
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 import netCDF4 as nc
@@ -101,9 +101,7 @@ class InferenceData:
 
 # pylint: disable=protected-access
 def concat(*args, copy=True, inplace=False):
-    """Concatenate InferenceData objects on a group level.
-
-    Supports only concatenating with independent unique groups.
+    """Concatenate InferenceData objects on a group or chain level.
 
     Parameters
     ----------
@@ -142,22 +140,20 @@ def concat(*args, copy=True, inplace=False):
                 "Concatenating is supported only"
                 "between InferenceData objects. Input arg {} is {}".format(i, type(arg))
             )
-    # assert that groups are independent
+    # handle independent and dependent groups
     first_arg = args[0]
     first_arg_groups = ccopy(first_arg._groups)
-    args_groups = dict()
-    for arg in args[1:]:
-        for group in arg._groups:
-            if group in args_groups or group in first_arg_groups:
-                raise NotImplementedError("Concatenating with overlapping groups is not supported.")
-            group_data = getattr(arg, group)
-            args_groups[group] = deepcopy(group_data) if copy else group_data
-
+    args_groups = defaultdict(list)
     # add first_arg to args_groups if inplace is False
     if not inplace:
         for group in first_arg_groups:
             group_data = getattr(first_arg, group)
-            args_groups[group] = deepcopy(group_data) if copy else group_data
+            args_groups[group].append(deepcopy(group_data) if copy else group_data)
+
+    for arg in args[1:]:
+        for group in arg._groups:
+            group_data = getattr(arg, group)
+            args_groups[group].append(deepcopy(group_data) if copy else group_data)
 
     basic_order = [
         "posterior",
@@ -177,10 +173,17 @@ def concat(*args, copy=True, inplace=False):
         if group not in args_groups:
             continue
         if inplace:
-            first_arg._groups.append(group)
-            setattr(first_arg, group, args_groups[group])
+            if group not in first_arg._groups:
+                first_arg._groups.append(group)
+                setattr(first_arg, group, args_groups[group])
+            else:
+                # violates inplace
+                index = first_arg._groups.index(group)
+                objs = [getattr(first_arg, group)] + args_groups[group]
+                first_arg._groups[index] = xr.concat(objs, dim="chain")
         else:
-            inference_data_dict[group] = args_groups[group]
+            objs = args_groups[group]
+            inference_data_dict[group] = xr.concat(objs, dim="chain")
     if inplace:
         other_groups = [
             group for group in first_arg_groups if group not in basic_order
