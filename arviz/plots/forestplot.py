@@ -40,10 +40,8 @@ def plot_forest(
     figsize=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
-
     Generates a forest plot of 100*(credible_interval)% credible intervals from
     a trace or list of traces.
-
     Parameters
     ----------
     data : obj or list[obj]
@@ -92,18 +90,14 @@ def plot_forest(
         Overlap height for ridgeplots.
     figsize : tuple
         Figure size. If None it will be defined automatically.
-
     Returns
     -------
     gridspec : matplotlib GridSpec
-
     Examples
     --------
     Forestpĺot
-
     .. plot::
         :context: close-figs
-
         >>> import arviz as az
         >>> non_centered_data = az.load_arviz_data('non_centered_eight')
         >>> fig, axes = az.plot_forest(non_centered_data,
@@ -113,12 +107,9 @@ def plot_forest(
         >>>                            ridgeplot_overlap=3,
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
-
     Ridgeplot
-
     .. plot::
         :context: close-figs
-
         >>> fig, axes = az.plot_forest(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
@@ -246,9 +237,13 @@ class PlotHandler:
 
         if var_names is None:
             if len(self.data) > 1:
-                self.var_names = list(set().union(*[OrderedDict(datum.data_vars) for datum in self.data]))
+                self.var_names = list(
+                    set().union(*[OrderedDict(datum.data_vars) for datum in self.data])
+                )
             else:
-                self.var_names = list(reversed(*[OrderedDict(datum.data_vars) for datum in self.data]))
+                self.var_names = list(
+                    reversed(*[OrderedDict(datum.data_vars) for datum in self.data])
+                )
         else:
             self.var_names = list(reversed(var_names))  # y-values are upside down
 
@@ -303,7 +298,6 @@ class PlotHandler:
 
     def ridgeplot(self, mult, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
-
         Parameters
         ----------
         mult : float
@@ -334,7 +328,6 @@ class PlotHandler:
         self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
-
         Parameters
         ----------
         credible_interval : float
@@ -578,4 +571,4 @@ class VarHandler:
         if self.combined:
             end_y += self.group_offset
 
-        return end_y + 2 * self.group_offset
+return end_y + 2 * self.group_offset
