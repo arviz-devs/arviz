@@ -571,4 +571,4 @@ class VarHandler:
         if self.combined:
             end_y += self.group_offset
 
-return end_y + 2 * self.group_offset
+    return end_y + 2 * self.group_offset
