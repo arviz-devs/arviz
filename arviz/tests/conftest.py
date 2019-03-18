@@ -2,6 +2,10 @@
 # pylint: disable=redefined-outer-name
 import os
 import pytest
+import logging
+
+
+_log = logging.getLogger(__name__)
 
 
 def pytest_addoption(parser):
@@ -16,10 +20,10 @@ def save_figs(request):
 
     if fig_dir is not None:
         # Try creating directory if it doesn't exist
-        print("Saving generated images in {}".format(fig_dir))
+        _log.info("Saving generated images in %s", fig_dir)
 
         os.makedirs(fig_dir, exist_ok=True)
-        print("Directory {} created".format(fig_dir))
+        _log.info("Directory %s created", fig_dir)
 
         # Clear all files from the directory
         # Does not alter or delete directories
@@ -30,6 +34,6 @@ def save_figs(request):
                 os.remove(full_path)
 
             except OSError:
-                print("Failed to remove {}".format(full_path))
+                _log.info("Failed to remove %s", full_path)
 
     return fig_dir
