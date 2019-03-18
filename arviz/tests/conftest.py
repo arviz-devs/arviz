@@ -1,8 +1,8 @@
 """Configuration for test suite."""
 # pylint: disable=redefined-outer-name
 import os
-import pytest
 import logging
+import pytest
 
 
 _log = logging.getLogger(__name__)
