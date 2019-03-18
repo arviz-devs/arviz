@@ -192,7 +192,6 @@ def plot_pair(
         ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
         ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
-        axs = ax
 
     else:
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
@@ -203,7 +202,6 @@ def plot_pair(
             fig, ax = plt.subplots(
                 numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True
             )
-        axs = []
         hexbin_values = []
         for i in range(0, numvars - 1):
             var1 = _posterior[i]
@@ -254,6 +252,5 @@ def plot_pair(
                     )
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                axs.append(ax)
 
-    return axs
+    return ax
