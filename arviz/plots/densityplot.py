@@ -209,7 +209,7 @@ def plot_density(
             ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
         ax[0].legend(fontsize=xt_labelsize)
 
-    fig.tight_layout()
+#    fig.tight_layout()
 
     return ax
 
