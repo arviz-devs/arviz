@@ -1,5 +1,5 @@
 """Forest plot."""
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import tee
 
 import numpy as np
@@ -245,7 +245,7 @@ class PlotHandler:
         self.model_names = list(reversed(model_names))  # y-values are upside down
 
         if var_names is None:
-            self.var_names = list(set.union(*[set(datum.data_vars) for datum in self.data]))
+            self.var_names = list(reversed(*[OrderedDict(datum.data_vars) for datum in self.data]))
         else:
             self.var_names = list(reversed(var_names))  # y-values are upside down
 
@@ -484,7 +484,7 @@ class VarHandler:
             grouped_data = [datum.groupby("chain") for datum in self.data]
             skip_dims = set()
 
-        label_dict = {}
+        label_dict = OrderedDict()
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
