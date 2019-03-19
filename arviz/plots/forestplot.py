@@ -494,7 +494,7 @@ class VarHandler:
                 for _, selection, values in datum_iter:
                     label = make_label(self.var_name, selection, position="beside")
                     if label not in label_dict:
-                        label_dict[label] = {}
+                        label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
                         label_dict[label][name] = []
                     label_dict[label][name].append(values)
