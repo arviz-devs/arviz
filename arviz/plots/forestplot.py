@@ -39,9 +39,8 @@ def plot_forest(
     ridgeplot_overlap=2,
     figsize=None,
 ):
-    """Forest plot to compare credible intervals from a number of distributions.
-    Generates a forest plot of 100*(credible_interval)% credible intervals from
-    a trace or list of traces.
+    """Forest plot to compare credible intervals from a number of distributions, generates a forest plot of 100*(credible_interval)% credible intervals from a trace or list of traces.
+
     Parameters
     ----------
     data : obj or list[obj]
@@ -90,6 +89,7 @@ def plot_forest(
         Overlap height for ridgeplots.
     figsize : tuple
         Figure size. If None it will be defined automatically.
+
     Returns
     -------
     gridspec : matplotlib GridSpec
@@ -298,6 +298,7 @@ class PlotHandler:
 
     def ridgeplot(self, mult, linewidth, alpha, ax):
         """Draw ridgeplot for each plotter.
+
         Parameters
         ----------
         mult : float
@@ -328,6 +329,7 @@ class PlotHandler:
         self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
+
         Parameters
         ----------
         credible_interval : float
