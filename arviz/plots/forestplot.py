@@ -39,7 +39,10 @@ def plot_forest(
     ridgeplot_overlap=2,
     figsize=None,
 ):
-    """Forest plot to compare credible intervals from a number of distributions. Generates a forest plot of 100*(credible_interval)% credible intervals from a trace or list of traces.
+    """Forest plot to compare credible intervals from a number of distributions.
+    
+    Generates a forest plot of 100*(credible_interval)% credible intervals from
+    a trace or list of traces.
 
     Parameters
     ----------
