@@ -181,7 +181,7 @@ def plot_density(
         figsize, textsize, rows, cols
     )
 
-    fig, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+    _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
     for m_idx, plotters in enumerate(to_plot):
@@ -208,8 +208,6 @@ def plot_density(
         for m_idx, label in enumerate(data_labels):
             ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
         ax[0].legend(fontsize=xt_labelsize)
-
-    fig.tight_layout()
 
     return ax
 
