@@ -40,7 +40,7 @@ def plot_forest(
     figsize=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
-    
+
     Generates a forest plot of 100*(credible_interval)% credible intervals from
     a trace or list of traces.
 
