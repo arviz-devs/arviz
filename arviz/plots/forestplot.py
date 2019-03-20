@@ -9,6 +9,7 @@ from ..data import convert_to_dataset
 from ..stats import hpd
 from ..stats.diagnostics import _ess, _rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
+from .distplot import plot_dist
 from .kdeplot import _fast_kde
 from ..utils import _var_names
 
@@ -174,14 +175,14 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval,
-            quartiles,
-            xt_labelsize,
-            titlesize,
-            linewidth,
-            markersize,
-            axes[0],
-            rope,
+        credible_interval,
+        quartiles,
+        xt_labelsize,
+        titlesize,
+        linewidth,
+        markersize,
+        axes[0],
+        rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
@@ -324,6 +325,8 @@ class PlotHandler:
         zorder = 0
         for plotter in self.plotters.values():
             for x, y_min, y_max, color in plotter.ridgeplot(mult):
+                if x.dtype.kind == "i":
+                    plot_dist(x)
                 if alpha == 0:
                     border = color
                 else:
@@ -365,23 +368,27 @@ class PlotHandler:
 
         for plotter in self.plotters.values():
             for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
-                if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+                if values.dtype.kind == "i":
+                    plot_dist(values)
+                else:
+                    if isinstance(rope, dict):
+                        self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
-                mid = len(values) // 2
-                param_iter = zip(
-                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
-                )
-                for width, j in param_iter:
-                    ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
-                ax.plot(
-                    values[mid],
-                    y,
-                    "o",
-                    mfc=ax.get_facecolor(),
-                    markersize=markersize * 0.75,
-                    color=color,
-                )
+                    mid = len(values) // 2
+                    print(values[mid])
+                    param_iter = zip(
+                        np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
+                    )
+                    for width, j in param_iter:
+                        ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
+                    ax.plot(
+                        values[mid],
+                        y,
+                        "o",
+                        mfc=ax.get_facecolor(),
+                        markersize=markersize * 0.75,
+                        color=color,
+                    )
         ax.tick_params(labelsize=xt_labelsize)
         ax.set_title(
             "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
