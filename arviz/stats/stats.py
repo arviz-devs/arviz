@@ -1,6 +1,7 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 import warnings
+import logging
 from collections import OrderedDict
 from collections.abc import Sequence
 
@@ -11,8 +12,18 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import effective_sample_size, rhat
+from .diagnostics import (
+    effective_sample_size,
+    bulk_effective_sample_size,
+    tail_effective_sample_size,
+    rhat,
+    mcse_mean,
+    mcse_sd,
+    quantile_mcse,
+)
 from ..utils import _var_names
+
+_log = logging.getLogger(__name__)
 
 __all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
 
@@ -672,6 +683,7 @@ def summary(
     extend=True,
     credible_interval=0.94,
     order="C",
+    mcse=None,
 ):
     """Create a data frame with summary statistics.
 
@@ -702,6 +714,12 @@ def summary(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
+    mcse : list, dict
+        If given returns mcse_mean, mcse_sd and mcse_quantiles for list values.
+        Can contain either a list of quantile values (0-1) or
+        key, quantile pairs dict.
+        e.g. [0.01, 0.99] --> "mcse_q0.01", "mcse_q0.99"
+        e.g. {"mcse_q001" : 0.01, "mcse_q099" : 0.99} --> "mcse_q001", "mcse_q099"
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
 
@@ -717,9 +735,9 @@ def summary(
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-               mean    sd  mc_error  hpd_3  hpd_97  ess  r_hat
-        mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0  1.00
-        mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0  1.00
+               mean    sd  mc_error  hpd_3  hpd_97  ess   bulk_ess  tail_ess   r_hat
+        mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0    1.00
+        mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0    1.00
 
     Other statistics can be calculated by passing a list of functions.
 
@@ -854,8 +872,34 @@ def summary(
         metrics.append(effective_sample_size(posterior, var_names=var_names))
         metric_names.append("ess")
 
+        metrics.append(bulk_effective_sample_size(posterior, var_names=var_names))
+        metric_names.append("bulk_ess")
+
+        metrics.append(tail_effective_sample_size(posterior, var_names=var_names))
+        metric_names.append("tail_ess")
+
         metrics.append(rhat(posterior, var_names=var_names))
         metric_names.append("r_hat")
+
+    if mcse is not None:
+        metrics.append(mcse_mean(posterior, var_names=var_names))
+        metric_names.append("mcse_mean")
+
+        metrics.append(mcse_sd(posterior, var_names=var_names))
+        metric_names.append("mcse_sd")
+
+        if isinstance(mcse, dict):
+            mcse = list(mcse.items())
+        for q in mcse:
+            if isinstance(q, (list, tuple, np.ndarray)):
+                key, q = q
+            else:
+                key = "mcse_q{}".format(q)
+            if not (0 < q < 1):
+                _log.warning("mcse quantile values need to be in range of 0 to 1.")
+                continue
+            metrics.append(quantile_mcse(posterior, q, var_names=var_names))
+            metric_names.append(key)
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
@@ -885,7 +929,10 @@ def summary(
         summary_df = df
     else:
         summary_df = joined
-    return summary_df.round(round_to)
+    if round_to is None:
+        return summary_df
+    else:
+        return summary_df.round(round_to)
 
 
 def _make_ufunc(func, index=Ellipsis, **kwargs):  # noqa: D202

@@ -12,7 +12,17 @@ from ..data import convert_to_dataset
 from ..utils import _var_names
 
 
-__all__ = ["effective_sample_size", "rhat", "geweke", "autocorr"]
+__all__ = [
+    "effective_sample_size",
+    "bulk_effective_sample_size",
+    "tail_effective_sample_size",
+    "rhat",
+    "geweke",
+    "autocorr",
+    "mcse_mean",
+    "mcse_mean",
+    "quantile_mcse",
+]
 
 
 def effective_sample_size(data, *, var_names=None):
@@ -205,7 +215,6 @@ def _get_ess(sample_array):
         raise TypeError("Effective sample size calculation requires multiple chains.")
 
     acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
-
     chain_mean = sample_array.mean(axis=1)
     chain_var = acov[:, 0] * n_draws / (n_draws - 1.0)
     acov_t = acov[:, 1] * n_draws / (n_draws - 1.0)
@@ -238,6 +247,7 @@ def _get_ess(sample_array):
             rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
+
     ess = (
         int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
         if not np.any(np.isnan(rho_hat_t))
@@ -265,7 +275,8 @@ def autocorr(x):
     result = fftconvolve(y, y[::-1])
     acorr = result[len(result) // 2 :]
     acorr /= np.arange(len_y, 0, -1)
-    acorr /= acorr[0]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        acorr /= acorr[0]
     return acorr
 
 
@@ -385,7 +396,7 @@ def mcse_sd(data, var_names=None):
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
-    return xr.apply_ufunc(_mcse_mean_ufunc, dataset, input_core_dims=(("chain", "draw"),))
+    return xr.apply_ufunc(_mcse_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
 
 def _mcse_sd_ufunc(ary):
@@ -409,7 +420,9 @@ def quantile_mcse(data, prob, var_names=None):
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
-    return xr.apply_ufunc(_quantile_mcse_ufunc, dataset, prob, input_core_dims=(("chain", "draw"),))
+    return xr.apply_ufunc(
+        _quantile_mcse_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
+    )
 
 
 def _quantile_mcse_ufunc(ary, prob):
@@ -420,11 +433,9 @@ def _quantile_mcse_ufunc(ary, prob):
     """
     target = np.empty(ary.shape[:-2])
     for idx in np.ndindex(target.shape):
-        target[idx] = _get_quantile_mcse(ary[idx], prob)[0]
+        q_mcse, *_ = _get_quantile_mcse(ary[idx], prob)
+        target[idx] = q_mcse
     return target
-
-
-_get_quantile_mcse
 
 
 def _get_rhat(values, round_to=2):
@@ -515,29 +526,37 @@ def _get_quantile_mcse(ary, prob):
     I = ary <= np.quantile(ary, prob)
     size_ess = _get_ess(_get_z_scale(_get_split_chains(I)))
     p = np.array([0.1586553, 0.8413447, 0.05, 0.95])
-    a = stats.beta.ppf(p, size_ess * prob + 1, size_ess * (1 - prob) + 1)
+    with np.errstate(invalid="ignore"):
+        a = stats.beta.ppf(p, size_ess * prob + 1, size_ess * (1 - prob) + 1)
     sorted_ary = np.sort(ary.ravel())
     size = ary.size
-    th1 = sorted_ary[int(max(round(a[0] * size), 1))]
-    th2 = sorted_ary[int(min(round(a[1] * size), size))]
+    th1_idx = int(np.nanmax((round(a[0] * size), 0)))
+    th2_idx = int(np.nanmin((round(a[1] * size), size - 1)))
+    th1 = sorted_ary[th1_idx]
+    th2 = sorted_ary[th2_idx]
     mcse = (th2 - th1) / 2
-    th1 = sorted_ary[int(max(round(a[2] * size), 1))]
-    th2 = sorted_ary[int(min(round(a[3] * size), size))]
+    th1_idx = int(np.nanmax((round(a[2] * size), 0)))
+    th2_idx = int(np.nanmin((round(a[3] * size), size - 1)))
+    th1 = sorted_ary[th1_idx]
+    th2 = sorted_ary[th2_idx]
     return mcse, th1, th2, size_ess
 
 
-def _get_rank_normalized_rhat(ary):
+def _get_rank_normalized_rhat(ary, round_to=2):
     # z_scale
     z_split = _get_z_scale(_get_split_chains(ary))
-    z_split_rhat = _get_rhat(z_split)
+    z_split_rhat = _get_rhat(z_split, None)
 
     # folded z_scale
     ary_folded = np.abs(ary - np.median(ary))
     z_folded_split = _get_z_scale(_get_split_chains(ary_folded))
-    z_fsplit_rhat = _get_rhat(z_folded_split)
+    z_fsplit_rhat = _get_rhat(z_folded_split, None)
 
     rhat = max(z_split_rhat, z_fsplit_rhat)
-    return rhat
+    if round_to is None:
+        return rhat
+    else:
+        return np.round(rhat, round_to)
 
 
 def _get_rank_normalized_bulk_ess(ary):
