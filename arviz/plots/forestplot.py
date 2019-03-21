@@ -175,14 +175,14 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-        credible_interval,
-        quartiles,
-        xt_labelsize,
-        titlesize,
-        linewidth,
-        markersize,
-        axes[0],
-        rope,
+            credible_interval,
+            quartiles,
+            xt_labelsize,
+            titlesize,
+            linewidth,
+            markersize,
+            axes[0],
+            rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
@@ -377,7 +377,8 @@ class PlotHandler:
                     mid = len(values) // 2
                     print(values[mid])
                     param_iter = zip(
-                        np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
+                        np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1],
+                        range(mid),
                     )
                     for width, j in param_iter:
                         ax.hlines(y, values[j], values[-(j + 1)], linewidth=width, color=color)
