@@ -272,10 +272,14 @@ def autocorr(x):
     """
     y = x - x.mean()
     len_y = len(y)
-    result = fftconvolve(y, y[::-1])
+    with warnings.catch_warnings():
+        # silence annoying numpy tuple warning in another library
+        # silence hack added in 0.3.3+
+        warnings.simplefilter("ignore")
+        result = fftconvolve(y, y[::-1])
     acorr = result[len(result) // 2 :]
     acorr /= np.arange(len_y, 0, -1)
-    with np.errstate(divide="ignore", invalid="ignore"):
+    with np.errstate(invalid="ignore"):
         acorr /= acorr[0]
     return acorr
 
