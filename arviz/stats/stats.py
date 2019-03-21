@@ -19,7 +19,7 @@ from .diagnostics import (
     rhat,
     mcse_mean,
     mcse_sd,
-    quantile_mcse,
+    mcse_quantile,
 )
 from ..utils import _var_names
 
@@ -898,7 +898,7 @@ def summary(
             if not (0 < q < 1):
                 _log.warning("mcse quantile values need to be in range of 0 to 1.")
                 continue
-            metrics.append(quantile_mcse(posterior, q, var_names=var_names))
+            metrics.append(mcse_quantile(posterior, q, var_names=var_names))
             metric_names.append(key)
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
@@ -935,7 +935,7 @@ def summary(
         return summary_df.round(round_to)
 
 
-def _make_ufunc(func, index=Ellipsis, **kwargs):  # noqa: D202
+def _make_ufunc(func, index=Ellipsis, n_output=1, **kwargs):  # noqa: D202
     """Make ufunc from function."""
 
     def _ufunc(ary):
@@ -944,7 +944,18 @@ def _make_ufunc(func, index=Ellipsis, **kwargs):  # noqa: D202
             target[idx] = np.asarray(func(ary[idx].ravel(), **kwargs))[index]
         return target
 
-    return _ufunc
+    def _multi_ufunc(ary):
+        targets = tuple(np.empty(ary.shape[:-2]) for _ in range(n_output))
+        for idx in np.ndindex(ary.shape[:-2]):
+            results = func(ary[idx].ravel(), **kwargs)
+            for i, res in enumerate(results):
+                targets[i][idx] = np.asarray(res)[index]
+        return targets
+
+    if n_output > 1:
+        return _multi_ufunc
+    else:
+        return _ufunc
 
 
 def _mc_error(x, batches=5, circular=False):

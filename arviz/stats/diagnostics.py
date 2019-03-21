@@ -20,9 +20,55 @@ __all__ = [
     "geweke",
     "autocorr",
     "mcse_mean",
-    "mcse_mean",
-    "quantile_mcse",
+    "mcse_sd",
+    "mcse_quantile",
 ]
+
+
+def autocorr(x):
+    """Compute autocorrelation using FFT for every lag for the input array.
+
+    See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
+
+    Parameters
+    ----------
+    x : Numpy array
+        An array containing MCMC samples
+
+    Returns
+    -------
+    acorr: Numpy array same size as the input array
+    """
+    y = x - x.mean()
+    len_y = len(y)
+    with warnings.catch_warnings():
+        # silence annoying numpy tuple warning in another library
+        # silence hack added in 0.3.3+
+        warnings.simplefilter("ignore")
+        result = fftconvolve(y, y[::-1])
+    acorr = result[len(result) // 2 :]
+    acorr /= np.arange(len_y, 0, -1)
+    with np.errstate(invalid="ignore"):
+        acorr /= acorr[0]
+    return acorr
+
+
+def _autocov(x):
+    """Compute autocovariance estimates for every lag for the input array.
+
+    Parameters
+    ----------
+    x : Numpy array
+        An array containing MCMC samples
+
+    Returns
+    -------
+    acov: Numpy array same size as the input array
+    """
+    acorr = autocorr(x)
+    varx = np.var(x, ddof=1) * (len(x) - 1) / len(x)
+    acov = acorr * varx
+    return acov
 
 
 def effective_sample_size(data, *, var_names=None):
@@ -73,18 +119,6 @@ def effective_sample_size(data, *, var_names=None):
     return xr.apply_ufunc(_ess_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
 
-def _ess_ufunc(ary):
-    """Ufunc for computing effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_ess(ary[idx])
-    return target
-
-
 def bulk_effective_sample_size(data, *, var_names=None):
     r"""Calculate estimate of the bulk effective sample size.
 
@@ -100,8 +134,8 @@ def bulk_effective_sample_size(data, *, var_names=None):
 
     Returns
     -------
-    ess : xarray.Dataset
-        Return the effective sample size, :math:`\hat{N}_{eff}`
+    xarray.Dataset
+        Return the bulk effective sample size, :math:`\hat{N}_{eff}`
 
     Notes
     -----
@@ -124,25 +158,13 @@ def bulk_effective_sample_size(data, *, var_names=None):
     Gelman et al. BDA (2014) Formula 11.8
     """
     if isinstance(data, np.ndarray):
-        return _get_ess(data)
+        return _get_bulk_ess(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_bulk_ess_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def _bulk_ess_ufunc(ary):
-    """Ufunc for computing bulk effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_rank_normalized_bulk_ess(ary[idx])
-    return target
 
 
 def tail_effective_sample_size(data, *, var_names=None):
@@ -160,8 +182,8 @@ def tail_effective_sample_size(data, *, var_names=None):
 
     Returns
     -------
-    ess : xarray.Dataset
-        Return the effective sample size, :math:`\hat{N}_{eff}`
+    xarray.Dataset
+        Return the tail effective sample size, :math:`\hat{N}_{eff}`
 
     Notes
     -----
@@ -184,122 +206,13 @@ def tail_effective_sample_size(data, *, var_names=None):
     Gelman et al. BDA (2014) Formula 11.8
     """
     if isinstance(data, np.ndarray):
-        return _get_ess(data)
+        return _get_tail_ess(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_tail_ess_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def _tail_ess_ufunc(ary):
-    """Ufunc for computing tail effective sample size.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_tail_ess(ary[idx])
-    return target
-
-
-def _get_ess(sample_array):
-    """Compute the effective sample size for a 2D array."""
-    shape = sample_array.shape
-    if len(shape) != 2:
-        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
-    n_chain, n_draws = shape
-    if n_chain <= 1:
-        raise TypeError("Effective sample size calculation requires multiple chains.")
-
-    acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
-    chain_mean = sample_array.mean(axis=1)
-    chain_var = acov[:, 0] * n_draws / (n_draws - 1.0)
-    acov_t = acov[:, 1] * n_draws / (n_draws - 1.0)
-    mean_var = np.mean(chain_var)
-    var_plus = mean_var * (n_draws - 1.0) / n_draws
-    var_plus += np.var(chain_mean, ddof=1)
-
-    rho_hat_t = np.zeros(n_draws)
-    rho_hat_even = 1.0
-    rho_hat_t[0] = rho_hat_even
-    rho_hat_odd = 1.0 - (mean_var - np.mean(acov_t)) / var_plus
-    rho_hat_t[1] = rho_hat_odd
-
-    # Geyer's initial positive sequence
-    max_t = 1
-    t = 1
-    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
-        rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
-        rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
-        if (rho_hat_even + rho_hat_odd) >= 0:
-            rho_hat_t[t + 1] = rho_hat_even
-            rho_hat_t[t + 2] = rho_hat_odd
-        max_t = t + 2
-        t += 2
-
-    # Geyer's initial monotone sequence
-    t = 3
-    while t <= max_t - 2:
-        if (rho_hat_t[t + 1] + rho_hat_t[t + 2]) > (rho_hat_t[t - 1] + rho_hat_t[t]):
-            rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
-            rho_hat_t[t + 2] = rho_hat_t[t + 1]
-        t += 2
-
-    ess = (
-        int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
-        if not np.any(np.isnan(rho_hat_t))
-        else np.nan
-    )
-    return ess
-
-
-def autocorr(x):
-    """Compute autocorrelation using FFT for every lag for the input array.
-
-    See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
-
-    Parameters
-    ----------
-    x : Numpy array
-        An array containing MCMC samples
-
-    Returns
-    -------
-    acorr: Numpy array same size as the input array
-    """
-    y = x - x.mean()
-    len_y = len(y)
-    with warnings.catch_warnings():
-        # silence annoying numpy tuple warning in another library
-        # silence hack added in 0.3.3+
-        warnings.simplefilter("ignore")
-        result = fftconvolve(y, y[::-1])
-    acorr = result[len(result) // 2 :]
-    acorr /= np.arange(len_y, 0, -1)
-    with np.errstate(invalid="ignore"):
-        acorr /= acorr[0]
-    return acorr
-
-
-def _autocov(x):
-    """Compute autocovariance estimates for every lag for the input array.
-
-    Parameters
-    ----------
-    x : Numpy array
-        An array containing MCMC samples
-
-    Returns
-    -------
-    acov: Numpy array same size as the input array
-    """
-    acorr = autocorr(x)
-    varx = np.var(x, ddof=1) * (len(x) - 1) / len(x)
-    acov = acorr * varx
-    return acov
 
 
 def rhat(data, var_names=None):
@@ -355,40 +268,16 @@ def rhat(data, var_names=None):
     return xr.apply_ufunc(_rhat_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
 
-def _rhat_ufunc(ary):
-    """Ufunc for computing rank normalized R-hat.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_rank_normalized_rhat(ary[idx])
-    return target
-
-
 def mcse_mean(data, var_names=None):
     r""""""
     if isinstance(data, np.ndarray):
-        return _get_split_rhat(data)
+        return _get_mcse_mean(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(_mcse_mean_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def _mcse_mean_ufunc(ary):
-    """Ufunc for computing mcse_mean.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_mcse_mean(ary[idx])
-    return target
 
 
 def mcse_sd(data, var_names=None):
@@ -403,189 +292,35 @@ def mcse_sd(data, var_names=None):
     return xr.apply_ufunc(_mcse_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
 
-def _mcse_sd_ufunc(ary):
-    """Ufunc for computing mcse_sd.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_mcse_sd(ary[idx])
-    return target
-
-
-def quantile_mcse(data, prob, var_names=None):
+def mcse_mean_sd(data, var_names=None):
     r""""""
     if isinstance(data, np.ndarray):
-        return _get_split_rhat(data)
+        return _get_mcse_mean_sd(data)
+
+    dataset = az.convert_to_dataset(data, group="posterior")
+    var_names = az.stats.diagnostics._var_names(var_names, dataset)
+
+    dataset = dataset if var_names is None else dataset[var_names]
+    return xr.apply_ufunc(
+        az.stats.diagnostics._mcse_mean_sd_ufunc,
+        dataset,
+        input_core_dims=(("chain", "draw"),),
+        output_core_dims=([], []),
+    )
+
+
+def mcse_quantile(data, prob, var_names=None):
+    r""""""
+    if isinstance(data, np.ndarray):
+        return _get_mcse_quantile(data, prob)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
     return xr.apply_ufunc(
-        _quantile_mcse_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
+        _mcse_quantile_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
     )
-
-
-def _quantile_mcse_ufunc(ary, prob):
-    """Ufunc for computing _quantile_mcse.
-
-    This can be used on an xarray Dataset, using
-    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
-    """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        q_mcse, *_ = _get_quantile_mcse(ary[idx], prob)
-        target[idx] = q_mcse
-    return target
-
-
-def _get_rhat(values, round_to=2):
-    """Compute the rhat for a 2d array."""
-    shape = values.shape
-    if len(shape) != 2:
-        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
-    _, num_samples = shape
-    # Calculate chain mean
-    chain_mean = np.mean(values, axis=1)
-    # Calculate chain variance
-    chain_var = np.var(values, axis=1, ddof=1)
-    # Calculate between-chain variance
-    between_chain_variance = num_samples / 2 * np.var(chain_mean, ddof=1)
-    # Calculate within-chain variance
-    within_chain_variance = np.mean(chain_var)
-    # Estimate of marginal posterior variance
-    rhat = np.sqrt(
-        (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
-    )
-    if round_to is None:
-        return rhat
-    else:
-        return round(rhat, round_to)
-
-
-def _get_split_rhat(values, round_to=2):
-    """Compute the split-rhat for a 2d array."""
-    shape = values.shape
-    if len(shape) != 2:
-        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
-    _, num_samples = shape
-    num_split = num_samples // 2
-    # Calculate split chain mean
-    split_chain_mean1 = np.mean(values[:, :num_split], axis=1)
-    split_chain_mean2 = np.mean(values[:, num_split:], axis=1)
-    split_chain_mean = np.concatenate((split_chain_mean1, split_chain_mean2))
-    # Calculate split chain variance
-    split_chain_var1 = np.var(values[:, :num_split], axis=1, ddof=1)
-    split_chain_var2 = np.var(values[:, num_split:], axis=1, ddof=1)
-    split_chain_var = np.concatenate((split_chain_var1, split_chain_var2))
-    # Calculate between-chain variance
-    between_chain_variance = num_samples / 2 * np.var(split_chain_mean, ddof=1)
-    # Calculate within-chain variance
-    within_chain_variance = np.mean(split_chain_var)
-    # Estimate of marginal posterior variance
-    split_rhat = np.sqrt(
-        (between_chain_variance / within_chain_variance + num_samples / 2 - 1) / (num_samples / 2)
-    )
-
-    return round(split_rhat, round_to)
-
-
-def _get_z_scale(ary):
-    """Calculate z_scale
-
-    Parameters
-    ----------
-    ary : np.ndarray
-
-    Returns
-    -------
-    np.ndarray
-    """
-    size = ary.size
-    rank = stats.rankdata(ary, method="average")
-    z = stats.norm.ppf((rank - 0.5) / size)
-    z = z.reshape(ary.shape)
-    return z
-
-
-def _get_split_chains(ary):
-    _, n_draw = ary.shape
-    half = n_draw // 2
-    return np.vstack((ary[:, :half], ary[:, -half:]))
-
-
-def _get_tail_ess(ary):
-    I05 = ary <= np.quantile(ary, 0.05)
-    q05_ess = _get_ess(_get_z_scale(_get_split_chains(I05)))
-    I95 = ary <= np.quantile(ary, 0.95)
-    q95_ess = _get_ess(_get_z_scale(_get_split_chains(I95)))
-    return min(q05_ess, q95_ess)
-
-
-def _get_quantile_mcse(ary, prob):
-    """Return mcse, Q05, Q95, Seff"""
-    I = ary <= np.quantile(ary, prob)
-    size_ess = _get_ess(_get_z_scale(_get_split_chains(I)))
-    p = np.array([0.1586553, 0.8413447, 0.05, 0.95])
-    with np.errstate(invalid="ignore"):
-        a = stats.beta.ppf(p, size_ess * prob + 1, size_ess * (1 - prob) + 1)
-    sorted_ary = np.sort(ary.ravel())
-    size = ary.size
-    th1_idx = int(np.nanmax((round(a[0] * size), 0)))
-    th2_idx = int(np.nanmin((round(a[1] * size), size - 1)))
-    th1 = sorted_ary[th1_idx]
-    th2 = sorted_ary[th2_idx]
-    mcse = (th2 - th1) / 2
-    th1_idx = int(np.nanmax((round(a[2] * size), 0)))
-    th2_idx = int(np.nanmin((round(a[3] * size), size - 1)))
-    th1 = sorted_ary[th1_idx]
-    th2 = sorted_ary[th2_idx]
-    return mcse, th1, th2, size_ess
-
-
-def _get_rank_normalized_rhat(ary, round_to=2):
-    # z_scale
-    z_split = _get_z_scale(_get_split_chains(ary))
-    z_split_rhat = _get_rhat(z_split, None)
-
-    # folded z_scale
-    ary_folded = np.abs(ary - np.median(ary))
-    z_folded_split = _get_z_scale(_get_split_chains(ary_folded))
-    z_fsplit_rhat = _get_rhat(z_folded_split, None)
-
-    rhat = max(z_split_rhat, z_fsplit_rhat)
-    if round_to is None:
-        return rhat
-    else:
-        return np.round(rhat, round_to)
-
-
-def _get_rank_normalized_bulk_ess(ary):
-    z_split = _get_z_scale(_get_split_chains(ary))
-    bulk_ess = _get_ess(z_split)
-    return bulk_ess
-
-
-def _get_mcse_mean(ary):
-    ess = _get_ess(ary)
-    mean = np.mean(ary)
-    sd = np.std(ary, ddof=1)
-    mcse_mean = sd / np.sqrt(ess)
-    return mcse_mean
-
-
-def _get_mcse_sd(ary):
-    ess = _get_ess(ary)
-    sd = np.std(ary, ddof=1)
-
-    ess2 = _get_ess(ary ** 2)
-    essmin = min(ess, ess2)
-    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / essmin) ** (essmin - 1) - 1)
-    mcse_sd = sd * fac_mcse_sd
-    return mcse_sd
 
 
 def geweke(values, first=0.1, last=0.5, intervals=20):
@@ -685,3 +420,314 @@ def ks_summary(pareto_tail_indices):
         warnings.warn("All Pareto k estimates are ok (k < 0.7)")
 
     return df_k
+
+
+def _ess_ufunc(ary):
+    """Ufunc for computing effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_ess(ary[idx])
+    return target
+
+
+def _bulk_ess_ufunc(ary):
+    """Ufunc for computing bulk effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_bulk_ess(ary[idx])
+    return target
+
+
+def _tail_ess_ufunc(ary):
+    """Ufunc for computing tail effective sample size.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_tail_ess(ary[idx])
+    return target
+
+
+def _rhat_ufunc(ary):
+    """Ufunc for computing rank normalized R-hat.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_rank_normalized_rhat(ary[idx])
+    return target
+
+
+def _mcse_mean_ufunc(ary):
+    """Ufunc for computing mcse_mean.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_mcse_mean(ary[idx])
+    return target
+
+
+def _mcse_sd_ufunc(ary):
+    """Ufunc for computing mcse_sd.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        target[idx] = _get_mcse_sd(ary[idx])
+    return target
+
+
+def _mcse_mean_sd_ufunc(ary):
+    """Ufunc for computing mcse_mean and mcse_sd.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target_shape = ary.shape[:-2]
+    targets = tuple(np.empty(target_shape) for _ in range(2))
+    for idx in np.ndindex(target_shape):
+        results = np.asarray(_get_mcse_mean_sd(ary[idx]))
+        for i, res in enumerate(results):
+            targets[i][idx] = res
+    return targets
+
+
+def _mcse_quantile_ufunc(ary, prob):
+    """Ufunc for computing _quantile_mcse.
+
+    This can be used on an xarray Dataset, using
+    `xr.apply_ufunc(_neff_ufunc, ..., input_core_dims=(('chain', 'draw'),))
+    """
+    target = np.empty(ary.shape[:-2])
+    for idx in np.ndindex(target.shape):
+        q_mcse, *_ = _get_mcse_quantile(ary[idx], prob)
+        target[idx] = q_mcse
+    return target
+
+
+def _get_z_scale(ary):
+    """Calculate z_scale
+
+    Parameters
+    ----------
+    ary : np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+    """
+    size = ary.size
+    rank = stats.rankdata(ary, method="average")
+    z = stats.norm.ppf((rank - 0.5) / size)
+    z = z.reshape(ary.shape)
+    return z
+
+
+def _get_split_chains(ary):
+    _, n_draw = ary.shape
+    half = n_draw // 2
+    return np.vstack((ary[:, :half], ary[:, -half:]))
+
+
+def _get_rhat(values, round_to=2):
+    """Compute the rhat for a 2d array."""
+    shape = values.shape
+    if len(shape) != 2:
+        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
+    _, num_samples = shape
+    # Calculate chain mean
+    chain_mean = np.mean(values, axis=1)
+    # Calculate chain variance
+    chain_var = np.var(values, axis=1, ddof=1)
+    # Calculate between-chain variance
+    between_chain_variance = num_samples / 2 * np.var(chain_mean, ddof=1)
+    # Calculate within-chain variance
+    within_chain_variance = np.mean(chain_var)
+    # Estimate of marginal posterior variance
+    rhat = np.sqrt(
+        (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
+    )
+    if round_to is None:
+        return rhat
+    else:
+        return round(rhat, round_to)
+
+
+def _get_split_rhat(values, round_to=2):
+    """Compute the split-rhat for a 2d array."""
+    shape = values.shape
+    if len(shape) != 2:
+        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
+    _, num_samples = shape
+    num_split = num_samples // 2
+    # Calculate split chain mean
+    split_chain_mean1 = np.mean(values[:, :num_split], axis=1)
+    split_chain_mean2 = np.mean(values[:, num_split:], axis=1)
+    split_chain_mean = np.concatenate((split_chain_mean1, split_chain_mean2))
+    # Calculate split chain variance
+    split_chain_var1 = np.var(values[:, :num_split], axis=1, ddof=1)
+    split_chain_var2 = np.var(values[:, num_split:], axis=1, ddof=1)
+    split_chain_var = np.concatenate((split_chain_var1, split_chain_var2))
+    # Calculate between-chain variance
+    between_chain_variance = num_samples / 2 * np.var(split_chain_mean, ddof=1)
+    # Calculate within-chain variance
+    within_chain_variance = np.mean(split_chain_var)
+    # Estimate of marginal posterior variance
+    split_rhat = np.sqrt(
+        (between_chain_variance / within_chain_variance + num_samples / 2 - 1) / (num_samples / 2)
+    )
+
+    return round(split_rhat, round_to)
+
+
+def _get_rank_normalized_rhat(ary, round_to=2):
+    # z_scale
+    z_split = _get_z_scale(_get_split_chains(ary))
+    z_split_rhat = _get_rhat(z_split, None)
+
+    # folded z_scale
+    ary_folded = np.abs(ary - np.median(ary))
+    z_folded_split = _get_z_scale(_get_split_chains(ary_folded))
+    z_fsplit_rhat = _get_rhat(z_folded_split, None)
+
+    rhat = max(z_split_rhat, z_fsplit_rhat)
+    if round_to is None:
+        return rhat
+    else:
+        return np.round(rhat, round_to)
+
+
+def _get_ess(sample_array):
+    """Compute the effective sample size for a 2D array."""
+    shape = np.asarray(sample_array).shape
+    print(sample_array.shape)
+    if len(shape) != 2:
+        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
+    n_chain, n_draws = shape
+    if n_chain <= 1:
+        raise TypeError("Effective sample size calculation requires multiple chains.")
+
+    acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
+    chain_mean = sample_array.mean(axis=1)
+    chain_var = acov[:, 0] * n_draws / (n_draws - 1.0)
+    acov_t = acov[:, 1] * n_draws / (n_draws - 1.0)
+    mean_var = np.mean(chain_var)
+    var_plus = mean_var * (n_draws - 1.0) / n_draws
+    var_plus += np.var(chain_mean, ddof=1)
+
+    rho_hat_t = np.zeros(n_draws)
+    rho_hat_even = 1.0
+    rho_hat_t[0] = rho_hat_even
+    rho_hat_odd = 1.0 - (mean_var - np.mean(acov_t)) / var_plus
+    rho_hat_t[1] = rho_hat_odd
+
+    # Geyer's initial positive sequence
+    max_t = 1
+    t = 1
+    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
+        rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
+        rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
+        if (rho_hat_even + rho_hat_odd) >= 0:
+            rho_hat_t[t + 1] = rho_hat_even
+            rho_hat_t[t + 2] = rho_hat_odd
+        max_t = t + 2
+        t += 2
+
+    # Geyer's initial monotone sequence
+    t = 3
+    while t <= max_t - 2:
+        if (rho_hat_t[t + 1] + rho_hat_t[t + 2]) > (rho_hat_t[t - 1] + rho_hat_t[t]):
+            rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
+            rho_hat_t[t + 2] = rho_hat_t[t + 1]
+        t += 2
+
+    ess = (
+        int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
+        if not np.any(np.isnan(rho_hat_t))
+        else np.nan
+    )
+    return ess
+
+
+def _get_bulk_ess(ary):
+    z_split = _get_z_scale(_get_split_chains(ary))
+    bulk_ess = _get_ess(z_split)
+    return bulk_ess
+
+
+def _get_tail_ess(ary):
+    I05 = ary <= np.quantile(ary, 0.05)
+    q05_ess = _get_ess(_get_z_scale(_get_split_chains(I05)))
+    I95 = ary <= np.quantile(ary, 0.95)
+    q95_ess = _get_ess(_get_z_scale(_get_split_chains(I95)))
+    return min(q05_ess, q95_ess)
+
+
+def _get_mcse_mean(ary):
+    ess = _get_ess(ary)
+    mean = np.mean(ary)
+    sd = np.std(ary, ddof=1)
+    mcse_mean = sd / np.sqrt(ess)
+    return mcse_mean
+
+
+def _get_mcse_sd(ary):
+    ess = _get_ess(ary)
+    sd = np.std(ary, ddof=1)
+
+    ess2 = _get_ess(ary ** 2)
+    essmin = min(ess, ess2)
+    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / essmin) ** (essmin - 1) - 1)
+    mcse_sd = sd * fac_mcse_sd
+    return mcse_sd
+
+
+def _get_mcse_mean_sd(ary):
+    ess = _get_ess(ary)
+    mean = np.mean(ary)
+    sd = np.std(ary, ddof=1)
+    mcse_mean = sd / np.sqrt(ess)
+    ess2 = _get_ess(ary ** 2)
+    essmin = min(ess, ess2)
+    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / essmin) ** (essmin - 1) - 1)
+    mcse_sd = sd * fac_mcse_sd
+    print(mcse_mean, mcse_sd)
+    return mcse_mean, mcse_sd
+
+
+def _get_mcse_quantile(ary, prob):
+    """Return mcse, Q05, Q95, Seff"""
+    I = ary <= np.quantile(ary, prob)
+    size_ess = _get_ess(_get_z_scale(_get_split_chains(I)))
+    p = np.array([0.1586553, 0.8413447, 0.05, 0.95])
+    with np.errstate(invalid="ignore"):
+        a = stats.beta.ppf(p, size_ess * prob + 1, size_ess * (1 - prob) + 1)
+    sorted_ary = np.sort(ary.ravel())
+    size = ary.size
+    th1_idx = int(np.nanmax((round(a[0] * size), 0)))
+    th2_idx = int(np.nanmin((round(a[1] * size), size - 1)))
+    th1 = sorted_ary[th1_idx]
+    th2 = sorted_ary[th2_idx]
+    mcse = (th2 - th1) / 2
+    th1_idx = int(np.nanmax((round(a[2] * size), 0)))
+    th2_idx = int(np.nanmin((round(a[3] * size), size - 1)))
+    th1 = sorted_ary[th1_idx]
+    th2 = sorted_ary[th2_idx]
+    return mcse, th1, th2, size_ess
