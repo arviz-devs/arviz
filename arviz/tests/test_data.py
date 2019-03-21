@@ -33,6 +33,7 @@ from ..data.base import generate_dims_coords, make_attrs
 from ..data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
+    check_multiple_attrs,
     _emcee_lnprior as emcee_lnprior,
     _emcee_lnprob as emcee_lnprob,
     needs_emcee3,
@@ -176,12 +177,10 @@ def test_addition():
     idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
     new_idata = idata1 + idata2
     assert new_idata is not None
-    assert hasattr(new_idata, "posterior")
-    assert hasattr(new_idata, "prior")
-    assert hasattr(new_idata.posterior, "A")
-    assert hasattr(new_idata.posterior, "B")
-    assert hasattr(new_idata.prior, "C")
-    assert hasattr(new_idata.prior, "D")
+    objs = (None, None, "posterior", "posterior", "prior", "prior")
+    attrs = ("posterior", "prior", "A", "B", "C", "D")
+    fails = check_multiple_attrs(objs, attrs, parent=new_idata)
+    assert len(fails) == 0
 
 
 @pytest.mark.parametrize("copy", [True, False])

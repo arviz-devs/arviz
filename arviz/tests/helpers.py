@@ -38,6 +38,36 @@ def eight_schools_params():
     }
 
 
+def check_multiple_attrs(objs, attrs, parent=None):
+    """Perform multiple hasattr checks.
+
+    Args
+    ----
+    objs: iterable
+        Iterable containing the objects whose attributes should be checked
+    attrs: iterable
+        Iterable containing the names of the attributes to be checked.
+    parent: obj
+        Parent object of the objs, if present, check the attributes of parent.<obj>
+
+    Returns
+    -------
+    list
+        List containing the tuples (obj, attr) that failed
+    """
+    failed_attrs = []
+    if parent:
+        for check_obj, check_attr in zip(objs, attrs):
+            check_obj = getattr(parent, check_obj) if check_obj else parent
+            if not hasattr(check_obj, check_attr):
+                failed_attrs.append((check_obj, check_attr))
+    else:
+        for check_obj, check_attr in zip(objs, attrs):
+            if not hasattr(check_obj, check_attr):
+                failed_attrs.append((check_obj, check_attr))
+    return failed_attrs
+
+
 def emcee_version():
     """Check emcee version.
 
