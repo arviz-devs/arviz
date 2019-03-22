@@ -177,9 +177,8 @@ def test_addition():
     idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
     new_idata = idata1 + idata2
     assert new_idata is not None
-    objs = (None, None, "posterior", "posterior", "prior", "prior")
-    attrs = ("posterior", "prior", "A", "B", "C", "D")
-    fails = check_multiple_attrs(objs, attrs, parent=new_idata)
+    test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
+    fails = check_multiple_attrs(test_dict, new_idata)
     assert len(fails) == 0
 
 
