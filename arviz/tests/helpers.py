@@ -39,9 +39,10 @@ def eight_schools_params():
 
 
 def check_multiple_attrs(test_dict, parent):
-    """Perform multiple hasattr checks on InferenceData objects. It is thought to first check
-    if the parent object contains a given dataset, and then (if present) check the attributes
-    of the dataset.
+    """Perform multiple hasattr checks on InferenceData objects.
+
+    It is thought to first check if the parent object contains a given dataset,
+    and then (if present) check the attributes of the dataset.
 
     Args
     ----
