@@ -1,5 +1,6 @@
 # pylint: disable=wildcard-import
 """Statistical tests and diagnostics for ArviZ."""
+from .stats_utils import *
 from .stats import *
 from .diagnostics import *
 

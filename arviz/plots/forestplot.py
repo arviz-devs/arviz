@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from ..stats import hpd
-from ..stats.diagnostics import _get_ess, _get_split_rhat
+from ..stats.diagnostics import _ess, _rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
 from ..utils import _var_names
@@ -558,7 +558,7 @@ class VarHandler:
             if value.ndim != 2 or value.shape[0] < 2:
                 yield y, None, color
             else:
-                yield y, _get_ess(value), color
+                yield y, _ess(value), color
 
     def r_hat(self):
         """Get rhat data for the variable."""
@@ -567,7 +567,7 @@ class VarHandler:
             if value.ndim != 2 or value.shape[0] < 2:
                 yield y, None, color
             else:
-                yield y, _get_split_rhat(value), color
+                yield y, _rhat(value), color
 
     def y_max(self):
         """Get max y value for the variable."""

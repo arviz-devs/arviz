@@ -12,48 +12,13 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import (
-    effective_sample_size,
-    bulk_effective_sample_size,
-    tail_effective_sample_size,
-    rhat,
-    mcse_mean,
-    mcse_sd,
-    mcse_quantile,
-)
+from .diagnostics import _multichain_statistics, _mc_error, bfmi
+from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
 from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
-
-
-def bfmi(energy):
-    r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
-
-    BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
-    information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
-    information.
-
-    Parameters
-    ----------
-    energy : NumPy array
-        Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
-        after converting a trace or fit to InferenceData, the energy will be in
-        `data.sample_stats.energy`.
-
-    Returns
-    -------
-    z : array
-        The Bayesian fraction of missing information of the model and trace. One element per
-        chain in the trace.
-    """
-    energy_mat = np.atleast_2d(energy)
-    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    den = np.var(energy_mat, axis=1)
-    return num / den
+__all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
 
 
 def compare(
@@ -331,62 +296,6 @@ def hpd(x, credible_interval=0.94, circular=False):
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
     return np.array([hdi_min, hdi_max])
-
-
-def _logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
-    """Stable logsumexp when b >= 0 and b is scalar.
-
-    b_inv overwrites b unless b_inv is None.
-    """
-    # check dimensions for result arrays
-    ary = np.asarray(ary)
-    if ary.dtype.kind == "i":
-        ary = ary.astype(np.float64)
-    dtype = ary.dtype.type
-    shape = ary.shape
-    shape_len = len(shape)
-    if isinstance(axis, Sequence):
-        axis = tuple(axis_i if axis_i >= 0 else shape_len + axis_i for axis_i in axis)
-        agroup = axis
-    else:
-        axis = axis if (axis is None) or (axis >= 0) else shape_len + axis
-        agroup = (axis,)
-    shape_max = (
-        tuple(1 for _ in shape)
-        if axis is None
-        else tuple(1 if i in agroup else d for i, d in enumerate(shape))
-    )
-    # create result arrays
-    if out is None:
-        if not keepdims:
-            out_shape = (
-                tuple()
-                if axis is None
-                else tuple(d for i, d in enumerate(shape) if i not in agroup)
-            )
-        else:
-            out_shape = shape_max
-        out = np.empty(out_shape, dtype=dtype)
-    if b_inv == 0:
-        return np.full_like(out, np.inf, dtype=dtype) if out.shape else np.inf
-    if b_inv is None and b == 0:
-        return np.full_like(out, -np.inf) if out.shape else -np.inf
-    ary_max = np.empty(shape_max, dtype=dtype)
-    # calculations
-    ary.max(axis=axis, keepdims=True, out=ary_max)
-    if copy:
-        ary = ary.copy()
-    ary -= ary_max
-    np.exp(ary, out=ary)
-    ary.sum(axis=axis, keepdims=keepdims, out=out)
-    np.log(out, out=out)
-    if b_inv is not None:
-        ary_max -= np.log(b_inv)
-    elif b:
-        ary_max += np.log(b)
-    out += ary_max.squeeze() if not keepdims else ary_max
-    # transform to scalar if possible
-    return out if out.shape else dtype(out)
 
 
 def loo(data, pointwise=False, reff=None, scale="deviance"):
@@ -804,23 +713,17 @@ def summary(
         )
         metric_names.append("mc error")
 
-        metrics.append(
+        metrics.extend(
             xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval),
+                _make_ufunc(hpd, n_output=2, credible_interval=credible_interval),
                 posterior,
                 input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(2)),
             )
         )
-        metric_names.append("hpd {:g}%".format(100 * alpha / 2))
-
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        metric_names.extend(
+            ("hpd {:g}%".format(100 * alpha / 2), "hpd {:g}%".format(100 * (1 - alpha / 2)))
         )
-        metric_names.append("hpd {:g}%".format(100 * (1 - alpha / 2)))
 
     if include_circ:
         metrics.append(
@@ -850,56 +753,31 @@ def summary(
         )
         metric_names.append("circular mc error")
 
-        metrics.append(
+        metrics.extend(
             xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval, circular=True),
+                _make_ufunc(hpd, n_output=2, credible_interval=credible_interval, circular=True),
                 posterior,
                 input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(2)),
             )
         )
-        metric_names.append("circular hpd {:.2%}".format(alpha / 2))
-
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
+        metric_names.extend(
+            (
+                "circular hpd {:g}%".format(100 * alpha / 2),
+                "circular hpd {:g}%".format(100 * (1 - alpha / 2)),
             )
         )
-        metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
 
     if len(posterior.chain) > 1:
-        metrics.append(effective_sample_size(posterior, var_names=var_names))
-        metric_names.append("ess")
-
-        metrics.append(bulk_effective_sample_size(posterior, var_names=var_names))
-        metric_names.append("bulk_ess")
-
-        metrics.append(tail_effective_sample_size(posterior, var_names=var_names))
-        metric_names.append("tail_ess")
-
-        metrics.append(rhat(posterior, var_names=var_names))
-        metric_names.append("r_hat")
-
-    if mcse is not None:
-        metrics.append(mcse_mean(posterior, var_names=var_names))
-        metric_names.append("mcse_mean")
-
-        metrics.append(mcse_sd(posterior, var_names=var_names))
-        metric_names.append("mcse_sd")
-
-        if isinstance(mcse, dict):
-            mcse = list(mcse.items())
-        for q in mcse:
-            if isinstance(q, (list, tuple, np.ndarray)):
-                key, q = q
-            else:
-                key = "mcse_q{}".format(q)
-            if not (0 < q < 1):
-                _log.warning("mcse quantile values need to be in range of 0 to 1.")
-                continue
-            metrics.append(mcse_quantile(posterior, q, var_names=var_names))
-            metric_names.append(key)
+        metrics.extend(
+            xr.apply_ufunc(
+                _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
+                posterior,
+                input_core_dims=(("chain", "draw"),),
+                output_core_dims=tuple([] for _ in range(5)),
+            )
+        )
+        metric_names.extend(("mcse_mean", "mcse_sd", "bulk_ess", "tail_ess", "r_hat"))
 
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
@@ -933,77 +811,6 @@ def summary(
         return summary_df
     else:
         return summary_df.round(round_to)
-
-
-def _make_ufunc(func, index=Ellipsis, n_output=1, **kwargs):  # noqa: D202
-    """Make ufunc from function."""
-
-    def _ufunc(ary):
-        target = np.empty(ary.shape[:-2])
-        for idx in np.ndindex(target.shape):
-            target[idx] = np.asarray(func(ary[idx].ravel(), **kwargs))[index]
-        return target
-
-    def _multi_ufunc(ary):
-        targets = tuple(np.empty(ary.shape[:-2]) for _ in range(n_output))
-        for idx in np.ndindex(ary.shape[:-2]):
-            results = func(ary[idx].ravel(), **kwargs)
-            for i, res in enumerate(results):
-                targets[i][idx] = np.asarray(res)[index]
-        return targets
-
-    if n_output > 1:
-        return _multi_ufunc
-    else:
-        return _ufunc
-
-
-def _mc_error(x, batches=5, circular=False):
-    """Calculate the simulation standard error, accounting for non-independent samples.
-
-    The trace is divided into batches, and the standard deviation of the batch
-    means is calculated.
-
-    Parameters
-    ----------
-    x : Numpy array
-        An array containing MCMC samples
-    batches : integer
-        Number of batches
-    circular : bool
-        Whether to compute the error taking into account `x` is a circular variable
-        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-
-    Returns
-    -------
-    mc_error : float
-        Simulation standard error
-    """
-    if x.ndim > 1:
-
-        dims = np.shape(x)
-        trace = np.transpose([t.ravel() for t in x])
-
-        return np.reshape([_mc_error(t, batches) for t in trace], dims[1:])
-
-    else:
-        if batches == 1:
-            if circular:
-                std = st.circstd(x, high=np.pi, low=-np.pi)
-            else:
-                std = np.std(x)
-            return std / np.sqrt(len(x))
-
-        batched_traces = np.resize(x, (batches, int(len(x) / batches)))
-
-        if circular:
-            means = st.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
-            std = st.circstd(means, high=np.pi, low=-np.pi)
-        else:
-            means = np.mean(batched_traces, 1)
-            std = np.std(means)
-
-        return std / np.sqrt(batches)
 
 
 def waic(data, pointwise=False, scale="deviance"):
