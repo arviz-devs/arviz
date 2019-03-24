@@ -73,7 +73,7 @@ def _autocov(x):
     return acov
 
 
-def bfmi(energy):
+def bfmi(data):
     r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
 
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
@@ -84,10 +84,10 @@ def bfmi(energy):
 
     Parameters
     ----------
-    energy : NumPy array
-        Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
-        after converting a trace or fit to InferenceData, the energy will be in
-        `data.sample_stats.energy`.
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+        If InferenceData, energy variable needs to be found.
 
     Returns
     -------
@@ -95,10 +95,13 @@ def bfmi(energy):
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
     """
-    energy_mat = np.atleast_2d(energy)
-    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    den = np.var(energy_mat, axis=1)
-    return num / den
+    if isinstance(data, np.ndarray):
+        return _bfmi(data)
+
+    dataset = convert_to_dataset(data)
+    if (not hasattr(dataset, "sample_stats")) or (not hasattr(dataset.sample_stats, "energy")):
+        raise TypeError("Energy variable was not found.")
+    return _bfmi(dataset.sample_stats.energy)
 
 
 def effective_sample_size(data, *, var_names=None):
@@ -455,6 +458,34 @@ def ks_summary(pareto_tail_indices):
         warnings.warn("All Pareto k estimates are ok (k < 0.7)")
 
     return df_k
+
+
+def _bfmi(energy):
+    r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
+
+    BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
+    information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
+    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
+    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
+    information.
+
+    Parameters
+    ----------
+    energy : NumPy array
+        Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
+        after converting a trace or fit to InferenceData, the energy will be in
+        `data.sample_stats.energy`.
+
+    Returns
+    -------
+    z : array
+        The Bayesian fraction of missing information of the model and trace. One element per
+        chain in the trace.
+    """
+    energy_mat = np.atleast_2d(energy)
+    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
+    den = np.var(energy_mat, axis=1)
+    return num / den
 
 
 def _z_scale(ary):
