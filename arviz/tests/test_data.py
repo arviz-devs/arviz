@@ -525,7 +525,7 @@ class TestDictIONetCDFUtils:
             "posterior_predictive": [],
             "prior_predictive": [],
             "sample_stats_prior": [],
-            "observed_data": [],
+            "observed_data": ["J", "y", "sigma"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -760,7 +760,7 @@ class TestPyMC3NetCDFUtils:
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
         inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["x"], "observed_data": ["y1", "y2"]}
+        test_dict = {"posterior": ["x"], "observed_data": ["y1", "y2"], "sample_stats": ["lp"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
@@ -942,7 +942,7 @@ class TestPyStanNetCDFUtils:
             model = StanModel(model_code=model_code)
             fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
             posterior = from_pystan(posterior=fit)
-            test_dict = {"posterior": ["y", "z"]}
+            test_dict = {"posterior": ["y"], "sample_stats": ["lp"]}
             fails = check_multiple_attrs(test_dict, posterior)
             assert not fails
 
@@ -1316,12 +1316,12 @@ class TestCmdStanNetCDFUtils:
                 dims={"x": ["rand"]},
             )
             test_dict = {
-                "posterior": [],
-                "prior": [],
-                "prior_predictive": [],
-                "sample_stats": [],
-                "sample_stats_prior": [],
-                "posterior_predictive": [],
+                "posterior": ["x", "y", "Z"],
+                "prior": ["x", "y", "Z"],
+                "prior_predictive": ["x", "y", "Z"],
+                "sample_stats": ["lp"],
+                "sample_stats_prior": ["lp"],
+                "posterior_predictive": ["x", "y", "Z"],
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
@@ -1357,7 +1357,7 @@ class TestCmdStanNetCDFUtils:
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
                 "sample_stats": ["log_likelihood"],
                 "observed_data": ["y"],
-                "sample_stats_prior": [],
+                "sample_stats_prior": ["lp"],
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
