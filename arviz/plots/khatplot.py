@@ -35,9 +35,9 @@ def plot_khat(
     ax : axes
       Matplotlib axes.
 
-    Examples
-    --------
-    Plot default khat plot
+    Example
+    -------
+    Plot a default khat plot
 
     .. plot::
         :context: close-figs

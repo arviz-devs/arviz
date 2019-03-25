@@ -262,10 +262,26 @@ def test_loo_warning(centered_eight):
 
 
 def test_psislw():
+    np.random.seed(8)
     linewidth = np.random.randn(20000, 10)
     _, khats = psislw(linewidth)
     assert_array_less(khats, 0.5)
     assert khats.shape == (10,)
+    assert_almost_equal(
+        khats,
+        [
+            -0.9334782,
+            -0.93416902,
+            -0.91989532,
+            -1.00188605,
+            -0.97431781,
+            -0.86096162,
+            -0.8843592,
+            -0.90717741,
+            -0.93403207,
+            -0.83310005,
+        ],
+    )
 
 
 @pytest.mark.parametrize("size", [100, 101])
