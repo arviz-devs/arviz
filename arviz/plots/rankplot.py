@@ -1,3 +1,4 @@
+"""Histograms of ranked posterior draws, plotted for each chain."""
 import numpy as np
 import scipy.stats
 
@@ -34,16 +35,7 @@ def _sturges_formula(dataset, mult=1):
     return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
 
 
-def plot_rank(
-    data,
-    var_names=None,
-    coords=None,
-    bins=None,
-    ref_line=True,
-    mean_centered=False,
-    figsize=None,
-    axes=None,
-):
+def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsize=None, axes=None):
     """Plot rank order statistics of chains.
 
     From the paper: Rank plots are histograms of the ranked posterior
@@ -77,9 +69,6 @@ def plot_rank(
     ref_line : boolean
         Whether to include a dashed line showing where a uniform
         distribution would lie
-    mean_centered : boolean
-        When True, plots a histogram of deviations from the uniform
-        distribution. When False, plots a histogram of counts.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     ax : axes
@@ -108,15 +97,6 @@ def plot_rank(
         >>> import arviz as az
         >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_rank(data, var_names='tau')
-
-    Show a mean centered version of the plot
-
-    .. plot::
-        :context: close-figs
-
-        >>> import arviz as az
-        >>> data = az.load_arviz_data('non_centered_eight')
-        >>> az.plot_rank(data, var_names=['mu', 'tau'], mean_centered=True)
     """
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
@@ -125,7 +105,7 @@ def plot_rank(
     plotters = list(xarray_var_iter(posterior_data, var_names=var_names, combined=True))
 
     if bins is None:
-        # Use double sturges' formula
+        # Use double Sturges' formula
         bins = _sturges_formula(posterior_data, mult=2)
 
     if axes is None:
@@ -152,26 +132,19 @@ def plot_rank(
         y_ticks = []
         for idx, counts in enumerate(all_counts):
             y_ticks.append(idx * gap)
-            if ref_line and not mean_centered:
+            if ref_line:
                 # Line where data is uniform
                 ax.axhline(y=y_ticks[-1] + counts.mean(), linestyle="--", color="C1")
             # fake an x-axis
             ax.axhline(y=y_ticks[-1], color="k", lw=1)
-            ax_color = ax.get_facecolor()
-            if mean_centered:
-                heights = counts - counts.mean()
-                color = [f"C{abs(j - 1)}" for j in (heights > 0).astype(int)]
-            else:
-                heights = counts
-                color = "C0"
             ax.bar(
                 bin_ary,
-                heights,
+                counts,
                 bottom=y_ticks[-1],
                 width=width,
                 align="center",
-                color=color,
-                edgecolor=ax_color,
+                color="C0",
+                edgecolor=ax.get_facecolor(),
             )
         ax.set_xlabel("Rank (all chains)", fontsize=ax_labelsize)
         ax.set_ylabel("Chain", fontsize=ax_labelsize)
