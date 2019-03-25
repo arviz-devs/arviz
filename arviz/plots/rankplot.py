@@ -44,7 +44,80 @@ def plot_rank(
     figsize=None,
     axes=None,
 ):
+    """Plot rank order statistics of chains.
 
+    From the paper: Rank plots are histograms of the ranked posterior
+    draws (ranked over all chains) plotted separately for each chain.
+    If all of the chains are targeting the same posterior, we expect
+    the ranks in each chain to be uniform, whereas if one chain has a
+    different location or scale parameter, this will be reflected in
+    the deviation from uniformity. If rank plots of all chains look
+    similar, this indicates good mixing of the chains.
+
+    This plot was introduced by Aki Vehtari, Andrew Gelman, Daniel
+    Simpson, Bob Carpenter, Paul-Christian Burkner (2019):
+    Rank-normalization, folding, and localization: An improved R-hat
+    for assessing convergence of MCMC.
+    arXiv preprint https://arxiv.org/abs/1903.08008
+
+
+    Parameters
+    ----------
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+    var_names : string or list of variable names
+        Variables to be plotted
+    coords : mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    bins : None or passed to np.histogram
+        Binning strategy used for histogram. By default uses twice the
+        result of Sturges' formula. See `np.histogram` documenation for
+        other available arguments.
+    ref_line : boolean
+        Whether to include a dashed line showing where a uniform
+        distribution would lie
+    mean_centered : boolean
+        When True, plots a histogram of deviations from the uniform
+        distribution. When False, plots a histogram of counts.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
+    ax : axes
+        Matplotlib axes. Defaults to None.
+
+    Returns
+    -------
+    ax : matplotlib axes
+
+    Examples
+    --------
+    Show a default rank plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_rank(data)
+
+    Recreate Figure 13 from the arxiv preprint
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_rank(data, var_names='tau')
+
+    Show a mean centered version of the plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('non_centered_eight')
+        >>> az.plot_rank(data, var_names=['mu', 'tau'], mean_centered=True)
+    """
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)
