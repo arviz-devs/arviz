@@ -34,7 +34,16 @@ def _sturges_formula(dataset, mult=1):
     return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
 
 
-def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsize=None, axes=None):
+def plot_rank(
+    data,
+    var_names=None,
+    coords=None,
+    bins=None,
+    ref_line=True,
+    mean_centered=False,
+    figsize=None,
+    axes=None,
+):
 
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
@@ -64,25 +73,31 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         gap = all_counts.max() * 1.05
         width = bin_ary[1] - bin_ary[0]
 
-        y_ticks = []
-
         # Center the bins
         bin_ary = (bin_ary[1:] + bin_ary[:-1]) / 2
+
+        y_ticks = []
         for idx, counts in enumerate(all_counts):
             y_ticks.append(idx * gap)
-            if ref_line:
+            if ref_line and not mean_centered:
                 # Line where data is uniform
                 ax.axhline(y=y_ticks[-1] + counts.mean(), linestyle="--", color="C1")
             # fake an x-axis
-            ax.axhline(y=y_ticks[-1], color="k")
+            ax.axhline(y=y_ticks[-1], color="k", lw=1)
             ax_color = ax.get_facecolor()
+            if mean_centered:
+                heights = counts - counts.mean()
+                color = [f"C{abs(j - 1)}" for j in (heights > 0).astype(int)]
+            else:
+                heights = counts
+                color = "C0"
             ax.bar(
                 bin_ary,
-                counts,
+                heights,
                 bottom=y_ticks[-1],
                 width=width,
                 align="center",
-                color="C0",
+                color=color,
                 edgecolor=ax_color,
             )
         ax.set_xlabel("Rank (all chains)", fontsize=ax_labelsize)
