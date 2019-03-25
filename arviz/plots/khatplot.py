@@ -34,6 +34,23 @@ def plot_khat(
     -------
     ax : axes
       Matplotlib axes.
+
+    Examples
+    --------
+    Plot default khat plot
+
+    .. plot::
+        :context: close-figs
+
+    >>> import arviz as az
+    >>> centered_eight = az.load_arviz_data('centered_eight')
+    >>> log_likelihood = centered_eight.sample_stats.log_likelihood
+    >>> n_samples = log_likelihood.chain.size * log_likelihood.draw.size
+    >>> new_shape = (n_samples,) + log_likelihood.shape[2:]
+    >>> log_likelihood = log_likelihood.values.reshape(new_shape)
+    >>> khat = az.psislw(-log_likelihood, 1)[1] # Calculating Pareto's Tail Indices.
+    >>> az.plot_khat(khat, figsize=(6, 6))
+
     """
     if hlines_kwargs is None:
         hlines_kwargs = {}

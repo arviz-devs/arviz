@@ -265,6 +265,7 @@ def test_psislw():
     linewidth = np.random.randn(20000, 10)
     _, khats = psislw(linewidth)
     assert_array_less(khats, 0.5)
+    assert khats.shape == (10,)
 
 
 @pytest.mark.parametrize("size", [100, 101])
