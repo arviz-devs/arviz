@@ -12,7 +12,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import _multichain_statistics, _mc_error, bfmi
+from .diagnostics import _multichain_statistics, _mc_error, bfmi, effective_sample_size_mean
 from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
 from ..utils import _var_names
 
@@ -360,7 +360,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         if n_chains == 1:
             reff = 1.0
         else:
-            ess = effective_sample_size(posterior)
+            ess = effective_sample_size_mean(posterior)
             # this mean is over all data variables
             reff = np.hstack([ess[v].values.flatten() for v in ess.data_vars]).mean() / n_samples
 
@@ -460,9 +460,9 @@ def psislw(log_weights, reff=1.0):
                 # compute ordered statistic for the fit
                 sti = np.arange(0.5, tail_len) / tail_len
                 smoothed_tail = _gpinv(sti, k, sigma)
-                smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
+                smoothed_tail = np.log(
                     smoothed_tail + expxcutoff
-                )
+                )  # pylint: disable=assignment-from-no-return
                 # place the smoothed tail into the output array
                 x[tailinds[x_tail_si]] = smoothed_tail
                 # truncate smoothed values to the largest raw weight 0
@@ -541,9 +541,9 @@ def _gpinv(probs, kappa, sigma):
         if np.abs(kappa) < np.finfo(float).eps:
             x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation, E1130
         else:
-            x[ok] = (  # pylint: disable=unsupported-assignment-operation
+            x[ok] = (
                 np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
-            )
+            )  # pylint: disable=unsupported-assignment-operation
         x *= sigma
         x[probs == 0] = 0
         if kappa >= 0:
@@ -592,7 +592,7 @@ def summary(
     extend=True,
     credible_interval=0.94,
     order="C",
-    mcse=None,
+    index_origin=0,
 ):
     """Create a data frame with summary statistics.
 
@@ -623,20 +623,17 @@ def summary(
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
         None.
-    mcse : list, dict
-        If given returns mcse_mean, mcse_sd and mcse_quantiles for list values.
-        Can contain either a list of quantile values (0-1) or
-        key, quantile pairs dict.
-        e.g. [0.01, 0.99] --> "mcse_q0.01", "mcse_q0.99"
-        e.g. {"mcse_q001" : 0.01, "mcse_q099" : 0.99} --> "mcse_q001", "mcse_q099"
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
+    index_origin : int
+        If fmt is "wide, select n-based indexing for multivariate parameters. Defaults to 0.
 
     Returns
     -------
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
-        `hpd_3%`, `hpd_97%`, `mc_error`, `ess` and `r_hat`. `ess` and `r_hat` are only computed
+        `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat`.
+        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat` are only computed
         for traces with 2 or more chains.
 
     Examples
@@ -644,11 +641,12 @@ def summary(
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-               mean    sd  mc_error  hpd_3  hpd_97  ess   bulk_ess  tail_ess   r_hat
-        mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0    1.00
-        mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0    1.00
+               mean    sd  hpd_3  hpd_97  ess_bulk  ess_tail   r_hat
+        mu[0]  0.10  0.06  -0.02    0.23     487.0              1.00
+        mu[1] -0.04  0.06   0.00   -0.17     379.0              1.00
 
-    Other statistics can be calculated by passing a list of functions.
+    Other statistics can be calculated by passing a list of functions
+    or a dictionary with key, function pairs.
 
     .. code:: ipython
 
@@ -659,7 +657,7 @@ def summary(
         >>> def trace_quantiles(x):
         ...     return pd.DataFrame(pd.quantiles(x, [5, 50, 95]))
         ...
-        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
+        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles], extend=False)
                  sd     5    50    95
         mu[0]  0.06  0.00  0.10  0.21
         mu[1]  0.07 -0.16 -0.04  0.06
@@ -680,105 +678,129 @@ def summary(
 
     alpha = 1 - credible_interval
 
-    metrics = []
-    metric_names = []
+    extra_metrics = []
+    extra_metric_names = []
 
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():
-                metrics.append(
+                extra_metrics.append(
                     xr.apply_ufunc(
                         _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                     )
                 )
-                metric_names.append(stat_func_name)
+                extra_metric_names.append(stat_func_name)
         else:
             for stat_func in stat_funcs:
-                metrics.append(
+                extra_metrics.append(
                     xr.apply_ufunc(
                         _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                     )
                 )
-                metric_names.append(stat_func.__name__)
+                extra_metric_names.append(stat_func.__name__)
 
     if extend:
-        metrics.append(posterior.mean(dim=("chain", "draw")))
-        metric_names.append("mean")
+        mean = posterior.mean(dim=("chain", "draw"))
 
-        metrics.append(posterior.std(dim=("chain", "draw")))
-        metric_names.append("sd")
+        sd = posterior.std(dim=("chain", "draw"))
 
-        metrics.append(
-            xr.apply_ufunc(_make_ufunc(_mc_error), posterior, input_core_dims=(("chain", "draw"),))
-        )
-        metric_names.append("mc error")
-
-        metrics.extend(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, n_output=2, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-                output_core_dims=tuple([] for _ in range(2)),
-            )
-        )
-        metric_names.extend(
-            ("hpd {:g}%".format(100 * alpha / 2), "hpd {:g}%".format(100 * (1 - alpha / 2)))
+        hpd_lower, hpd_higher = xr.apply_ufunc(
+            _make_ufunc(hpd, n_output=2, credible_interval=credible_interval),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(2)),
         )
 
     if include_circ:
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_mean = xr.apply_ufunc(
+            _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
         )
-        metric_names.append("circular mean")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_sd = xr.apply_ufunc(
+            _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
         )
-        metric_names.append("circular standard deviation")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(_mc_error, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_mcse = xr.apply_ufunc(
+            _make_ufunc(_mc_error, circular=True), posterior, input_core_dims=(("chain", "draw"),)
         )
-        metric_names.append("circular mc error")
 
-        metrics.extend(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, n_output=2, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-                output_core_dims=tuple([] for _ in range(2)),
-            )
-        )
-        metric_names.extend(
-            (
-                "circular hpd {:g}%".format(100 * alpha / 2),
-                "circular hpd {:g}%".format(100 * (1 - alpha / 2)),
-            )
+        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
+            _make_ufunc(hpd, n_output=2, credible_interval=credible_interval, circular=True),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(2)),
         )
 
     if len(posterior.chain) > 1:
-        metrics.extend(
-            xr.apply_ufunc(
-                _make_ufunc(_multichain_statistics, n_output=5, ravel=False),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-                output_core_dims=tuple([] for _ in range(5)),
+        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(7)),
+        )
+
+    # Combine metrics
+    metrics = []
+    metric_names = []
+    if extend:
+        if len(posterior.chain) > 1:
+            metrics.extend(
+                (
+                    mean,
+                    sd,
+                    mcse_mean,
+                    mcse_sd,
+                    hpd_lower,
+                    hpd_higher,
+                    ess_mean,
+                    ess_sd,
+                    ess_bulk,
+                    ess_tail,
+                    r_hat,
+                )
+            )
+            metric_names.extend(
+                (
+                    "mean",
+                    "sd",
+                    "mcse_mean",
+                    "mcse_sd",
+                    "hpd_{:g}%".format(100 * alpha / 2),
+                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                    "ess_mean",
+                    "ess_sd",
+                    "ess_bulk",
+                    "ess_tail",
+                    "r_hat",
+                )
+            )
+        else:
+            metrics.extend((mean, sd, hpd_lower, hpd_higher))
+            metric_names.extend(
+                (
+                    "mean",
+                    "sd",
+                    "hpd_{:g}%".format(100 * alpha / 2),
+                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                )
+            )
+    if include_circ:
+        metrics.extend((circ_mean, circ_sd, circ_mcse, circ_hpd_lower, circ_hpd_higher))
+        metric_names.extend(
+            (
+                "circular_mean",
+                "circular_sd",
+                "circular_mcse",
+                "circular_hpd_{:g}%".format(100 * alpha / 2),
+                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
             )
         )
-        metric_names.extend(("mcse_mean", "mcse_sd", "bulk_ess", "tail_ess", "r_hat"))
-
+    metrics.extend(extra_metrics)
+    metrics.extend(extra_metric_names)
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
     if fmt.lower() == "wide":
@@ -791,7 +813,8 @@ def summary(
                     if order == "F":
                         idx = tuple(idx[::-1])
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
-                    key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
+                    key_index = ",".join(map(str, (i + index_origin for i in idx)))
+                    key = "{}[{}]".format(var_name, key_index)
                     data_dict[key] = ser
                 df = pd.DataFrame.from_dict(data_dict, orient="index")
                 df = df.loc[list(data_dict.keys())]
@@ -807,10 +830,9 @@ def summary(
         summary_df = df
     else:
         summary_df = joined
-    if round_to is None:
-        return summary_df
-    else:
-        return summary_df.round(round_to)
+    if round_to is not None:
+        summary_df = summary_df.round(round_to)
+    return summary_df
 
 
 def waic(data, pointwise=False, scale="deviance"):

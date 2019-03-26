@@ -1,13 +1,25 @@
 """Test Diagnostic methods"""
 # pylint: disable=redefined-outer-name, no-member
+import inspect
 import numpy as np
 import pytest
 
 from ..data import load_arviz_data
-from ..stats import rhat, effective_sample_size, geweke
-from ..stats.diagnostics import ks_summary
+from ..stats import (
+    rhat,
+    effective_sample_size_mean,
+    effective_sample_size_sd,
+    effective_sample_size_bulk,
+    effective_sample_size_tail,
+    effective_sample_size_quantile,
+    mcse_mean,
+    mcse_sd,
+    mcse_quantile,
+    geweke,
+)
+from ..stats.diagnostics import mcse_mean_sd, ks_summary, _multichain_statistics
 
-
+# For tests only, recommended value should be closer to 1.01
 GOOD_RHAT = 1.1
 
 
@@ -31,7 +43,8 @@ class TestDiagnostics:
             assert list(rhat_data.data_vars) == list(data.data_vars)
 
     def test_rhat_bad(self):
-        """Confirm Split R-hat statistic is far from 1 for a small number of samples."""
+        """Confirm rank normalized Split R-hat statistic is
+        far from 1 for a small number of samples."""
         r_hat = rhat(np.vstack([20 + np.random.randn(1, 100), np.random.randn(1, 100)]))
         assert 1 / GOOD_RHAT > r_hat or GOOD_RHAT < r_hat
 
@@ -39,23 +52,118 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             rhat(np.random.randn(3))
 
-    def test_effective_sample_size_array(self):
-        ess_hat = effective_sample_size(np.random.randn(4, 100))
+    @pytest.mark.parametrize(
+        "ess",
+        (
+            effective_sample_size_mean,
+            effective_sample_size_sd,
+            effective_sample_size_bulk,
+            effective_sample_size_tail,
+            effective_sample_size_quantile,
+        ),
+    )
+    def test_effective_sample_size_array(self, ess):
+        parameters = list(inspect(ess).patameters.keys())
+        if "prob" in parameters:
+            ess_hat = ess(np.random.randn(4, 100), prob=0.34)
+        else:
+            ess_hat = ess(np.random.randn(4, 100))
         assert ess_hat > 100
         assert ess_hat < 800
 
-    def test_effective_sample_size_bad_shape(self):
+    @pytest.mark.parametrize(
+        "ess",
+        (
+            effective_sample_size_mean,
+            effective_sample_size_sd,
+            effective_sample_size_bulk,
+            effective_sample_size_tail,
+            effective_sample_size_quantile,
+        ),
+    )
+    def test_effective_sample_size_bad_shape(self, ess):
         with pytest.raises(TypeError):
-            effective_sample_size(np.random.randn(3))
+            parameters = list(inspect(ess).patameters.keys())
+            if "prob" in parameters:
+                effective_sample_size(np.random.randn(3), prob=0.34)
+            else:
+                effective_sample_size(np.random.randn(3))
 
-    def test_effective_sample_size_bad_chains(self):
+    @pytest.mark.parametrize(
+        "ess",
+        (
+            effective_sample_size_mean,
+            effective_sample_size_sd,
+            effective_sample_size_bulk,
+            effective_sample_size_tail,
+            effective_sample_size_quantile,
+        ),
+    )
+    def test_effective_sample_size_bad_chains(self, ess):
         with pytest.raises(TypeError):
-            effective_sample_size(np.random.randn(1, 3))
+            parameters = list(inspect(ess).patameters.keys())
+            if "prob" in parameters:
+                effective_sample_size(np.random.randn(1, 3), prob=0.34)
+            else:
+                effective_sample_size(np.random.randn(1, 3))
 
+    @pytest.mark.parametrize(
+        "ess",
+        (
+            effective_sample_size_mean,
+            effective_sample_size_sd,
+            effective_sample_size_bulk,
+            effective_sample_size_tail,
+            effective_sample_size_quantile,
+        ),
+    )
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_effective_sample_size_dataset(self, data, var_names):
-        ess_hat = effective_sample_size(data, var_names=var_names)
+    def test_effective_sample_size_dataset(self, data, ess, var_names):
+        parameters = list(inspect(ess).patameters.keys())
+        if "prob" in parameters:
+            ess_hat = ess(data, var_names=var_names, prob=0.34)
+        else:
+            ess_hat = ess(data, var_names=var_names)
         assert ess_hat.mu > 100  # This might break if the data is regenerated
+
+    @pytest.mark.parametrize("mcse", (mcse_mean, mcse_sd, mcse_quantile))
+    def test_mcse_array(self, mcse):
+        parameters = list(inspect(ess).patameters.keys())
+        if "prob" in parameters:
+            mcse_hat = mcse(np.random.randn(4, 100), prob=0.34)
+        else:
+            mcse_hat = mcse(np.random.randn(4, 100))
+        assert mcse_hat
+
+    def test_summary_array(self):
+        ary = np.random.randn(4, 100)
+        mcse_mean = mcse_mean(ary, prob=0.34)
+        mcse_sd = _mcse_sd(ary)
+        ess_mean = _ess_mean(ary)
+        ess_sd = _ess_sd(ary)
+        ess_bulk = _ess_bulk(ary)
+        ess_tail = _ess_tail(ary)
+        rhat = _rhat_rank_normalized(ary)
+        mcse_mean_, mcse_sd_, ess_mean_, ess_sd_, ess_bulk_, ess_tail_, rhat_ = _multichain_statistics(
+            ary
+        )
+        assert mcse_mean == mcse_mean_
+        assert mcse_sd == mcse_sd_
+        assert ess_mean == ess_mean_
+        assert ess_sd == ess_sd_
+        assert ess_bulk == ess_bulk_
+        assert ess_tail == ess_tail_
+        assert rhat == rhat_
+
+    @pytest.mark.parametrize("mcse", (mcse_mean, mcse_sd, mcse_quantile))
+    @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+    def test_mcse_dataset(self, data, mcse, var_names):
+        parameters = list(inspect(ess).patameters.keys())
+        if "prob" in parameters:
+            mcse_hat = mcse(data, var_names=var_names, prob=0.34)
+        else:
+            mcse_hat = mcse(data, var_names=var_names)
+        assert mcse_hat  # This might break if the data is regenerated
 
     def test_geweke(self):
         first = 0.1
