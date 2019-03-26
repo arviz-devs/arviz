@@ -28,7 +28,7 @@ from ..plots import (
     plot_khat,
     plot_hpd,
     plot_dist,
-    plot_rank
+    plot_rank,
 )
 
 np.random.seed(0)
@@ -615,10 +615,9 @@ def test_plot_autocorr_var_names(models, var_names):
     [
         {},
         {"var_names": "mu"},
-        {"var_names": ("mu", "tau"),
-            "coords": {"theta_dim_0": [0, 1]}},
-        {"var_names": "mu", 'ref_line': True},
-        {"var_names": "mu", 'ref_line': False},
+        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": "mu", "ref_line": True},
+        {"var_names": "mu", "ref_line": False},
     ],
 )
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
@@ -626,6 +625,7 @@ def test_plot_rank(models, model_fit, kwargs):
     obj = getattr(models, model_fit)
     axes = plot_rank(obj, **kwargs)
     assert axes.shape
+
 
 @pytest.mark.parametrize(
     "kwargs",
