@@ -42,14 +42,10 @@ def plot_khat(
     .. plot::
         :context: close-figs
 
-    >>> import arviz as az
-    >>> centered_eight = az.load_arviz_data('centered_eight')
-    >>> log_likelihood = centered_eight.sample_stats.log_likelihood
-    >>> n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    >>> new_shape = (n_samples,) + log_likelihood.shape[2:]
-    >>> log_likelihood = log_likelihood.values.reshape(new_shape)
-    >>> khat = az.psislw(-log_likelihood, 1)[1] # Calculating Pareto's Tail Indices.
-    >>> az.plot_khat(khat, figsize=(6, 6))
+        >>> import arviz as az
+        >>> centered_eight = az.load_arviz_data('centered_eight')
+        >>> pareto_k = az.loo(centered_eight, pointwise=True)['pareto_k']
+        >>> az.plot_khat(pareto_k)
 
     """
     if hlines_kwargs is None:
