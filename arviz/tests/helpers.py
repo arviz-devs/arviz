@@ -38,6 +38,37 @@ def eight_schools_params():
     }
 
 
+def check_multiple_attrs(test_dict, parent):
+    """Perform multiple hasattr checks on InferenceData objects.
+
+    It is thought to first check if the parent object contains a given dataset,
+    and then (if present) check the attributes of the dataset.
+
+    Args
+    ----
+    test_dict: dict
+        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`
+    parent: InferenceData
+        InferenceData object on which to check the attributes.
+
+    Returns
+    -------
+    list
+        List containing the failed checks. It will contain either the dataset_name or a
+        tuple (dataset_name, var) for all non present attributes.
+    """
+    failed_attrs = []
+    for dataset_name, attributes in test_dict.items():
+        if hasattr(parent, dataset_name):
+            dataset = getattr(parent, dataset_name)
+            for attribute in attributes:
+                if not hasattr(dataset, attribute):
+                    failed_attrs.append((dataset_name, attribute))
+        else:
+            failed_attrs.append(dataset_name)
+    return failed_attrs
+
+
 def emcee_version():
     """Check emcee version.
 
