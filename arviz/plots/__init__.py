@@ -15,6 +15,7 @@ from .ppcplot import plot_ppc
 from .violinplot import plot_violin
 from .hpdplot import plot_hpd
 from .distplot import plot_dist
+from .rankplot import plot_rank
 
 
 __all__ = [
@@ -36,4 +37,5 @@ __all__ = [
     "plot_violin",
     "plot_hpd",
     "plot_dist",
+    "plot_rank",
 ]
