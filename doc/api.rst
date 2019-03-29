@@ -36,14 +36,13 @@ Stats
 .. autosummary::
     :toctree: generated/
 
-    bfmi
     compare
     hpd
     loo
+    psislw
     r2_score
     summary
     waic
-    psislw
 
 .. _diagnostics_api:
 
@@ -53,10 +52,28 @@ Diagnostics
 .. autosummary::
     :toctree: generated/
 
-    effective_sample_size
-    rhat
+    bfmi
     geweke
+    effective_sample_size_mean
+    effective_sample_size_sd
+    effective_sample_size_bulk
+    effective_sample_size_tail
+    effective_sample_size_quantile
+    rhat
+    msce_mean
+    msce_sd
+    msce_quantile
+
+.. _stats_utils_api:
+
+Stats utils
+-----------
+
+.. autosummary::
+    :toctree: generated/
+
     autocorr
+    make_ufunc
 
 Data
 ----

@@ -1,4 +1,5 @@
-"""Stats-utility functions for ArviZ"""
+"""Stats-utility functions for ArviZ."""
+from collections.abc import Sequence
 import warnings
 
 import numpy as np
@@ -9,55 +10,53 @@ from scipy.stats.mstats import mquantiles
 __all__ = ["autocorr", "make_ufunc"]
 
 
-def autocorr(x):
+def autocorr(ary):
     """Compute autocorrelation using FFT for every lag for the input array.
 
     See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
 
     Parameters
     ----------
-    x : Numpy array
+    ary : Numpy array
         An array containing MCMC samples
 
     Returns
     -------
     acorr: Numpy array same size as the input array
     """
-    y = x - x.mean()
-    len_y = len(y)
+    ary = ary - ary.mean()
+    n = len(ary)
     with warnings.catch_warnings():
         # silence annoying numpy tuple warning in another library
         # silence hack added in 0.3.3+
         warnings.simplefilter("ignore")
-        result = fftconvolve(y, y[::-1])
+        result = fftconvolve(ary, ary[::-1])
     acorr = result[len(result) // 2 :]
-    acorr /= np.arange(len_y, 0, -1)
+    acorr /= np.arange(n, 0, -1)
     with np.errstate(invalid="ignore"):
         acorr /= acorr[0]
     return acorr
 
 
-def _autocov(x):
+def _autocov(ary):
     """Compute autocovariance estimates for every lag for the input array.
 
     Parameters
     ----------
-    x : Numpy array
+    ary : Numpy array
         An array containing MCMC samples
 
     Returns
     -------
     acov: Numpy array same size as the input array
     """
-    acorr = autocorr(x)
-    varx = np.var(x, ddof=0)
+    acorr = autocorr(ary)
+    varx = np.var(ary, ddof=0)
     acov = acorr * varx
     return acov
 
 
-def make_ufunc(
-    func, n_dims=2, n_output=1, index=Ellipsis, ravel=True, args=None, **kwargs
-):  # noqa: D202
+def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa: D202
     """Make ufunc from a function taking 1D array input.
 
     Parameters
@@ -73,10 +72,6 @@ def make_ufunc(
         Slice ndarray with `index`. Defaults to `Ellipsis`.
     ravel : bool, optional
         If true, ravel the ndarray before calling `func`.
-    args : tuple, optional
-        Arguments for `func`.
-    **kwargs
-        Other parameters are inserted to `func`.
 
     Returns
     -------
@@ -86,12 +81,7 @@ def make_ufunc(
     if n_dims < 1:
         raise TypeError("n_dims must be one or higher.")
 
-    if args is None:
-        args = tuple()
-    if not isinstance(args, tuple):
-        raise TypeError("`args` needs to be tuple.")
-
-    def _ufunc(ary, out=None):
+    def _ufunc(ary, *args, out=None, **kwargs):
         """General ufunc for single-output function."""
         if out is None:
             out = np.empty(ary.shape[:-n_dims])
@@ -105,7 +95,7 @@ def make_ufunc(
             out[idx] = np.asarray(func(ary_idx, *args, **kwargs))[index]
         return out
 
-    def _multi_ufunc(ary, out=None):
+    def _multi_ufunc(ary, *args, out=None, **kwargs):
         """General ufunc for multi-output function."""
         element_shape = ary.shape[:-n_dims]
         if out is None:
@@ -135,12 +125,11 @@ def make_ufunc(
     else:
         ufunc = _ufunc
 
-    arg_input = len(args) + len(kwargs)
-    update_docstring(ufunc, func, arg_input, n_output)
+    update_docstring(ufunc, func, n_output)
     return ufunc
 
 
-def update_docstring(ufunc, func, arg_input=1, n_output=1):
+def update_docstring(ufunc, func, n_output=1):
     """Update ArviZ generated ufunc docstring."""
     module = ""
     name = ""
@@ -149,16 +138,16 @@ def update_docstring(ufunc, func, arg_input=1, n_output=1):
         module += func.__module__
     if hasattr(func, "__name__"):
         name += func.__name__
-    if hasattr(func, "__doc__"):
+    if hasattr(func, "__doc__") and isinstance(func.__doc__, str):
         docstring += func.__doc__
     ufunc.__doc__ += "\n\n"
     if module or name:
         ufunc.__doc__ += "This function is a ufunc wrapper for "
-        ufunc.__doc__ += func.__name__ + "."
+        ufunc.__doc__ += module + "." + name
         ufunc.__doc__ += "\n"
-    ufunc.__doc__ += 'Call ufunc from xarray against "chain" and "draw" dimensions:'
+    ufunc.__doc__ += 'Call ufunc with n_args from xarray against "chain" and "draw" dimensions:'
     ufunc.__doc__ += "\n\n"
-    input_core_dims = "({},)".format(", ".join(['("chain", "draw")'] * (arg_input + 1)))
+    input_core_dims = 'tuple(("chain", "draw") for _ in range(n_args))'
     if n_output > 1:
         output_core_dims = " tuple([] for _ in range({}))".format(n_output)
         msg = "xr.apply_ufunc(ufunc, dataset, input_core_dims={}, output_core_dims={})"
@@ -167,6 +156,8 @@ def update_docstring(ufunc, func, arg_input=1, n_output=1):
         output_core_dims = ""
         msg = "xr.apply_ufunc(ufunc, dataset, input_core_dims={})"
         ufunc.__doc__ += msg.format(input_core_dims)
+    ufunc.__doc__ += "\n\n"
+    ufunc.__doc__ += "For example: np.std(data, ddof=1) --> n_args=2"
     if docstring:
         ufunc.__doc__ += "\n\n"
         ufunc.__doc__ += module
@@ -235,7 +226,7 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
 def _rint(num):
     """Round and change to ingeter."""
     rnum = np.rint(num)
-    return int(num)
+    return int(rnum)
 
 
 def _round(num, decimals):
@@ -252,7 +243,18 @@ def _quantile(ary, q, axis=None, limit=None):
     return mquantiles(ary, q, alphap=1, betap=1, axis=axis, limit=limit)
 
 
+def check_nan(ary, axis=None, how="any"):
+    """Check if ary has NaN values."""
+    isnan = np.isnan(ary)
+    if how.lower() == "any":
+        isnan = isnan.any(axis)
+    elif how.lower() == "all":
+        isnan = isnan.all(axis)
+    return isnan
+
+
 def check_valid_size(ary, msg):
+    """Validate 2D array shape."""
     ary = np.asarray(ary)
     shape = ary.shape
     if len(shape) != 2:

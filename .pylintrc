@@ -250,10 +250,19 @@ good-names=b,
            mu,
            tr,
            ex,
-	   eta,
+	         eta,
            Run,
            _,
-           _log
+           _log,
+           z,
+           I05,
+           I95,
+           q,
+           I,
+           p,
+           a,
+           sd,
+           n
 
 # Include a hint for the correct naming format with invalid-name
 include-naming-hint=no

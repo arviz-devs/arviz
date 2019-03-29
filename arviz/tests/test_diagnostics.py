@@ -2,10 +2,12 @@
 # pylint: disable=redefined-outer-name, no-member
 import inspect
 import numpy as np
+from numpy.testing import assert_almost_equal
 import pytest
 
 from ..data import load_arviz_data
 from ..stats import (
+    bfmi,
     rhat,
     effective_sample_size_mean,
     effective_sample_size_sd,
@@ -17,7 +19,13 @@ from ..stats import (
     mcse_quantile,
     geweke,
 )
-from ..stats.diagnostics import mcse_mean_sd, ks_summary, _multichain_statistics
+from ..stats.diagnostics import (
+    mcse_mean_sd,
+    ks_summary,
+    _multichain_statistics,
+    _mc_error,
+    _rhat_rank_normalized,
+)
 
 # For tests only, recommended value should be closer to 1.01
 GOOD_RHAT = 1.1
@@ -30,10 +38,14 @@ def data():
 
 
 class TestDiagnostics:
+    def test_bfmi(self):
+        energy = np.array([1, 2, 3, 4])
+        assert_almost_equal(bfmi(energy), 0.8)
+
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_rhat(self, data, var_names):
-        """Confirm Split R-hat statistic is close to 1 for a large number of samples.
-        Also checks the correct shape"""
+        """Confirm rank normalized Split R-hat statistic is close to 1 for a large
+        number of samples. Also checks the correct shape"""
         rhat_data = rhat(data, var_names=var_names)
         for r_hat in rhat_data.data_vars.values():
             assert ((1 / GOOD_RHAT < r_hat.values) | (r_hat.values < GOOD_RHAT)).all()
@@ -63,7 +75,7 @@ class TestDiagnostics:
         ),
     )
     def test_effective_sample_size_array(self, ess):
-        parameters = list(inspect(ess).patameters.keys())
+        parameters = list(inspect.signature(ess).parameters.keys())
         if "prob" in parameters:
             ess_hat = ess(np.random.randn(4, 100), prob=0.34)
         else:
@@ -83,11 +95,11 @@ class TestDiagnostics:
     )
     def test_effective_sample_size_bad_shape(self, ess):
         with pytest.raises(TypeError):
-            parameters = list(inspect(ess).patameters.keys())
+            parameters = list(inspect.signature(ess).parameters.keys())
             if "prob" in parameters:
-                effective_sample_size(np.random.randn(3), prob=0.34)
+                ess(np.random.randn(3), prob=0.34)
             else:
-                effective_sample_size(np.random.randn(3))
+                ess(np.random.randn(3))
 
     @pytest.mark.parametrize(
         "ess",
@@ -101,11 +113,11 @@ class TestDiagnostics:
     )
     def test_effective_sample_size_bad_chains(self, ess):
         with pytest.raises(TypeError):
-            parameters = list(inspect(ess).patameters.keys())
+            parameters = list(inspect.signature(ess).parameters.keys())
             if "prob" in parameters:
-                effective_sample_size(np.random.randn(1, 3), prob=0.34)
+                ess(np.random.randn(1, 3), prob=0.34)
             else:
-                effective_sample_size(np.random.randn(1, 3))
+                ess(np.random.randn(1, 3))
 
     @pytest.mark.parametrize(
         "ess",
@@ -119,7 +131,7 @@ class TestDiagnostics:
     )
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_sample_size_dataset(self, data, ess, var_names):
-        parameters = list(inspect(ess).patameters.keys())
+        parameters = list(inspect.signature(ess).parameters.keys())
         if "prob" in parameters:
             ess_hat = ess(data, var_names=var_names, prob=0.34)
         else:
@@ -128,37 +140,53 @@ class TestDiagnostics:
 
     @pytest.mark.parametrize("mcse", (mcse_mean, mcse_sd, mcse_quantile))
     def test_mcse_array(self, mcse):
-        parameters = list(inspect(ess).patameters.keys())
+        parameters = list(inspect.signature(mcse).parameters.keys())
         if "prob" in parameters:
             mcse_hat = mcse(np.random.randn(4, 100), prob=0.34)
         else:
             mcse_hat = mcse(np.random.randn(4, 100))
         assert mcse_hat
 
-    def test_summary_array(self):
+    def test_mcse_mean_sd(self):
         ary = np.random.randn(4, 100)
-        mcse_mean = mcse_mean(ary, prob=0.34)
-        mcse_sd = _mcse_sd(ary)
-        ess_mean = _ess_mean(ary)
-        ess_sd = _ess_sd(ary)
-        ess_bulk = _ess_bulk(ary)
-        ess_tail = _ess_tail(ary)
-        rhat = _rhat_rank_normalized(ary)
-        mcse_mean_, mcse_sd_, ess_mean_, ess_sd_, ess_bulk_, ess_tail_, rhat_ = _multichain_statistics(
-            ary
-        )
-        assert mcse_mean == mcse_mean_
-        assert mcse_sd == mcse_sd_
-        assert ess_mean == ess_mean_
-        assert ess_sd == ess_sd_
-        assert ess_bulk == ess_bulk_
-        assert ess_tail == ess_tail_
-        assert rhat == rhat_
+        mcse_mean_hat = mcse_mean(ary)
+        mcse_sd_hat = mcse_sd(ary)
+
+        mcse_mean_hat_, mcse_sd_hat_ = mcse_mean_sd(ary)
+        assert mcse_mean_hat == mcse_mean_hat_
+        assert mcse_sd_hat == mcse_sd_hat_
+
+    def test_multichain_summary_array(self):
+        """Test multichain statistics against invidual functions."""
+        ary = np.random.randn(4, 100)
+        mcse_mean_hat = mcse_mean(ary)
+        mcse_sd_hat = mcse_sd(ary)
+        ess_mean_hat = effective_sample_size_mean(ary)
+        ess_sd_hat = effective_sample_size_sd(ary)
+        ess_bulk_hat = effective_sample_size_bulk(ary)
+        ess_tail_hat = effective_sample_size_tail(ary)
+        rhat_hat = _rhat_rank_normalized(ary, round_to=None)
+        (
+            mcse_mean_hat_,
+            mcse_sd_hat_,
+            ess_mean_hat_,
+            ess_sd_hat_,
+            ess_bulk_hat_,
+            ess_tail_hat_,
+            rhat_hat_,
+        ) = _multichain_statistics(ary)
+        assert mcse_mean_hat == mcse_mean_hat_
+        assert mcse_sd_hat == mcse_sd_hat_
+        assert ess_mean_hat == ess_mean_hat_
+        assert ess_sd_hat == ess_sd_hat_
+        assert ess_bulk_hat == ess_bulk_hat_
+        assert ess_tail_hat == ess_tail_hat_
+        assert round(rhat_hat, 3) == round(rhat_hat_, 3)
 
     @pytest.mark.parametrize("mcse", (mcse_mean, mcse_sd, mcse_quantile))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_mcse_dataset(self, data, mcse, var_names):
-        parameters = list(inspect(ess).patameters.keys())
+        parameters = list(inspect.signature(mcse).parameters.keys())
         if "prob" in parameters:
             mcse_hat = mcse(data, var_names=var_names, prob=0.34)
         else:
@@ -200,3 +228,11 @@ class TestDiagnostics:
         with pytest.warns(UserWarning):
             summary2 = ks_summary(pareto_tail_indices2)
         assert summary2 is not None
+
+    @pytest.mark.parametrize("size", [100, 101])
+    @pytest.mark.parametrize("batches", [1, 2, 3, 5, 7])
+    @pytest.mark.parametrize("ndim", [1, 2, 3])
+    @pytest.mark.parametrize("circular", [False, True])
+    def test_mc_error(self, size, batches, ndim, circular):
+        x = np.random.randn(size, ndim).squeeze()  # pylint: disable=no-member
+        assert _mc_error(x, batches=batches, circular=circular) is not None
