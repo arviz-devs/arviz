@@ -66,7 +66,7 @@ script:
 after_success:
   - echo $(pwd)
   - ls -la
-  - if [[ $NAME == SPHINX ]]; then "ghp-import -pfnr https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git doc/build ; fi
+  - if [[ $NAME == SPHINX ]]; then ./scripts/deploy_docs.sh ; fi
   - if [[ $NAME == UNIT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
   - if [[ $NAME == UNIT ]]; then coveralls; fi
 
