@@ -262,26 +262,13 @@ def test_loo_warning(centered_eight):
 
 
 def test_psislw():
-    np.random.seed(8)
-    linewidth = np.random.randn(20000, 10)
-    _, khats = psislw(linewidth)
-    assert_array_less(khats, 0.5)
-    assert khats.shape == (10,)
-    assert_almost_equal(
-        khats,
-        [
-            0.16292446,
-            0.2257762,
-            0.17049116,
-            0.28343034,
-            0.2281514,
-            0.28962611,
-            0.18979684,
-            0.28700855,
-            0.27624625,
-            0.20793388,
-        ],
-    )
+    data = load_arviz_data("centered_eight")
+    pareto_k = loo(data, pointwise=True, reff=0.7)["pareto_k"]
+    log_likelihood = data.sample_stats.log_likelihood
+    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
+    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    assert_almost_equal(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
 @pytest.mark.parametrize("size", [100, 101])
