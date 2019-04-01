@@ -4,21 +4,21 @@ language: python
 
 matrix:
   include:
-  - name: "Python 3.6 Unit Test"
-    python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
-  - name: "Python 3.6 Unit Test - PyStan=3 Pyro=0.2.1 Emcee=3"
-    python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 EMCEE_VERSION=3 NAME="UNIT"
-  - name: "Python 3.5 Unit Test"
-    python: 3.5
-    env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
-  - name: "Python 3.6 Lint"
-    python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="LINT"
-  - name: "Python 3.6 Sphinx"
-    python: 3.6
-    env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="SPHINX"
+    - name: "Python 3.6 Unit Test"
+      python: 3.6
+      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+    - name: "Python 3.6 Unit Test - PyStan=3 Pyro=0.2.1 Emcee=3"
+      python: 3.6
+      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=0.2.1 EMCEE_VERSION=3 NAME="UNIT"
+    - name: "Python 3.5 Unit Test"
+      python: 3.5
+      env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+    - name: "Python 3.6 Lint"
+      python: 3.6
+      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="LINT"
+    - name: "Python 3.6 Sphinx"
+      python: 3.6
+      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="SPHINX"
 
 addons:
   apt:
@@ -42,13 +42,12 @@ install:
   # Install packages needed for service integration
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
   - if [[ $NAME == LINT ]]; then pip install coveralls ; fi
-  - if [[ $NAME == SPHINX ]]; then pip install travis-sphinx ; fi
+  - if [[ $NAME == SPHINX ]]; then pip install ghp-import ; fi
 
 script:
-
   # Tests command is default in dockerfile cmd
   - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-                                              "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
+    "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
     fi
 
   - if [[ $NAME == LINT ]]; then docker run arviz:latest bash -c "./scripts/lint.sh";
@@ -56,19 +55,18 @@ script:
 
   # Tests saving plots and deleting files
   - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-                                              "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
+    "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
     fi
-
 
   # Awkward line spacing to avoid travis-ci errors
   - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest bash -c \
-                                              "travis-sphinx build --nowarn --source=doc";
+    "sphinx-build doc doc/build -b html";
     fi
 
 after_success:
   - echo $(pwd)
   - ls -la
-  - if [[ $NAME == SPHINX ]]; then travis-sphinx deploy; fi
+  - if [[ $NAME == SPHINX ]]; then ./scripts/deploy_docs.sh ; fi
   - if [[ $NAME == UNIT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
   - if [[ $NAME == UNIT ]]; then coveralls; fi
 
