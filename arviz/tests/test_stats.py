@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 from copy import deepcopy
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 from scipy.stats import linregress
