@@ -121,6 +121,28 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
+
+    Returns
+    -------
+    InferenceData
+
+    Examples
+    --------
+    Passing an `emcee.EnsembleSampler` directly to `from_emcee` allows to easily plot and calculate
+    statistics.
+
+    .. plot:: usage_examples/from_emcee.py
+        :include-source:
+        :context: close-figs
+
+    ArviZ has no support for the `blobs` functionality yet, but it is easy to create a
+    workaround. It should be noted that emcee chains are **not** independent, thus Arviz's `ess`
+    cannot be used.
+
+    .. plot:: usage_examples/emcee_blobs.py
+        :include-source:
+        :context: close-figs
+
     """
     return EmceeConverter(
         sampler=sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
