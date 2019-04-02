@@ -14,6 +14,21 @@ from ..stats import (
     effective_sample_size_bulk,
     effective_sample_size_tail,
     effective_sample_size_quantile,
+    effective_sample_size_split,
+    effective_sample_size_z_scale,
+    effective_sample_size_split_mad,
+    effective_sample_size_split_folded,
+    effective_sample_size_split_median,
+    relative_effective_sample_size_mean,
+    relative_effective_sample_size_sd,
+    relative_effective_sample_size_bulk,
+    relative_effective_sample_size_tail,
+    relative_effective_sample_size_quantile,
+    relative_effective_sample_size_split,
+    relative_effective_sample_size_z_scale,
+    relative_effective_sample_size_split_mad,
+    relative_effective_sample_size_split_folded,
+    relative_effective_sample_size_split_median,
     mcse_mean,
     mcse_sd,
     mcse_quantile,
@@ -72,6 +87,11 @@ class TestDiagnostics:
             effective_sample_size_bulk,
             effective_sample_size_tail,
             effective_sample_size_quantile,
+            effective_sample_size_split,
+            effective_sample_size_z_scale,
+            effective_sample_size_split_mad,
+            effective_sample_size_split_folded,
+            effective_sample_size_split_median,
         ),
     )
     def test_effective_sample_size_array(self, ess):
@@ -91,6 +111,11 @@ class TestDiagnostics:
             effective_sample_size_bulk,
             effective_sample_size_tail,
             effective_sample_size_quantile,
+            effective_sample_size_split,
+            effective_sample_size_z_scale,
+            effective_sample_size_split_mad,
+            effective_sample_size_split_folded,
+            effective_sample_size_split_median,
         ),
     )
     def test_effective_sample_size_bad_shape(self, ess):
@@ -109,6 +134,11 @@ class TestDiagnostics:
             effective_sample_size_bulk,
             effective_sample_size_tail,
             effective_sample_size_quantile,
+            effective_sample_size_split,
+            effective_sample_size_z_scale,
+            effective_sample_size_split_mad,
+            effective_sample_size_split_folded,
+            effective_sample_size_split_median,
         ),
     )
     def test_effective_sample_size_bad_chains(self, ess):
@@ -127,6 +157,11 @@ class TestDiagnostics:
             effective_sample_size_bulk,
             effective_sample_size_tail,
             effective_sample_size_quantile,
+            effective_sample_size_split,
+            effective_sample_size_z_scale,
+            effective_sample_size_split_mad,
+            effective_sample_size_split_folded,
+            effective_sample_size_split_median,
         ),
     )
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -136,7 +171,102 @@ class TestDiagnostics:
             ess_hat = ess(data, var_names=var_names, prob=0.34)
         else:
             ess_hat = ess(data, var_names=var_names)
-        assert ess_hat.mu > 100  # This might break if the data is regenerated
+        assert np.all(ess_hat.mu.values > 100)  # This might break if the data is regenerated
+
+    @pytest.mark.parametrize(
+        "ress",
+        (
+            relative_effective_sample_size_mean,
+            relative_effective_sample_size_sd,
+            relative_effective_sample_size_bulk,
+            relative_effective_sample_size_tail,
+            relative_effective_sample_size_quantile,
+            relative_effective_sample_size_split,
+            relative_effective_sample_size_z_scale,
+            relative_effective_sample_size_split_mad,
+            relative_effective_sample_size_split_folded,
+            relative_effective_sample_size_split_median,
+        ),
+    )
+    def test_relative_effective_sample_size_array(self, ress):
+        parameters = list(inspect.signature(ress).parameters.keys())
+        if "prob" in parameters:
+            ress_hat = ress(np.random.randn(4, 100), prob=0.34)
+        else:
+            ress_hat = ress(np.random.randn(4, 100))
+        assert ress_hat > 100 / 400
+        assert ress_hat < 800 / 400
+
+    @pytest.mark.parametrize(
+        "ress",
+        (
+            relative_effective_sample_size_mean,
+            relative_effective_sample_size_sd,
+            relative_effective_sample_size_bulk,
+            relative_effective_sample_size_tail,
+            relative_effective_sample_size_quantile,
+            relative_effective_sample_size_split,
+            relative_effective_sample_size_z_scale,
+            relative_effective_sample_size_split_mad,
+            relative_effective_sample_size_split_folded,
+            relative_effective_sample_size_split_median,
+        ),
+    )
+    def test_relative_effective_sample_size_bad_shape(self, ress):
+        with pytest.raises(TypeError):
+            parameters = list(inspect.signature(ress).parameters.keys())
+            if "prob" in parameters:
+                ress(np.random.randn(3), prob=0.34)
+            else:
+                ress(np.random.randn(3))
+
+    @pytest.mark.parametrize(
+        "ress",
+        (
+            relative_effective_sample_size_mean,
+            relative_effective_sample_size_sd,
+            relative_effective_sample_size_bulk,
+            relative_effective_sample_size_tail,
+            relative_effective_sample_size_quantile,
+            relative_effective_sample_size_split,
+            relative_effective_sample_size_z_scale,
+            relative_effective_sample_size_split_mad,
+            relative_effective_sample_size_split_folded,
+            relative_effective_sample_size_split_median,
+        ),
+    )
+    def test_relative_effective_sample_size_bad_chains(self, ress):
+        with pytest.raises(TypeError):
+            parameters = list(inspect.signature(ress).parameters.keys())
+            if "prob" in parameters:
+                ress(np.random.randn(1, 3), prob=0.34)
+            else:
+                ress(np.random.randn(1, 3))
+
+    @pytest.mark.parametrize(
+        "ress",
+        (
+            relative_effective_sample_size_mean,
+            relative_effective_sample_size_sd,
+            relative_effective_sample_size_bulk,
+            relative_effective_sample_size_tail,
+            relative_effective_sample_size_quantile,
+            relative_effective_sample_size_split,
+            relative_effective_sample_size_z_scale,
+            relative_effective_sample_size_split_mad,
+            relative_effective_sample_size_split_folded,
+            relative_effective_sample_size_split_median,
+        ),
+    )
+    @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+    def test_relative_effective_sample_size_dataset(self, data, ress, var_names):
+        parameters = list(inspect.signature(ress).parameters.keys())
+        if "prob" in parameters:
+            ress_hat = ress(data, var_names=var_names, prob=0.34)
+        else:
+            ress_hat = ress(data, var_names=var_names)
+        n = data.chain.size * data.draw.size
+        assert np.all(ress_hat.mu.values > (100 / n))  # This might break if the data is regenerated
 
     @pytest.mark.parametrize("mcse", (mcse_mean, mcse_sd, mcse_quantile))
     def test_mcse_array(self, mcse):
