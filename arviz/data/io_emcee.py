@@ -137,7 +137,8 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
     ArviZ has no support for the `blobs` functionality yet, but it is easy to create a
     workaround. It should be noted that emcee chains are **not** independent, thus Arviz's `ess`
-    cannot be used.
+    cannot be used. Thus, emcee's functions must be used. In this particular case, the functions
+    in emcee3 are more complete and user-friendly.
 
     .. plot:: usage_examples/emcee_blobs.py
         :include-source:

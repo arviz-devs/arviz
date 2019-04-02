@@ -67,6 +67,11 @@ if emcee.__version__[0] == '3':
 else:
     # in emcee2, if the chain is too short, the autocorr_time raises an error and there is
     # no way to avoid that, so to prevent the docs crashing, the ess value is hardcoded.
+    # to calculate the ess, the line below should be changed to:
+    # ess = chain.shape[1] / emcee.autocorr.integrated_time(chain)
+    # In this case `get_autocorr_time` can not be used because it does not take thinning
+    # into account. The numerator must also be modified accordingly (`get_autocorr_time`
+    # returns thin times `integrated_time`)
     ess = (draws-burnin)/30
 reff = np.mean(ess) / (nwalkers * chain.shape[1])
 loo_stats = az.loo(emcee_data, reff=reff, pointwise=True)
