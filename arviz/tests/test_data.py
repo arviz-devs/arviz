@@ -33,6 +33,7 @@ from ..data.base import generate_dims_coords, make_attrs
 from ..data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from .helpers import (  # pylint: disable=unused-import
+    check_multiple_attrs,
     _emcee_lnprior as emcee_lnprior,
     _emcee_lnprob as emcee_lnprob,
     needs_emcee3,
@@ -176,12 +177,9 @@ def test_addition():
     idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
     new_idata = idata1 + idata2
     assert new_idata is not None
-    assert hasattr(new_idata, "posterior")
-    assert hasattr(new_idata, "prior")
-    assert hasattr(new_idata.posterior, "A")
-    assert hasattr(new_idata.posterior, "B")
-    assert hasattr(new_idata.prior, "C")
-    assert hasattr(new_idata.prior, "D")
+    test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
+    fails = check_multiple_attrs(test_dict, new_idata)
+    assert not fails
 
 
 @pytest.mark.parametrize("copy", [True, False])
@@ -205,15 +203,9 @@ def test_concat(copy, inplace, sequence):
         assert new_idata is None
         new_idata = idata1
     assert new_idata is not None
-    assert hasattr(new_idata, "posterior")
-    assert hasattr(new_idata, "prior")
-    assert hasattr(new_idata, "observed_data")
-    assert hasattr(new_idata.posterior, "A")
-    assert hasattr(new_idata.posterior, "B")
-    assert hasattr(new_idata.prior, "C")
-    assert hasattr(new_idata.prior, "D")
-    assert hasattr(new_idata.observed_data, "E")
-    assert hasattr(new_idata.observed_data, "F")
+    test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"], "observed_data": ["E", "F"]}
+    fails = check_multiple_attrs(test_dict, new_idata)
+    assert not fails
     if copy:
         if inplace:
             assert id(new_idata.posterior) == original_idata1_posterior_id
@@ -243,9 +235,9 @@ def test_concat_edgecases(copy, inplace, sequence):
         new_idata = idata
     else:
         assert new_idata is not None
-    assert hasattr(new_idata, "posterior")
-    assert hasattr(new_idata.posterior, "A")
-    assert hasattr(new_idata.posterior, "B")
+    test_dict = {"posterior": ["A", "B"]}
+    fails = check_multiple_attrs(test_dict, new_idata)
+    assert not fails
     if copy and not inplace:
         assert id(new_idata.posterior) != id(idata.posterior)
     else:
@@ -526,13 +518,17 @@ class TestDictIONetCDFUtils:
 
     def test_inference_data(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data, "posterior_predictive")
-        assert hasattr(inference_data, "sample_stats")
-        assert hasattr(inference_data, "prior")
-        assert hasattr(inference_data, "prior_predictive")
-        assert hasattr(inference_data, "sample_stats_prior")
-        assert hasattr(inference_data, "observed_data")
+        test_dict = {
+            "posterior": [],
+            "prior": [],
+            "sample_stats": [],
+            "posterior_predictive": [],
+            "prior_predictive": [],
+            "sample_stats_prior": [],
+            "observed_data": ["J", "y", "sigma"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
         self.check_var_names_coords_dims(inference_data.posterior)
         self.check_var_names_coords_dims(inference_data.posterior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats)
@@ -600,18 +596,16 @@ class TestEmceeNetCDFUtils:
 
     def test_inference_data(self, data):
         inference_data = self.get_inference_data(data)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "ln(f)")
-        assert hasattr(inference_data.posterior, "b")
-        assert hasattr(inference_data.posterior, "m")
+        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     @needs_emcee3
     def test_inference_data_reader(self):
         inference_data = self.get_inference_data_reader()
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "ln(f)")
-        assert hasattr(inference_data.posterior, "b")
-        assert hasattr(inference_data.posterior, "m")
+        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     def test_verify_var_names(self, data):
         with pytest.raises(ValueError):
@@ -753,11 +747,9 @@ class TestPyMC3NetCDFUtils:
         y_missing, = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "x")
-        assert hasattr(inference_data.observed_data, "y")
-        assert hasattr(inference_data, "sample_stats")
-        assert hasattr(inference_data.sample_stats, "log_likelihood")
+        test_dict = {"posterior": ["x"], "observed_data": ["y"], "sample_stats": ["log_likelihood"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     def test_multiple_observed_rv(self):
         y1_data = np.random.randn(10)
@@ -768,11 +760,9 @@ class TestPyMC3NetCDFUtils:
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
         inference_data = from_pymc3(trace=trace)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "x")
-        assert hasattr(inference_data.observed_data, "y1")
-        assert hasattr(inference_data.observed_data, "y2")
-        assert hasattr(inference_data, "sample_stats")
+        test_dict = {"posterior": ["x"], "observed_data": ["y1", "y2"], "sample_stats": ["lp"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
 
@@ -875,9 +865,9 @@ class TestPyStanNetCDFUtils:
 
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "sample_stats")
-        assert hasattr(inference_data.sample_stats, "lp")
-        assert hasattr(inference_data.sample_stats, "diverging")
+        test_dict = {"sample_stats": ["lp", "diverging"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     def test_inference_data(self, data, eight_schools_params):
         inference_data1 = self.get_inference_data(data, eight_schools_params)
@@ -885,25 +875,38 @@ class TestPyStanNetCDFUtils:
         inference_data3 = self.get_inference_data3(data, eight_schools_params)
         inference_data4 = self.get_inference_data4(data)
         # inference_data 1
-        assert hasattr(inference_data1.sample_stats, "log_likelihood")
-        assert hasattr(inference_data1.posterior, "theta")
-        assert hasattr(inference_data1.prior, "theta")
-        assert hasattr(inference_data1.observed_data, "y")
+        test_dict = {
+            "posterior": ["theta"],
+            "observed_data": ["y"],
+            "sample_stats": ["log_likelihood"],
+            "prior": ["theta"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data1)
+        assert not fails
         # inference_data 2
-        assert hasattr(inference_data2.posterior_predictive, "y_hat")
-        assert hasattr(inference_data2.prior_predictive, "y_hat")
-        assert hasattr(inference_data2.sample_stats, "lp")
-        assert hasattr(inference_data2.sample_stats_prior, "lp")
-        assert hasattr(inference_data2.observed_data, "y")
+        test_dict = {
+            "posterior_predictive": ["y_hat"],
+            "observed_data": ["y"],
+            "sample_stats_prior": ["lp"],
+            "sample_stats": ["lp"],
+            "prior_predictive": ["y_hat"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data2)
+        assert not fails
         # inference_data 3
-        assert hasattr(inference_data3.posterior_predictive, "y_hat")
-        assert hasattr(inference_data3.prior_predictive, "y_hat")
-        assert hasattr(inference_data3.sample_stats, "lp")
-        assert hasattr(inference_data3.sample_stats_prior, "lp")
-        assert hasattr(inference_data3.observed_data, "y")
+        test_dict = {
+            "posterior_predictive": ["y_hat"],
+            "observed_data": ["y"],
+            "sample_stats_prior": ["lp"],
+            "sample_stats": ["lp"],
+            "prior_predictive": ["y_hat"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data3)
+        assert not fails
         # inference_data 4
-        assert hasattr(inference_data4.posterior, "theta")
-        assert hasattr(inference_data4.prior, "theta")
+        test_dict = {"posterior": ["theta"], "prior": ["theta"]}
+        fails = check_multiple_attrs(test_dict, inference_data4)
+        assert not fails
 
     def test_invalid_fit(self, data):
         if pystan_version() == 2:
@@ -939,9 +942,9 @@ class TestPyStanNetCDFUtils:
             model = StanModel(model_code=model_code)
             fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
             posterior = from_pystan(posterior=fit)
-            assert hasattr(posterior, "posterior")
-            assert hasattr(posterior.posterior, "y")
-            assert not hasattr(posterior.posterior, "z")
+            test_dict = {"posterior": ["y"], "sample_stats": ["lp"]}
+            fails = check_multiple_attrs(test_dict, posterior)
+            assert not fails
 
     def test_get_draws(self, data):
         fit = data.obj
@@ -1053,14 +1056,13 @@ class TestTfpNetCDFUtils:
 
     def test_inference_data(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "mu")
-        assert hasattr(inference_data.posterior, "tau")
-        assert hasattr(inference_data.posterior, "eta")
-        assert hasattr(inference_data, "observed_data")
-        assert hasattr(inference_data.observed_data, "obs")
-        assert hasattr(inference_data, "posterior_predictive")
-        assert hasattr(inference_data.posterior_predictive, "obs")
+        test_dict = {
+            "posterior": ["mu", "tau", "eta"],
+            "observed_data": ["obs"],
+            "posterior_predictive": ["obs"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     def test_inference_data2(self, data):
         inference_data = self.get_inference_data2(data)
@@ -1068,26 +1070,23 @@ class TestTfpNetCDFUtils:
 
     def test_inference_data3(self, data, eight_schools_params):
         inference_data = self.get_inference_data3(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "mu")
-        assert hasattr(inference_data.posterior, "tau")
-        assert hasattr(inference_data.posterior, "eta")
-        assert hasattr(inference_data, "observed_data")
-        assert hasattr(inference_data.observed_data, "obs")
-        assert hasattr(inference_data, "posterior_predictive")
-        assert hasattr(inference_data.posterior_predictive, "obs")
+        test_dict = {
+            "posterior": ["mu", "tau", "eta"],
+            "observed_data": ["obs"],
+            "posterior_predictive": ["obs"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
     def test_inference_data4(self, data, eight_schools_params):
         inference_data = self.get_inference_data4(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data.posterior, "mu")
-        assert hasattr(inference_data.posterior, "tau")
-        assert hasattr(inference_data.posterior, "eta")
-        assert hasattr(inference_data.posterior, "avg_effect")
-        assert hasattr(inference_data, "observed_data")
-        assert hasattr(inference_data.observed_data, "obs")
-        assert hasattr(inference_data, "posterior_predictive")
-        assert hasattr(inference_data.posterior_predictive, "obs")
+        test_dict = {
+            "posterior": ["mu", "tau", "eta", "avg_effect"],
+            "observed_data": ["obs"],
+            "posterior_predictive": ["obs"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
 
 
 class TestCmdStanNetCDFUtils:
@@ -1167,10 +1166,9 @@ class TestCmdStanNetCDFUtils:
             if "eight" in key or "missing" in key:
                 continue
             inference_data = self.get_inference_data(path)
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data.posterior, "y")
-            assert hasattr(inference_data.posterior, "x")
-            assert hasattr(inference_data.posterior, "Z")
+            test_dict = {"posterior": ["x", "y", "Z"]}
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
             assert inference_data.posterior["y"].shape == (4, 100)
             assert inference_data.posterior["x"].shape == (4, 100, 3)
             assert inference_data.posterior["Z"].shape == (4, 100, 4, 6)
@@ -1217,11 +1215,16 @@ class TestCmdStanNetCDFUtils:
                     "eta": ["school"],
                 },
             )
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "sample_stats")
-            assert hasattr(inference_data.sample_stats, "log_likelihood")
-            assert hasattr(inference_data, "posterior_predictive")
-            assert hasattr(inference_data, "observed_data")
+            test_dict = {
+                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior_predictive": ["y_hat"],
+                "sample_stats": ["log_likelihood"],
+                "observed_data": ["y"],
+                "posterior_predictive": ["y_hat"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
 
     def test_inference_data_input_types2(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
@@ -1249,11 +1252,16 @@ class TestCmdStanNetCDFUtils:
                     "eta": ["school"],
                 },
             )
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "sample_stats")
-            assert hasattr(inference_data.sample_stats, "log_likelihood")
-            assert hasattr(inference_data, "posterior_predictive")
-            assert hasattr(inference_data, "observed_data")
+            test_dict = {
+                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior_predictive": ["y_hat"],
+                "sample_stats": ["log_likelihood"],
+                "observed_data": ["y"],
+                "posterior_predictive": ["y_hat"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
 
     def test_inference_data_input_types3(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
@@ -1277,11 +1285,16 @@ class TestCmdStanNetCDFUtils:
                 coords={"school": np.arange(8), "log_lik_dim_0": np.arange(8)},
                 dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
             )
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "sample_stats")
-            assert hasattr(inference_data.sample_stats, "log_likelihood")
-            assert hasattr(inference_data, "posterior_predictive")
-            assert hasattr(inference_data, "observed_data")
+            test_dict = {
+                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior_predictive": ["y_hat"],
+                "sample_stats": ["log_likelihood"],
+                "observed_data": ["y"],
+                "posterior_predictive": ["y_hat"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
 
     def test_inference_data_input_types4(self, paths):
         """Check input types (change, see earlier)
@@ -1302,12 +1315,16 @@ class TestCmdStanNetCDFUtils:
                 coords={"rand": np.arange(3)},
                 dims={"x": ["rand"]},
             )
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "sample_stats")
-            assert hasattr(inference_data, "posterior_predictive")
-            assert hasattr(inference_data, "prior")
-            assert hasattr(inference_data, "sample_stats_prior")
-            assert hasattr(inference_data, "prior_predictive")
+            test_dict = {
+                "posterior": ["x", "y", "Z"],
+                "prior": ["x", "y", "Z"],
+                "prior_predictive": ["x", "y", "Z"],
+                "sample_stats": ["lp"],
+                "sample_stats_prior": ["lp"],
+                "posterior_predictive": ["x", "y", "Z"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
 
     def test_inference_data_input_types5(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
@@ -1335,10 +1352,15 @@ class TestCmdStanNetCDFUtils:
                     "eta": ["school"],
                 },
             )
-            assert hasattr(inference_data, "posterior")
-            assert hasattr(inference_data, "sample_stats")
-            assert hasattr(inference_data.sample_stats, "log_likelihood")
-            assert hasattr(inference_data, "observed_data")
+            test_dict = {
+                "posterior": ["mu", "tau", "theta_tilde", "theta"],
+                "prior": ["mu", "tau", "theta_tilde", "theta"],
+                "sample_stats": ["log_likelihood"],
+                "observed_data": ["y"],
+                "sample_stats_prior": ["lp"],
+            }
+            fails = check_multiple_attrs(test_dict, inference_data)
+            assert not fails
 
     def test_inference_data_bad_csv(self, paths):
         """Check ValueError for csv with missing headers"""

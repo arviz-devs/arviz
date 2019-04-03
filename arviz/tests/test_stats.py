@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 from copy import deepcopy
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_less
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 from scipy.stats import linregress
@@ -262,9 +262,13 @@ def test_loo_warning(centered_eight):
 
 
 def test_psislw():
-    linewidth = np.random.randn(20000, 10)
-    _, khats = psislw(linewidth)
-    assert_array_less(khats, 0.5)
+    data = load_arviz_data("centered_eight")
+    pareto_k = loo(data, pointwise=True, reff=0.7)["pareto_k"]
+    log_likelihood = data.sample_stats.log_likelihood
+    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
+    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    assert_almost_equal(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
 @pytest.mark.parametrize("size", [100, 101])

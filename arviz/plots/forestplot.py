@@ -1,5 +1,5 @@
 """Forest plot."""
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from itertools import tee
 
 import numpy as np
@@ -96,14 +96,11 @@ def plot_forest(
     Returns
     -------
     gridspec : matplotlib GridSpec
-
     Examples
     --------
     Forestpĺot
-
     .. plot::
         :context: close-figs
-
         >>> import arviz as az
         >>> non_centered_data = az.load_arviz_data('non_centered_eight')
         >>> fig, axes = az.plot_forest(non_centered_data,
@@ -113,12 +110,9 @@ def plot_forest(
         >>>                            ridgeplot_overlap=3,
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
-
     Ridgeplot
-
     .. plot::
         :context: close-figs
-
         >>> fig, axes = az.plot_forest(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
@@ -245,7 +239,14 @@ class PlotHandler:
         self.model_names = list(reversed(model_names))  # y-values are upside down
 
         if var_names is None:
-            self.var_names = list(set.union(*[set(datum.data_vars) for datum in self.data]))
+            if len(self.data) > 1:
+                self.var_names = list(
+                    set().union(*[OrderedDict(datum.data_vars) for datum in self.data])
+                )
+            else:
+                self.var_names = list(
+                    reversed(*[OrderedDict(datum.data_vars) for datum in self.data])
+                )
         else:
             self.var_names = list(reversed(var_names))  # y-values are upside down
 
@@ -484,7 +485,7 @@ class VarHandler:
             grouped_data = [datum.groupby("chain") for datum in self.data]
             skip_dims = set()
 
-        label_dict = {}
+        label_dict = OrderedDict()
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
@@ -496,7 +497,7 @@ class VarHandler:
                 for _, selection, values in datum_iter:
                     label = make_label(self.var_name, selection, position="beside")
                     if label not in label_dict:
-                        label_dict[label] = {}
+                        label_dict[label] = OrderedDict()
                     if name not in label_dict[label]:
                         label_dict[label][name] = []
                     label_dict[label][name].append(values)

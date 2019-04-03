@@ -29,7 +29,7 @@ ArviZ is a Python package for exploratory analysis of Bayesian models. Includes 
 The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects. See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ.
 
 
-**ArviZ is under heavy development.**
+
 
 Installation with pip is recommended
 
@@ -48,17 +48,17 @@ Contributions and issue reports are very welcome at
 
 If you use ArviZ and want to cite it please use |JOSS|
 
-Here is the citation in BibTeX format  
+Here is the citation in BibTeX format
 
 .. code:: bash
 
     @article{arviz_2019,
-	    title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},  
-	    author = {Kumar, Ravin and Colin, Carroll and Hartikainen, Ari and Martin, Osvaldo A.},  
-	    journal = {The Journal of Open Source Software},  
-	    year = {2019},  
-	    doi = {10.21105/joss.01143},  
-	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},  
+	    title = {{ArviZ} a unified library for exploratory analysis of {Bayesian} models in {Python}},
+	    author = {Kumar, Ravin and Carroll, Colin and Hartikainen, Ari and Martin, Osvaldo A.},
+	    journal = {The Journal of Open Source Software},
+	    year = {2019},
+	    doi = {10.21105/joss.01143},
+	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},
     }
 
 .. toctree::

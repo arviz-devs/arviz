@@ -1,3 +1,7 @@
+div.body {
+  max-width: none;
+}
+
 dt:target {
   background-color: #E0FFFF;
 }
