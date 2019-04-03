@@ -7,7 +7,7 @@ J = 8
 y_obs = np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0])
 sigma = np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0])
 
-def log_prior_8school(theta, J):
+def log_prior_8school(theta):
     mu, tau, eta = theta[0], theta[1], theta[2:]
     # Half-cauchy prior, hwhm=25
     if tau < 0:
@@ -17,13 +17,13 @@ def log_prior_8school(theta, J):
     prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
-def log_likelihood_8school(theta, y, sigma):
+def log_likelihood_8school(theta, y, s):
     mu, tau, eta = theta[0], theta[1], theta[2:]
-    return -((mu + tau * eta - y) / sigma) ** 2
+    return -((mu + tau * eta - y) / s) ** 2
 
-def lnprob_8school(theta, J, y, sigma):
-    prior = log_prior_8school(theta, J)
-    like_vect = log_likelihood_8school(theta, y, sigma)
+def lnprob_8school(theta, y, s):
+    prior = log_prior_8school(theta)
+    like_vect = log_likelihood_8school(theta, y, s)
     like = np.sum(like_vect)
     return like + prior
 
@@ -35,12 +35,12 @@ sampler = emcee.EnsembleSampler(
     nwalkers,
     ndim,
     lnprob_8school,
-    args=(J, y_obs, sigma),
+    args=(y_obs, sigma),
 )
 sampler.run_mcmc(pos, draws)
 
 # define variable names, it cannot be inferred from emcee
-var_names = ['mu','tau']+['eta{}'.format(i) for i in range(J)]
+var_names = ['mu', 'tau']+['eta{}'.format(i) for i in range(J)]
 emcee_data = az.from_emcee(sampler, var_names=var_names)
 
 az.plot_posterior(emcee_data)
