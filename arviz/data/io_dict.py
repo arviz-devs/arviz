@@ -7,7 +7,7 @@ import xarray as xr
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
-_log = logging.getLogger("arviz")
+_log = logging.getLogger(__name__)
 
 
 class DictConverter:
