@@ -1,4 +1,5 @@
 """Plot a scatter or hexbin of sampled parameters."""
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
@@ -142,10 +143,19 @@ def plot_pair(
     # Get diverging draws and combine chains
     if divergences:
         divergent_data = convert_to_dataset(data, group="sample_stats")
-        _, diverging_mask = xarray_to_ndarray(
-            divergent_data, var_names=("diverging",), combined=True
-        )
-        diverging_mask = np.squeeze(diverging_mask)
+        if hasattr(divergent_data, "diverging"):
+            _, diverging_mask = xarray_to_ndarray(
+                divergent_data, var_names=("diverging",), combined=True
+            )
+            diverging_mask = np.squeeze(diverging_mask)
+        else:
+            divergences = False
+            warnings.warn(
+                "diverging field not found in sample stats. "
+                "Plotting without divergences, make sure divergences data is present "
+                "or set divergences=False",
+                SyntaxWarning
+            )
 
     if gridsize == "auto":
         gridsize = int(len(_posterior[0]) ** 0.35)
