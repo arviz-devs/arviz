@@ -154,7 +154,7 @@ def plot_pair(
                 "diverging field not found in sample stats. "
                 "Plotting without divergences, make sure divergences data is present "
                 "or set divergences=False",
-                SyntaxWarning
+                SyntaxWarning,
             )
 
     if gridsize == "auto":

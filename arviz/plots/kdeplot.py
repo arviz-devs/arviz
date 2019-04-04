@@ -28,6 +28,7 @@ def plot_kde(
     rug_kwargs=None,
     contour_kwargs=None,
     contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     ax=None,
     legend=True,
 ):
@@ -234,6 +235,8 @@ def plot_kde(
         contour_kwargs.setdefault("colors", "0.5")
         if contourf_kwargs is None:
             contourf_kwargs = {}
+        if pcolormesh_kwargs is None:
+            pcolormesh_kwargs = {}
 
         gridsize = (128, 128) if contour else (256, 256)
 
