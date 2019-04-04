@@ -72,7 +72,11 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to the contourplot. Ignored for 1D KDE.
+        Keywords passed to ax.contour. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
@@ -242,13 +246,12 @@ def plot_kde(
         ax.set_ylim(ymin, ymax)
         if contour:
             qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
-            if not fill_last:
-                qcfs.collections[0].set_alpha(0)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
             if not fill_last:
+                qcfs.collections[0].set_alpha(0)
                 qcs.collections[0].set_alpha(0)
         else:
-            ax.pcolormesh(x_x, y_y, density)
+            ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 
     return ax
 
