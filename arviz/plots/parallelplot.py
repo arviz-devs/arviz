@@ -10,6 +10,7 @@ from ..utils import _var_names
 def plot_parallel(
     data,
     var_names=None,
+    normalize=False,
     coords=None,
     figsize=None,
     textsize=None,
@@ -18,6 +19,7 @@ def plot_parallel(
     colord="C1",
     shadend=0.025,
     ax=None,
+    norm_method="normal",
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -32,6 +34,8 @@ def plot_parallel(
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted. Can be used to change the order
         of the plotted variables
+    normalize : bool
+        Enables the normalization of the data. Defaults to False.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
@@ -50,7 +54,9 @@ def plot_parallel(
         Defaults to .025
     ax : axes
         Matplotlib axes.
-
+    norm_method : str
+        Method for normalizing the data. Methods include normal, minmax as of now.
+        Defaults to normal.
     Returns
     -------
     ax : matplotlib axes
@@ -69,7 +75,15 @@ def plot_parallel(
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
-
+    if normalize:
+        if norm_method == "normal":
+            _posterior = (_posterior - np.mean(_posterior)) / np.std(_posterior)
+        elif norm_method == "minmax":
+            _posterior = _posterior - np.min(_posterior) / (np.max(_posterior) - np.min(_posterior))
+        else:
+            raise ValueError(
+                "{} is not supported. Use either normal or minmax.".format(norm_method)
+            )
     if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
 
