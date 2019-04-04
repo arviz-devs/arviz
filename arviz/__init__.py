@@ -16,7 +16,7 @@ _log = logging.getLogger("arviz")
 
 if not logging.root.handlers:
     handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     _log.setLevel(logging.INFO)
     _log.addHandler(handler)

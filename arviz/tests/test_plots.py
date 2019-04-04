@@ -521,7 +521,7 @@ def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
     )
     records = caplog.records
     assert len(records) == 1
-    assert records[0].levelname == 'WARNING'
+    assert records[0].levelname == "WARNING"
     assert axes
     assert anim
 

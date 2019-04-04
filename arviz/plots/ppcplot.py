@@ -16,6 +16,7 @@ from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
 
+
 def plot_ppc(
     data,
     kind="density",
