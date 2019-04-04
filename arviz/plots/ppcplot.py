@@ -1,7 +1,7 @@
 """Posterior predictive plot."""
 from numbers import Integral
 import platform
-import warnings
+import logging
 import numpy as np
 from matplotlib import animation
 from .kdeplot import plot_kde, _fast_kde
@@ -14,6 +14,7 @@ from .plot_utils import (
 )
 from ..utils import _var_names
 
+_log = logging.getLogger(__name__)
 
 def plot_ppc(
     data,
@@ -165,9 +166,9 @@ def plot_ppc(
         animation_kwargs.setdefault("blit", False)
 
     if animated and animation_kwargs["blit"] and platform.system() != "Linux":
-        warnings.warn(
-            """If you experience problems rendering the animation try setting
-            `animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)."""
+        _log.warning(
+            "If you experience problems rendering the animation try setting"
+            "`animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)"
         )
 
     if alpha is None:
