@@ -128,21 +128,159 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
     Examples
     --------
-    Passing an ``emcee.EnsembleSampler`` object directly to ``az.from_emcee`` allows to
-    easily plot and calculate statistics.
+    Passing an ``emcee.EnsembleSampler`` object directly to ``az.from_emcee`` converts it
+    to an InferenceData object. Start defining the model:
 
-    .. plot:: usage_examples/from_emcee.py
-        :include-source:
+    .. plot::
         :context: close-figs
 
-    ArviZ has no support for the ``blobs`` functionality yet, but it is easy to create a
-    workaround. It should be noted that emcee chains are **not** independent, thus Arviz's `ess`
-    cannot be used. Thus, emcee's functions must be used.
+        >>> import emcee
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> import matplotlib.pyplot as plt
+        >>> J = 8
+        >>> y_obs = np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0])
+        >>> sigma = np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0])
+        >>> def log_prior_8school(theta):
+        >>>     mu, tau, eta = theta[0], theta[1], theta[2:]
+        >>>     # Half-cauchy prior, hwhm=25
+        >>>     if tau < 0:
+        >>>         return -np.inf
+        >>>     prior_tau = -np.log(tau ** 2 + 25 ** 2)
+        >>>     prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+        >>>     prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
+        >>>     return prior_mu + prior_tau + prior_eta
+        >>> def log_likelihood_8school(theta, y, s):
+        >>>     mu, tau, eta = theta[0], theta[1], theta[2:]
+        >>>     return -((mu + tau * eta - y) / s) ** 2
+        >>> def lnprob_8school(theta, y, s):
+        >>>     prior = log_prior_8school(theta)
+        >>>     like_vect = log_likelihood_8school(theta, y, s)
+        >>>     like = np.sum(like_vect)
+        >>>     return like + prior
 
-    .. plot:: usage_examples/emcee_blobs.py
-        :include-source:
+    Run the MCMC sampler:
+
+    .. plot::
         :context: close-figs
 
+        >>> nwalkers, draws = 50, 7000
+        >>> ndim = J + 2
+        >>> pos = np.random.normal(size=(nwalkers, ndim))
+        >>> pos[:, 1] = np.absolute(pos[:, 1])
+        >>> sampler = emcee.EnsembleSampler(
+        >>>     nwalkers,
+        >>>     ndim,
+        >>>     lnprob_8school,
+        >>>     args=(y_obs, sigma)
+        >>> )
+        >>> sampler.run_mcmc(pos, draws);
+
+    And convert the sampler to an InferenceData object. As emcee does not store variable
+    names, they must be passed to the converter in order to have them:
+
+    .. plot::
+        :context: close-figs
+
+        >>> var_names = ['mu', 'tau']+['eta{}'.format(i) for i in range(J)]
+        >>> emcee_data = az.from_emcee(sampler, var_names=var_names)
+
+    From an InferenceData object it is really easy to plot with ArviZ. Plotting the posterior
+    of the first 3 variables is simply:
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_posterior(emcee_data, var_names=var_names[:3])
+
+    And plotting the trace:
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_trace(emcee_data, var_names=['mu'])
+
+    Emcee is an Affine Invariant MCMC Ensemble Sampler, thus, its chains are **not**
+    independent, which means that many ArviZ functions can not be used, at least directly.
+    However, it is possible to combine emcee and ArviZ and use most of ArviZ
+    functionalities. The first step is to use the ``blobs`` to store the log_likelihood:
+
+    .. plot::
+        :context: close-figs
+
+
+        >>> def lnprob_8school_blobs(theta, y, s):
+        >>>     prior = log_prior_8school(theta)
+        >>>     like_vect = log_likelihood_8school(theta, y, s)
+        >>>     like = np.sum(like_vect)
+        >>>     return like + prior, like_vect
+
+    Rerun the sampler with the modified probability function:
+
+    .. plot::
+        :context: close-figs
+
+        >>> sampler_blobs = emcee.EnsembleSampler(
+        >>>     nwalkers,
+        >>>     ndim,
+        >>>     lnprob_8school_blobs,
+        >>>     args=(y_obs, sigma)
+        >>> )
+        >>> sampler_blobs.run_mcmc(pos, draws);
+
+    ArviZ has no support for the ``blobs`` functionality yet, but it is easy
+    to create a workaround. First make sure that the dimensions are in the order
+    ``(chain, draw, *shape)``. It may also be a good idea to apply a burn-in period
+    and to thin the draw dimension (which due to the correlations between chains and
+    consecutive draws, won't reduce the effective sample size if the value is small enough)
+
+    .. plot::
+        :context: close-figs
+
+        >>> burnin, thin = 500, 10
+        >>> blobs = np.swapaxes(np.array(sampler_blobs.blobs), 0, 1)[:, burnin::thin, :]
+        >>> chain = sampler_blobs.chain[:, burnin::thin, :]
+
+    And convert them to InferenceData, in this case using ``az.from_dict``:
+
+    .. plot::
+        :context: close-figs
+
+        >>> posterior_dict = {"mu": chain[:, :, 0], "tau": chain[:, :, 1], "eta": chain[:, :, 2:]}
+        >>> stats_dict = {"log_likelihood": blobs}
+        >>> emcee_data = az.from_dict(
+        >>>     posterior=posterior_dict,
+        >>>     sample_stats=stats_dict,
+        >>>     coords={"school": range(8)},
+        >>>     dims={"eta": ["school"], "log_likelihood": ["school"]}
+        >>> )
+
+    To calculate the effective sample size emcee's functions must be used. There are many
+    changes in emcee's API, thus, this calculation is really easy in version 3, but not
+    so much in version 2, where in addition, the autocorrelation time raises an error if
+    the chain is not long enough.
+
+    .. plot::
+        :context: close-figs
+
+        >>> if emcee.__version__[0] == '3':
+        >>>     ess = (draws-burnin) / sampler.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
+        >>> else:
+        >>>     # to avoid error while generating the docs, the ess value is hard coded, it
+        >>>     # should be calculated with:
+        >>>     # ess = chain.shape[1] / emcee.autocorr.integrated_time(chain)
+        >>>     ess = (draws-burnin)/30
+        >>> reff = np.mean(ess) / (nwalkers * chain.shape[1])
+
+    This value can afterwards be used to estimate the leave-one-out cross-validation using
+    Pareto smoothed importance sampling with ArviZ and plot the results:
+
+    .. plot::
+        :context: close-figs
+
+        >>> loo_stats = az.loo(emcee_data, reff=reff, pointwise=True)
+        >>> az.plot_khat(loo_stats.pareto_k)
+        >>> plt.show()
     """
     return EmceeConverter(
         sampler=sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
