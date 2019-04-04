@@ -128,17 +128,16 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
     Examples
     --------
-    Passing an `emcee.EnsembleSampler` directly to `from_emcee` allows to easily plot and calculate
-    statistics.
+    Passing an ``emcee.EnsembleSampler`` object directly to ``az.from_emcee`` allows to
+    easily plot and calculate statistics.
 
     .. plot:: usage_examples/from_emcee.py
         :include-source:
         :context: close-figs
 
-    ArviZ has no support for the `blobs` functionality yet, but it is easy to create a
+    ArviZ has no support for the ``blobs`` functionality yet, but it is easy to create a
     workaround. It should be noted that emcee chains are **not** independent, thus Arviz's `ess`
-    cannot be used. Thus, emcee's functions must be used. In this particular case, the functions
-    in emcee3 are more complete and user-friendly.
+    cannot be used. Thus, emcee's functions must be used.
 
     .. plot:: usage_examples/emcee_blobs.py
         :include-source:
