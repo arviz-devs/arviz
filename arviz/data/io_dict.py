@@ -1,13 +1,11 @@
 """Dictionary specific conversion code."""
-import logging
+import warnings
 
 import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
-
-_log = logging.getLogger(__name__)
 
 
 class DictConverter:
@@ -44,7 +42,7 @@ class DictConverter:
             raise TypeError("DictConverter.posterior is not a dictionary")
 
         if "log_likelihood" in data:
-            _log.warning(
+            warnings.warn(
                 "log_likelihood found in posterior."
                 " For stats functions log_likelihood needs to be in sample_stats."
             )
