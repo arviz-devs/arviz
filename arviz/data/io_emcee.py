@@ -129,7 +129,7 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
     Examples
     --------
     Passing an ``emcee.EnsembleSampler`` object directly to ``az.from_emcee`` converts it
-    to an InferenceData object. Start defining the model:
+    to an InferenceData object. Start defining the model and running the sampler:
 
     .. plot::
         :context: close-figs
@@ -137,7 +137,6 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>> import emcee
         >>> import numpy as np
         >>> import arviz as az
-        >>> import matplotlib.pyplot as plt
         >>> J = 8
         >>> y_obs = np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0])
         >>> sigma = np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0])
@@ -158,12 +157,6 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>>     like_vect = log_likelihood_8school(theta, y, s)
         >>>     like = np.sum(like_vect)
         >>>     return like + prior
-
-    Run the MCMC sampler:
-
-    .. plot::
-        :context: close-figs
-
         >>> nwalkers, draws = 50, 7000
         >>> ndim = J + 2
         >>> pos = np.random.normal(size=(nwalkers, ndim))
@@ -203,7 +196,8 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
     Emcee is an Affine Invariant MCMC Ensemble Sampler, thus, its chains are **not**
     independent, which means that many ArviZ functions can not be used, at least directly.
     However, it is possible to combine emcee and ArviZ and use most of ArviZ
-    functionalities. The first step is to use the ``blobs`` to store the log_likelihood:
+    functionalities. The first step is to modify the probability function to use the
+    ``blobs`` and store the log_likelihood, then rerun the sampler using the new function:
 
     .. plot::
         :context: close-figs
@@ -214,12 +208,6 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>>     like_vect = log_likelihood_8school(theta, y, s)
         >>>     like = np.sum(like_vect)
         >>>     return like + prior, like_vect
-
-    Rerun the sampler with the modified probability function:
-
-    .. plot::
-        :context: close-figs
-
         >>> sampler_blobs = emcee.EnsembleSampler(
         >>>     nwalkers,
         >>>     ndim,
@@ -232,7 +220,8 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
     to create a workaround. First make sure that the dimensions are in the order
     ``(chain, draw, *shape)``. It may also be a good idea to apply a burn-in period
     and to thin the draw dimension (which due to the correlations between chains and
-    consecutive draws, won't reduce the effective sample size if the value is small enough)
+    consecutive draws, won't reduce the effective sample size if the value is small enough).
+    Then convert the numpy arrays to InferenceData, in this case using ``az.from_dict``:
 
     .. plot::
         :context: close-figs
@@ -240,12 +229,6 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>> burnin, thin = 500, 10
         >>> blobs = np.swapaxes(np.array(sampler_blobs.blobs), 0, 1)[:, burnin::thin, :]
         >>> chain = sampler_blobs.chain[:, burnin::thin, :]
-
-    And convert them to InferenceData, in this case using ``az.from_dict``:
-
-    .. plot::
-        :context: close-figs
-
         >>> posterior_dict = {"mu": chain[:, :, 0], "tau": chain[:, :, 1], "eta": chain[:, :, 2:]}
         >>> stats_dict = {"log_likelihood": blobs}
         >>> emcee_data = az.from_dict(
@@ -280,7 +263,6 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
         >>> loo_stats = az.loo(emcee_data, reff=reff, pointwise=True)
         >>> az.plot_khat(loo_stats.pareto_k)
-        >>> plt.show()
     """
     return EmceeConverter(
         sampler=sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
