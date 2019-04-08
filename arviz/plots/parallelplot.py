@@ -5,6 +5,7 @@ import numpy as np
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
+from scipy.stats import rankdata
 
 
 def plot_parallel(
@@ -28,6 +29,7 @@ def plot_parallel(
 
     Parameters
     ----------
+
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
@@ -55,8 +57,9 @@ def plot_parallel(
     ax : axes
         Matplotlib axes.
     norm_method : str
-        Method for normalizing the data. Methods include normal, minmax as of now.
+        Method for normalizing the data. Methods include normal, minmax and rank.
         Defaults to normal.
+
     Returns
     -------
     ax : matplotlib axes
@@ -80,10 +83,10 @@ def plot_parallel(
             _posterior = (_posterior - np.mean(_posterior)) / np.std(_posterior)
         elif norm_method == "minmax":
             _posterior = _posterior - np.min(_posterior) / (np.max(_posterior) - np.min(_posterior))
+        elif norm_method == "rank":
+            _posterior = rankdata(_posterior)
         else:
-            raise ValueError(
-                "{} is not supported. Use either normal or minmax.".format(norm_method)
-            )
+            raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
     if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
 
