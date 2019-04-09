@@ -5,9 +5,10 @@ import warnings
 import numpy as np
 from scipy.signal import fftconvolve
 from scipy.stats.mstats import mquantiles
+from xarray import apply_ufunc
 
 
-__all__ = ["autocorr", "make_ufunc"]
+__all__ = ["autocorr", "make_ufunc", "wrap_xarray_ufunc"]
 
 
 def autocorr(ary):
@@ -127,6 +128,51 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
 
     update_docstring(ufunc, func, n_output)
     return ufunc
+
+
+def wrap_xarray_ufunc(ufunc, dataset, *, ufunc_kwargs=None, func_kwargs=None):
+    """Wrap make_ufunc with xarray.apply_ufunc.
+
+    Parameters
+    ----------
+    ufunc : callable
+    dataset : xarray.dataset
+    ufunc_kwargs : dict
+        keyword arguments passed to `make_ufunc`.
+            - 'n_dims', int, by default 2
+            - 'n_output', int, by default 1
+            - 'index', slice, by default Ellipsis
+            - 'ravel', bool, by default True
+    func_kwargs : dict
+        keyword arguments passed to 'ufunc' and xarray.apply_ufunc
+    Return
+    ------
+    xarray.dataset
+    """
+    if ufunc_kwargs is None:
+        ufunc_kwargs = {}
+    if func_kwargs is None:
+        func_kwargs = {}
+
+    n_output = ufunc_kwargs.pop("n_output", 1)
+    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
+
+    if "input_core_dims" in func_kwargs:
+        input_core_dims = func_kwargs.pop("input_core_dims")
+    else:
+        input_core_dims = tuple(("chain", "draw") for _ in func_kwargs)
+    if "output_core_dims" in func_kwargs:
+        output_core_dims = func_kwargs.pop("output_core_dims")
+    else:
+        output_core_dims = tuple([] for _ in range(n_output))
+
+    return apply_ufunc(
+        callable_ufunc,
+        dataset,
+        **func_kwargs,
+        input_core_dims=input_core_dims,
+        output_core_dims=output_core_dims
+    )
 
 
 def update_docstring(ufunc, func, n_output=1):

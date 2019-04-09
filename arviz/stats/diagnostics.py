@@ -1,53 +1,26 @@
 # pylint: disable=too-many-lines, too-many-function-args
 """Diagnostic functions for ArviZ."""
+from collections.abc import Sequence
 import warnings
 
 import numpy as np
 import pandas as pd
 from scipy import stats
-import xarray as xr
 
 from .stats_utils import (
-    make_ufunc as _make_ufunc,
     _autocov,
     _rint,
     _round,
     _quantile,
     check_valid_size as _check_valid_size,
     check_nan as _check_nan,
+    wrap_xarray_ufunc as _wrap_xarray_ufunc,
 )
 from ..data import convert_to_dataset
 from ..utils import _var_names
 
 
-__all__ = [
-    "bfmi",
-    "effective_sample_size_mean",
-    "effective_sample_size_sd",
-    "effective_sample_size_bulk",
-    "effective_sample_size_tail",
-    "effective_sample_size_quantile",
-    "effective_sample_size_split",
-    "effective_sample_size_z_scale",
-    "effective_sample_size_split_mad",
-    "effective_sample_size_split_folded",
-    "effective_sample_size_split_median",
-    "relative_effective_sample_size_mean",
-    "relative_effective_sample_size_sd",
-    "relative_effective_sample_size_bulk",
-    "relative_effective_sample_size_tail",
-    "relative_effective_sample_size_quantile",
-    "relative_effective_sample_size_split",
-    "relative_effective_sample_size_z_scale",
-    "relative_effective_sample_size_split_mad",
-    "relative_effective_sample_size_split_folded",
-    "relative_effective_sample_size_split_median",
-    "rhat",
-    "mcse_mean",
-    "mcse_sd",
-    "mcse_quantile",
-    "geweke",
-]
+__all__ = ["bfmi", "effective_sample_size", "rhat", "mcse", "geweke"]
 
 
 def bfmi(data):
@@ -81,8 +54,8 @@ def bfmi(data):
     return _bfmi(dataset.sample_stats.energy)
 
 
-def effective_sample_size_mean(data, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for mean.
+def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
+    r"""Calculate estimate of the effective sample size.
 
     Parameters
     ----------
@@ -93,6 +66,23 @@ def effective_sample_size_mean(data, *, var_names=None):
         stochastic parameters.
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
+    method : str
+        Select ess method. Valid methods are
+        - "bulk"
+        - "tail"     # prob, optional
+        - "quantile" # prob
+        - "mean" (old ess)
+        - "sd"
+        - "median"
+        - "split_mad" (mean absolute deviance)
+        - "z_scale"
+        - "split_folded"
+        - "split"
+    relative : bool
+        Return relative ess
+        `ress = ess / N`
+    prob : float, optional
+        probability value for "tail" and "quantile" ess functions.
 
     Returns
     -------
@@ -113,466 +103,67 @@ def effective_sample_size_mean(data, *, var_names=None):
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
 
-    Mean estimation calculates estimate for the data.
-
-    .. math:: ess_mean = ess(x)
-    .. math:: sq_ess = ess(x**2)
-    .. math:: min(ess_mean, sq_ess)
-
     References
     ----------
     Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
     https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-
     Gelman et al. BDA (2014) Formula 11.8
     """
+    methods = {
+        "bulk": _ess_bulk,
+        "tail": _ess_tail,
+        "quantile": _ess_quantile,
+        "mean": _ess_mean,
+        "sd": _ess_sd,
+        "median": _ess_median,
+        "mad": _ess_mad,
+        "z_scale": _ess_z_scale,
+        "folded": _ess_folded,
+        "split": _ess_split,
+    }
+
+    methods_relative = {
+        "bulk": _ress_bulk,
+        "tail": _ress_tail,
+        "quantile": _ress_quantile,
+        "mean": _ress_mean,
+        "sd": _ress_sd,
+        "median": _ress_median,
+        "mad": _ress_mad,
+        "z_scale": _ress_z_scale,
+        "folded": _ress_folded,
+        "split": _ress_split,
+    }
+
+    if method not in methods:
+        raise TypeError(
+            "ESS method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
+        )
+    elif relative:
+        ess_func = methods_relative[method]
+    else:
+        ess_func = methods[method]
+
+    if method in ("tail", "quantile") and prob is None:
+        raise TypeError("Quantile (prob) information needs to be defined.")
+
     if isinstance(data, np.ndarray):
-        return _ess_mean(data)
+        if prob is not None:
+            return ess_func(data, prob=prob)
+        else:
+            return ess_func(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
-    ess_mean_ufunc = _make_ufunc(_ess_mean, ravel=False)
-    return xr.apply_ufunc(ess_mean_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
+    ufunc_kwargs = {"ravel": False}
+    func_kwargs = {} if prob is None else {"prob": prob}
+    return _wrap_xarray_ufunc(ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs)
 
-def effective_sample_size_sd(data, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for sd.
 
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
-    var_names : list
-        Names of variables to include in the effective_sample_size_sd report
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the effective sample size for sd, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    sd estimation calculates estimates both for the data and squared data,
-    where ess_sd estimation is the lower one.
-
-    .. math:: ess_mean = ess(x)
-    .. math:: sq_ess = ess(x**2)
-    .. math:: min(ess_mean, sq_ess)
-
-    References
-    ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-
-    Gelman et al. BDA (2014) Formula 11.8
-    """
-    if isinstance(data, np.ndarray):
-        return _ess_sd(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_sd_ufunc = _make_ufunc(_ess_sd, ravel=False)
-    return xr.apply_ufunc(ess_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_bulk(data, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for bulk.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
-    var_names : list
-        Names of variables to include in the effective_sample_size_bulk report
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the effective sample size for bulk, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    tail estimation follows the quantile estimation and is done by computing ess over z-transformed
-    ranked boolean vector with quantiles 5% and 95% and by selecting the minimum value.
-
-    .. math:: I05 = x <= quantile(x, 0.05)
-    .. math:: I95 = x <= quantile(x, 0.95)
-    .. math:: min(ess(I05), ess(95))
-
-    References
-    ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-
-    Gelman et al. BDA (2014) Formula 11.8
-    """
-    if isinstance(data, np.ndarray):
-        return _ess_bulk(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_bulk_ufunc = _make_ufunc(_ess_bulk, ravel=False)
-    return xr.apply_ufunc(ess_bulk_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_tail(data, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for tail.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
-    var_names : list
-        Names of variables to include in the effective_sample_size_tail report
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the effective sample size for tail, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    tail estimation follows the quantile estimation and is done by computing ess over z-transformed
-    ranked boolean vector with quantiles 5% and 95% and by selecting the minimum value.
-
-    .. math:: I05 = x <= quantile(x, 0.05)
-    .. math:: I95 = x <= quantile(x, 0.05)
-    .. math:: min(ess(z-transform(rank(I05))), ess(z-transform(rank(I95))))
-
-    References
-    ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-
-    Gelman et al. BDA (2014) Formula 11.8
-    """
-    if isinstance(data, np.ndarray):
-        return _ess_tail(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_tail_ufunc = _make_ufunc(_ess_tail, ravel=False)
-    return xr.apply_ufunc(ess_tail_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_quantile(data, prob, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for quantile on specific quantile.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
-    prob : float
-        quantile at which the ess is calculated.
-    var_names : list
-        Names of variables to include in the effective_sample_size_quantile report
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the tail effective sample size for specific quantile, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    quantile estimation is done by computing ess over z-transformed and ranked boolean vector
-
-    .. math:: I = x <= quantile(x)
-    .. math:: ess(z_transform(rankdata(I)))
-
-    References
-    ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-
-    Gelman et al. BDA (2014) Formula 11.8
-    """
-    if isinstance(data, np.ndarray):
-        return _ess_quantile(data, prob)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_quantile_ufunc = _make_ufunc(_ess_quantile, ravel=False)
-    return xr.apply_ufunc(
-        ess_quantile_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
-    )
-
-
-def effective_sample_size_z_scale(data, *, var_names=None):
-    r"""Calculate estimate of the effective sample size for z-scale."""
-    if isinstance(data, np.ndarray):
-        return _ess_z_scale(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_z_scale_ufunc = _make_ufunc(_ess_z_scale, ravel=False)
-    return xr.apply_ufunc(ess_z_scale_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_split_median(data, *, var_names=None):
-    r"""Calculate estimate of the median split effective sample size."""
-    if isinstance(data, np.ndarray):
-        return _ess_split_median(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_split_median_ufunc = _make_ufunc(_ess_split_median, ravel=False)
-    return xr.apply_ufunc(ess_split_median_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_split_folded(data, *, var_names=None):
-    r"""Calculate estimate of the split folded effective sample size."""
-    if isinstance(data, np.ndarray):
-        return _ess_split_folded(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_split_mad_ufunc = _make_ufunc(_ess_split_folded, ravel=False)
-    return xr.apply_ufunc(ess_split_mad_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_split_mad(data, *, var_names=None):
-    r"""Calculate estimate of the split effective sample size for mean absolute deviance."""
-    if isinstance(data, np.ndarray):
-        return _ess_split_mad(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_split_mad_ufunc = _make_ufunc(_ess_split_mad, ravel=False)
-    return xr.apply_ufunc(ess_split_mad_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def effective_sample_size_split(data, *, var_names=None):
-    r"""Calculate estimate of the split effective sample size."""
-    if isinstance(data, np.ndarray):
-        return _ess_split(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ess_split_ufunc = _make_ufunc(_ess_split, ravel=False)
-    return xr.apply_ufunc(ess_split_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_mean(data, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for the mean."""
-    if isinstance(data, np.ndarray):
-        return _ress_mean(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_mean_ufunc = _make_ufunc(_ress_mean, ravel=False)
-    return xr.apply_ufunc(ress_mean_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_sd(data, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for the sd."""
-    if isinstance(data, np.ndarray):
-        return _ress_sd(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_sd_ufunc = _make_ufunc(_ress_sd, ravel=False)
-    return xr.apply_ufunc(ress_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_bulk(data, *, var_names=None):
-    r"""Calculate estimate of the bulk relative effective sample size."""
-    if isinstance(data, np.ndarray):
-        return _ress_bulk(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_bulk_ufunc = _make_ufunc(_ress_bulk, ravel=False)
-    return xr.apply_ufunc(ress_bulk_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_tail(data, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for tails."""
-    if isinstance(data, np.ndarray):
-        return _ress_tail(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_tail_ufunc = _make_ufunc(_ress_tail, ravel=False)
-    return xr.apply_ufunc(ress_tail_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_quantile(data, prob, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for quantile."""
-    if isinstance(data, np.ndarray):
-        return _ress_quantile(data, prob)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_quantile_ufunc = _make_ufunc(_ress_quantile, ravel=False)
-    return xr.apply_ufunc(
-        ress_quantile_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
-    )
-
-
-def relative_effective_sample_size_split(data, *, var_names=None):
-    r"""Calculate estimate of the relative split effective sample size."""
-    if isinstance(data, np.ndarray):
-        return _ress_split(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_split_ufunc = _make_ufunc(_ress_split, ravel=False)
-    return xr.apply_ufunc(ress_split_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_split_mad(data, *, var_names=None):
-    r"""Calculate estimate of the relative split effective sample size for mad.
-
-    mad = mean absolute deviance
-    """
-    if isinstance(data, np.ndarray):
-        return _ress_split_mad(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_split_mad_ufunc = _make_ufunc(_ress_split_mad, ravel=False)
-    return xr.apply_ufunc(ress_split_mad_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_split_folded(data, *, var_names=None):
-    r"""Calculate estimate of the relative split effective sample size for folded."""
-    if isinstance(data, np.ndarray):
-        return _ress_split_folded(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_split_folded_ufunc = _make_ufunc(_ress_split_folded, ravel=False)
-    return xr.apply_ufunc(ress_split_folded_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_split_median(data, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for median."""
-    if isinstance(data, np.ndarray):
-        return _ress_split_median(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_median_ufunc = _make_ufunc(_ress_split_median, ravel=False)
-    return xr.apply_ufunc(ress_median_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def relative_effective_sample_size_z_scale(data, *, var_names=None):
-    r"""Calculate estimate of the relative effective sample size for z-scale."""
-    if isinstance(data, np.ndarray):
-        return _ress_z_scale(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    ress_z_scale_ufunc = _make_ufunc(_ress_z_scale, ravel=False)
-    return xr.apply_ufunc(ress_z_scale_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def rhat(data, *, var_names=None):
+def rhat(data, *, var_names=None, method="rank"):
     r"""Compute estimate of rank normalized splitR-hat for a set of traces.
 
     The rank normalized R-hat diagnostic tests for lack of convergence by comparing the variance
@@ -590,11 +181,18 @@ def rhat(data, *, var_names=None):
         stochastic parameters.
         For ndarray: shape = (chain, draw).
     var_names : list
-      Names of variables to include in the rhat report
+        Names of variables to include in the rhat report
+    method : str
+        Select R-hat method. Valid methods are
+        - "rank"        # recommended by Vehtari et al. (2019)
+        - "split"       # old split-Rhat
+        - "identity"    # no-split Rhat
+        - "folded"
+        - "z_scale"
 
     Returns
     -------
-    r_hat : xarray.Dataset
+    xarray.Dataset
       Returns dataset of the potential scale reduction factors, :math:`\hat{R}`
 
     Notes
@@ -618,70 +216,91 @@ def rhat(data, *, var_names=None):
     Brooks and Gelman (1998)
     Gelman and Rubin (1992)
     """
+    methods = {
+        "rank": _rhat_rank_normalized,
+        "split": _rhat_split,
+        "identity": _rhat,
+        "folded": _rhat_folded,
+        "z_scale": _rhat_z_scale,
+    }
+    if method not in methods:
+        raise TypeError(
+            "R-hat method {} not found. Valid methods are:\n{}".format(
+                method, "\n    ".join(methods)
+            )
+        )
+    else:
+        rhat_func = methods[method]
+
     if isinstance(data, np.ndarray):
-        return _rhat_rank_normalized(data)
+        return rhat_func(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
-    rhat_ufunc = _make_ufunc(_rhat_rank_normalized, ravel=False)
-    return xr.apply_ufunc(rhat_ufunc, dataset, input_core_dims=(("chain", "draw"),))
 
-
-def mcse_mean(data, *, var_names=None):
-    r"""Calculate mcse mean."""
-    if isinstance(data, np.ndarray):
-        return _mcse_mean(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    mcse_mean_ufunc = _make_ufunc(_mcse_mean, ravel=False)
-    return xr.apply_ufunc(mcse_mean_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def mcse_sd(data, *, var_names=None):
-    r"""Calculate mcse sd."""
-    if isinstance(data, np.ndarray):
-        return _mcse_sd(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    mcse_sd_ufunc = _make_ufunc(_mcse_sd, ravel=False)
-    return xr.apply_ufunc(mcse_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),))
-
-
-def mcse_mean_sd(data, *, var_names=None):
-    r"""Calculate mcse mean and sd in one go."""
-    if isinstance(data, np.ndarray):
-        return _mcse_mean_sd(data)
-
-    dataset = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, dataset)
-
-    dataset = dataset if var_names is None else dataset[var_names]
-    mcse_mean_sd_ufunc = _make_ufunc(_mcse_mean_sd, ravel=False)
-    return xr.apply_ufunc(
-        mcse_mean_sd_ufunc, dataset, input_core_dims=(("chain", "draw"),), output_core_dims=([], [])
+    ufunc_kwargs = {"ravel": False}
+    func_kwargs = {}
+    return _wrap_xarray_ufunc(
+        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
     )
 
 
-def mcse_quantile(data, prob, *, var_names=None):
-    r"""Calculate mcse for quantile."""
+def mcse(data, *, var_names=None, method="mean", prob=None):
+    """Calculate Markov Chain Standard Error for statistic.
+
+    Parameters
+    ----------
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+        At least 2 posterior chains are needed to compute this diagnostic of one or more
+        stochastic parameters.
+        For ndarray: shape = (chain, draw).
+    var_names : list
+        Names of variables to include in the rhat report
+    method : str
+        Select mcse method. Valid methods are
+        - "mean"
+        - "sd"
+        - "quantile"
+    prob : float
+        Quantile information.
+
+    Returns
+    -------
+    xarray.Dataset
+        Return the msce dataset
+    """
+    methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
+    if method not in methods:
+        raise TypeError(
+            "mcse method {} not found. Valid methods are:\n{}".format(
+                method, "\n    ".join(methods)
+            )
+        )
+    else:
+        mcse_func = methods[method]
+
+    if method == "quantile" and prob is None:
+        raise TypeError("Quantile (prob) information needs to be defined.")
+
     if isinstance(data, np.ndarray):
-        return _mcse_quantile(data, prob)
+        if prob is not None:
+            return mcse_func(data, prob=prob)  # pylint: disable=unexpected-keyword-arg
+        else:
+            return mcse_func(data)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
 
     dataset = dataset if var_names is None else dataset[var_names]
-    mcse_quantile_ufunc = _make_ufunc(_mcse_quantile, ravel=False)
-    return xr.apply_ufunc(
-        mcse_quantile_ufunc, dataset, prob, input_core_dims=(("chain", "draw"), ("chain", "draw"))
+
+    ufunc_kwargs = {"ravel": False}
+    func_kwargs = {} if prob is None else {"prob": prob}
+    return _wrap_xarray_ufunc(
+        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
     )
 
 
@@ -824,6 +443,9 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Bulk effective sample size")
+    if _check_nan(ary):
+        return np.nan
     size = ary.size
     rank = stats.rankdata(ary, method="average")
     z = stats.norm.ppf((rank - 0.5) / size)
@@ -863,7 +485,7 @@ def _rhat(ary, round_to=2, split=False):
     return _round(rhat_value, round_to)
 
 
-def rhat_split_(ary, round_to=2):
+def _rhat_split(ary, round_to=2):
     """Compute the split-rhat for a 2d array."""
     return _rhat(ary, round_to=round_to, split=True)
 
@@ -874,19 +496,16 @@ def _rhat_rank_normalized(ary, round_to=2):
     Computation follows https://arxiv.org/abs/1903.08008
     """
     ary = np.asarray(ary)
-    _check_valid_size(ary, "rank normalized split-Rhat")
-    if _check_nan(ary):
-        return np.nan
     rhat_bulk = _rhat(_z_scale(_split_chains(ary)), None)
 
-    ary_folded = np.abs(ary - np.median(ary))
+    ary_folded = abs(ary - np.median(ary))
     rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)), None)
 
     rhat_rank = max(rhat_bulk, rhat_tail)
     return _round(rhat_rank, round_to)
 
 
-def _rhat_split_folded(ary):
+def _rhat_folded(ary):
     """Calculate split-Rhat for folded z-values."""
     ary = _z_split_fold(ary)
     return _rhat(ary)
@@ -943,44 +562,36 @@ def _ess(ary, split=False):
 
 def _ess_bulk(ary):
     """Compute the effective sample size for the bulk."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Bulk effective sample size")
-    if _check_nan(ary):
-        return np.nan
     z_split = _z_scale(_split_chains(ary))
     ess_bulk = _ess(z_split)
     return ess_bulk
 
 
-def _ess_tail(ary):
-    """Compute the effective sample size for the tail."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Tail effective sample size")
-    if _check_nan(ary):
-        return np.nan
-    q05, q95 = _quantile(ary, [0.05, 0.95])
-    I05 = ary <= q05
-    q05_ess = _ess(_z_scale(_split_chains(I05)))
-    I95 = ary <= q95
-    q95_ess = _ess(_z_scale(_split_chains(I95)))
-    return min(q05_ess, q95_ess)
+def _ess_tail(ary, prob=None):
+    """Compute the effective sample size for the tail.
+
+    If `prob` defined, ess = min(qess(prob), qess(1-prob))
+    """
+    if prob is None:
+        prob = (0.05, 0.95)
+    elif not isinstance(prob, Sequence):
+        prob = (prob, 1 - prob)
+
+    prob_low, prob_high = prob
+    quantile_low_ess = _ess_quantile(ary, prob_low)
+    quantile_high_ess = _ess_quantile(ary, prob_high)
+    return min(quantile_low_ess, quantile_high_ess)
 
 
 def _ess_mean(ary, split=False):
     """Compute the effective sample size for the mean."""
     ary = np.asarray(ary)
-    _check_valid_size(ary, "Mean effective sample size")
-    if _check_nan(ary):
-        return np.nan
     return _ess(ary, split=split)
 
 
 def _ess_sd(ary, split=False):
     """Compute the effective sample size for the sd."""
     ary = np.asarray(ary)
-    _check_valid_size(ary, "SD effective sample size")
-    if _check_nan(ary):
-        return np.nan
     return min(_ess(ary, split=split), _ess(ary ** 2, split=split))
 
 
@@ -1004,36 +615,27 @@ def _ess_split(ary):
 
 def _ess_z_scale(ary, split=False):
     """Calculate ess for z-scaLe."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
     return _ess(_z_scale(ary), split=split)
 
 
-def _ess_split_folded(ary):
+def _ess_folded(ary):
     """Calculate split-ess for folded data."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
-    ary = _z_split_fold(ary)
-    return _ess(ary)
+    return _ess(_z_split_fold(ary))
 
 
-def _ess_split_median(ary):
+def _ess_median(ary):
     """Calculate split-ess for median."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
-    ary = ary - np.median(ary)
-    ary = (ary <= 0).astype(float)
-    ary = _z_scale(_split_chains(ary))
-    return _ess(ary)
+    return _ess_quantile(ary, 0.5)
 
 
-def _ess_split_mad(ary):
+def _ess_mad(ary):
     """Calculate split-ess for mean absolute deviance."""
     ary = np.asarray(ary)
     _check_valid_size(ary, "Effective sample size")
-    ary = ary - np.median(ary)
-    ary = np.abs(ary)
-    ary = ((ary - np.median(ary)) <= 0).astype(float)
+    if _check_nan(ary):
+        return np.nan
+    ary = abs(ary - np.median(ary))
+    ary = ary <= np.median(ary)
     ary = _z_scale(_split_chains(ary))
     return _ess(ary)
 
@@ -1051,10 +653,10 @@ def _conv_quantile(ary, prob):
     size = sorted_ary.size
     th1 = sorted_ary[_rint(np.nanmax((a[0] * size, 0)))]
     th2 = sorted_ary[_rint(np.nanmin((a[1] * size, size - 1)))]
-    mcse = (th2 - th1) / 2
+    mcse_quantile = (th2 - th1) / 2
     th1 = sorted_ary[_rint(np.nanmax((a[2] * size, 0)))]
     th2 = sorted_ary[_rint(np.nanmin((a[3] * size, size - 1)))]
-    return mcse, th1, th2, ess
+    return mcse_quantile, th1, th2, ess
 
 
 def _mcse_mean(ary, split=False):
@@ -1169,27 +771,26 @@ def _rhat_z_scale(ary, split=False):
 
 def _z_split_fold(ary):
     ary = np.asarray(ary)
-    ary = ary - np.median(ary)
-    ary = np.abs(ary)
+    ary = abs(ary - np.median(ary))
     ary = _z_scale(_split_chains(ary))
     return ary
 
 
-def _ress_split_folded(ary, ess=None):
+def _ress_folded(ary, ess=None):
     if ess is None:
-        ess = _ess_split_folded(ary)
+        ess = _ess_folded(ary)
     return ess / ary.size
 
 
-def _ress_split_median(ary, ess=None):
+def _ress_median(ary, ess=None):
     if ess is None:
-        ess = _ess_split_median(ary)
+        ess = _ess_median(ary)
     return ess / ary.size
 
 
-def _ress_split_mad(ary, ess=None):
+def _ress_mad(ary, ess=None):
     if ess is None:
-        ess = _ess_split_mad(ary)
+        ess = _ess_mad(ary)
     return ess / ary.size
 
 

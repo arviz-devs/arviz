@@ -11,7 +11,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import _multichain_statistics, _mc_error, effective_sample_size_mean
+from .diagnostics import _multichain_statistics, _mc_error, effective_sample_size
 from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
 from ..utils import _var_names
 
@@ -359,7 +359,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         if n_chains == 1:
             reff = 1.0
         else:
-            ess = effective_sample_size_mean(posterior)
+            ess = effective_sample_size(posterior, method="mean")
             # this mean is over all data variables
             reff = np.hstack([ess[v].values.flatten() for v in ess.data_vars]).mean() / n_samples
 
