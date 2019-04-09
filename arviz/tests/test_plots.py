@@ -242,6 +242,10 @@ def test_plot_parallel_exception(models):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(models.pymc3_fit, var_names="mu")
+    with pytest.raises(ValueError):
+        assert plot_parallel(
+            models.pymc3_fit, var_names=["mu, tau"], normalize=True, norm_method="foo"
+        )
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])

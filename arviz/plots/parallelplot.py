@@ -29,7 +29,6 @@ def plot_parallel(
 
     Parameters
     ----------
-
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
