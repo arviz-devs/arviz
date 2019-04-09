@@ -4,7 +4,7 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 
-from ..stats.stats_utils import logsumexp as _logsumexp
+from ..stats.stats_utils import logsumexp as _logsumexp, wrap_xarray_ufunc
 
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
@@ -66,3 +66,23 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
         arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
 
         assert_array_almost_equal(scipy_results, arviz_results)
+
+
+@pytest.mark.parametrize("q", ((0.5,), (0.5, 0.1)))
+@pytest.mark.parametrize("arg", (True, False))
+def test_wrap_ufunc_output(q, arg):
+    ary = np.random.randn(4, 100)
+    n_output = len(q)
+    if arg:
+        res = wrap_xarray_ufunc(
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(q,)
+        )
+    else:
+        res = wrap_xarray_ufunc(
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": q}
+        )
+    if n_output == 1:
+        assert not isinstance(res, tuple)
+    else:
+        assert isinstance(res, tuple)
+        assert len(res) == n_output

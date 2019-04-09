@@ -130,7 +130,9 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
     return ufunc
 
 
-def wrap_xarray_ufunc(ufunc, dataset, *, ufunc_kwargs=None, func_kwargs=None):
+def wrap_xarray_ufunc(
+    ufunc, dataset, *, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
+):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
     Parameters
@@ -138,40 +140,48 @@ def wrap_xarray_ufunc(ufunc, dataset, *, ufunc_kwargs=None, func_kwargs=None):
     ufunc : callable
     dataset : xarray.dataset
     ufunc_kwargs : dict
-        keyword arguments passed to `make_ufunc`.
+        Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
             - 'n_output', int, by default 1
             - 'index', slice, by default Ellipsis
             - 'ravel', bool, by default True
+    func_args : tuple
+        Arguments passed to 'ufunc'.
     func_kwargs : dict
-        keyword arguments passed to 'ufunc' and xarray.apply_ufunc
+        Keyword arguments passed to 'ufunc'.
+    **kwargs
+        Passed to xarray.apply_ufunc.
     Return
     ------
     xarray.dataset
     """
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
+    if func_args is None:
+        func_args = tuple()
     if func_kwargs is None:
         func_kwargs = {}
 
     n_output = ufunc_kwargs.pop("n_output", 1)
-    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
+    callable_ufunc = make_ufunc(ufunc, n_output=n_output, **ufunc_kwargs)
 
-    if "input_core_dims" in func_kwargs:
-        input_core_dims = func_kwargs.pop("input_core_dims")
+    if "input_core_dims" in kwargs:
+        input_core_dims = kwargs.pop("input_core_dims")
     else:
-        input_core_dims = tuple(("chain", "draw") for _ in func_kwargs)
-    if "output_core_dims" in func_kwargs:
-        output_core_dims = func_kwargs.pop("output_core_dims")
+        input_core_dims = tuple(("chain", "draw") for _ in range(len(func_args) + 1))
+    if "output_core_dims" in kwargs:
+        output_core_dims = kwargs.pop("output_core_dims")
     else:
         output_core_dims = tuple([] for _ in range(n_output))
 
     return apply_ufunc(
         callable_ufunc,
         dataset,
-        **func_kwargs,
+        *func_args,
+        kwargs=func_kwargs,
         input_core_dims=input_core_dims,
-        output_core_dims=output_core_dims
+        output_core_dims=output_core_dims,
+        **kwargs
     )
 
 

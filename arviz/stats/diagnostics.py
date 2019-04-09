@@ -139,12 +139,12 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         raise TypeError(
             "ESS method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
         )
-    elif relative:
+    if relative:
         ess_func = methods_relative[method]
     else:
         ess_func = methods[method]
 
-    if method in ("tail", "quantile") and prob is None:
+    if (method == "quantile") and prob is None:
         raise TypeError("Quantile (prob) information needs to be defined.")
 
     if isinstance(data, np.ndarray):
@@ -229,8 +229,7 @@ def rhat(data, *, var_names=None, method="rank"):
                 method, "\n    ".join(methods)
             )
         )
-    else:
-        rhat_func = methods[method]
+    rhat_func = methods[method]
 
     if isinstance(data, np.ndarray):
         return rhat_func(data)
@@ -280,8 +279,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
                 method, "\n    ".join(methods)
             )
         )
-    else:
-        mcse_func = methods[method]
+    mcse_func = methods[method]
 
     if method == "quantile" and prob is None:
         raise TypeError("Quantile (prob) information needs to be defined.")
@@ -456,6 +454,7 @@ def _z_scale(ary):
 def _split_chains(ary):
     """Split and stack chains."""
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Bulk effective sample size")
     _, n_draw = ary.shape
     half = n_draw // 2
     return np.vstack((ary[:, :half], ary[:, -half:]))
@@ -715,11 +714,11 @@ def _ress_bulk(ary, ess=None):
     return ess / ary.size
 
 
-def _ress_tail(ary, ess=None):
+def _ress_tail(ary, prob=None, ess=None):
     """Relative tail effective sample size."""
     ary = np.asarray(ary)
     if ess is None:
-        ess = _ess_tail(ary)
+        ess = _ess_tail(ary, prob=prob)
     return ess / ary.size
 
 

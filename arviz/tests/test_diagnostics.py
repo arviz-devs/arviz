@@ -51,8 +51,8 @@ class TestDiagnostics:
     )
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_array(self, ess, relative):
-        n_low = 100 if relative else 100 / 400
-        n_high = 800 if relative else 800 / 400
+        n_low = 100 if not relative else 100 / 400
+        n_high = 800 if not relative else 800 / 400
         if ess in ("quantile", "tail"):
             ess_hat = effective_sample_size(
                 np.random.randn(4, 100), method=ess, prob=0.34, relative=relative
@@ -69,7 +69,7 @@ class TestDiagnostics:
                     np.random.randn(4, 100), method=ess, prob=(0.2, 0.8), relative=relative
                 )
         else:
-            ess_hat = effective_sample_size(np.random.randn(4, 100))
+            ess_hat = effective_sample_size(np.random.randn(4, 100), relative=relative)
         assert ess_hat > n_low
         assert ess_hat < n_high
 
@@ -111,7 +111,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_sample_size_dataset(self, data, ess, var_names, relative):
-        n_low = 100 if relative else 100 / (data.chain.size * data.draw.size)
+        n_low = 100 if not relative else 100 / (data.chain.size * data.draw.size)
         if ess in ("quantile", "tail"):
             ess_hat = effective_sample_size(
                 data, var_names=var_names, method=ess, prob=0.34, relative=relative
