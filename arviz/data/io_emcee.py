@@ -186,7 +186,7 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
         >>> az.plot_posterior(emcee_data, var_names=var_names[:3])
 
-    And plotting the trace:
+    And the trace:
 
     .. plot::
         :context: close-figs
