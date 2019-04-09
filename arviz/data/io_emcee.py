@@ -128,7 +128,7 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
 
     Examples
     --------
-    Passing an ``emcee.EnsembleSampler`` object directly to ``az.from_emcee`` converts it
+    Passing an ``emcee.EnsembleSampler`` object to ``az.from_emcee`` converts it
     to an InferenceData object. Start defining the model and running the sampler:
 
     .. plot::
@@ -178,8 +178,8 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>> var_names = ['mu', 'tau']+['eta{}'.format(i) for i in range(J)]
         >>> emcee_data = az.from_emcee(sampler, var_names=var_names)
 
-    From an InferenceData object it is really easy to plot with ArviZ. Plotting the posterior
-    of the first 3 variables is simply:
+    From an InferenceData object, ArviZ's native data structure, the posterior plot
+    of the first 3 variables can be done in one line:
 
     .. plot::
         :context: close-figs
@@ -216,8 +216,8 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>> )
         >>> sampler_blobs.run_mcmc(pos, draws);
 
-    ArviZ has no support for the ``blobs`` functionality yet, but it is easy
-    to create a workaround. First make sure that the dimensions are in the order
+    ArviZ has no support for the ``blobs`` functionality yet, but a workaround can be
+    created. First make sure that the dimensions are in the order
     ``(chain, draw, *shape)``. It may also be a good idea to apply a burn-in period
     and to thin the draw dimension (which due to the correlations between chains and
     consecutive draws, won't reduce the effective sample size if the value is small enough).
@@ -238,10 +238,10 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>>     dims={"eta": ["school"], "log_likelihood": ["school"]}
         >>> )
 
-    To calculate the effective sample size emcee's functions must be used. There are many
-    changes in emcee's API, thus, this calculation is really easy in version 3, but not
-    so much in version 2, where in addition, the autocorrelation time raises an error if
-    the chain is not long enough.
+    To calculate the effective sample size emcee's functions must be used. There are
+    many changes in emcee's API from version 2 to 3, thus, the calculation is different
+    depending on the version. In addition, in version 2, the autocorrelation time raises
+    an error if the chain is not long enough.
 
     .. plot::
         :context: close-figs
