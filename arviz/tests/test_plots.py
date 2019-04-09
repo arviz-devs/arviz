@@ -272,7 +272,13 @@ def test_plot_joint_bad(models, model_fit):
     [
         {"plot_kwargs": {"linestyle": "-"}},
         {"contour": True, "fill_last": False},
+        {
+            "contour": True,
+            "contourf_kwargs": {"cmap": "plasma"},
+            "contour_kwargs": {"linewidths": 1},
+        },
         {"contour": False},
+        {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -280,7 +286,15 @@ def test_plot_kde(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"cumulative": True}, {"rug": True}])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"cumulative": True},
+        {"cumulative": True, "plot_kwargs": {"linestyle": "--"}},
+        {"rug": True},
+        {"rug": True, "rug_kwargs": {"alpha": 0.2}},
+    ],
+)
 def test_plot_kde_cumulative(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], quantiles=[0.25, 0.5, 0.75], **kwargs)
     assert axes
@@ -385,6 +399,18 @@ def test_plot_pair_bad(models, model_fit):
         plot_pair(obj, kind="bad_kind")
     with pytest.raises(Exception):
         plot_pair(obj, var_names=["mu"])
+
+
+@pytest.mark.parametrize("has_stats", [True, False])
+def test_plot_pair_divergences_warning(has_stats):
+    data = load_arviz_data("centered_eight")
+    if has_stats:
+        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
+    else:
+        data = data.posterior
+    with pytest.warns(SyntaxWarning):
+        ax = plot_pair(data, divergences=True)
+    assert np.all(ax)
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
