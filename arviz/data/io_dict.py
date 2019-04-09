@@ -44,7 +44,8 @@ class DictConverter:
         if "log_likelihood" in data:
             warnings.warn(
                 "log_likelihood found in posterior."
-                " For stats functions log_likelihood needs to be in sample_stats."
+                " For stats functions log_likelihood needs to be in sample_stats.",
+                SyntaxWarning,
             )
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
