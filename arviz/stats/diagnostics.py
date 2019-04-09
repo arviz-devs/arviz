@@ -682,25 +682,6 @@ def _mcse_sd(ary, split=False):
     return mcse_sd_value
 
 
-def _mcse_mean_sd(ary, split=False):
-    """Compute the Markov Chain mean and sd errors."""
-    ary = np.asarray(ary)
-    if _check_nan(ary):
-        return np.nan
-    # mean
-    ess = _ess(ary, split=split)
-    sd = np.std(ary, ddof=1)
-    mcse_mean_value = sd / np.sqrt(ess)
-
-    # sd
-    ess2 = _ess(ary ** 2, split=split)
-    essmin = min(ess, ess2)
-    fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / essmin) ** (essmin - 1) - 1)
-    mcse_sd_value = sd * fac_mcse_sd
-
-    return mcse_mean_value, mcse_sd_value
-
-
 def _mcse_quantile(ary, prob):
     """Compute the Markov Chain quantile error at quantile=prob."""
     ary = np.asarray(ary)
