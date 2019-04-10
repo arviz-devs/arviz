@@ -98,11 +98,15 @@ def plot_parallel(
         raise ValueError("This plot needs at least two variables")
     if norm_method != "none":
         if norm_method == "normal":
-            _posterior = (_posterior - np.mean(_posterior, axis=1)) / np.std(_posterior, axis=1)
+            mean = np.mean(_posterior, axis=1)
+            sd = np.std(_posterior, axis=1)
+            for i in range(0, np.shape(mean)[0]):
+                _posterior[i, :] = (_posterior[i, :] - mean[i]) / sd[i]
         elif norm_method == "minmax":
-            _posterior = _posterior - np.min(_posterior, axis=1) / (
-                np.max(_posterior, axis=1) - np.min(_posterior, axis=1)
-            )
+            min_elem = np.min(_posterior, axis=1)
+            max_elem = np.max(_posterior, axis=1)
+            for i in range(0, np.shape(min_elem)[0]):
+                _posterior[i, :] = ((_posterior[i, :]) - min_elem[i]) / (max_elem[i] - min_elem[i])
         elif norm_method == "rank":
             _posterior = rankdata(_posterior, axis=1)
         else:
