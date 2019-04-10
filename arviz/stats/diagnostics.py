@@ -537,8 +537,8 @@ def _ess(ary, split=False):
     while t < (n_draw - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
         rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
         rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
+        rho_hat_t[t + 1] = rho_hat_even
         if (rho_hat_even + rho_hat_odd) >= 0:
-            rho_hat_t[t + 1] = rho_hat_even
             rho_hat_t[t + 2] = rho_hat_odd
         t += 2
 
@@ -551,11 +551,10 @@ def _ess(ary, split=False):
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
 
-    ess = (
-        int((n_chain * n_draw) / (-1.0 + 2.0 * np.sum(rho_hat_t[: max_t + 1])))
-        if not np.any(np.isnan(rho_hat_t))
-        else np.nan
-    )
+    tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[:max_t]) + rho_hat_t[max_t + 1]
+    ess = (n_chain * n_draw) / tau_hat
+    if np.isnan(rho_hat_t).any():
+        ess = np.nan
     return ess
 
 
