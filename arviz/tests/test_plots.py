@@ -236,6 +236,9 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 def test_plot_parallel(models, model_fit):
     obj = getattr(models, model_fit)
     assert plot_parallel(obj, var_names=["mu", "tau"])
+    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True)
+    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True, norm_method="minmax")
+    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True, norm_method="rank")
 
 
 def test_plot_parallel_exception(models):
