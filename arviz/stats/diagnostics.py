@@ -551,7 +551,7 @@ def _ess(ary, split=False):
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
 
-    tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[:max_t]) + rho_hat_t[max_t + 1 : max_t + 2]
+    tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[:max_t]) + np.sum(rho_hat_t[max_t + 1 : max_t + 2])
     ess = (n_chain * n_draw) / tau_hat
     if np.isnan(rho_hat_t).any():
         ess = np.nan
