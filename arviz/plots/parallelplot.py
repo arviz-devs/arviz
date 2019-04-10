@@ -61,7 +61,7 @@ def plot_parallel(
     ax : matplotlib axes
 
     Examples
-    ________
+    --------
     Plot default parallel plot
 
     .. plot::
