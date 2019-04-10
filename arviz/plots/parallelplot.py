@@ -99,9 +99,9 @@ def plot_parallel(
     if norm_method != "none":
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
-            sd = np.std(_posterior, axis=1)
+            stan_dev = np.std(_posterior, axis=1)
             for i in range(0, np.shape(mean)[0]):
-                _posterior[i, :] = (_posterior[i, :] - mean[i]) / sd[i]
+                _posterior[i, :] = (_posterior[i, :] - mean[i]) / stan_dev[i]
         elif norm_method == "minmax":
             min_elem = np.min(_posterior, axis=1)
             max_elem = np.max(_posterior, axis=1)
