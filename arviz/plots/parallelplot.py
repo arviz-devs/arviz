@@ -2,10 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scipy.stats.mstats import rankdata
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
-from scipy.stats import rankdata
 
 
 def plot_parallel(
@@ -77,17 +77,17 @@ def plot_parallel(
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
+    if len(var_names) < 2:
+        raise ValueError("This plot needs at least two variables")
     if normalize:
         if norm_method == "normal":
             _posterior = (_posterior - np.mean(_posterior)) / np.std(_posterior)
         elif norm_method == "minmax":
             _posterior = _posterior - np.min(_posterior) / (np.max(_posterior) - np.min(_posterior))
         elif norm_method == "rank":
-            _posterior = rankdata(_posterior)
+            _posterior = rankdata(_posterior, axis=1)
         else:
             raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
-    if len(var_names) < 2:
-        raise ValueError("This plot needs at least two variables")
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
