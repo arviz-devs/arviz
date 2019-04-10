@@ -11,7 +11,6 @@ from ..utils import _var_names
 def plot_parallel(
     data,
     var_names=None,
-    normalize=False,
     coords=None,
     figsize=None,
     textsize=None,
@@ -20,7 +19,7 @@ def plot_parallel(
     colord="C1",
     shadend=0.025,
     ax=None,
-    norm_method="normal",
+    norm_method="none",
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -35,8 +34,6 @@ def plot_parallel(
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted. Can be used to change the order
         of the plotted variables
-    normalize : bool
-        Enables the normalization of the data. Defaults to False.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
@@ -57,11 +54,31 @@ def plot_parallel(
         Matplotlib axes.
     norm_method : str
         Method for normalizing the data. Methods include normal, minmax and rank.
-        Defaults to normal.
+        Defaults to none.
 
     Returns
     -------
     ax : matplotlib axes
+
+    Examples:
+    ________
+    Plot default parallel plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_parallel(data, var_names=["mu", "tau"])
+
+
+    Plot parallel plot with normalization
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_parallel(data, var_names=["mu", "tau"], norm_method='normal')
+
     """
     if coords is None:
         coords = {}
@@ -79,7 +96,7 @@ def plot_parallel(
     )
     if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
-    if normalize:
+    if norm_method != "none":
         if norm_method == "normal":
             _posterior = (_posterior - np.mean(_posterior)) / np.std(_posterior)
         elif norm_method == "minmax":

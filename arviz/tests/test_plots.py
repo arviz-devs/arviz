@@ -236,9 +236,9 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 def test_plot_parallel(models, model_fit):
     obj = getattr(models, model_fit)
     assert plot_parallel(obj, var_names=["mu", "tau"])
-    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True)
-    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True, norm_method="minmax")
-    assert plot_parallel(obj, var_names=["mu", "tau"], normalize=True, norm_method="rank")
+    assert plot_parallel(obj, var_names=["mu", "tau"], norm_method="normal")
+    assert plot_parallel(obj, var_names=["mu", "tau"], norm_method="minmax")
+    assert plot_parallel(obj, var_names=["mu", "tau"], norm_method="rank")
 
 
 def test_plot_parallel_exception(models):
@@ -246,9 +246,7 @@ def test_plot_parallel_exception(models):
     with pytest.raises(ValueError):
         assert plot_parallel(models.pymc3_fit, var_names="mu")
     with pytest.raises(ValueError):
-        assert plot_parallel(
-            models.pymc3_fit, var_names=["mu", "tau"], normalize=True, norm_method="foo"
-        )
+        assert plot_parallel(models.pymc3_fit, var_names=["mu", "tau"], norm_method="foo")
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
