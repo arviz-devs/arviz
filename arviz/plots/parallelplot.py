@@ -60,7 +60,7 @@ def plot_parallel(
     -------
     ax : matplotlib axes
 
-    Examples:
+    Examples
     ________
     Plot default parallel plot
 
@@ -98,9 +98,11 @@ def plot_parallel(
         raise ValueError("This plot needs at least two variables")
     if norm_method != "none":
         if norm_method == "normal":
-            _posterior = (_posterior - np.mean(_posterior)) / np.std(_posterior)
+            _posterior = (_posterior - np.mean(_posterior, axis=1)) / np.std(_posterior, axis=1)
         elif norm_method == "minmax":
-            _posterior = _posterior - np.min(_posterior) / (np.max(_posterior) - np.min(_posterior))
+            _posterior = _posterior - np.min(_posterior, axis=1) / (
+                np.max(_posterior, axis=1) - np.min(_posterior, axis=1)
+            )
         elif norm_method == "rank":
             _posterior = rankdata(_posterior, axis=1)
         else:
