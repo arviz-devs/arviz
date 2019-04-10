@@ -4,6 +4,7 @@ from copy import deepcopy
 from glob import glob
 import linecache
 import os
+import logging
 import re
 
 
@@ -13,6 +14,9 @@ import xarray as xr
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords
+
+
+_log = logging.getLogger(__name__)
 
 
 class CmdStanConverter:
@@ -42,7 +46,7 @@ class CmdStanConverter:
                     for i, path in enumerate(posterior, 1)
                 )
                 len_p = len(posterior)
-                print("glob found {} files for 'posterior':\n{}".format(len_p, msg))
+                _log.info("glob found %d files for 'posterior':\n%s", len_p, msg)
         self.posterior_ = posterior
         if isinstance(posterior_predictive, str):
             posterior_predictive_glob = glob(posterior_predictive)
@@ -53,7 +57,7 @@ class CmdStanConverter:
                     for i, path in enumerate(posterior_predictive, 1)
                 )
                 len_pp = len(posterior_predictive)
-                print("glob found {} files for 'posterior_predictive':\n{}".format(len_pp, msg))
+                _log.info("glob found %d files for 'posterior_predictive':\n%s", len_pp, msg)
         if isinstance(prior, str):
             prior_glob = glob(prior)
             if len(prior_glob) > 1:
@@ -62,7 +66,7 @@ class CmdStanConverter:
                     "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
                 )
                 len_p = len(prior)
-                print("glob found {} files for 'prior':\n{}".format(len_p, msg))
+                _log.info("glob found %d files for 'prior':\n%s", len_p, msg)
         if isinstance(prior_predictive, str):
             prior_predictive_glob = glob(prior_predictive)
             if len(prior_predictive_glob) > 1:
@@ -72,7 +76,7 @@ class CmdStanConverter:
                     for i, path in enumerate(prior_predictive, 1)
                 )
                 len_pp = len(prior_predictive)
-                print("glob found {} files for 'prior_predictive':\n{}".format(len_pp, msg))
+                _log.info("glob found %d files for 'prior_predictive':\n%s", len_pp, msg)
         self.posterior_predictive = posterior_predictive
         self.prior_ = prior
         self.prior_predictive = prior_predictive

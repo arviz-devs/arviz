@@ -500,7 +500,7 @@ def test_plot_ppc_discrete_save_animation(kind):
 
 
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
-def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system):
+def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
 
     import platform
@@ -511,15 +511,17 @@ def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system):
     monkeypatch.setattr(platform, "system", mock_system)
 
     animation_kwargs = {"blit": True}
-    with pytest.warns(UserWarning):
-        axes, anim = plot_ppc(
-            data,
-            kind="density",
-            animated=True,
-            animation_kwargs=animation_kwargs,
-            num_pp_samples=5,
-            random_seed=3,
-        )
+    axes, anim = plot_ppc(
+        data,
+        kind="density",
+        animated=True,
+        animation_kwargs=animation_kwargs,
+        num_pp_samples=5,
+        random_seed=3,
+    )
+    records = caplog.records
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
     assert axes
     assert anim
 
