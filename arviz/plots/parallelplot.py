@@ -19,7 +19,7 @@ def plot_parallel(
     colord="C1",
     shadend=0.025,
     ax=None,
-    norm_method="none",
+    norm_method=None,
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -96,7 +96,7 @@ def plot_parallel(
     )
     if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
-    if norm_method != "none":
+    if norm_method is not None:
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
             standard_deviation = np.std(_posterior, axis=1)
