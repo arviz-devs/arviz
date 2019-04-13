@@ -232,9 +232,8 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
         plot_parallel(df_trace)
 
 
-@pytest.mark.parametrize(
-    "model_fit", ["pymc3_fit", "stan_fit"],["normal", "minmax", "rank"]
-)
+@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
+@pytest.mark.parametrize("norm_method", ["normal", "minmax", "rank"], indirect=True)
 def test_plot_parallel(models, model_fit, norm_method):
     obj = getattr(models, model_fit)
     assert plot_parallel(obj, var_names=["mu", "tau"], norm_method=norm_method)
