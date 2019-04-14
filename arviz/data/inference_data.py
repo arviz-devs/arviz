@@ -27,8 +27,8 @@ class InferenceData:
                 continue
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
-                    "Arguments to InferenceData must be xarray Datasets "
-                    '(argument "{}" was type "{}")'.format(key, type(dataset))
+                    "Arguments to {} must be xarray Datasets "
+                    '(argument "{}" was type "{}")'.format(self.__class__.__name__, key, type(dataset))
                 )
             setattr(self, key, dataset)
             self._groups.append(key)
@@ -97,6 +97,34 @@ class InferenceData:
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
+
+
+class VInferenceData(InferenceData):
+    """Container for accessing netCDF files using xarray."""
+
+    def __init__(self, **kwargs):
+        """Initialize VInferenceData object from keyword xarray datasets.
+
+        Examples
+        --------
+        VInferenceData(posterior=posterior, prior=prior)
+
+        Parameters
+        ----------
+        kwargs :
+            Keyword arguments of xarray datasets
+
+        Note
+        ----
+        VInferenceData object is designed to handle variational inference data.
+        """
+        super().__init__(**kwargs)
+
+    def __repr__(self):
+        """Make string representation of object."""
+        return "Variational inference data with groups:\n\t> {options}".format(
+            options="\n\t> ".join(self._groups)
+        )
 
 
 # pylint: disable=protected-access
