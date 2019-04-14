@@ -104,6 +104,8 @@ class InferenceData:
 class VInferenceData(InferenceData):
     """Container for accessing netCDF files using xarray."""
 
+    # pylint: disable=useless-super-delegation
+
     def __init__(self, **kwargs):
         """Initialize VInferenceData object from keyword xarray datasets.
 
