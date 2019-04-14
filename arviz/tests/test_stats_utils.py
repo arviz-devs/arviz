@@ -68,18 +68,18 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
         assert_array_almost_equal(scipy_results, arviz_results)
 
 
-@pytest.mark.parametrize("q", ((0.5,), (0.5, 0.1)))
+@pytest.mark.parametrize("quantile", ((0.5,), (0.5, 0.1)))
 @pytest.mark.parametrize("arg", (True, False))
-def test_wrap_ufunc_output(q, arg):
+def test_wrap_ufunc_output(quantile, arg):
     ary = np.random.randn(4, 100)
-    n_output = len(q)
+    n_output = len(quantile)
     if arg:
         res = wrap_xarray_ufunc(
-            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(q,)
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(quantile,)
         )
     else:
         res = wrap_xarray_ufunc(
-            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": q}
+            np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"quantile": quantile}
         )
     if n_output == 1:
         assert not isinstance(res, tuple)

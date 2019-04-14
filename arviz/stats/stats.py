@@ -459,7 +459,7 @@ def psislw(log_weights, reff=1.0):
                 # compute ordered statistic for the fit
                 sti = np.arange(0.5, tail_len) / tail_len
                 smoothed_tail = _gpinv(sti, k, sigma)
-                smoothed_tail = np.log( # pylint: disable=assignment-from-no-return
+                smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
                     smoothed_tail + expxcutoff
                 )
                 # place the smoothed tail into the output array

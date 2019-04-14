@@ -281,7 +281,7 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
 
 def _rint(num):
     """Round and change to ingeter."""
-    rnum = np.rint(num) # pylint: disable=assignment-from-no-return
+    rnum = np.rint(num)  # pylint: disable=assignment-from-no-return
     return int(rnum)
 
 
