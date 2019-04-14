@@ -281,7 +281,7 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
 
 def _rint(num):
     """Round and change to ingeter."""
-    rnum = np.rint(num)
+    rnum = np.rint(num) # pylint: disable=assignment-from-no-return
     return int(rnum)
 
 
@@ -292,11 +292,11 @@ def _round(num, decimals):
     return num
 
 
-def _quantile(ary, q, axis=None, limit=None):
+def _quantile(ary, quantile, axis=None, limit=None):
     """Use same quantile function as R (Type 7)."""
     if limit is None:
         limit = tuple()
-    return mquantiles(ary, q, alphap=1, betap=1, axis=axis, limit=limit)
+    return mquantiles(ary, quantile, alphap=1, betap=1, axis=axis, limit=limit)
 
 
 def check_nan(ary, axis=None, how="any"):

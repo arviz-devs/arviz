@@ -600,9 +600,9 @@ def _ess_quantile(ary, prob):
     _check_valid_size(ary, "Quantile effective sample size")
     if _check_nan(ary):
         return np.nan
-    q, = _quantile(ary, prob)
-    I = ary <= q
-    return _ess(_z_scale(_split_chains(I)))
+    quantile, = _quantile(ary, prob)
+    iquantile = ary <= quantile
+    return _ess(_z_scale(_split_chains(iquantile)))
 
 
 def _ess_split(ary):
@@ -645,16 +645,16 @@ def _conv_quantile(ary, prob):
     if _check_nan(ary):
         return np.nan, np.nan, np.nan, np.nan
     ess = _ess_quantile(ary, prob)
-    p = [0.1586553, 0.8413447, 0.05, 0.95]
+    probability = [0.1586553, 0.8413447, 0.05, 0.95]
     with np.errstate(invalid="ignore"):
-        a = stats.beta.ppf(p, ess * prob + 1, ess * (1 - prob) + 1)
+        ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
     sorted_ary = np.sort(ary.ravel())
     size = sorted_ary.size
-    th1 = sorted_ary[_rint(np.nanmax((a[0] * size, 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((a[1] * size, size - 1)))]
+    th1 = sorted_ary[_rint(np.nanmax((ppf[0] * size, 0)))]
+    th2 = sorted_ary[_rint(np.nanmin((ppf[1] * size, size - 1)))]
     mcse_quantile = (th2 - th1) / 2
-    th1 = sorted_ary[_rint(np.nanmax((a[2] * size, 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((a[3] * size, size - 1)))]
+    th1 = sorted_ary[_rint(np.nanmax((ppf[2] * size, 0)))]
+    th2 = sorted_ary[_rint(np.nanmin((ppf[3] * size, size - 1)))]
     return mcse_quantile, th1, th2, ess
 
 
@@ -850,12 +850,12 @@ def _multichain_statistics(ary):
     ess_bulk_value = _ess(z_split)
 
     # ess tail
-    q05, q95 = _quantile(ary, [0.05, 0.95])
-    I05 = ary <= q05
-    q05_ess = _ess(_z_scale(_split_chains(I05)))
-    I95 = ary <= q95
-    q95_ess = _ess(_z_scale(_split_chains(I95)))
-    ess_tail_value = min(q05_ess, q95_ess)
+    quantile05, quantile95 = _quantile(ary, [0.05, 0.95])
+    iquantile05 = ary <= quantile05
+    quantile05_ess = _ess(_z_scale(_split_chains(iquantile05)))
+    iquantile95 = ary <= quantile95
+    quantile95_ess = _ess(_z_scale(_split_chains(iquantile95)))
+    ess_tail_value = min(quantile05_ess, quantile95_ess)
 
     # r_hat
     rhat_bulk = _rhat(z_split, None)
