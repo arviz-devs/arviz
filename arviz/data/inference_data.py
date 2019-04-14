@@ -28,7 +28,9 @@ class InferenceData:
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to {} must be xarray Datasets "
-                    '(argument "{}" was type "{}")'.format(self.__class__.__name__, key, type(dataset))
+                    '(argument "{}" was type "{}")'.format(
+                        self.__class__.__name__, key, type(dataset)
+                    )
                 )
             setattr(self, key, dataset)
             self._groups.append(key)
