@@ -401,12 +401,14 @@ def test_plot_pair_bad(models, model_fit):
         plot_pair(obj, var_names=["mu"])
 
 
-@pytest.mark.parametrize("has_stats", [True, False])
-def test_plot_pair_divergences_warning(has_stats):
+@pytest.mark.parametrize("has_sample_stats", [True, False])
+def test_plot_pair_divergences_warning(has_sample_stats):
     data = load_arviz_data("centered_eight")
-    if has_stats:
+    if has_sample_stats:
+        # sample_stats present, diverging field missing
         data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
     else:
+        # sample_stats missing
         data = data.posterior
     with pytest.warns(SyntaxWarning):
         ax = plot_pair(data, divergences=True)
