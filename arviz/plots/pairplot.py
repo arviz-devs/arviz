@@ -152,8 +152,9 @@ def plot_pair(
         else:
             divergences = False
             warnings.warn(
-                "diverging field not found in sample stats. "
-                "Plotting without divergences, make sure divergences data is present "
+                "Divergences data not found, plotting without divergences. "
+                "Make sure the sample method provides divergences data and "
+                "that it is present in the `diverging` field of `sample_stats` "
                 "or set divergences=False",
                 SyntaxWarning,
             )
