@@ -61,6 +61,25 @@ def plot_energy(
     Returns
     -------
     ax : matplotlib axes
+
+    Examples
+    --------
+    Plot a default energy plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_energy(data)
+
+    Represent energy plot via histograms
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_energy(data, kind='hist')
+
     """
     energy = convert_to_dataset(data, group="sample_stats").energy.values
 
