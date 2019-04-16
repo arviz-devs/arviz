@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
-from scipy.stats import entropy
 import xarray as xr
 from ..data.inference_data import InferenceData
 from ..utils import conditional_jit
@@ -292,9 +291,9 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     assert np.min(x) >= xmin
     assert np.max(x) <= xmax
 
-    std_x = entropy(x - xmin) * bw
+    log_len_x = np.log(len_x) * bw
 
-    n_bins = min(int(len_x ** (1 / 3) * std_x * 2), n_points)
+    n_bins = min(int(len_x ** (1 / 3) * log_len_x * 2), n_points)
     if n_bins < 2:
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
@@ -303,13 +302,13 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     grid = _histogram(x, n_bins, range_hist=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
-    kern_nx = int(scotts_factor * 2 * np.pi * std_x)
-    kernel = gaussian(kern_nx, scotts_factor * std_x)
+    kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
+    kernel = gaussian(kern_nx, scotts_factor * log_len_x)
 
     npad = min(n_bins, 2 * kern_nx)
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
-    norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
+    norm_factor = len_x * d_x * (2 * np.pi * log_len_x ** 2 * scotts_factor ** 2) ** 0.5
 
     density /= norm_factor
 
