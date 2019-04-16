@@ -27,6 +27,8 @@ def plot_kde(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     ax=None,
     legend=True,
 ):
@@ -71,7 +73,11 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to the contourplot. Ignored for 1D KDE.
+        Keywords passed to ax.contour. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
@@ -227,6 +233,10 @@ def plot_kde(
         if contour_kwargs is None:
             contour_kwargs = {}
         contour_kwargs.setdefault("colors", "0.5")
+        if contourf_kwargs is None:
+            contourf_kwargs = {}
+        if pcolormesh_kwargs is None:
+            pcolormesh_kwargs = {}
 
         gridsize = (128, 128) if contour else (256, 256)
 
@@ -238,14 +248,13 @@ def plot_kde(
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
         if contour:
-            qcfs = ax.contourf(x_x, y_y, density, antialiased=True)
-            if not fill_last:
-                qcfs.collections[0].set_alpha(0)
+            qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
             if not fill_last:
+                qcfs.collections[0].set_alpha(0)
                 qcs.collections[0].set_alpha(0)
         else:
-            ax.pcolormesh(x_x, y_y, density)
+            ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 
     return ax
 
