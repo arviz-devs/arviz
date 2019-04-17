@@ -1030,12 +1030,12 @@ def waic(data, pointwise=False, scale="deviance"):
             the Observed RV in your model to make sure it returns element-wise logp.
             """
             )
-        return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
+        return pd.Series(
+            data=[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale],
+            index=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
         )
     else:
-        return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, scale]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
+        return pd.Series(
+            data=[waic_sum, waic_se, p_waic, warn_mg, scale],
+            index=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
         )
