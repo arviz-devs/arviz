@@ -35,8 +35,8 @@ def plot_khat(
     ax : axes
       Matplotlib axes.
 
-    Example
-    -------
+    Examples
+    --------
     Plot a default khat plot
 
     .. plot::

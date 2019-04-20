@@ -37,7 +37,7 @@ def plot_ppc(
     legend=True,
 ):
     """
-    Plot for Posterior Predictive checks.
+    Plot for posterior predictive checks.
 
     Parameters
     ----------
@@ -59,11 +59,9 @@ def plot_ppc(
     data_pairs : dict
         Dictionary containing relations between observed data and posterior predictive data.
         Dictionary structure:
-            Key = data var_name
-
-            Value = posterior predictive var_name
-        Example: `data_pairs = {'y' : 'y_hat'}`
-
+        Key = data var_name
+        Value = posterior predictive var_name
+        For example, `data_pairs = {'y' : 'y_hat'}`
         If None, it will assume that the observed data and the posterior
         predictive data have the same variable name.
     var_names : list
