@@ -189,18 +189,24 @@ Testing the code using docker consists of executing the same file 3 times (you m
 First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
 
 ### Using the Docker image interactively
-Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. 
+Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. Therefore, code can be edited and executed inside the docker container. Once finished, the results can be copied back to the host machine.
 
 To start a bash shell inside Docker, run:
 
     $ docker run -it arviz bash
 
-To start a jupyter notebook, there are two steps, first run:
+Alternatively, to start a jupyter notebook, there are two steps, first run:
 
     $ docker run --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec -it jupyter-dock pip install jupyter
     $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
+
+Once the code has been edited in the docker container, it can be copied back to the host machine with the following command (on the host machine):
+
+    $ docker cp <containerId>:/file/path/within/container /host/path/target
+    
+Where the `containerId` can be found using `docker ps` if the flag `--name` was not used when creating the container. It should not be necessary to keep the container running until everything has been copied, but it is highly recommended to do so. If the container crashes however, many of the files could still be recovered.
 
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)
