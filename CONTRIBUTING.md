@@ -193,11 +193,11 @@ Once the Docker image is built with `./scripts/container.sh --build`, interactiv
 
 To start a bash shell inside Docker, run:
 
-    $ docker run -it arviz bash
+    $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
 
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
-    $ docker run --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec -it jupyter-dock pip install jupyter
     $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
 
