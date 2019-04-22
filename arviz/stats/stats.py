@@ -46,7 +46,13 @@ def bfmi(energy):
 
 
 def compare(
-    dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"
+    dataset_dict,
+    ic="waic",
+    method="BB-pseudo-BMA",
+    b_samples=1000,
+    alpha=1,
+    seed=None,
+    scale="deviance",
 ):
     r"""Compare models based on WAIC or LOO cross validation.
 
@@ -63,8 +69,8 @@ def compare(
     method : str
         Method used to estimate the weights for each model. Available options are:
 
-        - 'stacking' : (default) stacking of predictive distributions.
-        - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
+        - 'stacking' : stacking of predictive distributions.
+        - 'BB-pseudo-BMA' : (default) pseudo-Bayesian Model averaging using Akaike-type
            weighting. The weights are stabilized using the Bayesian bootstrap
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
            weighting, without Bootstrap stabilization (not recommended)
