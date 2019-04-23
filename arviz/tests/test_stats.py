@@ -80,7 +80,7 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
 def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
-    assert weight["non_centered"] > weight["centered"]
+    assert weight["non_centered"] >= weight["centered"]
     assert_almost_equal(np.sum(weight), 1.0)
 
 
