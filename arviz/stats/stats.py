@@ -837,7 +837,14 @@ def summary(
     if (round_to is not None) and (round_to not in ("None", "none")):
         summary_df = summary_df.round(round_to)
     elif round_to not in ("None", "none"):
-        decimals = {col : 3 if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"} else 2 if col == "r_hat" else 0 for col in summary_df.columns}
+        decimals = {
+            col: 3
+            if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"}
+            else 2
+            if col == "r_hat"
+            else 0
+            for col in summary_df.columns
+        }
         summary_df = summary_df.round(decimals)
 
     return summary_df
