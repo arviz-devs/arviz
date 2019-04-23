@@ -182,7 +182,7 @@ def compare(
         def gradient(weights):
             w_full = w_fuller(weights)
             grad = np.zeros(last_col)
-            for k in range(last_col):
+            for k in range(last_col-1):
                 for i in range(rows):
                     grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
                         exp_ic_i[i], w_full
