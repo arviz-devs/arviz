@@ -583,7 +583,7 @@ def summary(
     data,
     var_names=None,
     fmt="wide",
-    round_to=2,
+    round_to=None,
     include_circ=None,
     stat_funcs=None,
     extend=True,
@@ -605,7 +605,7 @@ def summary(
     fmt : {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     round_to : int
-        Number of decimals used to round results. Defaults to 2.
+        Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
     stat_funcs : dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -834,8 +834,12 @@ def summary(
         summary_df = df
     else:
         summary_df = joined
-    if round_to is not None:
+    if (round_to is not None) and (round_to not in ("None", "none")):
         summary_df = summary_df.round(round_to)
+    elif round_to not in ("None", "none"):
+        decimals = {col : 3 if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"} else 2 if col == "r_hat" else 0 for col in summary_df.columns}
+        summary_df = summary_df.round(decimals)
+
     return summary_df
 
 

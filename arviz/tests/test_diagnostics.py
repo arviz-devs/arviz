@@ -8,7 +8,8 @@ from ..data import load_arviz_data
 from ..stats import bfmi, rhat, effective_sample_size, mcse, geweke
 from ..stats.diagnostics import ks_summary, _multichain_statistics, _mc_error, _rhat_rank_normalized
 
-# For tests only, recommended value should be closer to 1.01
+# For tests only, recommended value should be closer to 1.01-1.05
+# See discussion in https://github.com/stan-dev/rstan/pull/618
 GOOD_RHAT = 1.1
 
 
@@ -148,7 +149,7 @@ class TestDiagnostics:
         ess_sd_hat = effective_sample_size(ary, method="sd")
         ess_bulk_hat = effective_sample_size(ary, method="bulk")
         ess_tail_hat = effective_sample_size(ary, method="tail")
-        rhat_hat = _rhat_rank_normalized(ary, round_to=None)
+        rhat_hat = _rhat_rank_normalized(ary)
         (
             mcse_mean_hat_,
             mcse_sd_hat_,

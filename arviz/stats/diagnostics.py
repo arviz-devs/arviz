@@ -460,7 +460,7 @@ def _split_chains(ary):
     return np.vstack((ary[:, :half], ary[:, -half:]))
 
 
-def _rhat(ary, round_to=2, split=False):
+def _rhat(ary, split=False):
     """Compute the rhat for a 2d array."""
     ary = np.asarray(ary)
     _check_valid_size(ary, "Rhat")
@@ -481,15 +481,15 @@ def _rhat(ary, round_to=2, split=False):
     rhat_value = np.sqrt(
         (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
     )
-    return _round(rhat_value, round_to)
+    return rhat_value
 
 
-def _rhat_split(ary, round_to=2):
+def _rhat_split(ary):
     """Compute the split-rhat for a 2d array."""
-    return _rhat(ary, round_to=round_to, split=True)
+    return _rhat(ary, split=True)
 
 
-def _rhat_rank_normalized(ary, round_to=2):
+def _rhat_rank_normalized(ary):
     """Compute the rank normalized rhat for 2d array.
 
     Computation follows https://arxiv.org/abs/1903.08008
@@ -501,7 +501,7 @@ def _rhat_rank_normalized(ary, round_to=2):
     rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)), None)
 
     rhat_rank = max(rhat_bulk, rhat_tail)
-    return _round(rhat_rank, round_to)
+    return rhat_rank
 
 
 def _rhat_folded(ary):
@@ -857,9 +857,9 @@ def _multichain_statistics(ary):
     ess_tail_value = min(quantile05_ess, quantile95_ess)
 
     # r_hat
-    rhat_bulk = _rhat(z_split, None)
+    rhat_bulk = _rhat(z_split)
     ary_folded = np.abs(ary - np.median(ary))
-    rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)), None)
+    rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)))
     rhat_value = max(rhat_bulk, rhat_tail)
 
     # mcse_mean
