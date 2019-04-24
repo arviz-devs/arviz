@@ -1,12 +1,15 @@
 """Test Diagnostic methods"""
 # pylint: disable=redefined-outer-name, no-member
+import os
 import numpy as np
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
+import pandas as pd
 import pytest
 
-from ..data import load_arviz_data
-from ..stats import bfmi, rhat, effective_sample_size, mcse, geweke
-from ..stats.diagnostics import ks_summary, _multichain_statistics, _mc_error, _rhat_rank_normalized
+from ..data import load_arviz_data, from_cmdstan
+from ..plots.plot_utils import xarray_var_iter
+from ..stats import bfmi, rhat, ess, mcse, geweke
+from ..stats.diagnostics import ks_summary, _multichain_statistics, _mc_error, _rhat_rank
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
@@ -23,6 +26,111 @@ class TestDiagnostics:
     def test_bfmi(self):
         energy = np.array([1, 2, 3, 4])
         assert_almost_equal(bfmi(energy), 0.8)
+
+    def test_deterministic(self):
+        """
+        Test algorithm against RStan monitor.R functions.
+        monitor.R :
+        https://github.com/stan-dev/rstan/blob/66a77a4b0de4da8f8e8c8cd36dc83bb92a833813/rstan/rstan/R/monitor.R
+        R code:
+        ```
+        source('~/monitor.R')
+
+        data2 <- read.csv("blocker.2.csv", comment.char = "#")
+        data1 <- read.csv("blocker.1.csv", comment.char = "#")
+
+        output <- matrix(ncol=15, nrow=length(names(data1))-4)
+
+        j = 0
+        for (i in 1:length(names(data1))) {
+          name = names(data1)[i]
+          ary = matrix(c(data1[,name], data2[,name]), 1000, 2)
+          if (!endsWith(name, "__"))
+              j <- j + 1
+              output[j,] <- c(
+                rhat(ary),
+                rhat_rfun(ary),
+                ess_bulk(ary),
+                ess_tail(ary),
+                ess_mean(ary),
+                ess_sd(ary),
+                ess_rfun(ary),
+                ess_quantile(ary, 0.01),
+                ess_quantile(ary, 0.1),
+                ess_quantile(ary, 0.3),
+                mcse_mean(ary),
+                mcse_sd(ary),
+                mcse_quantile(ary, prob=0.01),
+                mcse_quantile(ary, prob=0.1),
+                mcse_quantile(ary, prob=0.3))
+            }
+
+        df = data.frame(output, row.names = names(data1)[5:ncol(data1)])
+        colnames(df) <- c("rhat_rank",
+                          "rhat_raw",
+                          "ess_bulk",
+                          "ess_tail",
+                          "ess_mean",
+                          "ess_sd",
+                          "ess_raw",
+                          "ess_quantile01",
+                          "ess_quantile10",
+                          "ess_quantile30",
+                          "mcse_mean",
+                          "mcse_sd",
+                          "mcse_quantile01",
+                          "mcse_quantile10",
+                          "mcse_quantile30")
+
+        write.csv(df, "reference_values.csv")
+        ```
+        """
+        # download input files
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        path = os.path.join(data_directory, "stan_diagnostics/blocker.[0-9].csv")
+        posterior = from_cmdstan(path)
+        reference_path = os.path.join(data_directory, "stan_diagnostics/reference.csv", index_col=0)
+        reference = (
+            pd.read_csv(reference_path, index_col=0).reference.sort_index(axis=1).sort_index(axis=0)
+        )
+        # test arviz functions
+        funcs = {
+            "rhat_rank": lambda x: az.rhat(x, method="rank"),
+            "rhat_raw": lambda x: az.rhat(x, method="identity"),
+            "ess_bulk": lambda x: az.ess(x, method="bulk"),
+            "ess_tail": lambda x: az.ess(x, method="tail"),
+            "ess_mean": lambda x: az.ess(x, method="mean"),
+            "ess_sd": lambda x: az.ess(x, method="sd"),
+            "ess_raw": lambda x: az.ess(x, method="identity"),
+            "ess_quantile01": lambda x: az.ess(x, method="quantile", prob=0.01),
+            "ess_quantile10": lambda x: az.ess(x, method="quantile", prob=0.1),
+            "ess_quantile30": lambda x: az.ess(x, method="quantile", prob=0.3),
+            "mcse_mean": lambda x: az.mcse(x, method="mean"),
+            "mcse_sd": lambda x: az.mcse(x, method="sd"),
+            "mcse_quantile01": lambda x: az.mcse(x, method="quantile", prob=0.01),
+            "mcse_quantile10": lambda x: az.mcse(x, method="quantile", prob=0.1),
+            "mcse_quantile30": lambda x: az.mcse(x, method="quantile", prob=0.3),
+        }
+        results = {}
+        for key, coord_dict, vals in xarray_var_iter(idata.posterior, combined=True):
+            if coord_dict:
+                key = key + ".{}".format(list(coord_dict.values())[0] + 1)
+            results[key] = {func_name: func(vals) for func_name, func in funcs.items()}
+        arviz_data = (
+            pd.DataFrame.from_dict(results).T.reference.sort_index(axis=1).sort_index(axis=0)
+        )
+        # check column names
+        assert set(arviz_data.columns) == set(reference.columns)
+        # check parameter names
+        assert set(arviz_data.index) == set(reference.index)
+        # check equality (rhat_rank has accuracy < 6e-5, atleast with this data)
+        # this is due to numerical accuracy in calculation leading to rankdata
+        # function, which causes minimal difference to larger scale
+        # test first with numpy
+        assert np.testing.assert_array_almost_equal(reference, arviz_data, decimal=4)
+        # then test manually (more strict)
+        assert (abs(reference - arviz_data) < 6e-5).all(None)
 
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_rhat(self, data, var_names):
@@ -47,80 +155,70 @@ class TestDiagnostics:
             rhat(np.random.randn(3))
 
     @pytest.mark.parametrize(
-        "ess",
+        "method",
         ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
     )
     @pytest.mark.parametrize("relative", (True, False))
-    def test_effective_sample_size_array(self, ess, relative):
+    def test_effective_sample_size_array(self, method, relative):
         n_low = 100 if not relative else 100 / 400
         n_high = 800 if not relative else 800 / 400
-        if ess in ("quantile", "tail"):
-            ess_hat = effective_sample_size(
-                np.random.randn(4, 100), method=ess, prob=0.34, relative=relative
-            )
-            if ess == "tail":
+        if method in ("quantile", "tail"):
+            ess_hat = ess(np.random.randn(4, 100), method=method, prob=0.34, relative=relative)
+            if method == "tail":
                 assert ess_hat > n_low
                 assert ess_hat < n_high
-                ess_hat = effective_sample_size(
-                    np.random.randn(4, 100), method=ess, relative=relative
-                )
+                ess_hat = ess(np.random.randn(4, 100), method=method, relative=relative)
                 assert ess_hat > n_low
                 assert ess_hat < n_high
-                ess_hat = effective_sample_size(
-                    np.random.randn(4, 100), method=ess, prob=(0.2, 0.8), relative=relative
+                ess_hat = ess(
+                    np.random.randn(4, 100), method=method, prob=(0.2, 0.8), relative=relative
                 )
         else:
-            ess_hat = effective_sample_size(np.random.randn(4, 100), relative=relative)
+            ess_hat = ess(np.random.randn(4, 100), relative=relative)
         assert ess_hat > n_low
         assert ess_hat < n_high
 
     @pytest.mark.parametrize(
-        "ess",
+        "method",
         ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
     )
     @pytest.mark.parametrize("relative", (True, False))
-    def test_effective_sample_size_bad_shape(self, ess, relative):
+    def test_effective_sample_size_bad_shape(self, method, relative):
         with pytest.raises(TypeError):
-            if ess in ("quantile", "tail"):
-                effective_sample_size(np.random.randn(3), method=ess, prob=0.34, relative=relative)
+            if method in ("quantile", "tail"):
+                ess(np.random.randn(3), method=method, prob=0.34, relative=relative)
             else:
-                effective_sample_size(np.random.randn(3), method=ess, relative=relative)
+                ess(np.random.randn(3), method=method, relative=relative)
 
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
-            effective_sample_size(np.random.randn(4, 100), method="quantile", relative=relative)
+            ess(np.random.randn(4, 100), method="quantile", relative=relative)
 
     @pytest.mark.parametrize(
-        "ess",
+        "method",
         ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
     )
     @pytest.mark.parametrize("relative", (True, False))
-    def test_effective_sample_size_bad_chains(self, ess, relative):
+    def test_effective_sample_size_bad_chains(self, method, relative):
         with pytest.raises(TypeError):
-            if ess in ("quantile", "tail"):
-                effective_sample_size(
-                    np.random.randn(1, 3), method=ess, prob=0.34, relative=relative
-                )
+            if method in ("quantile", "tail"):
+                ess(np.random.randn(1, 3), method=method, prob=0.34, relative=relative)
             else:
-                effective_sample_size(np.random.randn(1, 3), method=ess, relative=relative)
+                ess(np.random.randn(1, 3), method=method, relative=relative)
 
     @pytest.mark.parametrize(
-        "ess",
+        "method",
         ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
     )
     @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_effective_sample_size_dataset(self, data, ess, var_names, relative):
+    def test_effective_sample_size_dataset(self, data, method, var_names, relative):
         n_low = 100 if not relative else 100 / (data.chain.size * data.draw.size)
-        if ess in ("quantile", "tail"):
-            ess_hat = effective_sample_size(
-                data, var_names=var_names, method=ess, prob=0.34, relative=relative
-            )
+        if method in ("quantile", "tail"):
+            ess_hat = ess(data, var_names=var_names, method=method, prob=0.34, relative=relative)
         else:
-            ess_hat = effective_sample_size(
-                data, var_names=var_names, method=ess, relative=relative
-            )
+            ess_hat = ess(data, var_names=var_names, method=method, relative=relative)
         assert np.all(ess_hat.mu.values > n_low)  # This might break if the data is regenerated
 
     @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
@@ -145,11 +243,11 @@ class TestDiagnostics:
         ary = np.random.randn(4, 100)
         mcse_mean_hat = mcse(ary, method="mean")
         mcse_sd_hat = mcse(ary, method="sd")
-        ess_mean_hat = effective_sample_size(ary, method="mean")
-        ess_sd_hat = effective_sample_size(ary, method="sd")
-        ess_bulk_hat = effective_sample_size(ary, method="bulk")
-        ess_tail_hat = effective_sample_size(ary, method="tail")
-        rhat_hat = _rhat_rank_normalized(ary)
+        ess_mean_hat = ess(ary, method="mean")
+        ess_sd_hat = ess(ary, method="sd")
+        ess_bulk_hat = ess(ary, method="bulk")
+        ess_tail_hat = ess(ary, method="tail")
+        rhat_hat = _rhat_rank(ary)
         (
             mcse_mean_hat_,
             mcse_sd_hat_,

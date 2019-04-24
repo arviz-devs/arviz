@@ -1,17 +1,50 @@
 """Stats-utility functions for ArviZ."""
 from collections.abc import Sequence
-import warnings
 
 import numpy as np
-from scipy.signal import fftconvolve
+from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
 
-__all__ = ["autocorr", "make_ufunc", "wrap_xarray_ufunc"]
+__all__ = ["autocorr", "autocov", "make_ufunc", "wrap_xarray_ufunc"]
 
 
-def autocorr(ary):
+def autocov(ary, axis=-1):
+    """Compute autocovariance estimates for every lag for the input array.
+
+    Parameters
+    ----------
+    ary : Numpy array
+        An array containing MCMC samples
+
+    Returns
+    -------
+    acov: Numpy array same size as the input array
+    """
+    axis = axis if axis > 0 else len(ary.shape) + axis
+    n = ary.shape[axis]
+    m = next_fast_len(n)
+    mt2 = m * 2
+
+    ary = ary - ary.mean(axis, keepdims=True)
+    pad_shape = tuple(
+        dim_len if dim != axis else mt2 - dim_len for dim, dim_len in enumerate(ary.shape)
+    )
+    ary = np.concatenate((ary, np.zeros(pad_shape)), axis=axis)
+    ifft_ary = np.fft.rfft(ary, n=mt2, axis=axis)
+    ifft_ary *= np.conjugate(ifft_ary)
+
+    shape = tuple(
+        slice(None) if dim_len != axis else slice(0, n) for dim_len, _ in enumerate(ary.shape)
+    )
+    cov = np.fft.irfft(ifft_ary, n=mt2, axis=axis)[shape]
+    cov /= n
+
+    return cov
+
+
+def autocorr(ary, axis=-1):
     """Compute autocorrelation using FFT for every lag for the input array.
 
     See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
@@ -25,36 +58,14 @@ def autocorr(ary):
     -------
     acorr: Numpy array same size as the input array
     """
-    ary = ary - ary.mean()
-    n = len(ary)
-    with warnings.catch_warnings():
-        # silence annoying numpy tuple warning in another library
-        # silence hack added in 0.3.3+
-        warnings.simplefilter("ignore")
-        result = fftconvolve(ary, ary[::-1])
-    acorr = result[len(result) // 2 :]
-    acorr /= np.arange(n, 0, -1)
+    corr = autocov(ary, axis=axis)
+    axis = axis = axis if axis > 0 else len(corr.shape) + axis
+    norm = tuple(
+        slice(None, None) if dim != axis else slice(None, 1) for dim, _ in enumerate(corr.shape)
+    )
     with np.errstate(invalid="ignore"):
-        acorr /= acorr[0]
-    return acorr
-
-
-def _autocov(ary):
-    """Compute autocovariance estimates for every lag for the input array.
-
-    Parameters
-    ----------
-    ary : Numpy array
-        An array containing MCMC samples
-
-    Returns
-    -------
-    acov: Numpy array same size as the input array
-    """
-    acorr = autocorr(ary)
-    varx = np.var(ary, ddof=0)
-    acov = acorr * varx
-    return acov
+        corr /= corr[norm]
+    return corr
 
 
 def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa: D202
@@ -309,14 +320,18 @@ def check_nan(ary, axis=None, how="any"):
     return isnan
 
 
-def check_valid_size(ary, msg):
+def check_valid_size(ary, msg, min_n_chain=2, min_n_draw=2):
     """Validate 2D array shape."""
     ary = np.asarray(ary)
     shape = ary.shape
     if len(shape) != 2:
         raise TypeError("{} calculation requires 2 dimensional array.".format(msg))
     n_chain, n_draw = shape
-    if n_chain <= 1:
-        raise TypeError("{} calculation requires multiple chains.".format(msg))
-    if n_draw <= 1:
-        raise TypeError("{} calculation requires multiple draws.".format(msg))
+    if n_chain < min_n_chain:
+        raise TypeError(
+            "{} calculation requires multiple chains. (minimum={})".format(msg, min_n_chain)
+        )
+    if n_draw < min_n_draw:
+        raise TypeError(
+            "{} calculation requires multiple draws (minimum={}).".format(msg, min_n_draw)
+        )

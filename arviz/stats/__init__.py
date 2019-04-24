@@ -15,8 +15,10 @@ __all__ = [
     "summary",
     "waic",
     "effective_sample_size",
+    "ess",
     "rhat",
     "mcse",
     "geweke",
     "autocorr",
+    "autocov",
 ]

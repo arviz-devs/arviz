@@ -11,7 +11,7 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import _multichain_statistics, _mc_error, effective_sample_size
+from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
 from ..utils import _var_names
 
@@ -310,7 +310,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     pointwise: bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
-        Relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
+        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
     scale : str
         Output scale for loo. Available options are:
@@ -359,9 +359,11 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         if n_chains == 1:
             reff = 1.0
         else:
-            ess = effective_sample_size(posterior, method="mean")
+            ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
-            reff = np.hstack([ess[v].values.flatten() for v in ess.data_vars]).mean() / n_samples
+            reff = (
+                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+            )
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood

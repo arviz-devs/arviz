@@ -1,4 +1,4 @@
-# pylint: disable=too-many-lines, too-many-function-args
+# pylint: disable=too-many-lines, too-many-function-args, redefined-outer-name
 """Diagnostic functions for ArviZ."""
 from collections.abc import Sequence
 import warnings
@@ -8,10 +8,9 @@ import pandas as pd
 from scipy import stats
 
 from .stats_utils import (
-    _autocov,
     _rint,
-    _round,
     _quantile,
+    autocov,
     check_valid_size as _check_valid_size,
     check_nan as _check_nan,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
@@ -20,7 +19,7 @@ from ..data import convert_to_dataset
 from ..utils import _var_names
 
 
-__all__ = ["bfmi", "effective_sample_size", "rhat", "mcse", "geweke"]
+__all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
 
 def bfmi(data):
@@ -57,6 +56,8 @@ def bfmi(data):
 def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
     r"""Calculate estimate of the effective sample size.
 
+    Function deprecated. Use `arviz.ess`.
+
     Parameters
     ----------
     data : obj
@@ -74,10 +75,73 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         - "mean" (old ess)
         - "sd"
         - "median"
-        - "split_mad" (mean absolute deviance)
+        - "mad" (mean absolute deviance)
         - "z_scale"
-        - "split_folded"
+        - "folded"
         - "split"
+        - "identity"
+    relative : bool
+        Return relative ess
+        `ress = ess / N`
+    prob : float, optional
+        probability value for "tail" and "quantile" ess functions.
+
+    Returns
+    -------
+    xarray.Dataset
+        Return the effective sample size for mean, :math:`\hat{N}_{eff}`
+
+    Notes
+    -----
+    The basic ess diagnostic is computed by:
+
+    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
+    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
+
+    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
+    is the first odd positive integer for which the sum
+    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
+
+    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
+    criterion (Geyer, 1992; Geyer, 2011).
+
+    References
+    ----------
+    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
+    Gelman et al. BDA (2014) Formula 11.8
+    """
+    warnings.warn(
+        "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
+    )
+    return ess(data=data, var_names=var_names, method=method, relative=relative, prob=prob)
+
+
+def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
+    r"""Calculate estimate of the effective sample size.
+
+    Parameters
+    ----------
+    data : obj
+        Any object that can be converted to an az.InferenceData object
+        Refer to documentation of az.convert_to_dataset for details
+        At least 2 posterior chains are needed to compute this diagnostic of one or more
+        stochastic parameters.
+    var_names : list
+        Names of variables to include in the effective_sample_size_mean report
+    method : str
+        Select ess method. Valid methods are
+        - "bulk"
+        - "tail"     # prob, optional
+        - "quantile" # prob
+        - "mean" (old ess)
+        - "sd"
+        - "median"
+        - "mad" (mean absolute deviance)
+        - "z_scale"
+        - "folded"
+        - "split"
+        - "identity"
     relative : bool
         Return relative ess
         `ress = ess / N`
@@ -120,6 +184,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         "z_scale": _ess_z_scale,
         "folded": _ess_folded,
         "split": _ess_split,
+        "identity": _ess,
     }
 
     methods_relative = {
@@ -133,6 +198,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         "z_scale": _ress_z_scale,
         "folded": _ress_folded,
         "split": _ress_split,
+        "identity": _ress,
     }
 
     if method not in methods:
@@ -185,10 +251,10 @@ def rhat(data, *, var_names=None, method="rank"):
     method : str
         Select R-hat method. Valid methods are
         - "rank"        # recommended by Vehtari et al. (2019)
-        - "split"       # old split-Rhat
-        - "identity"    # no-split Rhat
+        - "split"
         - "folded"
         - "z_scale"
+        - "identity"
 
     Returns
     -------
@@ -217,11 +283,11 @@ def rhat(data, *, var_names=None, method="rank"):
     Gelman and Rubin (1992)
     """
     methods = {
-        "rank": _rhat_rank_normalized,
+        "rank": _rhat_rank,
         "split": _rhat_split,
-        "identity": _rhat,
         "folded": _rhat_folded,
         "z_scale": _rhat_z_scale,
+        "identity": _rhat,
     }
     if method not in methods:
         raise TypeError(
@@ -441,7 +507,7 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
-    _check_valid_size(ary, "Bulk effective sample size")
+    _check_valid_size(ary, "Z-scale")
     if _check_nan(ary):
         return np.nan
     size = ary.size
@@ -454,27 +520,26 @@ def _z_scale(ary):
 def _split_chains(ary):
     """Split and stack chains."""
     ary = np.asarray(ary)
-    _check_valid_size(ary, "Bulk effective sample size")
+    _check_valid_size(ary, "Split chains", min_n_chain=1)
     _, n_draw = ary.shape
     half = n_draw // 2
     return np.vstack((ary[:, :half], ary[:, -half:]))
 
 
-def _rhat(ary, split=False):
+def _rhat(ary):
     """Compute the rhat for a 2d array."""
     ary = np.asarray(ary)
     _check_valid_size(ary, "Rhat")
     if _check_nan(ary):
         return np.nan
     _, num_samples = ary.shape
-    if split:
-        ary = _split_chains(ary)
+
     # Calculate chain mean
     chain_mean = np.mean(ary, axis=1)
     # Calculate chain variance
     chain_var = np.var(ary, axis=1, ddof=1)
     # Calculate between-chain variance
-    between_chain_variance = num_samples / 2 * np.var(chain_mean, ddof=1)
+    between_chain_variance = num_samples * np.var(chain_mean, ddof=1)
     # Calculate within-chain variance
     within_chain_variance = np.mean(chain_var)
     # Estimate of marginal posterior variance
@@ -484,21 +549,16 @@ def _rhat(ary, split=False):
     return rhat_value
 
 
-def _rhat_split(ary):
-    """Compute the split-rhat for a 2d array."""
-    return _rhat(ary, split=True)
-
-
-def _rhat_rank_normalized(ary):
+def _rhat_rank(ary):
     """Compute the rank normalized rhat for 2d array.
 
     Computation follows https://arxiv.org/abs/1903.08008
     """
     ary = np.asarray(ary)
-    rhat_bulk = _rhat(_z_scale(_split_chains(ary)), None)
+    rhat_bulk = _rhat(_z_scale(_split_chains(ary)))
 
     ary_folded = abs(ary - np.median(ary))
-    rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)), None)
+    rhat_tail = _rhat(_z_scale(_split_chains(ary_folded)))
 
     rhat_rank = max(rhat_bulk, rhat_tail)
     return rhat_rank
@@ -506,20 +566,28 @@ def _rhat_rank_normalized(ary):
 
 def _rhat_folded(ary):
     """Calculate split-Rhat for folded z-values."""
-    ary = _z_split_fold(ary)
+    ary = _z_fold(_split_chains(ary))
     return _rhat(ary)
 
 
-def _ess(ary, split=False):
+def _rhat_z_scale(ary):
+    return _rhat(_z_scale(_split_chains(ary)))
+
+
+def _rhat_split(ary):
+    return _rhat(_split_chains(ary))
+
+
+def _ess(ary):
     """Compute the effective sample size for a 2D array."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
+    ary = np.asarray(ary, dtype=float)
+    _check_valid_size(ary, "Effective sample size", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
-    if split:
-        ary = _split_chains(ary)
+    if (np.max(ary) - np.min(ary)) < np.finfo(float).resolution:  # pylint: disable=no-member
+        return ary.size
     n_chain, n_draw = ary.shape
-    acov = np.asarray([_autocov(ary[chain]) for chain in range(n_chain)])
+    acov = autocov(ary, axis=1)
     chain_mean = ary.mean(axis=1)
     mean_var = np.mean(acov[:, 0]) * n_draw / (n_draw - 1.0)
     var_plus = mean_var * (n_draw - 1.0) / n_draw
@@ -534,15 +602,18 @@ def _ess(ary, split=False):
 
     # Geyer's initial positive sequence
     t = 1
-    while t < (n_draw - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
+    while t < (n_draw - 3) and (rho_hat_even + rho_hat_odd) > 0.0:
         rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
         rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
-        rho_hat_t[t + 1] = rho_hat_even
         if (rho_hat_even + rho_hat_odd) >= 0:
+            rho_hat_t[t + 1] = rho_hat_even
             rho_hat_t[t + 2] = rho_hat_odd
         t += 2
 
-    max_t = t
+    max_t = t - 2
+    # improve estimation
+    if rho_hat_even > 0:
+        rho_hat_t[max_t + 1] = rho_hat_even
     # Geyer's initial monotone sequence
     t = 1
     while t <= max_t - 2:
@@ -551,8 +622,10 @@ def _ess(ary, split=False):
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
 
-    tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[:max_t]) + np.sum(rho_hat_t[max_t + 1 : max_t + 2])
-    ess = (n_chain * n_draw) / tau_hat
+    ess = n_chain * n_draw
+    tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[: max_t + 1]) + np.sum(rho_hat_t[max_t + 1 : max_t + 2])
+    tau_hat = max(tau_hat, 1 / np.log10(ess))
+    ess = ess / tau_hat
     if np.isnan(rho_hat_t).any():
         ess = np.nan
     return ess
@@ -560,8 +633,12 @@ def _ess(ary, split=False):
 
 def _ess_bulk(ary):
     """Compute the effective sample size for the bulk."""
-    z_split = _z_scale(_split_chains(ary))
-    ess_bulk = _ess(z_split)
+    ary = np.asarray(ary)
+    _check_valid_size(ary, "Bulk effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    z_scaled = _z_scale(_split_chains(ary))
+    ess_bulk = _ess(z_scaled)
     return ess_bulk
 
 
@@ -575,50 +652,72 @@ def _ess_tail(ary, prob=None):
     elif not isinstance(prob, Sequence):
         prob = (prob, 1 - prob)
 
+    ary = np.asarray(ary)
+    _check_valid_size(ary, "Tail effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+
     prob_low, prob_high = prob
     quantile_low_ess = _ess_quantile(ary, prob_low)
     quantile_high_ess = _ess_quantile(ary, prob_high)
     return min(quantile_low_ess, quantile_high_ess)
 
 
-def _ess_mean(ary, split=False):
+def _ess_mean(ary):
     """Compute the effective sample size for the mean."""
     ary = np.asarray(ary)
-    return _ess(ary, split=split)
+    _check_valid_size(ary, "Mean effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    return _ess(_split_chains(ary))
 
 
-def _ess_sd(ary, split=False):
+def _ess_sd(ary):
     """Compute the effective sample size for the sd."""
     ary = np.asarray(ary)
-    return min(_ess(ary, split=split), _ess(ary ** 2, split=split))
+    _check_valid_size(ary, "Standard deviation effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    ary = _split_chains(ary)
+    return min(_ess(ary), _ess(ary ** 2))
 
 
 def _ess_quantile(ary, prob):
     """Compute the effective sample size for the specific residual."""
     ary = np.asarray(ary)
-    _check_valid_size(ary, "Quantile effective sample size")
+    _check_valid_size(ary, "Quantile effective sample size", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
     quantile, = _quantile(ary, prob)
     iquantile = ary <= quantile
-    return _ess(_z_scale(_split_chains(iquantile)))
+    return _ess(_split_chains(iquantile))
 
 
-def _ess_split(ary):
-    """Calculate split-ess."""
-    ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
-    return _ess(ary, split=True)
-
-
-def _ess_z_scale(ary, split=False):
+def _ess_z_scale(ary):
     """Calculate ess for z-scaLe."""
-    return _ess(_z_scale(ary), split=split)
+    ary = np.asarray(ary)
+    _check_valid_size(ary, "Z-scale effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    return _ess(_z_scale(_split_chains(ary)))
 
 
 def _ess_folded(ary):
     """Calculate split-ess for folded data."""
-    return _ess(_z_split_fold(ary))
+    ary = np.asarray(ary)
+    _check_valid_size(ary, "Folded effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    return _ess(_z_fold(_split_chains(ary)))
+
+
+def _ess_split(ary):
+    """Calculate split-ess for median."""
+    ary = np.asarray(ary)
+    _check_valid_size(ary, "Split effective sample size", min_n_draw=3)
+    if _check_nan(ary):
+        return np.nan
+    return _ess(_split_chains(ary))
 
 
 def _ess_median(ary):
@@ -629,7 +728,7 @@ def _ess_median(ary):
 def _ess_mad(ary):
     """Calculate split-ess for mean absolute deviance."""
     ary = np.asarray(ary)
-    _check_valid_size(ary, "Effective sample size")
+    _check_valid_size(ary, "Effective sample size", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
     ary = abs(ary - np.median(ary))
@@ -641,39 +740,43 @@ def _ess_mad(ary):
 def _conv_quantile(ary, prob):
     """Return mcse, Q05, Q95, Seff."""
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Quantile sample size", min_n_draw=3)
     if _check_nan(ary):
         return np.nan, np.nan, np.nan, np.nan
-    ess = _ess_quantile(ary, prob)
+    ess = _ess_quantile(_split_chains(ary), prob)
     probability = [0.1586553, 0.8413447, 0.05, 0.95]
     with np.errstate(invalid="ignore"):
         ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
     sorted_ary = np.sort(ary.ravel())
     size = sorted_ary.size
-    th1 = sorted_ary[_rint(np.nanmax((ppf[0] * size, 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf[1] * size, size - 1)))]
+    ppf_size = ppf * size - 1
+    th1 = sorted_ary[_rint(np.nanmax((ppf_size[0], 0)))]
+    th2 = sorted_ary[_rint(np.nanmin((ppf_size[1], size - 1)))]
     mcse_quantile = (th2 - th1) / 2
-    th1 = sorted_ary[_rint(np.nanmax((ppf[2] * size, 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf[3] * size, size - 1)))]
+    th1 = sorted_ary[_rint(np.nanmax((ppf_size[2], 0)))]
+    th2 = sorted_ary[_rint(np.nanmin((ppf_size[3], size - 1)))]
     return mcse_quantile, th1, th2, ess
 
 
-def _mcse_mean(ary, split=False):
+def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Mean Markov Chain Sample Error", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
-    ess = _ess_mean(ary, split=split)
+    ess = _ess_mean(ary)
     sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess)
     return mcse_mean_value
 
 
-def _mcse_sd(ary, split=False):
+def _mcse_sd(ary):
     """Compute the Markov Chain sd error."""
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Standard Deviation Markov Chain Sample Error", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
-    ess = _ess_sd(ary, split=split)
+    ess = _ess_sd(ary)
     sd = np.std(ary, ddof=1)
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
     mcse_sd_value = sd * fac_mcse_sd
@@ -683,25 +786,26 @@ def _mcse_sd(ary, split=False):
 def _mcse_quantile(ary, prob):
     """Compute the Markov Chain quantile error at quantile=prob."""
     ary = np.asarray(ary)
+    _check_valid_size(ary, "Quantile Markov Chain Sample Error", min_n_draw=3)
     if _check_nan(ary):
         return np.nan
     mcse_q, *_ = _conv_quantile(ary, prob)
     return mcse_q
 
 
-def _ress_mean(ary, ess=None, split=False):
+def _ress_mean(ary, ess=None):
     """Relative mean effective sample size."""
     ary = np.asarray(ary)
     if ess is None:
-        ess = _ess_mean(ary, split=split)
+        ess = _ess_mean(ary)
     return ess / ary.size
 
 
-def _ress_sd(ary, ess=None, split=False):
+def _ress_sd(ary, ess=None):
     """Relative sd effective sample size."""
     ary = np.asarray(ary)
     if ess is None:
-        ess = _ess_sd(ary, split=split)
+        ess = _ess_sd(ary)
     return ess / ary.size
 
 
@@ -738,21 +842,10 @@ def _ress_split(ary, ess=None):
     return ess / ary.size
 
 
-def _ress_z_scale(ary, ess=None, split=False):
+def _ress_z_scale(ary, ess=None):
     if ess is None:
-        ess = _ess_z_scale(ary, split=split)
+        ess = _ess_z_scale(ary)
     return ess / ary.size
-
-
-def _rhat_z_scale(ary, split=False):
-    return _rhat(_z_scale(ary), split=split)
-
-
-def _z_split_fold(ary):
-    ary = np.asarray(ary)
-    ary = abs(ary - np.median(ary))
-    ary = _z_scale(_split_chains(ary))
-    return ary
 
 
 def _ress_folded(ary, ess=None):
@@ -771,6 +864,21 @@ def _ress_mad(ary, ess=None):
     if ess is None:
         ess = _ess_mad(ary)
     return ess / ary.size
+
+
+def _ress(ary, ess=None):
+    """Relative effective sample size."""
+    ary = np.asarray(ary)
+    if ess is None:
+        ess = _ess(ary)
+    return ess / ary.size
+
+
+def _z_fold(ary):
+    ary = np.asarray(ary)
+    ary = abs(ary - np.median(ary))
+    ary = _z_scale(ary)
+    return ary
 
 
 def _mc_error(ary, batches=5, circular=False):
