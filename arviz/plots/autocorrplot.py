@@ -13,7 +13,9 @@ from .plot_utils import (
 from ..utils import _var_names
 
 
-def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
+def plot_autocorr(
+    data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None, ax=None
+):
     """Bar plot of the autocorrelation function for a sequence of data.
 
     Useful in particular for posteriors from MCMC samples which may display correlation.
@@ -37,6 +39,8 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    ax: axes
+        Matplotlib axes
 
     Returns
     -------
@@ -87,9 +91,12 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
         figsize, textsize, rows, cols
     )
 
-    _, axes = _create_axes_grid(
-        length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True
-    )
+    if ax is None:
+        _, axes = _create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True
+        )
+    else:
+        axes = ax
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
     for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
