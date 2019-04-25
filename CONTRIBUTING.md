@@ -41,7 +41,7 @@ For code generally follow the
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)
 Both more or less follows PEP 8.
 
-Final formatting is done with [black](https://github.com/ambv/black). 
+Final formatting is done with [black](https://github.com/ambv/black).
 For more detailed steps on a typical development workflow see the
 [Pull request checklist](#pull-request-checklist)
 
@@ -55,8 +55,8 @@ when in doubt, add a docstring.
 #### Documentation for user facing methods
 If changes are made to a method documented in the
 [ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
-please consider adding inline documentation examples. 
-`az.plot_posterior` is a particularly 
+please consider adding inline documentation examples.
+`az.plot_posterior` is a particularly
 [good example](https://arviz-devs.github.io/arviz/generated/arviz.plot_posterior.html#arviz.plot_posterior).
 
 
@@ -185,19 +185,24 @@ We have provided a Dockerfile which helps for isolating build problems, and loca
 Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
 ### Testing in Docker
-Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it). 
+Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
 First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
 
+NOTE: If you run into errors due to `__pycache__` files (i.e. while testing in
+docker after testing locally or installing with pip after testing with
+docker), try running `./scripts/container.sh --clear-cache` before the errored
+command.
+
 ### Using the Docker image interactively
-Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. 
+Once the Docker image is built with `./scripts/container.sh --build`, interactive containers can also be run. Therefore, code can be edited and executed using the docker container, but modifying directly the working directory of the host machine.
 
 To start a bash shell inside Docker, run:
 
-    $ docker run -it arviz bash
+    $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
 
-To start a jupyter notebook, there are two steps, first run:
+Alternatively, to start a jupyter notebook, there are two steps, first run:
 
-    $ docker run --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec -it jupyter-dock pip install jupyter
     $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
 
