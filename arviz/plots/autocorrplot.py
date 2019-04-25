@@ -99,7 +99,7 @@ def plot_autocorr(
         axes = ax
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
-    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+    for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
 
         if combined:
@@ -107,10 +107,10 @@ def plot_autocorr(
 
         y = autocorr(x_prime)
 
-        ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
-        ax.hlines(0, 0, max_lag, "steelblue")
-        ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax.tick_params(labelsize=xt_labelsize)
+        ax_.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
+        ax_.hlines(0, 0, max_lag, "steelblue")
+        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax_.tick_params(labelsize=xt_labelsize)
 
     if axes.size > 0:
         axes[0, 0].set_xlim(0, max_lag)
