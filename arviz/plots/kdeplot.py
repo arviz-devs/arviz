@@ -2,6 +2,7 @@
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
@@ -167,6 +168,7 @@ def plot_kde(
         plot_kwargs.setdefault("color", "C0")
 
         default_color = plot_kwargs.get("color")
+
         if fill_kwargs is None:
             fill_kwargs = {}
 
@@ -227,7 +229,8 @@ def plot_kde(
             fill_func(fill_x, fill_y, **fill_kwargs)
 
         if legend and label:
-            ax.legend()
+            legend_element = [Patch(edgecolor=default_color, label=label)]
+            ax.legend(handles=legend_element)
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
