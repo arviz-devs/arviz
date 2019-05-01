@@ -47,7 +47,7 @@ class PyMC3Converter:
                 log_like_val = log_like(point)
                 if var.missing_values:
                     log_like_val = log_like_val[~var.observations.mask]
-                log_like_vals.append(log_like_val.ravel())
+                log_like_vals.append(log_like_val)
             return np.concatenate(log_like_vals)
 
         chain_likelihoods = []
