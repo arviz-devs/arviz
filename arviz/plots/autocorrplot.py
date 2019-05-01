@@ -80,7 +80,6 @@ def plot_autocorr(
 
         >>> az.plot_autocorr(data, var_names=['mu', 'tau'], max_lag=200, combined=True)
     """
-
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, data)
 
