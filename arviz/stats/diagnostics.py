@@ -137,7 +137,7 @@ def _autocov(x):
     acov: Numpy array same size as the input array
     """
     acorr = autocorr(x)
-    varx = np.var(x, axis=-1, ddof=1, keepdims=True) * (x.shape[-1] - 1) / x.shape[-1]
+    varx = np.var(x, axis=-1, keepdims=True)
     acov = acorr * varx
     return acov
 
