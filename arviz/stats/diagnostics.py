@@ -84,20 +84,23 @@ def _get_ess(sample_array):
     var_plus = mean_var * (n_draws - 1.0) / n_draws
     if n_chain > 1:
         var_plus += np.var(chain_mean, axis=-2, ddof=1)
+    else:
+        # to make rho_hat_t = autocorr(sample_array)
+        mean_var = var_plus
 
     # Geyer's initial positive sequence
     rho_hat_t = 1.0 - (mean_var - acov.mean(axis=-2)) / var_plus
     rho_hat_t[..., 0] = 1.0  # correlation at lag 0 is 1
     # take sum of even index and odd index from the sequence
-    rho_hat_t = rho_hat_t[..., :-1:2] + rho_hat_t[..., 1::2]
+    P_t = rho_hat_t[..., :-1:2] + rho_hat_t[..., 1::2]
 
     # Geyer's initial monotone sequence
     # here we split out the initial value and take the accumulated min of the remaining sequence
-    rho_hat_t = np.concatenate([rho_hat_t[..., :1],
-                                np.minimum.accumulate(rho_hat_t[..., 1:].clip(min=0), axis=-1)
-                               ], axis=-1)
+    P_t = np.concatenate([P_t[..., :1],
+                          np.minimum.accumulate(P_t[..., 1:].clip(min=0), axis=-1)
+                         ], axis=-1)
 
-    ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t, axis=-1)))
+    ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(P_t, axis=-1)))
     return ess
 
 
@@ -137,7 +140,7 @@ def _autocov(x):
     acov: Numpy array same size as the input array
     """
     acorr = autocorr(x)
-    varx = np.var(x, axis=-1, keepdims=True)
+    varx = np.var(x, axis=-1, ddof=0, keepdims=True)
     acov = acorr * varx
     return acov
 
