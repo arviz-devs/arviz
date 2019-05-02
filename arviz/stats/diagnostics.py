@@ -99,8 +99,7 @@ def _get_ess(sample_array):
     # Geyer's initial monotone sequence
     # here we split out the initial value and take the accumulated min of the remaining sequence
     p_t = np.concatenate(
-        [p_t[..., :1], np.minimum.accumulate(p_t[..., 1:].clip(min=0), axis=-1)],
-        axis=-1
+        [p_t[..., :1], np.minimum.accumulate(p_t[..., 1:].clip(min=0), axis=-1)], axis=-1
     )
 
     ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(p_t, axis=-1)))
