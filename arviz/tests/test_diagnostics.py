@@ -44,14 +44,6 @@ class TestDiagnostics:
         assert ess_hat > 100
         assert ess_hat < 800
 
-    def test_effective_sample_size_bad_shape(self):
-        with pytest.raises(TypeError):
-            effective_sample_size(np.random.randn(3))
-
-    def test_effective_sample_size_bad_chains(self):
-        with pytest.raises(TypeError):
-            effective_sample_size(np.random.randn(1, 3))
-
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_effective_sample_size_dataset(self, data, var_names):
         ess_hat = effective_sample_size(data, var_names=var_names)

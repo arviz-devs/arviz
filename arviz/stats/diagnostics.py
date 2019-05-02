@@ -21,8 +21,6 @@ def effective_sample_size(data, *, var_names=None):
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
     var_names : list
       Names of variables to include in the effective_sample_size report
 
@@ -67,65 +65,44 @@ def _ess_ufunc(ary):
     This can be used on an xarray Dataset, using
     `xr.apply_ufunc(_ess_ufunc, ..., input_core_dims=(('chain', 'draw'),))
     """
-    target = np.empty(ary.shape[:-2])
-    for idx in np.ndindex(target.shape):
-        target[idx] = _get_ess(ary[idx])
-    return target
+    return _get_ess(ary)
 
 
 def _get_ess(sample_array):
-    """Compute the effective sample size for a 2D array."""
-    shape = sample_array.shape
-    if len(shape) != 2:
-        raise TypeError("Effective sample size calculation requires 2 dimensional arrays.")
-    n_chain, n_draws = shape
-    if n_chain <= 1:
-        raise TypeError("Effective sample size calculation requires multiple chains.")
+    """Compute the effective sample size for a ND array with the last two dimensions are chain
+    dimension and draw dimension.
+    """
+    if sample_array.ndim == 1:
+        sample_array = sample_array[None, ...]
+    n_chain, n_draws = sample_array.shape[-2], sample_array.shape[-1]
 
-    acov = np.asarray([_autocov(sample_array[chain]) for chain in range(n_chain)])
+    acov = _autocov(sample_array)
 
-    chain_mean = sample_array.mean(axis=1)
-    chain_var = acov[:, 0] * n_draws / (n_draws - 1.0)
-    acov_t = acov[:, 1] * n_draws / (n_draws - 1.0)
-    mean_var = np.mean(chain_var)
+    chain_mean = sample_array.mean(axis=-1, keepdims=True)
+    chain_var = acov[..., :1] * n_draws / (n_draws - 1.0)
+    mean_var = np.mean(chain_var, axis=-2)
     var_plus = mean_var * (n_draws - 1.0) / n_draws
-    var_plus += np.var(chain_mean, ddof=1)
-
-    rho_hat_t = np.zeros(n_draws)
-    rho_hat_even = 1.0
-    rho_hat_t[0] = rho_hat_even
-    rho_hat_odd = 1.0 - (mean_var - np.mean(acov_t)) / var_plus
-    rho_hat_t[1] = rho_hat_odd
+    if n_chain > 1:
+        var_plus += np.var(chain_mean, axis=-2, ddof=1)
 
     # Geyer's initial positive sequence
-    max_t = 1
-    t = 1
-    while t < (n_draws - 2) and (rho_hat_even + rho_hat_odd) >= 0.0:
-        rho_hat_even = 1.0 - (mean_var - np.mean(acov[:, t + 1])) / var_plus
-        rho_hat_odd = 1.0 - (mean_var - np.mean(acov[:, t + 2])) / var_plus
-        if (rho_hat_even + rho_hat_odd) >= 0:
-            rho_hat_t[t + 1] = rho_hat_even
-            rho_hat_t[t + 2] = rho_hat_odd
-        max_t = t + 2
-        t += 2
+    rho_hat_t = 1.0 - (mean_var - acov.mean(axis=-2)) / var_plus
+    rho_hat_t[..., 0] = 1.0  # correlation at lag 0 is 1
+    # take sum of even index and odd index from the sequence
+    rho_hat_t = rho_hat_t[..., :-1:2] + rho_hat_t[..., 1::2]
 
     # Geyer's initial monotone sequence
-    t = 3
-    while t <= max_t - 2:
-        if (rho_hat_t[t + 1] + rho_hat_t[t + 2]) > (rho_hat_t[t - 1] + rho_hat_t[t]):
-            rho_hat_t[t + 1] = (rho_hat_t[t - 1] + rho_hat_t[t]) / 2.0
-            rho_hat_t[t + 2] = rho_hat_t[t + 1]
-        t += 2
-    ess = (
-        int((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t)))
-        if not np.any(np.isnan(rho_hat_t))
-        else np.nan
-    )
+    # here we split out the initial value and take the accumulated min of the remaining sequence
+    rho_hat_t = np.concatenate([rho_hat_t[..., :1],
+                                np.minimum.accumulate(rho_hat_t[..., 1:].clip(min=0), axis=-1)
+                               ], axis=-1)
+
+    ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(rho_hat_t, axis=-1)))
     return ess
 
 
 def autocorr(x):
-    """Compute autocorrelation using FFT for every lag for the input array.
+    """Compute autocorrelation (over the last axis) using FFT for every lag for the input array.
 
     See https://en.wikipedia.org/wiki/autocorrelation#Efficient_computation
 
@@ -138,17 +115,18 @@ def autocorr(x):
     -------
     acorr: Numpy array same size as the input array
     """
-    y = x - x.mean()
-    len_y = len(y)
-    result = fftconvolve(y, y[::-1])
-    acorr = result[len(result) // 2 :]
+    y = x - x.mean(axis=-1, keepdims=True)
+    len_y = y.shape[-1]
+    result = fftconvolve(y, y[..., ::-1], axes=-1)
+    print(result)
+    acorr = result[..., result.shape[-1] // 2 :]
     acorr /= np.arange(len_y, 0, -1)
-    acorr /= acorr[0]
+    acorr /= acorr[..., :1]
     return acorr
 
 
 def _autocov(x):
-    """Compute autocovariance estimates for every lag for the input array.
+    """Compute autocovariance estimates (over the last axis) for every lag for the input array.
 
     Parameters
     ----------
@@ -160,7 +138,7 @@ def _autocov(x):
     acov: Numpy array same size as the input array
     """
     acorr = autocorr(x)
-    varx = np.var(x, ddof=1) * (len(x) - 1) / len(x)
+    varx = np.var(x, axis=-1, ddof=1, keepdims=True) * (x.shape[-1] - 1) / x.shape[-1]
     acov = acorr * varx
     return acov
 
