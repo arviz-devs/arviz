@@ -73,6 +73,7 @@ def _get_ess(sample_array):
 
     It is required that the last two dimensions are chain dimension and draw dimension.
     """
+    # pylint: disable=no-member
     if sample_array.ndim == 1:
         sample_array = sample_array[None, ...]
     n_chain, n_draws = sample_array.shape[-2], sample_array.shape[-1]
@@ -93,15 +94,16 @@ def _get_ess(sample_array):
     rho_hat_t = 1.0 - (mean_var - acov.mean(axis=-2)) / var_plus
     rho_hat_t[..., 0] = 1.0  # correlation at lag 0 is 1
     # take sum of even index and odd index from the sequence
-    P_t = rho_hat_t[..., :-1:2] + rho_hat_t[..., 1::2]
+    p_t = rho_hat_t[..., :-1:2] + rho_hat_t[..., 1::2]
 
     # Geyer's initial monotone sequence
     # here we split out the initial value and take the accumulated min of the remaining sequence
-    P_t = np.concatenate(
-        [P_t[..., :1], np.minimum.accumulate(P_t[..., 1:].clip(min=0), axis=-1)], axis=-1
+    p_t = np.concatenate(
+        [p_t[..., :1], np.minimum.accumulate(p_t[..., 1:].clip(min=0), axis=-1)],
+        axis=-1
     )
 
-    ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(P_t, axis=-1)))
+    ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(p_t, axis=-1)))
     return ess
 
 
