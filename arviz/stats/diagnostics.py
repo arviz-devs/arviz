@@ -97,9 +97,9 @@ def _get_ess(sample_array):
 
     # Geyer's initial monotone sequence
     # here we split out the initial value and take the accumulated min of the remaining sequence
-    P_t = np.concatenate([P_t[..., :1],
-                          np.minimum.accumulate(P_t[..., 1:].clip(min=0), axis=-1)],
-                         axis=-1)
+    P_t = np.concatenate(
+        [P_t[..., :1], np.minimum.accumulate(P_t[..., 1:].clip(min=0), axis=-1)], axis=-1
+    )
 
     ess = np.floor((n_chain * n_draws) / (-1.0 + 2.0 * np.sum(P_t, axis=-1)))
     return ess
@@ -122,7 +122,7 @@ def autocorr(x):
     y = x - x.mean(axis=-1, keepdims=True)
     len_y = y.shape[-1]
     result = fftconvolve(y, y[..., ::-1], axes=-1)
-    acorr = result[..., result.shape[-1] // 2:]
+    acorr = result[..., result.shape[-1] // 2 :]
     acorr /= np.arange(len_y, 0, -1)
     acorr /= acorr[..., :1]
     return acorr
