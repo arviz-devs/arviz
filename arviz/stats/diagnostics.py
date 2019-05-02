@@ -118,7 +118,6 @@ def autocorr(x):
     y = x - x.mean(axis=-1, keepdims=True)
     len_y = y.shape[-1]
     result = fftconvolve(y, y[..., ::-1], axes=-1)
-    print(result)
     acorr = result[..., result.shape[-1] // 2 :]
     acorr /= np.arange(len_y, 0, -1)
     acorr /= acorr[..., :1]
