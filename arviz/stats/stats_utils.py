@@ -114,13 +114,14 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
             out = tuple(np.empty(element_shape) for _ in range(n_output))
         else:
             raise_error = False
+            correct_shape = tuple(element_shape for _ in range(n_output))
             if isinstance(out, tuple):
                 out_shape = tuple(item.shape for item in out)
-                correct_shape = tuple(element_shape for _ in range(n_output))
                 if out_shape != correct_shape:
                     raise_error = True
             else:
                 raise_error = True
+                out_shape = "not tuple, type={}".format(type(out))
             if raise_error:
                 msg = "Shapes incorrect for `out`: {}.".format(out_shape)
                 msg += " Correct shapes are {}".format(correct_shape)
@@ -294,13 +295,6 @@ def _rint(num):
     """Round and change to ingeter."""
     rnum = np.rint(num)  # pylint: disable=assignment-from-no-return
     return int(rnum)
-
-
-def _round(num, decimals):
-    """Skip rounding if decimals is None."""
-    if decimals is not None:
-        num = np.round(num, decimals)
-    return num
 
 
 def _quantile(ary, quantile, axis=None, limit=None):

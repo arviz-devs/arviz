@@ -838,7 +838,8 @@ def summary(
         summary_df = joined
     if (round_to is not None) and (round_to not in ("None", "none")):
         summary_df = summary_df.round(round_to)
-    elif round_to not in ("None", "none"):
+    elif round_to not in ("None", "none") and (fmt.lower() in ("long", "wide")):
+        # Don't round xarray object by default (even with "none")
         decimals = {
             col: 3
             if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"}

@@ -4,7 +4,13 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 
-from ..stats.stats_utils import logsumexp as _logsumexp, wrap_xarray_ufunc
+from ..stats.stats_utils import (
+    logsumexp as _logsumexp,
+    make_ufunc,
+    wrap_xarray_ufunc,
+    check_nan,
+    check_valid_size,
+)
 
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
@@ -78,14 +84,88 @@ def test_wrap_ufunc_output(quantile, arg):
             np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_args=(quantile,)
         )
     else:
-        res = wrap_xarray_ufunc(
-            np.quantile,
-            ary,
-            ufunc_kwargs={"n_output": n_output},
-            func_kwargs={"quantile": quantile},
-        )
+        if n_output == 1:
+            res = wrap_xarray_ufunc(np.quantile, ary, func_kwargs={"q": quantile})
+        else:
+            res = wrap_xarray_ufunc(
+                np.quantile, ary, ufunc_kwargs={"n_output": n_output}, func_kwargs={"q": quantile}
+            )
     if n_output == 1:
         assert not isinstance(res, tuple)
     else:
         assert isinstance(res, tuple)
         assert len(res) == n_output
+
+
+@pytest.mark.parametrize("n_output", (1, 2, 3))
+def test_make_ufunc(n_output):
+    if n_output == 3:
+        func = lambda x: (np.mean(x), np.mean(x), np.mean(x))
+    elif n_output == 2:
+        func = lambda x: (np.mean(x), np.mean(x))
+    else:
+        func = np.mean
+    ufunc = make_ufunc(func, n_dims=1, n_output=n_output)
+    ary = np.ones((4, 100))
+    res = ufunc(ary)
+    if n_output > 1:
+        assert all(len(res_i) == 4 for res_i in res)
+        assert all((res_i == 1).all() for res_i in res)
+    else:
+        assert len(res) == 4
+        assert (res == 1).all()
+
+
+@pytest.mark.parametrize("n_output", (1, 2, 3))
+def test_make_ufunc_out(n_output):
+    if n_output == 3:
+        func = lambda x: (np.mean(x), np.mean(x), np.mean(x))
+        res = (np.empty((4,)), np.empty((4,)), np.empty((4,)))
+    elif n_output == 2:
+        func = lambda x: (np.mean(x), np.mean(x))
+        res = (np.empty((4,)), np.empty((4,)))
+    else:
+        func = np.mean
+        res = np.empty((4,))
+    ufunc = make_ufunc(func, n_dims=1, n_output=n_output)
+    ary = np.ones((4, 100))
+    ufunc(ary, out=res)
+    if n_output > 1:
+        assert all(len(res_i) == 4 for res_i in res)
+        assert all((res_i == 1).all() for res_i in res)
+    else:
+        assert len(res) == 4
+        assert (res == 1).all()
+
+
+def test_make_ufunc_bad_ndim():
+    with pytest.raises(TypeError):
+        make_ufunc(np.mean, n_dims=0)
+
+
+@pytest.mark.parametrize("n_output", (1, 2, 3))
+def test_make_ufunc_out_bad(n_output):
+    if n_output == 3:
+        func = lambda x: (np.mean(x), np.mean(x), np.mean(x))
+        res = (np.empty((100,)), np.empty((100,)))
+    elif n_output == 2:
+        func = lambda x: (np.mean(x), np.mean(x))
+        res = np.empty((100,))
+    else:
+        func = np.mean
+        res = np.empty((100,))
+    ufunc = make_ufunc(func, n_dims=1, n_output=n_output)
+    ary = np.ones((4, 100))
+    with pytest.raises(TypeError):
+        ufunc(ary, out=res)
+
+
+@pytest.mark.parametrize("how", ("all", "any"))
+def test_nan(how):
+    assert not check_nan(np.ones(10), how=how)
+    assert check_nan(np.full(10, np.nan), how=how)
+
+
+def test_valid_size_bad():
+    with pytest.raises(TypeError):
+        check_valid_size(np.ones(10, 10), "testing", min_n_draw=100)

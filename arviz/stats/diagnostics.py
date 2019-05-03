@@ -47,10 +47,10 @@ def bfmi(data):
     if isinstance(data, np.ndarray):
         return _bfmi(data)
 
-    dataset = convert_to_dataset(data)
-    if (not hasattr(dataset, "sample_stats")) or (not hasattr(dataset.sample_stats, "energy")):
+    dataset = convert_to_dataset(data, group="sample_stats")
+    if not hasattr(dataset, "energy"):
         raise TypeError("Energy variable was not found.")
-    return _bfmi(dataset.sample_stats.energy)
+    return _bfmi(dataset.energy)
 
 
 def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
@@ -114,7 +114,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     warnings.warn(
         "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
     )
-    return ess(data=data, var_names=var_names, method=method, relative=relative, prob=prob)
+    return ess(data, var_names=var_names, method=method, relative=relative, prob=prob)
 
 
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
@@ -509,7 +509,7 @@ def _z_scale(ary):
     ary = np.asarray(ary)
     _check_valid_size(ary, "Z-scale")
     if _check_nan(ary):
-        return np.nan
+        return np.full_like(ary, np.nan)
     size = ary.size
     rank = stats.rankdata(ary, method="average")
     z = stats.norm.ppf((rank - 0.5) / size)
@@ -959,9 +959,9 @@ def _multichain_statistics(ary):
     # ess tail
     quantile05, quantile95 = _quantile(ary, [0.05, 0.95])
     iquantile05 = ary <= quantile05
-    quantile05_ess = _ess(_z_scale(_split_chains(iquantile05)))
+    quantile05_ess = _ess(_split_chains(iquantile05))
     iquantile95 = ary <= quantile95
-    quantile95_ess = _ess(_z_scale(_split_chains(iquantile95)))
+    quantile95_ess = _ess(_split_chains(iquantile95))
     ess_tail_value = min(quantile05_ess, quantile95_ess)
 
     # r_hat

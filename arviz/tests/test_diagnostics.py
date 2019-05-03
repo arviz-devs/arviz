@@ -1,5 +1,5 @@
 """Test Diagnostic methods"""
-# pylint: disable=redefined-outer-name, no-member
+# pylint: disable=redefined-outer-name, no-member, too-many-public-methods
 import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
@@ -8,8 +8,15 @@ import pytest
 
 from ..data import load_arviz_data, from_cmdstan
 from ..plots.plot_utils import xarray_var_iter
-from ..stats import bfmi, rhat, ess, mcse, geweke
-from ..stats.diagnostics import ks_summary, _multichain_statistics, _mc_error, _rhat_rank
+from ..stats import bfmi, rhat, ess, mcse, geweke, effective_sample_size
+from ..stats.diagnostics import (
+    ks_summary,
+    _multichain_statistics,
+    _mc_error,
+    _rhat_rank,
+    _z_scale,
+    _conv_quantile,
+)
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
@@ -26,6 +33,16 @@ class TestDiagnostics:
     def test_bfmi(self):
         energy = np.array([1, 2, 3, 4])
         assert_almost_equal(bfmi(energy), 0.8)
+
+    def test_bfmi_dataset(self):
+        data = load_arviz_data("centered_eight")
+        assert bfmi(data).all()
+
+    def test_bfmi_dataset_bad(self):
+        data = load_arviz_data("centered_eight")
+        del data.sample_stats["energy"]
+        with pytest.raises(TypeError):
+            bfmi(data)
 
     def test_deterministic(self):
         """
@@ -88,61 +105,66 @@ class TestDiagnostics:
         # download input files
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
-        path = os.path.join(data_directory, "stan_diagnostics/blocker.[0-9].csv")
+        path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
         posterior = from_cmdstan(path)
-        reference_path = os.path.join(data_directory, "stan_diagnostics/reference.csv", index_col=0)
-        reference = (
-            pd.read_csv(reference_path, index_col=0).reference.sort_index(axis=1).sort_index(axis=0)
-        )
+        reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_values.csv")
+        reference = pd.read_csv(reference_path, index_col=0).sort_index(axis=1).sort_index(axis=0)
         # test arviz functions
         funcs = {
-            "rhat_rank": lambda x: az.rhat(x, method="rank"),
-            "rhat_raw": lambda x: az.rhat(x, method="identity"),
-            "ess_bulk": lambda x: az.ess(x, method="bulk"),
-            "ess_tail": lambda x: az.ess(x, method="tail"),
-            "ess_mean": lambda x: az.ess(x, method="mean"),
-            "ess_sd": lambda x: az.ess(x, method="sd"),
-            "ess_raw": lambda x: az.ess(x, method="identity"),
-            "ess_quantile01": lambda x: az.ess(x, method="quantile", prob=0.01),
-            "ess_quantile10": lambda x: az.ess(x, method="quantile", prob=0.1),
-            "ess_quantile30": lambda x: az.ess(x, method="quantile", prob=0.3),
-            "mcse_mean": lambda x: az.mcse(x, method="mean"),
-            "mcse_sd": lambda x: az.mcse(x, method="sd"),
-            "mcse_quantile01": lambda x: az.mcse(x, method="quantile", prob=0.01),
-            "mcse_quantile10": lambda x: az.mcse(x, method="quantile", prob=0.1),
-            "mcse_quantile30": lambda x: az.mcse(x, method="quantile", prob=0.3),
+            "rhat_rank": lambda x: rhat(x, method="rank"),
+            "rhat_raw": lambda x: rhat(x, method="identity"),
+            "ess_bulk": lambda x: ess(x, method="bulk"),
+            "ess_tail": lambda x: ess(x, method="tail"),
+            "ess_mean": lambda x: ess(x, method="mean"),
+            "ess_sd": lambda x: ess(x, method="sd"),
+            "ess_raw": lambda x: ess(x, method="identity"),
+            "ess_quantile01": lambda x: ess(x, method="quantile", prob=0.01),
+            "ess_quantile10": lambda x: ess(x, method="quantile", prob=0.1),
+            "ess_quantile30": lambda x: ess(x, method="quantile", prob=0.3),
+            "mcse_mean": lambda x: mcse(x, method="mean"),
+            "mcse_sd": lambda x: mcse(x, method="sd"),
+            "mcse_quantile01": lambda x: mcse(x, method="quantile", prob=0.01),
+            "mcse_quantile10": lambda x: mcse(x, method="quantile", prob=0.1),
+            "mcse_quantile30": lambda x: mcse(x, method="quantile", prob=0.3),
         }
         results = {}
-        for key, coord_dict, vals in xarray_var_iter(idata.posterior, combined=True):
+        for key, coord_dict, vals in xarray_var_iter(posterior.posterior, combined=True):
             if coord_dict:
                 key = key + ".{}".format(list(coord_dict.values())[0] + 1)
             results[key] = {func_name: func(vals) for func_name, func in funcs.items()}
-        arviz_data = (
-            pd.DataFrame.from_dict(results).T.reference.sort_index(axis=1).sort_index(axis=0)
-        )
+        arviz_data = pd.DataFrame.from_dict(results).T.sort_index(axis=1).sort_index(axis=0)
         # check column names
         assert set(arviz_data.columns) == set(reference.columns)
         # check parameter names
         assert set(arviz_data.index) == set(reference.index)
-        # check equality (rhat_rank has accuracy < 6e-5, atleast with this data)
+        # check equality (rhat_rank has accuracy < 6e-5, atleast with this data, R vs Py)
         # this is due to numerical accuracy in calculation leading to rankdata
-        # function, which causes minimal difference to larger scale
+        # function, which scales minimal difference to larger scale
         # test first with numpy
-        assert np.testing.assert_array_almost_equal(reference, arviz_data, decimal=4)
+        assert_array_almost_equal(reference, arviz_data, decimal=4)
         # then test manually (more strict)
         assert (abs(reference - arviz_data) < 6e-5).all(None)
 
+    @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-    def test_rhat(self, data, var_names):
-        """Confirm rank normalized Split R-hat statistic is close to 1 for a large
+    def test_rhat(self, data, var_names, method):
+        """Confirm R-hat statistic is close to 1 for a large
         number of samples. Also checks the correct shape"""
-        rhat_data = rhat(data, var_names=var_names)
+        rhat_data = rhat(data, var_names=var_names, method=method)
         for r_hat in rhat_data.data_vars.values():
             assert ((1 / GOOD_RHAT < r_hat.values) | (r_hat.values < GOOD_RHAT)).all()
 
         # In None case check that all varnames from rhat_data match input data
         if var_names is None:
             assert list(rhat_data.data_vars) == list(data.data_vars)
+
+    @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
+    def test_rhat_nan(self, method):
+        """Confirm R-hat statistic returns nan."""
+        data = np.random.randn(4, 100)
+        data[0, 0] = np.nan
+        rhat_data = rhat(data, method=method)
+        assert np.isnan(rhat_data)
 
     def test_rhat_bad(self):
         """Confirm rank normalized Split R-hat statistic is
@@ -154,9 +176,25 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             rhat(np.random.randn(3))
 
+    def test_rhat_bad_method(self):
+        with pytest.raises(TypeError):
+            rhat(np.random.randn(2, 300), method="wrong_method")
+
     @pytest.mark.parametrize(
         "method",
-        ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
+        (
+            "bulk",
+            "tail",
+            "quantile",
+            "mean",
+            "sd",
+            "median",
+            "mad",
+            "z_scale",
+            "folded",
+            "split",
+            "identity",
+        ),
     )
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_array(self, method, relative):
@@ -174,13 +212,30 @@ class TestDiagnostics:
                     np.random.randn(4, 100), method=method, prob=(0.2, 0.8), relative=relative
                 )
         else:
-            ess_hat = ess(np.random.randn(4, 100), relative=relative)
+            ess_hat = ess(np.random.randn(4, 100), method=method, relative=relative)
         assert ess_hat > n_low
         assert ess_hat < n_high
 
+    def test_old_effective_sample_size(self):
+        with pytest.deprecated_call():
+            old_ess = effective_sample_size(np.random.randn(4, 100), method="bulk")
+        assert old_ess
+
     @pytest.mark.parametrize(
         "method",
-        ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
+        (
+            "bulk",
+            "tail",
+            "quantile",
+            "mean",
+            "sd",
+            "median",
+            "mad",
+            "z_scale",
+            "folded",
+            "split",
+            "identity",
+        ),
     )
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_bad_shape(self, method, relative):
@@ -190,6 +245,32 @@ class TestDiagnostics:
             else:
                 ess(np.random.randn(3), method=method, relative=relative)
 
+    @pytest.mark.parametrize(
+        "method",
+        (
+            "bulk",
+            "tail",
+            "quantile",
+            "mean",
+            "sd",
+            "median",
+            "mad",
+            "z_scale",
+            "folded",
+            "split",
+            "identity",
+        ),
+    )
+    @pytest.mark.parametrize("relative", (True, False))
+    def test_effective_sample_size_nan(self, method, relative):
+        data = np.random.randn(4, 100)
+        data[0, 0] = np.nan
+        if method in ("quantile", "tail"):
+            ess_value = ess(data, method=method, prob=0.34, relative=relative)
+        else:
+            ess_value = ess(data, method=method, relative=relative)
+        assert np.isnan(ess_value)
+
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
@@ -197,7 +278,19 @@ class TestDiagnostics:
 
     @pytest.mark.parametrize(
         "method",
-        ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
+        (
+            "bulk",
+            "tail",
+            "quantile",
+            "mean",
+            "sd",
+            "median",
+            "mad",
+            "z_scale",
+            "folded",
+            "split",
+            "identity",
+        ),
     )
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_bad_chains(self, method, relative):
@@ -207,9 +300,25 @@ class TestDiagnostics:
             else:
                 ess(np.random.randn(1, 3), method=method, relative=relative)
 
+    def test_effective_sample_size_bad_method(self):
+        with pytest.raises(TypeError):
+            ess(np.random.randn(4, 100), method="wrong_method")
+
     @pytest.mark.parametrize(
         "method",
-        ("bulk", "tail", "quantile", "mean", "sd", "median", "mad", "z_scale", "folded", "split"),
+        (
+            "bulk",
+            "tail",
+            "quantile",
+            "mean",
+            "sd",
+            "median",
+            "mad",
+            "z_scale",
+            "folded",
+            "split",
+            "identity",
+        ),
     )
     @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -237,6 +346,21 @@ class TestDiagnostics:
         else:
             mcse_hat = mcse(data, var_names=var_names, method=mcse_method)
         assert mcse_hat  # This might break if the data is regenerated
+
+    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
+    def test_mcse_nan(self, mcse_method):
+        data = np.random.randn(4, 100)
+        data[0, 0] = np.nan
+        if mcse_method == "quantile":
+            mcse_hat = mcse(data, method=mcse_method, prob=0.34)
+        else:
+            mcse_hat = mcse(data, method=mcse_method)
+        assert np.isnan(mcse_hat)
+
+    @pytest.mark.parametrize("method", ("wrong_method", "quantile"))
+    def test_mcse_bad_method(self, data, method):
+        with pytest.raises(TypeError):
+            mcse(data, method=method, prob=None)
 
     def test_multichain_summary_array(self):
         """Test multichain statistics against invidual functions."""
@@ -308,3 +432,23 @@ class TestDiagnostics:
     def test_mc_error(self, size, batches, ndim, circular):
         x = np.random.randn(size, ndim).squeeze()  # pylint: disable=no-member
         assert _mc_error(x, batches=batches, circular=circular) is not None
+
+    @pytest.mark.parametrize("size", [100, 101])
+    @pytest.mark.parametrize("ndim", [1, 2, 3])
+    def test_mc_error_nan(self, size, ndim):
+        x = np.random.randn(size, ndim).squeeze()  # pylint: disable=no-member
+        x[0] = np.nan
+        if ndim != 1:
+            assert np.isnan(_mc_error(x)).all()
+        else:
+            assert np.isnan(_mc_error(x))
+
+    @pytest.mark.parametrize("func", ("_conv_quantile", "_z_scale"))
+    def test_nan_behaviour(self, func):
+        data = np.random.randn(100, 4)
+        data[0, 0] = np.nan
+        if func == "_conv_quantile":
+            value = np.isnan(_conv_quantile(data, 0.5)).all(None)
+        else:
+            value = np.isnan(_z_scale(data)).all(None)
+        assert value
