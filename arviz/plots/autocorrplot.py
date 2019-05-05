@@ -14,7 +14,7 @@ from ..utils import _var_names
 
 
 def plot_autocorr(
-    data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None, ax=None
+    data, var_names=None, max_lag=None, combined=False, figsize=None, textsize=None, ax=None
 ):
     """Bar plot of the autocorrelation function for a sequence of data.
 
@@ -29,7 +29,7 @@ def plot_autocorr(
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.
     max_lag : int, optional
-        Maximum lag to calculate autocorrelation. Defaults to 100.
+        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller
     combined : bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
@@ -82,6 +82,10 @@ def plot_autocorr(
     """
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, data)
+
+    # Default max lag to 100 or max length of chain
+    if max_lag is None:
+        max_lag = min(100, data["draw"].shape[0])
 
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)

@@ -606,6 +606,13 @@ def test_plot_violin_discrete(discrete_model):
     assert axes.shape
 
 
+def test_plot_autocorr_short_chain():
+    """Check that logic for small chain defaulting doesn't cause exception"""
+    chain = np.arange(10)
+    axes = plot_autocorr(chain)
+    assert axes
+
+
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 def test_plot_autocorr_uncombined(models, model_fit):
     obj = getattr(models, model_fit)
