@@ -24,21 +24,17 @@ def autocov(ary, axis=-1):
     """
     axis = axis if axis > 0 else len(ary.shape) + axis
     n = ary.shape[axis]
-    m = next_fast_len(n)
-    mt2 = m * 2
+    m = next_fast_len(2 * n)
 
     ary = ary - ary.mean(axis, keepdims=True)
-    pad_shape = tuple(
-        dim_len if dim != axis else mt2 - dim_len for dim, dim_len in enumerate(ary.shape)
-    )
-    ary = np.concatenate((ary, np.zeros(pad_shape)), axis=axis)
-    ifft_ary = np.fft.rfft(ary, n=mt2, axis=axis)
+
+    ifft_ary = np.fft.rfft(ary, n=m, axis=axis)
     ifft_ary *= np.conjugate(ifft_ary)
 
     shape = tuple(
         slice(None) if dim_len != axis else slice(0, n) for dim_len, _ in enumerate(ary.shape)
     )
-    cov = np.fft.irfft(ifft_ary, n=mt2, axis=axis)[shape]
+    cov = np.fft.irfft(ifft_ary, n=m, axis=axis)[shape]
     cov /= n
 
     return cov
