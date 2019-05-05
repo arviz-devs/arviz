@@ -607,7 +607,7 @@ def test_plot_violin_discrete(discrete_model):
 
 
 def test_plot_autocorr_short_chain():
-    """Check that """
+    """Check that logic for small chain defaulting doesn't cause exception"""
     chain = np.arange(10)
     axes = plot_autocorr(chain)
     assert axes
