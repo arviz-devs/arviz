@@ -166,8 +166,9 @@ def wrap_xarray_ufunc(
         Keyword arguments passed to 'ufunc'.
     **kwargs
         Passed to xarray.apply_ufunc.
-    Return
-    ------
+
+    Returns
+    -------
     xarray.dataset
     """
     if ufunc_kwargs is None:
@@ -330,6 +331,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
                 Defaults to 1.
             min_draws : int
                 Defaults to 3.
+
     Returns
     -------
     bool
