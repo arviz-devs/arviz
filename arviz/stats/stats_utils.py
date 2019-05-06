@@ -1,11 +1,13 @@
 """Stats-utility functions for ArviZ."""
 from collections.abc import Sequence
+import logging
 
 import numpy as np
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
+_log = logging.getLogger(__name__)
 
 __all__ = ["autocorr", "autocov", "make_ufunc", "wrap_xarray_ufunc"]
 
@@ -300,28 +302,70 @@ def _quantile(ary, quantile, axis=None, limit=None):
     return mquantiles(ary, quantile, alphap=1, betap=1, axis=axis, limit=limit)
 
 
-def check_nan(ary, axis=None, how="any"):
-    """Check if ary has NaN values."""
-    isnan = np.isnan(ary)
-    if how.lower() == "any":
-        isnan = isnan.any(axis)
-    elif how.lower() == "all":
-        isnan = isnan.all(axis)
-    return isnan
+def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwargs=None):
+    """Validate ndarray.
 
-
-def check_valid_size(ary, msg, min_n_chain=2, min_n_draw=2):
-    """Validate 2D array shape."""
+    Parameters
+    ----------
+    ary : numpy.ndarray
+    check_nan : bool
+        Check if any value contains NaN.
+    check_shape : bool
+        Check if array has correct shape. Assumes dimensions in order (chain, draw, *shape).
+        For 1D arrays (shape = (n,)) assumes chain equals 1.
+    nan_kwargs : dict
+        Valid kwargs are:
+            axis : int,
+                Defaults to None.
+            how : str, {"all", "any"}
+                Default to "any".
+    shape_kwargs : dict
+        Valid kwargs are:
+            min_chains : int
+                Defaults to 1.
+            min_draws : int
+                Defaults to 3.
+    Returns
+    -------
+    bool
+    """
     ary = np.asarray(ary)
-    shape = ary.shape
-    if len(shape) != 2:
-        raise TypeError("{} calculation requires 2 dimensional array.".format(msg))
-    n_chain, n_draw = shape
-    if n_chain < min_n_chain:
-        raise TypeError(
-            "{} calculation requires multiple chains. (minimum={})".format(msg, min_n_chain)
+
+    nan_error = False
+    draw_error = False
+    chain_error = False
+
+    if check_nan:
+        if nan_kwargs is None:
+            nan_kwargs = dict()
+
+        isnan = np.isnan(ary)
+        axis = nan_kwargs.get("axis", None)
+        if nan_kwargs.get("how", "any").lower() == "all":
+            nan_error = isnan.all(axis)
+        else:
+            nan_error = isnan.any(axis)
+
+        if nan_error:
+            _log.warning("Array contains nan-value.")
+
+    if check_shape:
+        shape = ary.shape
+
+        if shape_kwargs is None:
+            shape_kwargs = dict()
+
+        min_chains = shape_kwargs.get("min_chains", 2)
+        min_draws = shape_kwargs.get("min_draws", 3)
+        error_msg = "Shape validation failed: input_shape: {}, minimum_shape: (chains={}, draws={})"
+        error_msg = error_msg.format(shape, min_chains, min_draws)
+
+        chain_error = ((min_chains > 1) and (len(shape) < 2)) or (shape[0] < min_chains)
+        draw_error = ((len(shape) < 2) and (shape[0] < min_draws)) or (
+            (len(shape) > 1) and (shape[1] < min_draws)
         )
-    if n_draw < min_n_draw:
-        raise TypeError(
-            "{} calculation requires multiple draws (minimum={}).".format(msg, min_n_draw)
-        )
+
+        if chain_error or draw_error:
+            _log.warning(error_msg)
+
+    return nan_error or chain_error or draw_error
