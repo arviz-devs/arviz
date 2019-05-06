@@ -8,9 +8,9 @@ import pandas as pd
 from scipy import stats
 
 from .stats_utils import (
-    _rint,
-    _quantile,
-    autocov,
+    rint as _rint,
+    quantile as _quantile,
+    autocov as _autocov,
     not_valid as _not_valid,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
 )
@@ -527,6 +527,14 @@ def _split_chains(ary):
     return np.vstack((ary[:, :half], ary[:, -half:]))
 
 
+def _z_fold(ary):
+    """Fold and z-scale values."""
+    ary = np.asarray(ary)
+    ary = abs(ary - np.median(ary))
+    ary = _z_scale(ary)
+    return ary
+
+
 def _rhat(ary):
     """Compute the rhat for a 2d array."""
     ary = np.asarray(ary, dtype=float)
@@ -555,7 +563,7 @@ def _rhat_rank(ary):
     Computation follows https://arxiv.org/abs/1903.08008
     """
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=2)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=2)):
         return np.nan
     rhat_bulk = _rhat(_z_scale(_split_chains(ary)))
 
@@ -569,7 +577,7 @@ def _rhat_rank(ary):
 def _rhat_folded(ary):
     """Calculate split-Rhat for folded z-values."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=2)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=2)):
         return np.nan
     ary = _z_fold(_split_chains(ary))
     return _rhat(ary)
@@ -577,14 +585,14 @@ def _rhat_folded(ary):
 
 def _rhat_z_scale(ary):
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=2)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=2)):
         return np.nan
     return _rhat(_z_scale(_split_chains(ary)))
 
 
 def _rhat_split(ary):
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=2)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=2)):
         return np.nan
     return _rhat(_split_chains(ary))
 
@@ -599,7 +607,7 @@ def _ess(ary):
     if len(ary.shape) < 2:
         ary = ary.reshape(1, -1)
     n_chain, n_draw = ary.shape
-    acov = autocov(ary, axis=1)
+    acov = _autocov(ary, axis=1)
     chain_mean = ary.mean(axis=1)
     mean_var = np.mean(acov[:, 0]) * n_draw / (n_draw - 1.0)
     var_plus = mean_var * (n_draw - 1.0) / n_draw
@@ -646,7 +654,7 @@ def _ess(ary):
 def _ess_bulk(ary):
     """Compute the effective sample size for the bulk."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     z_scaled = _z_scale(_split_chains(ary))
     ess_bulk = _ess(z_scaled)
@@ -664,7 +672,7 @@ def _ess_tail(ary, prob=None):
         prob = (prob, 1 - prob)
 
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
 
     prob_low, prob_high = prob
@@ -676,7 +684,7 @@ def _ess_tail(ary, prob=None):
 def _ess_mean(ary):
     """Compute the effective sample size for the mean."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     return _ess(_split_chains(ary))
 
@@ -684,7 +692,7 @@ def _ess_mean(ary):
 def _ess_sd(ary):
     """Compute the effective sample size for the sd."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     ary = _split_chains(ary)
     return min(_ess(ary), _ess(ary ** 2))
@@ -693,7 +701,7 @@ def _ess_sd(ary):
 def _ess_quantile(ary, prob):
     """Compute the effective sample size for the specific residual."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     quantile, = _quantile(ary, prob)
     iquantile = ary <= quantile
@@ -703,7 +711,7 @@ def _ess_quantile(ary, prob):
 def _ess_z_scale(ary):
     """Calculate ess for z-scaLe."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     return _ess(_z_scale(_split_chains(ary)))
 
@@ -711,7 +719,7 @@ def _ess_z_scale(ary):
 def _ess_folded(ary):
     """Calculate split-ess for folded data."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     return _ess(_z_fold(_split_chains(ary)))
 
@@ -719,7 +727,7 @@ def _ess_folded(ary):
 def _ess_split(ary):
     """Calculate split-ess for median."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     return _ess(_split_chains(ary))
 
@@ -727,7 +735,7 @@ def _ess_split(ary):
 def _ess_median(ary):
     """Calculate split-ess for median."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     return _ess_quantile(ary, 0.5)
 
@@ -735,7 +743,7 @@ def _ess_median(ary):
 def _ess_mad(ary):
     """Calculate split-ess for mean absolute deviance."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     ary = abs(ary - np.median(ary))
     ary = ary <= np.median(ary)
@@ -746,7 +754,7 @@ def _ess_mad(ary):
 def _conv_quantile(ary, prob):
     """Return mcse, Q05, Q95, Seff."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan, np.nan, np.nan, np.nan
     ess = _ess_quantile(_split_chains(ary), prob)
     probability = [0.1586553, 0.8413447, 0.05, 0.95]
@@ -766,7 +774,7 @@ def _conv_quantile(ary, prob):
 def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     ess = _ess_mean(ary)
     sd = np.std(ary, ddof=1)
@@ -777,7 +785,7 @@ def _mcse_mean(ary):
 def _mcse_sd(ary):
     """Compute the Markov Chain sd error."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     ess = _ess_sd(ary)
     sd = np.std(ary, ddof=1)
@@ -789,7 +797,7 @@ def _mcse_sd(ary):
 def _mcse_quantile(ary, prob):
     """Compute the Markov Chain quantile error at quantile=prob."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     mcse_q, *_ = _conv_quantile(ary, prob)
     return mcse_q
@@ -798,7 +806,7 @@ def _mcse_quantile(ary, prob):
 def _ress_mean(ary, ess=None):
     """Relative mean effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_mean(ary)
@@ -808,7 +816,7 @@ def _ress_mean(ary, ess=None):
 def _ress_sd(ary, ess=None):
     """Relative sd effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_sd(ary)
@@ -818,7 +826,7 @@ def _ress_sd(ary, ess=None):
 def _ress_bulk(ary, ess=None):
     """Relative bulk effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_bulk(ary)
@@ -828,7 +836,7 @@ def _ress_bulk(ary, ess=None):
 def _ress_tail(ary, prob=None, ess=None):
     """Relative tail effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_tail(ary, prob=prob)
@@ -838,7 +846,7 @@ def _ress_tail(ary, prob=None, ess=None):
 def _ress_quantile(ary, prob=None, ess=None):
     """Relative quantile effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         if prob is None:
@@ -850,7 +858,7 @@ def _ress_quantile(ary, prob=None, ess=None):
 def _ress_split(ary, ess=None):
     """Relative split effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_split(ary)
@@ -860,7 +868,7 @@ def _ress_split(ary, ess=None):
 def _ress_z_scale(ary, ess=None):
     """Relative z-scale effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_z_scale(ary)
@@ -870,7 +878,7 @@ def _ress_z_scale(ary, ess=None):
 def _ress_folded(ary, ess=None):
     """Relative folded effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_folded(ary)
@@ -880,7 +888,7 @@ def _ress_folded(ary, ess=None):
 def _ress_median(ary, ess=None):
     """Relative median effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_median(ary)
@@ -890,7 +898,7 @@ def _ress_median(ary, ess=None):
 def _ress_mad(ary, ess=None):
     """Relative mad effective sample size."""
     ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=3, min_chains=1)):
+    if _not_valid(ary, shape_kwargs=dict(min_draws=6, min_chains=1)):
         return np.nan
     if ess is None:
         ess = _ess_mad(ary)
@@ -905,16 +913,6 @@ def _ress(ary, ess=None):
     if ess is None:
         ess = _ess(ary)
     return ess / ary.size
-
-
-def _z_fold(ary):
-    """Fold and z-scale values."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=1, min_chains=1)):
-        return np.full_like(ary, np.nan)
-    ary = abs(ary - np.median(ary))
-    ary = _z_scale(ary)
-    return ary
 
 
 def _mc_error(ary, batches=5, circular=False):

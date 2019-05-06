@@ -175,10 +175,13 @@ class TestDiagnostics:
             data = np.random.randn(draw)
         else:
             data = np.random.randn(chain, draw)
-        if (chain in (None, 1)) or (draw in (1, 2)):
-            with pytest.warns(UserWarning):
-                rhat_data = rhat(data, method=method)
-                assert np.isnan(rhat_data)
+        if (
+            (chain in (None, 1))
+            or ((draw < 6) and (method != "identity"))
+            or ((draw < 3) and (method == "identity"))
+        ):
+            rhat_data = rhat(data, method=method)
+            assert np.isnan(rhat_data)
         else:
             rhat_data = rhat(data, method=method)
             assert not np.isnan(rhat_data)
@@ -210,7 +213,7 @@ class TestDiagnostics:
         ),
     )
     @pytest.mark.parametrize("relative", (True, False))
-    def test_effective_sample_size_array(self, method, relative):
+    def test_effective_sample_size_array(self, data, method, relative):
         n_low = 100 if not relative else 100 / 400
         n_high = 800 if not relative else 800 / 400
         if method in ("quantile", "tail"):
@@ -251,58 +254,40 @@ class TestDiagnostics:
         ),
     )
     @pytest.mark.parametrize("relative", (True, False))
-    def test_effective_sample_size_shapes(self, method, relative):
-        with pytest.raises(TypeError):
-            if method in ("quantile", "tail"):
-                ess(np.random.randn(3), method=method, prob=0.34, relative=relative)
-            else:
-                ess(np.random.randn(3), method=method, relative=relative)
-
-    @pytest.mark.parametrize(
-        "method",
-        (
-            "bulk",
-            "tail",
-            "quantile",
-            "mean",
-            "sd",
-            "median",
-            "mad",
-            "z_scale",
-            "folded",
-            "split",
-            "identity",
-        ),
-    )
-    @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("chain", (None, 1, 2))
-    @pytest.mark.parametrize("draw", (1, 2, 3, 4))
+    @pytest.mark.parametrize("draw", (1, 2, 3, 4, 5, 6, 7))
     @pytest.mark.parametrize("use_nan", (True, False))
-    def test_effective_sample_size_nan(self, method, relative, use_nan):
+    def test_effective_sample_size_nan(self, method, relative, chain, draw, use_nan):
         if chain is None:
             data = np.random.randn(draw)
         else:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
-        if draw < 3 or use_nan:
-            with pytest.warns(UserWarning):
-                if method in ("quantile", "tail"):
-                    ess_value = ess(data, method=method, prob=0.34, relative=relative)
-                else:
-                    ess_value = ess(data, method=method, relative=relative)
+        if (
+            ((draw < 6) and (method != "identity"))
+            or ((draw < 3) and method == "identity")
+            or use_nan
+        ):
+            if method in ("quantile", "tail"):
+                ess_value = ess(data, method=method, prob=0.34, relative=relative)
+            else:
+                ess_value = ess(data, method=method, relative=relative)
             assert np.isnan(ess_value)
         else:
             if method in ("quantile", "tail"):
                 ess_value = ess(data, method=method, prob=0.34, relative=relative)
             else:
                 ess_value = ess(data, method=method, relative=relative)
-                assert not np.isnan(ess_value)
+            assert not np.isnan(ess_value)
 
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="quantile", relative=relative)
+
+    def test_effective_sample_size_constant(self):
+        assert ess(np.ones((4, 100))) == 400
 
     def test_effective_sample_size_bad_method(self):
         with pytest.raises(TypeError):
@@ -353,7 +338,7 @@ class TestDiagnostics:
 
     @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
     @pytest.mark.parametrize("chain", (None, 1, 2))
-    @pytest.mark.parametrize("draw", (1, 2, 3, 4))
+    @pytest.mark.parametrize("draw", (1, 2, 3, 4, 5, 6, 7))
     @pytest.mark.parametrize("use_nan", (True, False))
     def test_mcse_nan(self, mcse_method, chain, draw, use_nan):
         if chain is None:
@@ -362,12 +347,11 @@ class TestDiagnostics:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
-        if draw < 3 or use_nan:
-            with pytest.warns(UserWarning):
-                if mcse_method == "quantile":
-                    mcse_hat = mcse(data, method=mcse_method, prob=0.34)
-                else:
-                    mcse_hat = mcse(data, method=mcse_method)
+        if draw < 6 or use_nan:
+            if mcse_method == "quantile":
+                mcse_hat = mcse(data, method=mcse_method, prob=0.34)
+            else:
+                mcse_hat = mcse(data, method=mcse_method)
             assert np.isnan(mcse_hat)
         else:
             if mcse_method == "quantile":
@@ -467,7 +451,7 @@ class TestDiagnostics:
         data = np.random.randn(100, 4)
         data[0, 0] = np.nan
         if func == "_conv_quantile":
-            value = np.isnan(_conv_quantile(data, 0.5)).all(None)
+            assert np.isnan(_conv_quantile(data, 0.5)).all(None)
         else:
-            value = np.isnan(_z_scale(data)).all(None)
-        assert value
+            assert not np.isnan(_z_scale(data)).all(None)
+            assert not np.isnan(_z_scale(data)).any(None)

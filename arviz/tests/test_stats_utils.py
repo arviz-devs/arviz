@@ -4,13 +4,7 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 
-from ..stats.stats_utils import (
-    logsumexp as _logsumexp,
-    make_ufunc,
-    wrap_xarray_ufunc,
-    check_nan,
-    check_valid_size,
-)
+from ..stats.stats_utils import logsumexp as _logsumexp, make_ufunc, wrap_xarray_ufunc, not_valid
 
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
@@ -162,10 +156,45 @@ def test_make_ufunc_out_bad(n_output):
 
 @pytest.mark.parametrize("how", ("all", "any"))
 def test_nan(how):
-    assert not check_nan(np.ones(10), how=how)
-    assert check_nan(np.full(10, np.nan), how=how)
+    assert not not_valid(np.ones(10), check_shape=False, nan_kwargs=dict(how=how))
+    if how == "any":
+        assert not_valid(
+            np.concatenate((np.random.randn(100), np.full(2, np.nan))),
+            check_shape=False,
+            nan_kwargs=dict(how=how),
+        )
+    else:
+        assert not not_valid(
+            np.concatenate((np.random.randn(100), np.full(2, np.nan))),
+            check_shape=False,
+            nan_kwargs=dict(how=how),
+        )
+        assert not_valid(np.full(10, np.nan), check_shape=False, nan_kwargs=dict(how=how))
 
 
-def test_valid_size_bad():
-    with pytest.raises(TypeError):
-        check_valid_size(np.ones(10, 10), "testing", min_n_draw=100)
+@pytest.mark.parametrize("axis", (-1, 0, 1))
+def test_nan_axis(axis):
+    data = np.random.randn(4, 100)
+    data[0, 0] = np.nan
+    axis_ = (len(data.shape) + axis) if axis < 0 else axis
+    assert not_valid(data, check_shape=False, nan_kwargs=dict(how="any"))
+    assert not_valid(data, check_shape=False, nan_kwargs=dict(how="any", axis=axis)).any()
+    assert not not_valid(data, check_shape=False, nan_kwargs=dict(how="any", axis=axis)).all()
+    assert not_valid(data, check_shape=False, nan_kwargs=dict(how="any", axis=axis)).shape == tuple(
+        dim for ax, dim in enumerate(data.shape) if ax != axis_
+    )
+
+
+def test_valid_shape():
+    assert not not_valid(
+        np.ones((2, 200)), check_nan=False, shape_kwargs=dict(min_chains=2, min_draws=100)
+    )
+    assert not not_valid(
+        np.ones((200, 2)), check_nan=False, shape_kwargs=dict(min_chains=100, min_draws=2)
+    )
+    assert not_valid(
+        np.ones((10, 10)), check_nan=False, shape_kwargs=dict(min_chains=2, min_draws=100)
+    )
+    assert not_valid(
+        np.ones((10, 10)), check_nan=False, shape_kwargs=dict(min_chains=100, min_draws=2)
+    )

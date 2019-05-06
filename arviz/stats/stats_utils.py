@@ -1,6 +1,7 @@
 """Stats-utility functions for ArviZ."""
 from collections.abc import Sequence
 import logging
+import warnings
 
 import numpy as np
 from scipy.fftpack import next_fast_len
@@ -30,14 +31,18 @@ def autocov(ary, axis=-1):
 
     ary = ary - ary.mean(axis, keepdims=True)
 
-    ifft_ary = np.fft.rfft(ary, n=m, axis=axis)
-    ifft_ary *= np.conjugate(ifft_ary)
+    # added to silence tuple warning for a submodule
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
 
-    shape = tuple(
-        slice(None) if dim_len != axis else slice(0, n) for dim_len, _ in enumerate(ary.shape)
-    )
-    cov = np.fft.irfft(ifft_ary, n=m, axis=axis)[shape]
-    cov /= n
+        ifft_ary = np.fft.rfft(ary, n=m, axis=axis)
+        ifft_ary *= np.conjugate(ifft_ary)
+
+        shape = tuple(
+            slice(None) if dim_len != axis else slice(0, n) for dim_len, _ in enumerate(ary.shape)
+        )
+        cov = np.fft.irfft(ifft_ary, n=m, axis=axis)[shape]
+        cov /= n
 
     return cov
 
@@ -289,17 +294,17 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
     return out if out.shape else dtype(out)
 
 
-def _rint(num):
+def rint(num):
     """Round and change to ingeter."""
     rnum = np.rint(num)  # pylint: disable=assignment-from-no-return
     return int(rnum)
 
 
-def _quantile(ary, quantile, axis=None, limit=None):
+def quantile(ary, q, axis=None, limit=None):
     """Use same quantile function as R (Type 7)."""
     if limit is None:
         limit = tuple()
-    return mquantiles(ary, quantile, alphap=1, betap=1, axis=axis, limit=limit)
+    return mquantiles(ary, q, alphap=1, betap=1, axis=axis, limit=limit)
 
 
 def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwargs=None):
@@ -346,8 +351,8 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
         else:
             nan_error = isnan.any(axis)
 
-        if nan_error:
-            _log.warning("Array contains nan-value.")
+        if (isinstance(nan_error, bool) and nan_error) or nan_error.any():
+            _log.warning("Array contains NaN-value.")
 
     if check_shape:
         shape = ary.shape
@@ -368,4 +373,4 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
         if chain_error or draw_error:
             _log.warning(error_msg)
 
-    return nan_error or chain_error or draw_error
+    return nan_error | chain_error | draw_error
