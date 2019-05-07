@@ -11,11 +11,16 @@ from ..plots.plot_utils import xarray_var_iter
 from ..stats import bfmi, rhat, ess, mcse, geweke, effective_sample_size
 from ..stats.diagnostics import (
     ks_summary,
+    _ess,
+    _ess_quantile,
+    _ress_quantile,
     _multichain_statistics,
     _mc_error,
+    _rhat,
     _rhat_rank,
     _z_scale,
     _conv_quantile,
+    _split_chains,
 )
 
 # For tests only, recommended value should be closer to 1.01-1.05
@@ -169,6 +174,8 @@ class TestDiagnostics:
         data[0, 0] = np.nan
         rhat_data = rhat(data, method=method)
         assert np.isnan(rhat_data)
+        if method == "rank":
+            assert np.isnan(_rhat(rhat_data))
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("chain", (None, 1, 2))
@@ -276,11 +283,22 @@ class TestDiagnostics:
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
+        if (method == "bulk") and (not relative) and (chain is None) and (draw == 4):
+            if use_nan:
+                assert np.isnan(_ess(data))
+            else:
+                assert not np.isnan(_ess(data))
 
     @pytest.mark.parametrize("relative", (True, False))
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="quantile", relative=relative)
+        if relative:
+            func = _ess_quantile
+        else:
+            func = _ress_quantile
+        with pytest.raises(TypeError):
+            func(np.random.randn(4, 100), prob=None)
 
     def test_effective_sample_size_constant(self):
         assert ess(np.ones((4, 100))) == 400
@@ -361,9 +379,15 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             mcse(data, method=method, prob=None)
 
-    def test_multichain_summary_array(self):
+    @pytest.mark.parametrize("draws", (3, 4, 100))
+    @pytest.mark.parametrize("chains", (None, 1, 2))
+    def test_multichain_summary_array(self, draws, chains):
         """Test multichain statistics against invidual functions."""
-        ary = np.random.randn(4, 100)
+        if chains is None:
+            ary = np.random.randn(draws)
+        else:
+            ary = np.random.randn(chains, draws)
+
         mcse_mean_hat = mcse(ary, method="mean")
         mcse_sd_hat = mcse(ary, method="sd")
         ess_mean_hat = ess(ary, method="mean")
@@ -380,13 +404,41 @@ class TestDiagnostics:
             ess_tail_hat_,
             rhat_hat_,
         ) = _multichain_statistics(ary)
-        assert mcse_mean_hat == mcse_mean_hat_
-        assert mcse_sd_hat == mcse_sd_hat_
-        assert ess_mean_hat == ess_mean_hat_
-        assert ess_sd_hat == ess_sd_hat_
-        assert ess_bulk_hat == ess_bulk_hat_
-        assert ess_tail_hat == ess_tail_hat_
-        assert round(rhat_hat, 3) == round(rhat_hat_, 3)
+        if draws == 3:
+            assert np.isnan(
+                (
+                    mcse_mean_hat,
+                    mcse_sd_hat,
+                    ess_mean_hat,
+                    ess_sd_hat,
+                    ess_bulk_hat,
+                    ess_tail_hat,
+                    rhat_hat,
+                )
+            ).all()
+            assert np.isnan(
+                (
+                    mcse_mean_hat_,
+                    mcse_sd_hat_,
+                    ess_mean_hat_,
+                    ess_sd_hat_,
+                    ess_bulk_hat_,
+                    ess_tail_hat_,
+                    rhat_hat_,
+                )
+            ).all()
+        else:
+            assert mcse_mean_hat == mcse_mean_hat_
+            assert mcse_sd_hat == mcse_sd_hat_
+            assert ess_mean_hat == ess_mean_hat_
+            assert ess_sd_hat == ess_sd_hat_
+            assert ess_bulk_hat == ess_bulk_hat_
+            assert ess_tail_hat == ess_tail_hat_
+            if chains in (None, 1):
+                assert np.isnan(rhat_hat)
+                assert np.isnan(rhat_hat_)
+            else:
+                assert round(rhat_hat, 3) == round(rhat_hat_, 3)
 
     def test_geweke(self):
         first = 0.1
@@ -451,3 +503,15 @@ class TestDiagnostics:
         else:
             assert not np.isnan(_z_scale(data)).all(None)
             assert not np.isnan(_z_scale(data)).any(None)
+
+    @pytest.mark.parametrize("chains", (None, 1, 2, 3))
+    @pytest.mark.parametrize("draws", (2, 3, 100, 101))
+    def test_split_chain_dims(self, chains, draws):
+        if chains is None:
+            data = np.random.randn(draws)
+        else:
+            data = np.random.randn(chains, draws)
+        split_data = _split_chains(data)
+        if chains is None:
+            chains = 1
+        assert split_data.shape == (chains * 2, draws // 2)

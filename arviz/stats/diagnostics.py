@@ -522,7 +522,8 @@ def _split_chains(ary):
     if len(ary.shape) > 1:
         _, n_draw = ary.shape
     else:
-        n_draw, = ary.shape
+        ary = np.atleast_2d(ary)
+        _, n_draw = ary.shape
     half = n_draw // 2
     return np.vstack((ary[:, :half], ary[:, -half:]))
 
@@ -613,7 +614,7 @@ def _ess(ary):
     if (np.max(ary) - np.min(ary)) < np.finfo(float).resolution:  # pylint: disable=no-member
         return ary.size
     if len(ary.shape) < 2:
-        ary = ary.reshape(1, -1)
+        ary = np.atleast_2d(ary)
     n_chain, n_draw = ary.shape
     acov = _autocov(ary, axis=1)
     chain_mean = ary.mean(axis=1)
@@ -711,6 +712,8 @@ def _ess_quantile(ary, prob):
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
+    if prob is None:
+        raise TypeError("Prob not defined.")
     quantile, = _quantile(ary, prob)
     iquantile = ary <= quantile
     return _ess(_split_chains(iquantile))
@@ -994,9 +997,9 @@ def _multichain_statistics(ary):
         Order of return parameters is
             - mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat
     """
+    ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
-
     # ess mean
     ess_mean_value = _ess_mean(ary)
 
