@@ -330,7 +330,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
             min_chains : int
                 Defaults to 1.
             min_draws : int
-                Defaults to 3.
+                Defaults to 4.
 
     Returns
     -------
@@ -363,7 +363,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
             shape_kwargs = dict()
 
         min_chains = shape_kwargs.get("min_chains", 2)
-        min_draws = shape_kwargs.get("min_draws", 3)
+        min_draws = shape_kwargs.get("min_draws", 4)
         error_msg = "Shape validation failed: input_shape: {}, minimum_shape: (chains={}, draws={})"
         error_msg = error_msg.format(shape, min_chains, min_draws)
 

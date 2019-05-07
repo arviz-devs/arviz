@@ -48,7 +48,7 @@ class TestDiagnostics:
         """
         Test algorithm against RStan monitor.R functions.
         monitor.R :
-        https://github.com/stan-dev/rstan/blob/66a77a4b0de4da8f8e8c8cd36dc83bb92a833813/rstan/rstan/R/monitor.R
+        https://github.com/stan-dev/rstan/blob/425d195565c4d9bcbcb8cccf513e140e6908ca62/rstan/rstan/R/monitor.R
         R code:
         ```
         source('~/monitor.R')
@@ -143,7 +143,11 @@ class TestDiagnostics:
         # test first with numpy
         assert_array_almost_equal(reference, arviz_data, decimal=4)
         # then test manually (more strict)
-        assert (abs(reference - arviz_data) < 6e-5).all(None)
+        assert (abs(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 6e-5).all(None)
+        assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-14).all(None)
+        not_rhat = [col for col in reference.columns if col != "rhat_rank"]
+        assert (abs(reference[not_rhat] - arviz_data[not_rhat]) < 1e-11).all(None)
+        assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-14).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -175,11 +179,7 @@ class TestDiagnostics:
             data = np.random.randn(draw)
         else:
             data = np.random.randn(chain, draw)
-        if (
-            (chain in (None, 1))
-            or ((draw < 6) and (method != "identity"))
-            or ((draw < 3) and (method == "identity"))
-        ):
+        if (chain in (None, 1)) or (draw < 4):
             rhat_data = rhat(data, method=method)
             assert np.isnan(rhat_data)
         else:
@@ -255,7 +255,7 @@ class TestDiagnostics:
     )
     @pytest.mark.parametrize("relative", (True, False))
     @pytest.mark.parametrize("chain", (None, 1, 2))
-    @pytest.mark.parametrize("draw", (1, 2, 3, 4, 5, 6, 7))
+    @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     @pytest.mark.parametrize("use_nan", (True, False))
     def test_effective_sample_size_nan(self, method, relative, chain, draw, use_nan):
         if chain is None:
@@ -264,11 +264,7 @@ class TestDiagnostics:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
-        if (
-            ((draw < 6) and (method != "identity"))
-            or ((draw < 3) and method == "identity")
-            or use_nan
-        ):
+        if (draw < 4) or use_nan:
             if method in ("quantile", "tail"):
                 ess_value = ess(data, method=method, prob=0.34, relative=relative)
             else:
@@ -338,7 +334,7 @@ class TestDiagnostics:
 
     @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
     @pytest.mark.parametrize("chain", (None, 1, 2))
-    @pytest.mark.parametrize("draw", (1, 2, 3, 4, 5, 6, 7))
+    @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     @pytest.mark.parametrize("use_nan", (True, False))
     def test_mcse_nan(self, mcse_method, chain, draw, use_nan):
         if chain is None:
@@ -347,7 +343,7 @@ class TestDiagnostics:
             data = np.random.randn(chain, draw)
         if use_nan:
             data[0] = np.nan
-        if draw < 6 or use_nan:
+        if draw < 4 or use_nan:
             if mcse_method == "quantile":
                 mcse_hat = mcse(data, method=mcse_method, prob=0.34)
             else:
