@@ -178,27 +178,14 @@ def wrap_xarray_ufunc(
     if func_kwargs is None:
         func_kwargs = {}
 
-    n_output = ufunc_kwargs.pop("n_output", 1)
-    callable_ufunc = make_ufunc(ufunc, n_output=n_output, **ufunc_kwargs)
+    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
-    if "input_core_dims" in kwargs:
-        input_core_dims = kwargs.pop("input_core_dims")
-    else:
-        input_core_dims = tuple(("chain", "draw") for _ in range(len(func_args) + 1))
-    if "output_core_dims" in kwargs:
-        output_core_dims = kwargs.pop("output_core_dims")
-    else:
-        output_core_dims = tuple([] for _ in range(n_output))
-
-    return apply_ufunc(
-        callable_ufunc,
-        dataset,
-        *func_args,
-        kwargs=func_kwargs,
-        input_core_dims=input_core_dims,
-        output_core_dims=output_core_dims,
-        **kwargs
+    kwargs.setdefault(
+        "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + 1))
     )
+    kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
+
+    return apply_ufunc(callable_ufunc, dataset, *func_args, kwargs=func_kwargs, **kwargs)
 
 
 def update_docstring(ufunc, func, n_output=1):
