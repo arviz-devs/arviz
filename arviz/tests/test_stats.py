@@ -12,7 +12,6 @@ from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv, _mc_error, _logsumexp
 
 
-
 @pytest.fixture(scope="session")
 def centered_eight():
     centered_eight = load_arviz_data("centered_eight")
