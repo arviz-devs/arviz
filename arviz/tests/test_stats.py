@@ -371,4 +371,3 @@ def test_multidimenional_log_likelihood():
     wr1 = waic(ds1)
     assert (wr1 == wrm).all()
     assert_array_almost_equal(wrm[:4], wr1[:4])
-
