@@ -1,4 +1,6 @@
 include *.md
+include *.txt
+include *.toml
 include LICENSE
 
 recursive-include arviz *.mplstyle
