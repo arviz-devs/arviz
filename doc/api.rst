@@ -26,6 +26,7 @@ Plots
     plot_parallel
     plot_posterior
     plot_ppc
+    plot_rank
     plot_trace
 
 .. _stats_api:

@@ -15,7 +15,7 @@ if [[ $* == *--build* ]]; then
         --rm
 fi
 
-if [[ $* == *--clear_cache* ]]; then
+if [[ $* == *--clear-cache* ]]; then
     echo "Removing cached files and models"
     find -type d -name __pycache__ -exec rm -rf {} +
     rm -f arviz/tests/saved_models/*.pkl

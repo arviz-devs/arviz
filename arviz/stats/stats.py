@@ -21,7 +21,13 @@ __all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
 
 
 def compare(
-    dataset_dict, ic="waic", method="stacking", b_samples=1000, alpha=1, seed=None, scale="deviance"
+    dataset_dict,
+    ic="waic",
+    method="BB-pseudo-BMA",
+    b_samples=1000,
+    alpha=1,
+    seed=None,
+    scale="deviance",
 ):
     r"""Compare models based on WAIC or LOO cross validation.
 
@@ -38,8 +44,8 @@ def compare(
     method : str
         Method used to estimate the weights for each model. Available options are:
 
-        - 'stacking' : (default) stacking of predictive distributions.
-        - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
+        - 'stacking' : stacking of predictive distributions.
+        - 'BB-pseudo-BMA' : (default) pseudo-Bayesian Model averaging using Akaike-type
            weighting. The weights are stabilized using the Bayesian bootstrap
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
            weighting, without Bootstrap stabilization (not recommended)
@@ -151,7 +157,7 @@ def compare(
         def gradient(weights):
             w_full = w_fuller(weights)
             grad = np.zeros(last_col)
-            for k in range(last_col):
+            for k in range(last_col - 1):
                 for i in range(rows):
                     grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
                         exp_ic_i[i], w_full
@@ -335,14 +341,14 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     for group in ("posterior", "sample_stats"):
         if not hasattr(inference_data, group):
             raise TypeError(
-                "Must be able to extract a {group}" "group from data!".format(group=group)
+                "Must be able to extract a {group} group from data!".format(group=group)
             )
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
     if scale.lower() == "deviance":
@@ -907,7 +913,7 @@ def waic(data, pointwise=False, scale="deviance"):
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
     lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
@@ -935,12 +941,12 @@ def waic(data, pointwise=False, scale="deviance"):
             the Observed RV in your model to make sure it returns element-wise logp.
             """
             )
-        return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
+        return pd.Series(
+            data=[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale],
+            index=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
         )
     else:
-        return pd.DataFrame(
-            [[waic_sum, waic_se, p_waic, warn_mg, scale]],
-            columns=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
+        return pd.Series(
+            data=[waic_sum, waic_se, p_waic, warn_mg, scale],
+            index=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
         )

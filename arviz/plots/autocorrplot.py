@@ -13,7 +13,9 @@ from .plot_utils import (
 from ..utils import _var_names
 
 
-def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=None, textsize=None):
+def plot_autocorr(
+    data, var_names=None, max_lag=None, combined=False, figsize=None, textsize=None, ax=None
+):
     """Bar plot of the autocorrelation function for a sequence of data.
 
     Useful in particular for posteriors from MCMC samples which may display correlation.
@@ -27,7 +29,7 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
         Variables to be plotted, if None all variable are plotted.
         Vector-value stochastics are handled automatically.
     max_lag : int, optional
-        Maximum lag to calculate autocorrelation. Defaults to 100.
+        Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller
     combined : bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
@@ -37,6 +39,8 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    ax: axes
+        Matplotlib axes
 
     Returns
     -------
@@ -79,6 +83,10 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, data)
 
+    # Default max lag to 100 or max length of chain
+    if max_lag is None:
+        max_lag = min(100, data["draw"].shape[0])
+
     plotters = list(xarray_var_iter(data, var_names, combined))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
@@ -87,12 +95,15 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
         figsize, textsize, rows, cols
     )
 
-    _, axes = _create_axes_grid(
-        length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True
-    )
+    if ax is None:
+        _, axes = _create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True
+        )
+    else:
+        axes = ax
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
-    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+    for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
 
         if combined:
@@ -100,10 +111,10 @@ def plot_autocorr(data, var_names=None, max_lag=100, combined=False, figsize=Non
 
         y = autocorr(x_prime)
 
-        ax.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
-        ax.hlines(0, 0, max_lag, "steelblue")
-        ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax.tick_params(labelsize=xt_labelsize)
+        ax_.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
+        ax_.hlines(0, 0, max_lag, "steelblue")
+        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+        ax_.tick_params(labelsize=xt_labelsize)
 
     if axes.size > 0:
         axes[0, 0].set_xlim(0, max_lag)

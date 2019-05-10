@@ -175,30 +175,3 @@ Additional information can be found in the [Contributing Readme](https://github.
 ## Code of Conduct
 ArviZ wishes to maintain a positive community. Additional details
 can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.MD)
-
-
-### Developing
-
-A typical development workflow is:
-
-1. Install project requirements: `pip install -r requirements.txt`
-2. Install additional testing requirements: `pip install -r requirements-dev.txt`
-3. Write helpful code and tests.
-4. Verify code style: `./scripts/lint.sh`
-5. Run test suite: `pytest arviz/tests`
-6. Make a pull request.
-
-There is also a Dockerfile which helps for isolating build problems and local development.
-
-1. Install Docker for your operating system
-2. Clone this repo,
-3. Run `./scripts/container.sh --build`
-
-This will build a local image with the tag `arviz`. 
-After building the image tests can be executing by running  
-`docker run arviz bash pytest arviz/tests`
- 
-An interactive shell can be started by running  
-`docker run -it arviz /bin/bash`  
- The correct conda environment will be activated automatically.
-

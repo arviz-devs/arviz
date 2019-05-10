@@ -233,15 +233,17 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_parallel(models, model_fit):
+@pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
+def test_plot_parallel(models, model_fit, norm_method):
     obj = getattr(models, model_fit)
-    assert plot_parallel(obj, var_names=["mu", "tau"])
+    assert plot_parallel(obj, var_names=["mu", "tau"], norm_method=norm_method)
 
 
-def test_plot_parallel_exception(models):
+@pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
+def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
-        assert plot_parallel(models.pymc3_fit, var_names="mu")
+        assert plot_parallel(models.pymc3_fit, var_names=var_names, norm_method="foo")
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
@@ -272,7 +274,13 @@ def test_plot_joint_bad(models, model_fit):
     [
         {"plot_kwargs": {"linestyle": "-"}},
         {"contour": True, "fill_last": False},
+        {
+            "contour": True,
+            "contourf_kwargs": {"cmap": "plasma"},
+            "contour_kwargs": {"linewidths": 1},
+        },
         {"contour": False},
+        {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -280,7 +288,15 @@ def test_plot_kde(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"cumulative": True}, {"rug": True}])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"cumulative": True},
+        {"cumulative": True, "plot_kwargs": {"linestyle": "--"}},
+        {"rug": True},
+        {"rug": True, "rug_kwargs": {"alpha": 0.2}},
+    ],
+)
 def test_plot_kde_cumulative(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], quantiles=[0.25, 0.5, 0.75], **kwargs)
     assert axes
@@ -385,6 +401,20 @@ def test_plot_pair_bad(models, model_fit):
         plot_pair(obj, kind="bad_kind")
     with pytest.raises(Exception):
         plot_pair(obj, var_names=["mu"])
+
+
+@pytest.mark.parametrize("has_sample_stats", [True, False])
+def test_plot_pair_divergences_warning(has_sample_stats):
+    data = load_arviz_data("centered_eight")
+    if has_sample_stats:
+        # sample_stats present, diverging field missing
+        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
+    else:
+        # sample_stats missing
+        data = data.posterior
+    with pytest.warns(SyntaxWarning):
+        ax = plot_pair(data, divergences=True)
+    assert np.all(ax)
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
@@ -500,7 +530,7 @@ def test_plot_ppc_discrete_save_animation(kind):
 
 
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
-def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system):
+def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
     data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
 
     import platform
@@ -511,15 +541,17 @@ def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system):
     monkeypatch.setattr(platform, "system", mock_system)
 
     animation_kwargs = {"blit": True}
-    with pytest.warns(UserWarning):
-        axes, anim = plot_ppc(
-            data,
-            kind="density",
-            animated=True,
-            animation_kwargs=animation_kwargs,
-            num_pp_samples=5,
-            random_seed=3,
-        )
+    axes, anim = plot_ppc(
+        data,
+        kind="density",
+        animated=True,
+        animation_kwargs=animation_kwargs,
+        num_pp_samples=5,
+        random_seed=3,
+    )
+    records = caplog.records
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
     assert axes
     assert anim
 
@@ -572,6 +604,13 @@ def test_plot_violin_layout(models, model_fit):
 def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model)
     assert axes.shape
+
+
+def test_plot_autocorr_short_chain():
+    """Check that logic for small chain defaulting doesn't cause exception"""
+    chain = np.arange(10)
+    axes = plot_autocorr(chain)
+    assert axes
 
 
 @pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])

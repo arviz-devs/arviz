@@ -2,9 +2,9 @@
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
-from scipy.stats import entropy
 import xarray as xr
 from ..data.inference_data import InferenceData
 from ..utils import conditional_jit
@@ -27,6 +27,8 @@ def plot_kde(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     ax=None,
     legend=True,
 ):
@@ -71,7 +73,11 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to the contourplot. Ignored for 1D KDE.
+        Keywords passed to ax.contour. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
@@ -162,6 +168,7 @@ def plot_kde(
         plot_kwargs.setdefault("color", "C0")
 
         default_color = plot_kwargs.get("color")
+
         if fill_kwargs is None:
             fill_kwargs = {}
 
@@ -222,11 +229,16 @@ def plot_kde(
             fill_func(fill_x, fill_y, **fill_kwargs)
 
         if legend and label:
-            ax.legend()
+            legend_element = [Patch(edgecolor=default_color, label=label)]
+            ax.legend(handles=legend_element)
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
         contour_kwargs.setdefault("colors", "0.5")
+        if contourf_kwargs is None:
+            contourf_kwargs = {}
+        if pcolormesh_kwargs is None:
+            pcolormesh_kwargs = {}
 
         gridsize = (128, 128) if contour else (256, 256)
 
@@ -238,14 +250,13 @@ def plot_kde(
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
         if contour:
-            qcfs = ax.contourf(x_x, y_y, density, antialiased=True)
-            if not fill_last:
-                qcfs.collections[0].set_alpha(0)
+            qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
             qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
             if not fill_last:
+                qcfs.collections[0].set_alpha(0)
                 qcs.collections[0].set_alpha(0)
         else:
-            ax.pcolormesh(x_x, y_y, density)
+            ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 
     return ax
 
@@ -292,9 +303,9 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     assert np.min(x) >= xmin
     assert np.max(x) <= xmax
 
-    std_x = entropy(x - xmin) * bw
+    log_len_x = np.log(len_x) * bw
 
-    n_bins = min(int(len_x ** (1 / 3) * std_x * 2), n_points)
+    n_bins = min(int(len_x ** (1 / 3) * log_len_x * 2), n_points)
     if n_bins < 2:
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
@@ -303,13 +314,13 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     grid = _histogram(x, n_bins, range_hist=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
-    kern_nx = int(scotts_factor * 2 * np.pi * std_x)
-    kernel = gaussian(kern_nx, scotts_factor * std_x)
+    kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
+    kernel = gaussian(kern_nx, scotts_factor * log_len_x)
 
     npad = min(n_bins, 2 * kern_nx)
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
-    norm_factor = len_x * d_x * (2 * np.pi * std_x ** 2 * scotts_factor ** 2) ** 0.5
+    norm_factor = len_x * d_x * (2 * np.pi * log_len_x ** 2 * scotts_factor ** 2) ** 0.5
 
     density /= norm_factor
 

@@ -1,10 +1,11 @@
 """Plot a scatter or hexbin of sampled parameters."""
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from ..data import convert_to_dataset
+from ..data import convert_to_dataset, convert_to_inference_data
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
@@ -133,6 +134,7 @@ def plot_pair(
     divergences_kwargs.setdefault("lw", 0)
 
     # Get posterior draws and combine chains
+    data = convert_to_inference_data(data)
     posterior_data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, posterior_data)
     flat_var_names, _posterior = xarray_to_ndarray(
@@ -141,11 +143,21 @@ def plot_pair(
 
     # Get diverging draws and combine chains
     if divergences:
-        divergent_data = convert_to_dataset(data, group="sample_stats")
-        _, diverging_mask = xarray_to_ndarray(
-            divergent_data, var_names=("diverging",), combined=True
-        )
-        diverging_mask = np.squeeze(diverging_mask)
+        if hasattr(data, "sample_stats") and hasattr(data.sample_stats, "diverging"):
+            divergent_data = convert_to_dataset(data, group="sample_stats")
+            _, diverging_mask = xarray_to_ndarray(
+                divergent_data, var_names=("diverging",), combined=True
+            )
+            diverging_mask = np.squeeze(diverging_mask)
+        else:
+            divergences = False
+            warnings.warn(
+                "Divergences data not found, plotting without divergences. "
+                "Make sure the sample method provides divergences data and "
+                "that it is present in the `diverging` field of `sample_stats` "
+                "or set divergences=False",
+                SyntaxWarning,
+            )
 
     if gridsize == "auto":
         gridsize = int(len(_posterior[0]) ** 0.35)

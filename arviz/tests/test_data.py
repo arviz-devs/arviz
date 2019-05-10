@@ -476,6 +476,11 @@ class TestDictNetCDFUtils:
         assert dataset.school.shape == (eight_schools_params["J"],)
         assert dataset.theta.shape == (chains, draws, eight_schools_params["J"])
 
+    def test_from_dict_warning(self):
+        bad_posterior_dict = {"log_likelihood": np.ones((5, 1000, 2))}
+        with pytest.warns(SyntaxWarning):
+            from_dict(posterior=bad_posterior_dict)
+
 
 class TestDictIONetCDFUtils:
     @pytest.fixture(scope="class")

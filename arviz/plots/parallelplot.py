@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scipy.stats.mstats import rankdata
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
@@ -18,6 +19,7 @@ def plot_parallel(
     colord="C1",
     shadend=0.025,
     ax=None,
+    norm_method=None,
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -50,10 +52,33 @@ def plot_parallel(
         Defaults to .025
     ax : axes
         Matplotlib axes.
+    norm_method : str
+        Method for normalizing the data. Methods include normal, minmax and rank.
+        Defaults to none.
 
     Returns
     -------
     ax : matplotlib axes
+
+    Examples
+    --------
+    Plot default parallel plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_parallel(data, var_names=["mu", "tau"])
+
+
+    Plot parallel plot with normalization
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_parallel(data, var_names=["mu", "tau"], norm_method='normal')
+
     """
     if coords is None:
         coords = {}
@@ -69,9 +94,23 @@ def plot_parallel(
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
-
     if len(var_names) < 2:
         raise ValueError("This plot needs at least two variables")
+    if norm_method is not None:
+        if norm_method == "normal":
+            mean = np.mean(_posterior, axis=1)
+            standard_deviation = np.std(_posterior, axis=1)
+            for i in range(0, np.shape(mean)[0]):
+                _posterior[i, :] = (_posterior[i, :] - mean[i]) / standard_deviation[i]
+        elif norm_method == "minmax":
+            min_elem = np.min(_posterior, axis=1)
+            max_elem = np.max(_posterior, axis=1)
+            for i in range(0, np.shape(min_elem)[0]):
+                _posterior[i, :] = ((_posterior[i, :]) - min_elem[i]) / (max_elem[i] - min_elem[i])
+        elif norm_method == "rank":
+            _posterior = rankdata(_posterior, axis=1)
+        else:
+            raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
