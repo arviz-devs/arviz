@@ -422,14 +422,14 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     for group in ("posterior", "sample_stats"):
         if not hasattr(inference_data, group):
             raise TypeError(
-                "Must be able to extract a {group}" "group from data!".format(group=group)
+                "Must be able to extract a {group} group from data!".format(group=group)
             )
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
     if scale.lower() == "deviance":
@@ -1008,7 +1008,7 @@ def waic(data, pointwise=False, scale="deviance"):
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples,) + log_likelihood.shape[2:]
+    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
     log_likelihood = log_likelihood.values.reshape(*new_shape)
 
     lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])

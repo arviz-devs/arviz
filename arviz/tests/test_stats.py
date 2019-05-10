@@ -5,9 +5,10 @@ from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 from scipy.stats import linregress
+from xarray import Dataset, DataArray
 
 
-from ..data import load_arviz_data, from_dict
+from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
 from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv, _mc_error, _logsumexp
 
@@ -350,3 +351,29 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
         arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
 
         assert_array_almost_equal(scipy_results, arviz_results)
+
+
+def test_multidimenional_log_likelihood():
+    np.random.seed(17)
+    llm = np.random.rand(4, 23, 15, 2)
+    ll1 = llm.reshape(4, 23, 15 * 2)
+    statsm = Dataset(dict(log_likelihood=DataArray(llm, dims=["chain", "draw", "a", "b"])))
+
+    stats1 = Dataset(dict(log_likelihood=DataArray(ll1, dims=["chain", "draw", "v"])))
+
+    post = Dataset(dict(mu=DataArray(np.random.rand(4, 23, 2), dims=["chain", "draw", "v"])))
+
+    dsm = convert_to_inference_data(statsm, group="sample_stats")
+    ds1 = convert_to_inference_data(stats1, group="sample_stats")
+    dsp = convert_to_inference_data(post, group="posterior")
+    dsm = concat(dsp, dsm)
+    ds1 = concat(dsp, ds1)
+    lrm = loo(dsm)
+    lr1 = loo(ds1)
+    assert (lr1 == lrm).all()
+    assert_array_almost_equal(lrm[:4], lr1[:4])
+
+    wrm = waic(dsm)
+    wr1 = waic(ds1)
+    assert (wr1 == wrm).all()
+    assert_array_almost_equal(wrm[:4], wr1[:4])
