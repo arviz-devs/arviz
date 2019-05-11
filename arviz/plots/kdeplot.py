@@ -182,6 +182,7 @@ def plot_kde(
         rug_kwargs.setdefault("space", 0.2)
 
         plot_kwargs.setdefault("linewidth", linewidth)
+        plot_kwargs.setdefault("linestyle", "-")
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
         density, lower, upper = _fast_kde(values, cumulative, bw)
@@ -229,8 +230,19 @@ def plot_kde(
             fill_func(fill_x, fill_y, **fill_kwargs)
 
         if legend and label:
-            legend_element = [Patch(edgecolor=default_color, label=label)]
-            ax.legend(handles=legend_element)
+            if fill_kwargs["alpha"] != 0:
+                legend_element = [
+                    Patch(
+                        facecolor=fill_kwargs["color"],
+                        edgecolor=plot_kwargs["color"],
+                        label=label,
+                        alpha=fill_kwargs["alpha"],
+                        linestyle=plot_kwargs["linestyle"],
+                    )
+                ]
+                ax.legend(handles=legend_element)
+            else:
+                ax.legend()
     else:
         if contour_kwargs is None:
             contour_kwargs = {}

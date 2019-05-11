@@ -136,11 +136,9 @@ def plot_energy(
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
             ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-
     if legend:
         ax.legend()
+    ax.set_xticks([])
+    ax.set_yticks([])
 
     return ax
