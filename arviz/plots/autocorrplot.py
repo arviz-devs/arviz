@@ -2,7 +2,7 @@
 import numpy as np
 
 from ..data import convert_to_dataset
-from ..stats.diagnostics import autocorr
+from ..stats import autocorr
 from .plot_utils import (
     _scale_fig_size,
     default_grid,

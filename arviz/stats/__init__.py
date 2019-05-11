@@ -1,5 +1,6 @@
 # pylint: disable=wildcard-import
 """Statistical tests and diagnostics for ArviZ."""
+from .stats_utils import *
 from .stats import *
 from .diagnostics import *
 
@@ -14,7 +15,10 @@ __all__ = [
     "summary",
     "waic",
     "effective_sample_size",
+    "ess",
     "rhat",
+    "mcse",
     "geweke",
     "autocorr",
+    "autocov",
 ]

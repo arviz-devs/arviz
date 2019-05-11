@@ -3,14 +3,13 @@ from copy import deepcopy
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pytest
-from scipy.special import logsumexp
 from scipy.stats import linregress
 from xarray import Dataset, DataArray
 
 
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
-from ..stats import bfmi, compare, hpd, loo, r2_score, waic, psislw, summary
-from ..stats.stats import _gpinv, _mc_error, _logsumexp
+from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
+from ..stats.stats import _gpinv
 
 
 @pytest.fixture(scope="session")
@@ -23,11 +22,6 @@ def centered_eight():
 def non_centered_eight():
     non_centered_eight = load_arviz_data("non_centered_eight")
     return non_centered_eight
-
-
-def test_bfmi():
-    energy = np.array([1, 2, 3, 4])
-    assert_almost_equal(bfmi(energy), 0.8)
 
 
 def test_hpd():
@@ -140,6 +134,15 @@ def test_summary_unpack_order(order):
                     column_order.append("a[{},{},{}]".format(idx3, idx2, idx1))
     for col1, col2 in zip(list(az_summary.index), column_order):
         assert col1 == col2
+
+
+@pytest.mark.parametrize("origin", [0, 1, 2, 3])
+def test_summary_index_origin(origin):
+    data = from_dict({"a": np.random.randn(2, 50, 10)})
+    az_summary = summary(data, index_origin=origin, fmt="wide")
+    assert az_summary is not None
+    for i, col in enumerate(list(az_summary.index)):
+        assert col == "a[{}]".format(i + origin)
 
 
 @pytest.mark.parametrize(
@@ -265,20 +268,11 @@ def test_loo_warning(centered_eight):
 def test_psislw():
     data = load_arviz_data("centered_eight")
     pareto_k = loo(data, pointwise=True, reff=0.7)["pareto_k"]
-    log_likelihood = data.sample_stats.log_likelihood
+    log_likelihood = data.sample_stats.log_likelihood  # pylint: disable=no-member
     n_samples = log_likelihood.chain.size * log_likelihood.draw.size
     new_shape = (n_samples,) + log_likelihood.shape[2:]
     log_likelihood = log_likelihood.values.reshape(*new_shape)
     assert_almost_equal(pareto_k, psislw(-log_likelihood, 0.7)[1])
-
-
-@pytest.mark.parametrize("size", [100, 101])
-@pytest.mark.parametrize("batches", [1, 2, 3, 5, 7])
-@pytest.mark.parametrize("ndim", [1, 2, 3])
-@pytest.mark.parametrize("circular", [False, True])
-def test_mc_error(size, batches, ndim, circular):
-    x = np.random.randn(size, ndim).squeeze()  # pylint: disable=no-member
-    assert _mc_error(x, batches=batches, circular=circular) is not None
 
 
 @pytest.mark.parametrize("probs", [True, False])
@@ -292,68 +286,8 @@ def test_gpinv(probs, kappa, sigma):
     assert len(_gpinv(probs, kappa, sigma)) == len(probs)
 
 
-@pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
-@pytest.mark.parametrize("axis", [None, 0, 1, (-2, -1)])
-@pytest.mark.parametrize("b", [None, 0, 1 / 100, 1 / 101])
-@pytest.mark.parametrize("keepdims", [True, False])
-def test_logsumexp_b(ary_dtype, axis, b, keepdims):
-    """Test ArviZ implementation of logsumexp.
-
-    Test also compares against Scipy implementation.
-    Case where b=None, they are equal. (N=len(ary))
-    Second case where b=x, and x is 1/(number of elements), they are almost equal.
-
-    Test tests against b parameter.
-    """
-    np.random.seed(17)
-    ary = np.random.randn(100, 101).astype(ary_dtype)  # pylint: disable=no-member
-    assert _logsumexp(ary=ary, axis=axis, b=b, keepdims=keepdims, copy=True) is not None
-    ary = ary.copy()
-    assert _logsumexp(ary=ary, axis=axis, b=b, keepdims=keepdims, copy=False) is not None
-    out = np.empty(5)
-    assert _logsumexp(ary=np.random.randn(10, 5), axis=0, out=out) is not None
-
-    # Scipy implementation
-    scipy_results = logsumexp(ary, b=b, axis=axis, keepdims=keepdims)
-    arviz_results = _logsumexp(ary, b=b, axis=axis, keepdims=keepdims)
-
-    assert_array_almost_equal(scipy_results, arviz_results)
-
-
-@pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
-@pytest.mark.parametrize("axis", [None, 0, 1, (-2, -1)])
-@pytest.mark.parametrize("b_inv", [None, 0, 100, 101])
-@pytest.mark.parametrize("keepdims", [True, False])
-def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
-    """Test ArviZ implementation of logsumexp.
-
-    Test also compares against Scipy implementation.
-    Case where b=None, they are equal. (N=len(ary))
-    Second case where b=x, and x is 1/(number of elements), they are almost equal.
-
-    Test tests against b_inv parameter.
-    """
-    np.random.seed(17)
-    ary = np.random.randn(100, 101).astype(ary_dtype)  # pylint: disable=no-member
-    assert _logsumexp(ary=ary, axis=axis, b_inv=b_inv, keepdims=keepdims, copy=True) is not None
-    ary = ary.copy()
-    assert _logsumexp(ary=ary, axis=axis, b_inv=b_inv, keepdims=keepdims, copy=False) is not None
-    out = np.empty(5)
-    assert _logsumexp(ary=np.random.randn(10, 5), axis=0, out=out) is not None
-
-    if b_inv != 0:
-        # Scipy implementation when b_inv != 0
-        if b_inv is not None:
-            b_scipy = 1 / b_inv
-        else:
-            b_scipy = None
-        scipy_results = logsumexp(ary, b=b_scipy, axis=axis, keepdims=keepdims)
-        arviz_results = _logsumexp(ary, b_inv=b_inv, axis=axis, keepdims=keepdims)
-
-        assert_array_almost_equal(scipy_results, arviz_results)
-
-
-def test_multidimenional_log_likelihood():
+@pytest.mark.parametrize("func", [loo, waic])
+def test_multidimensional_log_likelihood(func):
     np.random.seed(17)
     llm = np.random.rand(4, 23, 15, 2)
     ll1 = llm.reshape(4, 23, 15 * 2)
@@ -366,14 +300,12 @@ def test_multidimenional_log_likelihood():
     dsm = convert_to_inference_data(statsm, group="sample_stats")
     ds1 = convert_to_inference_data(stats1, group="sample_stats")
     dsp = convert_to_inference_data(post, group="posterior")
+
     dsm = concat(dsp, dsm)
     ds1 = concat(dsp, ds1)
-    lrm = loo(dsm)
-    lr1 = loo(ds1)
-    assert (lr1 == lrm).all()
-    assert_array_almost_equal(lrm[:4], lr1[:4])
 
-    wrm = waic(dsm)
-    wr1 = waic(ds1)
-    assert (wr1 == wrm).all()
-    assert_array_almost_equal(wrm[:4], wr1[:4])
+    frm = func(dsm)
+    fr1 = func(ds1)
+
+    assert (fr1 == frm).all()
+    assert_array_almost_equal(frm[:4], fr1[:4])

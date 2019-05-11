@@ -1,8 +1,8 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
 import warnings
+import logging
 from collections import OrderedDict
-from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -11,38 +11,13 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import effective_sample_size, rhat
+from .diagnostics import _multichain_statistics, _mc_error, ess
+from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
 from ..utils import _var_names
 
-__all__ = ["bfmi", "compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
+_log = logging.getLogger(__name__)
 
-
-def bfmi(energy):
-    r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
-
-    BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
-    information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
-    values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
-    change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
-    information.
-
-    Parameters
-    ----------
-    energy : NumPy array
-        Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
-        after converting a trace or fit to InferenceData, the energy will be in
-        `data.sample_stats.energy`.
-
-    Returns
-    -------
-    z : array
-        The Bayesian fraction of missing information of the model and trace. One element per
-        chain in the trace.
-    """
-    energy_mat = np.atleast_2d(energy)
-    num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    den = np.var(energy_mat, axis=1)
-    return num / den
+__all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
 
 
 def compare(
@@ -268,7 +243,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(x, credible_interval=0.94, circular=False):
+def hpd(ary, credible_interval=0.94, circular=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -290,24 +265,24 @@ def hpd(x, credible_interval=0.94, circular=False):
     np.ndarray
         lower and upper value of the interval.
     """
-    if x.ndim > 1:
+    if ary.ndim > 1:
         hpd_array = np.array(
-            [hpd(row, credible_interval=credible_interval, circular=circular) for row in x.T]
+            [hpd(row, credible_interval=credible_interval, circular=circular) for row in ary.T]
         )
         return hpd_array
     # Make a copy of trace
-    x = x.copy()
-    len_x = len(x)
+    ary = ary.copy()
+    n = len(ary)
 
     if circular:
-        mean = st.circmean(x, high=np.pi, low=-np.pi)
-        x = x - mean
-        x = np.arctan2(np.sin(x), np.cos(x))
+        mean = st.circmean(ary, high=np.pi, low=-np.pi)
+        ary = ary - mean
+        ary = np.arctan2(np.sin(ary), np.cos(ary))
 
-    x = np.sort(x)
-    interval_idx_inc = int(np.floor(credible_interval * len_x))
-    n_intervals = len_x - interval_idx_inc
-    interval_width = x[interval_idx_inc:] - x[:n_intervals]
+    ary = np.sort(ary)
+    interval_idx_inc = int(np.floor(credible_interval * n))
+    n_intervals = n - interval_idx_inc
+    interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
     if len(interval_width) == 0:
         raise ValueError(
@@ -316,8 +291,8 @@ def hpd(x, credible_interval=0.94, circular=False):
         )
 
     min_idx = np.argmin(interval_width)
-    hdi_min = x[min_idx]
-    hdi_max = x[min_idx + interval_idx_inc]
+    hdi_min = ary[min_idx]
+    hdi_max = ary[min_idx + interval_idx_inc]
 
     if circular:
         hdi_min = hdi_min + mean
@@ -326,62 +301,6 @@ def hpd(x, credible_interval=0.94, circular=False):
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
     return np.array([hdi_min, hdi_max])
-
-
-def _logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
-    """Stable logsumexp when b >= 0 and b is scalar.
-
-    b_inv overwrites b unless b_inv is None.
-    """
-    # check dimensions for result arrays
-    ary = np.asarray(ary)
-    if ary.dtype.kind == "i":
-        ary = ary.astype(np.float64)
-    dtype = ary.dtype.type
-    shape = ary.shape
-    shape_len = len(shape)
-    if isinstance(axis, Sequence):
-        axis = tuple(axis_i if axis_i >= 0 else shape_len + axis_i for axis_i in axis)
-        agroup = axis
-    else:
-        axis = axis if (axis is None) or (axis >= 0) else shape_len + axis
-        agroup = (axis,)
-    shape_max = (
-        tuple(1 for _ in shape)
-        if axis is None
-        else tuple(1 if i in agroup else d for i, d in enumerate(shape))
-    )
-    # create result arrays
-    if out is None:
-        if not keepdims:
-            out_shape = (
-                tuple()
-                if axis is None
-                else tuple(d for i, d in enumerate(shape) if i not in agroup)
-            )
-        else:
-            out_shape = shape_max
-        out = np.empty(out_shape, dtype=dtype)
-    if b_inv == 0:
-        return np.full_like(out, np.inf, dtype=dtype) if out.shape else np.inf
-    if b_inv is None and b == 0:
-        return np.full_like(out, -np.inf) if out.shape else -np.inf
-    ary_max = np.empty(shape_max, dtype=dtype)
-    # calculations
-    ary.max(axis=axis, keepdims=True, out=ary_max)
-    if copy:
-        ary = ary.copy()
-    ary -= ary_max
-    np.exp(ary, out=ary)
-    ary.sum(axis=axis, keepdims=keepdims, out=out)
-    np.log(out, out=out)
-    if b_inv is not None:
-        ary_max -= np.log(b_inv)
-    elif b:
-        ary_max += np.log(b)
-    out += ary_max.squeeze() if not keepdims else ary_max
-    # transform to scalar if possible
-    return out if out.shape else dtype(out)
 
 
 def loo(data, pointwise=False, reff=None, scale="deviance"):
@@ -397,7 +316,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     pointwise: bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
-        Relative MCMC efficiency, `effective_n / n` i.e. number of effective samples divided by
+        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
     scale : str
         Output scale for loo. Available options are:
@@ -446,9 +365,11 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         if n_chains == 1:
             reff = 1.0
         else:
-            ess = effective_sample_size(posterior)
+            ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
-            reff = np.hstack([ess[v].values.flatten() for v in ess.data_vars]).mean() / n_samples
+            reff = (
+                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+            )
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
@@ -561,7 +482,7 @@ def psislw(log_weights, reff=1.0):
     return log_weights_out, kss
 
 
-def _gpdfit(x):
+def _gpdfit(ary):
     """Estimate the parameters for the Generalized Pareto Distribution (GPD).
 
     Empirical Bayes estimate for the parameters of the generalized Pareto
@@ -569,7 +490,7 @@ def _gpdfit(x):
 
     Parameters
     ----------
-    x : array
+    ary : array
         sorted 1D data array
 
     Returns
@@ -581,15 +502,15 @@ def _gpdfit(x):
     """
     prior_bs = 3
     prior_k = 10
-    len_x = len(x)
-    m_est = 30 + int(len_x ** 0.5)
+    n = len(ary)
+    m_est = 30 + int(n ** 0.5)
 
     b_ary = 1 - np.sqrt(m_est / (np.arange(1, m_est + 1, dtype=float) - 0.5))
-    b_ary /= prior_bs * x[int(len_x / 4 + 0.5) - 1]
-    b_ary += 1 / x[-1]
+    b_ary /= prior_bs * ary[int(n / 4 + 0.5) - 1]
+    b_ary += 1 / ary[-1]
 
-    k_ary = np.log1p(-b_ary[:, None] * x).mean(axis=1)  # pylint: disable=no-member
-    len_scale = len_x * (np.log(-(b_ary / k_ary)) - k_ary - 1)
+    k_ary = np.log1p(-b_ary[:, None] * ary).mean(axis=1)  # pylint: disable=no-member
+    len_scale = n * (np.log(-(b_ary / k_ary)) - k_ary - 1)
     weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
 
     # remove negligible weights
@@ -603,9 +524,9 @@ def _gpdfit(x):
     # posterior mean for b
     b_post = np.sum(b_ary * weights)
     # estimate for k
-    k_post = np.log1p(-b_post * x).mean()  # pylint: disable=invalid-unary-operand-type,no-member
+    k_post = np.log1p(-b_post * ary).mean()  # pylint: disable=invalid-unary-operand-type,no-member
     # add prior for k_post
-    k_post = (len_x * k_post + prior_k * 0.5) / (len_x + prior_k)
+    k_post = (n * k_post + prior_k * 0.5) / (n + prior_k)
     sigma = -k_post / b_post
 
     return k_post, sigma
@@ -613,30 +534,28 @@ def _gpdfit(x):
 
 def _gpinv(probs, kappa, sigma):
     """Inverse Generalized Pareto distribution function."""
+    # pylint: disable=unsupported-assignment-operation, invalid-unary-operand-type
     x = np.full_like(probs, np.nan)
     if sigma <= 0:
         return x
     ok = (probs > 0) & (probs < 1)
     if np.all(ok):
         if np.abs(kappa) < np.finfo(float).eps:
-            x = -np.log1p(-probs)  # pylint: disable=invalid-unary-operand-type
+            x = -np.log1p(-probs)
         else:
             x = np.expm1(-kappa * np.log1p(-probs)) / kappa
         x *= sigma
     else:
         if np.abs(kappa) < np.finfo(float).eps:
-            x[ok] = -np.log1p(-probs[ok])  # pylint: disable=unsupported-assignment-operation, E1130
+            x[ok] = -np.log1p(-probs[ok])
         else:
-            x[ok] = (  # pylint: disable=unsupported-assignment-operation
-                np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
-            )
+            x[ok] = np.expm1(-kappa * np.log1p(-probs[ok])) / kappa
         x *= sigma
         x[probs == 0] = 0
         if kappa >= 0:
-            x[probs == 1] = np.inf  # pylint: disable=unsupported-assignment-operation
+            x[probs == 1] = np.inf
         else:
-            x[probs == 1] = -sigma / kappa  # pylint: disable=unsupported-assignment-operation
-
+            x[probs == 1] = -sigma / kappa
     return x
 
 
@@ -672,12 +591,13 @@ def summary(
     data,
     var_names=None,
     fmt="wide",
-    round_to=2,
+    round_to=None,
     include_circ=None,
     stat_funcs=None,
     extend=True,
     credible_interval=0.94,
     order="C",
+    index_origin=0,
 ):
     """Create a data frame with summary statistics.
 
@@ -693,7 +613,7 @@ def summary(
     fmt : {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     round_to : int
-        Number of decimals used to round results. Defaults to 2.
+        Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
     stat_funcs : dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -710,12 +630,15 @@ def summary(
         None.
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
+    index_origin : int
+        If fmt is "wide, select n-based indexing for multivariate parameters. Defaults to 0.
 
     Returns
     -------
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
-        `hpd_3%`, `hpd_97%`, `mc_error`, `ess` and `r_hat`. `ess` and `r_hat` are only computed
+        `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat`.
+        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat` are only computed
         for traces with 2 or more chains.
 
     Examples
@@ -723,11 +646,12 @@ def summary(
     .. code:: ipython
 
         >>> az.summary(trace, ['mu'])
-               mean    sd  mc_error  hpd_3  hpd_97  ess  r_hat
-        mu[0]  0.10  0.06      0.00  -0.02    0.23  487.0  1.00
-        mu[1] -0.04  0.06      0.00  -0.17    0.08  379.0  1.00
+               mean    sd  hpd_3  hpd_97  ess_bulk  ess_tail   r_hat
+        mu[0]  0.10  0.06  -0.02    0.23     487.0              1.00
+        mu[1] -0.04  0.06   0.00   -0.17     379.0              1.00
 
-    Other statistics can be calculated by passing a list of functions.
+    Other statistics can be calculated by passing a list of functions
+    or a dictionary with key, function pairs.
 
     .. code:: ipython
 
@@ -738,7 +662,7 @@ def summary(
         >>> def trace_quantiles(x):
         ...     return pd.DataFrame(pd.quantiles(x, [5, 50, 95]))
         ...
-        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles])
+        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles], extend=False)
                  sd     5    50    95
         mu[0]  0.06  0.00  0.10  0.21
         mu[1]  0.07 -0.16 -0.04  0.06
@@ -759,110 +683,136 @@ def summary(
 
     alpha = 1 - credible_interval
 
-    metrics = []
-    metric_names = []
+    extra_metrics = []
+    extra_metric_names = []
 
     if stat_funcs is not None:
         if isinstance(stat_funcs, dict):
             for stat_func_name, stat_func in stat_funcs.items():
-                metrics.append(
+                extra_metrics.append(
                     xr.apply_ufunc(
                         _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                     )
                 )
-                metric_names.append(stat_func_name)
+                extra_metric_names.append(stat_func_name)
         else:
             for stat_func in stat_funcs:
-                metrics.append(
+                extra_metrics.append(
                     xr.apply_ufunc(
                         _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
                     )
                 )
-                metric_names.append(stat_func.__name__)
+                extra_metric_names.append(stat_func.__name__)
 
     if extend:
-        metrics.append(posterior.mean(dim=("chain", "draw")))
-        metric_names.append("mean")
+        mean = posterior.mean(dim=("chain", "draw"))
 
-        metrics.append(posterior.std(dim=("chain", "draw")))
-        metric_names.append("sd")
+        sd = posterior.std(dim=("chain", "draw"))
 
-        metrics.append(
-            xr.apply_ufunc(_make_ufunc(_mc_error), posterior, input_core_dims=(("chain", "draw"),))
+        hpd_lower, hpd_higher = xr.apply_ufunc(
+            _make_ufunc(hpd, n_output=2),
+            posterior,
+            kwargs=dict(credible_interval=credible_interval),
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(2)),
         )
-        metric_names.append("mc error")
-
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
-        metric_names.append("hpd {:g}%".format(100 * alpha / 2))
-
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
-        metric_names.append("hpd {:g}%".format(100 * (1 - alpha / 2)))
 
     if include_circ:
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circmean, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_mean = xr.apply_ufunc(
+            _make_ufunc(st.circmean),
+            posterior,
+            kwargs=dict(high=np.pi, low=-np.pi),
+            input_core_dims=(("chain", "draw"),),
         )
-        metric_names.append("circular mean")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(st.circstd, high=np.pi, low=-np.pi),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_sd = xr.apply_ufunc(
+            _make_ufunc(st.circstd),
+            posterior,
+            kwargs=dict(high=np.pi, low=-np.pi),
+            input_core_dims=(("chain", "draw"),),
         )
-        metric_names.append("circular standard deviation")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(_mc_error, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_mcse = xr.apply_ufunc(
+            _make_ufunc(_mc_error),
+            posterior,
+            kwargs=dict(circular=True),
+            input_core_dims=(("chain", "draw"),),
         )
-        metric_names.append("circular mc error")
 
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=0, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
+            _make_ufunc(hpd, n_output=2),
+            posterior,
+            kwargs=dict(credible_interval=credible_interval, circular=True),
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(2)),
         )
-        metric_names.append("circular hpd {:.2%}".format(alpha / 2))
-
-        metrics.append(
-            xr.apply_ufunc(
-                _make_ufunc(hpd, index=1, credible_interval=credible_interval, circular=True),
-                posterior,
-                input_core_dims=(("chain", "draw"),),
-            )
-        )
-        metric_names.append("circular hpd {:.2%}".format(1 - alpha / 2))
 
     if len(posterior.chain) > 1:
-        metrics.append(effective_sample_size(posterior, var_names=var_names))
-        metric_names.append("ess")
+        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(7)),
+        )
 
-        metrics.append(rhat(posterior, var_names=var_names))
-        metric_names.append("r_hat")
-
+    # Combine metrics
+    metrics = []
+    metric_names = []
+    if extend:
+        if len(posterior.chain) > 1:
+            metrics.extend(
+                (
+                    mean,
+                    sd,
+                    mcse_mean,
+                    mcse_sd,
+                    hpd_lower,
+                    hpd_higher,
+                    ess_mean,
+                    ess_sd,
+                    ess_bulk,
+                    ess_tail,
+                    r_hat,
+                )
+            )
+            metric_names.extend(
+                (
+                    "mean",
+                    "sd",
+                    "mcse_mean",
+                    "mcse_sd",
+                    "hpd_{:g}%".format(100 * alpha / 2),
+                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                    "ess_mean",
+                    "ess_sd",
+                    "ess_bulk",
+                    "ess_tail",
+                    "r_hat",
+                )
+            )
+        else:
+            metrics.extend((mean, sd, hpd_lower, hpd_higher))
+            metric_names.extend(
+                (
+                    "mean",
+                    "sd",
+                    "hpd_{:g}%".format(100 * alpha / 2),
+                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                )
+            )
+    if include_circ:
+        metrics.extend((circ_mean, circ_sd, circ_mcse, circ_hpd_lower, circ_hpd_higher))
+        metric_names.extend(
+            (
+                "circular_mean",
+                "circular_sd",
+                "circular_mcse",
+                "circular_hpd_{:g}%".format(100 * alpha / 2),
+                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+            )
+        )
+    metrics.extend(extra_metrics)
+    metric_names.extend(extra_metric_names)
     joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
 
     if fmt.lower() == "wide":
@@ -875,7 +825,8 @@ def summary(
                     if order == "F":
                         idx = tuple(idx[::-1])
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
-                    key = "{}[{}]".format(var_name, ",".join(map(str, idx)))
+                    key_index = ",".join(map(str, (i + index_origin for i in idx)))
+                    key = "{}[{}]".format(var_name, key_index)
                     data_dict[key] = ser
                 df = pd.DataFrame.from_dict(data_dict, orient="index")
                 df = df.loc[list(data_dict.keys())]
@@ -891,67 +842,21 @@ def summary(
         summary_df = df
     else:
         summary_df = joined
-    return summary_df.round(round_to)
+    if (round_to is not None) and (round_to not in ("None", "none")):
+        summary_df = summary_df.round(round_to)
+    elif round_to not in ("None", "none") and (fmt.lower() in ("long", "wide")):
+        # Don't round xarray object by default (even with "none")
+        decimals = {
+            col: 3
+            if col not in {"ess_mean", "ess_sd", "ess_bulk", "ess_tail", "r_hat"}
+            else 2
+            if col == "r_hat"
+            else 0
+            for col in summary_df.columns
+        }
+        summary_df = summary_df.round(decimals)
 
-
-def _make_ufunc(func, index=Ellipsis, **kwargs):  # noqa: D202
-    """Make ufunc from function."""
-
-    def _ufunc(ary):
-        target = np.empty(ary.shape[:-2])
-        for idx in np.ndindex(target.shape):
-            target[idx] = np.asarray(func(ary[idx].ravel(), **kwargs))[index]
-        return target
-
-    return _ufunc
-
-
-def _mc_error(x, batches=5, circular=False):
-    """Calculate the simulation standard error, accounting for non-independent samples.
-
-    The trace is divided into batches, and the standard deviation of the batch
-    means is calculated.
-
-    Parameters
-    ----------
-    x : Numpy array
-        An array containing MCMC samples
-    batches : integer
-        Number of batches
-    circular : bool
-        Whether to compute the error taking into account `x` is a circular variable
-        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-
-    Returns
-    -------
-    mc_error : float
-        Simulation standard error
-    """
-    if x.ndim > 1:
-
-        dims = np.shape(x)
-        trace = np.transpose([t.ravel() for t in x])
-
-        return np.reshape([_mc_error(t, batches) for t in trace], dims[1:])
-
-    else:
-        if batches == 1:
-            if circular:
-                std = st.circstd(x, high=np.pi, low=-np.pi)
-            else:
-                std = np.std(x)
-            return std / np.sqrt(len(x))
-
-        batched_traces = np.resize(x, (batches, int(len(x) / batches)))
-
-        if circular:
-            means = st.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
-            std = st.circstd(means, high=np.pi, low=-np.pi)
-        else:
-            means = np.mean(batched_traces, 1)
-            std = np.std(means)
-
-        return std / np.sqrt(batches)
+    return summary_df
 
 
 def waic(data, pointwise=False, scale="deviance"):
