@@ -77,7 +77,6 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         - "mad" (mean absolute deviance)
         - "z_scale"
         - "folded"
-        - "split"
         - "identity"
     relative : bool
         Return relative ess
@@ -139,7 +138,6 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "mad" (mean absolute deviance)
         - "z_scale"
         - "folded"
-        - "split"
         - "identity"
     relative : bool
         Return relative ess
@@ -182,32 +180,14 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         "mad": _ess_mad,
         "z_scale": _ess_z_scale,
         "folded": _ess_folded,
-        "split": _ess_split,
         "identity": _ess_identity,
-    }
-
-    methods_relative = {
-        "bulk": _ress_bulk,
-        "tail": _ress_tail,
-        "quantile": _ress_quantile,
-        "mean": _ress_mean,
-        "sd": _ress_sd,
-        "median": _ress_median,
-        "mad": _ress_mad,
-        "z_scale": _ress_z_scale,
-        "folded": _ress_folded,
-        "split": _ress_split,
-        "identity": _ress_identity,
     }
 
     if method not in methods:
         raise TypeError(
             "ESS method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
         )
-    if relative:
-        ess_func = methods_relative[method]
-    else:
-        ess_func = methods[method]
+    ess_func = methods[method]
 
     if (method == "quantile") and prob is None:
         raise TypeError("Quantile (prob) information needs to be defined.")
@@ -215,9 +195,9 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
         if prob is not None:
-            return ess_func(data, prob=prob)
+            return ess_func(data, prob=prob, relative=relative)
         else:
-            return ess_func(data)
+            return ess_func(data, relative=relative)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -225,7 +205,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     dataset = dataset if var_names is None else dataset[var_names]
 
     ufunc_kwargs = {"ravel": False}
-    func_kwargs = {} if prob is None else {"prob": prob}
+    func_kwargs = {"relative": relative} if prob is None else {"prob": prob, "relative": relative}
     return _wrap_xarray_ufunc(ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs)
 
 
@@ -606,7 +586,7 @@ def _rhat_identity(ary):
     return _rhat(ary)
 
 
-def _ess(ary):
+def _ess(ary, relative=False):
     """Compute the effective sample size for a 2D array."""
     ary = np.asarray(ary, dtype=float)
     if _not_valid(ary, check_shape=False):
@@ -657,20 +637,22 @@ def _ess(ary):
     ess = ess / tau_hat
     if np.isnan(rho_hat_t).any():
         ess = np.nan
+    if relative:
+        ess /= ary.size
     return ess
 
 
-def _ess_bulk(ary):
+def _ess_bulk(ary, relative=False):
     """Compute the effective sample size for the bulk."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     z_scaled = _z_scale(_split_chains(ary))
-    ess_bulk = _ess(z_scaled)
+    ess_bulk = _ess(z_scaled, relative=relative)
     return ess_bulk
 
 
-def _ess_tail(ary, prob=None):
+def _ess_tail(ary, prob=None, relative=False):
     """Compute the effective sample size for the tail.
 
     If `prob` defined, ess = min(qess(prob), qess(1-prob))
@@ -685,29 +667,29 @@ def _ess_tail(ary, prob=None):
         return np.nan
 
     prob_low, prob_high = prob
-    quantile_low_ess = _ess_quantile(ary, prob_low)
-    quantile_high_ess = _ess_quantile(ary, prob_high)
+    quantile_low_ess = _ess_quantile(ary, prob_low, relative=relative)
+    quantile_high_ess = _ess_quantile(ary, prob_high, relative=relative)
     return min(quantile_low_ess, quantile_high_ess)
 
 
-def _ess_mean(ary):
+def _ess_mean(ary, relative=False):
     """Compute the effective sample size for the mean."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    return _ess(_split_chains(ary))
+    return _ess(_split_chains(ary), relative=relative)
 
 
-def _ess_sd(ary):
+def _ess_sd(ary, relative=False):
     """Compute the effective sample size for the sd."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ary = _split_chains(ary)
-    return min(_ess(ary), _ess(ary ** 2))
+    return min(_ess(ary, relative=relative), _ess(ary ** 2, relative=relative))
 
 
-def _ess_quantile(ary, prob):
+def _ess_quantile(ary, prob, relative=False):
     """Compute the effective sample size for the specific residual."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
@@ -716,42 +698,34 @@ def _ess_quantile(ary, prob):
         raise TypeError("Prob not defined.")
     quantile, = _quantile(ary, prob)
     iquantile = ary <= quantile
-    return _ess(_split_chains(iquantile))
+    return _ess(_split_chains(iquantile), relative=relative)
 
 
-def _ess_z_scale(ary):
+def _ess_z_scale(ary, relative=False):
     """Calculate ess for z-scaLe."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    return _ess(_z_scale(_split_chains(ary)))
+    return _ess(_z_scale(_split_chains(ary)), relative=relative)
 
 
-def _ess_folded(ary):
+def _ess_folded(ary, relative=False):
     """Calculate split-ess for folded data."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    return _ess(_z_fold(_split_chains(ary)))
+    return _ess(_z_fold(_split_chains(ary)), relative=relative)
 
 
-def _ess_split(ary):
+def _ess_median(ary, relative=False):
     """Calculate split-ess for median."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    return _ess(_split_chains(ary))
+    return _ess_quantile(ary, 0.5, relative=relative)
 
 
-def _ess_median(ary):
-    """Calculate split-ess for median."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    return _ess_quantile(ary, 0.5)
-
-
-def _ess_mad(ary):
+def _ess_mad(ary, relative=False):
     """Calculate split-ess for mean absolute deviance."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
@@ -759,15 +733,15 @@ def _ess_mad(ary):
     ary = abs(ary - np.median(ary))
     ary = ary <= np.median(ary)
     ary = _z_scale(_split_chains(ary))
-    return _ess(ary)
+    return _ess(ary, relative=relative)
 
 
-def _ess_identity(ary):
+def _ess_identity(ary, relative=False):
     """Calculate ess."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    return _ess(ary)
+    return _ess(ary, relative=relative)
 
 
 def _conv_quantile(ary, prob):
@@ -820,118 +794,6 @@ def _mcse_quantile(ary, prob):
         return np.nan
     mcse_q, *_ = _conv_quantile(ary, prob)
     return mcse_q
-
-
-def _ress_mean(ary, ess=None):
-    """Relative mean effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_mean(ary)
-    return ess / ary.size
-
-
-def _ress_sd(ary, ess=None):
-    """Relative sd effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_sd(ary)
-    return ess / ary.size
-
-
-def _ress_bulk(ary, ess=None):
-    """Relative bulk effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_bulk(ary)
-    return ess / ary.size
-
-
-def _ress_tail(ary, prob=None, ess=None):
-    """Relative tail effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_tail(ary, prob=prob)
-    return ess / ary.size
-
-
-def _ress_quantile(ary, prob=None, ess=None):
-    """Relative quantile effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        if prob is None:
-            raise TypeError("Prob needs to be defined if `ess` is None.")
-        ess = _ess_quantile(ary, prob=prob)
-    return ess / ary.size
-
-
-def _ress_split(ary, ess=None):
-    """Relative split effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_split(ary)
-    return ess / ary.size
-
-
-def _ress_z_scale(ary, ess=None):
-    """Relative z-scale effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_z_scale(ary)
-    return ess / ary.size
-
-
-def _ress_folded(ary, ess=None):
-    """Relative folded effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_folded(ary)
-    return ess / ary.size
-
-
-def _ress_median(ary, ess=None):
-    """Relative median effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_median(ary)
-    return ess / ary.size
-
-
-def _ress_mad(ary, ess=None):
-    """Relative mad effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_mad(ary)
-    return ess / ary.size
-
-
-def _ress_identity(ary, ess=None):
-    """Relative effective sample size."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan
-    if ess is None:
-        ess = _ess_identity(ary)
-    return ess / ary.size
 
 
 def _mc_error(ary, batches=5, circular=False):

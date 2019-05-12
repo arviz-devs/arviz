@@ -13,7 +13,6 @@ from ..stats.diagnostics import (
     ks_summary,
     _ess,
     _ess_quantile,
-    _ress_quantile,
     _multichain_statistics,
     _mc_error,
     _rhat,
@@ -215,7 +214,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
@@ -256,7 +254,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
@@ -293,12 +290,9 @@ class TestDiagnostics:
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="quantile", relative=relative)
-        if relative:
-            func = _ess_quantile
-        else:
-            func = _ress_quantile
+        func = _ess_quantile
         with pytest.raises(TypeError):
-            func(np.random.randn(4, 100), prob=None)
+            func(np.random.randn(4, 100), prob=None, relative=relative)
 
     def test_effective_sample_size_constant(self):
         assert ess(np.ones((4, 100))) == 400
@@ -319,7 +313,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
