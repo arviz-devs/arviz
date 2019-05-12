@@ -33,8 +33,8 @@ def bfmi(data):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
         If InferenceData, energy variable needs to be found.
 
     Returns
@@ -60,10 +60,10 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
+        For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
@@ -121,10 +121,10 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
+        For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
@@ -194,12 +194,19 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
-        if prob is not None:
-            return ess_func(  # pylint: disable=unexpected-keyword-arg
-                data, prob=prob, relative=relative
-            )
+        if len(data.shape) < 3:
+            if prob is not None:
+                return ess_func(  # pylint: disable=unexpected-keyword-arg
+                    data, prob=prob, relative=relative
+                )
+            else:
+                return ess_func(data, relative=relative)
         else:
-            return ess_func(data, relative=relative)
+            msg = (
+                "Only uni-dimensional ndarray variables are supported."
+                "Please transform first to dataset with `az.convert_to_dataset`."
+            )
+            raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -223,11 +230,12 @@ def rhat(data, *, var_names=None, method="rank"):
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
         At least 2 posterior chains are needed to compute this diagnostic of one or more
         stochastic parameters.
         For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -281,7 +289,14 @@ def rhat(data, *, var_names=None, method="rank"):
 
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
-        return rhat_func(data)
+        if len(data.shape) < 3:
+            return rhat_func(data)
+        else:
+            msg = (
+                "Only uni-dimensional ndarray variables are supported."
+                "Please transform first to dataset with `az.convert_to_dataset`."
+            )
+            raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -303,9 +318,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-        At least 2 posterior chains are needed to compute this diagnostic of one or more
-        stochastic parameters.
         For ndarray: shape = (chain, draw).
+        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
     var_names : list
         Names of variables to include in the rhat report
     method : str
@@ -335,10 +349,17 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
-        if prob is not None:
-            return mcse_func(data, prob=prob)  # pylint: disable=unexpected-keyword-arg
+        if len(data.shape) < 3:
+            if prob is not None:
+                return mcse_func(data, prob=prob)  # pylint: disable=unexpected-keyword-arg
+            else:
+                return mcse_func(data)
         else:
-            return mcse_func(data)
+            msg = (
+                "Only uni-dimensional ndarray variables are supported."
+                "Please transform first to dataset with `az.convert_to_dataset`."
+            )
+            raise TypeError(msg)
 
     dataset = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, dataset)
@@ -633,10 +654,10 @@ def _ess(ary, relative=False):
             rho_hat_t[t + 2] = rho_hat_t[t + 1]
         t += 2
 
-    ess = 1 if relative else n_chain * n_draw
+    ess = n_chain * n_draw
     tau_hat = -1.0 + 2.0 * np.sum(rho_hat_t[: max_t + 1]) + np.sum(rho_hat_t[max_t + 1 : max_t + 2])
     tau_hat = max(tau_hat, 1 / np.log10(ess))
-    ess = ess / tau_hat
+    ess = (1 if relative else ess) / tau_hat
     if np.isnan(rho_hat_t).any():
         ess = np.nan
     return ess

@@ -202,6 +202,10 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             rhat(np.random.randn(2, 300), method="wrong_method")
 
+    def test_rhat_ndarray(self):
+        with pytest.raises(TypeError):
+            rhat(np.random.randn(2, 300, 10))
+
     @pytest.mark.parametrize(
         "method",
         (
@@ -301,6 +305,10 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="wrong_method")
 
+    def test_effective_sample_size_ndarray(self):
+        with pytest.raises(TypeError):
+            ess(np.random.randn(2, 300, 10))
+
     @pytest.mark.parametrize(
         "method",
         (
@@ -333,6 +341,10 @@ class TestDiagnostics:
         else:
             mcse_hat = mcse(np.random.randn(4, 100), method=mcse_method)
         assert mcse_hat
+
+    def test_mcse_ndarray(self):
+        with pytest.raises(TypeError):
+            mcse(np.random.randn(2, 300, 10))
 
     @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
