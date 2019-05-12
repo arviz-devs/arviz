@@ -1,7 +1,7 @@
 """Plot energy transition distribution in HMC inference."""
 import numpy as np
 import matplotlib.pyplot as plt
-
+from matplotlib.patches import Patch
 from ..data import convert_to_dataset
 from ..stats import bfmi as e_bfmi
 from .kdeplot import plot_kde
@@ -117,7 +117,6 @@ def plot_energy(
                 fill_kwargs=fill_kwargs,
                 ax=ax,
             )
-
     elif kind == "hist":
         for alpha, color, label, value in series:
             ax.hist(
@@ -137,7 +136,17 @@ def plot_energy(
         for idx, val in enumerate(e_bfmi(energy)):
             ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
     if legend:
-        ax.legend()
+        if kind != "kde":
+            ax.legend()
+        else:
+            handles, labels = ax.get_legend_handles_labels()
+            m_patch = Patch(facecolor=plot_kwargs["color"], label=labels[0])
+            e_patch = Patch(facecolor=fill_kwargs["color"], label=labels[1])
+            ax.legend(
+                labels=labels,
+                handles=[m_patch, e_patch, handles[2], handles[3], handles[4], handles[5]],
+            )
+
     ax.set_xticks([])
     ax.set_yticks([])
 
