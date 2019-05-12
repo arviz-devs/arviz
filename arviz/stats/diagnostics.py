@@ -195,7 +195,9 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     if isinstance(data, np.ndarray):
         data = np.atleast_2d(data)
         if prob is not None:
-            return ess_func(data, prob=prob, relative=relative)
+            return ess_func(  # pylint: disable=unexpected-keyword-arg
+                data, prob=prob, relative=relative
+            )
         else:
             return ess_func(data, relative=relative)
 
