@@ -204,7 +204,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         else:
             msg = (
                 "Only uni-dimensional ndarray variables are supported."
-                "Please transform first to dataset with `az.convert_to_dataset`."
+                " Please transform first to dataset with `az.convert_to_dataset`."
             )
             raise TypeError(msg)
 
@@ -294,7 +294,7 @@ def rhat(data, *, var_names=None, method="rank"):
         else:
             msg = (
                 "Only uni-dimensional ndarray variables are supported."
-                "Please transform first to dataset with `az.convert_to_dataset`."
+                " Please transform first to dataset with `az.convert_to_dataset`."
             )
             raise TypeError(msg)
 
@@ -357,7 +357,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         else:
             msg = (
                 "Only uni-dimensional ndarray variables are supported."
-                "Please transform first to dataset with `az.convert_to_dataset`."
+                " Please transform first to dataset with `az.convert_to_dataset`."
             )
             raise TypeError(msg)
 
