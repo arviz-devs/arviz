@@ -55,15 +55,10 @@ Diagnostics
 
     bfmi
     geweke
-    effective_sample_size_mean
-    effective_sample_size_sd
-    effective_sample_size_bulk
-    effective_sample_size_tail
-    effective_sample_size_quantile
+    ess
+    effective_sample_size
     rhat
-    msce_mean
-    msce_sd
-    msce_quantile
+    msce
 
 .. _stats_utils_api:
 
@@ -73,8 +68,10 @@ Stats utils
 .. autosummary::
     :toctree: generated/
 
+    autocov
     autocorr
     make_ufunc
+    wrap_xarray_ufunc
 
 Data
 ----
