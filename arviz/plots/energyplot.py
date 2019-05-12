@@ -143,11 +143,8 @@ def plot_energy(
             m_patch = Patch(facecolor=plot_kwargs["color"], label=labels[0])
             e_patch = Patch(facecolor=fill_kwargs["color"], label=labels[1])
             patches = [m_patch, e_patch]
-            patches.extend(handles[2:len(handles)])
-            ax.legend(
-                labels=labels,
-                handles=patches
-            )
+            patches.extend(handles[2: len(handles)])
+            ax.legend(labels=labels, handles=patches)
 
     ax.set_xticks([])
     ax.set_yticks([])
