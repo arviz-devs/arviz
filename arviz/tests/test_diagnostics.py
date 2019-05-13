@@ -13,7 +13,6 @@ from ..stats.diagnostics import (
     ks_summary,
     _ess,
     _ess_quantile,
-    _ress_quantile,
     _multichain_statistics,
     _mc_error,
     _rhat,
@@ -203,6 +202,10 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             rhat(np.random.randn(2, 300), method="wrong_method")
 
+    def test_rhat_ndarray(self):
+        with pytest.raises(TypeError):
+            rhat(np.random.randn(2, 300, 10))
+
     @pytest.mark.parametrize(
         "method",
         (
@@ -215,7 +218,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
@@ -256,7 +258,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
@@ -283,6 +284,7 @@ class TestDiagnostics:
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
+        # test following only once tests are runned
         if (method == "bulk") and (not relative) and (chain is None) and (draw == 4):
             if use_nan:
                 assert np.isnan(_ess(data))
@@ -293,12 +295,8 @@ class TestDiagnostics:
     def test_effective_sample_size_missing_prob(self, relative):
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="quantile", relative=relative)
-        if relative:
-            func = _ess_quantile
-        else:
-            func = _ress_quantile
         with pytest.raises(TypeError):
-            func(np.random.randn(4, 100), prob=None)
+            _ess_quantile(np.random.randn(4, 100), prob=None, relative=relative)
 
     def test_effective_sample_size_constant(self):
         assert ess(np.ones((4, 100))) == 400
@@ -306,6 +304,10 @@ class TestDiagnostics:
     def test_effective_sample_size_bad_method(self):
         with pytest.raises(TypeError):
             ess(np.random.randn(4, 100), method="wrong_method")
+
+    def test_effective_sample_size_ndarray(self):
+        with pytest.raises(TypeError):
+            ess(np.random.randn(2, 300, 10))
 
     @pytest.mark.parametrize(
         "method",
@@ -319,7 +321,6 @@ class TestDiagnostics:
             "mad",
             "z_scale",
             "folded",
-            "split",
             "identity",
         ),
     )
@@ -340,6 +341,10 @@ class TestDiagnostics:
         else:
             mcse_hat = mcse(np.random.randn(4, 100), method=mcse_method)
         assert mcse_hat
+
+    def test_mcse_ndarray(self):
+        with pytest.raises(TypeError):
+            mcse(np.random.randn(2, 300, 10))
 
     @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
