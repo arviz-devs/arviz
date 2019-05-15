@@ -377,11 +377,11 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     warn_mg = 0
     if np.any(pareto_shape > 0.7):
         warnings.warn(
-            """Estimated shape parameter of Pareto distribution is greater than 0.7 for
-        one or more samples. You should consider using a more robust model, this is because
-        importance sampling is less likely to work well if the marginal posterior and LOO posterior
-        are very different. This is more likely to happen with a non-robust model and highly
-        influential observations."""
+            "Estimated shape parameter of Pareto distribution is greater than 0.7 for "
+            "one or more samples. You should consider using a more robust model, this is because "
+            "importance sampling is less likely to work well if the marginal posterior and LOO posterior "
+            "are very different. This is more likely to happen with a non-robust model and highly "
+            "influential observations."
         )
         warn_mg = 1
 

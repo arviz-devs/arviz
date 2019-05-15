@@ -141,25 +141,26 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "identity"
     relative : bool
         Return relative ess
-        `ress = ess / N`
+        `ress = ess / n`
     prob : float, optional
         probability value for "tail" and "quantile" ess functions.
 
     Returns
     -------
     xarray.Dataset
-        Return the effective sample size for mean, :math:`\hat{N}_{eff}`
+        Return the effective sample size, :math:`\hat{N}_{eff}`
 
     Notes
     -----
     The basic ess diagnostic is computed by:
 
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
+    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
 
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
+    where :math:`M` is the number of chains, :math:`N` the number of draws,
+    :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag :math:`t`, and
+    :math:`K` is the last integer for which :math:`\hat{P}_{K} = \hat{\rho}_{2K} +
+    \hat{\rho}_{2K+1}` is still positive.
 
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
@@ -311,7 +312,7 @@ def rhat(data, *, var_names=None, method="rank"):
 
 
 def mcse(data, *, var_names=None, method="mean", prob=None):
-    """Calculate Markov Chain Standard Error for statistic.
+    """Calculate Markov Chain Standard Error statistic.
 
     Parameters
     ----------
