@@ -42,6 +42,17 @@ def bfmi(data):
     z : array
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
+
+    Examples
+    --------
+    Compute the BFMI of an InferenceData object
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('radon')
+           ...: az.bfmi(data)
+
     """
     if isinstance(data, np.ndarray):
         return _bfmi(data)
@@ -170,6 +181,29 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
     * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
+
+    Examples
+    --------
+    Calculate the effective_sample_size using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('non_centered_eight')
+           ...: az.ess(data)
+
+    Calculate the ress of some of the variables
+
+    .. ipython::
+
+        In [2]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
+
+    Calculate the ess using the "tail" method, which requires the `prob` argument
+
+    .. ipython::
+
+        In [3]: az.ess(data, method="tail", prob=.1)
+
     """
     methods = {
         "bulk": _ess_bulk,
