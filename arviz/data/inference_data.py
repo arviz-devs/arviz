@@ -116,7 +116,8 @@ class InferenceData:
             for key, item in kwargs.items():
                 if key in list(dataset.dims):
                     dataset = dataset.sel(key=item)
-                    setattr(self, group,dataset)
+                    setattr(self, group, dataset)
+
 
 # pylint: disable=protected-access
 def concat(*args, copy=True, inplace=False):

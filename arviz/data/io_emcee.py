@@ -72,7 +72,7 @@ class EmceeConverter:
         coords=None,
         dims=None,
         blob_names=None,
-        blob_groups=None
+        blob_groups=None,
     ):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
@@ -146,8 +146,10 @@ class EmceeConverter:
         blob_groups_set = set(self.blob_groups)
         idata_groups = ("posterior", "observed_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
-            raise SyntaxError("{} groups should not come from blobs. Using them here would "
-                              "overwrite their actual values".format(idata_groups))
+            raise SyntaxError(
+                "{} groups should not come from blobs. Using them here would "
+                "overwrite their actual values".format(idata_groups)
+            )
         blob_dict = {group: {} for group in blob_groups_set}
         for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
             # for coherent blobs (all having the same dimensions) one line is enough
@@ -183,7 +185,7 @@ def from_emcee(
     var_names=None,
     arg_names=None,
     blob_names=None,
-    blob_groups=None
+    blob_groups=None,
     coords=None,
     dims=None,
 ):
