@@ -1,5 +1,6 @@
 """emcee-specific conversion code."""
 import xarray as xr
+import numpy as np
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
 
@@ -62,13 +63,25 @@ def _verify_names(sampler, var_names, arg_names):
 class EmceeConverter:
     """Encapsulate emcee specific logic."""
 
-    def __init__(self, *, sampler, var_names=None, arg_names=None, coords=None, dims=None):
+    def __init__(
+        self,
+        *,
+        sampler,
+        var_names=None,
+        arg_names=None,
+        coords=None,
+        dims=None,
+        blob_names=None,
+        blob_groups=None
+    ):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
         self.var_names = var_names
         self.arg_names = arg_names
         self.coords = coords
         self.dims = dims
+        self.blob_names = blob_names
+        self.blob_groups = blob_groups
         import emcee
 
         self.emcee = emcee
@@ -108,17 +121,65 @@ class EmceeConverter:
             observed_data[arg_name] = xr.DataArray(arg_array, dims=arg_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.emcee))
 
+    def blobs_to_dict(self):
+        "Convert blobs to dictionary {groupname: xr.Dataset}"
+        if self.blob_names is None:
+            return {}
+        elif self.blob_groups is None:
+            self.blob_groups = ["sample_stats" for _ in self.blob_names]
+        if len(self.blob_names) != len(self.blob_groups):
+            raise ValueError(
+                "blob_names and blob_groups must have the same length, or blob_groups be None"
+            )
+        if int(self.emcee.__version__[0]) >= 3:
+            blobs = self.sampler.get_blobs().swapaxes(0, 1)
+            nwalkers, ndraws, nblobs, *_ = blobs.shape
+            if len(self.blob_names) != nblobs:
+                raise ValueError(
+                    "Incorrect number of blob names. Expected {}, found {}".format(
+                        nblobs, len(self.blob_names)
+                    )
+                )
+            Ndraws, Nwalkers = np.meshgrid(range(ndraws),range(nwalkers))
+            blob_dict = {group: {} for group in set(self.blob_groups)}
+            for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
+                # for coherent blobs (all having the same dimensions) one line is enough
+                blob = blobs[Nwalkers, Ndraws, np.full_like(Nwalkers, i_blob)]
+                # for blobs of different size, we get an array of arrays, which we convert
+                # to an ndarray per blob_name
+                if blob.dtype == object:
+                    blob = blob.reshape(-1)
+                    blob = np.stack(blob)
+                    blob = blob.reshape((nwalkers, ndraws, -1))
+                blob_dict[group][name] = np.squeeze(blob)
+        else:
+            blob_dict = {}
+        for key,values in blob_dict.items():
+            blob_dict[key] = dict_to_dataset(values, library=self.emcee, coords=self.coords, dims=self.dims)
+        return blob_dict
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
+        blobs_dict = self.blobs_to_dict()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                **blobs_dict,
             }
         )
 
 
-def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dims=None):
+def from_emcee(
+    sampler=None,
+    *,
+    var_names=None,
+    arg_names=None,
+    coords=None,
+    dims=None,
+    blob_names=None,
+    blob_groups=None
+):
     """Convert emcee data into an InferenceData object.
 
     Parameters
@@ -277,5 +338,11 @@ def from_emcee(sampler=None, *, var_names=None, arg_names=None, coords=None, dim
         >>> az.plot_khat(loo_stats.pareto_k)
     """
     return EmceeConverter(
-        sampler=sampler, var_names=var_names, arg_names=arg_names, coords=coords, dims=dims
+        sampler=sampler,
+        var_names=var_names,
+        arg_names=arg_names,
+        coords=coords,
+        dims=dims,
+        blob_names=blob_names,
+        blob_groups=blob_groups,
     ).to_inference_data()
