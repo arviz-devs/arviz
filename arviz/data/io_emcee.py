@@ -327,7 +327,7 @@ def from_emcee(
         :context: close-figs
 
         >>> if emcee.__version__[0] == '3':
-        >>>     ess=(draws-burnin)/sampler.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
+        >>>     ess=(draws-burnin)/sampler_blobs.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
         >>> else:
         >>>     # to avoid error while generating the docs, the ess value is hard coded, it
         >>>     # should be calculated with:
