@@ -99,11 +99,23 @@ class InferenceData:
         return concat(self, other, copy=True, inplace=False)
 
     def sel(self, **kwargs):
+        """Perform an xarray selection on all groups.
+
+        Loops over all groups to perform Dataset.sel(key=item)
+        for every kwarg if key is a dimension of the dataset.
+        The selection is performed inplace.
+
+        Parameters
+        ----------
+        **kwargs : mapping
+            It must be accepted by Dataset.sel()
+        """
+
         for group in self._groups:
             dataset = getattr(self, group)
-            for key in kwargs.keys():
+            for key, item in kwargs.items():
                 if key in list(dataset.dims):
-                    dataset = dataset.sel(**kwargs)
+                    dataset = dataset.sel(key=item)
                     setattr(self, group,dataset)
 
 # pylint: disable=protected-access

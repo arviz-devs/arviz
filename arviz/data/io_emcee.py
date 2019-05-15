@@ -122,7 +122,7 @@ class EmceeConverter:
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.emcee))
 
     def blobs_to_dict(self):
-        "Convert blobs to dictionary {groupname: xr.Dataset}"
+        """Convert blobs to dictionary {groupname: xr.Dataset}."""
         if self.blob_names is None:
             return {}
         elif self.blob_groups is None:
@@ -182,10 +182,10 @@ def from_emcee(
     *,
     var_names=None,
     arg_names=None,
-    coords=None,
-    dims=None,
     blob_names=None,
     blob_groups=None
+    coords=None,
+    dims=None,
 ):
     """Convert emcee data into an InferenceData object.
 
@@ -197,9 +197,18 @@ def from_emcee(
         A list of names for variables in the sampler
     arg_names : list[str] (Optional)
         A list of names for args in the sampler
-    coords : dict[str] -> list[str]
+    blob_names : list[str] (Optional)
+        A list of names for blobs in the sampler. When None,
+        blobs are omitted, independently of them being present
+        in the sampler or not.
+    blob_groups : list[str] (Optional)
+        A list of the groups where blob_names variables
+        should be assigned respectively. If blob_names!=None
+        and blob_groups is None, all variables are assigned
+        to sample_stats group
+    coords : dict[str] -> list[str] (Optional)
         Map of dimensions to coordinates
-    dims : dict[str] -> list[str]
+    dims : dict[str] -> list[str] (Optional)
         Map variable names to their coordinates
 
     Returns
