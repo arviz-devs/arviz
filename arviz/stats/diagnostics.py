@@ -105,9 +105,9 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-    Gelman et al. BDA (2014) Formula 11.8
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
+    * Gelman et al. BDA (2014) Formula 11.8
     """
     warnings.warn(
         "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
@@ -167,9 +167,9 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-    Gelman et al. BDA (2014) Formula 11.8
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
+    * Gelman et al. BDA (2014) Formula 11.8
     """
     methods = {
         "bulk": _ess_bulk,
@@ -268,10 +268,10 @@ def rhat(data, *, var_names=None, method="rank"):
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    Gelman et al. BDA (2014)
-    Brooks and Gelman (1998)
-    Gelman and Rubin (1992)
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * Gelman et al. BDA (2014)
+    * Brooks and Gelman (1998)
+    * Gelman and Rubin (1992)
     """
     methods = {
         "rank": _rhat_rank,
@@ -411,7 +411,7 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
 
     References
     ----------
-    Geweke (1992)
+    * Geweke (1992)
     """
     # Filter out invalid intervals
     for interval in (first, last):
