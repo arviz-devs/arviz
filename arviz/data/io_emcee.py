@@ -133,29 +133,36 @@ class EmceeConverter:
             )
         if int(self.emcee.__version__[0]) >= 3:
             blobs = self.sampler.get_blobs().swapaxes(0, 1)
-            nwalkers, ndraws, nblobs, *_ = blobs.shape
-            if len(self.blob_names) != nblobs:
-                raise ValueError(
-                    "Incorrect number of blob names. Expected {}, found {}".format(
-                        nblobs, len(self.blob_names)
-                    )
-                )
-            Ndraws, Nwalkers = np.meshgrid(range(ndraws),range(nwalkers))
-            blob_dict = {group: {} for group in set(self.blob_groups)}
-            for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
-                # for coherent blobs (all having the same dimensions) one line is enough
-                blob = blobs[Nwalkers, Ndraws, np.full_like(Nwalkers, i_blob)]
-                # for blobs of different size, we get an array of arrays, which we convert
-                # to an ndarray per blob_name
-                if blob.dtype == object:
-                    blob = blob.reshape(-1)
-                    blob = np.stack(blob)
-                    blob = blob.reshape((nwalkers, ndraws, -1))
-                blob_dict[group][name] = np.squeeze(blob)
         else:
-            blob_dict = {}
-        for key,values in blob_dict.items():
-            blob_dict[key] = dict_to_dataset(values, library=self.emcee, coords=self.coords, dims=self.dims)
+            blobs = np.array(self.sampler.blobs).swapaxes(0, 1)
+        nwalkers, ndraws, nblobs, *_ = blobs.shape
+        if len(self.blob_names) != nblobs:
+            raise ValueError(
+                "Incorrect number of blob names. Expected {}, found {}".format(
+                    nblobs, len(self.blob_names)
+                )
+            )
+        Ndraws, Nwalkers = np.meshgrid(range(ndraws), range(nwalkers))
+        blob_groups_set = set(self.blob_groups)
+        idata_groups = ("posterior", "observed_data")
+        if np.any(np.isin(list(blob_groups_set), idata_groups)):
+            raise SyntaxError("{} groups should not come from blobs. Using them here would "
+                              "overwrite their actual values".format(idata_groups))
+        blob_dict = {group: {} for group in blob_groups_set}
+        for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
+            # for coherent blobs (all having the same dimensions) one line is enough
+            blob = blobs[Nwalkers, Ndraws, np.full_like(Nwalkers, i_blob)]
+            # for blobs of different size, we get an array of arrays, which we convert
+            # to an ndarray per blob_name
+            if blob.dtype == object:
+                blob = blob.reshape(-1)
+                blob = np.stack(blob)
+                blob = blob.reshape((nwalkers, ndraws, -1))
+            blob_dict[group][name] = np.squeeze(blob)
+        for key, values in blob_dict.items():
+            blob_dict[key] = dict_to_dataset(
+                values, library=self.emcee, coords=self.coords, dims=self.dims
+            )
         return blob_dict
 
     def to_inference_data(self):
