@@ -98,6 +98,13 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
+    def sel(self, **kwargs):
+        for group in self._groups:
+            dataset = getattr(self, group)
+            for key in kwargs.keys():
+                if key in list(dataset.dims):
+                    dataset = dataset.sel(**kwargs)
+                    setattr(self, group,dataset)
 
 # pylint: disable=protected-access
 def concat(*args, copy=True, inplace=False):
