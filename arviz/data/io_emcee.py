@@ -1,6 +1,7 @@
 """emcee-specific conversion code."""
+import xarray as xr
 from .inference_data import InferenceData
-from .base import dict_to_dataset
+from .base import dict_to_dataset, generate_dims_coords, make_attrs
 
 
 def _verify_names(sampler, var_names, arg_names):
@@ -86,15 +87,26 @@ class EmceeConverter:
 
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        data = {}
-        for idx, var_name in enumerate(self.arg_names):
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        observed_data = {}
+        for idx, arg_name in enumerate(self.arg_names):
             # Use emcee3 syntax, else use emcee2
-            data[var_name] = (
+            arg_array = (
                 self.sampler.log_prob_fn.args[idx]
                 if hasattr(self.sampler, "log_prob_fn")
                 else self.sampler.args[idx]
             )
-        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
+            arg_dims = dims.get(arg_name)
+            arg_dims, coords = generate_dims_coords(
+                arg_array.shape, arg_name, dims=arg_dims, coords=self.coords
+            )
+            # filter coords based on the dims
+            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in arg_dims}
+            observed_data[arg_name] = xr.DataArray(arg_array, dims=arg_dims, coords=coords)
+        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.emcee))
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
