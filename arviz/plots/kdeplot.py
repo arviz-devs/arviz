@@ -2,7 +2,6 @@
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
