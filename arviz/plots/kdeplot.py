@@ -226,23 +226,14 @@ def plot_kde(
             )
         else:
             fill_kwargs.setdefault("alpha", 0)
-            ax.plot(x, density, label=label, **plot_kwargs)
-            fill_func(fill_x, fill_y, **fill_kwargs)
-
-        if legend and label:
-            if fill_kwargs["alpha"] != 0:
-                legend_element = [
-                    Patch(
-                        facecolor=fill_kwargs["color"],
-                        edgecolor=plot_kwargs["color"],
-                        label=label,
-                        alpha=fill_kwargs["alpha"],
-                        linestyle=plot_kwargs["linestyle"],
-                    )
-                ]
-                ax.legend(handles=legend_element)
+            if fill_kwargs.get("alpha") == 0:
+                ax.plot(x, density, **plot_kwargs, label=label)
+                fill_func(fill_x, fill_y, **fill_kwargs)
             else:
-                ax.legend()
+                ax.plot(x, density, **plot_kwargs)
+                fill_func(fill_x, fill_y, **fill_kwargs, label=label)
+        if legend and label:
+            ax.legend()
     else:
         if contour_kwargs is None:
             contour_kwargs = {}

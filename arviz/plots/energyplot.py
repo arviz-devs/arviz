@@ -113,8 +113,8 @@ def plot_energy(
                 bw=bw,
                 label=label,
                 textsize=xt_labelsize,
-                plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,
+                plot_kwargs=plot_kwargs,
                 ax=ax,
             )
     elif kind == "hist":
@@ -136,15 +136,7 @@ def plot_energy(
         for idx, val in enumerate(e_bfmi(energy)):
             ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
     if legend:
-        if kind != "kde":
-            ax.legend()
-        else:
-            handles, labels = ax.get_legend_handles_labels()
-            m_patch = Patch(facecolor=plot_kwargs["color"], label=labels[0])
-            e_patch = Patch(facecolor=fill_kwargs["color"], label=labels[1])
-            patches = [m_patch, e_patch]
-            patches.extend(handles[2 : len(handles)])
-            ax.legend(labels=labels, handles=patches)
+        ax.legend()
 
     ax.set_xticks([])
     ax.set_yticks([])
