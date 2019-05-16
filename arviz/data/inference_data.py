@@ -110,12 +110,11 @@ class InferenceData:
         **kwargs : mapping
             It must be accepted by Dataset.sel()
         """
-
         for group in self._groups:
             dataset = getattr(self, group)
             for key, item in kwargs.items():
                 if key in list(dataset.dims):
-                    dataset = dataset.sel(key=item)
+                    dataset = dataset.sel(**{key: item})
                     setattr(self, group, dataset)
 
 

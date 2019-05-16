@@ -72,7 +72,7 @@ class EmceeConverter:
         coords=None,
         dims=None,
         blob_names=None,
-        blob_groups=None,
+        blob_groups=None
     ):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
@@ -123,6 +123,8 @@ class EmceeConverter:
 
     def blobs_to_dict(self):
         """Convert blobs to dictionary {groupname: xr.Dataset}."""
+        # Omit blob conversion if blob_names is none.
+        # I should return {} instead of None when avoided
         if self.blob_names is None:
             return {}
         elif self.blob_groups is None:
@@ -132,17 +134,16 @@ class EmceeConverter:
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
             )
         if int(self.emcee.__version__[0]) >= 3:
-            blobs = self.sampler.get_blobs().swapaxes(0, 1)
+            blobs = self.sampler.get_blobs().swapaxes(0, 2)
         else:
-            blobs = np.array(self.sampler.blobs).swapaxes(0, 1)
-        nwalkers, ndraws, nblobs, *_ = blobs.shape
+            blobs = np.array(self.sampler.blobs).swapaxes(0, 2)
+        nblobs, nwalkers, ndraws, *_ = blobs.shape
         if len(self.blob_names) != nblobs:
             raise ValueError(
                 "Incorrect number of blob names. Expected {}, found {}".format(
                     nblobs, len(self.blob_names)
                 )
             )
-        Ndraws, Nwalkers = np.meshgrid(range(ndraws), range(nwalkers))
         blob_groups_set = set(self.blob_groups)
         idata_groups = ("posterior", "observed_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
@@ -153,7 +154,7 @@ class EmceeConverter:
         blob_dict = {group: {} for group in blob_groups_set}
         for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
             # for coherent blobs (all having the same dimensions) one line is enough
-            blob = blobs[Nwalkers, Ndraws, np.full_like(Nwalkers, i_blob)]
+            blob = blobs[i_blob]
             # for blobs of different size, we get an array of arrays, which we convert
             # to an ndarray per blob_name
             if blob.dtype == object:
