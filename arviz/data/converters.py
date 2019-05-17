@@ -66,7 +66,10 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             return from_cmdstan(**kwargs)
         else:
             return InferenceData.from_netcdf(obj)
-    elif obj.__class__.__name__ in {"StanFit4Model", "stan.fit", "PosteriorSample"}:
+    elif (
+        obj.__class__.__name__ in {"StanFit4Model", "PosteriorSample"}
+        or obj.__class__.__module__ == "stan.fit"
+    ):
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
         elif group == "sample_stats_prior":

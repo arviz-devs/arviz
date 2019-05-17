@@ -130,11 +130,7 @@ class CmdStanPyConverter:
 
         if isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
-        valid_cols = [
-            col
-            for col in columns
-            if col.split(".")[0] in set(posterior_predictive)
-        ]
+        valid_cols = [col for col in columns if col.split(".")[0] in set(posterior_predictive)]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
@@ -152,11 +148,8 @@ class CmdStanPyConverter:
             prior_predictive = [col for col in columns if prior_predictive == col.split(".")[0]]
         else:
             prior_predictive = [
-                col
-                for col in columns
-                if col.split(".")[0] in set(prior_predictive)
+                col for col in columns if col.split(".")[0] in set(prior_predictive)
             ]
-
 
         valid_cols = [col for col in columns if col not in set(prior_predictive)]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
@@ -190,9 +183,7 @@ class CmdStanPyConverter:
 
         if isinstance(prior_predictive, str):
             prior_predictive = [prior_predictive]
-        valid_cols = [
-            col for col in columns if col.split(".")[0] in set(prior_predictive)
-        ]
+        valid_cols = [col for col in columns if col.split(".")[0] in set(prior_predictive)]
         data = _unpack_frame(self.prior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
