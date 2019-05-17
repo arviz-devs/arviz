@@ -133,7 +133,7 @@ class CmdStanPyConverter:
         valid_cols = [
             col
             for col in columns
-            if any(item == col.split(".")[0] for item in posterior_predictive)
+            if col.split(".")[0] in set(posterior_predictive)
         ]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
@@ -154,10 +154,11 @@ class CmdStanPyConverter:
             prior_predictive = [
                 col
                 for col in columns
-                if any(item == col.split(".")[0] for item in prior_predictive)
+                if col.split(".")[0] in set(prior_predictive)
             ]
 
-        valid_cols = [col for col in columns if col not in prior_predictive]
+
+        valid_cols = [col for col in columns if col not in set(prior_predictive)]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
@@ -190,7 +191,7 @@ class CmdStanPyConverter:
         if isinstance(prior_predictive, str):
             prior_predictive = [prior_predictive]
         valid_cols = [
-            col for col in columns if any(item == col.split(".")[0] for item in prior_predictive)
+            col for col in columns if col.split(".")[0] in set(prior_predictive)
         ]
         data = _unpack_frame(self.prior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
@@ -246,34 +247,43 @@ def _unpack_frame(data, columns, valid_cols):
 
     column_groups = defaultdict(list)
     column_locs = defaultdict(list)
+    # iterate flat column names
     for i, col in enumerate(columns):
+        # parse parameter names e.g. X.1.2 --> X, (1,2)
         col_base, *col_tail = col.split(".")
         if len(col_tail):
+            # gather nD array locations
             column_groups[col_base].append(tuple(map(int, col_tail)))
+        # gather raw data locations for each parameter
         column_locs[col_base].append(i)
     dims = {}
     for colname, col_dims in column_groups.items():
+        # gather parameter dimensions (assumes dense arrays)
         dims[colname] = tuple(np.array(col_dims).max(0))
     sample = {}
     valid_base_cols = []
+    # get list of parameters for extraction (basename) X.1.2 --> X
     for col in valid_cols:
         base_col, *_ = col.split(".")
         if base_col not in valid_base_cols:
             valid_base_cols.append(base_col)
 
+    # extract each wanted parameter to ndarray with correct shape
     for key in valid_base_cols:
         ndim = dims.get(key, None)
+        shape_location = column_groups.get(key, None)
         if ndim is not None:
             sample[key] = np.full((chains, draws, *ndim), np.nan)
-        else:
-            sample[key] = np.full((chains, draws), np.nan)
-        shape_location = column_groups.get(key, None)
         if shape_location is None:
-            sample[key][Ellipsis] = np.swapaxes(data[..., column_locs[key][0]], 0, 1)
+            # reorder draw, chain -> chain, draw
+            i, = column_locs[key]
+            sample[key] = np.swapaxes(data[..., i], 0, 1)
         else:
             for i, shape_loc in zip(column_locs[key], shape_location):
-                shape_loc = [Ellipsis] + [j - 1 for j in shape_loc]
-                sample[key][tuple(shape_loc)] = np.swapaxes(data[..., i], 0, 1)
+                # location to insert extracted array
+                shape_loc = tuple([Ellipsis] + [j - 1 for j in shape_loc])
+                # reorder draw, chain -> chain, draw and insert to ndarray
+                sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1)
     return sample
 
 

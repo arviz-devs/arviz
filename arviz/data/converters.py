@@ -66,26 +66,15 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             return from_cmdstan(**kwargs)
         else:
             return InferenceData.from_netcdf(obj)
-    elif obj.__class__.__name__ == "StanFit4Model":  # ugly, but doesn't make PyStan a requirement
+    elif obj.__class__.__name__ in {"StanFit4Model", "stan.fit", "PosteriorSample"}:
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
         elif group == "sample_stats_prior":
             kwargs["prior"] = kwargs.pop(group)
-        return from_pystan(**kwargs)
-    elif obj.__class__.__module__ == "stan.fit":  # ugly, but doesn't make PyStan3 a requirement
-        if group == "sample_stats":
-            kwargs["posterior"] = kwargs.pop(group)
-        elif group == "sample_stats_prior":
-            kwargs["prior"] = kwargs.pop(group)
-        return from_pystan(**kwargs)
-    elif (
-        obj.__class__.__name__ == "PosteriorSample"
-    ):  # ugly, but doesn't make CmdStanPy a requirement
-        if group == "sample_stats":
-            kwargs["posterior"] = kwargs.pop(group)
-        elif group == "sample_stats_prior":
-            kwargs["prior"] = kwargs.pop(group)
-        return from_cmdstanpy(**kwargs)
+        if obj.__class__.__name__ == "PosteriorSample":
+            return from_cmdstanpy(**kwargs)
+        else:  # pystan or pystan3
+            return from_pystan(**kwargs)
     elif obj.__class__.__name__ == "MultiTrace":  # ugly, but doesn't make PyMC3 a requirement
         return from_pymc3(trace=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "EnsembleSampler":  # ugly, but doesn't make emcee a requirement
