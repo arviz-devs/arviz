@@ -1,11 +1,12 @@
 """emcee-specific conversion code."""
+import warnings
 import xarray as xr
 import numpy as np
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
 
 
-def _verify_names(sampler, var_names, arg_names):
+def _verify_names(sampler, var_names, arg_names, slices):
     """Make sure var_names and arg_names are assigned reasonably.
 
     This is meant to run before loading emcee objects into InferenceData.
@@ -22,22 +23,40 @@ def _verify_names(sampler, var_names, arg_names):
         Names for the emcee parameters
     arg_names : list[str] or None
         Names for the args/observations provided to emcee
+    slices : list[seq] or None
+        slices to select the variables (used for multidimensional variables)
 
     Returns
     -------
-    list[str], list[str]
-        Defaults for var_names and arg_names
+    list[str], list[str], list[seq]
+        Defaults for var_names, arg_names and slices
     """
     # There are 3 possible cases: emcee2, emcee3 and sampler read from h5 file (emcee3 only)
     if hasattr(sampler, "args"):
-        num_vars = sampler.chain.shape[-1]
+        ndim = sampler.chain.shape[-1]
         num_args = len(sampler.args)
     elif hasattr(sampler, "log_prob_fn"):
-        num_vars = sampler.get_chain().shape[-1]
+        ndim = sampler.get_chain().shape[-1]
         num_args = len(sampler.log_prob_fn.args)
     else:
-        num_vars = sampler.get_chain().shape[-1]
+        ndim = sampler.get_chain().shape[-1]
         num_args = 0  # emcee only stores the posterior samples
+
+    if slices is None:
+        slices = np.arange(ndim)
+        num_vars = ndim
+    else:
+        num_vars = len(slices)
+    indexs = np.arange(ndim)
+    slicing_try = np.concatenate([np.atleast_1d(indexs[idx]) for idx in slices])
+    if len(set(slicing_try)) != ndim:
+        warnings.warn(
+            "Check slices: Not all parameters in chain captured. "
+            "{} are present, and {} have been captured.".format(ndim, len(slicing_try)),
+            SyntaxWarning,
+        )
+    if len(slicing_try) != len(set(slicing_try)):
+        warnings.warn("Overlapping slices. Check the index present: {}".format(slicing_try))
 
     if var_names is None:
         var_names = ["var_{}".format(idx) for idx in range(num_vars)]
@@ -57,7 +76,7 @@ def _verify_names(sampler, var_names, arg_names):
                 num_args, len(arg_names)
             )
         )
-    return var_names, arg_names
+    return var_names, arg_names, slices
 
 
 class EmceeConverter:
@@ -67,15 +86,17 @@ class EmceeConverter:
         self,
         sampler,
         var_names=None,
+        slices=None,
         arg_names=None,
         blob_names=None,
         blob_groups=None,
         coords=None,
         dims=None,
     ):
-        var_names, arg_names = _verify_names(sampler, var_names, arg_names)
+        var_names, arg_names, slices = _verify_names(sampler, var_names, arg_names, slices)
         self.sampler = sampler
         self.var_names = var_names
+        self.slices = slices
         self.arg_names = arg_names
         self.blob_names = blob_names
         self.blob_groups = blob_groups
@@ -88,10 +109,10 @@ class EmceeConverter:
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = {}
-        for idx, var_name in enumerate(self.var_names):
+        for idx, var_name in zip(self.slices, self.var_names):
             # Use emcee3 syntax, else use emcee2
             data[var_name] = (
-                self.sampler.get_chain()[(..., idx)].T
+                self.sampler.get_chain()[(..., idx)].swapaxes(0, 1)
                 if hasattr(self.sampler, "get_chain")
                 else self.sampler.chain[(..., idx)]
             )
@@ -133,11 +154,14 @@ class EmceeConverter:
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
             )
         if int(self.emcee.__version__[0]) >= 3:
-            blobs = self.sampler.get_blobs().swapaxes(0, 2)
+            blobs = self.sampler.get_blobs()
         else:
-            blobs = np.array(self.sampler.blobs).swapaxes(0, 2)
+            blobs = np.array(self.sampler.blobs)
+        if blobs is None:
+            raise ValueError("No blobs in sampler, blob_names must be None")
+        blobs = blobs.swapaxes(0, 2)
         nblobs, nwalkers, ndraws, *_ = blobs.shape
-        if len(self.blob_names) != nblobs:
+        if len(self.blob_names) != nblobs and len(self.blob_names) != 1:
             raise ValueError(
                 "Incorrect number of blob names. Expected {}, found {}".format(
                     nblobs, len(self.blob_names)
@@ -151,16 +175,19 @@ class EmceeConverter:
                 "overwrite their actual values".format(idata_groups)
             )
         blob_dict = {group: {} for group in blob_groups_set}
-        for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
-            # for coherent blobs (all having the same dimensions) one line is enough
-            blob = blobs[i_blob]
-            # for blobs of different size, we get an array of arrays, which we convert
-            # to an ndarray per blob_name
-            if blob.dtype == object:
-                blob = blob.reshape(-1)
-                blob = np.stack(blob)
-                blob = blob.reshape((nwalkers, ndraws, -1))
-            blob_dict[group][name] = np.squeeze(blob)
+        if len(self.blob_names) == 1:
+            blob_dict[self.blob_groups[0]][self.blob_names[0]] = blobs.swapaxes(0, 2).swapaxes(0, 1)
+        else:
+            for i_blob, (name, group) in enumerate(zip(self.blob_names, self.blob_groups)):
+                # for coherent blobs (all having the same dimensions) one line is enough
+                blob = blobs[i_blob]
+                # for blobs of different size, we get an array of arrays, which we convert
+                # to an ndarray per blob_name
+                if blob.dtype == object:
+                    blob = blob.reshape(-1)
+                    blob = np.stack(blob)
+                    blob = blob.reshape((nwalkers, ndraws, -1))
+                blob_dict[group][name] = np.squeeze(blob)
         for key, values in blob_dict.items():
             blob_dict[key] = dict_to_dataset(
                 values, library=self.emcee, coords=self.coords, dims=self.dims
@@ -182,6 +209,7 @@ class EmceeConverter:
 def from_emcee(
     sampler=None,
     var_names=None,
+    slices=None,
     arg_names=None,
     blob_names=None,
     blob_groups=None,
@@ -196,6 +224,9 @@ def from_emcee(
         Fitted sampler from emcee.
     var_names : list[str] (Optional)
         A list of names for variables in the sampler
+    slices : list[array-like] (Optional)
+        A list containing the indexes of each variable. Should only be used
+        for multidimensional variables.
     arg_names : list[str] (Optional)
         A list of names for args in the sampler
     blob_names : list[str] (Optional)
@@ -247,7 +278,7 @@ def from_emcee(
         >>>     like_vect = log_likelihood_8school(theta, y, s)
         >>>     like = np.sum(like_vect)
         >>>     return like + prior
-        >>> nwalkers, draws = 50, 7000
+        >>> nwalkers, draws = 50, 700
         >>> ndim = J + 2
         >>> pos = np.random.normal(size=(nwalkers, ndim))
         >>> pos[:, 1] = np.absolute(pos[:, 1])
@@ -276,18 +307,31 @@ def from_emcee(
 
         >>> az.plot_posterior(emcee_data, var_names=var_names[:3])
 
-    And the trace:
+    This way of calling ``from_emcee`` stores each `eta` as a different variable, called
+    `etai`, however, they are in fact different dimensions of the same variable. This can
+    be seen in the likelihood and prior functions:
+    ``mu, tau, eta = theta[0], theta[1], theta[2:]``. ArviZ has support for
+    multidimensional variables, and there is a way to tell it how to split the variables
+    like it was done in the likelihood and prior functions:
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_trace(emcee_data, var_names=['mu'])
+        >>> emcee_data = az.from_emcee(sampler, slices=[0, 1, slice(2, None)])
 
-    Emcee is an Affine Invariant MCMC Ensemble Sampler, thus, its chains are **not**
-    independent, which means that many ArviZ functions can not be used, at least directly.
-    However, it is possible to combine emcee and ArviZ and use most of ArviZ
-    functionalities. The first step is to modify the probability function to use the
-    ``blobs`` and store the log_likelihood, then rerun the sampler using the new function:
+    After checking the default variable names, the trace of one dimension of eta can be
+    plotted using ArviZ syntax:
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_trace(emcee_data, var_names=["var_2"], coords={"var_2_dim_0": 4})
+
+    Emcee does not store per-draw sample stats, however, it has a functionality called
+    blobs that allows to store any variable on a per-draw basis. It can be used
+    to store some sample_stats or even posterior_predictive data. The first step is to
+    modify the probability function to use the ``blobs`` and store the log_likelihood,
+    then rerun the sampler using the new function:
 
     .. plot::
         :context: close-figs
@@ -306,60 +350,66 @@ def from_emcee(
         >>> )
         >>> sampler_blobs.run_mcmc(pos, draws);
 
-    ArviZ has no support for the ``blobs`` functionality yet, but a workaround can be
-    created. First make sure that the dimensions are in the order
-    ``(chain, draw, *shape)``. It may also be a good idea to apply a burn-in period
-    and to thin the draw dimension (which due to the correlations between chains and
-    consecutive draws, won't reduce the effective sample size if the value is small enough).
-    Then convert the numpy arrays to InferenceData, in this case using ``az.from_dict``:
+    Here, the argument blob_names is added with respect to the previous examples. As the
+    group is not specified, it will go to sample_stats.
 
     .. plot::
         :context: close-figs
 
-        >>> burnin, thin = 500, 10
-        >>> blobs = np.swapaxes(np.array(sampler_blobs.blobs), 0, 1)[:, burnin::thin, :]
-        >>> chain = sampler_blobs.chain[:, burnin::thin, :]
-        >>> posterior_dict = {"mu": chain[:, :, 0], "tau": chain[:, :, 1], "eta": chain[:, :, 2:]}
-        >>> stats_dict = {"log_likelihood": blobs}
-        >>> emcee_data = az.from_dict(
-        >>>     posterior=posterior_dict,
-        >>>     sample_stats=stats_dict,
-        >>>     coords={"school": range(8)},
-        >>>     dims={"eta": ["school"], "log_likelihood": ["school"]}
+        >>> dims = {"eta": ["school"], "log_likelihood": ["school"]}
+        >>> data = az.from_emcee(
+        >>>     sampler_blobs,
+        >>>     var_names = ["mu", "tau", "eta"],
+        >>>     slices=[0, 1, slice(2,None)],
+        >>>     blob_names=["log_likelihood"],
+        >>>     dims=dims,
+        >>>     coords={"school": range(8)}
         >>> )
 
-    To calculate the effective sample size emcee's functions must be used. There are
-    many changes in emcee's API from version 2 to 3, thus, the calculation is different
-    depending on the version. In addition, in version 2, the autocorrelation time raises
-    an error if the chain is not long enough.
+    Or in the case of even more complicated blobs, each corresponding to a different
+    group of the InferenceData object:
 
     .. plot::
         :context: close-figs
 
-        >>> if emcee.__version__[0] == '3':
-        >>>     ess=(
-        >>>         (draws-burnin) /
-        >>>         sampler_blobs.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
-        >>>     )
-        >>> else:
-        >>>     # to avoid error while generating the docs, the ess value is hard coded, it
-        >>>     # should be calculated with:
-        >>>     # ess = chain.shape[1] / emcee.autocorr.integrated_time(chain)
-        >>>     ess = (draws-burnin)/30
-        >>> reff = np.mean(ess) / (nwalkers * chain.shape[1])
+        >>> def lnprob_8school_blobs(theta, y, sigma):
+        >>>     mu, tau, eta = theta[0], theta[1], theta[2:]
+        >>>     prior = log_prior_8school(theta)
+        >>>     like_vect = log_likelihood_8school(theta, y, sigma)
+        >>>     like = np.sum(like_vect)
+        >>>     return like + prior, like_vect, np.random.normal((mu + tau * eta - y), sigma)
+        >>> sampler_blobs = emcee.EnsembleSampler(
+        >>>     nwalkers,
+        >>>     ndim,
+        >>>     lnprob_8school_blobs,
+        >>>     args=(y_obs, sigma),
+        >>> )
+        >>> sampler_blobs.run_mcmc(pos, draws);
+        >>> dims = {"eta": ["school"], "log_likelihood": ["school"], "y": ["school"]}
+        >>> data = az.from_emcee(
+        >>>     sampler_blobs,
+        >>>     var_names = ["mu", "tau", "eta"],
+        >>>     slices=[0, 1, slice(2,None)],
+        >>>     arg_names=["y","sigma"],
+        >>>     blob_names=["log_likelihood", "y"],
+        >>>     blob_groups=["sample_stats", "posterior_predictive"],
+        >>>     dims=dims,
+        >>>     coords={"school": range(8)}
+        >>> )
 
-    This value can afterwards be used to estimate the leave-one-out cross-validation using
-    Pareto smoothed importance sampling with ArviZ and plot the results:
+    This last version, which contains both observed data and posterior predictive can be
+    used to plot posterior predictive checks:
 
     .. plot::
         :context: close-figs
 
-        >>> loo_stats = az.loo(emcee_data, reff=reff, pointwise=True)
-        >>> az.plot_khat(loo_stats.pareto_k)
+        >>> az.plot_ppc(data, var_names=["y"], alpha=0.3, num_pp_samples=50)
+
     """
     return EmceeConverter(
         sampler=sampler,
         var_names=var_names,
+        slices=slices,
         arg_names=arg_names,
         blob_names=blob_names,
         blob_groups=blob_groups,
