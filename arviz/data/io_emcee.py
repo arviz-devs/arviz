@@ -65,23 +65,22 @@ class EmceeConverter:
 
     def __init__(
         self,
-        *,
         sampler,
         var_names=None,
         arg_names=None,
+        blob_names=None,
+        blob_groups=None,
         coords=None,
         dims=None,
-        blob_names=None,
-        blob_groups=None
     ):
         var_names, arg_names = _verify_names(sampler, var_names, arg_names)
         self.sampler = sampler
         self.var_names = var_names
         self.arg_names = arg_names
-        self.coords = coords
-        self.dims = dims
         self.blob_names = blob_names
         self.blob_groups = blob_groups
+        self.coords = coords
+        self.dims = dims
         import emcee
 
         self.emcee = emcee
@@ -107,7 +106,7 @@ class EmceeConverter:
         observed_data = {}
         for idx, arg_name in enumerate(self.arg_names):
             # Use emcee3 syntax, else use emcee2
-            arg_array = (
+            arg_array = np.atleast_1d(
                 self.sampler.log_prob_fn.args[idx]
                 if hasattr(self.sampler, "log_prob_fn")
                 else self.sampler.args[idx]
@@ -182,7 +181,6 @@ class EmceeConverter:
 
 def from_emcee(
     sampler=None,
-    *,
     var_names=None,
     arg_names=None,
     blob_names=None,
@@ -339,7 +337,10 @@ def from_emcee(
         :context: close-figs
 
         >>> if emcee.__version__[0] == '3':
-        >>>     ess=(draws-burnin)/sampler_blobs.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
+        >>>     ess=(
+        >>>         (draws-burnin) /
+        >>>         sampler_blobs.get_autocorr_time(quiet=True, discard=burnin, thin=thin)
+        >>>     )
         >>> else:
         >>>     # to avoid error while generating the docs, the ess value is hard coded, it
         >>>     # should be calculated with:
@@ -360,8 +361,8 @@ def from_emcee(
         sampler=sampler,
         var_names=var_names,
         arg_names=arg_names,
-        coords=coords,
-        dims=dims,
         blob_names=blob_names,
         blob_groups=blob_groups,
+        coords=coords,
+        dims=dims,
     ).to_inference_data()
