@@ -50,7 +50,6 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     -------
     InferenceData
     """
-
     kwargs[group] = obj
     kwargs["coords"] = coords
     kwargs["dims"] = dims
