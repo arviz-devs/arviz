@@ -97,10 +97,9 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     if isinstance(obj, xr.Dataset):
         dataset = obj
     elif isinstance(obj, dict):
-        dataset = dict_to_dataset(**kwargs)
+        dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
-        kwargs[group] = {"x": kwargs.pop(group)}
-        dataset = dict_to_dataset(**kwargs)
+        dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
     elif isinstance(obj, (list, tuple)) and isinstance(obj[0], str) and obj[0].endswith(".csv"):
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
