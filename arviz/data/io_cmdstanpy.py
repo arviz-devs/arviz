@@ -1,4 +1,3 @@
-# pylint: disable=duplicate-code
 """CmdStan-specific conversion code."""
 from collections import defaultdict
 from copy import deepcopy
