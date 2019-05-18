@@ -4,6 +4,8 @@ import xarray as xr
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset
+from .io_cmdstan import from_cmdstan
+from .io_cmdstanpy import from_cmdstanpy
 from .io_emcee import from_emcee
 from .io_pymc3 import from_pymc3
 from .io_pyro import from_pyro
@@ -22,8 +24,10 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     obj : dict, str, np.ndarray, xr.Dataset, pystan fit, pymc3 trace
         A supported object to convert to InferenceData:
             | InferenceData: returns unchanged
-            | str: Attempts to load the netcdf dataset from disk
+            | str: Attempts to load the cmdstan csv or netcdf dataset from disk
             | pystan fit: Automatically extracts data
+            | cmdstanpy fit: Automatically extracts data
+            | cmdstan csv-list: Automatically extracts data
             | pymc3 trace: Automatically extracts data
             | emcee sampler: Automatically extracts data
             | pyro MCMC: Automatically extracts data
@@ -46,21 +50,40 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     -------
     InferenceData
     """
+    kwargs[group] = obj
+    kwargs["coords"] = coords
+    kwargs["dims"] = dims
+
     # Cases that convert to InferenceData
     if isinstance(obj, InferenceData):
         return obj
     elif isinstance(obj, str):
-        return InferenceData.from_netcdf(obj)
-    elif obj.__class__.__name__ == "StanFit4Model":  # ugly, but doesn't make PyStan a requirement
-        return from_pystan(posterior=obj, coords=coords, dims=dims, **kwargs)
-    elif obj.__class__.__module__ == "stan.fit":  # ugly, but doesn't make PyStan3 a requirement
-        return from_pystan(posterior=obj, coords=coords, dims=dims, **kwargs)
+        if obj.endswith(".csv"):
+            if group == "sample_stats":
+                kwargs["posterior"] = kwargs.pop(group)
+            elif group == "sample_stats_prior":
+                kwargs["prior"] = kwargs.pop(group)
+            return from_cmdstan(**kwargs)
+        else:
+            return InferenceData.from_netcdf(obj)
+    elif (
+        obj.__class__.__name__ in {"StanFit4Model", "PosteriorSample"}
+        or obj.__class__.__module__ == "stan.fit"
+    ):
+        if group == "sample_stats":
+            kwargs["posterior"] = kwargs.pop(group)
+        elif group == "sample_stats_prior":
+            kwargs["prior"] = kwargs.pop(group)
+        if obj.__class__.__name__ == "PosteriorSample":
+            return from_cmdstanpy(**kwargs)
+        else:  # pystan or pystan3
+            return from_pystan(**kwargs)
     elif obj.__class__.__name__ == "MultiTrace":  # ugly, but doesn't make PyMC3 a requirement
-        return from_pymc3(trace=obj, coords=coords, dims=dims, **kwargs)
+        return from_pymc3(trace=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "EnsembleSampler":  # ugly, but doesn't make emcee a requirement
-        return from_emcee(obj, coords=coords, dims=dims, **kwargs)
+        return from_emcee(sampler=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("pyro"):
-        return from_pyro(obj, coords=coords, dims=dims, **kwargs)
+        return from_pyro(posterior=kwargs.pop(group), **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
@@ -69,6 +92,12 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
         dataset = dict_to_dataset({"x": obj}, coords=coords, dims=dims)
+    elif isinstance(obj, (list, tuple)) and isinstance(obj[0], str) and obj[0].endswith(".csv"):
+        if group == "sample_stats":
+            kwargs["posterior"] = kwargs.pop(group)
+        elif group == "sample_stats_prior":
+            kwargs["prior"] = kwargs.pop(group)
+        return from_cmdstan(**kwargs)
     else:
         allowable_types = (
             "xarray dataset",
@@ -77,6 +106,10 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "numpy array",
             "pystan fit",
             "pymc3 trace",
+            "emcee fit",
+            "pyro mcmc fit",
+            "cmdstan fit csv",
+            "cmdstanpy fit",
         )
         raise ValueError(
             "Can only convert {} to InferenceData, not {}".format(
