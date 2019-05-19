@@ -583,10 +583,7 @@ class TestEmceeNetCDFUtils:
             # emcee uses lots of walkers
             obj = load_cached_models(eight_schools_params, draws, chains)["emcee"]
 
-        return Data
-
-    def get_inference_data(self, data):
-        return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
+        return Data.obj
 
     def get_inference_data_reader(self):
         from emcee import backends  # pylint: disable=no-name-in-module
@@ -599,9 +596,28 @@ class TestEmceeNetCDFUtils:
         reader = backends.HDFBackend(filepath, read_only=True)
         return from_emcee(reader, var_names=["ln(f)", "b", "m"])
 
-    def test_inference_data(self, data):
-        inference_data = self.get_inference_data(data)
-        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"var_names": ["mu", "tau", "eta"], "slices": [0, 1, slice(2, None)]},
+            {
+                "blob_names": ["log_likelihood", "y"],
+                "blob_groups": ["sample_stats", "posterior_predictive"],
+            },
+            {
+                "blob_names": ["log_likelihood", "y"],
+                "dims": {"eta": ["school"], "log_likelihood": ["school"], "y": ["school"]},
+                "var_names": ["mu", "tau", "eta"],
+                "slices": [0, 1, slice(2, None)],
+                "arg_names": ["y", "sigma"],
+                "coords": {"school": range(8)},
+            },
+        ],
+    )
+    def test_inference_data(self, data, kwargs):
+        inference_data = from_emcee(data, **kwargs)
+        test_dict = {"posterior": 1}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
