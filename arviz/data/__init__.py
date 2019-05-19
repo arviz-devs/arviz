@@ -1,6 +1,6 @@
 """Code for loading and manipulating data structures."""
 from .inference_data import InferenceData, concat
-from .io_netcdf import from_netcdf, to_netcdf, load_data, save_data
+from .io_netcdf import from_netcdf, to_netcdf
 from .datasets import load_arviz_data, list_datasets, clear_data_home
 from .base import numpy_to_data_array, dict_to_dataset
 from .converters import convert_to_dataset, convert_to_inference_data
@@ -33,6 +33,4 @@ __all__ = [
     "from_tfp",
     "from_netcdf",
     "to_netcdf",
-    "load_data",
-    "save_data",
 ]
