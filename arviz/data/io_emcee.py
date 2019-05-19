@@ -377,7 +377,7 @@ def from_emcee(
         >>>     prior = log_prior_8school(theta)
         >>>     like_vect = log_likelihood_8school(theta, y, sigma)
         >>>     like = np.sum(like_vect)
-        >>>     return like + prior, like_vect, np.random.normal((mu + tau * eta), sigma)
+        >>>     return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
         >>> sampler_blobs = emcee.EnsembleSampler(
         >>>     nwalkers,
         >>>     ndim,
