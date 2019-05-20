@@ -181,7 +181,6 @@ def plot_kde(
         rug_kwargs.setdefault("space", 0.2)
 
         plot_kwargs.setdefault("linewidth", linewidth)
-        plot_kwargs.setdefault("linestyle", "-")
         rug_kwargs.setdefault("markersize", 2 * markersize)
 
         density, lower, upper = _fast_kde(values, cumulative, bw)

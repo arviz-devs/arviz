@@ -115,6 +115,7 @@ def plot_energy(
                 fill_kwargs=fill_kwargs,
                 plot_kwargs=plot_kwargs,
                 ax=ax,
+                legend=False
             )
     elif kind == "hist":
         for alpha, color, label, value in series:
