@@ -2,7 +2,6 @@
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
@@ -225,12 +224,14 @@ def plot_kde(
             )
         else:
             fill_kwargs.setdefault("alpha", 0)
-            ax.plot(x, density, label=label, **plot_kwargs)
-            fill_func(fill_x, fill_y, **fill_kwargs)
-
+            if fill_kwargs.get("alpha") == 0:
+                ax.plot(x, density, label=label, **plot_kwargs)
+                fill_func(fill_x, fill_y, **fill_kwargs)
+            else:
+                ax.plot(x, density, **plot_kwargs)
+                fill_func(fill_x, fill_y, label=label, **fill_kwargs)
         if legend and label:
-            legend_element = [Patch(edgecolor=default_color, label=label)]
-            ax.legend(handles=legend_element)
+            ax.legend()
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
