@@ -343,7 +343,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     Parameters
     ----------
-    data : result of MCMC run
+    data : obj
+        Any object that can be converted to an az.InferenceData object. Refer to documentation
+        of az.convert_to_inference_data for details
     pointwise : bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
@@ -362,11 +364,23 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     loo : approximated Leave-one-out cross-validation
     loo_se : standard error of loo
     p_loo : effective number of parameters
-    shape_warn : 1 if the estimated shape parameter of
+    shape_warn : bool
+        True if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
     loo_i : array of pointwise predictive accuracy, only if pointwise True
     pareto_k : array of Pareto shape values, only if pointwise True
     loo_scale : scale of the loo results
+
+    Examples
+    --------
+    Calculate the LOO-CV of a model:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.loo(data, pointwise=True)
+
     """
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
@@ -405,7 +419,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
 
-    warn_mg = 0
+    warn_mg = False
     if np.any(pareto_shape > 0.7):
         warnings.warn(
             "Estimated shape parameter of Pareto distribution is greater than 0.7 for "
@@ -414,7 +428,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
             "LOO posterior are very different. This is more likely to happen with a non-robust "
             "model and highly influential observations."
         )
-        warn_mg = 1
+        warn_mg = True
 
     loo_lppd_i = scale_value * _logsumexp(log_weights, axis=0)
     loo_lppd = loo_lppd_i.sum()
@@ -595,7 +609,7 @@ def r2_score(y_true, y_pred):
 
     Parameters
     ----------
-    y_true: : array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true : array-like of shape = (n_samples) or (n_samples, n_outputs)
         Ground truth (correct) target values.
     y_pred : array-like of shape = (n_samples) or (n_samples, n_outputs)
         Estimated target values.
@@ -674,29 +688,37 @@ def summary(
 
     Examples
     --------
-    .. code:: ipython
+    .. ipython::
 
-        >>> az.summary(trace, ['mu'])
-               mean    sd  hpd_3  hpd_97  ess_bulk  ess_tail   r_hat
-        mu[0]  0.10  0.06  -0.02    0.23     487.0              1.00
-        mu[1] -0.04  0.06   0.00   -0.17     379.0              1.00
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.summary(data, var_names=["mu", "tau"])
 
     Other statistics can be calculated by passing a list of functions
     or a dictionary with key, function pairs.
 
-    .. code:: ipython
+    .. ipython::
 
-        >>> import pandas as pd
-        >>> def trace_sd(x):
-        ...     return pd.Series(np.std(x, 0), name='sd')
-        ...
-        >>> def trace_quantiles(x):
-        ...     return pd.DataFrame(pd.quantiles(x, [5, 50, 95]))
-        ...
-        >>> az.summary(trace, ['mu'], stat_funcs=[trace_sd, trace_quantiles], extend=False)
-                 sd     5    50    95
-        mu[0]  0.06  0.00  0.10  0.21
-        mu[1]  0.07 -0.16 -0.04  0.06
+        In [1]: import numpy as np
+           ...: def median_sd(x):
+           ...:     median = np.percentile(x, 50)
+           ...:     sd = np.sqrt(np.mean((x-median)**2))
+           ...:     return sd
+           ...:
+           ...: func_dict = {
+           ...:     "std": np.std,
+           ...:     "median_std": median_sd,
+           ...:     "5%": lambda x: np.percentile(x, 5),
+           ...:     "median": lambda x: np.percentile(x, 50),
+           ...:     "95%": lambda x: np.percentile(x, 95),
+           ...: }
+           ...: az.summary(
+           ...:     data,
+           ...:     var_names=["mu", "tau"],
+           ...:     stat_funcs=func_dict,
+           ...:     extend=False
+           ...: )
+
     """
     posterior = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, posterior)
@@ -896,14 +918,14 @@ def waic(data, pointwise=False, scale="deviance"):
     Also calculates the WAIC's standard error and the effective number of
     parameters of the samples in trace from model. Read more theory here - in
     a paper by some of the leading authorities on model selection
-    dx.doi.org/10.1111/1467-9868.00353
+    <dx.doi.org/10.1111/1467-9868.00353>
 
     Parameters
     ----------
     data : obj
         Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-    pointwise: bool
+        Refer to documentation of az.convert_to_inference_data for details
+    pointwise : bool
         if True the pointwise predictive accuracy will be returned.
         Default False
     scale : str
@@ -916,13 +938,25 @@ def waic(data, pointwise=False, scale="deviance"):
     Returns
     -------
     DataFrame with the following columns:
-    waic: widely available information criterion
-    waic_se: standard error of waic
-    p_waic: effective number parameters
-    var_warn: 1 if posterior variance of the log predictive
-         densities exceeds 0.4
-    waic_i: and array of the pointwise predictive accuracy, only if pointwise True
-    waic_scale: scale of the waic results
+    waic : widely available information criterion
+    waic_se : standard error of waic
+    p_waic : effective number parameters
+    var_warn : bool
+        True if posterior variance of the log predictive
+        densities exceeds 0.4
+    waic_i : and array of the pointwise predictive accuracy, only if pointwise True
+    waic_scale : scale of the waic results
+
+    Examples
+    --------
+    Calculate the LOO-CV of a model:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.waic(data, pointwise=True)
+
     """
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
@@ -950,7 +984,7 @@ def waic(data, pointwise=False, scale="deviance"):
     lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
 
     vars_lpd = np.var(log_likelihood, axis=0)
-    warn_mg = 0
+    warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
             """For one or more samples the posterior variance of the log predictive
@@ -958,7 +992,7 @@ def waic(data, pointwise=False, scale="deviance"):
         http://arxiv.org/abs/1507.04544 for details
         """
         )
-        warn_mg = 1
+        warn_mg = True
 
     waic_i = scale_value * (lppd_i - vars_lpd)
     waic_se = (len(waic_i) * np.var(waic_i)) ** 0.5
