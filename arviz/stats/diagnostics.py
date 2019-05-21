@@ -78,7 +78,8 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
-        Select ess method. Valid methods are
+        Select ess method. Valid methods are:
+
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -139,7 +140,8 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
-        Select ess method. Valid methods are
+        Select ess method. Valid methods are:
+
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -196,13 +198,13 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     .. ipython::
 
-        In [2]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
+        In [1]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
 
     Calculate the ess using the "tail" method, which requires the `prob` argument
 
     .. ipython::
 
-        In [3]: az.ess(data, method="tail", prob=.1)
+        In [1]: az.ess(data, method="tail", prob=.1)
 
     """
     methods = {
@@ -274,7 +276,8 @@ def rhat(data, *, var_names=None, method="rank"):
     var_names : list
         Names of variables to include in the rhat report
     method : str
-        Select R-hat method. Valid methods are
+        Select R-hat method. Valid methods are:
+
         - "rank"        # recommended by Vehtari et al. (2019)
         - "split"
         - "folded"
@@ -306,6 +309,23 @@ def rhat(data, *, var_names=None, method="rank"):
     * Gelman et al. BDA (2014)
     * Brooks and Gelman (1998)
     * Gelman and Rubin (1992)
+
+    Examples
+    --------
+    Calculate the R-hat using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: az.rhat(data)
+
+    Calculate the R-hat of some variables using the folded method:
+
+    .. ipython::
+
+        In [1]: az.rhat(data, var_names=["mu", "theta_t"], method="folded")
+
     """
     methods = {
         "rank": _rhat_rank,
@@ -358,7 +378,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     var_names : list
         Names of variables to include in the rhat report
     method : str
-        Select mcse method. Valid methods are
+        Select mcse method. Valid methods are:
+
         - "mean"
         - "sd"
         - "quantile"
@@ -369,6 +390,23 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     -------
     xarray.Dataset
         Return the msce dataset
+
+    Examples
+    --------
+    Calculate the Markov Chain Standard Error using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: az.mcse(data)
+
+    Calculate the Markov Chain Standard Error using the quantile method:
+
+    .. ipython::
+
+        In [1]: az.mcse(data, method="quantile", prob=.7)
+
     """
     methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
     if method not in methods:
