@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ma
 import pymc3 as pm
 import pytest
+import emcee
 
 from arviz import (
     concat,
@@ -660,6 +661,22 @@ class TestEmceeNetCDFUtils:
     def test_slices_warning(self, data, slices):
         with pytest.warns(SyntaxWarning):
             from_emcee(data.obj, slices=slices)
+
+    def test_no_blobs_error(self):
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: -x ** 2)
+        sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
+        with pytest.raises(ValueError):
+            from_emcee(sampler, blob_names=["inexistent"])
+
+    def test_peculiar_blobs(self, data):
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: (-x ** 2, (np.random.normal(x), 3)))
+        sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
+        inference_data = from_emcee(sampler, blob_names=["normal", "threes"])
+        fails = check_multiple_attrs({"sample_stats": ["normal", "threes"]}, inference_data)
+        assert not fails
+        inference_data = from_emcee(data.obj, blob_names=["mix"])
+        fails = check_multiple_attrs({"sample_stats": ["mix"]}, inference_data)
+        assert not fails
 
     @pytest.mark.parametrize(
         "blob_args",
