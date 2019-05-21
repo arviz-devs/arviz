@@ -107,6 +107,8 @@ class InferenceData:
 
         Parameters
         ----------
+        inplace : bool
+            If True, modify the InferenceData object inplace, otherwise, return the modified copy.
         **kwargs : mapping
             It must be accepted by Dataset.sel()
         """
