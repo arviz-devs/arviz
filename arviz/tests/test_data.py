@@ -255,6 +255,40 @@ def test_concat_bad():
         concat(idata, idata)
 
 
+@pytest.mark.parametrize("inplace", [True, False])
+def test_sel_method(inplace):
+    data = np.random.normal(size=(4, 500, 8))
+    idata = from_dict(
+        posterior={"a": data[..., 0], "b": data},
+        sample_stats={"a": data[..., 0], "b": data},
+        observed_data={"b": data[0, 0, :]},
+        posterior_predictive={"a": data[..., 0], "b": data},
+    )
+    original_groups = getattr(idata, "_groups")
+    ndraws = idata.posterior.draw.values.size
+    kwargs = {
+        "draw": slice(200, None),
+        "chain": slice(None, None, 2),
+        "b_dim_0": [1, 2, 7],
+    }
+    if inplace:
+        idata.sel(inplace=inplace, **kwargs)
+    else:
+        idata2 = idata.sel(inplace=inplace, **kwargs)
+        assert idata2 is not idata
+        idata = idata2
+    groups = getattr(idata, "_groups")
+    assert np.all(np.isin(groups, original_groups))
+    for group in groups:
+        dataset = getattr(idata, group)
+        assert "b_dim_0" in dataset.dims
+        assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
+        if group != "observed_data":
+            assert np.all(np.isin(["chain", "draw"], dataset.dims))
+            assert np.all(dataset.chain.values == np.arange(0, 4, 2))
+            assert np.all(dataset.draw.values == np.arange(200, ndraws))
+
+
 class TestNumpyToDataArray:
     def test_1d_dataset(self):
         size = 100
