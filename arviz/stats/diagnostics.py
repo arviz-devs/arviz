@@ -119,7 +119,8 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
+      Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
     """
     warnings.warn(
@@ -183,7 +184,8 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
+      Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
 
     Examples
