@@ -29,9 +29,9 @@ def compare(
     seed=None,
     scale="deviance",
 ):
-    r"""Compare models based on WAIC or LOO cross validation.
+    r"""Compare models based on WAIC or LOO cross-validation.
 
-    WAIC is Widely applicable information criterion, and LOO is leave-one-out
+    WAIC is the Widely applicable information criterion, and LOO is leave-one-out
     (LOO) cross-validation. Read more theory here - in a paper by some of the
     leading authorities on model selection - dx.doi.org/10.1111/1467-9868.00353
 
@@ -46,9 +46,9 @@ def compare(
 
         - 'stacking' : stacking of predictive distributions.
         - 'BB-pseudo-BMA' : (default) pseudo-Bayesian Model averaging using Akaike-type
-           weighting. The weights are stabilized using the Bayesian bootstrap
+          weighting. The weights are stabilized using the Bayesian bootstrap.
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
-           weighting, without Bootstrap stabilization (not recommended)
+          weighting, without Bootstrap stabilization (not recommended).
 
         For more information read https://arxiv.org/abs/1704.02030
     b_samples: int
@@ -71,14 +71,13 @@ def compare(
 
     Returns
     -------
-    A DataFrame, ordered from lowest to highest IC. The index reflects the order in which the
+    A DataFrame, ordered from lowest to highest IC. The index reflects the key with which the
     models are passed to this function. The columns are:
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
         If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
-    dIC : Relative difference between each IC (WAIC or LOO)
-    and the lowest IC (WAIC or LOO).
+    dIC : Relative difference between each IC (WAIC or LOO) and the lowest IC (WAIC or LOO).
         It's always 0 for the top-ranked model.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
@@ -86,12 +85,32 @@ def compare(
         Bayesian bootstrap.
     SE : Standard error of the IC estimate.
         If method = BB-pseudo-BMA these values are estimated using Bayesian bootstrap.
-    dSE : Standard error of the difference in IC between each model and
-    the top-ranked model.
+    dSE : Standard error of the difference in IC between each model and the top-ranked model.
         It's always 0 for the top-ranked model.
-    warning : A value of 1 indicates that the computation of the IC may not be reliable. This could
-        be indication of WAIC/LOO starting to fail see http://arxiv.org/abs/1507.04544 for details.
+    warning : A value of 1 indicates that the computation of the IC may not be reliable.
+        This could be indication of WAIC/LOO starting to fail see
+        http://arxiv.org/abs/1507.04544 for details.
     scale : Scale used for the IC.
+
+    Examples
+    --------
+    Compare the centered and non centered models of the eight school problem:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data1 = az.load_arviz_data("non_centered_eight")
+           ...: data2 = az.load_arviz_data("centered_eight")
+           ...: compare_dict = {"non centered": data1, "centered": data2}
+           ...: az.compare(compare_dict)
+
+    Compare the models using LOO-CV, returning the IC in log scale and calculating the
+    weights using the stacking method.
+
+    .. ipython::
+
+        In [1]: az.compare(compare_dict, ic="loo", method="stacking", scale="log")
+
     """
     names = list(dataset_dict.keys())
     scale = scale.lower()
@@ -105,6 +124,7 @@ def compare(
             scale_value = -2
         ascending = True
 
+    ic = ic.lower()
     if ic == "waic":
         ic_func = waic
         df_comp = pd.DataFrame(
@@ -264,6 +284,17 @@ def hpd(ary, credible_interval=0.94, circular=False):
     -------
     np.ndarray
         lower and upper value of the interval.
+
+    Examples
+    --------
+    Calculate the hpd of a Normal random variable:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: import numpy as np
+           ...: data = np.random.normal(size=2000)
+           ...: az.hpd(data, credible_interval=.68)
     """
     if ary.ndim > 1:
         hpd_array = np.array(
@@ -313,7 +344,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     Parameters
     ----------
     data : result of MCMC run
-    pointwise: bool, optional
+    pointwise : bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
     reff : float, optional
         Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
@@ -328,14 +359,14 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     Returns
     -------
     pandas.Series with the following columns:
-    loo: approximated Leave-one-out cross-validation
-    loo_se: standard error of loo
-    p_loo: effective number of parameters
-    shape_warn: 1 if the estimated shape parameter of
+    loo : approximated Leave-one-out cross-validation
+    loo_se : standard error of loo
+    p_loo : effective number of parameters
+    shape_warn : 1 if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
-    loo_i: array of pointwise predictive accuracy, only if pointwise True
-    pareto_k: array of Pareto shape values, only if pointwise True
-    loo_scale: scale of the loo results
+    loo_i : array of pointwise predictive accuracy, only if pointwise True
+    pareto_k : array of Pareto shape values, only if pointwise True
+    loo_scale : scale of the loo results
     """
     inference_data = convert_to_inference_data(data)
     for group in ("posterior", "sample_stats"):
@@ -379,9 +410,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         warnings.warn(
             "Estimated shape parameter of Pareto distribution is greater than 0.7 for "
             "one or more samples. You should consider using a more robust model, this is because "
-            "importance sampling is less likely to work well if the marginal posterior and LOO posterior "
-            "are very different. This is more likely to happen with a non-robust model and highly "
-            "influential observations."
+            "importance sampling is less likely to work well if the marginal posterior and "
+            "LOO posterior are very different. This is more likely to happen with a non-robust "
+            "model and highly influential observations."
         )
         warn_mg = 1
 
