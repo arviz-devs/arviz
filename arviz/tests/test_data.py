@@ -576,35 +576,25 @@ class TestDictIONetCDFUtils:
 
 
 class TestEmceeNetCDFUtils:
-    @pytest.fixture(scope="class")
-    def data(self, draws, chains):
-        class Data:
-            # chains are not used
-            # emcee uses lots of walkers
-            obj = load_cached_models(eight_schools_params, draws, chains)["emcee"]
-
-        return Data.obj
-
-    def get_inference_data_reader(self):
-        from emcee import backends  # pylint: disable=no-name-in-module
-
-        here = os.path.dirname(os.path.abspath(__file__))
-        data_directory = os.path.join(here, "saved_models")
-        filepath = os.path.join(data_directory, "reader_testfile.h5")
-        assert os.path.exists(filepath)
-        assert os.path.getsize(filepath)
-        reader = backends.HDFBackend(filepath, read_only=True)
-        return from_emcee(reader, var_names=["ln(f)", "b", "m"])
-
-    @pytest.mark.parametrize(
-        "kwargs",
-        [
-            {},
+    arg_list = [
+        ({}, {"posterior": ["var_0", "var_1", "var_7"], "observed_data": ["arg_0", "arg_1"]}),
+        (
             {"var_names": ["mu", "tau", "eta"], "slices": [0, 1, slice(2, None)]},
+            {"posterior": ["mu", "tau", "eta"], "observed_data": ["arg_0", "arg_1"]},
+        ),
+        (
             {
                 "blob_names": ["log_likelihood", "y"],
                 "blob_groups": ["sample_stats", "posterior_predictive"],
             },
+            {
+                "posterior": ["var_0", "var_1", "var_7"],
+                "observed_data": ["arg_0", "arg_1"],
+                "sample_stats": ["log_likelihood"],
+                "posterior_predictive": ["y"],
+            },
+        ),
+        (
             {
                 "blob_names": ["log_likelihood", "y"],
                 "dims": {"eta": ["school"], "log_likelihood": ["school"], "y": ["school"]},
@@ -613,18 +603,48 @@ class TestEmceeNetCDFUtils:
                 "arg_names": ["y", "sigma"],
                 "coords": {"school": range(8)},
             },
-        ],
-    )
-    def test_inference_data(self, data, kwargs):
-        inference_data = from_emcee(data, **kwargs)
-        test_dict = {"posterior": 1}
+            {
+                "posterior": ["mu", "tau", "eta"],
+                "observed_data": ["y", "sigma"],
+                "sample_stats": ["log_likelihood", "y"],
+            },
+        ),
+    ]
+
+    @pytest.fixture(scope="class")
+    def data(self, draws, chains):
+        class Data:
+            # chains are not used
+            # emcee uses lots of walkers
+            obj = load_cached_models(eight_schools_params, draws, chains)["emcee"]
+
+        return Data
+
+    def get_inference_data_reader(self, **kwargs):
+        from emcee import backends  # pylint: disable=no-name-in-module
+
+        here = os.path.dirname(os.path.abspath(__file__))
+        data_directory = os.path.join(here, "saved_models")
+        filepath = os.path.join(data_directory, "reader_testfile.h5")
+        assert os.path.exists(filepath)
+        assert os.path.getsize(filepath)
+        reader = backends.HDFBackend(filepath, read_only=True)
+        return from_emcee(reader, **kwargs)
+
+    @pytest.mark.parametrize("test_args", arg_list)
+    def test_inference_data(self, data, test_args):
+        kwargs, test_dict = test_args
+        inference_data = from_emcee(data.obj, **kwargs)
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
     @needs_emcee3
-    def test_inference_data_reader(self):
-        inference_data = self.get_inference_data_reader()
-        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+    @pytest.mark.parametrize("test_args", arg_list)
+    def test_inference_data_reader(self, test_args):
+        kwargs, test_dict = test_args
+        kwargs = {k: i for k, i in kwargs.items() if k != "arg_names"}
+        inference_data = self.get_inference_data_reader(**kwargs)
+        test_dict.pop("observed_data")
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -634,12 +654,32 @@ class TestEmceeNetCDFUtils:
 
     def test_verify_arg_names(self, data):
         with pytest.raises(ValueError):
-            from_emcee(data.obj, arg_names=["not", "enough"])
+            from_emcee(data.obj, arg_names=["not enough"])
+
+    @pytest.mark.parametrize("slices", [[0, 0, slice(2, None)], [0, 1, slice(1, None)]])
+    def test_slices_warning(self, data, slices):
+        with pytest.warns(SyntaxWarning):
+            from_emcee(data.obj, slices=slices)
+
+    @pytest.mark.parametrize(
+        "blob_args",
+        [
+            (ValueError, ["a", "b"], ["prior"]),
+            (ValueError, ["too", "many", "names"], None),
+            (SyntaxError, ["a", "b"], ["posterior", "observed_data"]),
+        ],
+    )
+    def test_bad_blobs(self, data, blob_args):
+        error, names, groups = blob_args
+        with pytest.raises(error):
+            from_emcee(data.obj, blob_names=names, blob_groups=groups)
 
     def test_ln_funcs_for_infinity(self):
         # after dropping Python 3.5 support use underscore 1_000_000
-        assert np.isinf(emcee_lnprior([1000, 10000, 1000000]))
-        assert np.isinf(emcee_lnprob([1000, 10000, 1000000], 0, 0, 0))
+        ary = np.ones(10)
+        ary[1] = -1
+        assert np.isinf(emcee_lnprior(ary))
+        assert np.isinf(emcee_lnprob(ary, ary[2:], ary[2:])[0])
 
 
 class TestIONetCDFUtils:
