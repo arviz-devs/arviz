@@ -90,6 +90,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         - "z_scale"
         - "folded"
         - "identity"
+
     relative : bool
         Return relative ess
         `ress = ess / N`
@@ -152,6 +153,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
+
     relative : bool
         Return relative ess
         `ress = ess / n`
@@ -383,6 +385,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         - "mean"
         - "sd"
         - "quantile"
+
     prob : float
         Quantile information.
 
