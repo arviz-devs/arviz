@@ -266,11 +266,7 @@ def test_sel_method(inplace):
     )
     original_groups = getattr(idata, "_groups")
     ndraws = idata.posterior.draw.values.size
-    kwargs = {
-        "draw": slice(200, None),
-        "chain": slice(None, None, 2),
-        "b_dim_0": [1, 2, 7],
-    }
+    kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
     if inplace:
         idata.sel(inplace=inplace, **kwargs)
     else:
