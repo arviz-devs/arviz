@@ -355,9 +355,11 @@ def get_draws(fit, variables=None, ignore=None):
 
     # check if the values are in 0-based (<=2.17) or 1-based indexing (>=2.18)
     shift = 1
-    if any(fit.sim["dims_oi"]):
+    if any(dim and np.prod(dim) != 0 for dim in fit.sim["dims_oi"]):
         # choose variable with lowest number of dims > 1
-        par_idx = min((dim, i) for i, dim in enumerate(fit.sim["dims_oi"]) if dim)[1]
+        par_idx = min(
+            (dim, i) for i, dim in enumerate(fit.sim["dims_oi"]) if (dim and np.prod(dim) != 0)
+        )[1]
         offset = int(sum(map(np.product, fit.sim["dims_oi"][:par_idx])))
         par_offset = int(np.product(fit.sim["dims_oi"][par_idx]))
         par_keys = fit.sim["fnames_oi"][offset : offset + par_offset]
