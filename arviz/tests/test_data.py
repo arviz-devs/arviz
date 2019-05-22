@@ -926,7 +926,9 @@ class TestPyStanNetCDFUtils:
             model_code = """
                 parameters {
                     real y;
-                    vector[0] z;
+                    vector[3] x;
+                    vector[0] a;
+                    vector[2] z;
                 }
                 model {
                     y ~ normal(0,1);
@@ -937,7 +939,7 @@ class TestPyStanNetCDFUtils:
             model = StanModel(model_code=model_code)
             fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
             posterior = from_pystan(posterior=fit)
-            test_dict = {"posterior": ["y"], "sample_stats": ["lp"]}
+            test_dict = {"posterior": ["y", "x", "z"], "sample_stats": ["lp"]}
             fails = check_multiple_attrs(test_dict, posterior)
             assert not fails
 
