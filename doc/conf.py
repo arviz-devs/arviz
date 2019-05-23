@@ -48,6 +48,7 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "numpydoc",
     "nbsphinx",
+    "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
 ]

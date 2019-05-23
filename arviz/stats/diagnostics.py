@@ -42,6 +42,17 @@ def bfmi(data):
     z : array
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
+
+    Examples
+    --------
+    Compute the BFMI of an InferenceData object
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('radon')
+           ...: az.bfmi(data)
+
     """
     if isinstance(data, np.ndarray):
         return _bfmi(data)
@@ -67,7 +78,8 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
-        Select ess method. Valid methods are
+        Select ess method. Valid methods are:
+
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -78,6 +90,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         - "z_scale"
         - "folded"
         - "identity"
+
     relative : bool
         Return relative ess
         `ress = ess / N`
@@ -105,9 +118,10 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-    Gelman et al. BDA (2014) Formula 11.8
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
+      Section 15.4.2
+    * Gelman et al. BDA (2014) Formula 11.8
     """
     warnings.warn(
         "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
@@ -128,7 +142,8 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     var_names : list
         Names of variables to include in the effective_sample_size_mean report
     method : str
-        Select ess method. Valid methods are
+        Select ess method. Valid methods are:
+
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -139,36 +154,56 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
+
     relative : bool
         Return relative ess
-        `ress = ess / N`
+        `ress = ess / n`
     prob : float, optional
         probability value for "tail" and "quantile" ess functions.
 
     Returns
     -------
     xarray.Dataset
-        Return the effective sample size for mean, :math:`\hat{N}_{eff}`
+        Return the effective sample size, :math:`\hat{N}_{eff}`
 
     Notes
     -----
     The basic ess diagnostic is computed by:
 
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
+    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
 
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
+    where :math:`M` is the number of chains, :math:`N` the number of draws,
+    :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag :math:`t`, and
+    :math:`K` is the last integer for which :math:`\hat{P}_{K} = \hat{\rho}_{2K} +
+    \hat{\rho}_{2K+1}` is still positive.
 
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html Section 15.4.2
-    Gelman et al. BDA (2014) Formula 11.8
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
+      Section 15.4.2
+    * Gelman et al. BDA (2014) Formula 11.8
+
+    Examples
+    --------
+    Calculate the effective_sample_size using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('non_centered_eight')
+           ...: az.ess(data)
+
+    Calculate the ress of some of the variables
+
+    .. ipython::
+
+        In [1]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
+
     """
     methods = {
         "bulk": _ess_bulk,
@@ -239,7 +274,8 @@ def rhat(data, *, var_names=None, method="rank"):
     var_names : list
         Names of variables to include in the rhat report
     method : str
-        Select R-hat method. Valid methods are
+        Select R-hat method. Valid methods are:
+
         - "rank"        # recommended by Vehtari et al. (2019)
         - "split"
         - "folded"
@@ -267,10 +303,27 @@ def rhat(data, *, var_names=None, method="rank"):
 
     References
     ----------
-    Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    Gelman et al. BDA (2014)
-    Brooks and Gelman (1998)
-    Gelman and Rubin (1992)
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+    * Gelman et al. BDA (2014)
+    * Brooks and Gelman (1998)
+    * Gelman and Rubin (1992)
+
+    Examples
+    --------
+    Calculate the R-hat using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: az.rhat(data)
+
+    Calculate the R-hat of some variables using the folded method:
+
+    .. ipython::
+
+        In [1]: az.rhat(data, var_names=["mu", "theta_t"], method="folded")
+
     """
     methods = {
         "rank": _rhat_rank,
@@ -311,7 +364,7 @@ def rhat(data, *, var_names=None, method="rank"):
 
 
 def mcse(data, *, var_names=None, method="mean", prob=None):
-    """Calculate Markov Chain Standard Error for statistic.
+    """Calculate Markov Chain Standard Error statistic.
 
     Parameters
     ----------
@@ -323,10 +376,12 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     var_names : list
         Names of variables to include in the rhat report
     method : str
-        Select mcse method. Valid methods are
+        Select mcse method. Valid methods are:
+
         - "mean"
         - "sd"
         - "quantile"
+
     prob : float
         Quantile information.
 
@@ -334,6 +389,23 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     -------
     xarray.Dataset
         Return the msce dataset
+
+    Examples
+    --------
+    Calculate the Markov Chain Standard Error using the default arguments:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("non_centered_eight")
+           ...: az.mcse(data)
+
+    Calculate the Markov Chain Standard Error using the quantile method:
+
+    .. ipython::
+
+        In [1]: az.mcse(data, method="quantile", prob=.7)
+
     """
     methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
     if method not in methods:
@@ -410,7 +482,7 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
 
     References
     ----------
-    Geweke (1992)
+    * Geweke (1992)
     """
     # Filter out invalid intervals
     for interval in (first, last):
