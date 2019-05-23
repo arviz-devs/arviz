@@ -78,9 +78,13 @@ def plot_pointwise_elpd(
             pointwise_elpd = loo(idata, pointwise=True, scale=scale).loo_i
         like_dataarray = idata.sample_stats.log_likelihood
         dims = [dim for dim in like_dataarray.dims if dim not in ["chain", "draw"]]
-        coords = {dim: like_dataarray.coords.indexes[dim] for dim in dims}
-        elpd_dataarray = xr.DataArray(pointwise_elpd, dims=dims, coords=coords)
-        return elpd_dataarray.sel(**coords)
+        present_coords = {dim: like_dataarray.coords.indexes[dim] for dim in dims}
+        elpd_dataarray = xr.DataArray(pointwise_elpd, dims=dims, coords=present_coords)
+        print(elpd_dataarray)
+        print(coords)
+        elpd_dataarray = elpd_dataarray.sel(**coords)
+        print(elpd_dataarray)
+        return elpd_dataarray
 
 
     # Make sure all objects in idata_dict are InferenceData
