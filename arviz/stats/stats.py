@@ -31,7 +31,7 @@ def compare(
 ):
     r"""Compare models based on WAIC or LOO cross-validation.
 
-    WAIC is the Widely applicable information criterion, and LOO is leave-one-out
+    WAIC is the widely applicable information criterion, and LOO is leave-one-out
     (LOO) cross-validation. Read more theory here - in a paper by some of the
     leading authorities on model selection - dx.doi.org/10.1111/1467-9868.00353
 
