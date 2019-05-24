@@ -97,7 +97,9 @@ def plot_trace(
     """
     if divergences:
         try:
-            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
+            divergence_data = get_coords(
+                convert_to_dataset(data, group="sample_stats"), coords
+            ).diverging
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
             divergences = False
 
