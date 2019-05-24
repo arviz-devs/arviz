@@ -245,7 +245,7 @@ def plot_trace(
                 alpha=trace_kwargs["alpha"]
             )
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
-        axes[idx, 1].set_xlim(left=0, right=data.draw.max())
+        axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
     return axes
 
