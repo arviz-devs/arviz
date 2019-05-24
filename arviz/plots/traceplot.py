@@ -144,17 +144,30 @@ def plot_trace(
     colors = {}
     for idx, (var_name, selection, value) in enumerate(plotters):
         colors[idx] = []
-        if combined:
-            value = value.flatten()
         value = np.atleast_2d(value)
 
         for row in value:
             axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
 
-            colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
+            if not combined:
+                colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
+                plot_kwargs["color"] = colors[idx][-1]
+                plot_dist(
+                    row,
+                    textsize=xt_labelsize,
+                    ax=axes[idx, 0],
+                    hist_kwargs=hist_kwargs,
+                    plot_kwargs=plot_kwargs,
+                    fill_kwargs=fill_kwargs,
+                    rug_kwargs=rug_kwargs,
+                )
+
+        if combined:
+            # value = value.flatten()
+            colors[idx].append(axes[idx, 1].get_lines()[0].get_color())
             plot_kwargs["color"] = colors[idx][-1]
             plot_dist(
-                row,
+                value.flatten(),
                 textsize=xt_labelsize,
                 ax=axes[idx, 0],
                 hist_kwargs=hist_kwargs,
@@ -177,8 +190,8 @@ def plot_trace(
         if divergences:
             div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
             divs = divergence_data.sel(**div_selection).values
-            if combined:
-                divs = divs.flatten()
+            # if combined:
+            #     divs = divs.flatten()
             divs = np.atleast_2d(divs)
 
             for chain, chain_divs in enumerate(divs):
