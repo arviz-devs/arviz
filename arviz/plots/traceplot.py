@@ -17,6 +17,7 @@ def plot_trace(
     textsize=None,
     lines=None,
     combined=False,
+    legend=False,
     plot_kwargs=None,
     fill_kwargs=None,
     rug_kwargs=None,
@@ -50,6 +51,8 @@ def plot_trace(
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
+    legend : bool
+        Add a legend to the figure with the chain color code.
     plot_kwargs : dict
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     fill_kwargs : dict
@@ -103,7 +106,7 @@ def plot_trace(
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
             divergences = False
 
-    data = convert_to_dataset(data, group="posterior")
+    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
     var_names = _var_names(var_names, data)
 
     if coords is None:
@@ -112,7 +115,7 @@ def plot_trace(
     if lines is None:
         lines = ()
 
-    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)
@@ -148,8 +151,9 @@ def plot_trace(
         colors[idx] = []
         value = np.atleast_2d(value)
 
-        for row in value:
-            axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
+        for chain_idx, row in enumerate(value):
+            chain_id = data.chain.values[chain_idx]
+            axes[idx, 1].plot(np.arange(len(row)), row, label=chain_id, **trace_kwargs)
 
             if not combined:
                 colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
@@ -247,6 +251,8 @@ def plot_trace(
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
         axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
+    if legend:
+        axes[0, 1].legend(title="chain")
     return axes
 
 
