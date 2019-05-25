@@ -1,6 +1,7 @@
 """General utilities."""
 import importlib
 import warnings
+import timeit
 
 
 def _var_names(var_names, data):
@@ -80,3 +81,19 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         return wrapper(function)
     else:
         return wrapper
+
+
+def wrapper(function, *args, **kwargs):
+    def wrapped():
+        return function(*args, **kwargs)
+
+    return wrapped
+
+
+def to_numba_or_not_to_numba(function, *args, **kwargs):
+    wrapped = wrapper(function, *args, **kwargs)
+    wrapped_numba = wrapper(conditional_jit(function), *args, **kwargs)
+    a = timeit.timeit(wrapped, number=1000)
+    dummy = timeit.timeit(wrapped_numba, number=1000)
+    b = timeit.timeit(wrapped_numba, number=1000)
+    return a / b

@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
-from numba import njit
 import xarray as xr
 from ..data.inference_data import InferenceData
 from .plot_utils import _scale_fig_size
+from ..utils import conditional_jit
 
 
 def plot_kde(
@@ -262,7 +262,6 @@ def plot_kde(
     return ax
 
 
-@njit(cache=True)
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
 
@@ -332,13 +331,12 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     return density, xmin, xmax
 
 
-@njit(cache=True)
+@conditional_jit
 def _histogram(x, n_bins, range_hist=None):
     grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
     return grid
 
 
-@njit(cache=True)
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
     2D fft-based Gaussian kernel density estimate (KDE).
