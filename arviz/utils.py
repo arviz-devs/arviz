@@ -1,7 +1,8 @@
 """General utilities."""
 import importlib
 import warnings
-import numpy as np
+import timeit
+
 
 
 def _var_names(var_names, data):
@@ -83,20 +84,19 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         return wrapper
 
 
-def format_sig_figs(value, default=None):
-    """Get a default number of significant figures.
 
-    Gives the integer part or `default`, whichever is bigger.
+def wrapper(function, *args, **kwargs):
+    def wrapped():
+        return function(*args, **kwargs)
 
-    Examples
-    --------
-    0.1234 --> 0.12
-    1.234  --> 1.2
-    12.34  --> 12
-    123.4  --> 123
-    """
-    if default is None:
-        default = 2
-    if value == 0:
-        return 1
-    return max(int(np.log10(np.abs(value))) + 1, default)
+    return wrapped
+
+
+def to_numba_or_not_to_numba(function, *args, **kwargs):
+    wrapped = wrapper(function, *args, **kwargs)
+    wrapped_numba = wrapper(conditional_jit(function), *args, **kwargs)
+    a = timeit.timeit(wrapped, number=1000)
+    dummy = timeit.timeit(wrapped_numba, number=1000)
+    b = timeit.timeit(wrapped_numba, number=1000)
+    return a / b
+>>>>>>> Added an enhancement function

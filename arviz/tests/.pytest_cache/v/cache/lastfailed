@@ -1,0 +1,16 @@
+{
+  "i-495.py": true,
+  "i-495.py::test_conditional_jit_numba_decorator_keyword": true,
+  "test_plots.py::test_plot_ppc_discrete_save_animation[cumulative]": true,
+  "test_plots.py::test_plot_ppc_discrete_save_animation[density]": true,
+  "test_plots.py::test_plot_ppc_discrete_save_animation[scatter]": true,
+  "test_plots.py::test_plot_ppc_save_animation[cumulative]": true,
+  "test_plots.py::test_plot_ppc_save_animation[density]": true,
+  "test_plots.py::test_plot_ppc_save_animation[scatter]": true,
+  "test_stats_utils.py::test_wrap_ufunc_output[False-quantile0]": true,
+  "test_stats_utils.py::test_wrap_ufunc_output[False-quantile1]": true,
+  "test_stats_utils.py::test_wrap_ufunc_output[True-quantile0]": true,
+  "test_stats_utils.py::test_wrap_ufunc_output[True-quantile1]": true,
+  "test_utils.py::test_numba_utils": true,
+  "test_utils.py::test_numba_var[0-0]": true
+}
