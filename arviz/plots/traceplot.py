@@ -16,6 +16,7 @@ def plot_trace(
     figsize=None,
     textsize=None,
     lines=None,
+    compact=False,
     combined=False,
     legend=False,
     plot_kwargs=None,
@@ -48,6 +49,8 @@ def plot_trace(
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
+    compact : bool
+        Plot multidimensional variables in a single plot.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
@@ -116,7 +119,12 @@ def plot_trace(
     if lines is None:
         lines = ()
 
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
+    if compact:
+        skip_dims = set(data.dims) - {"chain", "draw"}
+    else:
+        skip_dims = set()
+
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)
@@ -152,36 +160,38 @@ def plot_trace(
         colors[idx] = []
         value = np.atleast_2d(value)
 
-        for chain_idx, row in enumerate(value):
-            chain_id = data.chain.values[chain_idx]
-            axes[idx, 1].plot(data.draw.values, row, label=chain_id, **trace_kwargs)
-
-            if not combined:
-                colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
-                plot_kwargs["color"] = colors[idx][-1]
-                plot_dist(
-                    row,
-                    textsize=xt_labelsize,
-                    ax=axes[idx, 0],
-                    hist_kwargs=hist_kwargs,
-                    plot_kwargs=plot_kwargs,
-                    fill_kwargs=fill_kwargs,
-                    rug_kwargs=rug_kwargs,
-                )
-
-        if combined:
-            # value = value.flatten()
-            colors[idx].append(axes[idx, 1].get_lines()[0].get_color())
-            plot_kwargs["color"] = colors[idx][-1]
-            plot_dist(
-                value.flatten(),
-                textsize=xt_labelsize,
-                ax=axes[idx, 0],
-                hist_kwargs=hist_kwargs,
-                plot_kwargs=plot_kwargs,
-                fill_kwargs=fill_kwargs,
-                rug_kwargs=rug_kwargs,
+        if len(value.shape) == 2:
+            _plot_chains(
+                axes,
+                idx,
+                value,
+                data,
+                colors,
+                combined,
+                xt_labelsize,
+                trace_kwargs,
+                hist_kwargs,
+                plot_kwargs,
+                fill_kwargs,
+                rug_kwargs,
             )
+        else:
+            value = value.reshape((value.shape[0], value.shape[1], -1))
+            for sub_idx in range(value.shape[2]):
+                _plot_chains(
+                    axes,
+                    idx,
+                    value[..., sub_idx],
+                    data,
+                    colors,
+                    combined,
+                    xt_labelsize,
+                    trace_kwargs,
+                    hist_kwargs,
+                    plot_kwargs,
+                    fill_kwargs,
+                    rug_kwargs,
+                )
 
         if value[0].dtype.kind == "i":
             xticks = get_bins(value)
@@ -263,3 +273,49 @@ def _histplot_op(ax, data, **kwargs):
     bins = get_bins(data)
     ax.hist(data, bins=bins, align="left", density=True, **kwargs)
     return ax
+
+
+def _plot_chains(
+    axes,
+    idx,
+    value,
+    data,
+    colors,
+    combined,
+    xt_labelsize,
+    trace_kwargs,
+    hist_kwargs,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+):
+    for chain_idx, row in enumerate(value):
+        chain_id = data.chain.values[chain_idx]
+        axes[idx, 1].plot(data.draw.values, row, label=chain_id, **trace_kwargs)
+
+        if not combined:
+            colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
+            plot_kwargs["color"] = colors[idx][-1]
+            plot_dist(
+                row,
+                textsize=xt_labelsize,
+                ax=axes[idx, 0],
+                hist_kwargs=hist_kwargs,
+                plot_kwargs=plot_kwargs,
+                fill_kwargs=fill_kwargs,
+                rug_kwargs=rug_kwargs,
+            )
+
+    if combined:
+        # value = value.flatten()
+        colors[idx].append(axes[idx, 1].get_lines()[0].get_color())
+        plot_kwargs["color"] = colors[idx][-1]
+        plot_dist(
+            value.flatten(),
+            textsize=xt_labelsize,
+            ax=axes[idx, 0],
+            hist_kwargs=hist_kwargs,
+            plot_kwargs=plot_kwargs,
+            fill_kwargs=fill_kwargs,
+            rug_kwargs=rug_kwargs,
+        )
