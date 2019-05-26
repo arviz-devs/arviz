@@ -1,4 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
+from itertools import cycle
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
@@ -122,7 +123,12 @@ def plot_trace(
         lines = ()
 
     num_colors = len(data.chain) + 1 if combined else len(data.chain)
-    colors = [prop["color"] for _, prop in zip(range(num_colors), plt.rcParams["axes.prop_cycle"])]
+    colors = [
+        prop
+        for _, prop in zip(
+            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        )
+    ]
 
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}
@@ -253,15 +259,9 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-            axes[idx, 0].vlines(
-                line_values, *ylims[0], colors=colors[idx][0], linewidth=1.5, alpha=0.75
-            )
+            axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
             axes[idx, 1].hlines(
-                line_values,
-                *xlims[1],
-                colors=colors[idx][0],
-                linewidth=1.5,
-                alpha=trace_kwargs["alpha"]
+                line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
             )
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
         axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
