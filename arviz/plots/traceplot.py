@@ -298,7 +298,6 @@ def _plot_chains(
     rug_kwargs,
 ):
     for chain_idx, row in enumerate(value):
-        chain_id = data.chain.values[chain_idx]
         axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
 
         if not combined:
@@ -314,7 +313,6 @@ def _plot_chains(
             )
 
     if combined:
-        # value = value.flatten()
         plot_kwargs["color"] = colors[-1]
         plot_dist(
             value.flatten(),
