@@ -1,5 +1,6 @@
 """Plot kde or histograms and values from MCMC samples."""
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 from ..data import convert_to_dataset
@@ -119,6 +120,9 @@ def plot_trace(
     if lines is None:
         lines = ()
 
+    num_colors = len(data.chain) + 1 if combined else len(data.chain)
+    colors = [prop["color"] for _, prop in zip(range(num_colors), plt.rcParams["axes.prop_cycle"])]
+
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}
     else:
@@ -155,9 +159,7 @@ def plot_trace(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
-    colors = {}
     for idx, (var_name, selection, value) in enumerate(plotters):
-        colors[idx] = []
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
@@ -264,7 +266,13 @@ def plot_trace(
         axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
     if legend:
-        axes[0, 1].legend(title="chain")
+        handles = [
+            Line2D([], [], color=color, label=chain_id)
+            for chain_id, color in zip(data.chain.values, colors)
+        ]
+        if combined:
+            handles.insert(0, Line2D([], [], color=colors[-1], label="combined"))
+        axes[0, 1].legend(handles=handles, title="chain")
     return axes
 
 
@@ -291,11 +299,10 @@ def _plot_chains(
 ):
     for chain_idx, row in enumerate(value):
         chain_id = data.chain.values[chain_idx]
-        axes[idx, 1].plot(data.draw.values, row, label=chain_id, **trace_kwargs)
+        axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
 
         if not combined:
-            colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
-            plot_kwargs["color"] = colors[idx][-1]
+            plot_kwargs["color"] = colors[chain_idx]
             plot_dist(
                 row,
                 textsize=xt_labelsize,
@@ -308,8 +315,7 @@ def _plot_chains(
 
     if combined:
         # value = value.flatten()
-        colors[idx].append(axes[idx, 1].get_lines()[0].get_color())
-        plot_kwargs["color"] = colors[idx][-1]
+        plot_kwargs["color"] = colors[-1]
         plot_dist(
             value.flatten(),
             textsize=xt_labelsize,
