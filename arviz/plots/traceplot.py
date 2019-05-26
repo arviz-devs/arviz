@@ -100,17 +100,18 @@ def plot_trace(
     """
     if divergences:
         try:
-            divergence_data = get_coords(
-                convert_to_dataset(data, group="sample_stats"), coords
-            ).diverging
+            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
             divergences = False
+
+    if coords is None:
+        coords = {}
 
     data = get_coords(convert_to_dataset(data, group="posterior"), coords)
     var_names = _var_names(var_names, data)
 
-    if coords is None:
-        coords = {}
+    if divergences:
+        divergence_data = get_coords(divergence_data, coords)
 
     if lines is None:
         lines = ()
@@ -153,7 +154,7 @@ def plot_trace(
 
         for chain_idx, row in enumerate(value):
             chain_id = data.chain.values[chain_idx]
-            axes[idx, 1].plot(np.arange(len(row)), row, label=chain_id, **trace_kwargs)
+            axes[idx, 1].plot(data.draw.values, row, label=chain_id, **trace_kwargs)
 
             if not combined:
                 colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
@@ -201,6 +202,7 @@ def plot_trace(
             divs = np.atleast_2d(divs)
 
             for chain, chain_divs in enumerate(divs):
+                div_draws = data.draw.values[chain_divs]
                 div_idxs = np.arange(len(chain_divs))[chain_divs]
                 if div_idxs.size > 0:
                     if divergences == "top":
@@ -209,7 +211,7 @@ def plot_trace(
                         ylocs = [ylim[0] for ylim in ylims]
                     values = value[chain, div_idxs]
                     axes[idx, 1].plot(
-                        div_idxs,
+                        div_draws,
                         np.zeros_like(div_idxs) + ylocs[1],
                         marker="|",
                         color="black",
