@@ -25,6 +25,7 @@ def plot_trace(
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
+    max_plots=40,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -159,7 +160,7 @@ def plot_trace(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
-    for idx, (var_name, selection, value) in enumerate(plotters):
+    for idx, (var_name, selection, value) in zip(range(max_plots), plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
