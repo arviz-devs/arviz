@@ -2,6 +2,7 @@
 import importlib
 import warnings
 import timeit
+import numpy as np
 
 
 def _var_names(var_names, data):
@@ -83,17 +84,24 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         return wrapper
 
 
-def wrapper(function, *args, **kwargs):
-    def wrapped():
-        return function(*args, **kwargs)
+def numba_check(function, *args, **kwargs):
+    """
+    Compares the time of a numbified function to a non numbified one.
 
-    return wrapped
+    """
 
+    def wrapper(function, *args, **kwargs):
+        def wrapped():
+            return function(*args, **kwargs)
 
-def to_numba_or_not_to_numba(function, *args, **kwargs):
+        return wrapped
+
     wrapped = wrapper(function, *args, **kwargs)
     wrapped_numba = wrapper(conditional_jit(function), *args, **kwargs)
-    a = timeit.timeit(wrapped, number=1000)
-    dummy = timeit.timeit(wrapped_numba, number=1000)
-    b = timeit.timeit(wrapped_numba, number=1000)
-    return a / b
+    dummy = timeit.timeit(wrapped_numba, number=1)
+    time = np.zeros(100)
+    for i in range(0, 100):
+        a = timeit.timeit(wrapped, number=1000)
+        b = timeit.timeit(wrapped_numba, number=1000)
+        time[i] = a / b
+    return time.mean()

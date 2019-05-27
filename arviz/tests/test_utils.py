@@ -5,7 +5,7 @@ Tests for arviz.utils.
 from unittest.mock import Mock
 import numpy as np
 import pytest
-from ..utils import _var_names
+from ..utils import _var_names, numba_check
 from ..data import load_arviz_data, from_dict
 
 
@@ -119,3 +119,16 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     function_results, wrapper_result = placeholder_func
     assert wrapper_result == {"keyword_argument": "A keyword argument"}
     assert function_results == "output"
+
+
+def test_numba_check():
+    test_data = np.random.rand(200).reshape(10, 20)
+
+    def placeholder(x):
+        """A simple function to test numba enhancement"""
+        dummy = 0
+        for i in range(0, x.shape[0]):
+            dummy = dummy + np.log10(x[i, i])
+        return dummy
+
+    assert numba_check(placeholder, test_data) >= 1

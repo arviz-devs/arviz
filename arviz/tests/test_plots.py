@@ -9,6 +9,7 @@ import pymc3 as pm
 
 from ..data import from_dict, from_pymc3, load_arviz_data
 from ..stats import compare, psislw
+from ..utils import numba_check
 from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -30,6 +31,7 @@ from ..plots import (
     plot_dist,
     plot_rank,
 )
+from ..plots.kdeplot import _histogram
 
 np.random.seed(0)
 
@@ -339,6 +341,12 @@ def test_plot_kde_inference_data():
         plot_kde(eight)
     with pytest.raises(ValueError, match="Xarray"):
         plot_kde(eight.posterior)
+
+
+def test_numba_plot_kde_histogram():
+    data = load_arviz_data("centered_eight").posterior["mu"].values
+    n_bins = 10
+    assert numba_check(_histogram, data, n_bins) >= 1
 
 
 def test_plot_khat():
