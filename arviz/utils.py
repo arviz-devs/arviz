@@ -86,8 +86,8 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
 
 def numba_check(function, *args, **kwargs):
     """
-    Compares the time of a numbified function to a non numbified one.
-
+    Compare the time of a numbified function to a non numbified one.
+    The total time of 1000 executions is compared.
     """
 
     def wrapper(function, *args, **kwargs):
