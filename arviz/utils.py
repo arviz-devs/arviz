@@ -91,10 +91,7 @@ def wrapper(function, *args, **kwargs):
     def wrapped():
         return function(*args, **kwargs
 def numba_check(function, *args, **kwargs):
-    """
-    Compare the time of a numbified function to a non numbified one.
-    The total time of 1000 executions is compared.
-    """
+    """Compare the time of a numbified function to a non numbified one."""
 
     def wrapper(function, *args, **kwargs):
         def wrapped():
