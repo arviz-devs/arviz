@@ -6,9 +6,11 @@ from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 
-from ..data import from_dict, load_arviz_data
-from ..stats import compare, psislw, loo, waic
-from .helpers import eight_schools_params  # pylint: disable=unused-import
+
+from ..data import from_dict, from_pymc3, load_arviz_data
+from ..stats import compare, psislw
+from ..utils import numba_check
+from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -30,6 +32,7 @@ from ..plots import (
     plot_rank,
     plot_elpd,
 )
+from ..plots.kdeplot import _histogram
 
 np.random.seed(0)
 
@@ -419,6 +422,12 @@ def test_plot_kde_inference_data(models):
         plot_kde(models.model_1)
     with pytest.raises(ValueError, match="Xarray"):
         plot_kde(models.model_1.posterior)
+
+
+def test_numba_plot_kde_histogram():
+    data = load_arviz_data("centered_eight").posterior["mu"].values
+    n_bins = 10
+    assert numba_check(_histogram, data, n_bins) >= 1
 
 
 def test_plot_khat():
