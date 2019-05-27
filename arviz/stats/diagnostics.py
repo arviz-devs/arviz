@@ -204,6 +204,13 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
         In [1]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
 
+    Calculate the ess using the "tail" method, leaving the `prob` argument at its default
+    value.
+
+    .. ipython::
+
+        In [1]: az.ess(data, method="tail")
+
     """
     methods = {
         "bulk": _ess_bulk,
