@@ -61,6 +61,19 @@ def plot_pointwise_elpd(
 
     Examples
     --------
+    Compare pointwise WAIC for centered and non centered models of the 8school problem
+
+    .. plot::
+        :context: close-figs
+
+        In [1]: import arviz as az
+           ...: idata1 = az.load_arviz_data("centered_eight")
+           ...: idata2 = az.load_arviz_data("non_centered_eight")
+           ...: az.plot_pointwise_elpd(
+           ...:     {"centered model": idata1, "non centered model": idata2},
+           ...:     xlabels=True
+           ...: )
+
     """
     valid_ics = ["waic", "loo"]
     ic = ic.lower()
@@ -71,12 +84,17 @@ def plot_pointwise_elpd(
             )
         )
 
+    # Make sure all objects in idata_dict are InferenceData
+    idata_dict = {key: convert_to_inference_data(idata) for key, idata in idata_dict.items()}
+    numvars = len(idata_dict)
+    models = list(idata_dict.keys())
+
     if coords is None:
         coords = {}
 
     if plot_kwargs is None:
         plot_kwargs = {}
-        plot_kwargs.setdefault("marker", ".")
+    plot_kwargs.setdefault("marker", "+")
 
     def get_pointwise_as_dataarray(idata, coords=coords, ic=ic, scale=scale):
         if ic == "waic":
@@ -90,15 +108,11 @@ def plot_pointwise_elpd(
         elpd_dataarray = elpd_dataarray.sel(**coords)
         return elpd_dataarray
 
-    # Make sure all objects in idata_dict are InferenceData
-    idata_dict = {key: convert_to_inference_data(idata) for key, idata in idata_dict.items()}
-    numvars = len(idata_dict)
-    models = list(idata_dict.keys())
     pointwise_data = [get_pointwise_as_dataarray(idata_dict[model]) for model in models]
     xdata = np.arange(pointwise_data[0].size)
 
     if isinstance(color, str):
-        if color in pointwise_data[0].dims:
+        if color in pointwise_data[0].coords:
             coord_values = pointwise_data[0][color].values
             unique_coords = set(coord_values)
             color_mapping = {
@@ -107,12 +121,22 @@ def plot_pointwise_elpd(
             colors = [color_mapping[coord] for coord in coord_values]
             if legend:
                 cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
+                markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
                 cmap = getattr(cm, cmap_name)
                 handles = [
-                    Line2D([], [], color=cmap(color_mapping[coord]), label=coord, **plot_kwargs)
+                    Line2D(
+                        [],
+                        [],
+                        color=cmap(color_mapping[coord]),
+                        label=coord,
+                        ms=markersize,
+                        lw=0,
+                        **plot_kwargs
+                    )
                     for coord in unique_coords
                 ]
                 plot_kwargs.setdefault("cmap", cmap_name)
+                plot_kwargs.setdefault("s", markersize ** 2)
             plot_kwargs.setdefault("c", colors)
         else:
             plot_kwargs.setdefault("c", color)
@@ -133,12 +157,13 @@ def plot_pointwise_elpd(
         raise Exception("Number of models to compare must be 2 or greater.")
 
     if numvars == 2:
-        (figsize, ax_labelsize, titlesize, xt_labelsize, _, _) = _scale_fig_size(
+        (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
+        plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+            fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))
 
         ax.scatter(xdata, pointwise_data[0] - pointwise_data[1], **plot_kwargs)
 
@@ -146,19 +171,24 @@ def plot_pointwise_elpd(
         ax.set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
         if xlabels:
-            set_xticklabels(ax, coord_labels)
+            _set_xticklabels(ax, coord_labels)
             fig.autofmt_xdate()
         if legend:
-            ax.legend(handles=handles)
+            ncols = len(handles) // 6 + 1
+            ax.legend(handles=handles, ncol=ncols, bbox_to_anchor=(0, 1), loc="upper left")
 
     else:
-        (figsize, ax_labelsize, titlesize, xt_labelsize, _, _) = _scale_fig_size(
+        (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )
+        plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
             fig, ax = plt.subplots(
-                numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True
+                numvars - 1,
+                numvars - 1,
+                figsize=figsize,
+                constrained_layout=(not xlabels and not legend),
             )
 
         for i in range(0, numvars - 1):
@@ -177,7 +207,7 @@ def plot_pointwise_elpd(
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                     ax[j, i].set_xticks([])
                 elif xlabels:
-                    set_xticklabels(ax[j, i], coord_labels)
+                    _set_xticklabels(ax[j, i], coord_labels)
 
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
@@ -192,11 +222,13 @@ def plot_pointwise_elpd(
         if xlabels:
             fig.autofmt_xdate()
         if legend:
-            ax[0, 1].legend(handles=handles)
+            ncols = len(handles) // 6 + 1
+            ax[0, 1].legend(handles=handles, ncol=ncols, bbox_to_anchor=(0, 1), loc="upper left")
     return ax
 
 
-def set_xticklabels(ax, coord_labels):
+def _set_xticklabels(ax, coord_labels):
+    """Set xticklabels to coordinate labels using Matplotlib default formatter"""
     xlim = ax.get_xlim()
     ax.xaxis.get_major_locator().set_params(nbins=9, steps=[1, 2, 5, 10])
     xticks = ax.get_xticks().astype(np.int64)
