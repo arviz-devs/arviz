@@ -12,7 +12,7 @@ import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
 from .diagnostics import _multichain_statistics, _mc_error, ess
-from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
+from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp, ELPDData
 from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
@@ -360,7 +360,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     Returns
     -------
-    pandas.Series with the following columns:
+    pandas.Series with the following rows:
     loo : approximated Leave-one-out cross-validation
     loo_se : standard error of loo
     p_loo : effective number of parameters
@@ -371,6 +371,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     pareto_k : array of Pareto shape values, only if pointwise True
     loo_scale : scale of the loo results
 
+        The returned object has a custom print method that overrides pd.Series method. It is
+        specific to expected log pointwise predictive density (elpd) information criteria.
+
     Examples
     --------
     Calculate the LOO-CV of a model:
@@ -379,7 +382,15 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: az.loo(data, pointwise=True)
+           ...: az.loo(data)
+
+    The custom print method can be seen here, printing only the relevant information and
+    with a specific organization. ``IC_loo`` stands for information criteria, which is the
+    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+
+    .. ipython::
+
+        In [2]: az.loo(data, pointwise=True, scale="log")
 
     """
     inference_data = convert_to_inference_data(data)
@@ -392,9 +403,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
-    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
-    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    n_samples = np.product(log_likelihood.shape[:2])
+    n_data_points = np.product(log_likelihood.shape[2:])
+    log_likelihood = log_likelihood.values.reshape(n_samples, n_data_points)
 
     if scale.lower() == "deviance":
         scale_value = -2
@@ -440,19 +451,38 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
-                """The point-wise LOO is the same with the sum LOO, please double check
-                          the Observed RV in your model to make sure it returns element-wise logp.
-                          """
+                "The point-wise LOO is the same with the sum LOO, please double check "
+                "the Observed RV in your model to make sure it returns element-wise logp."
             )
-        return pd.Series(
-            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
-            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "pareto_k", "loo_scale"],
+        return ELPDData(
+            data=[
+                loo_lppd,
+                loo_lppd_se,
+                p_loo,
+                n_samples,
+                n_data_points,
+                warn_mg,
+                loo_lppd_i,
+                pareto_shape,
+                scale,
+            ],
+            index=[
+                "loo",
+                "loo_se",
+                "p_loo",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "loo_i",
+                "pareto_k",
+                "loo_scale",
+            ],
         )
 
     else:
-        return pd.Series(
-            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
-            index=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
+        return ELPDData(
+            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
+            index=["loo", "loo_se", "p_loo", "n_samples", "n_data_points", "warning", "loo_scale"],
         )
 
 
@@ -937,7 +967,7 @@ def waic(data, pointwise=False, scale="deviance"):
 
     Returns
     -------
-    DataFrame with the following columns:
+    Series with the following rows:
     waic : widely available information criterion
     waic_se : standard error of waic
     p_waic : effective number parameters
@@ -947,9 +977,12 @@ def waic(data, pointwise=False, scale="deviance"):
     waic_i : and array of the pointwise predictive accuracy, only if pointwise True
     waic_scale : scale of the waic results
 
+        The returned object has a custom print method that overrides pd.Series method. It is
+        specific to expected log pointwise predictive density (elpd) information criteria.
+
     Examples
     --------
-    Calculate the LOO-CV of a model:
+    Calculate the WAIC of a model:
 
     .. ipython::
 
@@ -957,6 +990,9 @@ def waic(data, pointwise=False, scale="deviance"):
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.waic(data, pointwise=True)
 
+    The custom print method can be seen here, printing only the relevant information and
+    with a specific organization. ``IC_loo`` stands for information criteria, which is the
+    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
@@ -977,9 +1013,9 @@ def waic(data, pointwise=False, scale="deviance"):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
-    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    n_samples = np.product(log_likelihood.shape[:2])
+    n_data_points = np.product(log_likelihood.shape[2:])
+    log_likelihood = log_likelihood.values.reshape(n_samples, n_data_points)
 
     lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
 
@@ -1006,12 +1042,29 @@ def waic(data, pointwise=False, scale="deviance"):
             the Observed RV in your model to make sure it returns element-wise logp.
             """
             )
-        return pd.Series(
-            data=[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale],
-            index=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
+        return ELPDData(
+            data=[waic_sum, waic_se, p_waic, n_samples, n_data_points, warn_mg, waic_i, scale],
+            index=[
+                "waic",
+                "waic_se",
+                "p_waic",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "waic_i",
+                "waic_scale",
+            ],
         )
     else:
-        return pd.Series(
-            data=[waic_sum, waic_se, p_waic, warn_mg, scale],
-            index=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
+        return ELPDData(
+            data=[waic_sum, waic_se, p_waic, n_samples, n_data_points, warn_mg, scale],
+            index=[
+                "waic",
+                "waic_se",
+                "p_waic",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "waic_scale",
+            ],
         )

@@ -4,6 +4,7 @@ import logging
 import warnings
 
 import numpy as np
+import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
@@ -363,3 +364,45 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
             _log.warning(error_msg)
 
     return nan_error | chain_error | draw_error
+
+
+base_fmt = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
+
+{{0:{0}}} Estimate       SE
+{{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
+p_{{kind:{1}}} {{3:8.2f}}        -"""
+pointwise_loo_fmt = """------
+
+Pareto k diagnostic values:
+                         {{0:>{0}}} {{1:>6}}
+(-Inf, 0.5]   (good)     {{2:{0}d}} {{6:6.1f}}%
+ (0.5, 0.7]   (ok)       {{3:{0}d}} {{7:6.1f}}%
+   (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
+   (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
+"""
+scale_dict = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
+
+class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
+    def __str__(self):
+        kind = self.index[0]
+
+        if kind not in ("waic", "loo"):
+            raise ValueError("Invalid ELPDData object")
+
+        scale_str = scale_dict[self["{}_scale".format(kind)]]
+        padding = len(scale_str)+len(kind)+1
+        base = base_fmt.format(padding, padding-2)
+        base = base.format("", kind=kind, scale=scale_str, n_samples=self.n_samples, n_points=self.n_data_points, *self.values)
+
+        if self.warning:
+            base += "\n\nThere has been a warning during the calculation. Please check the results."
+
+        if kind == "loo" and  "pareto_k" in self:
+            counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, .5, .7, 1, np.inf])
+            extended = pointwise_loo_fmt.format(max(4, len(str(np.max(counts)))))
+            extended = extended.format("Count", "Pct.", *[*counts, *(counts/np.sum(counts)*100)])
+            base = "\n".join([base, extended])
+        return base
+
+    def __repr__(self):
+        return self.__str__()
