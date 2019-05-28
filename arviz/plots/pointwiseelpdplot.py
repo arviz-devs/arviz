@@ -55,6 +55,7 @@ def plot_pointwise_elpd(
         scale argument passed to az.waic or az.loo, see their docs for details
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot
+
     Returns
     -------
     ax : matplotlib axes
@@ -66,13 +67,13 @@ def plot_pointwise_elpd(
     .. plot::
         :context: close-figs
 
-        In [1]: import arviz as az
-           ...: idata1 = az.load_arviz_data("centered_eight")
-           ...: idata2 = az.load_arviz_data("non_centered_eight")
-           ...: az.plot_pointwise_elpd(
-           ...:     {"centered model": idata1, "non centered model": idata2},
-           ...:     xlabels=True
-           ...: )
+        >>> import arviz as az
+        >>> idata1 = az.load_arviz_data("centered_eight")
+        >>> idata2 = az.load_arviz_data("non_centered_eight")
+        >>> az.plot_pointwise_elpd(
+        >>>     {"centered model": idata1, "non centered model": idata2},
+        >>>     xlabels=True
+        >>> )
 
     """
     valid_ics = ["waic", "loo"]
@@ -228,7 +229,7 @@ def plot_pointwise_elpd(
 
 
 def _set_xticklabels(ax, coord_labels):
-    """Set xticklabels to coordinate labels using Matplotlib default formatter"""
+    """Set xticklabels to coordinate labels using Matplotlib default formatter."""
     xlim = ax.get_xlim()
     ax.xaxis.get_major_locator().set_params(nbins=9, steps=[1, 2, 5, 10])
     xticks = ax.get_xticks().astype(np.int64)
