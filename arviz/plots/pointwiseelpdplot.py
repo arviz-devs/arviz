@@ -127,7 +127,9 @@ def plot_pointwise_elpd(
         )
 
         if ax is None:
-            fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True)
+            fig, ax = plt.subplots(
+                numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True
+            )
 
         for i in range(0, numvars - 1):
             var1 = pointwise_data[i]
@@ -154,7 +156,9 @@ def plot_pointwise_elpd(
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title("{} - {}".format(models[i], models[j+1]), fontsize=titlesize, wrap=True)
+                ax[j, i].set_title(
+                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
+                )
         if xlabels:
             fig.autofmt_xdate()
 
