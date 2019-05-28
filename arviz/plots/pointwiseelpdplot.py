@@ -2,8 +2,9 @@
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from matplotlib.ticker import NullFormatter
-import matplotlib.ticker as mticker
+from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
 from .plot_utils import _scale_fig_size
@@ -18,6 +19,7 @@ def plot_pointwise_elpd(
     figsize=None,
     textsize=None,
     coords=None,
+    legend=False,
     ax=None,
     scale="deviance",
     plot_kwargs=None,
@@ -45,6 +47,8 @@ def plot_pointwise_elpd(
     coords : mapping, optional
         Coordinates of points to plot. **All** values are used for computation, but only a
         a subset can be plotted for convenience.
+    legend : bool, optional
+        Include a legend to the plot. Only taken into account when color argument is a dim name.
     ax: axes, optional
         Matplotlib axes
     scale : str, optional
@@ -73,7 +77,6 @@ def plot_pointwise_elpd(
     if plot_kwargs is None:
         plot_kwargs = {}
         plot_kwargs.setdefault("marker", ".")
-        # plot_kwargs.setdefault("lw", 0)
 
     def get_pointwise_as_dataarray(idata, coords=coords, ic=ic, scale=scale):
         if ic == "waic":
@@ -93,6 +96,31 @@ def plot_pointwise_elpd(
     models = list(idata_dict.keys())
     pointwise_data = [get_pointwise_as_dataarray(idata_dict[model]) for model in models]
     xdata = np.arange(pointwise_data[0].size)
+
+    if isinstance(color, str):
+        if color in pointwise_data[0].dims:
+            coord_values = pointwise_data[0][color].values
+            unique_coords = set(coord_values)
+            color_mapping = {
+                coord: num / len(unique_coords) for num, coord in enumerate(unique_coords)
+            }
+            colors = [color_mapping[coord] for coord in coord_values]
+            if legend:
+                cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
+                cmap = getattr(cm, cmap_name)
+                handles = [
+                    Line2D([], [], color=cmap(color_mapping[coord]), label=coord, **plot_kwargs)
+                    for coord in unique_coords
+                ]
+                plot_kwargs.setdefault("cmap", cmap_name)
+            plot_kwargs.setdefault("c", colors)
+        else:
+            plot_kwargs.setdefault("c", color)
+            legend = False
+    else:
+        legend = False
+        plot_kwargs.setdefault("c", color)
+
     if xlabels:
         coord_labels = pointwise_data[0].coords.to_index().values
         if isinstance(coord_labels[0], tuple):
@@ -120,6 +148,8 @@ def plot_pointwise_elpd(
         if xlabels:
             set_xticklabels(ax, coord_labels)
             fig.autofmt_xdate()
+        if legend:
+            ax.legend(handles=handles)
 
     else:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, _) = _scale_fig_size(
@@ -161,7 +191,8 @@ def plot_pointwise_elpd(
                 )
         if xlabels:
             fig.autofmt_xdate()
-
+        if legend:
+            ax[0, 1].legend(handles=handles)
     return ax
 
 
