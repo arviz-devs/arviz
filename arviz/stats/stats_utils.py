@@ -382,6 +382,7 @@ Pareto k diagnostic values:
 """
 scale_dict = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
 
+
 class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
     def __str__(self):
         kind = self.index[0]
@@ -390,17 +391,26 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             raise ValueError("Invalid ELPDData object")
 
         scale_str = scale_dict[self["{}_scale".format(kind)]]
-        padding = len(scale_str)+len(kind)+1
-        base = base_fmt.format(padding, padding-2)
-        base = base.format("", kind=kind, scale=scale_str, n_samples=self.n_samples, n_points=self.n_data_points, *self.values)
+        padding = len(scale_str) + len(kind) + 1
+        base = base_fmt.format(padding, padding - 2)
+        base = base.format(
+            "",
+            kind=kind,
+            scale=scale_str,
+            n_samples=self.n_samples,
+            n_points=self.n_data_points,
+            *self.values
+        )
 
         if self.warning:
             base += "\n\nThere has been a warning during the calculation. Please check the results."
 
-        if kind == "loo" and  "pareto_k" in self:
-            counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, .5, .7, 1, np.inf])
+        if kind == "loo" and "pareto_k" in self:
+            counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, 0.5, 0.7, 1, np.inf])
             extended = pointwise_loo_fmt.format(max(4, len(str(np.max(counts)))))
-            extended = extended.format("Count", "Pct.", *[*counts, *(counts/np.sum(counts)*100)])
+            extended = extended.format(
+                "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
+            )
             base = "\n".join([base, extended])
         return base
 
