@@ -114,6 +114,8 @@ class PyMC3Converter:
             dims = self.dims
         observed_data = {}
         for name, vals in observations.items():
+            if hasattr(vals, "get_value"):
+                vals = vals.get_value()
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
             val_dims, coords = generate_dims_coords(
