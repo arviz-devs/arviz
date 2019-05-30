@@ -1,4 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
+import warnings
 from itertools import cycle
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -136,6 +137,14 @@ def plot_trace(
         skip_dims = set()
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        plotters = plotters[:max_plots]
+        warnings.warn(
+            "max_plots is smaller than the number of variables to plot "
+            "generating only max_plots traceplots",
+            SyntaxWarning,
+        )
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)
@@ -166,7 +175,8 @@ def plot_trace(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
-    for idx, (var_name, selection, value) in zip(range(max_plots), plotters):
+
+    for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
