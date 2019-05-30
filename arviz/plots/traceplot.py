@@ -1,5 +1,8 @@
 """Plot kde or histograms and values from MCMC samples."""
+import warnings
+from itertools import cycle
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 from ..data import convert_to_dataset
@@ -16,12 +19,15 @@ def plot_trace(
     figsize=None,
     textsize=None,
     lines=None,
+    compact=False,
     combined=False,
+    legend=False,
     plot_kwargs=None,
     fill_kwargs=None,
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
+    max_plots=40,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -47,9 +53,13 @@ def plot_trace(
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
+    compact : bool
+        Plot multidimensional variables in a single plot.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
+    legend : bool
+        Add a legend to the figure with the chain color code.
     plot_kwargs : dict
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     fill_kwargs : dict
@@ -77,7 +87,14 @@ def plot_trace(
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
 
-    Combine all chains into one distribution and trace
+    Show all dimensions of multidimensional variables in the same plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_trace(data, compact=True)
+
+    Combine all chains into one distribution
 
     .. plot::
         :context: close-figs
@@ -94,6 +111,7 @@ def plot_trace(
         >>> lines = (('theta_t',{'theta_t_dim_0':0}, [-1]),)
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
+
     """
     if divergences:
         try:
@@ -101,16 +119,42 @@ def plot_trace(
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
             divergences = False
 
-    data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, data)
-
     if coords is None:
         coords = {}
+
+    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+    var_names = _var_names(var_names, data)
+
+    if divergences:
+        divergence_data = get_coords(
+            divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
+        )
 
     if lines is None:
         lines = ()
 
-    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
+    num_colors = len(data.chain) + 1 if combined else len(data.chain)
+    colors = [
+        prop
+        for _, prop in zip(
+            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        )
+    ]
+
+    if compact:
+        skip_dims = set(data.dims) - {"chain", "draw"}
+    else:
+        skip_dims = set()
+
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        plotters = plotters[:max_plots]
+        warnings.warn(
+            "max_plots is smaller than the number of variables to plot "
+            "generating only max_plots traceplots",
+            SyntaxWarning,
+        )
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)
@@ -141,27 +185,41 @@ def plot_trace(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
-    colors = {}
     for idx, (var_name, selection, value) in enumerate(plotters):
-        colors[idx] = []
-        if combined:
-            value = value.flatten()
         value = np.atleast_2d(value)
 
-        for row in value:
-            axes[idx, 1].plot(np.arange(len(row)), row, **trace_kwargs)
-
-            colors[idx].append(axes[idx, 1].get_lines()[-1].get_color())
-            plot_kwargs["color"] = colors[idx][-1]
-            plot_dist(
-                row,
-                textsize=xt_labelsize,
-                ax=axes[idx, 0],
-                hist_kwargs=hist_kwargs,
-                plot_kwargs=plot_kwargs,
-                fill_kwargs=fill_kwargs,
-                rug_kwargs=rug_kwargs,
+        if len(value.shape) == 2:
+            _plot_chains(
+                axes,
+                idx,
+                value,
+                data,
+                colors,
+                combined,
+                xt_labelsize,
+                trace_kwargs,
+                hist_kwargs,
+                plot_kwargs,
+                fill_kwargs,
+                rug_kwargs,
             )
+        else:
+            value = value.reshape((value.shape[0], value.shape[1], -1))
+            for sub_idx in range(value.shape[2]):
+                _plot_chains(
+                    axes,
+                    idx,
+                    value[..., sub_idx],
+                    data,
+                    colors,
+                    combined,
+                    xt_labelsize,
+                    trace_kwargs,
+                    hist_kwargs,
+                    plot_kwargs,
+                    fill_kwargs,
+                    rug_kwargs,
+                )
 
         if value[0].dtype.kind == "i":
             xticks = get_bins(value)
@@ -177,11 +235,12 @@ def plot_trace(
         if divergences:
             div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
             divs = divergence_data.sel(**div_selection).values
-            if combined:
-                divs = divs.flatten()
+            # if combined:
+            #     divs = divs.flatten()
             divs = np.atleast_2d(divs)
 
             for chain, chain_divs in enumerate(divs):
+                div_draws = data.draw.values[chain_divs]
                 div_idxs = np.arange(len(chain_divs))[chain_divs]
                 if div_idxs.size > 0:
                     if divergences == "top":
@@ -190,7 +249,7 @@ def plot_trace(
                         ylocs = [ylim[0] for ylim in ylims]
                     values = value[chain, div_idxs]
                     axes[idx, 1].plot(
-                        div_idxs,
+                        div_draws,
                         np.zeros_like(div_idxs) + ylocs[1],
                         marker="|",
                         color="black",
@@ -219,24 +278,61 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-            axes[idx, 0].vlines(
-                line_values, *ylims[0], colors=colors[idx][0], linewidth=1.5, alpha=0.75
-            )
+            axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
             axes[idx, 1].hlines(
-                line_values,
-                *xlims[1],
-                colors=colors[idx][0],
-                linewidth=1.5,
-                alpha=trace_kwargs["alpha"]
+                line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
             )
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
-        axes[idx, 1].set_xlim(left=0, right=data.draw.max())
+        axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
+    if legend:
+        handles = [
+            Line2D([], [], color=color, label=chain_id)
+            for chain_id, color in zip(data.chain.values, colors)
+        ]
+        if combined:
+            handles.insert(0, Line2D([], [], color=colors[-1], label="combined"))
+        axes[0, 1].legend(handles=handles, title="chain")
     return axes
 
 
-def _histplot_op(ax, data, **kwargs):
-    """Add a histogram for the data to the axes."""
-    bins = get_bins(data)
-    ax.hist(data, bins=bins, align="left", density=True, **kwargs)
-    return ax
+def _plot_chains(
+    axes,
+    idx,
+    value,
+    data,
+    colors,
+    combined,
+    xt_labelsize,
+    trace_kwargs,
+    hist_kwargs,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+):
+    for chain_idx, row in enumerate(value):
+        axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
+
+        if not combined:
+            plot_kwargs["color"] = colors[chain_idx]
+            plot_dist(
+                row,
+                textsize=xt_labelsize,
+                ax=axes[idx, 0],
+                hist_kwargs=hist_kwargs,
+                plot_kwargs=plot_kwargs,
+                fill_kwargs=fill_kwargs,
+                rug_kwargs=rug_kwargs,
+            )
+
+    if combined:
+        plot_kwargs["color"] = colors[-1]
+        plot_dist(
+            value.flatten(),
+            textsize=xt_labelsize,
+            ax=axes[idx, 0],
+            hist_kwargs=hist_kwargs,
+            plot_kwargs=plot_kwargs,
+            fill_kwargs=fill_kwargs,
+            rug_kwargs=rug_kwargs,
+        )
