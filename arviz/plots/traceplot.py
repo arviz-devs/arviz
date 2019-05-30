@@ -175,7 +175,6 @@ def plot_trace(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
-
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 

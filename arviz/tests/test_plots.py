@@ -139,6 +139,8 @@ def test_plot_density_bad_kwargs(models):
         {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
         {"combined": True},
+        {"compact": True},
+        {"combined": True, "compact": True, "legend": True},
         {"divergences": "top"},
         {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
@@ -158,6 +160,12 @@ def test_plot_trace_emcee(models):
 
 def test_plot_trace_discrete(discrete_model):
     axes = plot_trace(discrete_model)
+    assert axes.shape
+
+
+def test_plot_trace_max_plots_warning(models):
+    with pytest.warns(SyntaxWarning):
+        axes = plot_trace(models.pymc3_fit, max_plots=1)
     assert axes.shape
 
 
