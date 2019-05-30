@@ -87,7 +87,14 @@ def plot_trace(
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
 
-    Combine all chains into one distribution and trace
+    Show all dimensions of multidimensional variables in the same plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_trace(data, compact=True)
+
+    Combine all chains into one distribution
 
     .. plot::
         :context: close-figs
@@ -104,6 +111,7 @@ def plot_trace(
         >>> lines = (('theta_t',{'theta_t_dim_0':0}, [-1]),)
         >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
+
     """
     if divergences:
         try:
@@ -118,7 +126,9 @@ def plot_trace(
     var_names = _var_names(var_names, data)
 
     if divergences:
-        divergence_data = get_coords(divergence_data, coords)
+        divergence_data = get_coords(
+            divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
+        )
 
     if lines is None:
         lines = ()
