@@ -296,13 +296,6 @@ def plot_trace(
     return axes
 
 
-def _histplot_op(ax, data, **kwargs):
-    """Add a histogram for the data to the axes."""
-    bins = get_bins(data)
-    ax.hist(data, bins=bins, align="left", density=True, **kwargs)
-    return ax
-
-
 def _plot_chains(
     axes,
     idx,
