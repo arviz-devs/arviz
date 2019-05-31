@@ -21,15 +21,10 @@ steps:
   displayName: 'Pull Docker Image'
 
 - script: |
-    # Build docker image
-   ./scripts/container.sh --build
-   
-   # Print conda details
-   docker run --rm arviz:latest bash -c "conda info -a"
-  
-   # Print conda environment details
-   docker run --rm arviz:latest bash -c "conda list && pip freeze"
-  displayName: 'Build Docker Container'
+    . ./scripts/container.sh --build
+    docker run --rm arviz:latest bash -c "conda info -a"
+    docker run --rm arviz:latest bash -c "conda list && pip freeze"
+  displayName: 'Run a multi-line script'
 
 - script: |
     echo Add other tasks to build, test, and deploy your project.
