@@ -37,6 +37,7 @@ jobs:
         PYRO_VERSION: "latest"
         EMCEE_VERSION: 2
         NAME: "LINT"
+
   steps:
   - script: |
       docker pull conda/miniconda3
@@ -61,6 +62,16 @@ jobs:
         fi
     displayName: 'Test ArviZ'
     
+  - script: |
+     if [[ $NAME == LINT ]]; then docker run arviz:latest bash -c "./scripts/lint.sh";
+        fi
+        
+     # Tests saving plots and deleting files
+     if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+    "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
+        fi
+    displayName: 'Lint ArviZ'
+
   - script: |
       echo Add other tasks to build, test, and deploy your project.
       echo See https://aka.ms/yaml
