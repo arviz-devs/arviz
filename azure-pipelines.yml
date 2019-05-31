@@ -9,29 +9,36 @@ pr:
 pool:
   vmImage: 'ubuntu-latest'
 
-strategy:
-  matrix:
-    Python_36_Unit_Test":
-      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+jobs: 
+- job: build
+  strategy:
+    matrix:
+      Python_36_Unit_Test":
+        env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
 
-steps:
-- script: |
-    docker pull conda/miniconda3
-    docker --version
-  displayName: 'Pull Docker Image'
+  steps:
+  - script: |
+      docker pull conda/miniconda3
+      docker --version
+    displayName: 'Pull Docker Image'
 
-- script: |
-    # Build docker image
-    . ./scripts/container.sh --build
+  - script: |
+      # Build docker image
+      . ./scripts/container.sh --build
 
-    # Print conda details
-    docker run --rm arviz:latest bash -c "conda info -a"
+      # Print conda details
+      docker run --rm arviz:latest bash -c "conda info -a"
 
-    # Print conda environment details
-    docker run --rm arviz:latest bash -c "conda list && pip freeze"
-  displayName: 'Build Docker Container'
+      # Print conda environment details
+      docker run --rm arviz:latest bash -c "conda list && pip freeze"
+    displayName: 'Build Docker Container'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line script'
+    
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line script'
