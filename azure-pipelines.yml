@@ -19,7 +19,12 @@ jobs:
         PYRO_VERSION: "latest"
         EMCEE_VERSION: 2
         NAME: "UNIT"
-
+      Python_36_Unit_Test_PyStan_3_Pyro_0.2.1_Emcee_3:
+        PYTHON_VERSION: 3.6
+        PYSTAN_VERSION: preview
+        PYRO_VERSION: 0.2.1
+        EMCEE_VERSION: 3
+        NAME: UNIT
   steps:
   - script: |
       echo $NAME
