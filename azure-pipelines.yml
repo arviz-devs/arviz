@@ -63,12 +63,14 @@ jobs:
     displayName: 'Test ArviZ'
     
   - script: |
-     if [[ $NAME == LINT ]]; then docker run arviz:latest bash -c "./scripts/lint.sh";
+      if [[ $NAME == LINT ]]; 
+      then docker run arviz:latest bash -c "./scripts/lint.sh";
         fi
         
      # Tests saving plots and deleting files
-     if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-    "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
+      if [[ $NAME == LINT ]]; 
+      then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+      "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
         fi
     displayName: 'Lint ArviZ'
 
