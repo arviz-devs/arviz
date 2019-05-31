@@ -29,6 +29,7 @@ steps:
   
    # Print conda environment details
    docker run --rm arviz:latest bash -c "conda list && pip freeze"
+  displayName: 'Build Docker Container'
 
 - script: |
     echo Add other tasks to build, test, and deploy your project.
