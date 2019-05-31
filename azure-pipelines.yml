@@ -34,9 +34,11 @@ jobs:
     displayName: 'Build Docker Container'
 
   - script: |
-      echo Add other tasks to build, test, and deploy your project.
-      echo See https://aka.ms/yaml
-    displayName: 'Run a multi-line script'
+      if [[ $NAME == UNIT ]]; 
+      then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
+      "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
+        fi
+    displayName: 'Test ArviZ'
     
   - script: |
       echo Add other tasks to build, test, and deploy your project.
