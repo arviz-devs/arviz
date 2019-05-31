@@ -21,14 +21,24 @@ jobs:
         NAME: "UNIT"
       Python_36_Unit_Test_PyStan_3_Pyro_0.2.1_Emcee_3:
         PYTHON_VERSION: 3.6
-        PYSTAN_VERSION: preview
+        PYSTAN_VERSION: "preview"
         PYRO_VERSION: 0.2.1
         EMCEE_VERSION: 3
-        NAME: UNIT
+        NAME: "UNIT"
+      Python_35_Unit_Test:
+        PYTHON_VERSION: 3.5
+        PYSTAN_VERSION: "latest"
+        PYRO_VERSION: "latest"
+        EMCEE_VERSION: 2
+        NAME: "UNIT"
+      Python_36_Lint:
+        PYTHON_VERSION: 3.6
+        PYSTAN_VERSION: "latest"
+        PYRO_VERSION: "latest"
+        EMCEE_VERSION: 2
+        NAME: "LINT"
   steps:
   - script: |
-      echo $NAME
-      echo $EMCEE_VERSION
       docker pull conda/miniconda3
       docker --version
     displayName: 'Pull Docker Image'
