@@ -18,7 +18,10 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
 )
-from ..utils import _var_names
+from ..utils import _var_names,conditional_jit
+from numba import njit
+
+>>>>>>> Pushing
 
 _log = logging.getLogger(__name__)
 
@@ -212,7 +215,7 @@ def compare(
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
-            u_weights = np.exp((z_b - np.min(z_b)) / scale_value)
+            u_weights = _zb_weights(z_b, scale_value)
             z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
@@ -249,6 +252,10 @@ def compare(
             )
 
     return df_comp.sort_values(by=ic, ascending=ascending)
+
+@conditional_jit
+def _zb_weights(zb, scale_value):
+    return np.exp((zb-np.min(zb))/scale_value)
 
 
 def _ic_matrix(ics, ic_i):

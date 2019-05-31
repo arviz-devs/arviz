@@ -61,3 +61,6 @@ target/
 .idea/
 
 saved_animations/
+
+#notebooks
+Untitled.ipynb
