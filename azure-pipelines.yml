@@ -6,11 +6,11 @@
 pr:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
 
 jobs: 
 - job: build
+  pool:
+    vmImage: 'ubuntu-latest'
   strategy:
     matrix:
       Python_36_Unit_Test":
