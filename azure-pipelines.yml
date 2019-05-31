@@ -13,11 +13,17 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      Python_36_Unit_Test":
-        env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+      Python_36_Unit_Test:
+        PYTHON_VERSION: 3.6
+        PYSTAN_VERSION: "latest"
+        PYRO_VERSION: "latest"
+        EMCEE_VERSION: 2
+        NAME: "UNIT"
 
   steps:
   - script: |
+      echo $NAME
+      echo $EMCEE_VERSION
       docker pull conda/miniconda3
       docker --version
     displayName: 'Pull Docker Image'
