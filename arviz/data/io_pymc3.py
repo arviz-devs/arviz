@@ -52,7 +52,7 @@ class PyMC3Converter:
 
         chain_likelihoods = []
         for chain in self.trace.chains:
-            log_like = (log_likelihood_vals_point(point) for point in self.trace.points([chain]))
+            log_like = [log_likelihood_vals_point(point) for point in self.trace.points([chain])]
             chain_likelihoods.append(np.stack(log_like))
         return np.stack(chain_likelihoods), coord_name
 
