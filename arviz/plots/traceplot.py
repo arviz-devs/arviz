@@ -39,8 +39,8 @@ def plot_trace(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
-        Variables to be plotted, two variables are required.
+    var_names : string, or list of strings
+        One or more variables to be plotted.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
