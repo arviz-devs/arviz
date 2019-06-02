@@ -2,7 +2,6 @@
 pr:
 - master
 
-
 jobs: 
 - job: build
   pool:
@@ -57,7 +56,6 @@ jobs:
       "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --junitxml=junit/test-results.xml --cov=arviz/ --cov-report=xml --cov-report=html";
         fi
     displayName: 'Test ArviZ'
-    
 
   - script: |
       if [[ $NAME == LINT ]]; 
@@ -76,11 +74,6 @@ jobs:
       sed -i '6s/\/opt\/arviz/\/home\/vsts\/work\/1\/s/' coverage.xml;
        fi
     displayName: 'Coverage path adjustment'
-
-  - script: |
-      pwd
-      ls -la
-    displayName: 'Debug CI'
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()
