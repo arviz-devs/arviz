@@ -72,6 +72,7 @@ jobs:
     displayName: 'Lint ArviZ'
 
   - script: |
+      pwd
       ls -la
     displayName: 'Debug CI'
 
