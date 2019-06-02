@@ -366,12 +366,12 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
     return nan_error | chain_error | draw_error
 
 
-base_fmt = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
+BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
 
 {{0:{0}}} Estimate       SE
 {{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
 p_{{kind:{1}}} {{3:8.2f}}        -"""
-pointwise_loo_fmt = """------
+POINTWISE_LOO_FMT = """------
 
 Pareto k diagnostic values:
                          {{0:>{0}}} {{1:>6}}
@@ -380,7 +380,7 @@ Pareto k diagnostic values:
    (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
-scale_dict = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
+SCALE_DICT = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
 
 
 class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
@@ -390,9 +390,9 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         if kind not in ("waic", "loo"):
             raise ValueError("Invalid ELPDData object")
 
-        scale_str = scale_dict[self["{}_scale".format(kind)]]
+        scale_str = SCALE_DICT[self["{}_scale".format(kind)]]
         padding = len(scale_str) + len(kind) + 1
-        base = base_fmt.format(padding, padding - 2)
+        base = BASE_FMT.format(padding, padding - 2)
         base = base.format(
             "",
             kind=kind,
@@ -407,7 +407,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
 
         if kind == "loo" and "pareto_k" in self:
             counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, 0.5, 0.7, 1, np.inf])
-            extended = pointwise_loo_fmt.format(max(4, len(str(np.max(counts)))))
+            extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
             )
