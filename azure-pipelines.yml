@@ -73,8 +73,7 @@ jobs:
 
   - script: |
       if [[ $NAME == LINT || $NAME == UNIT ]];
-
-      sed -i '6s/\/opt\/arviz/\/home\/vsts\/work\/1\/s\/arviz/' coverage.xml
+      sed -i '6s/\/opt\/arviz/\/home\/vsts\/work\/1\/s\/arviz/' coverage.xml;
         fi
     displayName: 'Coverage path adjustment'
 
