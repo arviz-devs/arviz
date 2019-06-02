@@ -54,7 +54,7 @@ jobs:
   - script: |
       if [[ $NAME == UNIT ]]; 
       then docker run -t  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-      "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
+      "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html";
         fi
     displayName: 'Test ArviZ'
     
@@ -67,7 +67,12 @@ jobs:
       # Tests saving plots and deleting files
       if [[ $NAME == LINT ]]; 
       then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-      "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
+      "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html";
         fi
     displayName: 'Lint ArviZ'
 
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
