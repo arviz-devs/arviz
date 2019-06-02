@@ -72,6 +72,13 @@ jobs:
     displayName: 'Lint ArviZ'
 
   - script: |
+      if [[ $NAME == LINT || $NAME == UNIT ]];
+
+      sed -i '6s/\/opt\/arviz/\/home\/vsts\/work\/1\/s\/arviz/' coverage.xml
+        fi
+    displayName: 'Coverage path adjustment'
+
+  - script: |
       pwd
       ls -la
     displayName: 'Debug CI'
