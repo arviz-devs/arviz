@@ -103,9 +103,12 @@ def plot_elpd(
         else:
             pointwise_elpd = loo(idata, pointwise=True, scale=scale).loo_i
         like_dataarray = idata.sample_stats.log_likelihood
+        _, _, *shape = like_dataarray.shape
         dims = [dim for dim in like_dataarray.dims if dim not in ["chain", "draw"]]
         present_coords = {dim: like_dataarray.coords.indexes[dim] for dim in dims}
-        elpd_dataarray = xr.DataArray(pointwise_elpd, dims=dims, coords=present_coords)
+        elpd_dataarray = xr.DataArray(
+            pointwise_elpd.reshape(shape), dims=dims, coords=present_coords
+        )
         elpd_dataarray = elpd_dataarray.sel(**coords)
         return elpd_dataarray
 
@@ -113,13 +116,19 @@ def plot_elpd(
     xdata = np.arange(pointwise_data[0].size)
 
     if isinstance(color, str):
-        if color in pointwise_data[0].coords:
+        present_dims = pointwise_data[0].dims
+        if color in present_dims:
             coord_values = pointwise_data[0][color].values
             unique_coords = set(coord_values)
             color_mapping = {
                 coord: num / len(unique_coords) for num, coord in enumerate(unique_coords)
             }
-            colors = [color_mapping[coord] for coord in coord_values]
+            if len(present_dims) > 1:
+                multi_coords = pointwise_data[0].coords.to_index()
+                coord_idx = present_dims.index(color)
+                colors = [color_mapping[coord[coord_idx]] for coord in multi_coords]
+            else:
+                colors = [color_mapping[coord] for coord in coord_values]
             if legend:
                 cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
                 markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
@@ -176,7 +185,7 @@ def plot_elpd(
             fig.autofmt_xdate()
         if legend:
             ncols = len(handles) // 6 + 1
-            ax.legend(handles=handles, ncol=ncols, bbox_to_anchor=(0, 1), loc="upper left")
+            ax.legend(handles=handles, ncol=ncols, title=color)
 
     else:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
@@ -224,7 +233,9 @@ def plot_elpd(
             fig.autofmt_xdate()
         if legend:
             ncols = len(handles) // 6 + 1
-            ax[0, 1].legend(handles=handles, ncol=ncols, bbox_to_anchor=(0, 1), loc="upper left")
+            ax[0, 1].legend(
+                handles=handles, ncol=ncols, title=color, bbox_to_anchor=(0, 1), loc="upper left"
+            )
     return ax
 
 
