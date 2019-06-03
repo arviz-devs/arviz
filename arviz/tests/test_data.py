@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ma
 import pymc3 as pm
 import pytest
+import emcee
 
 from arviz import (
     concat,
@@ -250,6 +251,36 @@ def test_concat_bad():
         concat(idata, np.array([1, 2, 3, 4, 5]))
     with pytest.raises(NotImplementedError):
         concat(idata, idata)
+
+
+@pytest.mark.parametrize("inplace", [True, False])
+def test_sel_method(inplace):
+    data = np.random.normal(size=(4, 500, 8))
+    idata = from_dict(
+        posterior={"a": data[..., 0], "b": data},
+        sample_stats={"a": data[..., 0], "b": data},
+        observed_data={"b": data[0, 0, :]},
+        posterior_predictive={"a": data[..., 0], "b": data},
+    )
+    original_groups = getattr(idata, "_groups")
+    ndraws = idata.posterior.draw.values.size
+    kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
+    if inplace:
+        idata.sel(inplace=inplace, **kwargs)
+    else:
+        idata2 = idata.sel(inplace=inplace, **kwargs)
+        assert idata2 is not idata
+        idata = idata2
+    groups = getattr(idata, "_groups")
+    assert np.all(np.isin(groups, original_groups))
+    for group in groups:
+        dataset = getattr(idata, group)
+        assert "b_dim_0" in dataset.dims
+        assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
+        if group != "observed_data":
+            assert np.all(np.isin(["chain", "draw"], dataset.dims))
+            assert np.all(dataset.chain.values == np.arange(0, 4, 2))
+            assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
 
 class TestNumpyToDataArray:
@@ -574,6 +605,41 @@ class TestDictIONetCDFUtils:
 
 
 class TestEmceeNetCDFUtils:
+    arg_list = [
+        ({}, {"posterior": ["var_0", "var_1", "var_7"], "observed_data": ["arg_0", "arg_1"]}),
+        (
+            {"var_names": ["mu", "tau", "eta"], "slices": [0, 1, slice(2, None)]},
+            {"posterior": ["mu", "tau", "eta"], "observed_data": ["arg_0", "arg_1"]},
+        ),
+        (
+            {
+                "blob_names": ["log_likelihood", "y"],
+                "blob_groups": ["sample_stats", "posterior_predictive"],
+            },
+            {
+                "posterior": ["var_0", "var_1", "var_7"],
+                "observed_data": ["arg_0", "arg_1"],
+                "sample_stats": ["log_likelihood"],
+                "posterior_predictive": ["y"],
+            },
+        ),
+        (
+            {
+                "blob_names": ["log_likelihood", "y"],
+                "dims": {"eta": ["school"], "log_likelihood": ["school"], "y": ["school"]},
+                "var_names": ["mu", "tau", "eta"],
+                "slices": [0, 1, slice(2, None)],
+                "arg_names": ["y", "sigma"],
+                "coords": {"school": range(8)},
+            },
+            {
+                "posterior": ["mu", "tau", "eta"],
+                "observed_data": ["y", "sigma"],
+                "sample_stats": ["log_likelihood", "y"],
+            },
+        ),
+    ]
+
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
         class Data:
@@ -583,10 +649,7 @@ class TestEmceeNetCDFUtils:
 
         return Data
 
-    def get_inference_data(self, data):
-        return from_emcee(data.obj, var_names=["ln(f)", "b", "m"])
-
-    def get_inference_data_reader(self):
+    def get_inference_data_reader(self, **kwargs):
         from emcee import backends  # pylint: disable=no-name-in-module
 
         here = os.path.dirname(os.path.abspath(__file__))
@@ -595,18 +658,22 @@ class TestEmceeNetCDFUtils:
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath)
         reader = backends.HDFBackend(filepath, read_only=True)
-        return from_emcee(reader, var_names=["ln(f)", "b", "m"])
+        return from_emcee(reader, **kwargs)
 
-    def test_inference_data(self, data):
-        inference_data = self.get_inference_data(data)
-        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+    @pytest.mark.parametrize("test_args", arg_list)
+    def test_inference_data(self, data, test_args):
+        kwargs, test_dict = test_args
+        inference_data = from_emcee(data.obj, **kwargs)
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
     @needs_emcee3
-    def test_inference_data_reader(self):
-        inference_data = self.get_inference_data_reader()
-        test_dict = {"posterior": ["ln(f)", "b", "m"]}
+    @pytest.mark.parametrize("test_args", arg_list)
+    def test_inference_data_reader(self, test_args):
+        kwargs, test_dict = test_args
+        kwargs = {k: i for k, i in kwargs.items() if k != "arg_names"}
+        inference_data = self.get_inference_data_reader(**kwargs)
+        test_dict.pop("observed_data")
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -616,12 +683,48 @@ class TestEmceeNetCDFUtils:
 
     def test_verify_arg_names(self, data):
         with pytest.raises(ValueError):
-            from_emcee(data.obj, arg_names=["not", "enough"])
+            from_emcee(data.obj, arg_names=["not enough"])
+
+    @pytest.mark.parametrize("slices", [[0, 0, slice(2, None)], [0, 1, slice(1, None)]])
+    def test_slices_warning(self, data, slices):
+        with pytest.warns(SyntaxWarning):
+            from_emcee(data.obj, slices=slices)
+
+    def test_no_blobs_error(self):
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: -x ** 2)
+        sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
+        with pytest.raises(ValueError):
+            from_emcee(sampler, blob_names=["inexistent"])
+
+    def test_peculiar_blobs(self, data):
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: (-x ** 2, (np.random.normal(x), 3)))
+        sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
+        inference_data = from_emcee(sampler, blob_names=["normal", "threes"])
+        fails = check_multiple_attrs({"sample_stats": ["normal", "threes"]}, inference_data)
+        assert not fails
+        inference_data = from_emcee(data.obj, blob_names=["mix"])
+        fails = check_multiple_attrs({"sample_stats": ["mix"]}, inference_data)
+        assert not fails
+
+    @pytest.mark.parametrize(
+        "blob_args",
+        [
+            (ValueError, ["a", "b"], ["prior"]),
+            (ValueError, ["too", "many", "names"], None),
+            (SyntaxError, ["a", "b"], ["posterior", "observed_data"]),
+        ],
+    )
+    def test_bad_blobs(self, data, blob_args):
+        error, names, groups = blob_args
+        with pytest.raises(error):
+            from_emcee(data.obj, blob_names=names, blob_groups=groups)
 
     def test_ln_funcs_for_infinity(self):
         # after dropping Python 3.5 support use underscore 1_000_000
-        assert np.isinf(emcee_lnprior([1000, 10000, 1000000]))
-        assert np.isinf(emcee_lnprob([1000, 10000, 1000000], 0, 0, 0))
+        ary = np.ones(10)
+        ary[1] = -1
+        assert np.isinf(emcee_lnprior(ary))
+        assert np.isinf(emcee_lnprob(ary, ary[2:], ary[2:])[0])
 
 
 class TestIONetCDFUtils:

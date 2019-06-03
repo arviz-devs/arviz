@@ -20,7 +20,6 @@ except ImportError:
 
 import tensorflow_probability as tfp
 import tensorflow_probability.python.edward2 as ed
-import scipy.optimize as op
 import torch
 import tensorflow as tf
 
@@ -84,64 +83,43 @@ def emcee_version():
 needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")
 
 
-def _emcee_neg_lnlike(theta, x, y, yerr):
-    """Proper function to allow pickling."""
-    slope, intercept, lnf = theta
-    model = slope * x + intercept
-    inv_sigma2 = 1.0 / (yerr ** 2 + model ** 2 * np.exp(2 * lnf))
-    return 0.5 * (np.sum((y - model) ** 2 * inv_sigma2 - np.log(inv_sigma2)))
-
-
 def _emcee_lnprior(theta):
     """Proper function to allow pickling."""
-    slope, intercept, lnf = theta
-    if -5.0 < slope < 0.5 and 0.0 < intercept < 10.0 and -10.0 < lnf < 1.0:
-        return 0.0
-    return -np.inf
-
-
-def _emcee_lnprob(theta, x, y, yerr):
-    """Proper function to allow pickling."""
-    logp = _emcee_lnprior(theta)
-    if not np.isfinite(logp):
+    mu, tau, eta = theta[0], theta[1], theta[2:]
+    # Half-cauchy prior, hwhm=25
+    if tau < 0:
         return -np.inf
-    return logp - _emcee_neg_lnlike(theta, x, y, yerr)
+    prior_tau = -np.log(tau ** 2 + 25 ** 2)
+    prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+    prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
+    return prior_mu + prior_tau + prior_eta
 
 
-def emcee_linear_model(data, draws, chains):
-    """Linear model fit in emcee.
+def _emcee_lnprob(theta, y, sigma):
+    """Proper function to allow pickling."""
+    mu, tau, eta = theta[0], theta[1], theta[2:]
+    prior = _emcee_lnprior(theta)
+    like_vect = -((mu + tau * eta - y) / sigma) ** 2
+    like = np.sum(like_vect)
+    return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
 
-    Note that the data is unused, but included to fit the pattern
-    from other libraries.
 
-    From http://dfm.io/emcee/current/user/line/
-    """
-    del data
-    chains = 10 * chains  # emcee is sad with too few walkers
-
-    # Choose the "true" parameters.
-    m_true = -0.9594
-    b_true = 4.294
-    f_true = 0.534
+def emcee_schools_model(data, draws, chains):
+    """Schools model in emcee."""
+    chains = 50
+    y = data["y"]
+    sigma = data["sigma"]
+    J = data["J"]
+    ndim = J + 2
 
     # make reproducible
     np.random.seed(0)
 
-    # Generate some synthetic data from the model.
-    num_data = 50
-    x = np.sort(10 * np.random.rand(num_data))
-    yerr = 0.1 + 0.5 * np.random.rand(num_data)
-    y = m_true * x + b_true
-    y += np.abs(f_true * y) * np.random.randn(num_data)
-    y += yerr * np.random.randn(num_data)
-
-    result = op.minimize(_emcee_neg_lnlike, [m_true, b_true, np.log(f_true)], args=(x, y, yerr))
-
-    ndim = result["x"].shape[0]
-    pos = [result["x"] + 1e-4 * np.random.randn(ndim) for _ in range(chains)]
+    pos = np.random.normal(size=(chains, ndim))
+    pos[:, 1] = np.absolute(pos[:, 1])
 
     if emcee_version() < 3:
-        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(y, sigma))
         # pylint: enable=unexpected-keyword-arg
         sampler.run_mcmc(pos, draws)
     else:
@@ -152,7 +130,7 @@ def emcee_linear_model(data, draws, chains):
         backend.reset(chains, ndim)
         # pylint: disable=unexpected-keyword-arg
         sampler = emcee.EnsembleSampler(
-            chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
+            chains, ndim, _emcee_lnprob, args=(y, sigma), backend=backend
         )
         # pylint: enable=unexpected-keyword-arg
         sampler.run_mcmc(pos, draws, store=True)
@@ -328,7 +306,7 @@ def load_cached_models(eight_schools_data, draws, chains):
         (tfp, tfp_noncentered_schools),
         (pystan, pystan_noncentered_schools),
         (pm, pymc3_noncentered_schools),
-        (emcee, emcee_linear_model),
+        (emcee, emcee_schools_model),
         (pyro, pyro_centered_schools),
     )
     data_directory = os.path.join(here, "saved_models")
