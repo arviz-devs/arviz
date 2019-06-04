@@ -403,8 +403,11 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
-    n_samples = np.product(log_likelihood.shape[:2])
-    n_data_points = np.product(log_likelihood.shape[2:])
+    n_chains, n_draws, *shape = log_likelihood.shape
+    n_samples = n_chains * n_draws
+    n_data_points = np.product(shape)
+    dims = [dim for dim in log_likelihood.dims if dim not in ["chain", "draw"]]
+    present_coords = {dim: log_likelihood.coords.indexes[dim] for dim in dims}
     log_likelihood = log_likelihood.values.reshape(n_samples, n_data_points)
 
     if scale.lower() == "deviance":
@@ -445,10 +448,16 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     loo_lppd = loo_lppd_i.sum()
     loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
 
-    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
+    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=n_samples))
     p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
+        loo_lppd_i = xr.DataArray(
+            loo_lppd_i.reshape(shape), dims=dims, coords=present_coords
+        )
+        pareto_shape = xr.DataArray(
+            pareto_shape.reshape(shape), dims=dims, coords=present_coords
+        )
         if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
                 "The point-wise LOO is the same with the sum LOO, please double check "
@@ -1013,11 +1022,14 @@ def waic(data, pointwise=False, scale="deviance"):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    n_samples = np.product(log_likelihood.shape[:2])
-    n_data_points = np.product(log_likelihood.shape[2:])
+    n_chains, n_draws, *shape = log_likelihood.shape
+    n_samples = n_chains * n_draws
+    n_data_points = np.product(shape)
+    dims = [dim for dim in log_likelihood.dims if dim not in ["chain", "draw"]]
+    present_coords = {dim: log_likelihood.coords.indexes[dim] for dim in dims}
     log_likelihood = log_likelihood.values.reshape(n_samples, n_data_points)
 
-    lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
+    lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=n_samples)
 
     vars_lpd = np.var(log_likelihood, axis=0)
     warn_mg = False
@@ -1036,6 +1048,9 @@ def waic(data, pointwise=False, scale="deviance"):
     p_waic = np.sum(vars_lpd)
 
     if pointwise:
+        waic_i = xr.DataArray(
+            waic_i.reshape(shape), dims=dims, coords=present_coords
+        )
         if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise WAIC is the same with the sum WAIC, please double check
