@@ -15,6 +15,7 @@ __all__ = [
     "summary",
     "waic",
     "effective_sample_size",
+    "ELPDData",
     "ess",
     "rhat",
     "mcse",

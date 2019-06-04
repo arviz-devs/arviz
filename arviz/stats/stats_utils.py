@@ -11,7 +11,7 @@ from xarray import apply_ufunc
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["autocorr", "autocov", "make_ufunc", "wrap_xarray_ufunc"]
+__all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "wrap_xarray_ufunc"]
 
 
 def autocov(ary, axis=-1):
