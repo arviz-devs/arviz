@@ -10,7 +10,7 @@ from .helpers import chains, check_multiple_attrs, draws, eight_schools_params, 
 
 class TestDataPyMC3:
     @pytest.fixture(scope="class")
-    def data(self, draws, chains):
+    def data(self, eight_schools_params, draws, chains):
         class Data:
             model, obj = load_cached_models(eight_schools_params, draws, chains, "pymc3")["pymc3"]
 

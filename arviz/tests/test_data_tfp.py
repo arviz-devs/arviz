@@ -8,7 +8,7 @@ from .helpers import chains, check_multiple_attrs, draws, eight_schools_params, 
 
 class TestDataTfp:
     @pytest.fixture(scope="class")
-    def data(self, draws, chains):
+    def data(self, eight_schools_params, draws, chains):
         class Data:
             # Returns result of from_tfp
             model, obj = load_cached_models(

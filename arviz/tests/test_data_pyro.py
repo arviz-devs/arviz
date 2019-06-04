@@ -6,7 +6,7 @@ from .helpers import chains, draws, eight_schools_params, load_cached_models
 
 class TestDataPyro:
     @pytest.fixture(scope="class")
-    def data(self, draws, chains):
+    def data(self, eight_schools_params, draws, chains):
         class Data:
             obj = load_cached_models(eight_schools_params, draws, chains, "pyro")["pyro"]
 

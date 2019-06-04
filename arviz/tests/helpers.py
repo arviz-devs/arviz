@@ -24,13 +24,13 @@ def eight_schools_params():
 
 @pytest.fixture(scope="module")
 def draws():
-    """Default # draws."""
+    """Number of draws."""
     return 500
 
 
 @pytest.fixture(scope="module")
 def chains():
-    """Default # chains."""
+    """Number of chains."""
     return 2
 
 
@@ -79,6 +79,7 @@ def emcee_version():
 
 
 def needs_emcee3_func():
+    """Check if emcee3 is required."""
     # pylint: disable=invalid-name
     needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")
     return needs_emcee3
@@ -106,16 +107,13 @@ def _emcee_lnprob(theta, y, sigma):
 
 
 def emcee_schools_model(data, draws, chains):
-    """Schools model in emcee.
-    From http://dfm.io/emcee/current/user/line/
-    """
+    """Schools model in emcee."""
     import emcee
 
-    del data
     chains = 10 * chains  # emcee is sad with too few walkers
     y = data["y"]
     sigma = data["sigma"]
-    J = data["J"] # pylint: disable=invalid-name
+    J = data["J"]  # pylint: disable=invalid-name
     ndim = J + 2
 
     # make reproducible
@@ -299,13 +297,6 @@ def pystan_noncentered_schools(data, draws, chains):
     else:
         import stan
 
-        # hard code schools data
-        # bug in PyStan3 preview. It modifies data in-place (old bug, now fixed)
-        data = {
-            "J": 8,
-            "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-            "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-        }
         stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
             num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False

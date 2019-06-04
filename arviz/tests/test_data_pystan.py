@@ -17,7 +17,7 @@ from .helpers import (
 
 class TestDataPyStan:
     @pytest.fixture(scope="class")
-    def data(self, draws, chains):
+    def data(self, eight_schools_params, draws, chains):
         class Data:
             model, obj = load_cached_models(eight_schools_params, draws, chains, "pystan")["pystan"]
 
