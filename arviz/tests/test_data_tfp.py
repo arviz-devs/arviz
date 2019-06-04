@@ -3,13 +3,13 @@ import numpy as np
 import pytest
 
 from arviz import from_tfp
-from .helpers import (
+from .helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
     draws,
     eight_schools_params,
     load_cached_models,
-)  # pylint: disable=unused-import
+)
 
 
 class TestDataTfp:
