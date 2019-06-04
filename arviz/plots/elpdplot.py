@@ -104,7 +104,7 @@ def plot_elpd(
             "All Information Criteria must be of the same kind, but both loo and waic data present"
         )
     ic = ics[0]
-    scales = [elpd_data["scale"] for elpd_data in compare_dict.values()]
+    scales = [elpd_data["{}_scale".format(ic)] for elpd_data in compare_dict.values()]
     if not all(x == scales[0] for x in scales):
         raise SyntaxError(
             "All Information Criteria must be on the same scale, but {} are present".format(

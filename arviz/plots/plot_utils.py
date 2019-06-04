@@ -414,7 +414,7 @@ def format_coords_as_labels(dataarray):
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]
     else:
         coord_labels[:] = ["{}".format(s) for s in coord_labels]
-    return dataarray
+    return coord_labels
 
 
 def set_xticklabels(ax, coord_labels):
