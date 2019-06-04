@@ -67,7 +67,7 @@ def plot_hpd(
 
     x = np.asarray(x)
     y = np.asarray(y)
-    
+
     x_shape = x.shape
     y_shape = y.shape
     if y_shape[-len(x_shape) :] != x_shape:
