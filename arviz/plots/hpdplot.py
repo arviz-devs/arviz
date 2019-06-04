@@ -27,7 +27,7 @@ def plot_hpd(
     x : array-like
         Values to plot
     y : array-like
-        values ​​from which to compute the hpd
+        values ​​from which to compute the hpd. Assumed shape (chain, draw, *shape).
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94.
     color : str
@@ -64,6 +64,21 @@ def plot_hpd(
 
     if ax is None:
         ax = gca()
+
+    x = np.asarray(x)
+    y = np.asarray(y)
+    
+    x_shape = x.shape
+    y_shape = y.shape
+    if y_shape[-len(x_shape) :] != x_shape:
+        msg = "Dimension mismatch for x: {} and y: {}."
+        msg += " y-dimensions should be (chain, draw, *x.shape) or"
+        msg += " (draw, *x.shape)"
+        raise TypeError(msg.format(x_shape, y_shape))
+
+    if len(y_shape[: -len(x_shape)]) > 1:
+        new_shape = tuple([-1] + list(x_shape))
+        y = y.reshape(new_shape)
 
     hpd_ = hpd(y, credible_interval=credible_interval, circular=circular)
 
