@@ -452,12 +452,8 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
-        loo_lppd_i = xr.DataArray(
-            loo_lppd_i.reshape(shape), dims=dims, coords=present_coords
-        )
-        pareto_shape = xr.DataArray(
-            pareto_shape.reshape(shape), dims=dims, coords=present_coords
-        )
+        loo_lppd_i = xr.DataArray(loo_lppd_i.reshape(shape), dims=dims, coords=present_coords)
+        pareto_shape = xr.DataArray(pareto_shape.reshape(shape), dims=dims, coords=present_coords)
         if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
                 "The point-wise LOO is the same with the sum LOO, please double check "
@@ -1048,9 +1044,7 @@ def waic(data, pointwise=False, scale="deviance"):
     p_waic = np.sum(vars_lpd)
 
     if pointwise:
-        waic_i = xr.DataArray(
-            waic_i.reshape(shape), dims=dims, coords=present_coords
-        )
+        waic_i = xr.DataArray(waic_i.reshape(shape), dims=dims, coords=present_coords)
         if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
             warnings.warn(
                 """The point-wise WAIC is the same with the sum WAIC, please double check

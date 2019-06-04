@@ -115,7 +115,9 @@ def plot_elpd(
         plot_kwargs = {}
     plot_kwargs.setdefault("marker", "+")
 
-    pointwise_data = [(compare_dict[model]["{}_i".format(ic)]) for model in models]
+    pointwise_data = [
+        get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models
+    ]
     xdata = np.arange(pointwise_data[0].size)
 
     if isinstance(color, str):
