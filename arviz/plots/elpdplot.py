@@ -6,7 +6,13 @@ from matplotlib.ticker import NullFormatter
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
-from .plot_utils import _scale_fig_size
+from .plot_utils import (
+    _scale_fig_size,
+    get_coords,
+    color_from_dim,
+    format_coords_as_labels,
+    set_xticklabels,
+)
 from ..stats import waic, loo, ELPDData
 
 
@@ -121,19 +127,8 @@ def plot_elpd(
     xdata = np.arange(pointwise_data[0].size)
 
     if isinstance(color, str):
-        present_dims = pointwise_data[0].dims
-        if color in present_dims:
-            coord_values = pointwise_data[0][color].values
-            unique_coords = set(coord_values)
-            color_mapping = {
-                coord: num / len(unique_coords) for num, coord in enumerate(unique_coords)
-            }
-            if len(present_dims) > 1:
-                multi_coords = pointwise_data[0].coords.to_index()
-                coord_idx = present_dims.index(color)
-                colors = [color_mapping[coord[coord_idx]] for coord in multi_coords]
-            else:
-                colors = [color_mapping[coord] for coord in coord_values]
+        if color in pointwise_data[0].dims:
+            colors, color_mapping = color_from_dim(pointwise_data[0], color)
             if legend:
                 cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
                 markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
@@ -142,13 +137,13 @@ def plot_elpd(
                     Line2D(
                         [],
                         [],
-                        color=cmap(color_mapping[coord]),
+                        color=cmap(float_color),
                         label=coord,
                         ms=markersize,
                         lw=0,
                         **plot_kwargs
                     )
-                    for coord in unique_coords
+                    for coord, float_color in color_mapping.items()
                 ]
                 plot_kwargs.setdefault("cmap", cmap_name)
                 plot_kwargs.setdefault("s", markersize ** 2)
@@ -161,12 +156,7 @@ def plot_elpd(
         plot_kwargs.setdefault("c", color)
 
     if xlabels:
-        coord_labels = pointwise_data[0].coords.to_index().values
-        if isinstance(coord_labels[0], tuple):
-            fmt = ", ".join(["{}" for _ in coord_labels[0]])
-            coord_labels[:] = [fmt.format(*x) for x in coord_labels]
-        else:
-            coord_labels[:] = ["{}".format(s) for s in coord_labels]
+        coord_labels = format_coords_as_labels(pointwise_data[0])
 
     if numvars < 2:
         raise Exception("Number of models to compare must be 2 or greater.")
@@ -186,7 +176,7 @@ def plot_elpd(
         ax.set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
         if xlabels:
-            _set_xticklabels(ax, coord_labels)
+            set_xticklabels(ax, coord_labels)
             fig.autofmt_xdate()
         if legend:
             ncols = len(handles) // 6 + 1
@@ -222,7 +212,7 @@ def plot_elpd(
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                     ax[j, i].set_xticks([])
                 elif xlabels:
-                    _set_xticklabels(ax[j, i], coord_labels)
+                    set_xticklabels(ax[j, i], coord_labels)
 
                 if i != 0:
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
@@ -242,17 +232,3 @@ def plot_elpd(
                 handles=handles, ncol=ncols, title=color, bbox_to_anchor=(0, 1), loc="upper left"
             )
     return ax
-
-
-def _set_xticklabels(ax, coord_labels):
-    """Set xticklabels to coordinate labels using Matplotlib default formatter."""
-    xlim = ax.get_xlim()
-    ax.xaxis.get_major_locator().set_params(nbins=9, steps=[1, 2, 5, 10])
-    xticks = ax.get_xticks().astype(np.int64)
-    xticks = xticks[(xticks > xlim[0]) & (xticks < xlim[1])]
-    if len(xticks) > len(coord_labels):
-        ax.set_xticks(np.arange(len(coord_labels)))
-        ax.set_xticklabels(coord_labels)
-    else:
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(coord_labels[xticks])
