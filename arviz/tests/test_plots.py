@@ -742,7 +742,7 @@ def test_plot_compare_no_ic(models):
     ],
 )
 def test_plot_hpd(models, data, kwargs):
-    plot_hpd(data["y"], models.model_1["theta"], **kwargs)
+    plot_hpd(data["y"], models.model_1.posterior["theta"], **kwargs)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
