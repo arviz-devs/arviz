@@ -5,7 +5,6 @@ import os
 from urllib.parse import urlunsplit
 import numpy as np
 import pytest
-import emcee
 
 from arviz import (
     concat,
