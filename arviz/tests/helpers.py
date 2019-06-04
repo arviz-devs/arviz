@@ -328,7 +328,7 @@ def library_handle(library):
         except ImportError:
             module = importlib.import_module("stan")
     else:
-        module = importlib.import_module(library, library)
+        module = importlib.import_module(library)
     return module
 
 
