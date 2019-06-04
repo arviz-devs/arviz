@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pytest
 
-import emcee
+import emcee  # pylint: disable=unused-import
 
 from arviz import from_emcee
 from .helpers import (  # pylint: disable=unused-import
