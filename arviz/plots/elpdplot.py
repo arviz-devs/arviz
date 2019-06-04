@@ -1,6 +1,5 @@
 """Plot pointwise elpd estimations of inference data."""
 import numpy as np
-import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.ticker import NullFormatter
@@ -8,12 +7,11 @@ from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
 from .plot_utils import _scale_fig_size
-from ..stats import waic, loo
+from ..stats import waic, loo, ELPDData
 
 
 def plot_elpd(
-    idata_dict,
-    ic="waic",
+    compare_dict,
     color=None,
     xlabels=False,
     figsize=None,
@@ -21,6 +19,7 @@ def plot_elpd(
     coords=None,
     legend=False,
     ax=None,
+    ic="waic",
     scale="deviance",
     plot_kwargs=None,
 ):
@@ -29,11 +28,10 @@ def plot_elpd(
 
     Parameters
     ----------
-    idata_dict : mapping, str -> InferenceData
-        A dictionary mapping the model name to the object containing its inference data.
+    compare_dict : mapping, str -> ELPDData or InferenceData
+        A dictionary mapping the model name to the object containing its inference data or
+        the result of `waic`/`loo` functions.
         Refer to az.convert_to_inference_data for details on possible dict items
-    ic : str, optional
-        Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will have the same color,
         if it is the size of the observations, each dot will have the specified color,
@@ -51,8 +49,12 @@ def plot_elpd(
         Include a legend to the plot. Only taken into account when color argument is a dim name.
     ax: axes, optional
         Matplotlib axes
+    ic : str, optional
+        Information Criterion (WAIC or LOO) used to compare models. Default WAIC. Only taken
+        into account when input is InferenceData.
     scale : str, optional
-        scale argument passed to az.waic or az.loo, see their docs for details
+        scale argument passed to az.waic or az.loo, see their docs for details. Only taken
+        into account when input is InferenceData.
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot
 
@@ -84,11 +86,27 @@ def plot_elpd(
                 ic, valid_ics
             )
         )
+    ic_fun = waic if ic == "waic" else loo
 
-    # Make sure all objects in idata_dict are InferenceData
-    idata_dict = {key: convert_to_inference_data(idata) for key, idata in idata_dict.items()}
-    numvars = len(idata_dict)
-    models = list(idata_dict.keys())
+    # Make sure all object are ELPDData
+    for k, item in compare_dict.items():
+        if not isinstance(item, ELPDData):
+            compare_dict[k] = ic_fun(convert_to_inference_data(item), pointwise=True, scale=scale)
+    ics = [elpd_data.index[0] for elpd_data in compare_dict.values()]
+    if not all(x == ics[0] for x in ics):
+        raise SyntaxError(
+            "All Information Criteria must be of the same kind, but both loo and waic data present"
+        )
+    ic = ics[0]
+    scales = [elpd_data["scale"] for elpd_data in compare_dict.values()]
+    if not all(x == scales[0] for x in scales):
+        raise SyntaxError(
+            "All Information Criteria must be on the same scale, but {} are present".format(
+                set(scales)
+            )
+        )
+    numvars = len(compare_dict)
+    models = list(compare_dict.keys())
 
     if coords is None:
         coords = {}
@@ -97,22 +115,7 @@ def plot_elpd(
         plot_kwargs = {}
     plot_kwargs.setdefault("marker", "+")
 
-    def get_pointwise_as_dataarray(idata, coords=coords, ic=ic, scale=scale):
-        if ic == "waic":
-            pointwise_elpd = waic(idata, pointwise=True, scale=scale).waic_i
-        else:
-            pointwise_elpd = loo(idata, pointwise=True, scale=scale).loo_i
-        like_dataarray = idata.sample_stats.log_likelihood
-        _, _, *shape = like_dataarray.shape
-        dims = [dim for dim in like_dataarray.dims if dim not in ["chain", "draw"]]
-        present_coords = {dim: like_dataarray.coords.indexes[dim] for dim in dims}
-        elpd_dataarray = xr.DataArray(
-            pointwise_elpd.reshape(shape), dims=dims, coords=present_coords
-        )
-        elpd_dataarray = elpd_dataarray.sel(**coords)
-        return elpd_dataarray
-
-    pointwise_data = [get_pointwise_as_dataarray(idata_dict[model]) for model in models]
+    pointwise_data = [(compare_dict[model]["{}_i".format(ic)]) for model in models]
     xdata = np.arange(pointwise_data[0].size)
 
     if isinstance(color, str):
