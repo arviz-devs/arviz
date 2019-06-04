@@ -683,8 +683,7 @@ def summary(
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
         `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat`.
-        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat` are only computed
-        for traces with 2 or more chains.
+        `r_hat` is only computed for traces with 2 or more chains.
 
     Examples
     --------
@@ -800,59 +799,47 @@ def summary(
             output_core_dims=tuple([] for _ in range(2)),
         )
 
-    if len(posterior.chain) > 1:
-        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-            posterior,
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(7)),
-        )
+    mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+        _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+        posterior,
+        input_core_dims=(("chain", "draw"),),
+        output_core_dims=tuple([] for _ in range(7)),
+    )
 
     # Combine metrics
     metrics = []
     metric_names = []
     if extend:
-        if len(posterior.chain) > 1:
-            metrics.extend(
-                (
-                    mean,
-                    sd,
-                    mcse_mean,
-                    mcse_sd,
-                    hpd_lower,
-                    hpd_higher,
-                    ess_mean,
-                    ess_sd,
-                    ess_bulk,
-                    ess_tail,
-                    r_hat,
-                )
+        metrics.extend(
+            (
+                mean,
+                sd,
+                mcse_mean,
+                mcse_sd,
+                hpd_lower,
+                hpd_higher,
+                ess_mean,
+                ess_sd,
+                ess_bulk,
+                ess_tail,
+                r_hat,
             )
-            metric_names.extend(
-                (
-                    "mean",
-                    "sd",
-                    "mcse_mean",
-                    "mcse_sd",
-                    "hpd_{:g}%".format(100 * alpha / 2),
-                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                    "ess_mean",
-                    "ess_sd",
-                    "ess_bulk",
-                    "ess_tail",
-                    "r_hat",
-                )
+        )
+        metric_names.extend(
+            (
+                "mean",
+                "sd",
+                "mcse_mean",
+                "mcse_sd",
+                "hpd_{:g}%".format(100 * alpha / 2),
+                "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "ess_mean",
+                "ess_sd",
+                "ess_bulk",
+                "ess_tail",
+                "r_hat",
             )
-        else:
-            metrics.extend((mean, sd, hpd_lower, hpd_higher))
-            metric_names.extend(
-                (
-                    "mean",
-                    "sd",
-                    "hpd_{:g}%".format(100 * alpha / 2),
-                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                )
-            )
+        )
     if include_circ:
         metrics.extend((circ_mean, circ_sd, circ_mcse, circ_hpd_lower, circ_hpd_higher))
         metric_names.extend(
