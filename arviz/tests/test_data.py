@@ -420,9 +420,9 @@ class TestDataConvert:
     def data(self, draws, chains):
         class Data:
             # fake 8-school output
-            obs = {}
+            obj = {}
             for key, shape in {"mu": [], "tau": [], "eta": [8], "theta": [8]}.items():
-                obs[key] = np.random.randn(chains, draws, *shape)
+                obj[key] = np.random.randn(chains, draws, *shape)
 
         return Data
 
@@ -461,9 +461,9 @@ class TestDataDict:
     def data(self, draws, chains):
         class Data:
             # fake 8-school output
-            obs = {}
+            obj = {}
             for key, shape in {"mu": [], "tau": [], "eta": [8], "theta": [8]}.items():
-                obs[key] = np.random.randn(chains, draws, *shape)
+                obj[key] = np.random.randn(chains, draws, *shape)
 
         return Data
 
@@ -548,9 +548,9 @@ class TestDataNetCDF:
     def data(self, draws, chains):
         class Data:
             # fake 8-school output
-            obs = {}
+            obj = {}
             for key, shape in {"mu": [], "tau": [], "eta": [8], "theta": [8]}.items():
-                obs[key] = np.random.randn(chains, draws, *shape)
+                obj[key] = np.random.randn(chains, draws, *shape)
 
         return Data
 

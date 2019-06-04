@@ -3,6 +3,8 @@ import os
 import numpy as np
 import pytest
 
+import emcee
+
 from arviz import from_emcee
 from .helpers import (
     chains,
