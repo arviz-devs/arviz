@@ -49,7 +49,7 @@ def create_model(seed=10):
         "eta": np.random.randn(nchains, ndraws, data["J"]),
         "theta": np.random.randn(nchains, ndraws, data["J"]),
     }
-    posterior_predictive = {"y": np.random.randn(nchains, ndraws, data["J"])}
+    posterior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"]))}
     sample_stats = {
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
@@ -61,7 +61,7 @@ def create_model(seed=10):
         "eta": np.random.randn(nchains, ndraws, data["J"]) / 2,
         "theta": np.random.randn(nchains, ndraws, data["J"]) / 2,
     }
-    prior_predictive = {"y": np.random.randn(nchains, ndraws, data["J"]) / 2}
+    prior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"])) / 2}
     sample_stats_prior = {
         "energy": np.random.randn(nchains, ndraws),
         "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
@@ -73,7 +73,8 @@ def create_model(seed=10):
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
-        observed_data=data,
+        observed_data={"y" : data["y"]},
+        dims = {"y" : ["obs_dim"]}
     )
     return model
 
@@ -571,10 +572,10 @@ def test_non_linux_blit(models, monkeypatch, system, caplog):
 def test_plot_ppc_grid(models):
     axes = plot_ppc(models.model_1, kind="scatter", flatten=[])
     assert len(axes) == 8
-    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], coords={"obs_dim_0": [1, 2, 3]})
+    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], coords={"obs_dim": [1, 2, 3]})
     assert len(axes) == 3
     axes = plot_ppc(
-        models.model_1, kind="scatter", flatten=["obs_dim_0"], coords={"obs_dim_0": [1, 2, 3]}
+        models.model_1, kind="scatter", flatten=["obs_dim"], coords={"obs_dim": [1, 2, 3]}
     )
     assert len(axes) == 1
 
