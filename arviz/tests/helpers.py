@@ -24,13 +24,13 @@ def eight_schools_params():
 
 @pytest.fixture(scope="module")
 def draws():
-    """Number of draws."""
+    """Share default draw count."""
     return 500
 
 
 @pytest.fixture(scope="module")
 def chains():
-    """Number of chains."""
+    """Share default chain count."""
     return 2
 
 
@@ -52,6 +52,7 @@ def check_multiple_attrs(test_dict, parent):
     list
         List containing the failed checks. It will contain either the dataset_name or a
         tuple (dataset_name, var) for all non present attributes.
+
     """
     failed_attrs = []
     for dataset_name, attributes in test_dict.items():
@@ -72,6 +73,7 @@ def emcee_version():
     -------
     int
         Major version number
+
     """
     import emcee
 
@@ -382,6 +384,7 @@ def pystan_version():
     -------
     int
         Major version number
+
     """
     try:
         import pystan

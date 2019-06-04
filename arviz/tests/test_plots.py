@@ -73,8 +73,8 @@ def create_model(seed=10):
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
-        observed_data={"y" : data["y"]},
-        dims = {"y" : ["obs_dim"]}
+        observed_data={"y": data["y"]},
+        dims={"y": ["obs_dim"]},
     )
     return model
 
