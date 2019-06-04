@@ -21,12 +21,12 @@ from arviz import (
 )
 from ..data.base import generate_dims_coords, make_attrs
 from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
-from .helpers import (
+from .helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
     draws,
     eight_schools_params,
-)  # pylint: disable=unused-import
+)
 
 
 @pytest.fixture(autouse=True)

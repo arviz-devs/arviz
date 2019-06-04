@@ -6,7 +6,7 @@ import pytest
 import emcee
 
 from arviz import from_emcee
-from .helpers import (
+from .helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
     draws,

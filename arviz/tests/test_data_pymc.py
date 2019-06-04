@@ -5,7 +5,13 @@ import pymc3 as pm
 import pytest
 
 from arviz import from_pymc3
-from .helpers import chains, check_multiple_attrs, draws, eight_schools_params, load_cached_models
+from .helpers import (  # pylint: disable=unused-import
+    chains,
+    check_multiple_attrs,
+    draws,
+    eight_schools_params,
+    load_cached_models,
+)
 
 
 class TestDataPyMC3:

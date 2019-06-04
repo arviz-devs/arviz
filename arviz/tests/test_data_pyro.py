@@ -1,7 +1,12 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import pytest
 from arviz import from_pyro
-from .helpers import chains, draws, eight_schools_params, load_cached_models
+from .helpers import (  # pylint: disable=unused-import
+    chains,
+    draws,
+    eight_schools_params,
+    load_cached_models,
+)
 
 
 class TestDataPyro:

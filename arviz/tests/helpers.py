@@ -297,7 +297,7 @@ def pystan_noncentered_schools(data, draws, chains):
             data=data, iter=draws, warmup=0, chains=chains, check_hmc_diagnostics=False
         )
     else:
-        import stan
+        import stan  # pylint: disable=import-error
 
         stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
@@ -389,5 +389,5 @@ def pystan_version():
     try:
         import pystan
     except ImportError:
-        import stan as pystan
+        import stan as pystan  # pylint: disable=import-error
     return int(pystan.__version__[0])
