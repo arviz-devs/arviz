@@ -115,7 +115,7 @@ def emcee_schools_model(data, draws, chains):
     chains = 10 * chains  # emcee is sad with too few walkers
     y = data["y"]
     sigma = data["sigma"]
-    J = data["J"]
+    J = data["J"] # pylint: disable=invalid-name
     ndim = J + 2
 
     # make reproducible
@@ -346,7 +346,7 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         ("tensorflow_probability", tfp_noncentered_schools),
         ("pystan", pystan_noncentered_schools),
         ("pymc3", pymc3_noncentered_schools),
-        ("emcee", emcee_linear_model),
+        ("emcee", emcee_schools_model),
         ("pyro", pyro_centered_schools),
     )
     data_directory = os.path.join(here, "saved_models")
