@@ -24,6 +24,7 @@ def plot_elpd(
     textsize=None,
     coords=None,
     legend=False,
+    threshold=None,
     ax=None,
     ic="waic",
     scale="deviance",
@@ -53,6 +54,9 @@ def plot_elpd(
         a subset can be plotted for convenience.
     legend : bool, optional
         Include a legend to the plot. Only taken into account when color argument is a dim name.
+    threshold : float
+        If some elpd difference is larger than `threshold * elpd.std()`, show its label. If
+        `None`, no observations will be highlighted.
     ax: axes, optional
         Matplotlib axes
     ic : str, optional
@@ -170,7 +174,29 @@ def plot_elpd(
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))
 
-        ax.scatter(xdata, pointwise_data[0] - pointwise_data[1], **plot_kwargs)
+        ydata = pointwise_data[0] - pointwise_data[1]
+        ax.scatter(xdata, ydata, **plot_kwargs)
+        if threshold is not None:
+            ydata = ydata.values.flatten()
+            diff_abs = np.abs(ydata - ydata.mean())
+            bool_ary = diff_abs > threshold * ydata.std()
+            try:
+                coord_labels
+            except NameError:
+                coord_labels = xdata.astype(str)
+            outliers = np.argwhere(bool_ary).squeeze()
+            for outlier in outliers:
+                label = coord_labels[outlier]
+                ax.text(
+                    outlier,
+                    ydata[outlier],
+                    label,
+                    horizontalalignment="center",
+                    verticalalignment="bottom" if ydata[outlier] > 0 else "top",
+                    fontsize=.8*xt_labelsize,
+                )
+
+
 
         ax.set_title("{} - {}".format(*models), fontsize=titlesize, wrap=True)
         ax.set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
@@ -205,8 +231,26 @@ def plot_elpd(
                     continue
 
                 var2 = pointwise_data[j + 1]
-
                 ax[j, i].scatter(xdata, var1 - var2, **plot_kwargs)
+                if threshold is not None:
+                    ydata = (var1 - var2).values.flatten()
+                    diff_abs = np.abs(ydata - ydata.mean())
+                    bool_ary = diff_abs > threshold * ydata.std()
+                    try:
+                        coord_labels
+                    except NameError:
+                        coord_labels = xdata.astype(str)
+                    outliers = np.argwhere(bool_ary).squeeze()
+                    for outlier in outliers:
+                        label = coord_labels[outlier]
+                        ax[j, i].text(
+                            outlier,
+                            ydata[outlier],
+                            label,
+                            horizontalalignment="center",
+                            verticalalignment="bottom" if ydata[outlier] > 0 else "top",
+                            fontsize=.8*xt_labelsize,
+                        )
 
                 if j + 1 != numvars - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
