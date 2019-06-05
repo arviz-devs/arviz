@@ -81,3 +81,12 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
+
+    def test_single_observation(self):
+        with pm.Model():
+            p = pm.Uniform("p", 0, 1)
+            pm.Binomial("w", p=p, n=2, observed=1)
+            trace = pm.sample(500, chains=2)
+
+        inference_data = from_pymc3(trace=trace)
+        assert inference_data
