@@ -5,11 +5,10 @@ from pandas import DataFrame
 from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
-import pymc3 as pm
 
-from ..data import from_dict, from_pymc3, load_arviz_data
+from ..data import from_dict, load_arviz_data
 from ..stats import compare, psislw
-from .helpers import eight_schools_params, load_cached_models  # pylint: disable=unused-import
+from .helpers import eight_schools_params  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -34,14 +33,57 @@ from ..plots import (
 np.random.seed(0)
 
 
+def create_model(seed=10):
+    """Create model with fake data."""
+    np.random.seed(seed)
+    nchains = 4
+    ndraws = 500
+    data = {
+        "J": 8,
+        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+    }
+    posterior = {
+        "mu": np.random.randn(nchains, ndraws),
+        "tau": abs(np.random.randn(nchains, ndraws)),
+        "eta": np.random.randn(nchains, ndraws, data["J"]),
+        "theta": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    posterior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"]))}
+    sample_stats = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": np.random.randn(nchains, ndraws) > 0.90,
+        "log_likelihood": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    prior = {
+        "mu": np.random.randn(nchains, ndraws) / 2,
+        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
+        "eta": np.random.randn(nchains, ndraws, data["J"]) / 2,
+        "theta": np.random.randn(nchains, ndraws, data["J"]) / 2,
+    }
+    prior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"])) / 2}
+    sample_stats_prior = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
+    }
+    model = from_dict(
+        posterior=posterior,
+        posterior_predictive=posterior_predictive,
+        sample_stats=sample_stats,
+        prior=prior,
+        prior_predictive=prior_predictive,
+        sample_stats_prior=sample_stats_prior,
+        observed_data={"y": data["y"]},
+        dims={"y": ["obs_dim"]},
+    )
+    return model
+
+
 @pytest.fixture(scope="module")
-def models(eight_schools_params):
+def models():
     class Models:
-        models = load_cached_models(eight_schools_params, draws=500, chains=2)
-        pymc3_model, pymc3_fit = models["pymc3"]
-        stan_model, stan_fit = models["pystan"]
-        emcee_fit = models["emcee"]
-        pyro_fit = models["pyro"]
+        model_1 = create_model(seed=10)
+        model_2 = create_model(seed=11)
 
     return Models()
 
@@ -56,13 +98,6 @@ def clean_plots(request, save_figs):
         plt.close("all")
 
     request.addfinalizer(fin)
-
-
-@pytest.fixture(scope="module")
-def pymc3_sample_ppc(models):
-
-    with models.pymc3_model:
-        return pm.sample_ppc(models.pymc3_fit, 100)
 
 
 @pytest.fixture(scope="module")
@@ -109,7 +144,7 @@ def fig_ax():
     ],
 )
 def test_plot_density_float(models, kwargs):
-    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
+    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
     assert axes.shape[0] >= 18
 
@@ -120,7 +155,7 @@ def test_plot_density_discrete(discrete_model):
 
 
 def test_plot_density_bad_kwargs(models):
-    obj = [getattr(models, model_fit) for model_fit in ["pymc3_fit", "stan_fit", "pyro_fit"]]
+    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     with pytest.raises(ValueError):
         plot_density(obj, point_estimate="bad_value")
 
@@ -131,7 +166,6 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, credible_interval=2)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -147,14 +181,8 @@ def test_plot_density_bad_kwargs(models):
         {"lines": [("mu", {}, 8)]},
     ],
 )
-def test_plot_trace(models, model_fit, kwargs):
-    obj = getattr(models, model_fit)
-    axes = plot_trace(obj, **kwargs)
-    assert axes.shape
-
-
-def test_plot_trace_emcee(models):
-    axes = plot_trace(models.emcee_fit)
+def test_plot_trace(models, kwargs):
+    axes = plot_trace(models.model_1, **kwargs)
     assert axes.shape
 
 
@@ -165,13 +193,11 @@ def test_plot_trace_discrete(discrete_model):
 
 def test_plot_trace_max_plots_warning(models):
     with pytest.warns(SyntaxWarning):
-        axes = plot_trace(models.pymc3_fit, max_plots=1)
+        axes = plot_trace(models.model_1, max_plots=1)
     assert axes.shape
 
 
-@pytest.mark.parametrize(
-    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
-)
+@pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
 @pytest.mark.parametrize(
     "args_expected",
     [
@@ -209,9 +235,7 @@ def test_plot_forest_single_value():
     assert axes.shape
 
 
-@pytest.mark.parametrize(
-    "model_fits", [["pyro_fit"], ["pymc3_fit"], ["stan_fit"], ["pymc3_fit", "stan_fit"]]
-)
+@pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
 def test_plot_forest_bad(models, model_fits):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     with pytest.raises(TypeError):
@@ -221,18 +245,14 @@ def test_plot_forest_bad(models, model_fits):
         plot_forest(obj, model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)])
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("kind", ["kde", "hist"])
-def test_plot_energy(models, model_fit, kind):
-    obj = getattr(models, model_fit)
-    assert plot_energy(obj, kind=kind)
+def test_plot_energy(models, kind):
+    assert plot_energy(models.model_1, kind=kind)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_energy_bad(models, model_fit):
-    obj = getattr(models, model_fit)
+def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
-        plot_energy(obj, kind="bad_kind")
+        plot_energy(models.model_1, kind="bad_kind")
 
 
 def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-name
@@ -240,25 +260,21 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
         plot_parallel(df_trace)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
-def test_plot_parallel(models, model_fit, norm_method):
-    obj = getattr(models, model_fit)
-    assert plot_parallel(obj, var_names=["mu", "tau"], norm_method=norm_method)
+def test_plot_parallel(models, norm_method):
+    assert plot_parallel(models.model_1, var_names=["mu", "tau"], norm_method=norm_method)
 
 
 @pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
 def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
-        assert plot_parallel(models.pymc3_fit, var_names=var_names, norm_method="foo")
+        assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
-def test_plot_joint(models, model_fit, kind):
-    obj = getattr(models, model_fit)
-    axjoin, _, _ = plot_joint(obj, var_names=("mu", "tau"), kind=kind)
+def test_plot_joint(models, kind):
+    axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
     assert axjoin
 
 
@@ -267,14 +283,12 @@ def test_plot_joint_discrete(discrete_model):
     assert axjoin
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_joint_bad(models, model_fit):
-    obj = getattr(models, model_fit)
+def test_plot_joint_bad(models):
     with pytest.raises(ValueError):
-        plot_joint(obj, var_names=("mu", "tau"), kind="bad_kind")
+        plot_joint(models.model_1, var_names=("mu", "tau"), kind="bad_kind")
 
     with pytest.raises(Exception):
-        plot_joint(obj, var_names=("mu", "tau", "eta"))
+        plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
 
 
 @pytest.mark.parametrize(
@@ -337,16 +351,15 @@ def test_plot_kde_quantiles(continuous_model, kwargs):
     assert axes
 
 
-def test_plot_kde_inference_data():
+def test_plot_kde_inference_data(models):
     """
     Ensure that an exception is raised when plot_kde
     is used with an inference data or Xarray dataset object.
     """
-    eight = load_arviz_data("centered_eight")
     with pytest.raises(ValueError, match="Inference Data"):
-        plot_kde(eight)
+        plot_kde(models.model_1)
     with pytest.raises(ValueError, match="Xarray"):
-        plot_kde(eight.posterior)
+        plot_kde(models.model_1.posterior)
 
 
 def test_plot_khat():
@@ -357,7 +370,6 @@ def test_plot_khat():
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -387,9 +399,8 @@ def test_plot_khat():
         },
     ],
 )
-def test_plot_pair(models, model_fit, kwargs):
-    obj = getattr(models, model_fit)
-    ax = plot_pair(obj, **kwargs)
+def test_plot_pair(models, kwargs):
+    ax = plot_pair(models.model_1, **kwargs)
     assert np.all(ax)
 
 
@@ -402,13 +413,11 @@ def test_plot_pair_2var(discrete_model, fig_ax, kwargs):
     assert ax
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
-def test_plot_pair_bad(models, model_fit):
-    obj = getattr(models, model_fit)
+def test_plot_pair_bad(models):
     with pytest.raises(ValueError):
-        plot_pair(obj, kind="bad_kind")
+        plot_pair(models.model_1, kind="bad_kind")
     with pytest.raises(Exception):
-        plot_pair(obj, var_names=["mu"])
+        plot_pair(models.model_1, var_names=["mu"])
 
 
 @pytest.mark.parametrize("has_sample_stats", [True, False])
@@ -419,7 +428,7 @@ def test_plot_pair_divergences_warning(has_sample_stats):
         data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
     else:
         # sample_stats missing
-        data = data.posterior
+        data = data.posterior  # pylint: disable=no-member
     with pytest.warns(SyntaxWarning):
         ax = plot_pair(data, divergences=True)
     assert np.all(ax)
@@ -428,11 +437,10 @@ def test_plot_pair_divergences_warning(has_sample_stats):
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
-def test_plot_ppc(models, pymc3_sample_ppc, kind, alpha, animated):
-    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+def test_plot_ppc(models, kind, alpha, animated):
     animation_kwargs = {"blit": False}
     axes = plot_ppc(
-        data,
+        models.model_1,
         kind=kind,
         alpha=alpha,
         animated=animated,
@@ -491,11 +499,10 @@ def test_plot_ppc_discrete(kind, animated):
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
-def test_plot_ppc_save_animation(models, pymc3_sample_ppc, kind):
-    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
+def test_plot_ppc_save_animation(models, kind):
     animation_kwargs = {"blit": False}
     axes, anim = plot_ppc(
-        data,
+        models.model_1,
         kind=kind,
         animated=True,
         animation_kwargs=animation_kwargs,
@@ -538,9 +545,7 @@ def test_plot_ppc_discrete_save_animation(kind):
 
 
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
-def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
-    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
-
+def test_non_linux_blit(models, monkeypatch, system, caplog):
     import platform
 
     def mock_system():
@@ -550,7 +555,7 @@ def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
 
     animation_kwargs = {"blit": True}
     axes, anim = plot_ppc(
-        data,
+        models.model_1,
         kind="density",
         animated=True,
         animation_kwargs=animation_kwargs,
@@ -564,48 +569,42 @@ def test_non_linux_blit(models, pymc3_sample_ppc, monkeypatch, system, caplog):
     assert anim
 
 
-def test_plot_ppc_grid(models, pymc3_sample_ppc):
-    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
-    axes = plot_ppc(data, kind="scatter", flatten=[])
+def test_plot_ppc_grid(models):
+    axes = plot_ppc(models.model_1, kind="scatter", flatten=[])
     assert len(axes) == 8
-    axes = plot_ppc(data, kind="scatter", flatten=[], coords={"obs_dim_0": [1, 2, 3]})
+    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], coords={"obs_dim": [1, 2, 3]})
     assert len(axes) == 3
-    axes = plot_ppc(data, kind="scatter", flatten=["obs_dim_0"], coords={"obs_dim_0": [1, 2, 3]})
+    axes = plot_ppc(
+        models.model_1, kind="scatter", flatten=["obs_dim"], coords={"obs_dim": [1, 2, 3]}
+    )
     assert len(axes) == 1
 
 
 @pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
-def test_plot_ppc_bad(models, pymc3_sample_ppc, kind):
-    data = from_pymc3(trace=models.pymc3_fit)
+def test_plot_ppc_bad(models, kind):
+    data = from_dict(posterior={"mu": np.random.randn()})
     with pytest.raises(TypeError):
         plot_ppc(data, kind=kind)
-    data = from_pymc3(trace=models.pymc3_fit, posterior_predictive=pymc3_sample_ppc)
     with pytest.raises(TypeError):
-        plot_ppc(data, kind="bad_val")
+        plot_ppc(models.model_1, kind="bad_val")
     with pytest.raises(TypeError):
-        plot_ppc(data, num_pp_samples="bad_val")
+        plot_ppc(models.model_1, num_pp_samples="bad_val")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
-def test_plot_violin(models, model_fit, var_names):
-    obj = getattr(models, model_fit)
-    axes = plot_violin(obj, var_names=var_names)
+def test_plot_violin(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names)
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_violin_ax(models, model_fit):
-    obj = getattr(models, model_fit)
+def test_plot_violin_ax(models):
     _, ax = plt.subplots(1)
-    axes = plot_violin(obj, var_names="mu", ax=ax)
+    axes = plot_violin(models.model_1, var_names="mu", ax=ax)
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_violin_layout(models, model_fit):
-    obj = getattr(models, model_fit)
-    axes = plot_violin(obj, var_names=["mu", "tau"], sharey=False)
+def test_plot_violin_layout(models):
+    axes = plot_violin(models.model_1, var_names=["mu", "tau"], sharey=False)
     assert axes.shape
 
 
@@ -621,39 +620,21 @@ def test_plot_autocorr_short_chain():
     assert axes
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_autocorr_uncombined(models, model_fit):
-    obj = getattr(models, model_fit)
-    axes = plot_autocorr(obj, combined=False)
+def test_plot_autocorr_uncombined(models):
+    axes = plot_autocorr(models.model_1, combined=False)
     assert axes.shape[0] == 1
-    assert (
-        axes.shape[1] == 36
-        and model_fit == "pymc3_fit"
-        or axes.shape[1] == 68
-        and model_fit == "stan_fit"
-        or axes.shape[1] == 10
-        and model_fit == "pyro_fit"
-    )
+    assert axes.shape[1] == 72
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_autocorr_combined(models, model_fit):
-    obj = getattr(models, model_fit)
-    axes = plot_autocorr(obj, combined=True)
+def test_plot_autocorr_combined(models):
+    axes = plot_autocorr(models.model_1, combined=True)
     assert axes.shape[0] == 1
-    assert (
-        axes.shape[1] == 18
-        and model_fit == "pymc3_fit"
-        or axes.shape[1] == 34
-        and model_fit == "stan_fit"
-        or axes.shape[1] == 10
-        and model_fit == "pyro_fit"
-    )
+    assert axes.shape[1] == 18
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_autocorr_var_names(models, var_names):
-    axes = plot_autocorr(models.pymc3_fit, var_names=var_names, combined=True)
+    axes = plot_autocorr(models.model_1, var_names=var_names, combined=True)
     assert axes.shape
 
 
@@ -667,10 +648,8 @@ def test_plot_autocorr_var_names(models, var_names):
         {"var_names": "mu", "ref_line": False},
     ],
 )
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_rank(models, model_fit, kwargs):
-    obj = getattr(models, model_fit)
-    axes = plot_rank(obj, **kwargs)
+def test_plot_rank(models, kwargs):
+    axes = plot_rank(models.model_1, **kwargs)
     assert axes.shape
 
 
@@ -692,10 +671,8 @@ def test_plot_rank(models, model_fit, kwargs):
         {"mu": {"ref_val": (-1, 1)}},
     ],
 )
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_posterior(models, model_fit, kwargs):
-    obj = getattr(models, model_fit)
-    axes = plot_posterior(obj, **kwargs)
+def test_plot_posterior(models, kwargs):
+    axes = plot_posterior(models.model_1, **kwargs)
     assert axes.shape
 
 
@@ -705,22 +682,18 @@ def test_plot_posterior_discrete(discrete_model, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
-def test_plot_posterior_bad(models, model_fit):
-    obj = getattr(models, model_fit)
+def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
-        plot_posterior(obj, rope="bad_value")
+        plot_posterior(models.model_1, rope="bad_value")
     with pytest.raises(ValueError):
-        plot_posterior(obj, ref_val="bad_value")
+        plot_posterior(models.model_1, ref_val="bad_value")
     with pytest.raises(ValueError):
-        plot_posterior(obj, point_estimate="bad_value")
+        plot_posterior(models.model_1, point_estimate="bad_value")
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit", "pyro_fit"])
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
-def test_point_estimates(models, model_fit, point_estimate):
-    obj = getattr(models, model_fit)
-    axes = plot_posterior(obj, var_names=("mu", "tau"), point_estimate=point_estimate)
+def test_point_estimates(models, point_estimate):
+    axes = plot_posterior(models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate)
     assert axes.shape == (2,)
 
 
@@ -729,8 +702,7 @@ def test_point_estimates(models, model_fit, point_estimate):
 )
 def test_plot_compare(models, kwargs):
 
-    # Pymc3 models create loglikelihood on InferenceData automatically
-    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     axes = plot_compare(model_compare, **kwargs)
     assert axes
@@ -738,8 +710,7 @@ def test_plot_compare(models, kwargs):
 
 def test_plot_compare_manual(models):
     """Test compare plot without scale column"""
-    # Pymc3 models create loglikelihood on InferenceData automatically
-    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # remove "scale" column
     del model_compare["waic_scale"]
@@ -749,7 +720,7 @@ def test_plot_compare_manual(models):
 
 def test_plot_compare_no_ic(models):
     """Check exception is raised if model_compare doesn't contain a valid information criterion"""
-    model_compare = compare({"Pymc3": models.pymc3_fit, "Pymc3_Again": models.pymc3_fit})
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
     model_compare = model_compare.drop("waic", axis=1)
@@ -760,7 +731,6 @@ def test_plot_compare_no_ic(models):
     assert "['waic', 'loo']" in str(err)
 
 
-@pytest.mark.parametrize("model_fit", ["pymc3_fit", "stan_fit"])
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -771,9 +741,8 @@ def test_plot_compare_no_ic(models):
         {"smooth": False},
     ],
 )
-def test_plot_hpd(models, model_fit, data, kwargs):
-    obj = getattr(models, model_fit)
-    plot_hpd(data["y"], obj["theta"], **kwargs)
+def test_plot_hpd(models, data, kwargs):
+    plot_hpd(data["y"], models.model_1.posterior["theta"], **kwargs)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
