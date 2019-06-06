@@ -193,10 +193,8 @@ def plot_elpd(
                     label,
                     horizontalalignment="center",
                     verticalalignment="bottom" if ydata[outlier] > 0 else "top",
-                    fontsize=.8*xt_labelsize,
+                    fontsize=0.8 * xt_labelsize,
                 )
-
-
 
         ax.set_title("{} - {}".format(*models), fontsize=titlesize, wrap=True)
         ax.set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
@@ -249,7 +247,7 @@ def plot_elpd(
                             label,
                             horizontalalignment="center",
                             verticalalignment="bottom" if ydata[outlier] > 0 else "top",
-                            fontsize=.8*xt_labelsize,
+                            fontsize=0.8 * xt_labelsize,
                         )
 
                 if j + 1 != numvars - 1:

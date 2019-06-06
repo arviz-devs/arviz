@@ -225,9 +225,9 @@ def compare(
         for idx, val in enumerate(ics.index):
             res = ics.loc[val]
             if scale_value < 0:
-                diff = res[ic_i] - min_ic_i_val
+                diff = (res[ic_i] - min_ic_i_val).values
             else:
-                diff = min_ic_i_val - res[ic_i]
+                diff = (min_ic_i_val - res[ic_i]).values
             d_ic = np.sum(diff)
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]

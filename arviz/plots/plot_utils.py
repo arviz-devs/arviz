@@ -407,7 +407,7 @@ def color_from_dim(dataarray, dim_name):
 
 
 def format_coords_as_labels(dataarray):
-    """Format 1d or multi-d dataarray coords as strings"""
+    """Format 1d or multi-d dataarray coords as strings."""
     coord_labels = dataarray.coords.to_index().values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])

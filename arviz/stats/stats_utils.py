@@ -384,7 +384,10 @@ SCALE_DICT = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
 
 
 class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
+    """Class to contain the data from elpd information criterion like waic or loo."""
+
     def __str__(self):
+        """Print elpd data in a user friendly way."""
         kind = self.index[0]
 
         if kind not in ("waic", "loo"):
@@ -415,4 +418,5 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         return base
 
     def __repr__(self):
+        """Alias to ``__str__``."""
         return self.__str__()
