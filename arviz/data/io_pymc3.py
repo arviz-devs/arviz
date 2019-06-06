@@ -44,7 +44,7 @@ class PyMC3Converter:
             """Compute log likelihood for each observed point."""
             log_like_vals = []
             for var, log_like in cached:
-                log_like_val = log_like(point)
+                log_like_val = np.atleast_1d(log_like(point))
                 if var.missing_values:
                     log_like_val = log_like_val[~var.observations.mask]
                 log_like_vals.append(log_like_val)
