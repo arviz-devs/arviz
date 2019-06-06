@@ -345,7 +345,7 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
 
 
 def get_coords(data, coords):
-    """Subselects xarray dataset object to provided coords. Raises exception if fails.
+    """Subselects xarray DataSet or DataArray object to provided coords. Raises exception if fails.
 
     Raises
     ------
@@ -358,7 +358,7 @@ def get_coords(data, coords):
     Returns
     -------
     data: xarray
-        xarray.Dataset object
+        xarray.DataSet or xarray.DataArray object, same type as input
     """
     try:
         return data.sel(**coords)

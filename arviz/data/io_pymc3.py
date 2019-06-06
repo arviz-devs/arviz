@@ -44,7 +44,7 @@ class PyMC3Converter:
             """Compute log likelihood for each observed point."""
             log_like_vals = []
             for var, log_like in cached:
-                log_like_val = log_like(point)
+                log_like_val = np.atleast_1d(log_like(point))
                 if var.missing_values:
                     log_like_val = log_like_val[~var.observations.mask]
                 log_like_vals.append(log_like_val)
@@ -52,7 +52,7 @@ class PyMC3Converter:
 
         chain_likelihoods = []
         for chain in self.trace.chains:
-            log_like = (log_likelihood_vals_point(point) for point in self.trace.points([chain]))
+            log_like = [log_likelihood_vals_point(point) for point in self.trace.points([chain])]
             chain_likelihoods.append(np.stack(log_like))
         return np.stack(chain_likelihoods), coord_name
 
@@ -114,6 +114,8 @@ class PyMC3Converter:
             dims = self.dims
         observed_data = {}
         for name, vals in observations.items():
+            if hasattr(vals, "get_value"):
+                vals = vals.get_value()
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
             val_dims, coords = generate_dims_coords(

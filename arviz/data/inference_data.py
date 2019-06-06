@@ -98,6 +98,31 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
+    def sel(self, inplace=True, **kwargs):
+        """Perform an xarray selection on all groups.
+
+        Loops over all groups to perform Dataset.sel(key=item)
+        for every kwarg if key is a dimension of the dataset.
+        The selection is performed inplace.
+
+        Parameters
+        ----------
+        inplace : bool
+            If True, modify the InferenceData object inplace, otherwise, return the modified copy.
+        **kwargs : mapping
+            It must be accepted by Dataset.sel()
+        """
+        out = self if inplace else deepcopy(self)
+        for group in self._groups:
+            dataset = getattr(self, group)
+            valid_keys = set(kwargs.keys()).intersection(dataset.dims)
+            dataset = dataset.sel(**{key: kwargs[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
 
 # pylint: disable=protected-access
 def concat(*args, copy=True, inplace=False):
