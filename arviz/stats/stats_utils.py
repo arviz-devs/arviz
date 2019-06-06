@@ -72,7 +72,9 @@ def autocorr(ary, axis=-1):
     return corr
 
 
-def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa: D202
+def make_ufunc(
+    func, n_dims=2, n_output=1, index=Ellipsis, ravel=True, check_shape=True
+):  # noqa: D202
     """Make ufunc from a function taking 1D array input.
 
     Parameters
@@ -88,6 +90,9 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         Slice ndarray with `index`. Defaults to `Ellipsis`.
     ravel : bool, optional
         If true, ravel the ndarray before calling `func`.
+    check_shape: bool, optional
+        If false, do not check if the shape of the output is compatible with n_dims and
+        n_output.
 
     Returns
     -------
@@ -101,7 +106,7 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         """General ufunc for single-output function."""
         if out is None:
             out = np.empty(ary.shape[:-n_dims])
-        else:
+        elif check_shape:
             if out.shape != ary.shape[:-n_dims]:
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
                 msg += " Correct shape is {}".format(ary.shape[:-n_dims])
@@ -116,7 +121,7 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         element_shape = ary.shape[:-n_dims]
         if out is None:
             out = tuple(np.empty(element_shape) for _ in range(n_output))
-        else:
+        elif check_shape:
             raise_error = False
             correct_shape = tuple(element_shape for _ in range(n_output))
             if isinstance(out, tuple):
