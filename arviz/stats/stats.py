@@ -522,14 +522,19 @@ def psislw(log_weights, reff=1.0):
     kss : array
         Pareto tail indices
     """
-    n_samples = log_weights.shape[-1]
+    if hasattr(log_weights, "samples"):
+        n_samples = len(log_weights.samples)
+        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "samples"]
+    else:
+        n_samples = log_weights.shape[-1]
+        shape = log_weights.shape[:-1]
     # precalculate constants
     cutoff_ind = -int(np.ceil(min(n_samples / 5.0, 3 * (n_samples / reff) ** 0.5))) - 1
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
     k_min = 1.0 / 3
 
     # create output array with proper dimensions
-    out = tuple([np.empty_like(log_weights), np.empty(log_weights.shape[:-1])])
+    out = tuple([np.empty_like(log_weights), np.empty(shape)])
 
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
@@ -564,7 +569,6 @@ def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
     kss : float
         Pareto tail index
     """
-
     x = np.asarray(log_weights)
 
     # improve numerical accuracy
