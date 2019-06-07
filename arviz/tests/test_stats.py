@@ -216,6 +216,15 @@ def test_waic_warning(centered_eight):
         assert waic(centered_eight, pointwise=True) is not None
 
 
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+def test_waic_print(centered_eight, scale):
+    waic_data = waic(centered_eight, scale=scale).__repr__()
+    waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
+    assert waic_data is not None
+    assert waic_pointwise is not None
+    assert waic_data == waic_pointwise
+
+
 def test_loo(centered_eight):
     assert loo(centered_eight) is not None
 
@@ -263,6 +272,16 @@ def test_loo_warning(centered_eight):
     centered_eight.sample_stats["log_likelihood"][:, :, :] = 0
     with pytest.warns(UserWarning):
         assert loo(centered_eight, pointwise=True) is not None
+
+
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+def test_loo_print(centered_eight, scale):
+    loo_data = loo(centered_eight, scale=scale).__repr__()
+    loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
+    assert loo_data is not None
+    assert loo_pointwise is not None
+    assert len(loo_data) < len(loo_pointwise)
+    assert loo_data == loo_pointwise[: len(loo_data)]
 
 
 def test_psislw():

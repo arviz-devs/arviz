@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from ..data import from_dict, load_arviz_data
-from ..stats import compare, psislw
+from ..stats import compare, psislw, loo, waic
 from .helpers import eight_schools_params  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -28,6 +28,7 @@ from ..plots import (
     plot_hpd,
     plot_dist,
     plot_rank,
+    plot_elpd,
 )
 
 np.random.seed(0)
@@ -74,7 +75,8 @@ def create_model(seed=10):
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"]},
+        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        coords={"obs_dim": range(data["J"])},
     )
     return model
 
@@ -763,3 +765,59 @@ def test_fast_kde_cumulative(limits):
     data = np.random.normal(0, 1, 1000)
     density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1], cumulative=True)[0]
     np.testing.assert_almost_equal(round(density_fast[-1], 3), 1)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"ic": "loo"},
+        {"xlabels": True, "scale": "log"},
+        {"color": "obs_dim", "xlabels": True},
+        {"color": "obs_dim", "legend": True},
+        {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
+        {"color": np.random.uniform(size=8), "threshold": 0.1},
+    ],
+)
+@pytest.mark.parametrize("add_model", [False, True])
+@pytest.mark.parametrize("use_elpddata", [False, True])
+def test_plot_elpd(models, add_model, use_elpddata, kwargs):
+    model_dict = {"Model 1": models.model_1, "Model 2": models.model_2}
+    if add_model:
+        model_dict["Model 3"] = create_model(seed=12)
+    if use_elpddata:
+        ic = kwargs.get("ic", "waic")
+        scale = kwargs.get("scale", "deviance")
+        if ic == "waic":
+            model_dict = {k: waic(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+        else:
+            model_dict = {k: loo(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+    axes = plot_elpd(model_dict, **kwargs)
+    assert np.all(axes)
+    if add_model:
+        assert axes.shape[0] == axes.shape[1]
+        assert axes.shape[0] == len(model_dict) - 1
+
+
+def test_plot_elpd_ic_error(models):
+    model_dict = {
+        "Model 1": waic(models.model_1, pointwise=True),
+        "Model 2": loo(models.model_2, pointwise=True),
+    }
+    with pytest.raises(SyntaxError):
+        plot_elpd(model_dict)
+
+
+def test_plot_elpd_scale_error(models):
+    model_dict = {
+        "Model 1": waic(models.model_1, pointwise=True),
+        "Model 2": waic(models.model_2, pointwise=True, scale="log"),
+    }
+    with pytest.raises(SyntaxError):
+        plot_elpd(model_dict)
+
+
+def test_plot_elpd_one_model(models):
+    model_dict = {"Model 1": models.model_1}
+    with pytest.raises(Exception):
+        plot_elpd(model_dict)
