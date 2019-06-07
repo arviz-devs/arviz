@@ -206,6 +206,6 @@ def test_valid_shape():
     )
 
 
-def test_ELPDData_error():
+def test_elpd_data_error():
     with pytest.raises(ValueError):
         ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]).__repr__()
