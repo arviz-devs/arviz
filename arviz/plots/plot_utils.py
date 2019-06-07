@@ -419,10 +419,9 @@ def format_coords_as_labels(dataarray):
 
 def set_xticklabels(ax, coord_labels):
     """Set xticklabels to label list using Matplotlib default formatter."""
-    xlim = ax.get_xlim()
     ax.xaxis.get_major_locator().set_params(nbins=9, steps=[1, 2, 5, 10])
     xticks = ax.get_xticks().astype(np.int64)
-    xticks = xticks[(xticks > xlim[0]) & (xticks < xlim[1])]
+    xticks = xticks[(xticks >= 0) & (xticks < len(coord_labels))]
     if len(xticks) > len(coord_labels):
         ax.set_xticks(np.arange(len(coord_labels)))
         ax.set_xticklabels(coord_labels)
