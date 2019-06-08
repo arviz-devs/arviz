@@ -814,10 +814,10 @@ def summary(
             (
                 mean,
                 sd,
-                mcse_mean,
-                mcse_sd,
                 hpd_lower,
                 hpd_higher,
+                mcse_mean,
+                mcse_sd,
                 ess_mean,
                 ess_sd,
                 ess_bulk,
@@ -829,10 +829,10 @@ def summary(
             (
                 "mean",
                 "sd",
-                "mcse_mean",
-                "mcse_sd",
                 "hpd_{:g}%".format(100 * alpha / 2),
                 "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "mcse_mean",
+                "mcse_sd",
                 "ess_mean",
                 "ess_sd",
                 "ess_bulk",
@@ -841,14 +841,14 @@ def summary(
             )
         )
     if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_mcse, circ_hpd_lower, circ_hpd_higher))
+        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
         metric_names.extend(
             (
                 "circular_mean",
                 "circular_sd",
-                "circular_mcse",
                 "circular_hpd_{:g}%".format(100 * alpha / 2),
                 "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "circular_mcse",
             )
         )
     metrics.extend(extra_metrics)
