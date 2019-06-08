@@ -67,6 +67,10 @@ jobs:
       then docker run  -t --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
       "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --junitxml=junit/test-results.xml --cov=arviz/ --cov-report=xml --cov-report=html";
         fi
+
+      if [ $? -ne 0 ]; then
+        exit 1
+        if
     displayName: 'Lint ArviZ'
 
   - script: |
