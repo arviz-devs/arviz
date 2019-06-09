@@ -4,13 +4,14 @@ import logging
 import warnings
 
 import numpy as np
+import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["autocorr", "autocov", "make_ufunc", "wrap_xarray_ufunc"]
+__all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "wrap_xarray_ufunc"]
 
 
 def autocov(ary, axis=-1):
@@ -71,7 +72,9 @@ def autocorr(ary, axis=-1):
     return corr
 
 
-def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa: D202
+def make_ufunc(
+    func, n_dims=2, n_output=1, index=Ellipsis, ravel=True, check_shape=True
+):  # noqa: D202
     """Make ufunc from a function taking 1D array input.
 
     Parameters
@@ -87,6 +90,9 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         Slice ndarray with `index`. Defaults to `Ellipsis`.
     ravel : bool, optional
         If true, ravel the ndarray before calling `func`.
+    check_shape: bool, optional
+        If false, do not check if the shape of the output is compatible with n_dims and
+        n_output.
 
     Returns
     -------
@@ -100,7 +106,7 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         """General ufunc for single-output function."""
         if out is None:
             out = np.empty(ary.shape[:-n_dims])
-        else:
+        elif check_shape:
             if out.shape != ary.shape[:-n_dims]:
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
                 msg += " Correct shape is {}".format(ary.shape[:-n_dims])
@@ -115,7 +121,7 @@ def make_ufunc(func, n_dims=2, n_output=1, index=Ellipsis, ravel=True):  # noqa:
         element_shape = ary.shape[:-n_dims]
         if out is None:
             out = tuple(np.empty(element_shape) for _ in range(n_output))
-        else:
+        elif check_shape:
             raise_error = False
             correct_shape = tuple(element_shape for _ in range(n_output))
             if isinstance(out, tuple):
@@ -363,3 +369,59 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
             _log.warning(error_msg)
 
     return nan_error | chain_error | draw_error
+
+
+BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
+
+{{0:{0}}} Estimate       SE
+{{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
+p_{{kind:{1}}} {{3:8.2f}}        -"""
+POINTWISE_LOO_FMT = """------
+
+Pareto k diagnostic values:
+                         {{0:>{0}}} {{1:>6}}
+(-Inf, 0.5]   (good)     {{2:{0}d}} {{6:6.1f}}%
+ (0.5, 0.7]   (ok)       {{3:{0}d}} {{7:6.1f}}%
+   (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
+   (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
+"""
+SCALE_DICT = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
+
+
+class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
+    """Class to contain the data from elpd information criterion like waic or loo."""
+
+    def __str__(self):
+        """Print elpd data in a user friendly way."""
+        kind = self.index[0]
+
+        if kind not in ("waic", "loo"):
+            raise ValueError("Invalid ELPDData object")
+
+        scale_str = SCALE_DICT[self["{}_scale".format(kind)]]
+        padding = len(scale_str) + len(kind) + 1
+        base = BASE_FMT.format(padding, padding - 2)
+        base = base.format(
+            "",
+            kind=kind,
+            scale=scale_str,
+            n_samples=self.n_samples,
+            n_points=self.n_data_points,
+            *self.values
+        )
+
+        if self.warning:
+            base += "\n\nThere has been a warning during the calculation. Please check the results."
+
+        if kind == "loo" and "pareto_k" in self:
+            counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, 0.5, 0.7, 1, np.inf])
+            extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
+            extended = extended.format(
+                "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
+            )
+            base = "\n".join([base, extended])
+        return base
+
+    def __repr__(self):
+        """Alias to ``__str__``."""
+        return self.__str__()

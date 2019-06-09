@@ -6,6 +6,7 @@ from .energyplot import plot_energy
 from .forestplot import plot_forest
 from .kdeplot import plot_kde, _fast_kde, _fast_kde_2d
 from .parallelplot import plot_parallel
+from .elpdplot import plot_elpd
 from .posteriorplot import plot_posterior
 from .traceplot import plot_trace
 from .pairplot import plot_pair
@@ -28,6 +29,7 @@ __all__ = [
     "_fast_kde",
     "_fast_kde_2d",
     "plot_parallel",
+    "plot_elpd",
     "plot_posterior",
     "plot_trace",
     "plot_pair",

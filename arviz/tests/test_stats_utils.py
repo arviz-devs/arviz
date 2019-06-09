@@ -4,7 +4,13 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
 
-from ..stats.stats_utils import logsumexp as _logsumexp, make_ufunc, wrap_xarray_ufunc, not_valid
+from ..stats.stats_utils import (
+    logsumexp as _logsumexp,
+    make_ufunc,
+    wrap_xarray_ufunc,
+    not_valid,
+    ELPDData,
+)
 
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])
@@ -198,3 +204,8 @@ def test_valid_shape():
     assert not_valid(
         np.ones((10, 10)), check_nan=False, shape_kwargs=dict(min_chains=100, min_draws=2)
     )
+
+
+def test_elpd_data_error():
+    with pytest.raises(ValueError):
+        ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]).__repr__()

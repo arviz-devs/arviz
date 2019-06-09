@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 from copy import deepcopy
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
+from numpy.testing import assert_allclose, assert_array_almost_equal
 import pytest
 from scipy.stats import linregress
 from xarray import Dataset, DataArray
@@ -40,7 +40,7 @@ def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
     res = linregress(x, y)
-    assert_almost_equal(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
+    assert_allclose(res.rvalue ** 2, r2_score(y, res.intercept + res.slope * x).r2, 2)
 
 
 def test_r2_score_multivariate():
@@ -57,8 +57,8 @@ def test_compare_same(centered_eight, method):
     data_dict = {"first": centered_eight, "second": centered_eight}
 
     weight = compare(data_dict, method=method)["weight"]
-    assert_almost_equal(weight[0], weight[1])
-    assert_almost_equal(np.sum(weight), 1.0)
+    assert_allclose(weight[0], weight[1])
+    assert_allclose(np.sum(weight), 1.0)
 
 
 def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
@@ -76,7 +76,7 @@ def test_compare_different(centered_eight, non_centered_eight, ic, method, scale
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
     assert weight["non_centered"] >= weight["centered"]
-    assert_almost_equal(np.sum(weight), 1.0)
+    assert_allclose(np.sum(weight), 1.0)
 
 
 def test_compare_different_size(centered_eight, non_centered_eight):
@@ -216,6 +216,15 @@ def test_waic_warning(centered_eight):
         assert waic(centered_eight, pointwise=True) is not None
 
 
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+def test_waic_print(centered_eight, scale):
+    waic_data = waic(centered_eight, scale=scale).__repr__()
+    waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
+    assert waic_data is not None
+    assert waic_pointwise is not None
+    assert waic_data == waic_pointwise
+
+
 def test_loo(centered_eight):
     assert loo(centered_eight) is not None
 
@@ -265,14 +274,22 @@ def test_loo_warning(centered_eight):
         assert loo(centered_eight, pointwise=True) is not None
 
 
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+def test_loo_print(centered_eight, scale):
+    loo_data = loo(centered_eight, scale=scale).__repr__()
+    loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()
+    assert loo_data is not None
+    assert loo_pointwise is not None
+    assert len(loo_data) < len(loo_pointwise)
+    assert loo_data == loo_pointwise[: len(loo_data)]
+
+
 def test_psislw():
     data = load_arviz_data("centered_eight")
     pareto_k = loo(data, pointwise=True, reff=0.7)["pareto_k"]
     log_likelihood = data.sample_stats.log_likelihood  # pylint: disable=no-member
-    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples,) + log_likelihood.shape[2:]
-    log_likelihood = log_likelihood.values.reshape(*new_shape)
-    assert_almost_equal(pareto_k, psislw(-log_likelihood, 0.7)[1])
+    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
 @pytest.mark.parametrize("probs", [True, False])

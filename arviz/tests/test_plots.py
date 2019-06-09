@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from ..data import from_dict, load_arviz_data
-from ..stats import compare, psislw
+from ..stats import compare, psislw, loo, waic
 from .helpers import eight_schools_params  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -28,6 +28,7 @@ from ..plots import (
     plot_hpd,
     plot_dist,
     plot_rank,
+    plot_elpd,
 )
 
 np.random.seed(0)
@@ -74,7 +75,56 @@ def create_model(seed=10):
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"]},
+        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        coords={"obs_dim": range(data["J"])},
+    )
+    return model
+
+
+def create_multidimensional_model(seed=10):
+    """Create model with fake data."""
+    np.random.seed(seed)
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "sigma": np.random.normal(size=(ndim1, ndim2)),
+    }
+    posterior = {
+        "mu": np.random.randn(nchains, ndraws),
+        "tau": abs(np.random.randn(nchains, ndraws)),
+        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    posterior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2)}
+    sample_stats = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": np.random.randn(nchains, ndraws) > 0.90,
+        "log_likelihood": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    prior = {
+        "mu": np.random.randn(nchains, ndraws) / 2,
+        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
+        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
+        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
+    }
+    prior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2}
+    sample_stats_prior = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
+    }
+    model = from_dict(
+        posterior=posterior,
+        posterior_predictive=posterior_predictive,
+        sample_stats=sample_stats,
+        prior=prior,
+        prior_predictive=prior_predictive,
+        sample_stats_prior=sample_stats_prior,
+        observed_data={"y": data["y"]},
+        dims={"y": ["dim1", "dim2"], "log_likelihood": ["dim1", "dim2"]},
+        coords={"dim1": range(ndim1), "dim2": range(ndim2)},
     )
     return model
 
@@ -84,6 +134,15 @@ def models():
     class Models:
         model_1 = create_model(seed=10)
         model_2 = create_model(seed=11)
+
+    return Models()
+
+
+@pytest.fixture(scope="module")
+def multidim_models():
+    class Models:
+        model_1 = create_multidimensional_model(seed=10)
+        model_2 = create_multidimensional_model(seed=11)
 
     return Models()
 
@@ -763,3 +822,104 @@ def test_fast_kde_cumulative(limits):
     data = np.random.normal(0, 1, 1000)
     density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1], cumulative=True)[0]
     np.testing.assert_almost_equal(round(density_fast[-1], 3), 1)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"ic": "loo"},
+        {"xlabels": True, "scale": "log"},
+        {"color": "obs_dim", "xlabels": True},
+        {"color": "obs_dim", "legend": True},
+        {"ic": "loo", "color": "blue", "coords": {"obs_dim": slice(2, 5)}},
+        {"color": np.random.uniform(size=8), "threshold": 0.1},
+    ],
+)
+@pytest.mark.parametrize("add_model", [False, True])
+@pytest.mark.parametrize("use_elpddata", [False, True])
+def test_plot_elpd(models, add_model, use_elpddata, kwargs):
+    model_dict = {"Model 1": models.model_1, "Model 2": models.model_2}
+    if add_model:
+        model_dict["Model 3"] = create_model(seed=12)
+
+    if use_elpddata:
+        ic = kwargs.get("ic", "waic")
+        scale = kwargs.get("scale", "deviance")
+        if ic == "waic":
+            model_dict = {k: waic(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+        else:
+            model_dict = {k: loo(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+
+    axes = plot_elpd(model_dict, **kwargs)
+    assert np.all(axes)
+    if add_model:
+        assert axes.shape[0] == axes.shape[1]
+        assert axes.shape[0] == len(model_dict) - 1
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"ic": "loo"},
+        {"xlabels": True, "scale": "log"},
+        {"color": "dim1", "xlabels": True},
+        {"color": "dim2", "legend": True},
+        {"ic": "loo", "color": "blue", "coords": {"dim2": slice(2, 4)}},
+        {"color": np.random.uniform(size=35), "threshold": 0.1},
+    ],
+)
+@pytest.mark.parametrize("add_model", [False, True])
+@pytest.mark.parametrize("use_elpddata", [False, True])
+def test_plot_elpd_multidim(multidim_models, add_model, use_elpddata, kwargs):
+    model_dict = {"Model 1": multidim_models.model_1, "Model 2": multidim_models.model_2}
+    if add_model:
+        model_dict["Model 3"] = create_multidimensional_model(seed=12)
+
+    if use_elpddata:
+        ic = kwargs.get("ic", "waic")
+        scale = kwargs.get("scale", "deviance")
+        if ic == "waic":
+            model_dict = {k: waic(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+        else:
+            model_dict = {k: loo(v, scale=scale, pointwise=True) for k, v in model_dict.items()}
+
+    axes = plot_elpd(model_dict, **kwargs)
+    assert np.all(axes)
+    if add_model:
+        assert axes.shape[0] == axes.shape[1]
+        assert axes.shape[0] == len(model_dict) - 1
+
+
+def test_plot_elpd_bad_ic(models):
+    model_dict = {
+        "Model 1": waic(models.model_1, pointwise=True),
+        "Model 2": loo(models.model_2, pointwise=True),
+    }
+    with pytest.raises(ValueError):
+        plot_elpd(model_dict, ic="bad_ic")
+
+
+def test_plot_elpd_ic_error(models):
+    model_dict = {
+        "Model 1": waic(models.model_1, pointwise=True),
+        "Model 2": loo(models.model_2, pointwise=True),
+    }
+    with pytest.raises(SyntaxError):
+        plot_elpd(model_dict)
+
+
+def test_plot_elpd_scale_error(models):
+    model_dict = {
+        "Model 1": waic(models.model_1, pointwise=True),
+        "Model 2": waic(models.model_2, pointwise=True, scale="log"),
+    }
+    with pytest.raises(SyntaxError):
+        plot_elpd(model_dict)
+
+
+def test_plot_elpd_one_model(models):
+    model_dict = {"Model 1": models.model_1}
+    with pytest.raises(Exception):
+        plot_elpd(model_dict)

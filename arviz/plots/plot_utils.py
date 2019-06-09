@@ -375,3 +375,56 @@ def get_coords(data, coords):
                 " dimensions are valid. {}"
             ).format(err)
         )
+
+
+def color_from_dim(dataarray, dim_name):
+    """Return colors and color mapping of a DataArray using coord values as color code.
+
+    Parameters
+    ----------
+    dataarray : xarray.DataArray
+    dim_name : str
+        dimension whose coordinates will be used as color code.
+
+    Returns
+    -------
+    colors : array of floats
+        Array of colors (as floats for use with a cmap) for each element in the dataarray.
+    color_mapping : mapping coord_value -> float
+        Mapping from coord values to corresponding color
+    """
+    present_dims = dataarray.dims
+    coord_values = dataarray[dim_name].values
+    unique_coords = set(coord_values)
+    color_mapping = {coord: num / len(unique_coords) for num, coord in enumerate(unique_coords)}
+    if len(present_dims) > 1:
+        multi_coords = dataarray.coords.to_index()
+        coord_idx = present_dims.index(dim_name)
+        colors = [color_mapping[coord[coord_idx]] for coord in multi_coords]
+    else:
+        colors = [color_mapping[coord] for coord in coord_values]
+    return colors, color_mapping
+
+
+def format_coords_as_labels(dataarray):
+    """Format 1d or multi-d dataarray coords as strings."""
+    coord_labels = dataarray.coords.to_index().values
+    if isinstance(coord_labels[0], tuple):
+        fmt = ", ".join(["{}" for _ in coord_labels[0]])
+        coord_labels[:] = [fmt.format(*x) for x in coord_labels]
+    else:
+        coord_labels[:] = ["{}".format(s) for s in coord_labels]
+    return coord_labels
+
+
+def set_xticklabels(ax, coord_labels):
+    """Set xticklabels to label list using Matplotlib default formatter."""
+    ax.xaxis.get_major_locator().set_params(nbins=9, steps=[1, 2, 5, 10])
+    xticks = ax.get_xticks().astype(np.int64)
+    xticks = xticks[(xticks >= 0) & (xticks < len(coord_labels))]
+    if len(xticks) > len(coord_labels):
+        ax.set_xticks(np.arange(len(coord_labels)))
+        ax.set_xticklabels(coord_labels)
+    else:
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(coord_labels[xticks])
