@@ -78,15 +78,42 @@ def plot_khat(
 
     Examples
     --------
-    Plot a default khat plot
+    Plot estimated pareto shape parameters showing how many fall in each category.
 
     .. plot::
         :context: close-figs
 
         >>> import arviz as az
-        >>> centered_eight = az.load_arviz_data('centered_eight')
-        >>> pareto_k = az.loo(centered_eight, pointwise=True)['pareto_k']
-        >>> az.plot_khat(pareto_k)
+        >>> radon = az.load_arviz_data("radon")
+        >>> loo_radon = az.loo(radon, pointwise=True)
+        >>> az.plot_khat(loo_radon, show_bins=True)
+
+    Show xlabels
+
+    .. plot::
+        :context: close-figs
+
+        >>> centered_eight = az.load_arviz_data("centered_eight")
+        >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
+        >>> az.plot_khat(khats, xlabels=True, annotate=True)
+
+    Use coord values to create color mapping
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_khat(loo_radon, color="observed_county", cmap="tab20")
+
+    Use custom color scheme
+
+    .. plot::
+        :context: close-figs
+
+        >>> counties = radon.posterior.observed_county.values
+        >>> colors = [
+        ...     "blue" if county[-1] in ("A", "N") else "green" for county in counties
+        ... ]
+        >>> az.plot_khat(loo_radon, color=colors)
 
     """
     if hlines_kwargs is None:
@@ -150,12 +177,12 @@ def plot_khat(
             rgba_c = to_rgba_array(np.full(n_data_points, color))
     else:
         legend = False
-        if len(color.shape) == 1 and len(color) == n_data_points:
+        try:
+            rgba_c = to_rgba_array(color)
+        except ValueError:
             cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
             cmap = getattr(cm, cmap_name)
             rgba_c = cmap(color)
-        else:
-            rgba_c = to_rgba_array(color)
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
