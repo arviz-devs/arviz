@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.ticker import NullFormatter
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
