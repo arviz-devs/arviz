@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from ..data import from_dict, load_arviz_data
-from ..stats import compare, psislw, loo, waic
+from ..stats import compare, loo, waic
 from .helpers import eight_schools_params  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
