@@ -83,10 +83,9 @@ def plot_khat(
     if hlines_kwargs is None:
         hlines_kwargs = {}
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
-    hlines_kwargs.setdefault("alpha", 0.5)
+    hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
     hlines_kwargs.setdefault("color", "C1")
-
 
     if coords is None:
         coords = {}
@@ -129,13 +128,13 @@ def plot_khat(
             cmap_name = kwargs.pop("cmap", plt.rcParams["image.cmap"])
             cmap = getattr(cm, cmap_name)
             if legend:
-                ms = np.sqrt(kwargs.pop("s", markersize))
+                msize = np.sqrt(kwargs.pop("s", markersize))
                 handles = [
-                    Line2D([], [], color=cmap(float_color), label=coord, ms=ms, lw=0, **kwargs)
+                    Line2D([], [], color=cmap(float_color), label=coord, ms=msize, lw=0, **kwargs)
                     for coord, float_color in color_mapping.items()
                 ]
                 kwargs.setdefault("cmap", cmap_name)
-                kwargs.setdefault("s", ms ** 2)
+                kwargs.setdefault("s", msize ** 2)
             rgba_c = np.array([cmap(float_color) for float_color in colors])
         else:
             legend = False
@@ -154,13 +153,7 @@ def plot_khat(
 
     xlims = ax.get_xlim()
     ylims1 = ax.get_ylim()
-    ax.hlines(
-        [0, 0.5, 0.7, 1],
-        xmin=xlims[0],
-        xmax=xlims[1],
-        linewidth=linewidth,
-        **hlines_kwargs
-    )
+    ax.hlines([0, 0.5, 0.7, 1], xmin=xlims[0], xmax=xlims[1], linewidth=linewidth, **hlines_kwargs)
     ylims2 = ax.get_ylim()
     ax.set_xlim(xlims)
     ax.set_ylim(min(ylims1[0], ylims2[0]), min(ylims1[1], ylims2[1]))
