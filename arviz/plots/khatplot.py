@@ -135,13 +135,18 @@ def plot_khat(
                 ]
                 kwargs.setdefault("cmap", cmap_name)
                 kwargs.setdefault("s", msize ** 2)
-            rgba_c = np.array([cmap(float_color) for float_color in colors])
+            rgba_c = cmap(colors)
         else:
             legend = False
             rgba_c = to_rgba_array(np.full(n_data_points, color))
     else:
         legend = False
-        rgba_c = to_rgba_array(color)
+        if len(color.shape) == 1 and len(color) == n_data_points:
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            rgba_c = cmap(color)
+        else:
+            rgba_c = to_rgba_array(color)
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))

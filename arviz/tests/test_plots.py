@@ -421,11 +421,6 @@ def test_plot_kde_inference_data(models):
         plot_kde(models.model_1.posterior)
 
 
-def test_plot_khat():
-    linewidth = np.random.randn(20000, 10)
-    _, khats = psislw(linewidth)
-    axes = plot_khat(khats)
-    assert axes
 
 
 @pytest.mark.slow
@@ -923,3 +918,62 @@ def test_plot_elpd_one_model(models):
     model_dict = {"Model 1": models.model_1}
     with pytest.raises(Exception):
         plot_elpd(model_dict)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "obs_dim", "xlabels": True},
+        {"color": "obs_dim", "legend": True},
+        {"color": "blue", "coords": {"obs_dim": slice(2, 4)}},
+        {"color": np.random.uniform(size=8)},
+        {"color": np.random.uniform(size=(8, 3))},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat(models, input_type, kwargs):
+    khats_data = loo(models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if "color" in kwargs and isinstance(kwargs["color"], str) and kwargs["color"] == "obs_dim":
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "dim1", "xlabels": True},
+        {"color": "dim2", "legend": True},
+        {"color": "blue", "coords": {"dim2": slice(2, 4)}},
+        {"color": np.random.uniform(size=35)},
+        {"color": np.random.uniform(size=(35, 3))},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat_multidim(multidim_models, input_type, kwargs):
+    khats_data = loo(multidim_models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if "color" in kwargs and isinstance(kwargs["color"], str) and kwargs["color"] in ("dim1", "dim2"):
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, **kwargs)
+    assert axes
+
+
+def test_plot_khat_bad_input(models):
+    with pytest.raises(ValueError):
+        plot_khat(models.model_1.sample_stats)
