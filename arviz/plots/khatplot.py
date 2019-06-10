@@ -1,31 +1,63 @@
 """Pareto tail indices plot."""
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.colors import to_rgba_array
+import matplotlib.cm as cm
 import numpy as np
+from xarray import DataArray
 
-from .plot_utils import _scale_fig_size
+from .plot_utils import (
+    _scale_fig_size,
+    get_coords,
+    color_from_dim,
+    format_coords_as_labels,
+    set_xticklabels,
+)
+from ..stats import ELPDData
 
 
 def plot_khat(
-    khats, figsize=None, textsize=None, markersize=None, ax=None, hlines_kwargs=None, **kwargs
+    khats,
+    color=None,
+    xlabels=False,
+    figsize=None,
+    textsize=None,
+    coords=None,
+    legend=False,
+    markersize=None,
+    ax=None,
+    hlines_kwargs=None,
+    **kwargs
 ):
     """
     Plot Pareto tail indices.
 
     Parameters
     ----------
-    khats : array
+    khats : ELPDData cointaining pareto shapes information or array
         Pareto tail indices.
-    figsize : tuple
+    color : str or array_like, optional
+        Colors of the scatter plot, if color is a str all dots will have the same color,
+        if it is the size of the observations, each dot will have the specified color,
+        otherwise, it will be interpreted as a list of the dims to be used for the color code
+    xlabels : bool, optional
+        Use coords as xticklabels
+    figsize : tuple, optional
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    markersize: int
+    coords : mapping, optional
+        Coordinates of points to plot. **All** values are used for computation, but only a
+        a subset can be plotted for convenience.
+    legend : bool, optional
+        Include a legend to the plot. Only taken into account when color argument is a dim name.
+    markersize: int, optional
         markersize for scatter plot. Defaults to `None` in which case it will
         be chosen based on autoscaling for figsize.
-    ax: axes, opt
+    ax: axes, optional
       Matplotlib axes
-    hlines_kwargs: dictionary
+    hlines_kwargs: dictionary, optional
       Additional keywords passed to ax.hlines
     kwargs :
       Additional keywords passed to ax.scatter
@@ -50,32 +82,98 @@ def plot_khat(
     """
     if hlines_kwargs is None:
         hlines_kwargs = {}
+    hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
+    hlines_kwargs.setdefault("alpha", 0.5)
+    hlines_kwargs.setdefault("zorder", -1)
+    hlines_kwargs.setdefault("color", "C1")
+
+
+    if coords is None:
+        coords = {}
+
+    if color is None:
+        color = "C0"
+
+    if isinstance(khats, np.ndarray):
+        khats = khats.flatten()
+        xlabels = False
+        legend = False
+        dims = []
+    else:
+        if isinstance(khats, ELPDData):
+            khats = khats.pareto_k
+        if not isinstance(khats, DataArray):
+            raise ValueError("Incorrect khat data input. Check the documentation")
+
+        khats = get_coords(khats, coords)
+        dims = khats.dims
+
+    if xlabels:
+        coord_labels = format_coords_as_labels(khats)
+
+    n_data_points = khats.size
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
         figsize, textsize
     )
 
     if markersize is None:
-        markersize = scaled_markersize
+        markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
+        # for dots to have the same size
+    kwargs.setdefault("s", markersize)
+    kwargs.setdefault("marker", "+")
+
+    if isinstance(color, str):
+        if color in dims:
+            colors, color_mapping = color_from_dim(khats, color)
+            cmap_name = kwargs.pop("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            if legend:
+                ms = np.sqrt(kwargs.pop("s", markersize))
+                handles = [
+                    Line2D([], [], color=cmap(float_color), label=coord, ms=ms, lw=0, **kwargs)
+                    for coord, float_color in color_mapping.items()
+                ]
+                kwargs.setdefault("cmap", cmap_name)
+                kwargs.setdefault("s", ms ** 2)
+            rgba_c = np.array([cmap(float_color) for float_color in colors])
+        else:
+            legend = False
+            rgba_c = to_rgba_array(np.full(n_data_points, color))
+    else:
+        legend = False
+        rgba_c = to_rgba_array(color)
 
     if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
+        fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))
 
+    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
+    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
+    rgba_c[:, 3] = alphas
+    ax.scatter(np.arange(n_data_points), khats, c=rgba_c, **kwargs)
+
+    xlims = ax.get_xlim()
+    ylims1 = ax.get_ylim()
     ax.hlines(
         [0, 0.5, 0.7, 1],
-        xmin=-1,
-        xmax=len(khats) + 1,
-        alpha=0.25,
+        xmin=xlims[0],
+        xmax=xlims[1],
         linewidth=linewidth,
         **hlines_kwargs
     )
+    ylims2 = ax.get_ylim()
+    ax.set_xlim(xlims)
+    ax.set_ylim(min(ylims1[0], ylims2[0]), min(ylims1[1], ylims2[1]))
 
-    alphas = 0.5 + 0.5 * (khats > 0.5)
-    rgba_c = np.zeros((len(khats), 4))
-    rgba_c[:, 2] = 0.8
-    rgba_c[:, 3] = alphas
-    ax.scatter(np.arange(len(khats)), khats, c=rgba_c, marker="+", s=markersize, **kwargs)
-    ax.set_xlabel("Data point", fontsize=ax_labelsize)
-    ax.set_ylabel(r"Shape parameter κ", fontsize=ax_labelsize)
+    ax.set_xlabel("Data Point", fontsize=ax_labelsize)
+    ax.set_ylabel(r"Shape parameter k", fontsize=ax_labelsize)
     ax.tick_params(labelsize=xt_labelsize)
+    if xlabels:
+        set_xticklabels(ax, coord_labels)
+        fig.autofmt_xdate()
+    if legend:
+        ncols = len(handles) // 6 + 1
+        ax.legend(handles=handles, ncol=ncols, title=color)
+    if xlabels or legend:
+        fig.tight_layout()
     return ax
