@@ -20,6 +20,9 @@ def plot_khat(
     khats,
     color=None,
     xlabels=False,
+    show_bins=False,
+    bin_format="{1:.1f}%",
+    annotate=False,
     figsize=None,
     textsize=None,
     coords=None,
@@ -42,6 +45,12 @@ def plot_khat(
         otherwise, it will be interpreted as a list of the dims to be used for the color code
     xlabels : bool, optional
         Use coords as xticklabels
+    show_bins : bool, optional
+        Show the number of khats which fall in each bin.
+    bin_format : str, optional
+        The string is used as formatting guide calling ``show_bins.format(count, pct)``.
+    annotate : bool, optional
+        Show the labels of k values larger than 1.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -149,19 +158,51 @@ def plot_khat(
             rgba_c = to_rgba_array(color)
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))
+        fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
 
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
-    ax.scatter(np.arange(n_data_points), khats, c=rgba_c, **kwargs)
+    xdata = np.arange(n_data_points)
+    ax.scatter(xdata, khats, c=rgba_c, **kwargs)
+    if annotate:
+        idxs = xdata[khats > 1]
+        try:
+            coord_labels
+        except NameError:
+            coord_labels = xdata.astype(str)
+        for idx in idxs:
+            ax.text(
+                idx,
+                khats[idx],
+                coord_labels[idx],
+                horizontalalignment="center",
+                verticalalignment="bottom",
+                fontsize=0.8 * xt_labelsize,
+            )
 
-    xlims = ax.get_xlim()
+    xmin, xmax = ax.get_xlim()
+    if show_bins:
+        xmax += n_data_points / 12
     ylims1 = ax.get_ylim()
-    ax.hlines([0, 0.5, 0.7, 1], xmin=xlims[0], xmax=xlims[1], linewidth=linewidth, **hlines_kwargs)
+    ax.hlines([0, 0.5, 0.7, 1], xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs)
     ylims2 = ax.get_ylim()
-    ax.set_xlim(xlims)
-    ax.set_ylim(min(ylims1[0], ylims2[0]), min(ylims1[1], ylims2[1]))
+    ymin = min(ylims1[0], ylims2[0])
+    ymax = min(ylims1[1], ylims2[1])
+    if show_bins:
+        bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
+        bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
+        hist, _ = np.histogram(khats, bin_edges)
+        for idx, count in enumerate(hist):
+            ax.text(
+                (n_data_points - 1 + xmax) / 2,
+                np.mean(bin_edges[idx : idx + 2]),
+                bin_format.format(count, count / n_data_points * 100),
+                horizontalalignment="center",
+                verticalalignment="center",
+            )
+    ax.set_ylim(ymin, ymax)
+    ax.set_xlim(xmin, xmax)
 
     ax.set_xlabel("Data Point", fontsize=ax_labelsize)
     ax.set_ylabel(r"Shape parameter k", fontsize=ax_labelsize)
@@ -169,9 +210,8 @@ def plot_khat(
     if xlabels:
         set_xticklabels(ax, coord_labels)
         fig.autofmt_xdate()
+        fig.tight_layout()
     if legend:
         ncols = len(handles) // 6 + 1
         ax.legend(handles=handles, ncol=ncols, title=color)
-    if xlabels or legend:
-        fig.tight_layout()
     return ax
