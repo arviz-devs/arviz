@@ -1159,13 +1159,13 @@ def loo_pit(idata, y, y_hat=None):
     y_hat = idata.posterior_predictive[y_hat]
     y_hat = y_hat.stack(samples=("chain", "draw"))
     log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-    log_weights, _ = psislw(-log_likelihood.values.T)
+    log_weights, _ = psislw(-log_likelihood.values)
 
     return xr.apply_ufunc(
         _loo_pit,
         y,
         y_hat,
-        log_weights.T,
+        log_weights,
         input_core_dims=[[], ["samples"], ["samples"]],
         output_core_dims=[[]],
     )
