@@ -1,9 +1,12 @@
 """PyMC3-specific conversion code."""
+import logging
 import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+
+_log = logging.getLogger(__name__)
 
 
 class PyMC3Converter:
@@ -13,6 +16,8 @@ class PyMC3Converter:
         self, *, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
     ):
         self.trace = trace
+        self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+        self.ndraws = len(trace._straces[0]) # pylint: disable=protected-access
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.coords = coords
@@ -87,7 +92,19 @@ class PyMC3Converter:
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        data = {k: np.expand_dims(v, 0) for k, v in self.posterior_predictive.items()}
+        data = {}
+        for k, ary in self.posterior_predictive.items():
+            shape = ary.shape
+            if shape[0] == self.nchains and shape[1] == self.ndraws:
+                data[k] = ary
+            elif shape[0] == self.nchains * self.ndraws:
+                data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
+            else:
+                data[k] = np.expand_dims(ary, 0)
+                _log.warning(
+                    "posterior predictive shape not compatible with number of chains and draws. "
+                    "This can mean that some draws or even whole chains are not represented."
+                )
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
     @requires("prior")
