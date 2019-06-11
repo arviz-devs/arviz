@@ -33,10 +33,10 @@ class TestDataPyMC3:
             posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
-        )
+        ), posterior_predictive
 
-    def test_from_pymc(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
+    def test_from_pymc(self, data, eight_schools_params, chains, draws):
+        inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "sample_stats": ["diverging", "log_likelihood"],
@@ -46,6 +46,10 @@ class TestDataPyMC3:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+        for key, values in posterior_predictive.items():
+            ivalues = inference_data.posterior_predictive[key]
+            for chain in range(chains):
+                assert np.all(np.isclose(ivalues[chain], values[chain * draws : (chain + 1) * draws]))
 
     def test_posterior_predictive_reshaped(self, data, chains, draws, eight_schools_params):
         with data.model:
