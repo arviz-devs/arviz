@@ -1134,32 +1134,42 @@ def waic(data, pointwise=False, scale="deviance"):
         )
 
 
-def loo_pit(idata, y, y_hat=None):
+def loo_pit(y, y_hat, log_weights):
     """Compute LOO-PIT values.
 
     Arguments
     ---------
-    idata : InferenceData
-        Inference data object containing the observed data, posterior predictive and
-        sample stats (with log likelihood) groups.
-    y : str
-        Name of the observed data variable.
-    y_hat : str, optional
-        Name of the posterior predictive variable corresponding to the `y` argument. If ``None``
-        it will be taken as equal to `y`.
+    y : array or DataArray
+        Observed data.
+    y_hat : array or DataArray
+        Posterior predictive samples for ``y``. It must have the same shape as y plus an
+        extra dimension at the end of size n_samples (chains and draws stacked)
+    log_weights : array or DataArray
+        Smoothed log_weights. It must have the same shape as ``y_hat``
 
     Returns
     -------
-    loo_pit : DataArray
+    loo_pit : array or DataArray
         Value of the LOO-PIT at each observed data point.
     """
-    if y_hat is None:
-        y_hat = y
-    y = idata.observed_data[y]
-    y_hat = idata.posterior_predictive[y_hat]
-    y_hat = y_hat.stack(samples=("chain", "draw"))
-    log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-    log_weights, _ = psislw(-log_likelihood.values)
+    if len(y.shape) + 1 != len(y_hat.shape):
+        raise ValueError(
+            "y_hat must have 1 more dimension than y, but y_hat has {} dims and y has "
+            "{} dims".format(len(y.shape), len(y_hat.shape))
+        )
+
+    if y.shape != y_hat.shape[:-1]:
+        raise ValueError(
+            "y has shape: {} which should be equal to y_hat shape (omitting the last "
+            "dimension): {}".format(y.shape, y_hat.shape)
+        )
+
+    if y_hat.shape != log_weights.shape:
+        raise ValueError(
+            "y_hat and log_weights must have the same shape but have shapes {} and {}".format(
+                y_hat.shape, log_weights.shape
+            )
+        )
 
     return xr.apply_ufunc(
         _loo_pit,
@@ -1168,6 +1178,7 @@ def loo_pit(idata, y, y_hat=None):
         log_weights,
         input_core_dims=[[], ["samples"], ["samples"]],
         output_core_dims=[[]],
+        join="left",
     )
 
 
