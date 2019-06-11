@@ -17,7 +17,7 @@ class PyMC3Converter:
     ):
         self.trace = trace
         self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-        self.ndraws = len(trace._straces[0]) # pylint: disable=protected-access
+        self.ndraws = len(trace)
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.coords = coords
