@@ -100,8 +100,12 @@ def plot_loo_pit(
     y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw"))
     log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
     log_weights, _ = _psislw(-log_likelihood)
-    loo_pit = _loo_pit(y, y_hat, log_weights)
-    loo_pit_kde, _, _ = _fast_kde(loo_pit.values.flatten(), xmin=0, xmax=1)
+
+    if log_weights.dims == y_hat.dims and y_hat.dims[:-1] == y.dims:
+        loo_pit = _loo_pit(y, y_hat, log_weights).values
+    else:
+        loo_pit = _loo_pit(y.values, y_hat.values, log_weights.values)
+    loo_pit_kde, _, _ = _fast_kde(loo_pit.flatten(), xmin=0, xmax=1)
 
     unif = np.random.uniform(size=(n_unif, loo_pit.size))
     x_vals = np.linspace(0, 1, len(loo_pit_kde))
