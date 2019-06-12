@@ -21,8 +21,6 @@ from .stats_utils import (
 from ..utils import _var_names,conditional_jit
 from numba import njit
 
->>>>>>> Pushing
-
 _log = logging.getLogger(__name__)
 
 __all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
