@@ -1,3 +1,4 @@
+"""Plot LOO-PIT predictive checks of inference data."""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb
