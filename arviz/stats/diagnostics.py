@@ -2,7 +2,6 @@
 """Diagnostic functions for ArviZ."""
 from collections.abc import Sequence
 import warnings
-
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -13,9 +12,10 @@ from .stats_utils import (
     autocov as _autocov,
     not_valid as _not_valid,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
+    stats_variance_2d as svar
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names
+from ..utils import _var_names, conditional_jit, conditional_vect,numba_check
 
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
@@ -23,36 +23,29 @@ __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
 def bfmi(data):
     r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
-
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
     values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
     change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
-
     Parameters
     ----------
     data : obj
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
         If InferenceData, energy variable needs to be found.
-
     Returns
     -------
     z : array
         The Bayesian fraction of missing information of the model and trace. One element per
         chain in the trace.
-
     Examples
     --------
     Compute the BFMI of an InferenceData object
-
     .. ipython::
-
         In [1]: import arviz as az
            ...: data = az.load_arviz_data('radon')
            ...: az.bfmi(data)
-
     """
     if isinstance(data, np.ndarray):
         return _bfmi(data)
@@ -65,9 +58,7 @@ def bfmi(data):
 
 def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
     r"""Calculate estimate of the effective sample size.
-
     Function deprecated. Use `arviz.ess`.
-
     Parameters
     ----------
     data : obj
@@ -79,7 +70,6 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         Names of variables to include in the effective_sample_size_mean report
     method : str
         Select ess method. Valid methods are:
-
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -90,32 +80,25 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
         - "z_scale"
         - "folded"
         - "identity"
-
     relative : bool
         Return relative ess
         `ress = ess / N`
     prob : float, optional
         probability value for "tail" and "quantile" ess functions.
-
     Returns
     -------
     xarray.Dataset
         Return the effective sample size for mean, :math:`\hat{N}_{eff}`
-
     Notes
     -----
     The basic ess diagnostic is computed by:
-
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
     where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
     is the first odd positive integer for which the sum
     :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
-
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
@@ -131,7 +114,6 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
 
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     r"""Calculate estimate of the effective sample size.
-
     Parameters
     ----------
     data : obj
@@ -143,7 +125,6 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         Names of variables to include in the effective_sample_size_mean report
     method : str
         Select ess method. Valid methods are:
-
         - "bulk"
         - "tail"     # prob, optional
         - "quantile" # prob
@@ -154,54 +135,41 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
-
     relative : bool
         Return relative ess
         `ress = ess / n`
     prob : float, optional
         probability value for "tail" and "quantile" ess functions.
-
     Returns
     -------
     xarray.Dataset
         Return the effective sample size, :math:`\hat{N}_{eff}`
-
     Notes
     -----
     The basic ess diagnostic is computed by:
-
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
-
     where :math:`M` is the number of chains, :math:`N` the number of draws,
     :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag :math:`t`, and
     :math:`K` is the last integer for which :math:`\hat{P}_{K} = \hat{\rho}_{2K} +
     \hat{\rho}_{2K+1}` is still positive.
-
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
-
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
     * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
       Section 15.4.2
     * Gelman et al. BDA (2014) Formula 11.8
-
     Examples
     --------
     Calculate the effective_sample_size using the default arguments:
-
     .. ipython::
-
         In [1]: import arviz as az
            ...: data = az.load_arviz_data('non_centered_eight')
            ...: az.ess(data)
-
     Calculate the ress of some of the variables
-
     .. ipython::
-
         In [1]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
 
     Calculate the ess using the "tail" method, leaving the `prob` argument at its default
@@ -263,13 +231,11 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
 def rhat(data, *, var_names=None, method="rank"):
     r"""Compute estimate of rank normalized splitR-hat for a set of traces.
-
     The rank normalized R-hat diagnostic tests for lack of convergence by comparing the variance
     between multiple chains to the variance within each chain. If convergence has been achieved,
     the between-chain and within-chain variances should be identical. To be most effective in
     detecting evidence for nonconvergence, each chain should have been initialized to starting
     values that are dispersed relative to the target distribution.
-
     Parameters
     ----------
     data : obj
@@ -283,55 +249,41 @@ def rhat(data, *, var_names=None, method="rank"):
         Names of variables to include in the rhat report
     method : str
         Select R-hat method. Valid methods are:
-
         - "rank"        # recommended by Vehtari et al. (2019)
         - "split"
         - "folded"
         - "z_scale"
         - "identity"
-
     Returns
     -------
     xarray.Dataset
       Returns dataset of the potential scale reduction factors, :math:`\hat{R}`
-
     Notes
     -----
     The diagnostic is computed by:
-
       .. math:: \hat{R} = \frac{\hat{V}}{W}
-
     where :math:`W` is the within-chain variance and :math:`\hat{V}` is the posterior variance
     estimate for the pooled rank-traces. This is the potential scale reduction factor, which
     converges to unity when each of the traces is a sample from the target posterior. Values
     greater than one indicate that one or more chains have not yet converged.
-
     Rank values are calculated over all the chains with `scipy.stats.rankdata`.
     Each chain is split in two and normalized with the z-transform following Vehtari et al. (2019).
-
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
     * Gelman et al. BDA (2014)
     * Brooks and Gelman (1998)
     * Gelman and Rubin (1992)
-
     Examples
     --------
     Calculate the R-hat using the default arguments:
-
     .. ipython::
-
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("non_centered_eight")
            ...: az.rhat(data)
-
     Calculate the R-hat of some variables using the folded method:
-
     .. ipython::
-
         In [1]: az.rhat(data, var_names=["mu", "theta_t"], method="folded")
-
     """
     methods = {
         "rank": _rhat_rank,
@@ -373,7 +325,6 @@ def rhat(data, *, var_names=None, method="rank"):
 
 def mcse(data, *, var_names=None, method="mean", prob=None):
     """Calculate Markov Chain Standard Error statistic.
-
     Parameters
     ----------
     data : obj
@@ -385,35 +336,25 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         Names of variables to include in the rhat report
     method : str
         Select mcse method. Valid methods are:
-
         - "mean"
         - "sd"
         - "quantile"
-
     prob : float
         Quantile information.
-
     Returns
     -------
     xarray.Dataset
         Return the msce dataset
-
     Examples
     --------
     Calculate the Markov Chain Standard Error using the default arguments:
-
     .. ipython::
-
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("non_centered_eight")
            ...: az.mcse(data)
-
     Calculate the Markov Chain Standard Error using the quantile method:
-
     .. ipython::
-
         In [1]: az.mcse(data, method="quantile", prob=.7)
-
     """
     methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
     if method not in methods:
@@ -453,13 +394,17 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     )
 
 
+@conditional_vect
+def _sqr(a, b):
+    return np.sqrt(a+b)
+
+
+@conditional_jit
 def geweke(ary, first=0.1, last=0.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
-
     Compare the mean of the first % of series with the mean of the last % of series. x is divided
     into a number of segments for which this difference is computed. If the series is converged,
     this score should oscillate between -1 and 1.
-
     Parameters
     ----------
     ary : 1D array-like
@@ -471,23 +416,18 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
       at the beginning.
     intervals : int
       The number of segments.
-
     Returns
     -------
     scores : list [[]]
       Return a list of [i, score], where i is the starting index for each interval and score the
       Geweke score on the interval.
-
     Notes
     -----
     The Geweke score on some series x is computed by:
-
       .. math:: \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
-
     where :math:`E` stands for the mean, :math:`V` the variance,
     :math:`x_s` a section at the start of the series and
     :math:`x_e` a section at the end of the series.
-
     References
     ----------
     * Geweke (1992)
@@ -518,27 +458,34 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
         last_slice = ary[int(end - last * (end - start)) :]
 
         z_score = first_slice.mean() - last_slice.mean()
-        z_score /= np.sqrt(first_slice.var() + last_slice.var())
+        if numba_check():
+            z_score /= _sqr(svar(first_slice), svar(last_slice))
+        else:
+            z_score /= np.sqrt(first_slice.var() + last_slice.var())
 
         zscores.append([start, z_score])
 
     return np.array(zscores)
 
 
+@conditional_jit
+def _histogram(data):
+    kcounts, _ = np.histogram(data,bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    return kcounts
+
+
 def ks_summary(pareto_tail_indices):
     """Display a summary of Pareto tail indices.
-
     Parameters
     ----------
     pareto_tail_indices : array
       Pareto tail indices.
-
     Returns
     -------
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
-    kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    kcounts = _histogram(pareto_tail_indices)
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
@@ -554,20 +501,17 @@ def ks_summary(pareto_tail_indices):
 
 def _bfmi(energy):
     r"""Calculate the estimated Bayesian fraction of missing information (BFMI).
-
     BFMI quantifies how well momentum resampling matches the marginal energy distribution. For more
     information on BFMI, see https://arxiv.org/pdf/1604.00695v1.pdf. The current advice is that
     values smaller than 0.3 indicate poor sampling. However, this threshold is provisional and may
     change. See http://mc-stan.org/users/documentation/case-studies/pystan_workflow.html for more
     information.
-
     Parameters
     ----------
     energy : NumPy array
         Should be extracted from a gradient based sampler, such as in Stan or PyMC3. Typically,
         after converting a trace or fit to InferenceData, the energy will be in
         `data.sample_stats.energy`.
-
     Returns
     -------
     z : array
@@ -576,17 +520,18 @@ def _bfmi(energy):
     """
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    den = np.var(energy_mat, axis=1)
+    if numba_check():
+        den = svar(energy_mat, axis=1)
+    else:
+        den = np.var(energy_mat, axis=1)
     return num / den
 
 
 def _z_scale(ary):
     """Calculate z_scale.
-
     Parameters
     ----------
     ary : np.ndarray
-
     Returns
     -------
     np.ndarray
@@ -629,9 +574,15 @@ def _rhat(ary):
     # Calculate chain mean
     chain_mean = np.mean(ary, axis=1)
     # Calculate chain variance
-    chain_var = np.var(ary, axis=1, ddof=1)
+    if numba_check():
+        chain_var = svar(ary, axis=1, ddof=1)
+    else:
+        chain_var = np.var(ary, axis=1, ddof=1)
     # Calculate between-chain variance
-    between_chain_variance = num_samples * np.var(chain_mean, ddof=1)
+    if numba_check():
+        between_chain_variance = num_samples * svar(chain_mean, ddof=1)
+    else:
+        between_chain_variance = num_samples * np.var(chain_mean, ddof=1)
     # Calculate within-chain variance
     within_chain_variance = np.mean(chain_var)
     # Estimate of marginal posterior variance
@@ -643,7 +594,6 @@ def _rhat(ary):
 
 def _rhat_rank(ary):
     """Compute the rank normalized rhat for 2d array.
-
     Computation follows https://arxiv.org/abs/1903.08008
     """
     ary = np.asarray(ary)
@@ -704,7 +654,10 @@ def _ess(ary, relative=False):
     mean_var = np.mean(acov[:, 0]) * n_draw / (n_draw - 1.0)
     var_plus = mean_var * (n_draw - 1.0) / n_draw
     if n_chain > 1:
-        var_plus += np.var(chain_mean, ddof=1)
+        if numba_check():
+            var_plus += svar(chain_mean, ddof=1)
+        else:
+            var_plus += np.var(chain_mean, ddof=1)
 
     rho_hat_t = np.zeros(n_draw)
     rho_hat_even = 1.0
@@ -755,7 +708,6 @@ def _ess_bulk(ary, relative=False):
 
 def _ess_tail(ary, prob=None, relative=False):
     """Compute the effective sample size for the tail.
-
     If `prob` defined, ess = min(qess(prob), qess(1-prob))
     """
     if prob is None:
@@ -885,7 +837,11 @@ def _mcse_mean(ary):
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ess = _ess_mean(ary)
-    sd = np.std(ary, ddof=1)
+    if numba_check():
+        ary = np.ravel(ary)
+        sd = np.sqrt(svar(ary, ddof=1))
+    else:
+        sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess)
     return mcse_mean_value
 
@@ -896,7 +852,11 @@ def _mcse_sd(ary):
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ess = _ess_sd(ary)
-    sd = np.std(ary, ddof=1)
+    if numba_check():
+        ary = np.ravel(ary)
+        sd = np.sqrt(svar(ary, ddof=1))
+    else:
+        sd = np.std(ary, ddof=1)
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
     mcse_sd_value = sd * fac_mcse_sd
     return mcse_sd_value
@@ -911,12 +871,32 @@ def _mcse_quantile(ary, prob):
     return mcse_q
 
 
+def _circfunc(samples, high, low):
+    samples = np.asarray(samples)
+    if samples.size == 0:
+        return np.nan, np.nan
+    return samples, _angle(samples, low,high,np.pi)
+
+
+@conditional_vect
+def _angle(samples, low, high, pi=np.pi):
+    ang = (samples - low)*2.*pi / (high - low)
+    return ang
+
+
+def _circular_standard_deviation(samples, high=2*np.pi, low=0, axis=None):
+    pi = np.pi
+    samples, ang = _circfunc(samples, high, low)
+    S = np.sin(ang).mean(axis=axis)
+    C = np.cos(ang).mean(axis=axis)
+    R = np.hypot(S, C)
+    return ((high - low)/2.0/pi) * np.sqrt(-2*np.log(R))
+
+
 def _mc_error(ary, batches=5, circular=False):
     """Calculate the simulation standard error, accounting for non-independent samples.
-
     The trace is divided into batches, and the standard deviation of the batch
     means is calculated.
-
     Parameters
     ----------
     ary : Numpy array
@@ -926,7 +906,6 @@ def _mc_error(ary, batches=5, circular=False):
     circular : bool
         Whether to compute the error taking into account `ary` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-
     Returns
     -------
     mc_error : float
@@ -944,30 +923,40 @@ def _mc_error(ary, batches=5, circular=False):
             return np.nan
         if batches == 1:
             if circular:
-                std = stats.circstd(ary, high=np.pi, low=-np.pi)
+                if numba_check():
+                    std = _circular_standard_deviation(ary, high=np.pi, low=-np.pi)
+                else:
+                    std = stats.circstd(ary, high=np.pi, low=-np.pi)
             else:
-                std = np.std(ary)
+                if numba_check():
+                    std = np.sqrt(svar(ary))
+                else:
+                    std = np.std(ary)
             return std / np.sqrt(len(ary))
 
         batched_traces = np.resize(ary, (batches, int(len(ary) / batches)))
 
         if circular:
             means = stats.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
-            std = stats.circstd(means, high=np.pi, low=-np.pi)
+            if numba_check():
+                std = _circular_standard_deviation(means, high=np.pi, low=-np.pi)
+            else:
+                std = stats.circstd(means, high=np.pi, low=-np.pi)
         else:
             means = np.mean(batched_traces, 1)
-            std = np.std(means)
+            if numba_check():
+                std = np.sqrt(svar(means))
+            else:
+                std = np.std(means)
 
         return std / np.sqrt(batches)
 
 
 def _multichain_statistics(ary):
     """Calculate efficiently multichain statistics for summary.
-
     Parameters
     ----------
     ary : numpy.ndarray
-
     Returns
     -------
     tuple

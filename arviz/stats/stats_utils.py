@@ -8,6 +8,7 @@ import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
+from ..utils import conditional_jit
 
 _log = logging.getLogger(__name__)
 
@@ -425,3 +426,30 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
     def __repr__(self):
         """Alias to ``__str__``."""
         return self.__str__()
+
+
+@conditional_jit
+def stats_variance_1d(data, ddof=0):
+    a, b = 0, 0
+    for i in data:
+        a = a + i
+        b = b + i * i
+    var =  b / (len(data)) - ((a / (len(data))) ** 2)
+    var = var *(len(data)/(len(data)-ddof))
+    return var
+
+
+def stats_variance_2d(data, ddof=0, axis=1):
+    try:
+        a, b = data.shape
+    except ValueError:
+        return stats_variance_1d(data, ddof=ddof)
+    if axis == 1:
+        var = np.zeros(a)
+        for i in range(a):
+            var[i] = stats_variance_1d(data[i], ddof=ddof)
+    else:
+        var = np.zeros(b)
+        for i in range(b):
+            var[i] = stats_variance_1d(data[:, i], ddof=ddof)
+    return var

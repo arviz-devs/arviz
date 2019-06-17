@@ -4,6 +4,7 @@ import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pandas as pd
+import scipy.stats as st
 import pytest
 
 from ..data import load_arviz_data, from_cmdstan
@@ -20,6 +21,11 @@ from ..stats.diagnostics import (
     _z_scale,
     _conv_quantile,
     _split_chains,
+    _sqr,
+    _histogram,
+    _angle,
+    _circfunc,
+    _circular_standard_deviation
 )
 
 # For tests only, recommended value should be closer to 1.01-1.05
@@ -56,12 +62,9 @@ class TestDiagnostics:
         R code:
         ```
         source('~/monitor.R')
-
         data2 <- read.csv("blocker.2.csv", comment.char = "#")
         data1 <- read.csv("blocker.1.csv", comment.char = "#")
-
         output <- matrix(ncol=15, nrow=length(names(data1))-4)
-
         j = 0
         for (i in 1:length(names(data1))) {
           name = names(data1)[i]
@@ -85,7 +88,6 @@ class TestDiagnostics:
                 mcse_quantile(ary, prob=0.1),
                 mcse_quantile(ary, prob=0.3))
             }
-
         df = data.frame(output, row.names = names(data1)[5:ncol(data1)])
         colnames(df) <- c("rhat_rank",
                           "rhat_raw",
@@ -102,7 +104,6 @@ class TestDiagnostics:
                           "mcse_quantile01",
                           "mcse_quantile10",
                           "mcse_quantile30")
-
         write.csv(df, "reference_values.csv")
         ```
         """
@@ -205,6 +206,25 @@ class TestDiagnostics:
     def test_rhat_ndarray(self):
         with pytest.raises(TypeError):
             rhat(np.random.randn(2, 300, 10))
+
+    def test_angle(self):
+        x = np.random.randn(100)
+        high = 8
+        low = 4
+        res = (x - low) * 2 * np.pi / (high - low)
+        assert np.allclose(_angle(x, low, high, np.pi), res)
+
+    def test_circfunc(self):
+        school = load_arviz_data("centered_eight").posterior["mu"].values
+        a, b = _circfunc(school, 8, 4)
+        assert np.allclose(a, school)
+        assert np.allclose(b, _angle(school, 4, 8, np.pi))
+
+    @pytest.mark.parametrize("data",(np.random.randn(100), np.random.randn(100,100), np.random.randn(100,100,100)))
+    def test_circular_standard_deviation_1d(self, data):
+        high = 8
+        low = 4
+        assert np.allclose(_circular_standard_deviation(data, high=high, low=low), st.circstd(data, high=high, low=low))
 
     @pytest.mark.parametrize(
         "method",
@@ -455,12 +475,12 @@ class TestDiagnostics:
                 )
             ).all()
         else:
-            assert mcse_mean_hat == mcse_mean_hat_
-            assert mcse_sd_hat == mcse_sd_hat_
-            assert ess_mean_hat == ess_mean_hat_
-            assert ess_sd_hat == ess_sd_hat_
-            assert ess_bulk_hat == ess_bulk_hat_
-            assert ess_tail_hat == ess_tail_hat_
+            assert_almost_equal(mcse_mean_hat, mcse_mean_hat_)
+            assert_almost_equal(mcse_sd_hat, mcse_sd_hat_)
+            assert_almost_equal(ess_mean_hat, ess_mean_hat_)
+            assert_almost_equal(ess_sd_hat, ess_sd_hat_)
+            assert_almost_equal(ess_bulk_hat, ess_bulk_hat_)
+            assert_almost_equal(ess_tail_hat, ess_tail_hat_)
             if chains in (None, 1):
                 assert np.isnan(rhat_hat)
                 assert np.isnan(rhat_hat_)
@@ -471,15 +491,20 @@ class TestDiagnostics:
         first = 0.1
         last = 0.5
         intervals = 100
-
-        gw_stat = geweke(np.random.randn(10000), first=first, last=last, intervals=intervals)
+        data = np.random.randn(100000)
+        gw_stat = geweke(data, first, last, intervals)
 
         # all geweke values should be between -1 and 1 for this many draws from a
         # normal distribution
         assert ((gw_stat[:, 1] > -1) | (gw_stat[:, 1] < 1)).all()
 
         assert gw_stat.shape[0] == intervals
-        assert 10000 * last - gw_stat[:, 0].max() == 1
+        assert 100000 * last - gw_stat[:, 0].max() == 1
+
+    def test_sqr(self):
+        x = np.random.rand(100)
+        y = np.random.rand(100)
+        assert np.allclose(_sqr(x, y), np.sqrt(x + y))
 
     def test_geweke_bad_interval(self):
         # lower bound
@@ -502,6 +527,12 @@ class TestDiagnostics:
         with pytest.warns(UserWarning):
             summary2 = ks_summary(pareto_tail_indices2)
         assert summary2 is not None
+
+    def test_histogram(self):
+        school = load_arviz_data("non_centered_eight").posterior["mu"].values
+        k_count = _histogram(school)
+        kcount, _ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+        assert np.allclose(k_count, kcount)
 
     @pytest.mark.parametrize("size", [100, 101])
     @pytest.mark.parametrize("batches", [1, 2, 3, 5, 7])
@@ -542,3 +573,4 @@ class TestDiagnostics:
         if chains is None:
             chains = 1
         assert split_data.shape == (chains * 2, draws // 2)
+
