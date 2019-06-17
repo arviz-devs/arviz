@@ -165,19 +165,19 @@ def make_ufunc(
 
 
 def wrap_xarray_ufunc(
-    ufunc, dataset, *, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
+    ufunc, *datasets, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
 ):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
     Parameters
     ----------
     ufunc : callable
-    dataset : xarray.dataset
+    datasets : xarray.dataset
     ufunc_kwargs : dict
         Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
             - 'n_output', int, by default 1
-            - 'n_input', int, by default 1
+            - 'n_input', int, by default len(datasets)
             - 'index', slice, by default Ellipsis
             - 'ravel', bool, by default True
     func_args : tuple
@@ -193,6 +193,7 @@ def wrap_xarray_ufunc(
     """
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
+    ufunc_kwargs.setdefault("n_input", len(datasets))
     if func_args is None:
         func_args = tuple()
     if func_kwargs is None:
@@ -205,7 +206,7 @@ def wrap_xarray_ufunc(
     )
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
 
-    return apply_ufunc(callable_ufunc, dataset, *func_args, kwargs=func_kwargs, **kwargs)
+    return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
 
 
 def update_docstring(ufunc, func, n_output=1):
