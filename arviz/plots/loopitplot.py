@@ -67,10 +67,8 @@ def plot_loo_pit(
         raise ValueError("idata must be of type InferenceData")
 
     if ax is None:
-        (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-            figsize, textsize, 1, 1
-        )
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+        _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -121,6 +119,7 @@ def plot_loo_pit(
             ax.plot(x_vals, unif_density, **plot_unif_kwargs)
     ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
 
+    ax.tick_params(labelsize=xt_labelsize)
     if legend:
         if not use_hpd:
             ax.plot([], label="Uniform", **plot_unif_kwargs)
