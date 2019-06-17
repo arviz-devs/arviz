@@ -439,17 +439,22 @@ def stats_variance_1d(data, ddof=0):
     return var
 
 
+@conditional_jit
 def stats_variance_2d(data, ddof=0, axis=1):
-    try:
-        a, b = data.shape
-    except ValueError:
+    if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
-    if axis == 1:
-        var = np.zeros(a)
-        for i in range(a):
-            var[i] = stats_variance_1d(data[i], ddof=ddof)
+    elif data.ndim == 2:
+        a, b = data.shape
+        if axis == 1:
+            var = np.zeros(a)
+            for i in range(a):
+                var[i] = stats_variance_1d(data[i], ddof=ddof)
+        elif axis == 0:
+            var = np.zeros(b)
+            for i in range(b):
+                var[i] = stats_variance_1d(data[:, i], ddof=ddof)
+        else:
+            raise ValueError("Please choose an axis value of 0 or 1")
+        return var
     else:
-        var = np.zeros(b)
-        for i in range(b):
-            var[i] = stats_variance_1d(data[:, i], ddof=ddof)
-    return var
+        raise ValueError("{} dimensional data is not suitable for this methods".format(data.ndim))
