@@ -125,16 +125,26 @@ class InferenceData:
 
 
 # pylint: disable=protected-access
-def concat(*args, copy=True, inplace=False):
-    """Concatenate InferenceData objects on a group level.
+def concat(*args, dim=None, copy=True, inplace=False):
+    """Concatenate InferenceData objects.
 
-    Supports only concatenating with independent unique groups.
+    Concatenates over `group`, `chain` or `draw`.
+    By default concatenates over unique groups.
+    To concatenate over `chain` or `draw` function
+    needs identical groups and variables.
+
+    The `variables` in the `data` -group are merged if `dim` are not found.
+
 
     Parameters
     ----------
     *args : InferenceData
         Variable length InferenceData list or
         Sequence of InferenceData.
+    dim : str, optional
+        If defined, concatenated over the defined dimension.
+        Dimension which is concatenated. If None, concatenates over
+        unique groups.
     copy : bool
         If True, groups are copied to the new InferenceData object.
     inplace : bool
@@ -147,18 +157,9 @@ def concat(*args, copy=True, inplace=False):
         When `inplace==True` merge args to first arg and return `None`
     """
     if len(args) == 0:
+        if inplace:
+            return
         return InferenceData()
-    if len(args) == 1 and isinstance(args[0], Sequence):
-        args = args[0]
-    elif len(args) == 1:
-        if isinstance(args[0], InferenceData):
-            if inplace:
-                return None
-            else:
-                if copy:
-                    return deepcopy(args[0])
-                else:
-                    return args[0]
 
     # assert that all args are InferenceData
     for i, arg in enumerate(args):
@@ -167,52 +168,146 @@ def concat(*args, copy=True, inplace=False):
                 "Concatenating is supported only"
                 "between InferenceData objects. Input arg {} is {}".format(i, type(arg))
             )
-    # assert that groups are independent
-    first_arg = args[0]
-    first_arg_groups = ccopy(first_arg._groups)
+
+    if dim is not None and dim.lower() not in {"group", "chain", "draw"}:
+        msg = "Invalid `dim`: {}. Valid `dim` are {}".format(dim, '{"group", "chain", "draw"}')
+        raise TypeError(msg)
+
+    if len(args) == 1 and isinstance(args[0], Sequence):
+        args = args[0]
+    elif len(args) == 1:
+        if isinstance(args[0], InferenceData):
+            if inplace:
+                return
+            else:
+                if copy:
+                    return deepcopy(args[0])
+                else:
+                    return args[0]
+
+
+    arg0 = args[0]
+    arg0_groups = ccopy(arg0._groups)
     args_groups = dict()
-    for arg in args[1:]:
-        for group in arg._groups:
-            if group in args_groups or group in first_arg_groups:
-                raise NotImplementedError("Concatenating with overlapping groups is not supported.")
-            group_data = getattr(arg, group)
-            args_groups[group] = deepcopy(group_data) if copy else group_data
-
-    # add first_arg to args_groups if inplace is False
-    if not inplace:
-        for group in first_arg_groups:
-            group_data = getattr(first_arg, group)
-            args_groups[group] = deepcopy(group_data) if copy else group_data
-
-    basic_order = [
-        "posterior",
-        "posterior_predictive",
-        "sample_stats",
-        "prior",
-        "prior_predictive",
-        "sample_stats_prior",
-        "observed_data",
-    ]
-    other_groups = [group for group in args_groups if group not in basic_order]
 
     if not inplace:
         # Keep order for python 3.5
         inference_data_dict = OrderedDict()
-    for group in basic_order + other_groups:
-        if group not in args_groups:
-            continue
-        if inplace:
-            first_arg._groups.append(group)
-            setattr(first_arg, group, args_groups[group])
-        else:
-            inference_data_dict[group] = args_groups[group]
-    if inplace:
-        other_groups = [
-            group for group in first_arg_groups if group not in basic_order
-        ] + other_groups
-        sorted_groups = [
-            group for group in basic_order + other_groups if group in first_arg._groups
+
+    if dim is None:
+        # check if groups are independent
+        # Concat over unique groups
+        for arg in args[1:]:
+            for group in arg._groups:
+                if group in args_groups or group in arg0_groups:
+                    msg = "Concatenating overlapping groups is not supported unless `dim` is defined."
+                    msg += " Valid dimensions are `chain` and `draw`."
+                    raise TypeError(msg)
+            group_data = getattr(arg, group)
+            args_groups[group] = deepcopy(group_data) if copy else group_data
+        # add arg0 to args_groups if inplace is False
+        if not inplace:
+            for group in arg0:
+                group_data = getattr(arg0, group)
+                args_groups[group] = deepcopy(group_data) if copy else group_data
+
+        basic_order = [
+            "posterior",
+            "posterior_predictive",
+            "sample_stats",
+            "prior",
+            "prior_predictive",
+            "sample_stats_prior",
+            "observed_data",
         ]
-        setattr(first_arg, "_groups", sorted_groups)
-        return None
-    return InferenceData(**inference_data_dict)
+        other_groups = [group for group in args_groups if group not in basic_order]
+
+        for group in basic_order + other_groups:
+            if group not in args_groups:
+                continue
+            if inplace:
+                arg0._groups.append(group)
+                setattr(arg0, group, args_groups[group])
+            else:
+                inference_data_dict[group] = args_groups[group]
+        if inplace:
+            other_groups = [
+                group for group in arg0_groups if group not in basic_order
+            ] + other_groups
+            sorted_groups = [
+                group for group in basic_order + other_groups if group in arg0._groups
+            ]
+            setattr(arg0, "_groups", sorted_groups)
+    elif dim in ("chain", "draw"):
+        for arg in args[1:]:
+            for group0 in arg0_groups:
+                if group0 not in arg._groups:
+                    if group0 == "observed_data":
+                        continue
+                    msg = "Mismatch between the groups."
+                    raise TypeError(msg)
+            for group in arg._groups:
+                if group != "observed_data":
+                    # assert that groups are equal
+                    if group not in arg0_groups:
+                        msg = "Mismatch between the groups."
+                        raise TypeError(msg)
+
+                    # assert that variables are equal
+                    group_data = getattr(arg, group)
+                    group_vars = group_data.data_vars
+
+                    group0_data = getattr(arg0, group)
+                    group0_vars = group0_data.data_vars
+
+                    for var in group_vars:
+                        if var not in group0_vars:
+                            msg = "Mismatch between the variables."
+                            raise TypeError(msg)
+                        var_dims = getattr(group_data, var).dims
+                        var0_dims = getattr(group0_data, var).dims
+                        if var_dims != var0_dims:
+                            msg = "Mismatch between the dimensions."
+                            raise TypeError(msg)
+
+                        if dim not in var_dims or dim not in var0_dims:
+                            msg = "Dimension {} missing.".format(dim)
+                            raise TypeError(msg)
+
+                    # xr.concat
+                    concatenated_group = xr.concat((group_data, group0_data), dim=dim)
+                    if inplace:
+                        setattr(arg0, group, concatenated_group)
+                    else:
+                        inference_data_dict[group] = concatenated_group
+                else:
+                    # observed_data
+                    if (group not in arg0_groups) and inplace:
+                        msg = "observed_data missing from the groups."
+                        raise TypeError(msg)
+
+                    # assert that variables are equal
+                    group_data = getattr(arg, group)
+                    group_vars = group_data.data_vars
+
+                    group0_data = getattr(arg0, group)
+                    if not inplace:
+                        group0_data = deepcopy(group0_data)
+                    group0_vars = group0_data.data_vars
+
+                    for var in group_vars:
+                        if var not in group0_vars:
+                            var_data = getattr(group_data, var)
+                            arg0.observed_data[var] = var_data
+                        else:
+                            var_data = getattr(group_data, var)
+                            var0_data = getattr(group0_data, var)
+                            if dim in var_data.dims and dim in var0_data.dims:
+                                concatenated_var = xr.concat((group_data, group0_data), dim=dim)
+                                group0_data[var] = concatenated_var
+                    if inplace:
+                        setattr(arg0, group, group0_data)
+                    else:
+                        inference_data_dict[group] = group0_data
+
+    return None if inplace else InferenceData(**inference_data_dict)
