@@ -1170,25 +1170,22 @@ def loo_pit(y, y_hat, log_weights):
                 y_hat.shape, log_weights.shape
             )
         )
+    kwargs = {
+        "input_core_dims": [[], ["samples"], ["samples"]],
+        "output_core_dims": [[]],
+        "join": "left"
+    }
+    ufunc_kwargs = {"n_dims": 1}
 
-    return xr.apply_ufunc(
-        _loo_pit,
-        y,
-        y_hat,
-        log_weights,
-        input_core_dims=[[], ["samples"], ["samples"]],
-        output_core_dims=[[]],
-        join="left",
+    return _wrap_xarray_ufunc(
+        _loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
     )
 
 
 def _loo_pit(y, y_hat, log_weights):
     """Compute LOO-PIT values."""
-    out = np.empty_like(y, dtype=np.float64)
-    for idx in np.ndindex(y.shape):
-        sel = y_hat[idx] <= y[idx]
-        if np.sum(sel) > 0:
-            out[idx] = np.exp(_logsumexp(log_weights[idx][sel]))
-        else:
-            out[idx] = 0
-    return out
+    sel = y_hat <= y
+    if np.sum(sel) > 0:
+        return np.exp(_logsumexp(log_weights[sel]))
+    else:
+        return 0
