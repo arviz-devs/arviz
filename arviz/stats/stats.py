@@ -23,7 +23,17 @@ from ..utils import _var_names, Numba, _numba_var
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["compare", "hpd", "loo", "loo_pit", "psislw", "r2_score", "summary", "waic"]
+__all__ = [
+    "apply_test_function",
+    "compare",
+    "hpd",
+    "loo",
+    "loo_pit",
+    "psislw",
+    "r2_score",
+    "summary",
+    "waic",
+]
 
 
 def compare(
@@ -462,7 +472,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
-            **kwargs
+            **kwargs,
         ).values
     )
     p_loo = lppd - loo_lppd / scale_value
@@ -1071,7 +1081,7 @@ def waic(data, pointwise=False, scale="deviance"):
         log_likelihood,
         func_kwargs={"b_inv": n_samples},
         ufunc_kwargs=ufunc_kwargs,
-        **kwargs
+        **kwargs,
     )
 
     vars_lpd = log_likelihood.var(dim="samples")
@@ -1173,13 +1183,11 @@ def loo_pit(y, y_hat, log_weights):
     kwargs = {
         "input_core_dims": [[], ["samples"], ["samples"]],
         "output_core_dims": [[]],
-        "join": "left"
+        "join": "left",
     }
     ufunc_kwargs = {"n_dims": 1}
 
-    return _wrap_xarray_ufunc(
-        _loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
-    )
+    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs)
 
 
 def _loo_pit(y, y_hat, log_weights):
@@ -1189,3 +1197,65 @@ def _loo_pit(y, y_hat, log_weights):
         return np.exp(_logsumexp(log_weights[sel]))
     else:
         return 0
+
+
+def apply_test_function(
+    idata,
+    func,
+    group="both",
+    var_names=None,
+    out_name_data="T",
+    out_name_pp=None,
+    func_args=None,
+    func_kwargs=None,
+    **kwargs,
+):
+    valid_groups = ("observed_data", "posterior_predictive", "both")
+    if group not in valid_groups:
+        raise ValueError(
+            "Invalid group argument. Must be one of {} not {}.".format(valid_groups, group)
+        )
+
+    if out_name_pp is None:
+        out_name_pp = out_name_data + "_hat"
+
+    if func_args is None:
+        func_args = tuple()
+    if func_kwargs is None:
+        func_kwargs = {}
+    if var_names is None:
+        var_names = {}
+    both_var_names = var_names.pop("both", None)
+    var_names.setdefault("posterior", idata.posterior.dims)
+
+    if group in ("observed_data", "both"):
+        if not hasattr(idata, "observed_data"):
+            raise ValueError("InferenceData object must have observed_data group")
+        var_names.setdefault(
+            "observed_data", idata.observed_data.dims if both_var_names is None else both_var_names
+        )
+        idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
+            func,
+            idata.observed_data[var_names["observed_data"]],
+            idata.posterior[var_names["posterior"]],
+            func_args=func_args,
+            func_kwargs=func_kwargs,
+            **kwargs,
+        )
+
+    if group in ("posterior_predictive", "both"):
+        if not hasattr(idata, "posterior_predictive"):
+            raise ValueError("InferenceData object must have posterior_predictive group")
+        var_names.setdefault(
+            "posterior_predictive",
+            idata.posterior_predictive.dims if both_var_names is None else both_var_names,
+        )
+        idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
+            func,
+            idata.posterior_predictive[var_names["posterior_predictive"]],
+            idata.posterior[var_names["posterior"]],
+            func_args=func_args,
+            func_kwargs=func_kwargs,
+            **kwargs,
+        )
+    return idata

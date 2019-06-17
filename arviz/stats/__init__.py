@@ -6,6 +6,7 @@ from .diagnostics import *
 
 
 __all__ = [
+    "apply_test_function",
     "bfmi",
     "compare",
     "hpd",
