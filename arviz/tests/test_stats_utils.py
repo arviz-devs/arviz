@@ -11,7 +11,7 @@ from ..stats.stats_utils import (
     wrap_xarray_ufunc,
     not_valid,
     ELPDData,
-stats_variance_2d
+    stats_variance_2d,
 )
 
 
@@ -212,6 +212,7 @@ def test_elpd_data_error():
     with pytest.raises(ValueError):
         ELPDData(data=[0, 1, 2], index=["not IC", "se", "p"]).__repr__()
 
+
 def test_stats_variance_1d():
     data = np.random.rand(1_000_000)
     assert np.allclose(np.var(data), stats_variance_2d(data))
@@ -236,4 +237,6 @@ def test_stats_variance_2d():
     assert np.allclose(np.var(data_1, axis=0), stats_variance_2d(data_1, axis=0))
     assert np.allclose(np.var(data_1, axis=1), stats_variance_2d(data_1, axis=1))
     assert np.allclose(np.var(data_1, axis=0, ddof=1), stats_variance_2d(data_1, axis=0, ddof=1))
+
+
 assert np.allclose(np.var(data_1, axis=1, ddof=1), stats_variance_2d(data_1, axis=1, ddof=1))

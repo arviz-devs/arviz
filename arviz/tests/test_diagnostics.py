@@ -25,7 +25,7 @@ from ..stats.diagnostics import (
     _histogram,
     _angle,
     _circfunc,
-    _circular_standard_deviation
+    _circular_standard_deviation,
 )
 
 # For tests only, recommended value should be closer to 1.01-1.05
@@ -220,11 +220,16 @@ class TestDiagnostics:
         assert np.allclose(a, school)
         assert np.allclose(b, _angle(school, 4, 8, np.pi))
 
-    @pytest.mark.parametrize("data",(np.random.randn(100), np.random.randn(100,100), np.random.randn(100,100,100)))
+    @pytest.mark.parametrize(
+        "data", (np.random.randn(100), np.random.randn(100, 100), np.random.randn(100, 100, 100))
+    )
     def test_circular_standard_deviation_1d(self, data):
         high = 8
         low = 4
-        assert np.allclose(_circular_standard_deviation(data, high=high, low=low), st.circstd(data, high=high, low=low))
+        assert np.allclose(
+            _circular_standard_deviation(data, high=high, low=low),
+            st.circstd(data, high=high, low=low),
+        )
 
     @pytest.mark.parametrize(
         "method",
@@ -573,4 +578,3 @@ class TestDiagnostics:
         if chains is None:
             chains = 1
         assert split_data.shape == (chains * 2, draws // 2)
-

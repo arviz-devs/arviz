@@ -12,10 +12,10 @@ from .stats_utils import (
     autocov as _autocov,
     not_valid as _not_valid,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
-    stats_variance_2d as svar
+    stats_variance_2d as svar,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect,numba_check
+from ..utils import _var_names, conditional_jit, conditional_vect, numba_check
 
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
@@ -396,7 +396,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
 @conditional_vect
 def _sqr(a, b):
-    return np.sqrt(a+b)
+    return np.sqrt(a + b)
 
 
 @conditional_jit
@@ -470,7 +470,7 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
 
 @conditional_jit
 def _histogram(data):
-    kcounts, _ = np.histogram(data,bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    kcounts, _ = np.histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     return kcounts
 
 
@@ -875,22 +875,22 @@ def _circfunc(samples, high, low):
     samples = np.asarray(samples)
     if samples.size == 0:
         return np.nan, np.nan
-    return samples, _angle(samples, low,high,np.pi)
+    return samples, _angle(samples, low, high, np.pi)
 
 
 @conditional_vect
 def _angle(samples, low, high, pi=np.pi):
-    ang = (samples - low)*2.*pi / (high - low)
+    ang = (samples - low) * 2.0 * pi / (high - low)
     return ang
 
 
-def _circular_standard_deviation(samples, high=2*np.pi, low=0, axis=None):
+def _circular_standard_deviation(samples, high=2 * np.pi, low=0, axis=None):
     pi = np.pi
     samples, ang = _circfunc(samples, high, low)
     S = np.sin(ang).mean(axis=axis)
     C = np.cos(ang).mean(axis=axis)
     R = np.hypot(S, C)
-    return ((high - low)/2.0/pi) * np.sqrt(-2*np.log(R))
+    return ((high - low) / 2.0 / pi) * np.sqrt(-2 * np.log(R))
 
 
 def _mc_error(ary, batches=5, circular=False):
