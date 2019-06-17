@@ -1187,5 +1187,8 @@ def _loo_pit(y, y_hat, log_weights):
     out = np.empty_like(y, dtype=np.float64)
     for idx in np.ndindex(y.shape):
         sel = y_hat[idx] <= y[idx]
-        out[idx] = np.exp(_logsumexp(log_weights[idx][sel]))
+        if np.sum(sel) > 0:
+            out[idx] = np.exp(_logsumexp(log_weights[idx][sel]))
+        else:
+            out[idx] = 0
     return out
