@@ -102,7 +102,7 @@ def format_sig_figs(value, default=None):
     return max(int(np.log10(np.abs(value))) + 1, default)
 
 
-def conditional_vect(function=None, **kwargs): # noqa: D202
+def conditional_vect(function=None, **kwargs):  # noqa: D202
     """Use numba's vectorize decorator if numba is installed.
 
     Notes
