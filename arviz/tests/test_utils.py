@@ -183,8 +183,8 @@ def test_conditional_vect_numba_decorator():
     assert func() == "Numba used"
 
 
-def test_conditional_jit_numba_decorator_keyword(monkeypatch):
-    """Checks else statement and JIT keyword argument"""
+def test_conditional_vect_numba_decorator_keyword(monkeypatch):
+    """Checks else statement and vect keyword argument"""
     from arviz import utils
 
     # Mock import lib to return numba with hit method which returns a function that returns kwargs

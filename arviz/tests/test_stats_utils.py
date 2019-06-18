@@ -214,7 +214,7 @@ def test_elpd_data_error():
 
 
 def test_stats_variance_1d():
-    data = np.random.rand(1_000_000)
+    data = np.random.rand(1000000)
     assert np.allclose(np.var(data), stats_variance_2d(data))
     assert np.allclose(np.var(data, ddof=1), stats_variance_2d(data, ddof=1))
 
