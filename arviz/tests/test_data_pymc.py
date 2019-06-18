@@ -56,15 +56,13 @@ class TestDataPyMC3:
                     np.isclose(ivalues[chain], values[chain * draws : (chain + 1) * draws])
                 )
 
-    def test_posterior_predictive_reshaped(self, data, chains, draws, eight_schools_params):
+    def test_posterior_predictive_keep_size(self, data, chains, draws, eight_schools_params):
         with data.model:
-            posterior_predictive = pm.sample_posterior_predictive(data.obj)
+            posterior_predictive = pm.sample_posterior_predictive(data.obj, keep_size=True)
 
         inference_data = from_pymc3(
             trace=data.obj,
-            posterior_predictive={
-                k: v.reshape((chains, draws, *v.shape[1:])) for k, v in posterior_predictive.items()
-            },
+            posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
         )
