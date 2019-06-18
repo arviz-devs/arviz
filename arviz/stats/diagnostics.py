@@ -45,7 +45,6 @@ def bfmi(data):
 
     Examples
     --------
-
     Compute the BFMI of an InferenceData object
     .. ipython::
 
@@ -112,8 +111,10 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
     is the first odd positive integer for which the sum
     :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
+
     The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
     criterion (Geyer, 1992; Geyer, 2011).
+
     References
     ----------
     * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
