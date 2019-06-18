@@ -1,7 +1,9 @@
 """Plot posterior densities."""
+from typing import Optional
 from numbers import Number
 import numpy as np
 from scipy.stats import mode
+
 
 from ..data import convert_to_dataset
 from ..stats import hpd
@@ -25,6 +27,7 @@ def plot_posterior(
     textsize=None,
     credible_interval=0.94,
     round_to=1,
+    significant_figs: Optional[int] = None,
     point_estimate="mean",
     rope=None,
     ref_val=None,
@@ -54,6 +57,8 @@ def plot_posterior(
         Credible intervals. Defaults to 0.94.
     round_to : int
         Controls formatting for floating point numbers
+    significant_figs : int, optional
+        Alternative means of controlling formatting of floats.
     point_estimate: str
         Must be in ('mode', 'mean', 'median')
     rope: tuple or dictionary of tuples
@@ -174,6 +179,7 @@ def plot_posterior(
             bins=bins,
             kind=kind,
             point_estimate=point_estimate,
+            significant_figs=significant_figs,
             round_to=round_to,
             credible_interval=credible_interval,
             ref_val=ref_val,
@@ -204,6 +210,7 @@ def _plot_posterior_op(
     rope,
     ax_labelsize,
     xt_labelsize,
+    significant_figs: Optional[int] = None,
     **kwargs
 ):  # noqa: D202
     """Artist to draw posterior."""
@@ -255,6 +262,7 @@ def _plot_posterior_op(
         elif isinstance(rope, dict):
             vals = None
             for sel in rope.get(var_name, []):
+                # pylint: disable=line-too-long
                 if all(k in selection and selection[k] == v for k, v in sel.items() if k != "rope"):
                     vals = sel["rope"]
                     break
@@ -295,11 +303,16 @@ def _plot_posterior_op(
                 x = np.linspace(lower, upper, len(density))
                 point_value = x[np.argmax(density)]
             else:
-                point_value = mode(values.round(round_to))[0][0]
+                if significant_figs is None:
+                    point_value = mode(values.round(round_to))[0][0]
+                else:
+                    point_value = mode(values)[0][0]
         elif point_estimate == "median":
             point_value = np.median(values)
-        point_text = "{}={:.{}f}".format(point_estimate, point_value, round_to)
-
+        if significant_figs is None:
+            point_text = "{}={:.{}f}".format(point_estimate, point_value, round_to)
+        else:
+            point_text = "{}={:.{}g}".format(point_estimate, point_value, significant_figs)
         ax.text(
             point_value,
             plot_height * 0.8,
@@ -309,7 +322,17 @@ def _plot_posterior_op(
         )
 
     def display_hpd():
-        hpd_intervals = hpd(values, credible_interval=credible_interval)
+        # np.ndarray with 2 entries, min and max
+        # pylint: disable=line-too-long
+        hpd_intervals = hpd(values, credible_interval=credible_interval)  # type: np.ndarray
+
+        def round_num(n: float) -> str:
+            if significant_figs is None:
+                fstr = "%%.%df" % round_to
+            else:
+                fstr = "%%.%dg" % significant_figs
+            return fstr % n
+
         ax.plot(
             hpd_intervals,
             (plot_height * 0.02, plot_height * 0.02),
@@ -320,14 +343,14 @@ def _plot_posterior_op(
         ax.text(
             hpd_intervals[0],
             plot_height * 0.07,
-            hpd_intervals[0].round(round_to),
+            round_num(hpd_intervals[0]),
             size=ax_labelsize,
             horizontalalignment="center",
         )
         ax.text(
             hpd_intervals[1],
             plot_height * 0.07,
-            hpd_intervals[1].round(round_to),
+            round_num(hpd_intervals[1]),
             size=ax_labelsize,
             horizontalalignment="center",
         )
