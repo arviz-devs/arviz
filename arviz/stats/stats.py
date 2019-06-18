@@ -1204,12 +1204,45 @@ def apply_test_function(
     func,
     group="both",
     var_names=None,
+    pointwise=False,
+    out_data_shape=None,
+    out_pp_shape=None,
     out_name_data="T",
     out_name_pp=None,
     func_args=None,
     func_kwargs=None,
-    **kwargs,
+    ufunc_kwargs=None,
+    wrap_data_kwargs=None,
+    wrap_pp_kwargs=None,
 ):
+    """Apply a Bayesian test function to an InferenceData object.
+
+    Arguments
+    ---------
+    idata : InferenceData
+        InferenceData object on which to apply the test function. This function will add
+        new variables to the InferenceData object to store the result without modifying the
+        existing ones.
+    func : callable
+        Callable that calculates the test function. It must have the following call signature
+        ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
+        predictive and ``theta`` the model parameters) even if not all the arguments are
+        used.
+    group : str, optional
+        Group on which to apply the test function. Can be observed_data, posterior_predictive
+        or both.
+    var_names : dict group -> var_names, optional
+        Mapping from group name to the variables to be passed to func. It can be a dict of
+        strings or lists of strings. There is also the option of using ``both`` as key,
+        in which case, the same variables are used in observed data and posterior predictive
+        groups
+    pointwise : bool, optional
+        If True, apply the test function to each observation and sample, otherwise, apply
+        test function to each sample.
+    out_data_shape : tuple, optional
+        Output shape of the test function applied to the observed data. If None, the default
+        depends on the value of pointwise.
+    """
     valid_groups = ("observed_data", "posterior_predictive", "both")
     if group not in valid_groups:
         raise ValueError(
@@ -1221,41 +1254,94 @@ def apply_test_function(
 
     if func_args is None:
         func_args = tuple()
+
     if func_kwargs is None:
         func_kwargs = {}
+
+    if ufunc_kwargs is None:
+        ufunc_kwargs = {}
+    ufunc_kwargs.setdefault("check_shape", False)
+
+    if wrap_data_kwargs is None:
+        wrap_data_kwargs = {}
+    if wrap_pp_kwargs is None:
+        wrap_pp_kwargs = {}
     if var_names is None:
         var_names = {}
-    both_var_names = var_names.pop("both", None)
-    var_names.setdefault("posterior", idata.posterior.dims)
 
-    if group in ("observed_data", "both"):
-        if not hasattr(idata, "observed_data"):
-            raise ValueError("InferenceData object must have observed_data group")
-        var_names.setdefault(
-            "observed_data", idata.observed_data.dims if both_var_names is None else both_var_names
-        )
-        idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
-            func,
-            idata.observed_data[var_names["observed_data"]],
-            idata.posterior[var_names["posterior"]],
-            func_args=func_args,
-            func_kwargs=func_kwargs,
-            **kwargs,
-        )
+    both_var_names = var_names.pop("both", None)
+    var_names.setdefault("posterior", list(idata.posterior.data_vars))
+
+    in_posterior = idata.posterior[var_names["posterior"]]
+    if isinstance(in_posterior, xr.Dataset):
+        in_posterior = in_posterior.to_array().squeeze()
 
     if group in ("posterior_predictive", "both"):
         if not hasattr(idata, "posterior_predictive"):
             raise ValueError("InferenceData object must have posterior_predictive group")
         var_names.setdefault(
             "posterior_predictive",
-            idata.posterior_predictive.dims if both_var_names is None else both_var_names,
+            list(idata.posterior_predictive.data_vars)
+            if both_var_names is None
+            else both_var_names,
         )
+        in_pp = idata.posterior_predictive[var_names["posterior_predictive"]]
+        if isinstance(in_pp, xr.Dataset):
+            in_pp = in_pp.to_array(dim="pp_var").squeeze()
+
+        if out_pp_shape is None:
+            out_pp_shape = in_pp.shape if pointwise else in_pp.shape[:2]
+        loop_dims = in_pp.dims if pointwise else in_pp.dims[:2]
+
+        wrap_pp_kwargs.setdefault(
+            "input_core_dims",
+            [
+                [dim for dim in dataset.dims if dim not in loop_dims]
+                for dataset in [in_pp, in_posterior]
+            ],
+        )
+
+        func_kwargs["out"] = np.empty(out_pp_shape)
         idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
             func,
-            idata.posterior_predictive[var_names["posterior_predictive"]],
-            idata.posterior[var_names["posterior"]],
+            in_pp,
+            in_posterior,
             func_args=func_args,
             func_kwargs=func_kwargs,
-            **kwargs,
+            ufunc_kwargs=ufunc_kwargs,
+            **wrap_pp_kwargs,
+        )
+
+    if group in ("observed_data", "both"):
+        if not hasattr(idata, "observed_data"):
+            raise ValueError("InferenceData object must have observed_data group")
+        var_names.setdefault(
+            "observed_data",
+            list(idata.observed_data.data_vars) if both_var_names is None else both_var_names,
+        )
+        in_data = idata.observed_data[var_names["observed_data"]]
+        if isinstance(in_data, xr.Dataset):
+            in_data = in_data.to_array(dim="obs_var").squeeze()
+
+        if out_data_shape is None:
+            out_data_shape = in_data.shape if pointwise else ()
+        loop_dims = in_data.dims if pointwise else ()
+
+        wrap_data_kwargs.setdefault(
+            "input_core_dims",
+            [
+                [dim for dim in dataset.dims if dim not in loop_dims]
+                for dataset in [in_data, in_posterior]
+            ],
+        )
+        func_kwargs["out"] = np.empty(out_data_shape)
+        idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
+            func,
+            in_data,
+            in_posterior,
+            func_args=func_args,
+            func_kwargs=func_kwargs,
+            ufunc_kwargs=ufunc_kwargs,
+            **wrap_data_kwargs,
         )
     return idata
