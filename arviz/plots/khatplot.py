@@ -161,16 +161,8 @@ def plot_khat(
     if isinstance(color, str):
         if color in dims:
             colors, color_mapping = color_from_dim(khats, color)
-            cmap_name = kwargs.pop("cmap", plt.rcParams["image.cmap"])
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
             cmap = getattr(cm, cmap_name)
-            if legend:
-                msize = np.sqrt(kwargs.pop("s", markersize))
-                handles = [
-                    Line2D([], [], color=cmap(float_color), label=coord, ms=msize, lw=0, **kwargs)
-                    for coord, float_color in color_mapping.items()
-                ]
-                kwargs.setdefault("cmap", cmap_name)
-                kwargs.setdefault("s", msize ** 2)
             rgba_c = cmap(colors)
         else:
             legend = False
@@ -239,6 +231,8 @@ def plot_khat(
         fig.autofmt_xdate()
         fig.tight_layout()
     if legend:
-        ncols = len(handles) // 6 + 1
-        ax.legend(handles=handles, ncol=ncols, title=color)
+        ncols = len(color_mapping) // 6 + 1
+        for label, float_color in color_mapping.items():
+            ax.scatter([], [], c=[cmap(float_color)], label=label, **kwargs)
+        ax.legend(ncol=ncols, title=color)
     return ax
