@@ -19,7 +19,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
 )
-from ..utils import _var_names
+from ..utils import _var_names, numba_check
 
 _log = logging.getLogger(__name__)
 
