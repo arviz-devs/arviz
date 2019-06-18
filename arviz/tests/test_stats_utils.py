@@ -221,7 +221,7 @@ def test_stats_variance_1d():
 
 def test_stats_variance_2d():
     data_1 = np.random.randn(1000, 1000)
-    data_2 = np.random.randn(1_000_000)
+    data_2 = np.random.randn(1000000)
     school = load_arviz_data("centered_eight").posterior["mu"].values
     n_school = load_arviz_data("non_centered_eight").posterior["mu"].values
     assert np.allclose(np.var(school, ddof=1, axis=1), stats_variance_2d(school, ddof=1, axis=1))
@@ -237,6 +237,4 @@ def test_stats_variance_2d():
     assert np.allclose(np.var(data_1, axis=0), stats_variance_2d(data_1, axis=0))
     assert np.allclose(np.var(data_1, axis=1), stats_variance_2d(data_1, axis=1))
     assert np.allclose(np.var(data_1, axis=0, ddof=1), stats_variance_2d(data_1, axis=0, ddof=1))
-
-
-assert np.allclose(np.var(data_1, axis=1, ddof=1), stats_variance_2d(data_1, axis=1, ddof=1))
+    assert np.allclose(np.var(data_1, axis=1, ddof=1), stats_variance_2d(data_1, axis=1, ddof=1))
