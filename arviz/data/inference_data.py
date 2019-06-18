@@ -2,7 +2,9 @@
 from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
+from datetime import datetime
 import netCDF4 as nc
+import numpy as np
 import xarray as xr
 
 
@@ -124,8 +126,8 @@ class InferenceData:
             return out
 
 
-# pylint: disable=protected-access
-def concat(*args, dim=None, copy=True, inplace=False):
+# pylint: disable=protected-access, inconsistent-return-statements
+def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     """Concatenate InferenceData objects.
 
     Concatenates over `group`, `chain` or `draw`.
@@ -147,8 +149,11 @@ def concat(*args, dim=None, copy=True, inplace=False):
         unique groups.
     copy : bool
         If True, groups are copied to the new InferenceData object.
+        Used only if `dim` is None.
     inplace : bool
         If True, merge args to first object.
+    reset_dim : bool
+        Valid only if dim is not None.
 
     Returns
     -------
@@ -156,10 +161,14 @@ def concat(*args, dim=None, copy=True, inplace=False):
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
     """
+    # pylint: disable=undefined-loop-variable, too-many-nested-blocks
     if len(args) == 0:
         if inplace:
             return
         return InferenceData()
+
+    if len(args) == 1 and isinstance(args[0], Sequence):
+        args = args[0]
 
     # assert that all args are InferenceData
     for i, arg in enumerate(args):
@@ -172,42 +181,42 @@ def concat(*args, dim=None, copy=True, inplace=False):
     if dim is not None and dim.lower() not in {"group", "chain", "draw"}:
         msg = "Invalid `dim`: {}. Valid `dim` are {}".format(dim, '{"group", "chain", "draw"}')
         raise TypeError(msg)
+    dim = dim.lower() if dim is not None else dim
 
-    if len(args) == 1 and isinstance(args[0], Sequence):
-        args = args[0]
-    elif len(args) == 1:
-        if isinstance(args[0], InferenceData):
-            if inplace:
-                return
+    if len(args) == 1 and isinstance(args[0], InferenceData):
+        if inplace:
+            return None
+        else:
+            if copy:
+                return deepcopy(args[0])
             else:
-                if copy:
-                    return deepcopy(args[0])
-                else:
-                    return args[0]
+                return args[0]
 
-
-    arg0 = args[0]
-    arg0_groups = ccopy(arg0._groups)
-    args_groups = dict()
+    current_time = str(datetime.now())
 
     if not inplace:
         # Keep order for python 3.5
         inference_data_dict = OrderedDict()
 
     if dim is None:
+        arg0 = args[0]
+        arg0_groups = ccopy(arg0._groups)
+        args_groups = dict()
         # check if groups are independent
         # Concat over unique groups
         for arg in args[1:]:
             for group in arg._groups:
                 if group in args_groups or group in arg0_groups:
-                    msg = "Concatenating overlapping groups is not supported unless `dim` is defined."
+                    msg = (
+                        "Concatenating overlapping groups is not supported unless `dim` is defined."
+                    )
                     msg += " Valid dimensions are `chain` and `draw`."
                     raise TypeError(msg)
             group_data = getattr(arg, group)
             args_groups[group] = deepcopy(group_data) if copy else group_data
         # add arg0 to args_groups if inplace is False
         if not inplace:
-            for group in arg0:
+            for group in arg0_groups:
                 group_data = getattr(arg0, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
@@ -234,11 +243,11 @@ def concat(*args, dim=None, copy=True, inplace=False):
             other_groups = [
                 group for group in arg0_groups if group not in basic_order
             ] + other_groups
-            sorted_groups = [
-                group for group in basic_order + other_groups if group in arg0._groups
-            ]
+            sorted_groups = [group for group in basic_order + other_groups if group in arg0._groups]
             setattr(arg0, "_groups", sorted_groups)
-    elif dim in ("chain", "draw"):
+    else:
+        arg0 = args[0]
+        arg0_groups = arg0._groups
         for arg in args[1:]:
             for group0 in arg0_groups:
                 if group0 not in arg._groups:
@@ -257,8 +266,16 @@ def concat(*args, dim=None, copy=True, inplace=False):
                     group_data = getattr(arg, group)
                     group_vars = group_data.data_vars
 
-                    group0_data = getattr(arg0, group)
+                    if not inplace and group in inference_data_dict:
+                        group0_data = inference_data_dict[group]
+                    else:
+                        group0_data = getattr(arg0, group)
                     group0_vars = group0_data.data_vars
+
+                    for var in group0_vars:
+                        if var not in group_vars:
+                            msg = "Mismatch between the variables."
+                            raise TypeError(msg)
 
                     for var in group_vars:
                         if var not in group0_vars:
@@ -276,15 +293,66 @@ def concat(*args, dim=None, copy=True, inplace=False):
 
                     # xr.concat
                     concatenated_group = xr.concat((group_data, group0_data), dim=dim)
+                    if reset_dim:
+                        concatenated_group[dim] = range(concatenated_group[dim].size)
+
+                    # handle attrs
+                    if hasattr(group0_data, "attrs"):
+                        group0_attrs = deepcopy(getattr(group0_data, "attrs"))
+                    else:
+                        group0_attrs = OrderedDict()
+
+                    if hasattr(group_data, "attrs"):
+                        group_attrs = getattr(group_data, "attrs")
+                    else:
+                        group_attrs = dict()
+
+                    # gather attrs results to group0_attrs
+                    for attr_key, attr_values in group_attrs.items():
+                        group0_attr_values = group0_attrs.get(attr_key, None)
+                        equality = attr_values == group0_attr_values
+                        if hasattr(equality, "__iter__"):
+                            equality = np.all(equality)
+                        if equality:
+                            continue
+                        # handle special cases:
+                        if attr_key in ("created_at", "previous_created_at"):
+                            # check the defaults
+                            if not hasattr(group0_attrs, "previous_created_at"):
+                                group0_attrs["previous_created_at"] = []
+                                if group0_attr_values is not None:
+                                    group0_attrs["previous_created_at"].append(group0_attr_values)
+                            # check previous values
+                            if attr_key == "previous_created_at":
+                                if not isinstance(attr_values, list):
+                                    attr_values = [attr_values]
+                                group0_attrs["previous_created_at"].extend(attr_values)
+                                continue
+                            # update "created_at"
+                            if group0_attr_values != current_time:
+                                group0_attrs[attr_key] = current_time
+                            group0_attrs["previous_created_at"].append(attr_values)
+
+                        elif attr_key in group0_attrs:
+                            combined_key = "combined_{}".format(attr_key)
+                            if combined_key not in group0_attrs:
+                                group0_attrs[combined_key] = [group0_attr_values]
+                            group0_attrs[combined_key].append(attr_values)
+                        else:
+                            group0_attrs[attr_key] = attr_values
+                    # update attrs
+                    setattr(concatenated_group, "attrs", group0_attrs)
+
                     if inplace:
                         setattr(arg0, group, concatenated_group)
                     else:
                         inference_data_dict[group] = concatenated_group
                 else:
                     # observed_data
-                    if (group not in arg0_groups) and inplace:
-                        msg = "observed_data missing from the groups."
-                        raise TypeError(msg)
+                    if group not in arg0_groups:
+                        setattr(arg0, group, deepcopy(group_data) if copy else group_data)
+                        arg0._groups.append(group)
+                        continue
 
                     # assert that variables are equal
                     group_data = getattr(arg, group)
@@ -305,6 +373,55 @@ def concat(*args, dim=None, copy=True, inplace=False):
                             if dim in var_data.dims and dim in var0_data.dims:
                                 concatenated_var = xr.concat((group_data, group0_data), dim=dim)
                                 group0_data[var] = concatenated_var
+
+                    # handle attrs
+                    if hasattr(group0_data, "attrs"):
+                        group0_attrs = getattr(group0_data, "attrs")
+                    else:
+                        group0_attrs = OrderedDict()
+
+                    if hasattr(group_data, "attrs"):
+                        group_attrs = getattr(group_data, "attrs")
+                    else:
+                        group_attrs = dict()
+
+                    # gather attrs results to group0_attrs
+                    for attr_key, attr_values in group_attrs.items():
+                        group0_attr_values = group0_attrs.get(attr_key, None)
+                        equality = attr_values == group0_attr_values
+                        if hasattr(equality, "__iter__"):
+                            equality = np.all(equality)
+                        if equality:
+                            continue
+                        # handle special cases:
+                        if attr_key in ("created_at", "previous_created_at"):
+                            # check the defaults
+                            if not hasattr(group0_attrs, "previous_created_at"):
+                                group0_attrs["previous_created_at"] = []
+                                if group0_attr_values is not None:
+                                    group0_attrs["previous_created_at"].append(group0_attr_values)
+                            # check previous values
+                            if attr_key == "previous_created_at":
+                                if not isinstance(attr_values, list):
+                                    attr_values = [attr_values]
+                                group0_attrs["previous_created_at"].extend(attr_values)
+                                continue
+                            # update "created_at"
+                            if group0_attr_values != current_time:
+                                group0_attrs[attr_key] = current_time
+                            group0_attrs["previous_created_at"].append(attr_values)
+
+                        elif attr_key in group0_attrs:
+                            combined_key = "combined_{}".format(attr_key)
+                            if combined_key not in group0_attrs:
+                                group0_attrs[combined_key] = [group0_attr_values]
+                            group0_attrs[combined_key].append(attr_values)
+
+                        else:
+                            group0_attrs[attr_key] = attr_values
+                    # update attrs
+                    setattr(group0_data, "attrs", group0_attrs)
+
                     if inplace:
                         setattr(arg0, group, group0_data)
                     else:
