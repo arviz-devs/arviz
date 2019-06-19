@@ -124,15 +124,7 @@ def make_ufunc(
                 msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
                 raise TypeError(msg)
         for idx in np.ndindex(out.shape):
-            try:
-                arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
-            except IndexError:
-                arys_idx = []
-                for ary in arys:
-                    idx_broadcast = tuple(
-                        0 if dim_len == 1 else idx_i for idx_i, dim_len in zip(idx, ary.shape)
-                    )
-                    arys_idx.append(ary[idx_broadcast].ravel() if ravel else ary[idx_broadcast])
+            arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
             out[idx] = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))[index]
         return out
 

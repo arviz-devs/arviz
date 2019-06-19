@@ -1350,24 +1350,24 @@ def apply_test_function(
         func_kwargs["out"] = np.empty(out_data_shape)
         try:
             idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
-            func,
-            in_data.values,
-            in_posterior.values,
-            func_args=func_args,
-            func_kwargs=func_kwargs,
-            ufunc_kwargs=ufunc_kwargs,
-            **wrap_data_kwargs,
-        )
+                func,
+                in_data.values,
+                in_posterior.values,
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_data_kwargs,
+            )
         except IndexError:
             input_core_dims = sum(*wrap_data_kwargs["input_core_dims"])
             wrap_data_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
             idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
-            func,
-            *xr.broadcast(in_data, in_posterior),
-            func_args=func_args,
-            func_kwargs=func_kwargs,
-            ufunc_kwargs=ufunc_kwargs,
-            **wrap_data_kwargs,
-        )
+                func,
+                *xr.broadcast(in_data, in_posterior),
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_data_kwargs,
+            )
 
     return idata
