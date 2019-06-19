@@ -177,12 +177,12 @@ def test_conditional_vect_numba_decorator():
     from arviz import utils
 
     @utils.conditional_vect
-    def func(a,b):
-        return a+b
+    def func(a, b):
+        return a + b
 
     a = np.random.randn(10)
     b = np.random.randn(10)
-    assert np.allclose(func(a, b), a+b)
+    assert np.allclose(func(a, b), a + b)
 
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
@@ -200,9 +200,9 @@ def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     numba_mock.vectorize = vectorize
 
     @utils.conditional_vect(keyword_argument="A keyword argument")
-    def placeholder_func(a,b):
+    def placeholder_func(a, b):
         """This function does nothing"""
-        c = a+b
+        c = a + b
         return "output"
 
     # pylint: disable=unpacking-non-sequence
