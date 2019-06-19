@@ -1,14 +1,8 @@
 """Tests for stats_utils."""
 import numpy as np
-<<<<<<< HEAD
-from numpy.testing import assert_array_almost_equal
-import pytest
-from scipy.special import logsumexp
-=======
 import pytest
 from scipy.special import logsumexp
 from numpy.testing import assert_array_almost_equal
->>>>>>> Changed tests
 from arviz.data import load_arviz_data
 
 from ..stats.stats_utils import (
