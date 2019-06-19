@@ -199,9 +199,8 @@ def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     numba_mock.vectorize = vectorize
 
     @utils.conditional_vect(keyword_argument="A keyword argument")
-    def placeholder_func(a, b):
+    def placeholder_func():
         """This function does nothing"""
-        c = a + b
         return "output"
 
     # pylint: disable=unpacking-non-sequence
