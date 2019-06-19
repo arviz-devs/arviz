@@ -158,7 +158,7 @@ def test_addition():
 @pytest.mark.parametrize("copy", [True, False])
 @pytest.mark.parametrize("inplace", [True, False])
 @pytest.mark.parametrize("sequence", [True, False])
-def test_concat(copy, inplace, sequence):
+def test_concat_group(copy, inplace, sequence):
     idata1 = from_dict(
         posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
     )
@@ -192,6 +192,57 @@ def test_concat(copy, inplace, sequence):
         assert id(new_idata.observed_data) == id(idata3.observed_data)
 
 
+@pytest.mark.parametrize("dim", ["chain", "draw"])
+@pytest.mark.parametrize("copy", [True, False])
+@pytest.mark.parametrize("inplace", [True, False])
+@pytest.mark.parametrize("sequence", [True, False])
+@pytest.mark.parametrize("reset_dim", [True, False])
+def test_concat_dim(dim, copy, inplace, sequence, reset_dim):
+    idata1 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)},
+        observed_data={"C": np.random.randn(100), "D": np.random.randn(2, 100)},
+    )
+    if inplace:
+        original_idata1_id = id(idata1)
+    idata2 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)},
+        observed_data={"C": np.random.randn(100), "D": np.random.randn(2, 100)},
+    )
+    idata3 = from_dict(
+        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)},
+        observed_data={"C": np.random.randn(100), "D": np.random.randn(2, 100)},
+    )
+    # basic case
+    assert (
+        concat(idata1, idata2, dim=dim, copy=copy, inplace=False, reset_dim=reset_dim) is not None
+    )
+    if sequence:
+        new_idata = concat(
+            (idata1, idata2, idata3), copy=copy, dim=dim, inplace=inplace, reset_dim=reset_dim
+        )
+    else:
+        new_idata = concat(
+            idata1, idata2, idata3, dim=dim, copy=copy, inplace=inplace, reset_dim=reset_dim
+        )
+    if inplace:
+        assert new_idata is None
+        new_idata = idata1
+    assert new_idata is not None
+    test_dict = {"posterior": ["A", "B"], "observed_data": ["C", "D"]}
+    fails = check_multiple_attrs(test_dict, new_idata)
+    assert not fails
+    if inplace:
+        assert id(new_idata) == original_idata1_id
+    else:
+        assert id(new_idata) != id(idata1)
+    assert getattr(new_idata.posterior, dim).size == 6 if dim == "chain" else 30
+    if reset_dim:
+        assert np.all(
+            getattr(new_idata.posterior, dim).values
+            == (np.arange(6) if dim == "chain" else np.arange(30))
+        )
+
+
 @pytest.mark.parametrize("copy", [True, False])
 @pytest.mark.parametrize("inplace", [True, False])
 @pytest.mark.parametrize("sequence", [True, False])
@@ -221,10 +272,20 @@ def test_concat_bad():
     with pytest.raises(TypeError):
         concat("hello", "hello")
     idata = from_dict(posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)})
+    idata2 = from_dict(posterior={"A": np.random.randn(2, 10, 2)})
+    idata3 = from_dict(prior={"A": np.random.randn(2, 10, 2)})
     with pytest.raises(TypeError):
         concat(idata, np.array([1, 2, 3, 4, 5]))
-    with pytest.raises(NotImplementedError):
-        concat(idata, idata)
+    with pytest.raises(TypeError):
+        concat(idata, idata, dim=None)
+    with pytest.raises(TypeError):
+        concat(idata, idata2, dim="chain")
+    with pytest.raises(TypeError):
+        concat(idata2, idata, dim="chain")
+    with pytest.raises(TypeError):
+        concat(idata, idata3, dim="chain")
+    with pytest.raises(TypeError):
+        concat(idata3, idata, dim="chain")
 
 
 @pytest.mark.parametrize("inplace", [True, False])
