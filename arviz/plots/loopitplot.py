@@ -66,8 +66,8 @@ def plot_loo_pit(
     if not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData")
 
+    (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
     if ax is None:
-        (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
         _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
     if plot_kwargs is None:

@@ -1194,7 +1194,8 @@ def _loo_pit(y, y_hat, log_weights):
     """Compute LOO-PIT values."""
     sel = y_hat <= y
     if np.sum(sel) > 0:
-        return np.exp(_logsumexp(log_weights[sel]))
+        value = np.exp(_logsumexp(log_weights[sel]))
+        return min(1, value)
     else:
         return 0
 
@@ -1261,6 +1262,7 @@ def apply_test_function(
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
     ufunc_kwargs.setdefault("check_shape", False)
+    ufunc_kwargs.setdefault("ravel", False)
 
     if wrap_data_kwargs is None:
         wrap_data_kwargs = {}
@@ -1291,7 +1293,7 @@ def apply_test_function(
 
         if out_pp_shape is None:
             out_pp_shape = in_pp.shape if pointwise else in_pp.shape[:2]
-        loop_dims = in_pp.dims if pointwise else in_pp.dims[:2]
+        loop_dims = in_pp.dims if pointwise else ("chain", "draw")
 
         wrap_pp_kwargs.setdefault(
             "input_core_dims",
@@ -1300,17 +1302,28 @@ def apply_test_function(
                 for dataset in [in_pp, in_posterior]
             ],
         )
-
         func_kwargs["out"] = np.empty(out_pp_shape)
-        idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
-            func,
-            in_pp,
-            in_posterior,
-            func_args=func_args,
-            func_kwargs=func_kwargs,
-            ufunc_kwargs=ufunc_kwargs,
-            **wrap_pp_kwargs,
-        )
+        try:
+            idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
+                func,
+                in_pp,
+                in_posterior,
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_pp_kwargs,
+            )
+        except IndexError:
+            input_core_dims = sum(*wrap_pp_kwargs["input_core_dims"])
+            wrap_pp_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
+            idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
+                func,
+                *xr.broadcast(in_pp, in_posterior),
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_pp_kwargs,
+            )
 
     if group in ("observed_data", "both"):
         if not hasattr(idata, "observed_data"):
@@ -1335,13 +1348,26 @@ def apply_test_function(
             ],
         )
         func_kwargs["out"] = np.empty(out_data_shape)
-        idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
+        try:
+            idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
             func,
-            in_data,
-            in_posterior,
+            in_data.values,
+            in_posterior.values,
             func_args=func_args,
             func_kwargs=func_kwargs,
             ufunc_kwargs=ufunc_kwargs,
             **wrap_data_kwargs,
         )
+        except IndexError:
+            input_core_dims = sum(*wrap_data_kwargs["input_core_dims"])
+            wrap_data_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
+            idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
+            func,
+            *xr.broadcast(in_data, in_posterior),
+            func_args=func_args,
+            func_kwargs=func_kwargs,
+            ufunc_kwargs=ufunc_kwargs,
+            **wrap_data_kwargs,
+        )
+
     return idata
