@@ -73,7 +73,7 @@ def plot_loo_pit(
     if plot_kwargs is None:
         plot_kwargs = {}
     plot_kwargs["color"] = color
-    plot_kwargs.setdefault("linewidth", linewidth)
+    plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     plot_kwargs.setdefault("label", "LOO-PIT")
 
     if plot_unif_kwargs is None:
