@@ -1,6 +1,7 @@
 """Pareto tail indices plot."""
+import warnings
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 from matplotlib.colors import to_rgba_array
 import matplotlib.cm as cm
 import numpy as np
@@ -23,6 +24,7 @@ def plot_khat(
     show_bins=False,
     bin_format="{1:.1f}%",
     annotate=False,
+    hover_label=False,
     figsize=None,
     textsize=None,
     coords=None,
@@ -51,6 +53,9 @@ def plot_khat(
         The string is used as formatting guide calling ``show_bins.format(count, pct)``.
     annotate : bool, optional
         Show the labels of k values larger than 1.
+    hover_label : bool, optional
+        Show the datapoint label when hovering over it with the mouse. Requires an interactive
+        backend.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -116,6 +121,22 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
+    if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
+        try:
+            from IPython import get_ipython
+            ipython = get_ipython()
+            ipython.magic("matplotlib")
+        except (ImportError, AttributeError):
+            hover_label = False
+            warnings.warn(
+                "hover labels are only available with interactive backends. To switch to an "
+                "interactive backend from ipython or jupyter, use `%matplotlib` there is no need "
+                "to restart the kernel",
+                UserWarning
+            )
+        else:
+            warnings.warn("switching to interactive backend to use hover labels", UserWarning)
+
     if hlines_kwargs is None:
         hlines_kwargs = {}
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
@@ -143,10 +164,12 @@ def plot_khat(
         khats = get_coords(khats, coords)
         dims = khats.dims
 
-    if xlabels:
-        coord_labels = format_coords_as_labels(khats)
-
     n_data_points = khats.size
+    xdata = np.arange(n_data_points)
+    if isinstance(khats, DataArray):
+        coord_labels = format_coords_as_labels(khats)
+    else:
+        coord_labels = xdata.astype(str)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
         figsize, textsize
@@ -182,14 +205,9 @@ def plot_khat(
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
-    xdata = np.arange(n_data_points)
-    ax.scatter(xdata, khats, c=rgba_c, **kwargs)
+    sc_plot = ax.scatter(xdata, khats, c=rgba_c, **kwargs)
     if annotate:
         idxs = xdata[khats > 1]
-        try:
-            coord_labels
-        except NameError:
-            coord_labels = xdata.astype(str)
         for idx in idxs:
             ax.text(
                 idx,
@@ -235,4 +253,43 @@ def plot_khat(
         for label, float_color in color_mapping.items():
             ax.scatter([], [], c=[cmap(float_color)], label=label, **kwargs)
         ax.legend(ncol=ncols, title=color)
+
+    if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
+        make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
+
     return ax
+
+
+def make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
+    annot = ax.annotate(
+        "",
+        xy=(0, 0),
+        xytext=(10, 10),
+        textcoords="offset points",
+        bbox=dict(boxstyle="round", fc="w"),
+        arrowprops=dict(arrowstyle="->"),
+    )
+    annot.set_visible(False)
+
+    def update_annot(ind):
+        idx = ind["ind"][0]
+        pos = sc_plot.get_offsets()[idx]
+        annot.xy = pos
+        annot.set_text(coord_labels[idx])
+        annot.get_bbox_patch().set_facecolor(rgba_c[idx])
+        annot.get_bbox_patch().set_alpha(0.4)
+
+    def hover(event):
+        vis = annot.get_visible()
+        if event.inaxes == ax:
+            cont, ind = sc_plot.contains(event)
+            if cont:
+                update_annot(ind)
+                annot.set_visible(True)
+                fig.canvas.draw_idle()
+            else:
+                if vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
+
+    fig.canvas.mpl_connect("motion_notify_event", hover)
