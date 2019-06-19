@@ -49,7 +49,6 @@ def test_numba_check():
     """Test if numba is installed."""
     try:
         import numba
-
         assert numba_check()
     except ImportError:
         assert not numba_check()
