@@ -46,7 +46,7 @@ def test_var_names_warning():
 
 
 def test_numba_check():
-    """Test if numba is installed or not"""
+    """Test if numba is installed."""
     try:
         import numba
 
@@ -101,9 +101,9 @@ def test_conditional_jit_numba_decorator():
 
     @utils.conditional_jit
     def func():
-        return "Numba used"
+        return True
 
-    assert func() == "Numba used"
+    assert func()
 
 
 def test_conditional_jit_numba_decorator_keyword(monkeypatch):
@@ -177,10 +177,12 @@ def test_conditional_vect_numba_decorator():
     from arviz import utils
 
     @utils.conditional_vect
-    def func():
-        return "Numba used"
+    def func(a,b):
+        return a+b
 
-    assert func() == "Numba used"
+    a = np.random.randn(10)
+    b = np.random.randn(10)
+    assert np.allclose(func(a, b), a+b)
 
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
@@ -192,14 +194,15 @@ def test_conditional_vect_numba_decorator_keyword(monkeypatch):
     monkeypatch.setattr(utils.importlib, "import_module", lambda x: numba_mock)
 
     def vectorize(**kwargs):
-        """overwrite numba.jit function"""
+        """overwrite numba.vectorize function"""
         return lambda x: (x(), kwargs)
 
-    numba_mock.vect = vectorize
+    numba_mock.vectorize = vectorize
 
     @utils.conditional_vect(keyword_argument="A keyword argument")
-    def placeholder_func():
+    def placeholder_func(a,b):
         """This function does nothing"""
+        c = a+b
         return "output"
 
     # pylint: disable=unpacking-non-sequence

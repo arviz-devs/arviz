@@ -151,7 +151,7 @@ class TestDiagnostics:
         assert (abs(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 6e-5).all(None)
         assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-14).all(None)
         not_rhat = [col for col in reference.columns if col != "rhat_rank"]
-        assert (abs(reference[not_rhat] - arviz_data[not_rhat]) < 1e-11).all(None)
+        assert (abs((reference[not_rhat] - arviz_data[not_rhat])).values < 1e-8).all(None)
         assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-14).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))

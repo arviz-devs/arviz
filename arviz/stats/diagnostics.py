@@ -104,7 +104,7 @@ def effective_sample_size(data, *, var_names=None, method="bulk", relative=False
     Notes
     -----
     The basic ess diagnostic is computed by:
-    
+
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
 
