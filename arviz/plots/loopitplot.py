@@ -1,5 +1,6 @@
 """Plot LOO-PIT predictive checks of inference data."""
 import numpy as np
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb
 
@@ -14,6 +15,7 @@ def plot_loo_pit(
     idata,
     y,
     y_hat=None,
+    ecdf=False,
     n_unif=100,
     use_hpd=False,
     figsize=None,
@@ -37,6 +39,11 @@ def plot_loo_pit(
     y_hat : str, optional
         Name of the posterior_predictive variable to use. If None, it will be taken as equal
         to y.
+    ecdf : bool, optional
+        Plot LOO-PIT Empirical Cumulative Distribution Function (ECDF) instead of LOO-PIT kde.
+        In this case, instead of overlaying uniform distributions, the beta 95% interval around
+        the theoretical uniform CDF is shown. For more information, see `Vehtari et al. (2019)`,
+        Appendix G.
     n_unif : int, optional
         Number of datasets to simulate and overlay from the uniform distribution.
     use_hpd : bool, optional
@@ -52,9 +59,10 @@ def plot_loo_pit(
     ax : axes, optional
         Matplotlib axes
     plot_kwargs : dict, optional
-        Additional keywords passed to ax.plot, for LOO-PIT line
+        Additional keywords passed to ax.plot for LOO-PIT line (kde or ECDF)
     plot_unif_kwargs : dict, optional
-        Additional keywords passed to ax.plot, for overlaid uniform distributions.
+        Additional keywords passed to ax.plot for overlaid uniform distributions or
+        for beta 95% interval lines if ``ecdf=True``
     hpd_kwargs : dict, optional
         Additional keywords passed to az.plot_hpd
 
@@ -63,6 +71,8 @@ def plot_loo_pit(
     axes : axes
         Matplotlib axes
     """
+    if ecdf and use_hpd:
+        raise ValueError("use_hpd is incompatible with ecdf plot")
     if not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData")
 
@@ -74,7 +84,8 @@ def plot_loo_pit(
         plot_kwargs = {}
     plot_kwargs["color"] = color
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
-    plot_kwargs.setdefault("label", "LOO-PIT")
+    plot_kwargs.setdefault("label", "LOO-PIT ECDF" if ecdf else "LOO-PIT")
+    plot_kwargs.setdefault("zorder", 5)
 
     if plot_unif_kwargs is None:
         plot_unif_kwargs = {}
@@ -84,7 +95,6 @@ def plot_loo_pit(
     plot_unif_kwargs.setdefault("color", hsv_to_rgb(light_color))
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
-    plot_unif_kwargs.setdefault("zorder", -1)
 
     if hpd_kwargs is None:
         hpd_kwargs = {}
@@ -101,23 +111,40 @@ def plot_loo_pit(
     log_weights, _ = _psislw(-log_likelihood)
 
     if log_weights.dims == y_hat.dims and y_hat.dims[:-1] == y.dims:
-        loo_pit = _loo_pit(y, y_hat, log_weights).values
+        loo_pit = _loo_pit(y, y_hat, log_weights).values.flatten()
     else:
-        loo_pit = _loo_pit(y.values, y_hat.values, log_weights.values)
-    loo_pit_kde, _, _ = _fast_kde(loo_pit.flatten(), xmin=0, xmax=1)
+        loo_pit = _loo_pit(y.values, y_hat.values, log_weights.values).flatten()
 
-    unif = np.random.uniform(size=(n_unif, loo_pit.size))
-    x_vals = np.linspace(0, 1, len(loo_pit_kde))
-    if use_hpd:
-        unif_densities = np.empty((n_unif, len(loo_pit_kde)))
-        for idx in range(n_unif):
-            unif_densities[idx, :], _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
-        plot_hpd(x_vals, unif_densities, **hpd_kwargs)
+    if ecdf:
+        loo_pit = np.sort(loo_pit)
+        S = loo_pit.size
+        loo_pit_ecdf = np.arange(S) / S
+        unif_ecdf = np.arange(
+            S + 1
+        )  # ideal unnormalized ECDF of uniform distribution with S points
+        p975 = stats.beta.ppf(0.975, unif_ecdf + 1, S - unif_ecdf + 1)
+        p025 = stats.beta.ppf(0.025, unif_ecdf + 1, S - unif_ecdf + 1)
+
+        plot_kwargs.setdefault("drawstyle", "steps" if S < 100 else "default")
+        plot_unif_kwargs.setdefault("drawstyle", "steps" if S < 100 else "default")
+
+        ax.plot(np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf, 1)), **plot_kwargs)
+        ax.plot(unif_ecdf / S, p975, unif_ecdf / S, p025, **plot_unif_kwargs)
     else:
-        for idx in range(n_unif):
-            unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
-            ax.plot(x_vals, unif_density, **plot_unif_kwargs)
-    ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
+        loo_pit_kde, _, _ = _fast_kde(loo_pit, xmin=0, xmax=1)
+
+        unif = np.random.uniform(size=(n_unif, loo_pit.size))
+        x_vals = np.linspace(0, 1, len(loo_pit_kde))
+        if use_hpd:
+            unif_densities = np.empty((n_unif, len(loo_pit_kde)))
+            for idx in range(n_unif):
+                unif_densities[idx, :], _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
+            plot_hpd(x_vals, unif_densities, **hpd_kwargs)
+        else:
+            for idx in range(n_unif):
+                unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
+                ax.plot(x_vals, unif_density, **plot_unif_kwargs)
+        ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
 
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
