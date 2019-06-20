@@ -27,29 +27,65 @@ class TestDataPyMC3:
             prior = pm.sample_prior_predictive()
             posterior_predictive = pm.sample_posterior_predictive(data.obj)
 
-        return from_pymc3(
+        return (
+            from_pymc3(
+                trace=data.obj,
+                prior=prior,
+                posterior_predictive=posterior_predictive,
+                coords={"school": np.arange(eight_schools_params["J"])},
+                dims={"theta": ["school"], "eta": ["school"]},
+            ),
+            posterior_predictive,
+        )
+
+    def test_from_pymc(self, data, eight_schools_params, chains, draws):
+        inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
+        test_dict = {
+            "posterior": ["mu", "tau", "eta", "theta"],
+            "sample_stats": ["diverging", "log_likelihood"],
+            "posterior_predictive": ["obs"],
+            "prior": ["mu", "tau", "eta", "theta"],
+            "observed_data": ["obs"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        for key, values in posterior_predictive.items():
+            ivalues = inference_data.posterior_predictive[key]
+            for chain in range(chains):
+                assert np.all(
+                    np.isclose(ivalues[chain], values[chain * draws : (chain + 1) * draws])
+                )
+
+    def test_posterior_predictive_keep_size(self, data, chains, draws, eight_schools_params):
+        with data.model:
+            posterior_predictive = pm.sample_posterior_predictive(data.obj, keep_size=True)
+
+        inference_data = from_pymc3(
             trace=data.obj,
-            prior=prior,
             posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
         )
+        shape = inference_data.posterior_predictive.obs.shape
+        assert np.all(
+            [obs_s == s for obs_s, s in zip(shape, (chains, draws, eight_schools_params["J"]))]
+        )
 
-    def test_posterior(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior")
+    def test_posterior_predictive_warning(self, data, eight_schools_params, caplog):
+        with data.model:
+            posterior_predictive = pm.sample_posterior_predictive(data.obj, 370)
 
-    def test_sampler_stats(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "sample_stats")
-
-    def test_posterior_predictive(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "posterior_predictive")
-
-    def test_prior(self, data, eight_schools_params):
-        inference_data = self.get_inference_data(data, eight_schools_params)
-        assert hasattr(inference_data, "prior")
+        inference_data = from_pymc3(
+            trace=data.obj,
+            posterior_predictive=posterior_predictive,
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
+        records = caplog.records
+        shape = inference_data.posterior_predictive.obs.shape
+        assert np.all([obs_s == s for obs_s, s in zip(shape, (1, 370, eight_schools_params["J"]))])
+        assert len(records) == 1
+        assert records[0].levelname == "WARNING"
 
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py
