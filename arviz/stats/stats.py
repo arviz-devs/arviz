@@ -10,7 +10,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..data import convert_to_inference_data, convert_to_dataset
+from ..data import convert_to_inference_data, convert_to_dataset, InferenceData
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
     make_ufunc as _make_ufunc,
@@ -1144,16 +1144,20 @@ def waic(data, pointwise=False, scale="deviance"):
         )
 
 
-def loo_pit(y, y_hat, log_weights):
+def loo_pit(idata=None, y=None, y_hat=None, log_weights=None):
     """Compute LOO-PIT values.
 
     Arguments
     ---------
-    y : array or DataArray
-        Observed data.
-    y_hat : array or DataArray
+    idata : InferenceData
+        InferenceData object.
+    y : array, DataArray or str
+        Observed data. If str, idata must be present and contain the observed data group
+    y_hat : array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
-        extra dimension at the end of size n_samples (chains and draws stacked)
+        extra dimension at the end of size n_samples (chains and draws stacked). If str or
+        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        equal to y, thus, y must be str too.
     log_weights : array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
 
@@ -1162,6 +1166,39 @@ def loo_pit(y, y_hat, log_weights):
     loo_pit : array or DataArray
         Value of the LOO-PIT at each observed data point.
     """
+    if idata is not None and not isinstance(idata, InferenceData):
+        raise ValueError("idata must be of type InferenceData or None")
+
+    if idata is None:
+        if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat, log_weights)):
+            raise ValueError(
+                "all 3 y, y_hat and log_weights must be array or DataArray when idata is None "
+                "but they are of types {}".format([type(arg) for arg in (y, y_hat, log_weights)])
+            )
+
+    else:
+        if y_hat is None and isinstance(y, str):
+            y_hat = y
+        elif y_hat is None:
+            raise ValueError("y_hat cannot be None if y is not a str")
+        if isinstance(y, str):
+            y = idata.observed_data[y].values
+        elif not isinstance(y, (np.ndarray, xr.DataArray)):
+            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+        if isinstance(y_hat, str):
+            y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw")).values
+        elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "y_hat must be of types array, DataArray or str, not {}".format(type(y))
+            )
+        if log_weights is None:
+            log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+            log_weights = psislw(-log_likelihood)[0].values
+        elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "log_weights must be None or of types array or DataArray, not {}".format(type(y))
+            )
+
     if len(y.shape) + 1 != len(y_hat.shape):
         raise ValueError(
             "y_hat must have 1 more dimension than y, but y_hat has {} dims and y has "
@@ -1180,6 +1217,7 @@ def loo_pit(y, y_hat, log_weights):
                 y_hat.shape, log_weights.shape
             )
         )
+
     kwargs = {
         "input_core_dims": [[], ["samples"], ["samples"]],
         "output_core_dims": [[]],

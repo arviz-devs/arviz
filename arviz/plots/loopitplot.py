@@ -4,17 +4,17 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb
 
-from ..data import InferenceData
-from ..stats import loo_pit as _loo_pit, psislw as _psislw
+from ..stats import loo_pit as _loo_pit
 from .plot_utils import _scale_fig_size
 from .kdeplot import _fast_kde
 from .hpdplot import plot_hpd
 
 
 def plot_loo_pit(
-    idata,
-    y,
+    idata=None,
+    y=None,
     y_hat=None,
+    log_weights=None,
     ecdf=False,
     n_unif=100,
     use_hpd=False,
@@ -32,13 +32,16 @@ def plot_loo_pit(
     Parameters
     ----------
     idata : InferenceData
-        InferenceData object with groups `observed_data`, `posterior_predictive` and
-        `sample_stats`. Objects that can be converted to InferenceData are not accepted.
-    y : str
-        Name of the observed_data variable to use.
-    y_hat : str, optional
-        Name of the posterior_predictive variable to use. If None, it will be taken as equal
-        to y.
+        InferenceData object.
+    y : array, DataArray or str
+        Observed data. If str, idata must be present and contain the observed data group
+    y_hat : array, DataArray or str
+        Posterior predictive samples for ``y``. It must have the same shape as y plus an
+        extra dimension at the end of size n_samples (chains and draws stacked). If str or
+        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        equal to y, thus, y must be str too.
+    log_weights : array or DataArray
+        Smoothed log_weights. It must have the same shape as ``y_hat``
     ecdf : bool, optional
         Plot LOO-PIT Empirical Cumulative Distribution Function (ECDF) instead of LOO-PIT kde.
         In this case, instead of overlaying uniform distributions, the beta 95% interval around
@@ -73,8 +76,6 @@ def plot_loo_pit(
     """
     if ecdf and use_hpd:
         raise ValueError("use_hpd is incompatible with ecdf plot")
-    if not isinstance(idata, InferenceData):
-        raise ValueError("idata must be of type InferenceData")
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
     if ax is None:
@@ -103,33 +104,25 @@ def plot_loo_pit(
     fill_kwargs.setdefault("label", "Uniform HPD")
     hpd_kwargs["fill_kwargs"] = fill_kwargs
 
-    if y_hat is None:
-        y_hat = y
-    y = idata.observed_data[y]
-    y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw"))
-    log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-    log_weights, _ = _psislw(-log_likelihood)
-
-    if log_weights.dims == y_hat.dims and y_hat.dims[:-1] == y.dims:
-        loo_pit = _loo_pit(y, y_hat, log_weights).values.flatten()
-    else:
-        loo_pit = _loo_pit(y.values, y_hat.values, log_weights.values).flatten()
+    loo_pit = _loo_pit(idata, y, y_hat, log_weights)
+    loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
     if ecdf:
-        loo_pit = np.sort(loo_pit)
-        S = loo_pit.size
-        loo_pit_ecdf = np.arange(S) / S
-        unif_ecdf = np.arange(
-            S + 1
-        )  # ideal unnormalized ECDF of uniform distribution with S points
-        p975 = stats.beta.ppf(0.975, unif_ecdf + 1, S - unif_ecdf + 1)
-        p025 = stats.beta.ppf(0.025, unif_ecdf + 1, S - unif_ecdf + 1)
+        loo_pit.sort()
+        n_data_points = loo_pit.size
+        loo_pit_ecdf = np.arange(n_data_points) / n_data_points
+        # ideal unnormalized ECDF of uniform distribution with n_data_points points
+        unif_ecdf = np.arange(n_data_points + 1)
+        p975 = stats.beta.ppf(0.975, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
+        p025 = stats.beta.ppf(0.025, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
 
-        plot_kwargs.setdefault("drawstyle", "steps" if S < 100 else "default")
-        plot_unif_kwargs.setdefault("drawstyle", "steps" if S < 100 else "default")
+        plot_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
+        plot_unif_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
 
         ax.plot(np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf, 1)), **plot_kwargs)
-        ax.plot(unif_ecdf / S, p975, unif_ecdf / S, p025, **plot_unif_kwargs)
+        ax.plot(
+            unif_ecdf / n_data_points, p975, unif_ecdf / n_data_points, p025, **plot_unif_kwargs
+        )
     else:
         loo_pit_kde, _, _ = _fast_kde(loo_pit, xmin=0, xmax=1)
 
