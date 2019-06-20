@@ -45,16 +45,6 @@ def test_var_names_warning():
         assert _var_names(var_names, data) == expected
 
 
-def test_numba_check():
-    """Test if numba is installed."""
-    try:
-        import numba
-
-        assert numba_check()
-    except ImportError:
-        assert not numba_check()
-
-
 @pytest.fixture(scope="function")
 def utils_with_numba_import_fail(monkeypatch):
     """Patch numba in utils so when its imported it raises ImportError"""
