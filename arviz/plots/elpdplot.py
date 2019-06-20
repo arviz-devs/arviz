@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.ticker import NullFormatter
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
@@ -172,7 +171,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=(not xlabels and not legend))
+            fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
@@ -202,6 +201,7 @@ def plot_elpd(
         if xlabels:
             set_xticklabels(ax, coord_labels)
             fig.autofmt_xdate()
+            fig.tight_layout()
         if legend:
             ncols = len(handles) // 6 + 1
             ax.legend(handles=handles, ncol=ncols, title=color)
@@ -217,7 +217,9 @@ def plot_elpd(
                 numvars - 1,
                 numvars - 1,
                 figsize=figsize,
-                constrained_layout=(not xlabels and not legend),
+                constrained_layout=not xlabels,
+                sharey="row",
+                sharex="all",
             )
 
         for i in range(0, numvars - 1):
@@ -250,16 +252,7 @@ def plot_elpd(
                             fontsize=0.8 * xt_labelsize,
                         )
 
-                if j + 1 != numvars - 1:
-                    ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
-                    ax[j, i].set_xticks([])
-                elif xlabels:
-                    set_xticklabels(ax[j, i], coord_labels)
-
-                if i != 0:
-                    ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
-                    ax[j, i].set_yticks([])
-                else:
+                if i == 0:
                     ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
@@ -267,7 +260,9 @@ def plot_elpd(
                     "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
                 )
         if xlabels:
+            set_xticklabels(ax[-1, -1], coord_labels)
             fig.autofmt_xdate()
+            fig.tight_layout()
         if legend:
             ncols = len(handles) // 6 + 1
             ax[0, 1].legend(
