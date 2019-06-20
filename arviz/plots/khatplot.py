@@ -256,12 +256,13 @@ def plot_khat(
         ax.legend(ncol=ncols, title=color)
 
     if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
-        make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
+        _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
 
     return ax
 
 
-def make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
+def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
+    """Show data point label when hovering over it with mouse."""
     annot = ax.annotate(
         "",
         xy=(0, 0),
