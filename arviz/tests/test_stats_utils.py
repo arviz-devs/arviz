@@ -3,8 +3,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
-from arviz.data import load_arviz_data
 
+from ..data import load_arviz_data
 from ..stats.stats_utils import (
     logsumexp as _logsumexp,
     make_ufunc,

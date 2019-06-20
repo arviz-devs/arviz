@@ -627,3 +627,14 @@ def test_ks_summary_numba():
     with_numba = (ks_summary(data)["Count"]).values
     assert np.allclose(non_numba, with_numba)
     assert Numba.numba_flag == state
+
+
+def test_geweke_numba():
+    state = Numba.numba_flag
+    data = np.random.randn(100)
+    Numba.disable_numba()
+    non_numba = geweke(data)
+    Numba.enable_numba()
+    with_numba = geweke(data)
+    assert np.allclose(non_numba, with_numba)
+    assert Numba.numba_flag == state
