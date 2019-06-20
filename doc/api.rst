@@ -24,6 +24,7 @@ Plots
     plot_khat
     plot_pair
     plot_parallel
+    plot_elpd
     plot_posterior
     plot_ppc
     plot_rank

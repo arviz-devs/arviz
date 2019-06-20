@@ -12,7 +12,12 @@ import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
 from .diagnostics import _multichain_statistics, _mc_error, ess
-from .stats_utils import make_ufunc as _make_ufunc, logsumexp as _logsumexp
+from .stats_utils import (
+    make_ufunc as _make_ufunc,
+    wrap_xarray_ufunc as _wrap_xarray_ufunc,
+    logsumexp as _logsumexp,
+    ELPDData,
+)
 from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
@@ -225,9 +230,9 @@ def compare(
         for idx, val in enumerate(ics.index):
             res = ics.loc[val]
             if scale_value < 0:
-                diff = res[ic_i] - min_ic_i_val
+                diff = (res[ic_i] - min_ic_i_val).values
             else:
-                diff = min_ic_i_val - res[ic_i]
+                diff = (min_ic_i_val - res[ic_i]).values
             d_ic = np.sum(diff)
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
@@ -360,7 +365,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     Returns
     -------
-    pandas.Series with the following columns:
+    pandas.Series with the following rows:
     loo : approximated Leave-one-out cross-validation
     loo_se : standard error of loo
     p_loo : effective number of parameters
@@ -371,6 +376,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     pareto_k : array of Pareto shape values, only if pointwise True
     loo_scale : scale of the loo results
 
+        The returned object has a custom print method that overrides pd.Series method. It is
+        specific to expected log pointwise predictive density (elpd) information criteria.
+
     Examples
     --------
     Calculate the LOO-CV of a model:
@@ -379,7 +387,15 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: az.loo(data, pointwise=True)
+           ...: az.loo(data)
+
+    The custom print method can be seen here, printing only the relevant information and
+    with a specific organization. ``IC_loo`` stands for information criteria, which is the
+    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+
+    .. ipython::
+
+        In [2]: az.loo(data, pointwise=True, scale="log")
 
     """
     inference_data = convert_to_inference_data(data)
@@ -392,9 +408,10 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
-    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
-    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    shape = log_likelihood.shape
+    n_samples = shape[-1]
+    n_data_points = np.product(shape[:-1])
 
     if scale.lower() == "deviance":
         scale_value = -2
@@ -430,29 +447,60 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         )
         warn_mg = True
 
-    loo_lppd_i = scale_value * _logsumexp(log_weights, axis=0)
-    loo_lppd = loo_lppd_i.sum()
-    loo_lppd_se = (len(loo_lppd_i) * np.var(loo_lppd_i)) ** 0.5
+    ufunc_kwargs = {"n_dims": 1, "ravel": False}
+    kwargs = {"input_core_dims": [["samples"]]}
+    loo_lppd_i = scale_value * _wrap_xarray_ufunc(
+        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
+    )
+    loo_lppd = loo_lppd_i.values.sum()
+    loo_lppd_se = (n_data_points * np.var(loo_lppd_i.values)) ** 0.5
 
-    lppd = np.sum(_logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0]))
+    lppd = np.sum(
+        _wrap_xarray_ufunc(
+            _logsumexp,
+            log_likelihood,
+            func_kwargs={"b_inv": n_samples},
+            ufunc_kwargs=ufunc_kwargs,
+            **kwargs
+        ).values
+    )
     p_loo = lppd - loo_lppd / scale_value
 
     if pointwise:
         if np.equal(loo_lppd, loo_lppd_i).all():  # pylint: disable=no-member
             warnings.warn(
-                """The point-wise LOO is the same with the sum LOO, please double check
-                          the Observed RV in your model to make sure it returns element-wise logp.
-                          """
+                "The point-wise LOO is the same with the sum LOO, please double check "
+                "the Observed RV in your model to make sure it returns element-wise logp."
             )
-        return pd.Series(
-            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, loo_lppd_i, pareto_shape, scale],
-            index=["loo", "loo_se", "p_loo", "warning", "loo_i", "pareto_k", "loo_scale"],
+        return ELPDData(
+            data=[
+                loo_lppd,
+                loo_lppd_se,
+                p_loo,
+                n_samples,
+                n_data_points,
+                warn_mg,
+                loo_lppd_i.rename("loo_i"),
+                pareto_shape,
+                scale,
+            ],
+            index=[
+                "loo",
+                "loo_se",
+                "p_loo",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "loo_i",
+                "pareto_k",
+                "loo_scale",
+            ],
         )
 
     else:
-        return pd.Series(
-            data=[loo_lppd, loo_lppd_se, p_loo, warn_mg, scale],
-            index=["loo", "loo_se", "p_loo", "warning", "loo_scale"],
+        return ELPDData(
+            data=[loo_lppd, loo_lppd_se, p_loo, n_samples, n_data_points, warn_mg, scale],
+            index=["loo", "loo_se", "p_loo", "n_samples", "n_data_points", "warning", "loo_scale"],
         )
 
 
@@ -463,7 +511,7 @@ def psislw(log_weights, reff=1.0):
     Parameters
     ----------
     log_weights : array
-        Array of size (n_samples, n_observations)
+        Array of size (n_observations, n_samples)
     reff : float
         relative MCMC efficiency, `ess / n`
 
@@ -474,57 +522,92 @@ def psislw(log_weights, reff=1.0):
     kss : array
         Pareto tail indices
     """
-    rows, cols = log_weights.shape
-
-    log_weights_out = np.copy(log_weights, order="F")
-    kss = np.empty(cols)
-
+    if hasattr(log_weights, "samples"):
+        n_samples = len(log_weights.samples)
+        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "samples"]
+    else:
+        n_samples = log_weights.shape[-1]
+        shape = log_weights.shape[:-1]
     # precalculate constants
-    cutoff_ind = -int(np.ceil(min(rows / 5.0, 3 * (rows / reff) ** 0.5))) - 1
+    cutoff_ind = -int(np.ceil(min(n_samples / 5.0, 3 * (n_samples / reff) ** 0.5))) - 1
     cutoffmin = np.log(np.finfo(float).tiny)  # pylint: disable=no-member, assignment-from-no-return
     k_min = 1.0 / 3
 
-    # loop over sets of log weights
-    for i, x in enumerate(log_weights_out.T):
-        # improve numerical accuracy
-        x -= np.max(x)
-        # sort the array
-        x_sort_ind = np.argsort(x)
-        # divide log weights into body and right tail
-        xcutoff = max(x[x_sort_ind[cutoff_ind]], cutoffmin)
+    # create output array with proper dimensions
+    out = tuple([np.empty_like(log_weights), np.empty(shape)])
 
-        expxcutoff = np.exp(xcutoff)
-        tailinds, = np.where(x > xcutoff)  # pylint: disable=unbalanced-tuple-unpacking
-        x_tail = x[tailinds]
-        tail_len = len(x_tail)
-        if tail_len <= 4:
-            # not enough tail samples for gpdfit
-            k = np.inf
-        else:
-            # order of tail samples
-            x_tail_si = np.argsort(x_tail)
-            # fit generalized Pareto distribution to the right tail samples
-            x_tail = np.exp(x_tail) - expxcutoff
-            k, sigma = _gpdfit(x_tail[x_tail_si])
+    # define kwargs
+    func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
+    ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
+    kwargs = {"input_core_dims": [["samples"]], "output_core_dims": [["sample"], []]}
+    log_weights, pareto_shape = _wrap_xarray_ufunc(
+        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+    )
+    if isinstance(log_weights, xr.DataArray):
+        log_weights = log_weights.rename("log_weights").rename(sample="samples")
+    if isinstance(pareto_shape, xr.DataArray):
+        pareto_shape = pareto_shape.rename("pareto_shape")
+    return log_weights, pareto_shape
 
-            if k >= k_min:
-                # no smoothing if short tail or GPD fit failed
-                # compute ordered statistic for the fit
-                sti = np.arange(0.5, tail_len) / tail_len
-                smoothed_tail = _gpinv(sti, k, sigma)
-                smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
-                    smoothed_tail + expxcutoff
-                )
-                # place the smoothed tail into the output array
-                x[tailinds[x_tail_si]] = smoothed_tail
-                # truncate smoothed values to the largest raw weight 0
-                x[x > 0] = 0
-        # renormalize weights
-        x -= _logsumexp(x)
-        # store tail index k
-        kss[i] = k
 
-    return log_weights_out, kss
+def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
+    """
+    Pareto smoothed importance sampling (PSIS) for a 1D vector.
+
+    Parameters
+    ----------
+    log_weights : array
+        Array of length n_observations
+    cutoff_ind : int
+    cutoffmin : float
+    k_min : float
+
+    Returns
+    -------
+    lw_out : array
+        Smoothed log weights
+    kss : float
+        Pareto tail index
+    """
+    x = np.asarray(log_weights)
+
+    # improve numerical accuracy
+    x -= np.max(x)
+    # sort the array
+    x_sort_ind = np.argsort(x)
+    # divide log weights into body and right tail
+    xcutoff = max(x[x_sort_ind[cutoff_ind]], cutoffmin)
+
+    expxcutoff = np.exp(xcutoff)
+    tailinds, = np.where(x > xcutoff)  # pylint: disable=unbalanced-tuple-unpacking
+    x_tail = x[tailinds]
+    tail_len = len(x_tail)
+    if tail_len <= 4:
+        # not enough tail samples for gpdfit
+        k = np.inf
+    else:
+        # order of tail samples
+        x_tail_si = np.argsort(x_tail)
+        # fit generalized Pareto distribution to the right tail samples
+        x_tail = np.exp(x_tail) - expxcutoff
+        k, sigma = _gpdfit(x_tail[x_tail_si])
+
+        if k >= k_min:
+            # no smoothing if short tail or GPD fit failed
+            # compute ordered statistic for the fit
+            sti = np.arange(0.5, tail_len) / tail_len
+            smoothed_tail = _gpinv(sti, k, sigma)
+            smoothed_tail = np.log(  # pylint: disable=assignment-from-no-return
+                smoothed_tail + expxcutoff
+            )
+            # place the smoothed tail into the output array
+            x[tailinds[x_tail_si]] = smoothed_tail
+            # truncate smoothed values to the largest raw weight 0
+            x[x > 0] = 0
+    # renormalize weights
+    x -= _logsumexp(x)
+
+    return x, k
 
 
 def _gpdfit(ary):
@@ -683,8 +766,7 @@ def summary(
     pandas.DataFrame
         With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
         `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat`.
-        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat` are only computed
-        for traces with 2 or more chains.
+        `r_hat` is only computed for traces with 2 or more chains.
 
     Examples
     --------
@@ -800,68 +882,56 @@ def summary(
             output_core_dims=tuple([] for _ in range(2)),
         )
 
-    if len(posterior.chain) > 1:
-        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-            posterior,
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(7)),
-        )
+    mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+        _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+        posterior,
+        input_core_dims=(("chain", "draw"),),
+        output_core_dims=tuple([] for _ in range(7)),
+    )
 
     # Combine metrics
     metrics = []
     metric_names = []
     if extend:
-        if len(posterior.chain) > 1:
-            metrics.extend(
-                (
-                    mean,
-                    sd,
-                    mcse_mean,
-                    mcse_sd,
-                    hpd_lower,
-                    hpd_higher,
-                    ess_mean,
-                    ess_sd,
-                    ess_bulk,
-                    ess_tail,
-                    r_hat,
-                )
+        metrics.extend(
+            (
+                mean,
+                sd,
+                hpd_lower,
+                hpd_higher,
+                mcse_mean,
+                mcse_sd,
+                ess_mean,
+                ess_sd,
+                ess_bulk,
+                ess_tail,
+                r_hat,
             )
-            metric_names.extend(
-                (
-                    "mean",
-                    "sd",
-                    "mcse_mean",
-                    "mcse_sd",
-                    "hpd_{:g}%".format(100 * alpha / 2),
-                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                    "ess_mean",
-                    "ess_sd",
-                    "ess_bulk",
-                    "ess_tail",
-                    "r_hat",
-                )
+        )
+        metric_names.extend(
+            (
+                "mean",
+                "sd",
+                "hpd_{:g}%".format(100 * alpha / 2),
+                "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "mcse_mean",
+                "mcse_sd",
+                "ess_mean",
+                "ess_sd",
+                "ess_bulk",
+                "ess_tail",
+                "r_hat",
             )
-        else:
-            metrics.extend((mean, sd, hpd_lower, hpd_higher))
-            metric_names.extend(
-                (
-                    "mean",
-                    "sd",
-                    "hpd_{:g}%".format(100 * alpha / 2),
-                    "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                )
-            )
+        )
     if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_mcse, circ_hpd_lower, circ_hpd_higher))
+        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
         metric_names.extend(
             (
                 "circular_mean",
                 "circular_sd",
-                "circular_mcse",
                 "circular_hpd_{:g}%".format(100 * alpha / 2),
                 "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "circular_mcse",
             )
         )
     metrics.extend(extra_metrics)
@@ -937,7 +1007,7 @@ def waic(data, pointwise=False, scale="deviance"):
 
     Returns
     -------
-    DataFrame with the following columns:
+    Series with the following rows:
     waic : widely available information criterion
     waic_se : standard error of waic
     p_waic : effective number parameters
@@ -947,9 +1017,12 @@ def waic(data, pointwise=False, scale="deviance"):
     waic_i : and array of the pointwise predictive accuracy, only if pointwise True
     waic_scale : scale of the waic results
 
+        The returned object has a custom print method that overrides pd.Series method. It is
+        specific to expected log pointwise predictive density (elpd) information criteria.
+
     Examples
     --------
-    Calculate the LOO-CV of a model:
+    Calculate the WAIC of a model:
 
     .. ipython::
 
@@ -957,6 +1030,9 @@ def waic(data, pointwise=False, scale="deviance"):
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.waic(data, pointwise=True)
 
+    The custom print method can be seen here, printing only the relevant information and
+    with a specific organization. ``IC_loo`` stands for information criteria, which is the
+    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
     for group in ("sample_stats",):
@@ -977,13 +1053,22 @@ def waic(data, pointwise=False, scale="deviance"):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    n_samples = log_likelihood.chain.size * log_likelihood.draw.size
-    new_shape = (n_samples, np.product(log_likelihood.shape[2:]))
-    log_likelihood = log_likelihood.values.reshape(*new_shape)
+    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    shape = log_likelihood.shape
+    n_samples = shape[-1]
+    n_data_points = np.product(shape[:-1])
 
-    lppd_i = _logsumexp(log_likelihood, axis=0, b_inv=log_likelihood.shape[0])
+    ufunc_kwargs = {"n_dims": 1, "ravel": False}
+    kwargs = {"input_core_dims": [["samples"]]}
+    lppd_i = _wrap_xarray_ufunc(
+        _logsumexp,
+        log_likelihood,
+        func_kwargs={"b_inv": n_samples},
+        ufunc_kwargs=ufunc_kwargs,
+        **kwargs
+    )
 
-    vars_lpd = np.var(log_likelihood, axis=0)
+    vars_lpd = log_likelihood.var(dim="samples")
     warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
@@ -995,9 +1080,9 @@ def waic(data, pointwise=False, scale="deviance"):
         warn_mg = True
 
     waic_i = scale_value * (lppd_i - vars_lpd)
-    waic_se = (len(waic_i) * np.var(waic_i)) ** 0.5
-    waic_sum = np.sum(waic_i)
-    p_waic = np.sum(vars_lpd)
+    waic_se = (n_data_points * np.var(waic_i.values)) ** 0.5
+    waic_sum = np.sum(waic_i.values)
+    p_waic = np.sum(vars_lpd.values)
 
     if pointwise:
         if np.equal(waic_sum, waic_i).all():  # pylint: disable=no-member
@@ -1006,12 +1091,38 @@ def waic(data, pointwise=False, scale="deviance"):
             the Observed RV in your model to make sure it returns element-wise logp.
             """
             )
-        return pd.Series(
-            data=[waic_sum, waic_se, p_waic, warn_mg, waic_i, scale],
-            index=["waic", "waic_se", "p_waic", "warning", "waic_i", "waic_scale"],
+        return ELPDData(
+            data=[
+                waic_sum,
+                waic_se,
+                p_waic,
+                n_samples,
+                n_data_points,
+                warn_mg,
+                waic_i.rename("waic_i"),
+                scale,
+            ],
+            index=[
+                "waic",
+                "waic_se",
+                "p_waic",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "waic_i",
+                "waic_scale",
+            ],
         )
     else:
-        return pd.Series(
-            data=[waic_sum, waic_se, p_waic, warn_mg, scale],
-            index=["waic", "waic_se", "p_waic", "warning", "waic_scale"],
+        return ELPDData(
+            data=[waic_sum, waic_se, p_waic, n_samples, n_data_points, warn_mg, scale],
+            index=[
+                "waic",
+                "waic_se",
+                "p_waic",
+                "n_samples",
+                "n_data_points",
+                "warning",
+                "waic_scale",
+            ],
         )

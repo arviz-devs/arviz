@@ -72,7 +72,7 @@ def plot_forest(
     r_hat : bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
     ess : bool, optional
-        Flag for plotting the effective sample size. Requires 2 or more chains. Defaults to False
+        Flag for plotting the effective sample size. Defaults to False
     colors : list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically chose a color per model from the
@@ -561,10 +561,7 @@ class VarHandler:
         """Get effective n data for the variable."""
         _, y_vals, values, colors = self.labels_ticks_and_vals()
         for y, value, color in zip(y_vals, values, colors):
-            if value.ndim != 2 or value.shape[0] < 2:
-                yield y, None, color
-            else:
-                yield y, _ess(value), color
+            yield y, _ess(value), color
 
     def r_hat(self):
         """Get rhat data for the variable."""

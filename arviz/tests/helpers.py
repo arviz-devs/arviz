@@ -1,29 +1,13 @@
+# pylint: disable=redefined-outer-name
 """Test helper functions."""
-from collections import OrderedDict
+import gzip
+import importlib
 import os
 import pickle
 import sys
 import logging
 import pytest
-
-import emcee
 import numpy as np
-import pymc3 as pm
-import pyro
-import pyro.distributions as dist
-from pyro.infer.mcmc import MCMC, NUTS
-
-try:
-    import pystan
-except ImportError:
-    import stan as pystan
-
-import tensorflow_probability as tfp
-import tensorflow_probability.python.edward2 as ed
-import scipy.optimize as op
-import torch
-import tensorflow as tf
-
 
 _log = logging.getLogger(__name__)
 
@@ -36,6 +20,18 @@ def eight_schools_params():
         "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
         "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
     }
+
+
+@pytest.fixture(scope="module")
+def draws():
+    """Share default draw count."""
+    return 500
+
+
+@pytest.fixture(scope="module")
+def chains():
+    """Share default chain count."""
+    return 2
 
 
 def check_multiple_attrs(test_dict, parent):
@@ -56,6 +52,7 @@ def check_multiple_attrs(test_dict, parent):
     list
         List containing the failed checks. It will contain either the dataset_name or a
         tuple (dataset_name, var) for all non present attributes.
+
     """
     failed_attrs = []
     for dataset_name, attributes in test_dict.items():
@@ -76,72 +73,59 @@ def emcee_version():
     -------
     int
         Major version number
+
     """
+    import emcee
+
     return int(emcee.__version__[0])
 
 
-# pylint: disable=invalid-name
-needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")
-
-
-def _emcee_neg_lnlike(theta, x, y, yerr):
-    """Proper function to allow pickling."""
-    slope, intercept, lnf = theta
-    model = slope * x + intercept
-    inv_sigma2 = 1.0 / (yerr ** 2 + model ** 2 * np.exp(2 * lnf))
-    return 0.5 * (np.sum((y - model) ** 2 * inv_sigma2 - np.log(inv_sigma2)))
+def needs_emcee3_func():
+    """Check if emcee3 is required."""
+    # pylint: disable=invalid-name
+    needs_emcee3 = pytest.mark.skipif(emcee_version() < 3, reason="emcee3 required")
+    return needs_emcee3
 
 
 def _emcee_lnprior(theta):
     """Proper function to allow pickling."""
-    slope, intercept, lnf = theta
-    if -5.0 < slope < 0.5 and 0.0 < intercept < 10.0 and -10.0 < lnf < 1.0:
-        return 0.0
-    return -np.inf
-
-
-def _emcee_lnprob(theta, x, y, yerr):
-    """Proper function to allow pickling."""
-    logp = _emcee_lnprior(theta)
-    if not np.isfinite(logp):
+    mu, tau, eta = theta[0], theta[1], theta[2:]
+    # Half-cauchy prior, hwhm=25
+    if tau < 0:
         return -np.inf
-    return logp - _emcee_neg_lnlike(theta, x, y, yerr)
+    prior_tau = -np.log(tau ** 2 + 25 ** 2)
+    prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+    prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
+    return prior_mu + prior_tau + prior_eta
 
 
-def emcee_linear_model(data, draws, chains):
-    """Linear model fit in emcee.
+def _emcee_lnprob(theta, y, sigma):
+    """Proper function to allow pickling."""
+    mu, tau, eta = theta[0], theta[1], theta[2:]
+    prior = _emcee_lnprior(theta)
+    like_vect = -((mu + tau * eta - y) / sigma) ** 2
+    like = np.sum(like_vect)
+    return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
 
-    Note that the data is unused, but included to fit the pattern
-    from other libraries.
 
-    From http://dfm.io/emcee/current/user/line/
-    """
-    del data
+def emcee_schools_model(data, draws, chains):
+    """Schools model in emcee."""
+    import emcee
+
     chains = 10 * chains  # emcee is sad with too few walkers
-
-    # Choose the "true" parameters.
-    m_true = -0.9594
-    b_true = 4.294
-    f_true = 0.534
+    y = data["y"]
+    sigma = data["sigma"]
+    J = data["J"]  # pylint: disable=invalid-name
+    ndim = J + 2
 
     # make reproducible
     np.random.seed(0)
 
-    # Generate some synthetic data from the model.
-    num_data = 50
-    x = np.sort(10 * np.random.rand(num_data))
-    yerr = 0.1 + 0.5 * np.random.rand(num_data)
-    y = m_true * x + b_true
-    y += np.abs(f_true * y) * np.random.randn(num_data)
-    y += yerr * np.random.randn(num_data)
-
-    result = op.minimize(_emcee_neg_lnlike, [m_true, b_true, np.log(f_true)], args=(x, y, yerr))
-
-    ndim = result["x"].shape[0]
-    pos = [result["x"] + 1e-4 * np.random.randn(ndim) for _ in range(chains)]
+    pos = np.random.normal(size=(chains, ndim))
+    pos[:, 1] = np.absolute(pos[:, 1])
 
     if emcee_version() < 3:
-        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(x, y, yerr))
+        sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(y, sigma))
         # pylint: enable=unexpected-keyword-arg
         sampler.run_mcmc(pos, draws)
     else:
@@ -152,7 +136,7 @@ def emcee_linear_model(data, draws, chains):
         backend.reset(chains, ndim)
         # pylint: disable=unexpected-keyword-arg
         sampler = emcee.EnsembleSampler(
-            chains, ndim, _emcee_lnprob, args=(x, y, yerr), backend=backend
+            chains, ndim, _emcee_lnprob, args=(y, sigma), backend=backend
         )
         # pylint: enable=unexpected-keyword-arg
         sampler.run_mcmc(pos, draws, store=True)
@@ -162,6 +146,10 @@ def emcee_linear_model(data, draws, chains):
 # pylint:disable=no-member,no-value-for-parameter
 def _pyro_centered_model(sigma):
     """Centered model setup."""
+    import pyro
+    import torch
+    import pyro.distributions as dist
+
     mu = pyro.sample("mu", dist.Normal(torch.zeros(1), 10 * torch.ones(1)))
     tau = pyro.sample("tau", dist.HalfCauchy(scale=25 * torch.ones(1)))
 
@@ -172,6 +160,8 @@ def _pyro_centered_model(sigma):
 
 def _pyro_conditioned_model(model, sigma, y):
     """Condition the model."""
+    import pyro
+
     return pyro.poutine.condition(model, data={"obs": y})(sigma)
 
 
@@ -181,6 +171,9 @@ def pyro_centered_schools(data, draws, chains):
     Note there is not really a deterministic node in pyro, so I do not
     know how to do a non-centered implementation.
     """
+    import torch
+    from pyro.infer.mcmc import MCMC, NUTS
+
     del chains
     y = torch.Tensor(data["y"]).type(torch.Tensor)
     sigma = torch.Tensor(data["sigma"]).type(torch.Tensor)
@@ -204,6 +197,9 @@ def pyro_centered_schools(data, draws, chains):
 
 def tfp_schools_model(num_schools, treatment_stddevs):
     """Non-centered eight schools model for tfp."""
+    import tensorflow_probability.python.edward2 as ed
+    import tensorflow as tf
+
     avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu`
     avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
     school_effects_standard = ed.Normal(
@@ -218,6 +214,10 @@ def tfp_schools_model(num_schools, treatment_stddevs):
 
 def tfp_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for tfp."""
+    import tensorflow_probability as tfp
+    import tensorflow_probability.python.edward2 as ed
+    import tensorflow as tf
+
     del chains
 
     log_joint = ed.make_log_joint_fn(tfp_schools_model)
@@ -290,19 +290,16 @@ def pystan_noncentered_schools(data, draws, chains):
         }
     """
     if pystan_version() == 2:
+        import pystan
+
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(
             data=data, iter=draws, warmup=0, chains=chains, check_hmc_diagnostics=False
         )
     else:
-        # hard code schools data
-        # bug in PyStan3 preview. It modify data in-place
-        data = {
-            "J": 8,
-            "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-            "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-        }
-        stan_model = pystan.build(schools_code, data=data)
+        import stan  # pylint: disable=import-error
+
+        stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
             num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False
         )
@@ -311,6 +308,8 @@ def pystan_noncentered_schools(data, draws, chains):
 
 def pymc3_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for pymc3."""
+    import pymc3 as pm
+
     with pm.Model() as model:
         mu = pm.Normal("mu", mu=0, sd=5)
         tau = pm.HalfCauchy("tau", beta=5)
@@ -321,20 +320,38 @@ def pymc3_noncentered_schools(data, draws, chains):
     return model, trace
 
 
-def load_cached_models(eight_schools_data, draws, chains):
+def library_handle(library):
+    """Import a library and return the handle."""
+    if library == "pystan":
+        try:
+            module = importlib.import_module("pystan")
+        except ImportError:
+            module = importlib.import_module("stan")
+    else:
+        module = importlib.import_module(library)
+    return module
+
+
+def load_cached_models(eight_schools_data, draws, chains, libs=None):
     """Load pymc3, pystan, emcee, and pyro models from pickle."""
     here = os.path.dirname(os.path.abspath(__file__))
     supported = (
-        (tfp, tfp_noncentered_schools),
-        (pystan, pystan_noncentered_schools),
-        (pm, pymc3_noncentered_schools),
-        (emcee, emcee_linear_model),
-        (pyro, pyro_centered_schools),
+        ("tensorflow_probability", tfp_noncentered_schools),
+        ("pystan", pystan_noncentered_schools),
+        ("pymc3", pymc3_noncentered_schools),
+        ("emcee", emcee_schools_model),
+        ("pyro", pyro_centered_schools),
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}
 
-    for library, func in supported:
+    if isinstance(libs, str):
+        libs = [libs]
+
+    for library_name, func in supported:
+        if libs is not None and library_name not in libs:
+            continue
+        library = library_handle(library_name)
         if library.__name__ == "stan":
             # PyStan3 does not support pickling
             # httpstan caches models automatically
@@ -343,63 +360,21 @@ def load_cached_models(eight_schools_data, draws, chains):
             continue
 
         py_version = sys.version_info
-        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl".format(
+        fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl.gzip".format(
             py_version, library, sys.platform, draws, chains
         )
 
         path = os.path.join(data_directory, fname)
         if not os.path.exists(path):
-            with open(path, "wb") as buff:
+            with gzip.open(path, "wb") as buff:
                 _log.info("Generating and caching %s", fname)
                 pickle.dump(func(eight_schools_data, draws, chains), buff)
 
-        with open(path, "rb") as buff:
+        with gzip.open(path, "rb") as buff:
             _log.info("Loading %s from cache", fname)
             models[library.__name__] = pickle.load(buff)
 
     return models
-
-
-def pystan_extract_unpermuted(fit, var_names=None):
-    """Extract PyStan samples unpermuted.
-
-    For PyStan 2.18+.
-    Function returns everything as a float.
-    """
-    if var_names is None:
-        var_names = fit.model_pars
-    elif isinstance(var_names, str):
-        var_names = [var_names]
-    extract = fit.extract(var_names, permuted=False)
-    return extract
-
-
-def stan_extract_dict(fit, var_names=None):
-    """Extract draws from PyStan3 fit.
-
-    For PyStan 3.0a+
-    Function returns everything as a float.
-    """
-    if var_names is None:
-        var_names = fit.param_names
-    elif isinstance(var_names, str):
-        var_names = [var_names]
-    var_names = list(var_names)
-
-    data = OrderedDict()
-
-    for var in var_names:
-        if var in data:
-            continue
-
-        # in future fix the correct number of draws if fit.save_warmup is True
-        new_shape = (*fit.dims[fit.param_names.index(var)], -1, fit.num_chains)
-        values = fit._draws[fit._parameter_indexes(var), :]  # pylint: disable=protected-access
-        values = values.reshape(new_shape, order="F")
-        values = np.moveaxis(values, [-2, -1], [1, 0])
-        data[var] = values
-
-    return data
 
 
 def pystan_version():
@@ -409,5 +384,10 @@ def pystan_version():
     -------
     int
         Major version number
+
     """
+    try:
+        import pystan
+    except ImportError:
+        import stan as pystan  # pylint: disable=import-error
     return int(pystan.__version__[0])

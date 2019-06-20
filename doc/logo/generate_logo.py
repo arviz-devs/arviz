@@ -27,7 +27,7 @@ plt.xlim(0, 0.9)
 bbox = Bbox([[0.75, 0.5], [5.4, 2.2]])
 
 #plt.savefig('logo_00.png', dpi=300,  bbox_inches=bbox, transparent=True)
-plt.text(x=0.04, y=-0.01, s='ArviZ',
+plt.text(x=0.04, y=-0.01, s='ArviZ', clip_on=True,
          fontdict={'name': 'ubuntu mono', 'fontsize': 62}, color='w')
 
 plt.savefig('ArviZ.png', dpi=300, bbox_inches=bbox, transparent=True)
