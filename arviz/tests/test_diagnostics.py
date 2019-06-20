@@ -595,7 +595,7 @@ def test_numba_bfmi():
 @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
 def test_numba_rhat(method):
     state = Numba.numba_flag
-    school = np.random.rand(100,100)
+    school = np.random.rand(100, 100)
     Numba.disable_numba()
     non_numba = rhat(school, method=method)
     Numba.enable_numba()
@@ -620,10 +620,10 @@ def test_numba_mcse(method, prob=None):
 
 def test_ks_summary_numba():
     state = Numba.numba_flag
-    data = np.random.randn(100,100)
+    data = np.random.randn(100, 100)
     Numba.disable_numba()
-    non_numba = (ks_summary(data)['Count']).values
+    non_numba = (ks_summary(data)["Count"]).values
     Numba.enable_numba()
-    with_numba = (ks_summary(data)['Count']).values
+    with_numba = (ks_summary(data)["Count"]).values
     assert np.allclose(non_numba, with_numba)
     assert Numba.numba_flag == state
