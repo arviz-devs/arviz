@@ -2,10 +2,10 @@
 """Diagnostic functions for ArviZ."""
 from collections.abc import Sequence
 import warnings
+import math
 import numpy as np
 import pandas as pd
 from scipy import stats
-import math
 
 from .stats_utils import (
     rint as _rint,
@@ -969,12 +969,12 @@ def _angle(samples, low, high, pi=np.pi):
 
 
 def _circular_standard_deviation(samples, high=2 * np.pi, low=0, axis=None):
-    pi = np.pi
+    p_i = np.pi
     samples, ang = _circfunc(samples, high, low)
-    S = np.sin(ang).mean(axis=axis)
-    C = np.cos(ang).mean(axis=axis)
-    R = np.hypot(S, C)
-    return ((high - low) / 2.0 / pi) * np.sqrt(-2 * np.log(R))
+    s_s = np.sin(ang).mean(axis=axis)
+    c_c = np.cos(ang).mean(axis=axis)
+    r_r = np.hypot(s_s, c_c)
+    return ((high - low) / 2.0 / p_i) * np.sqrt(-2 * np.log(r_r))
 
 
 def _mc_error(ary, batches=5, circular=False):

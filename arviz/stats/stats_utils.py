@@ -430,11 +430,11 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
 
 @conditional_jit
 def stats_variance_1d(data, ddof=0):
-    a, b = 0, 0
+    a_a, b_b = 0, 0
     for i in data:
-        a = a + i
-        b = b + i * i
-    var = b / (len(data)) - ((a / (len(data))) ** 2)
+        a_a = a_a + i
+        b_b = b_b + i * i
+    var = b_b / (len(data)) - ((a_a / (len(data))) ** 2)
     var = var * (len(data) / (len(data) - ddof))
     return var
 
@@ -444,14 +444,14 @@ def stats_variance_2d(data, ddof=0, axis=1):
     if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
     elif data.ndim == 2:
-        a, b = data.shape
+        a_a, b_b = data.shape
         if axis == 1:
-            var = np.zeros(a)
-            for i in range(a):
+            var = np.zeros(a_a)
+            for i in range(a_a):
                 var[i] = stats_variance_1d(data[i], ddof=ddof)
         elif axis == 0:
-            var = np.zeros(b)
-            for i in range(b):
+            var = np.zeros(b_b)
+            for i in range(b_b):
                 var[i] = stats_variance_1d(data[:, i], ddof=ddof)
         else:
             raise ValueError(

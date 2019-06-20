@@ -331,11 +331,11 @@ def test_multidimensional_log_likelihood(func):
 
 def test_numba_stats():
     state = Numba.numba_flag  # Store the current state of Numba
-    a = np.random.randn(100, 100)
-    b = np.random.randn(100, 100)
+    set_1 = np.random.randn(100, 100)
+    set_2 = np.random.randn(100, 100)
     Numba.disable_numba()
-    non_numba = r2_score(a, b)
+    non_numba = r2_score(set_1, set_2)
     Numba.enable_numba()
-    with_numba = r2_score(a, b)
+    with_numba = r2_score(set_1, set_2)
     assert state == Numba.numba_flag  # Ensure that inital state = final state
     assert np.allclose(non_numba, with_numba)

@@ -217,9 +217,9 @@ class TestDiagnostics:
 
     def test_circfunc(self):
         school = load_arviz_data("centered_eight").posterior["mu"].values
-        a, b = _circfunc(school, 8, 4)
-        assert np.allclose(a, school)
-        assert np.allclose(b, _angle(school, 4, 8, np.pi))
+        a_a, b_b = _circfunc(school, 8, 4)
+        assert np.allclose(a_a, school)
+        assert np.allclose(b_b, _angle(school, 4, 8, np.pi))
 
     @pytest.mark.parametrize(
         "data", (np.random.randn(100), np.random.randn(100, 100), np.random.randn(100, 100, 100))

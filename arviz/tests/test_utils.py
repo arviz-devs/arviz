@@ -167,12 +167,12 @@ def test_conditional_vect_numba_decorator():
     from arviz import utils
 
     @utils.conditional_vect
-    def func(a, b):
-        return a + b
+    def func(a_a, b_b):
+        return a_a + b_b
 
-    a = np.random.randn(10)
-    b = np.random.randn(10)
-    assert np.allclose(func(a, b), a + b)
+    value_one = np.random.randn(10)
+    value_two = np.random.randn(10)
+    assert np.allclose(func(value_one, value_two), value_one + value_two)
 
 
 def test_conditional_vect_numba_decorator_keyword(monkeypatch):
