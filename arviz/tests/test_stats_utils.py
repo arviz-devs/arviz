@@ -238,3 +238,7 @@ def test_stats_variance_2d():
     assert np.allclose(np.var(data_1, axis=1), stats_variance_2d(data_1, axis=1))
     assert np.allclose(np.var(data_1, axis=0, ddof=1), stats_variance_2d(data_1, axis=0, ddof=1))
     assert np.allclose(np.var(data_1, axis=1, ddof=1), stats_variance_2d(data_1, axis=1, ddof=1))
+    with pytest.raises(ValueError):
+        stats_variance_2d(school, axis=3, ddof=0)
+    with pytest.raises(ValueError):
+        stats_variance_2d(load_arviz_data("centered_eight").sample_stats.log_likelihood)
