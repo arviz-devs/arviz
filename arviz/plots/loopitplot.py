@@ -16,8 +16,10 @@ def plot_loo_pit(
     y_hat=None,
     log_weights=None,
     ecdf=False,
+    ecdf_fill=True,
     n_unif=100,
     use_hpd=False,
+    credible_interval=0.94,
     figsize=None,
     textsize=None,
     color="C0",
@@ -26,6 +28,7 @@ def plot_loo_pit(
     plot_kwargs=None,
     plot_unif_kwargs=None,
     hpd_kwargs=None,
+    fill_kwargs=None,
 ):
     """Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.
 
@@ -43,14 +46,20 @@ def plot_loo_pit(
     log_weights : array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
     ecdf : bool, optional
-        Plot LOO-PIT Empirical Cumulative Distribution Function (ECDF) instead of LOO-PIT kde.
-        In this case, instead of overlaying uniform distributions, the beta 95% interval around
-        the theoretical uniform CDF is shown. For more information, see `Vehtari et al. (2019)`,
-        Appendix G.
+        Plot the difference between the LOO-PIT Empirical Cumulative Distribution Function
+        (ECDF) and the uniform CDF instead of LOO-PIT kde.
+        In this case, instead of overlaying uniform distributions, the beta ``credible_interval``
+        interval around the theoretical uniform CDF is shown. For more information, see
+        `Vehtari et al. (2019)`, Appendix G.
+    fill_ecdf : bool, optional
+        Use fill_between to mark the area inside the credible interval. Otherwise, plot the
+        border lines.
     n_unif : int, optional
         Number of datasets to simulate and overlay from the uniform distribution.
     use_hpd : bool, optional
         Use plot_hpd to fill between hpd values instead of overlaying the uniform distributions.
+    credible_interval : float, optional
+        Credible interval of the hpd or of the ECDF theoretical credible interval
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
@@ -65,9 +74,11 @@ def plot_loo_pit(
         Additional keywords passed to ax.plot for LOO-PIT line (kde or ECDF)
     plot_unif_kwargs : dict, optional
         Additional keywords passed to ax.plot for overlaid uniform distributions or
-        for beta 95% interval lines if ``ecdf=True``
+        for beta credible interval lines if ``ecdf=True``
     hpd_kwargs : dict, optional
         Additional keywords passed to az.plot_hpd
+    fill_kwargs : dict, optional
+        Additional kwargs passed to ax.fill_between
 
     Returns
     -------
@@ -97,13 +108,6 @@ def plot_loo_pit(
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
 
-    if hpd_kwargs is None:
-        hpd_kwargs = {}
-    hpd_kwargs.setdefault("color", hsv_to_rgb(light_color))
-    fill_kwargs = hpd_kwargs.pop("fill_kwargs", {})
-    fill_kwargs.setdefault("label", "Uniform HPD")
-    hpd_kwargs["fill_kwargs"] = fill_kwargs
-
     loo_pit = _loo_pit(idata, y, y_hat, log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
@@ -112,23 +116,47 @@ def plot_loo_pit(
         n_data_points = loo_pit.size
         loo_pit_ecdf = np.arange(n_data_points) / n_data_points
         # ideal unnormalized ECDF of uniform distribution with n_data_points points
+        # it is used indistinctively as x or p(u<x) because for u~U(0,1) they are equal
         unif_ecdf = np.arange(n_data_points + 1)
-        p975 = stats.beta.ppf(0.975, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
-        p025 = stats.beta.ppf(0.025, unif_ecdf + 1, n_data_points - unif_ecdf + 1)
+        p975 = stats.beta.ppf(
+            0.5 + credible_interval / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
+        )
+        p025 = stats.beta.ppf(
+            0.5 - credible_interval / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
+        )
+        unif_ecdf = unif_ecdf / n_data_points
 
         plot_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
         plot_unif_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
 
-        ax.plot(np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf, 1)), **plot_kwargs)
         ax.plot(
-            unif_ecdf / n_data_points, p975, unif_ecdf / n_data_points, p025, **plot_unif_kwargs
+            np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf - loo_pit, 0)), **plot_kwargs
         )
+        if ecdf_fill:
+            if fill_kwargs is None:
+                fill_kwargs = {}
+            fill_kwargs.setdefault("color", hsv_to_rgb(light_color))
+            fill_kwargs.setdefault("alpha", 0.5)
+            fill_kwargs.setdefault("step", "pre" if plot_kwargs["drawstyle"] == "steps" else None)
+            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
+
+            ax.fill_between(unif_ecdf, p975 - unif_ecdf, p025 - unif_ecdf, **fill_kwargs)
+        else:
+            ax.plot(unif_ecdf, p975 - unif_ecdf, unif_ecdf, p025 - unif_ecdf, **plot_unif_kwargs)
     else:
         loo_pit_kde, _, _ = _fast_kde(loo_pit, xmin=0, xmax=1)
 
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
         x_vals = np.linspace(0, 1, len(loo_pit_kde))
         if use_hpd:
+            if hpd_kwargs is None:
+                hpd_kwargs = {}
+            hpd_kwargs.setdefault("color", hsv_to_rgb(light_color))
+            hpd_fill_kwargs = hpd_kwargs.pop("fill_kwargs", {})
+            hpd_fill_kwargs.setdefault("label", "Uniform HPD")
+            hpd_kwargs["fill_kwargs"] = hpd_fill_kwargs
+            hpd_kwargs["credible_interval"] = credible_interval
+
             unif_densities = np.empty((n_unif, len(loo_pit_kde)))
             for idx in range(n_unif):
                 unif_densities[idx, :], _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
@@ -141,7 +169,8 @@ def plot_loo_pit(
 
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
-        if not use_hpd:
-            ax.plot([], label="Uniform", **plot_unif_kwargs)
+        if not use_hpd and not ecdf_fill:
+            label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
+            ax.plot([], label=label, **plot_unif_kwargs)
         ax.legend()
     return ax
