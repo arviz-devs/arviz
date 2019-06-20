@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy import stats
+import math
 
 from .stats_utils import (
     rint as _rint,
@@ -16,7 +17,7 @@ from .stats_utils import (
 )
 from ..data import convert_to_dataset
 from ..utils import _var_names, conditional_jit, conditional_vect
-from .. import _numba_flag
+from .. import Numba
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
@@ -53,6 +54,7 @@ def bfmi(data):
            ...: az.bfmi(data)
 
     """
+    _numba_flag = Numba.numba_flag
     if isinstance(data, np.ndarray):
         return _bfmi(data)
 
@@ -451,7 +453,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
 @conditional_vect
 def _sqr(a, b):
-    return np.sqrt(a + b)
+    return math.sqrt(a + b)
 
 
 @conditional_jit
@@ -495,6 +497,8 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
     * Geweke (1992)
     """
     # Filter out invalid intervals
+    _numba_flag = Numba.numba_flag
+
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
@@ -549,6 +553,7 @@ def ks_summary(pareto_tail_indices):
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
+    _numba_flag = Numba.numba_flag
     if _numba_flag:
         kcounts = _histogram(pareto_tail_indices)
     else:
@@ -590,6 +595,7 @@ def _bfmi(energy):
     """
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
+    _numba_flag = Numba.numba_flag
     if _numba_flag:
         den = svar(energy_mat, axis=1)
     else:
@@ -638,6 +644,7 @@ def _z_fold(ary):
 
 def _rhat(ary):
     """Compute the rhat for a 2d array."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary, dtype=float)
     if _not_valid(ary, check_shape=False):
         return np.nan
@@ -714,6 +721,7 @@ def _rhat_identity(ary):
 
 def _ess(ary, relative=False):
     """Compute the effective sample size for a 2D array."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary, dtype=float)
     if _not_valid(ary, check_shape=False):
         return np.nan
@@ -907,6 +915,7 @@ def _conv_quantile(ary, prob):
 
 def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
@@ -922,6 +931,7 @@ def _mcse_mean(ary):
 
 def _mcse_sd(ary):
     """Compute the Markov Chain sd error."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
@@ -988,6 +998,7 @@ def _mc_error(ary, batches=5, circular=False):
     mc_error : float
         Simulation standard error
     """
+    _numba_flag = Numba.numba_flag
     if ary.ndim > 1:
 
         dims = np.shape(ary)

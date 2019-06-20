@@ -10,6 +10,7 @@ from xarray import Dataset, DataArray
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
 from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv
+from .. import Numba
 
 
 @pytest.fixture(scope="session")
@@ -326,3 +327,15 @@ def test_multidimensional_log_likelihood(func):
 
     assert (fr1 == frm).all()
     assert_array_almost_equal(frm[:4], fr1[:4])
+
+
+def test_numba_stats():
+    state = Numba.numba_flag # Store the current state of Numba
+    a = np.random.randn(100, 100)
+    b = np.random.randn(100, 100)
+    Numba.disable_numba()
+    non_numba = r2_score(a, b)
+    Numba.enable_numba()
+    with_numba = r2_score(a, b)
+    assert state == Numba.numba_flag # Ensure that inital state = final state
+    assert (np.allclose(non_numba, with_numba))

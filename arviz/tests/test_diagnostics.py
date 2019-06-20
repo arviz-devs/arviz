@@ -27,6 +27,7 @@ from ..stats.diagnostics import (
     _circfunc,
     _circular_standard_deviation,
 )
+from .. import Numba
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
@@ -578,3 +579,51 @@ class TestDiagnostics:
         if chains is None:
             chains = 1
         assert split_data.shape == (chains * 2, draws // 2)
+
+
+def test_numba_bfmi():
+    state = Numba.numba_flag
+    school = load_arviz_data("centered_eight")
+    Numba.disable_numba()
+    non_numba = bfmi(school.posterior["mu"].values)
+    Numba.enable_numba()
+    with_numba = bfmi(school.posterior["mu"].values)
+    assert np.allclose(with_numba, non_numba)
+    assert state == Numba.numba_flag
+
+
+@pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
+def test_numba_rhat(method):
+    state = Numba.numba_flag
+    school = np.random.rand(100,100)
+    Numba.disable_numba()
+    non_numba = rhat(school, method=method)
+    Numba.enable_numba()
+    with_numba = rhat(school, method=method)
+    assert np.allclose(with_numba, non_numba)
+    assert Numba.numba_flag == state
+
+
+@pytest.mark.parametrize("method", ("mean", "sd", "quantile"))
+def test_numba_mcse(method, prob=None):
+    state = Numba.numba_flag
+    school = np.random.rand(100, 100)
+    if method == "quantile":
+        prob = 0.80
+    Numba.disable_numba()
+    non_numba = mcse(school, method=method, prob=prob)
+    Numba.enable_numba()
+    with_numba = mcse(school, method=method, prob=prob)
+    assert np.allclose(with_numba, non_numba)
+    assert Numba.numba_flag == state
+
+
+def test_ks_summary_numba():
+    state = Numba.numba_flag
+    data = np.random.randn(100,100)
+    Numba.disable_numba()
+    non_numba = (ks_summary(data)['Count']).values
+    Numba.enable_numba()
+    with_numba = (ks_summary(data)['Count']).values
+    assert np.allclose(non_numba, with_numba)
+    assert Numba.numba_flag == state

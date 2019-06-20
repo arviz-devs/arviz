@@ -21,17 +21,16 @@ def numba_check():
     return numba is not None
 
 
-_numba_flag = numba_check()
+class Numba:
+    numba_flag = numba_check()
 
+    @classmethod
+    def disable_numba(cls):
+        cls.numba_flag = False
 
-def disable_numba():
-    global _numba_flag
-    _numba_flag = False
-
-
-def enable_numba():
-    global _numba_flag
-    _numba_flag = True
+    @classmethod
+    def enable_numba(cls):
+        cls.numba_flag = True
 
 
 if not logging.root.handlers:

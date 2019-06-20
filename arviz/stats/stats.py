@@ -19,7 +19,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
 )
-from .. import _numba_flag
+from .. import Numba
 from ..utils import _var_names
 
 _log = logging.getLogger(__name__)
@@ -705,6 +705,7 @@ def r2_score(y_true, y_pred):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
     """
+    _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:
         if _numba_flag:
             var_y_est = svar(y_pred)
