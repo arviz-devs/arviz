@@ -273,9 +273,9 @@ def test_Numba():
     flag = Numba.numba_flag
     assert flag == numba_check()
     Numba.disable_numba()
-    assert Numba.numba_flag == False
+    assert not Numba.numba_flag
     Numba.enable_numba()
-    assert Numba.numba_flag == True
+    assert Numba.numba_flag
     with pytest.raises(ValueError):
         Numba.enable_numba()
     assert flag == Numba.numba_flag

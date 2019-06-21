@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
-from ..data.converters import convert_to_inference_data
-from ..plots.plot_utils import (
+from ..data import convert_to_inference_data
+from .plot_utils import (
     _scale_fig_size,
     get_coords,
     color_from_dim,

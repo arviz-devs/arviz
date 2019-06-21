@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from ..stats.stats_utils import (
+from .stats_utils import (
     rint as _rint,
     quantile as _quantile,
     autocov as _autocov,
@@ -15,7 +15,7 @@ from ..stats.stats_utils import (
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     stats_variance_2d as svar,
 )
-from ..data.converters import convert_to_dataset
+from ..data import convert_to_dataset
 from ..utils import _var_names, conditional_jit, conditional_vect, Numba
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]

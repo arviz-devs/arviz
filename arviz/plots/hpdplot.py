@@ -4,7 +4,7 @@ from matplotlib.pyplot import gca
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
-from ..stats.stats import hpd
+from ..stats import hpd
 
 
 def plot_hpd(

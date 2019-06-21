@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
-from ..data.inference_data import InferenceData
+from ..data import InferenceData
 from ..utils import conditional_jit
 from .plot_utils import _scale_fig_size
 

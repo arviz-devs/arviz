@@ -1,8 +1,8 @@
 """Autocorrelation plot of data."""
 import numpy as np
 
-from ..data.converters import convert_to_dataset
-from ..stats.stats_utils import autocorr
+from ..data import convert_to_dataset
+from ..stats import autocorr
 from .plot_utils import (
     _scale_fig_size,
     default_grid,
