@@ -443,20 +443,14 @@ def stats_variance_1d(data, ddof=0):
 def stats_variance_2d(data, ddof=0, axis=1):
     if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
-    elif data.ndim == 2:
-        a_a, b_b = data.shape
-        if axis == 1:
-            var = np.zeros(a_a)
-            for i in range(a_a):
-                var[i] = stats_variance_1d(data[i], ddof=ddof)
-        elif axis == 0:
-            var = np.zeros(b_b)
-            for i in range(b_b):
-                var[i] = stats_variance_1d(data[:, i], ddof=ddof)
-        else:
-            raise ValueError(
-                "%d is invalid value for axis. Choose an axis value of 0 or 1" % (axis,)
-            )
+    a_a, b_b = data.shape
+    if axis == 1:
+        var = np.zeros(a_a)
+        for i in range(a_a):
+            var[i] = stats_variance_1d(data[i], ddof=ddof)
         return var
-    else:
-        raise ValueError("%d dimensional data is not suitable for this method." % (data.ndim,))
+    elif axis == 0:
+        var = np.zeros(b_b)
+        for i in range(b_b):
+            var[i] = stats_variance_1d(data[:, i], ddof=ddof)
+        return var
