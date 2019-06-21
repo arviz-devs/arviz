@@ -151,7 +151,7 @@ class Numba:
     @classmethod
     def enable_numba(cls):
         """To enable numba."""
-        if not cls.numba_flag:
+        if not cls.numba_flag and numba_check():
             cls.numba_flag = True
         else:
-            raise ValueError("Numba is already enabled")
+            raise ValueError("Numba is already enabled or not installed")
