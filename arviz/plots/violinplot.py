@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..data import convert_to_dataset
-from ..stats import hpd
+from ..data.converters import convert_to_dataset
+from ..stats.stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label
 from ..utils import _var_names

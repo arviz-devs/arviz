@@ -1,8 +1,8 @@
 """Plot energy transition distribution in HMC inference."""
 import numpy as np
 import matplotlib.pyplot as plt
-from ..data import convert_to_dataset
-from ..stats import bfmi as e_bfmi
+from ..data.converters import convert_to_dataset
+from ..stats.diagnostics import bfmi as e_bfmi
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size
 

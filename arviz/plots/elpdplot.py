@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
-from ..data import convert_to_inference_data
+from ..data.converters import convert_to_inference_data
 from .plot_utils import (
     _scale_fig_size,
     get_coords,
@@ -12,7 +12,8 @@ from .plot_utils import (
     format_coords_as_labels,
     set_xticklabels,
 )
-from ..stats import waic, loo, ELPDData
+from ..stats.stats import waic, loo
+from ..stats.stats_utils import ELPDData
 
 
 def plot_elpd(
