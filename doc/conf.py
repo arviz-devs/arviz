@@ -53,6 +53,9 @@ extensions = [
     "gallery_generator",
 ]
 
+# ipython directive configuration
+ipython_warning_is_error = False
+
 # Copy plot options from Seaborn
 # Include the example source for plots in API docs
 plot_include_source = True
