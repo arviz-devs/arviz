@@ -455,8 +455,8 @@ def stats_variance_2d(data, ddof=0, axis=1):
                 var[i] = stats_variance_1d(data[:, i], ddof=ddof)
         else:
             raise ValueError(
-                "{} value for axis is invalid. Choose an axis value of 0 or 1".format(axis)
+                "%d is invalid value for axis. Choose an axis value of 0 or 1" % (axis,)
             )
         return var
     else:
-        raise ValueError("{} dimensional data is not suitable for this method.".format(data.ndim))
+        raise ValueError("%d dimensional data is not suitable for this method." % (data.ndim,))

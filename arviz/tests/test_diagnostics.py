@@ -638,3 +638,16 @@ def test_geweke_numba():
     with_numba = geweke(data)
     assert np.allclose(non_numba, with_numba)
     assert Numba.numba_flag == state
+
+
+@pytest.mark.parametrize("batches", (1, 20))
+@pytest.mark.parametrize("circular", (True, False))
+def test_mcse_error_numba(batches, circular):
+    data = np.random.randn(100, 100)
+    state = Numba.numba_flag
+    Numba.disable_numba()
+    non_numba = _mc_error(data, batches=batches, circular=circular)
+    Numba.enable_numba()
+    with_numba = _mc_error(data, batches=batches, circular=circular)
+    assert np.allclose(non_numba, with_numba)
+    assert state == Numba.numba_flag

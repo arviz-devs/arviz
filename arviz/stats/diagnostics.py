@@ -452,8 +452,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
 
 @conditional_vect
-def _sqr(a, b):
-    return math.sqrt(a + b)
+def _sqr(a_a, b_b):
+    return math.sqrt(a_a + b_b)
 
 
 @conditional_jit
@@ -963,8 +963,8 @@ def _circfunc(samples, high, low):
 
 
 @conditional_vect
-def _angle(samples, low, high, pi=np.pi):
-    ang = (samples - low) * 2.0 * pi / (high - low)
+def _angle(samples, low, high, p_i=np.pi):
+    ang = (samples - low) * 2.0 * p_i / (high - low)
     return ang
 
 
