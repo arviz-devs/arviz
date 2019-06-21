@@ -46,6 +46,4 @@ if not logging.root.handlers:
     _log.setLevel(logging.INFO)
     _log.addHandler(handler)
 
-from .data import *
-from .plots import *
-from .stats import *
+
