@@ -11,8 +11,8 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data.converters import convert_to_inference_data, convert_to_dataset
-from .diagnostics import _multichain_statistics, _mc_error, ess
-from .stats_utils import (
+from ..stats.diagnostics import _multichain_statistics, _mc_error, ess
+from ..stats.stats_utils import (
     make_ufunc as _make_ufunc,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     logsumexp as _logsumexp,

@@ -3,8 +3,8 @@ import numpy as np
 
 from ..data.converters import convert_to_dataset
 from ..stats.stats import hpd
-from .kdeplot import _fast_kde
-from .plot_utils import (
+from ..plots.kdeplot import _fast_kde
+from ..plots.plot_utils import (
     _scale_fig_size,
     make_label,
     xarray_var_iter,
