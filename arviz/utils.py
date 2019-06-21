@@ -130,3 +130,28 @@ def conditional_vect(function=None, **kwargs):  # noqa: D202
         return wrapper(function)
     else:
         return wrapper
+
+
+def numba_check():
+    """Check if numba is installed."""
+    numba = importlib.util.find_spec("numba")
+    return numba is not None
+
+
+class Numba:
+    """A class to toggle numba states."""
+
+    numba_flag = numba_check()
+
+    @classmethod
+    def disable_numba(cls):
+        """To disable numba."""
+        cls.numba_flag = False
+
+    @classmethod
+    def enable_numba(cls):
+        """To enable numba."""
+        if not cls.numba_flag:
+            cls.numba_flag = True
+        else:
+            raise ValueError("Numba is already enabled")

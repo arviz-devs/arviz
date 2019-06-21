@@ -16,8 +16,7 @@ from ..stats.stats_utils import (
     stats_variance_2d as svar,
 )
 from ..data.converters import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect
-from .. import Numba
+from ..utils import _var_names, conditional_jit, conditional_vect, Numba
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 

@@ -27,7 +27,7 @@ from ..stats.diagnostics import (
     _circfunc,
     _circular_standard_deviation,
 )
-from .. import Numba
+from ..utils import Numba
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618

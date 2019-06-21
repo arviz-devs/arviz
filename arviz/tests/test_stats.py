@@ -10,7 +10,7 @@ from xarray import Dataset, DataArray
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
 from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv
-from .. import Numba
+from ..utils import Numba
 
 
 @pytest.fixture(scope="session")

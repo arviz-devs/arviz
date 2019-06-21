@@ -4,8 +4,9 @@ Tests for arviz.utils.
 # pylint: disable=redefined-outer-name, no-member
 from unittest.mock import Mock
 import numpy as np
+import importlib
 import pytest
-from ..utils import _var_names, format_sig_figs, numba_check
+from ..utils import _var_names, format_sig_figs, numba_check, Numba
 from ..data import load_arviz_data, from_dict
 
 
@@ -262,3 +263,19 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     assert function_results == "output"
 
 
+def test_numba_check():
+    numba = importlib.util.find_spec("numba")
+    flag = numba is not None
+    assert flag == numba_check()
+
+
+def test_Numba():
+    flag = Numba.numba_flag
+    assert flag == numba_check()
+    Numba.disable_numba()
+    assert Numba.numba_flag == False
+    Numba.enable_numba()
+    assert Numba.numba_flag == True
+    with pytest.raises(ValueError):
+        Numba.enable_numba()
+    assert flag == Numba.numba_flag
