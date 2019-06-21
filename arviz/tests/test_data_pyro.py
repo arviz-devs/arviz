@@ -1,7 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import pytest
 
-from ..data import from_pyro
+from ..data.io_pyro import from_pyro
 from .helpers import (  # pylint: disable=unused-import
     chains,
     draws,
