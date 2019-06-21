@@ -56,10 +56,11 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
         dims = []
     if len([dim for dim in dims if dim not in default_dims]) > len(shape):
         warnings.warn(
-            "More dims ({dims_len}) given than exists ({shape_len}). "
-            "Passed array should have shape (chains, draws, *shape)".format(
-                dims_len=len(dims), shape_len=len(shape)
-            ),
+            (
+                "In variable {var_name}, there are "
+                + "more dims ({dims_len}) given than exist ({shape_len}). "
+                + "Passed array should have shape (chains, draws, *shape)"
+            ).format(var_name=var_name, dims_len=len(dims), shape_len=len(shape)),
             SyntaxWarning,
         )
     if coords is None:
