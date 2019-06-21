@@ -83,9 +83,9 @@ def test_conditional_jit_decorator_no_numba(utils_with_numba_import_fail):
 
 
 def test_conditional_vect_decorator_no_numba(utils_with_numba_import_fail):
-    """Tests to see if Numba jit code block is skipped with Import Failure
+    """Tests to see if Numba vectorize code block is skipped with Import Failure
 
-    Test can be distinguished from test_conditional_jit__numba_decorator
+    Test can be distinguished from test_conditional_vect__numba_decorator
     by use of debugger or coverage tool
     """
 
