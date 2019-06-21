@@ -25,6 +25,7 @@ def plot_ess(
     textsize=None,
     n_points=20,
     ax=None,
+    extra_kwargs=None,
     **kwargs
 ):
     """Plot quantile or local effective sample sizes.
@@ -37,7 +38,7 @@ def plot_ess(
     var_names : list of variable names, optional
         Variables to be plotted, two variables are required.
     kind : str, optional
-        Options: ``local`` or ``quantile``, whether to plot local or quantile ess plot.
+        Options: ``local``, ``quantile`` or ``change``, specify the kind of plot.
     relative : bool
         Show relative ess in plot.
     coords : dict, optional
@@ -48,9 +49,12 @@ def plot_ess(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     n_points : int
-        Number of quantiles for which to plot their quantile/local ess
+        Number of quantiles for which to plot their quantile/local ess or number of subsets in the change plot.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
+    extra_kwargs : dict
+        kwargs used to plot ess tail and differentiate it from ess bulk. If None, the same
+        kwargs are used, thus, the 2 lines will differ in the color which is matplotlib default.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -61,7 +65,7 @@ def plot_ess(
     Examples
     --------
     """
-    valid_kinds = ("local", "quantile")
+    valid_kinds = ("local", "quantile", "change")
     kind = kind.lower()
     if kind not in valid_kinds:
         raise ValueError("Invalid kind, kind must be one of {} not {}".format(valid_kinds, kind))
@@ -74,15 +78,19 @@ def plot_ess(
 
     if kind == "quantile":
         probs = np.arange(1 / n_points, 1, 1 / n_points)
+        xdata = probs
+        ylabel = "{} for quantiles"
         ess_dataset = xr.concat(
             [
                 ess(data, var_names=var_names, relative=relative, method="quantile", prob=p)
                 for p in probs
             ],
-            dim="quantile",
+            dim="ess_dim",
         )
     elif kind == "local":
         probs = np.arange(0, 1, 1 / n_points)
+        xdata = probs
+        ylabel = "{} for small intervals"
         ess_dataset = xr.concat(
             [
                 ess(
@@ -94,13 +102,41 @@ def plot_ess(
                 )
                 for p in probs
             ],
-            dim="quantile",
+            dim="ess_dim",
+        )
+    else:
+        n_draws = len(data.draw)
+        n_samples = n_draws * len(data.chain)
+        ylabel = "{}"
+        xdata = np.linspace(n_samples / n_points, n_samples, n_points)
+        draw_divisions = np.linspace(n_draws / n_points, n_draws, n_points)
+        ess_dataset = xr.concat(
+            [
+                ess(
+                    data.sel(draw=slice(draw_div)),
+                    var_names=var_names,
+                    relative=relative,
+                    method="bulk",
+                )
+                for draw_div in draw_divisions
+            ],
+            dim="ess_dim",
+        )
+        ess_tail_dataset = xr.concat(
+            [
+                ess(
+                    data.sel(draw=slice(draw_div)),
+                    var_names=var_names,
+                    relative=relative,
+                    method="tail",
+                )
+                for draw_div in draw_divisions
+            ],
+            dim="ess_dim",
         )
 
     plotters = list(
-        xarray_var_iter(
-            get_coords(ess_dataset, coords), var_names=var_names, skip_dims={"quantile"}
-        )
+        xarray_var_iter(get_coords(ess_dataset, coords), var_names=var_names, skip_dims={"ess_dim"})
     )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
@@ -108,10 +144,15 @@ def plot_ess(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    kwargs.setdefault("linestyle", "none")
+    kwargs.setdefault("linestyle", "-" if kind == "change" else "none")
     kwargs.setdefault("linewidth", _linewidth)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("markersize", _markersize)
+    if kind == "change":
+        if extra_kwargs is None:
+            extra_kwargs = {key: item for key, item in kwargs.items()}
+        kwargs.setdefault("label", "bulk")
+        extra_kwargs.setdefault("label", "tail")
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -119,18 +160,21 @@ def plot_ess(
         )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        ax_.plot(probs, x, **kwargs)
+        ax_.plot(xdata, x, **kwargs)
+        if kind == "change":
+            x2 = ess_tail_dataset[var_name].sel(**selection)
+            ax_.plot(xdata, x2, **extra_kwargs)
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
-        ax_.set_xlabel("Quantile", fontsize=ax_labelsize)
-        ax_.set_ylabel(
-            "{} for {}".format(
-                "Relative ESS" if relative else "ESS",
-                "small intervals" if kind == "local" else "quantiles",
-            ),
-            fontsize=ax_labelsize,
-            wrap=True,
+        ax_.set_xlabel(
+            "Total number of draws" if kind == "change" else "Quantile", fontsize=ax_labelsize
         )
-        ax_.set_xlim(0, 1)
+        ax_.set_ylabel(
+            ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
+        )
+        if kind == "change":
+            ax_.legend(title="type")
+        else:
+            ax_.set_xlim(0, 1)
 
     return ax
