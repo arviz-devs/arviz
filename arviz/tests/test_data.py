@@ -46,7 +46,7 @@ def no_remote_data(monkeypatch, tmpdir):
         RemoteFileMetadata(
             filename=filename,
             url=url,
-            checksum="9ae00c83654b3f061d32c882ec0a270d10838fa36515ecb162b89a290e014849",
+            checksum="2c5501a9f5d7b6998fc7e6a4651030b9765032b2e5a1d7331f5b1f3df6c632a5",
             description=centered.description,
         ),
     )
