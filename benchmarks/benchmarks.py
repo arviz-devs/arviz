@@ -36,7 +36,6 @@ class Variance:
                 var = var * (len(data) / (len(data) - ddof))
                 return var
 
-            @numba.jit(cache=True)
             def stats_variance_2d(data, ddof=0, axis=1):
                 a, b = data.shape
                 if axis == 1:

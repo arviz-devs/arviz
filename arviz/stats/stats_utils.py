@@ -439,7 +439,6 @@ def stats_variance_1d(data, ddof=0):
     return var
 
 
-@conditional_jit
 def stats_variance_2d(data, ddof=0, axis=1):
     if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
@@ -449,7 +448,7 @@ def stats_variance_2d(data, ddof=0, axis=1):
         for i in range(a_a):
             var[i] = stats_variance_1d(data[i], ddof=ddof)
         return var
-    elif axis == 0:
+    else:
         var = np.zeros(b_b)
         for i in range(b_b):
             var[i] = stats_variance_1d(data[:, i], ddof=ddof)
