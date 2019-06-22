@@ -2,7 +2,7 @@
 import importlib
 import warnings
 def _var_names(var_names, data):
-    """Handle var_names input across arviz.skldjflksddfjlksdfjsljlksdflkjsldlklkjsldkfsldf
+    """Handle var_names input across arviz.
 
     Parameters
     ----------
