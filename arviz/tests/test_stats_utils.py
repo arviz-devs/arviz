@@ -214,12 +214,14 @@ def test_elpd_data_error():
 
 
 def test_stats_variance_1d():
+    """Test for stats_variance_1d."""
     data = np.random.rand(1000000)
     assert np.allclose(np.var(data), stats_variance_2d(data))
     assert np.allclose(np.var(data, ddof=1), stats_variance_2d(data, ddof=1))
 
 
 def test_stats_variance_2d():
+    """Test for stats_variance_2d."""
     data_1 = np.random.randn(1000, 1000)
     data_2 = np.random.randn(1000000)
     school = load_arviz_data("centered_eight").posterior["mu"].values
@@ -238,3 +240,11 @@ def test_stats_variance_2d():
     assert np.allclose(np.var(data_1, axis=1), stats_variance_2d(data_1, axis=1))
     assert np.allclose(np.var(data_1, axis=0, ddof=1), stats_variance_2d(data_1, axis=0, ddof=1))
     assert np.allclose(np.var(data_1, axis=1, ddof=1), stats_variance_2d(data_1, axis=1, ddof=1))
+
+
+def test_variance_bad_data():
+    """Test for variance when the data range is extremely wide."""
+    data = np.array([1e20, 200e-10, 1e17, 432e9, 2500432, 23e5, 16e-7])
+    assert np.allclose(stats_variance_2d(data), np.var(data))
+    assert np.allclose(stats_variance_2d(data, ddof=1), np.var(data, ddof=1))
+    assert not np.allclose(stats_variance_2d(data), np.var(data, ddof=1))

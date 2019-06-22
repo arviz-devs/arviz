@@ -4,7 +4,7 @@ import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pandas as pd
-import scipy.stats as st
+from scipy.stats import circstd
 import pytest
 
 from ..data import load_arviz_data, from_cmdstan
@@ -21,7 +21,7 @@ from ..stats.diagnostics import (
     _z_scale,
     _conv_quantile,
     _split_chains,
-    _sqr,
+    _sqrt,
     _histogram,
     _angle,
     _circfunc,
@@ -229,7 +229,7 @@ class TestDiagnostics:
         low = 4
         assert np.allclose(
             _circular_standard_deviation(data, high=high, low=low),
-            st.circstd(data, high=high, low=low),
+            circstd(data, high=high, low=low),
         )
 
     @pytest.mark.parametrize(
@@ -507,10 +507,10 @@ class TestDiagnostics:
         assert gw_stat.shape[0] == intervals
         assert 100000 * last - gw_stat[:, 0].max() == 1
 
-    def test_sqr(self):
+    def test_sqrt(self):
         x = np.random.rand(100)
         y = np.random.rand(100)
-        assert np.allclose(_sqr(x, y), np.sqrt(x + y))
+        assert np.allclose(_sqrt(x, y), np.sqrt(x + y))
 
     def test_geweke_bad_interval(self):
         # lower bound
@@ -582,6 +582,7 @@ class TestDiagnostics:
 
 
 def test_numba_bfmi():
+    """Numba test for bfmi."""
     state = Numba.numba_flag
     school = load_arviz_data("centered_eight")
     Numba.disable_numba()
@@ -594,6 +595,7 @@ def test_numba_bfmi():
 
 @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
 def test_numba_rhat(method):
+    """Numba test for mcse."""
     state = Numba.numba_flag
     school = np.random.rand(100, 100)
     Numba.disable_numba()
@@ -606,6 +608,7 @@ def test_numba_rhat(method):
 
 @pytest.mark.parametrize("method", ("mean", "sd", "quantile"))
 def test_numba_mcse(method, prob=None):
+    """Numba test for mcse."""
     state = Numba.numba_flag
     school = np.random.rand(100, 100)
     if method == "quantile":
@@ -619,6 +622,7 @@ def test_numba_mcse(method, prob=None):
 
 
 def test_ks_summary_numba():
+    """Numba test for ks_summary."""
     state = Numba.numba_flag
     data = np.random.randn(100, 100)
     Numba.disable_numba()
@@ -630,6 +634,7 @@ def test_ks_summary_numba():
 
 
 def test_geweke_numba():
+    """Numba test for geweke."""
     state = Numba.numba_flag
     data = np.random.randn(100)
     Numba.disable_numba()
@@ -643,6 +648,7 @@ def test_geweke_numba():
 @pytest.mark.parametrize("batches", (1, 20))
 @pytest.mark.parametrize("circular", (True, False))
 def test_mcse_error_numba(batches, circular):
+    """Numba test for mcse_error."""
     data = np.random.randn(100, 100)
     state = Numba.numba_flag
     Numba.disable_numba()

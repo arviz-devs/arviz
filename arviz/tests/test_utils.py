@@ -278,12 +278,14 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
 
 
 def test_numba_check():
+    """Test for numba_check"""
     numba = importlib.util.find_spec("numba")
     flag = numba is not None
     assert flag == numba_check()
 
 
 def test_numba_utils():
+    """Test for class Numba."""
     flag = Numba.numba_flag
     assert flag == numba_check()
     Numba.disable_numba()
@@ -292,6 +294,4 @@ def test_numba_utils():
     Numba.enable_numba()
     val = Numba.numba_flag
     assert val
-    with pytest.raises(ValueError):
-        Numba.enable_numba()
     assert flag == Numba.numba_flag

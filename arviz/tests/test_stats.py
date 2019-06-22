@@ -105,6 +105,11 @@ def test_summary_var_names(var_names_expected):
 @pytest.mark.parametrize("include_circ", [True, False])
 def test_summary_include_circ(centered_eight, include_circ):
     assert summary(centered_eight, include_circ=include_circ) is not None
+    state = Numba.numba_flag
+    Numba.disable_numba()
+    assert summary(centered_eight, include_circ=include_circ) is not NotImplementedError
+    Numba.enable_numba()
+    assert state == Numba.numba_flag
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])
@@ -330,6 +335,7 @@ def test_multidimensional_log_likelihood(func):
 
 
 def test_numba_stats():
+    """Numba test for r2_score"""
     state = Numba.numba_flag  # Store the current state of Numba
     set_1 = np.random.randn(100, 100)
     set_2 = np.random.randn(100, 100)

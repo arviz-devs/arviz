@@ -2,7 +2,6 @@
 """Diagnostic functions for ArviZ."""
 from collections.abc import Sequence
 import warnings
-import math
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -451,8 +450,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
 
 @conditional_vect
-def _sqr(a_a, b_b):
-    return math.sqrt(a_a + b_b)
+def _sqrt(a_a, b_b):
+    return (a_a + b_b) ** 0.5
 
 
 @conditional_jit
@@ -524,7 +523,7 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
 
         z_score = first_slice.mean() - last_slice.mean()
         if _numba_flag:
-            z_score /= _sqr(svar(first_slice), svar(last_slice))
+            z_score /= _sqrt(svar(first_slice), svar(last_slice))
         else:
             z_score /= np.sqrt(first_slice.var() + last_slice.var())
 
@@ -920,8 +919,7 @@ def _mcse_mean(ary):
         return np.nan
     ess = _ess_mean(ary)
     if _numba_flag:
-        ary = np.ravel(ary)
-        sd = np.sqrt(svar(ary, ddof=1))
+        sd = _sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1))
     else:
         sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess)
@@ -936,8 +934,7 @@ def _mcse_sd(ary):
         return np.nan
     ess = _ess_sd(ary)
     if _numba_flag:
-        ary = np.ravel(ary)
-        sd = np.sqrt(svar(ary, ddof=1))
+        sd = float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)))
     else:
         sd = np.std(ary, ddof=1)
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
@@ -1016,7 +1013,7 @@ def _mc_error(ary, batches=5, circular=False):
                     std = stats.circstd(ary, high=np.pi, low=-np.pi)
             else:
                 if _numba_flag:
-                    std = np.sqrt(svar(ary))
+                    std = float(_sqrt(svar(ary), np.zeros(1)))
                 else:
                     std = np.std(ary)
             return std / np.sqrt(len(ary))
@@ -1032,7 +1029,7 @@ def _mc_error(ary, batches=5, circular=False):
         else:
             means = np.mean(batched_traces, 1)
             if _numba_flag:
-                std = np.sqrt(svar(means))
+                std = _sqrt(svar(means), np.zeros(1))
             else:
                 std = np.std(means)
 

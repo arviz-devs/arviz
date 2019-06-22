@@ -12,8 +12,7 @@ from .plot_utils import (
     format_coords_as_labels,
     set_xticklabels,
 )
-from ..stats import waic, loo
-from ..stats import ELPDData
+from ..stats import waic, loo, ELPDData
 
 
 def plot_elpd(
