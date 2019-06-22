@@ -1,6 +1,7 @@
 """General utilities."""
 import importlib
 import warnings
+import numpy as np
 
 
 def _var_names(var_names, data):
