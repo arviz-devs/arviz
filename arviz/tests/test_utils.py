@@ -124,8 +124,8 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
         "value, default, expected",
     [
         (123.456, 2, 3),
-        (123.456, 3, 3),
-        (123.456, 4, 4),
+        (-123.456, 3, 3),
+        (-123.456, 4, 4),
         (12.3456, 2, 2),
         (1.23456, 2, 2),
         (0.123456, 2, 2),

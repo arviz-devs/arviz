@@ -210,10 +210,7 @@ def _plot_posterior_op(
 ):  # noqa: D202
     """Artist to draw posterior."""
 
-    if round_to is None:
-        significant_fig_func = format_sig_figs
-    else:
-        significant_fig_func = lambda v: round_to
+    significant_fig_func = lambda v: format_sig_figs(v, default=round_to)
 
     def format_as_percent(x, round_to=0):
         return "{0:.{1:d}f}%".format(100 * x, round_to)
@@ -322,7 +319,8 @@ def _plot_posterior_op(
         hpd_intervals = hpd(values, credible_interval=credible_interval)  # type: np.ndarray
 
         def round_num(n: float) -> str:
-            return f"{n:.{significant_fig_func(n)}g}"
+            sig_figs = significant_fig_func(n)
+            return f"{n:.{sig_figs}g}"
 
         ax.plot(
             hpd_intervals,
