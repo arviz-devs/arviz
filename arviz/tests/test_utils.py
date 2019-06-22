@@ -120,8 +120,9 @@ def test_conditional_jit_numba_decorator_keyword(monkeypatch):
     assert wrapper_result == {"keyword_argument": "A keyword argument"}
     assert function_results == "output"
 
+
 @pytest.mark.parametrize(
-        "value, default, expected",
+    "value, default, expected",
     [
         (123.456, 2, 3),
         (-123.456, 3, 3),

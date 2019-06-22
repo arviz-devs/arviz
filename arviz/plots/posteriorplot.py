@@ -304,7 +304,9 @@ def _plot_posterior_op(
         elif point_estimate == "median":
             point_value = np.median(values)
         sig_figs = significant_fig_func(point_value)
-        point_text = f"{point_estimate}={point_value:.{sig_figs}g}"
+        point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
+            point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
+        )
         ax.text(
             point_value,
             plot_height * 0.8,
@@ -320,7 +322,7 @@ def _plot_posterior_op(
 
         def round_num(n: float) -> str:
             sig_figs = significant_fig_func(n)
-            return f"{n:.{sig_figs}g}"
+            return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
 
         ax.plot(
             hpd_intervals,

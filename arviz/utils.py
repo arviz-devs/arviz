@@ -84,7 +84,7 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
 
 
 def format_sig_figs(value, default=None):
-    """Default for significant figures.
+    """Get a default number of significant figures.
 
     Gives the integer part or `default`, whichever is bigger.
 
