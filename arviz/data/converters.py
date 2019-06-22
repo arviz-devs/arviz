@@ -67,7 +67,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         else:
             return InferenceData.from_netcdf(obj)
     elif (
-        obj.__class__.__name__ in {"StanFit4Model", "PosteriorSample"}
+        obj.__class__.__name__ in {"StanFit4Model", "RunSet"}
         or obj.__class__.__module__ == "stan.fit"
     ):
         if group == "sample_stats":
