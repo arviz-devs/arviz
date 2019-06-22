@@ -244,7 +244,7 @@ def test_stats_variance_2d():
 
 def test_variance_bad_data():
     """Test for variance when the data range is extremely wide."""
-    data = np.array([1e20, 200e-10, 1e17, 432e9, 2500432, 23e5, 16e-7])
+    data = np.array([1e20, 200e-10, 1e-17, 432e9, 2500432, 23e5, 16e-7])
     assert np.allclose(stats_variance_2d(data), np.var(data))
     assert np.allclose(stats_variance_2d(data, ddof=1), np.var(data, ddof=1))
     assert not np.allclose(stats_variance_2d(data), np.var(data, ddof=1))

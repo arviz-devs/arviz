@@ -155,3 +155,11 @@ class Numba:
             cls.numba_flag = True
         else:
             raise ValueError("Numba is not installed")
+
+
+def _numba_var(function_1, function_2, data, axis=None, ddof=0):
+    """To replace the if-else blocks."""
+    if Numba.numba_flag:
+        return function_1(data, axis=axis, ddof=ddof)
+    else:
+        return function_2(data, axis=axis, ddof=ddof)

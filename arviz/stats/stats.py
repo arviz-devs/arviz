@@ -19,7 +19,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
 )
-from ..utils import _var_names, Numba
+from ..utils import _var_names, Numba, _numba_var
 
 _log = logging.getLogger(__name__)
 
@@ -706,20 +706,11 @@ def r2_score(y_true, y_pred):
     """
     _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:
-        if _numba_flag:
-            var_y_est = svar(y_pred)
-            var_e = svar(y_true - y_pred)
-        else:
-            var_y_est = np.var(y_pred)
-            var_e = np.var(y_true - y_pred)
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
     else:
-        if _numba_flag:
-            var_y_est = svar(y_pred.mean(0))
-            var_e = svar(y_true - y_pred, axis=0)
-        else:
-            var_y_est = np.var(y_pred.mean(0))
-            var_e = np.var(y_true - y_pred, 0)
-
+        var_y_est = _numba_var(svar, np.var, y_pred.mean(0))
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=0)
     r_squared = var_y_est / (var_y_est + var_e)
 
     return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])

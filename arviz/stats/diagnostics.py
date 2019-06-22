@@ -15,7 +15,7 @@ from .stats_utils import (
     stats_variance_2d as svar,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba
+from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
@@ -52,7 +52,6 @@ def bfmi(data):
            ...: az.bfmi(data)
 
     """
-    _numba_flag = Numba.numba_flag
     if isinstance(data, np.ndarray):
         return _bfmi(data)
 
@@ -594,10 +593,7 @@ def _bfmi(energy):
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
     _numba_flag = Numba.numba_flag
-    if _numba_flag:
-        den = svar(energy_mat, axis=1)
-    else:
-        den = np.var(energy_mat, axis=1)
+    den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=0)
     return num / den
 
 
@@ -651,15 +647,9 @@ def _rhat(ary):
     # Calculate chain mean
     chain_mean = np.mean(ary, axis=1)
     # Calculate chain variance
-    if _numba_flag:
-        chain_var = svar(ary, axis=1, ddof=1)
-    else:
-        chain_var = np.var(ary, axis=1, ddof=1)
+    chain_var = _numba_var(svar, np.var, ary, axis=1, ddof=1)
     # Calculate between-chain variance
-    if _numba_flag:
-        between_chain_variance = num_samples * svar(chain_mean, ddof=1)
-    else:
-        between_chain_variance = num_samples * np.var(chain_mean, ddof=1)
+    between_chain_variance = num_samples * _numba_var(svar, np.var, chain_mean, axis=None, ddof=1)
     # Calculate within-chain variance
     within_chain_variance = np.mean(chain_var)
     # Estimate of marginal posterior variance
@@ -733,10 +723,7 @@ def _ess(ary, relative=False):
     mean_var = np.mean(acov[:, 0]) * n_draw / (n_draw - 1.0)
     var_plus = mean_var * (n_draw - 1.0) / n_draw
     if n_chain > 1:
-        if _numba_flag:
-            var_plus += svar(chain_mean, ddof=1)
-        else:
-            var_plus += np.var(chain_mean, ddof=1)
+        var_plus += _numba_var(svar, np.var, chain_mean, axis=None, ddof=1)
 
     rho_hat_t = np.zeros(n_draw)
     rho_hat_even = 1.0

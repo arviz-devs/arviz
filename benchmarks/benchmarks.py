@@ -1,7 +1,7 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 import numpy as np
-import scipy.stats as st
+from scipy.stats import circstd
 
 
 class Hist:
@@ -82,4 +82,4 @@ class CircStd:
             return _circular_standard_deviation(data)
         except ImportError:
             data = np.random.randn(10000, 1000)
-            return st.circstd(data)
+            return circstd(data)
