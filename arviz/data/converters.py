@@ -74,7 +74,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             kwargs["posterior"] = kwargs.pop(group)
         elif group == "sample_stats_prior":
             kwargs["prior"] = kwargs.pop(group)
-        if obj.__class__.__name__ == "PosteriorSample":
+        if obj.__class__.__name__ == "RunSet":
             return from_cmdstanpy(**kwargs)
         else:  # pystan or pystan3
             return from_pystan(**kwargs)
