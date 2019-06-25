@@ -157,9 +157,28 @@ class Numba:
             raise ValueError("Numba is not installed")
 
 
-def _numba_var(function_1, function_2, data, axis=None, ddof=0):
-    """To replace the if-else blocks."""
+def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
+    """Replace the numpy methods used to calculate variance in the code.
+
+    Parameters
+    ----------
+    numba_function : function()
+        Custom numba function included in stats/stats_utils.py.
+
+    standard_numpy_func: function()
+        Standard function included in the numpy library.
+
+    data : array.
+    axis : Axis along with the values are calculated.
+    ddof : Degrees of freedom allowed while calculating variance.
+
+    Returns
+    -------
+    array:
+        Returns variance by appropriate function for numba speedup if Numba is installed or enabled.
+
+    """
     if Numba.numba_flag:
-        return function_1(data, axis=axis, ddof=ddof)
+        return numba_function(data, axis=axis, ddof=ddof)
     else:
-        return function_2(data, axis=axis, ddof=ddof)
+        return standard_numpy_func(data, axis=axis, ddof=ddof)
