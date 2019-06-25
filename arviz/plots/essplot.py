@@ -28,7 +28,7 @@ def plot_ess(
     extra_kwargs=None,
     **kwargs
 ):
-    """Plot quantile or local effective sample sizes.
+    """Plot quantile, local or change of effective sample sizes (ESS).
 
     Parameters
     ----------
@@ -49,7 +49,8 @@ def plot_ess(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     n_points : int
-        Number of quantiles for which to plot their quantile/local ess or number of subsets in the change plot.
+        Number of quantiles for which to plot their quantile/local ess or number of subsets
+        in the change plot.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
     extra_kwargs : dict
@@ -62,8 +63,67 @@ def plot_ess(
     -------
     ax : matplotlib axes
 
+    References
+    ----------
+    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+
     Examples
     --------
+
+    Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
+    that there are enough samples for all the explored regions of parameter space. Checking
+    local and quantile ESS is particularly relevant when working with credible intervals as
+    opposed to ESS bulk, which is relevant for point estimates.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data("centered_eight")
+        >>> coords = {"school": ["Choate", "Lawrenceville"]}
+        >>> az.plot_ess(
+        ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
+        ... )
+
+    Plot quantile ESS.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ess(
+        ...     idata, kind="quantile", var_names=["mu", "theta"], coords=coords
+        ... )
+
+    Plot ESS change as the number of samples increase. When the model is converging properly,
+    both lines in this plot should be roughly linear.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ess(
+        ...     idata, kind="change", var_names=["mu", "theta"], coords=coords
+        ... )
+
+    Customize local ESS plot to look like reference paper.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_ess(
+        ...     idata, kind="local", var_names=["mu"], drawstyle="steps-mid",
+        ...     color="k", linestyle="-", marker=None
+        ... )
+
+    Customize ESS change plot to look like reference paper.
+
+    .. plot::
+        :context: close-figs
+
+        >>> extra_kwargs = {"color": "lightsteelblue"}
+        >>> az.plot_ess(
+        ...     idata, kind="change", var_names=["mu"], color="royalblue", extra_kwargs=extra_kwargs
+        ... )
+
     """
     valid_kinds = ("local", "quantile", "change")
     kind = kind.lower()
@@ -150,7 +210,11 @@ def plot_ess(
     kwargs.setdefault("markersize", _markersize)
     if kind == "change":
         if extra_kwargs is None:
-            extra_kwargs = {key: item for key, item in kwargs.items()}
+            extra_kwargs = {}
+        extra_kwargs = {
+            **extra_kwargs,
+            **{key: item for key, item in kwargs.items() if key not in extra_kwargs},
+        }
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
 
@@ -162,8 +226,8 @@ def plot_ess(
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)
         if kind == "change":
-            x2 = ess_tail_dataset[var_name].sel(**selection)
-            ax_.plot(xdata, x2, **extra_kwargs)
+            ess_tail = ess_tail_dataset[var_name].sel(**selection)
+            ax_.plot(xdata, ess_tail, **extra_kwargs)
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel(
