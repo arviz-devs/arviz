@@ -16,31 +16,36 @@ from ..utils import _var_names
 
 
 def plot_ess(
-    data,
+    idata,
     var_names=None,
     kind="local",
     relative=False,
     coords=None,
     figsize=None,
     textsize=None,
+    rug=False,
+    rug_kind="diverging",
     n_points=20,
+    min_ess=400,
     ax=None,
     extra_kwargs=None,
+    hline_kwargs=None,
+    rug_kwargs=None,
     **kwargs
 ):
     """Plot quantile, local or change of effective sample sizes (ESS).
 
     Parameters
     ----------
-    data : obj
+    idata : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
     var_names : list of variable names, optional
-        Variables to be plotted, two variables are required.
+        Variables to be plotted.
     kind : str, optional
         Options: ``local``, ``quantile`` or ``change``, specify the kind of plot.
     relative : bool
-        Show relative ess in plot.
+        Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple, optional
@@ -48,14 +53,24 @@ def plot_ess(
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    rug : bool
+        Plot rug plot of values diverging or that reached the max tree depth.
+    rug_kind : bool
+        Variable in sample stats to use as rug mask. Must be a boolean variable.
     n_points : int
-        Number of quantiles for which to plot their quantile/local ess or number of subsets
+        Number of points for which to plot their quantile/local ess or number of subsets
         in the change plot.
+    min_ess : int
+        Minimum number of ESS desired.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
     extra_kwargs : dict
         kwargs used to plot ess tail and differentiate it from ess bulk. If None, the same
         kwargs are used, thus, the 2 lines will differ in the color which is matplotlib default.
+    hline_kwargs : dict
+        kwargs passed to ax.axhline for the horizontal minimum ESS line.
+    rug_kwargs : dict
+        kwargs passed to rug plot.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -69,7 +84,6 @@ def plot_ess(
 
     Examples
     --------
-
     Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
     that there are enough samples for all the explored regions of parameter space. Checking
     local and quantile ESS is particularly relevant when working with credible intervals as
@@ -110,8 +124,8 @@ def plot_ess(
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="local", var_names=["mu"], drawstyle="steps-mid",
-        ...     color="k", linestyle="-", marker=None
+        ...     idata, kind="local", var_names=["mu"], drawstyle="steps-mid", color="k",
+        ...     linestyle="-", marker=None, rug=True, rug_kwargs={"color": "r"}
         ... )
 
     Customize ESS change plot to look like reference paper.
@@ -133,7 +147,7 @@ def plot_ess(
     if coords is None:
         coords = {}
 
-    data = convert_to_dataset(data, group="posterior")
+    data = convert_to_dataset(idata, group="posterior")
     var_names = _var_names(var_names, data)
 
     if kind == "quantile":
@@ -208,6 +222,7 @@ def plot_ess(
     kwargs.setdefault("linewidth", _linewidth)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("markersize", _markersize)
+    kwargs.setdefault("zorder", 3)
     if kind == "change":
         if extra_kwargs is None:
             extra_kwargs = {}
@@ -217,6 +232,12 @@ def plot_ess(
         }
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
+    if hline_kwargs is None:
+        hline_kwargs = {}
+    hline_kwargs.setdefault("linewidth", _linewidth)
+    hline_kwargs.setdefault("linestyle", "--")
+    hline_kwargs.setdefault("color", "gray")
+    hline_kwargs.setdefault("alpha", 0.7)
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -228,6 +249,29 @@ def plot_ess(
         if kind == "change":
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
             ax_.plot(xdata, ess_tail, **extra_kwargs)
+        elif rug:
+            if rug_kwargs is None:
+                rug_kwargs = {}
+            if not hasattr(idata, "sample_stats"):
+                raise ValueError("InferenceData object must contain sample_stats for rug plot")
+            if not hasattr(idata.sample_stats, rug_kind):
+                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
+            rug_kwargs.setdefault("marker", "|")
+            rug_kwargs.setdefault("linestyle", "None")
+            rug_kwargs.setdefault("color", kwargs.get("color", "C0"))
+            rug_kwargs.setdefault("space", 0.1)
+            rug_kwargs.setdefault("markersize", 2 * _markersize)
+
+            values = data[var_name].sel(**selection).values.flatten()
+            mask = idata.sample_stats[rug_kind].values.flatten()
+            values = np.argsort(values)[mask]
+            rug_space = np.max(x) * rug_kwargs.pop("space")
+            rug_x, rug_y = values/(len(mask)-1), np.zeros_like(values) - rug_space
+            ax_.plot(rug_x, rug_y, **rug_kwargs)
+            ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
+
+        ax_.axhline(min_ess, **hline_kwargs)
+
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel(
@@ -240,5 +284,14 @@ def plot_ess(
             ax_.legend(title="type")
         else:
             ax_.set_xlim(0, 1)
+        if rug:
+            ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
+            _, ymax = ax_.get_ylim()
+            yticks = ax_.get_yticks().astype(np.int64)
+            yticks = yticks[(yticks >= 0) & (yticks < ymax)]
+            ax_.set_yticks(yticks)
+            ax_.set_yticklabels(yticks)
+        else:
+            ax_.set_ylim(bottom=0)
 
     return ax
