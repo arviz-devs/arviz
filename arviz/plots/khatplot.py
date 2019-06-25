@@ -122,21 +122,14 @@ def plot_khat(
 
     """
     if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
-        try:
-            from IPython import get_ipython
-
-            ipython = get_ipython()
-            ipython.magic("matplotlib")
-        except (ImportError, AttributeError):
-            hover_label = False
-            warnings.warn(
-                "hover labels are only available with interactive backends. To switch to an "
-                "interactive backend from ipython or jupyter, use `%matplotlib` there is no need "
-                "to restart the kernel",
-                UserWarning,
-            )
-        else:
-            warnings.warn("switching to interactive backend to use hover labels", UserWarning)
+        hover_label = False
+        warnings.warn(
+            "hover labels are only available with interactive backends. To switch to an "
+            "interactive backend from ipython or jupyter, use `%matplotlib` there should be no need "
+            "to restart the kernel. For other cases, see "
+            "https://matplotlib.org/3.1.0/tutorials/introductory/usage.html#backends",
+            UserWarning,
+        )
 
     if hlines_kwargs is None:
         hlines_kwargs = {}
