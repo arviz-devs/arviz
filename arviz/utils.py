@@ -158,7 +158,7 @@ class Numba:
 
 
 def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
-    """Replace the numpy methods used to calculate variance in the code.
+    """Replace the numpy methods used to calculate variance.
 
     Parameters
     ----------
@@ -169,13 +169,14 @@ def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
         Standard function included in the numpy library.
 
     data : array.
-    axis : Axis along with the values are calculated.
-    ddof : Degrees of freedom allowed while calculating variance.
+    axis : axis along which the variance is calculated.
+    ddof : degrees of freedom allowed while calculating variance.
 
     Returns
     -------
     array:
-        Returns variance by appropriate function for numba speedup if Numba is installed or enabled.
+        variance values calculate by appropriate function for numba speedup
+        if Numba is installed or enabled.
 
     """
     if Numba.numba_flag:
