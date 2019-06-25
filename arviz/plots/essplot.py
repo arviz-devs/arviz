@@ -180,14 +180,15 @@ def plot_ess(
         )
     else:
         n_draws = len(data.draw)
+        first_draw = data.draw.values[0]
         n_samples = n_draws * len(data.chain)
         ylabel = "{}"
         xdata = np.linspace(n_samples / n_points, n_samples, n_points)
-        draw_divisions = np.linspace(n_draws / n_points, n_draws, n_points)
+        draw_divisions = np.linspace(n_draws // n_points, n_draws, n_points, dtype=int)
         ess_dataset = xr.concat(
             [
                 ess(
-                    data.sel(draw=slice(draw_div)),
+                    data.sel(draw=slice(first_draw + draw_div)),
                     var_names=var_names,
                     relative=relative,
                     method="bulk",
@@ -199,7 +200,7 @@ def plot_ess(
         ess_tail_dataset = xr.concat(
             [
                 ess(
-                    data.sel(draw=slice(draw_div)),
+                    data.sel(draw=slice(first_draw + draw_div)),
                     var_names=var_names,
                     relative=relative,
                     method="tail",
