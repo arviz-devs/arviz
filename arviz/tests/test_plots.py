@@ -936,7 +936,7 @@ def test_plot_elpd_one_model(models):
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
     ],
 )
-@pytest.mark.parametrize("kind", ["local", "quantile", "change"])
+@pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
 def test_plot_ess(models, kind, kwargs):
     idata = models.model_1
     ax = plot_ess(idata, kind=kind, **kwargs)
@@ -958,9 +958,9 @@ def test_plot_ess_local_quantile(models, kind, kwargs):
     assert np.all(ax)
 
 
-def test_plot_ess_change(models):
+def test_plot_ess_evolution(models):
     idata = models.model_1
-    ax = plot_ess(idata, kind="change", extra_kwargs={"linestyle": "--"}, color="b")
+    ax = plot_ess(idata, kind="evolution", extra_kwargs={"linestyle": "--"}, color="b")
     assert np.all(ax)
 
 

@@ -33,7 +33,7 @@ def plot_ess(
     rug_kwargs=None,
     **kwargs
 ):
-    """Plot quantile, local or change of effective sample sizes (ESS).
+    """Plot quantile, local or evolution of effective sample sizes (ESS).
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def plot_ess(
     var_names : list of variable names, optional
         Variables to be plotted.
     kind : str, optional
-        Options: ``local``, ``quantile`` or ``change``, specify the kind of plot.
+        Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
     relative : bool
         Show relative ess in plot ``ress = ess / N``.
     coords : dict, optional
@@ -59,7 +59,7 @@ def plot_ess(
         Variable in sample stats to use as rug mask. Must be a boolean variable.
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
-        in the change plot.
+        in the evolution plot.
     min_ess : int
         Minimum number of ESS desired.
     ax : axes, optional
@@ -108,14 +108,14 @@ def plot_ess(
         ...     idata, kind="quantile", var_names=["mu", "theta"], coords=coords
         ... )
 
-    Plot ESS change as the number of samples increase. When the model is converging properly,
+    Plot ESS evolution as the number of samples increase. When the model is converging properly,
     both lines in this plot should be roughly linear.
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="change", var_names=["mu", "theta"], coords=coords
+        ...     idata, kind="evolution", var_names=["mu", "theta"], coords=coords
         ... )
 
     Customize local ESS plot to look like reference paper.
@@ -128,18 +128,18 @@ def plot_ess(
         ...     linestyle="-", marker=None, rug=True, rug_kwargs={"color": "r"}
         ... )
 
-    Customize ESS change plot to look like reference paper.
+    Customize ESS evolution plot to look like reference paper.
 
     .. plot::
         :context: close-figs
 
         >>> extra_kwargs = {"color": "lightsteelblue"}
         >>> az.plot_ess(
-        ...     idata, kind="change", var_names=["mu"], color="royalblue", extra_kwargs=extra_kwargs
+        ...     idata, kind="evolution", var_names=["mu"], color="royalblue", extra_kwargs=extra_kwargs
         ... )
 
     """
-    valid_kinds = ("local", "quantile", "change")
+    valid_kinds = ("local", "quantile", "evolution")
     kind = kind.lower()
     if kind not in valid_kinds:
         raise ValueError("Invalid kind, kind must be one of {} not {}".format(valid_kinds, kind))
@@ -149,11 +149,11 @@ def plot_ess(
 
     data = convert_to_dataset(idata, group="posterior")
     var_names = _var_names(var_names, data)
-    n_draws = len(data.draw)
-    n_samples = n_draws * len(data.chain)
+    n_draws = data.dims["draw"]
+    n_samples = n_draws * data.dims["chain"]
 
     if kind == "quantile":
-        probs = np.arange(1 / n_points, 1, 1 / n_points)
+        probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
         xdata = probs
         ylabel = "{} for quantiles"
         ess_dataset = xr.concat(
@@ -164,7 +164,7 @@ def plot_ess(
             dim="ess_dim",
         )
     elif kind == "local":
-        probs = np.arange(0, 1, 1 / n_points)
+        probs = np.linspace(0, 1 - 1 / n_points, n_points)
         xdata = probs
         ylabel = "{} for small intervals"
         ess_dataset = xr.concat(
@@ -219,12 +219,13 @@ def plot_ess(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    kwargs.setdefault("linestyle", "-" if kind == "change" else "none")
-    kwargs.setdefault("linewidth", _linewidth)
+    _linestyle = kwargs.pop("ls", "-" if kind == "evolution" else "none")
+    kwargs.setdefault("linestyle", _linestyle)
+    kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
+    kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("zorder", 3)
-    if kind == "change":
+    if kind == "evolution":
         if extra_kwargs is None:
             extra_kwargs = {}
         extra_kwargs = {
@@ -235,9 +236,9 @@ def plot_ess(
         extra_kwargs.setdefault("label", "tail")
     if hline_kwargs is None:
         hline_kwargs = {}
-    hline_kwargs.setdefault("linewidth", _linewidth)
-    hline_kwargs.setdefault("linestyle", "--")
-    hline_kwargs.setdefault("color", "gray")
+    hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
+    hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
+    hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
     hline_kwargs.setdefault("alpha", 0.7)
 
     if ax is None:
@@ -247,7 +248,7 @@ def plot_ess(
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)
-        if kind == "change":
+        if kind == "evolution":
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
             ax_.plot(xdata, ess_tail, **extra_kwargs)
         elif rug:
@@ -258,10 +259,10 @@ def plot_ess(
             if not hasattr(idata.sample_stats, rug_kind):
                 raise ValueError("InferenceData does not contain {} data".format(rug_kind))
             rug_kwargs.setdefault("marker", "|")
-            rug_kwargs.setdefault("linestyle", "None")
-            rug_kwargs.setdefault("color", kwargs.get("color", "C0"))
+            rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
+            rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
             rug_kwargs.setdefault("space", 0.1)
-            rug_kwargs.setdefault("markersize", 2 * _markersize)
+            rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
 
             values = data[var_name].sel(**selection).values.flatten()
             mask = idata.sample_stats[rug_kind].values.flatten()
@@ -276,12 +277,12 @@ def plot_ess(
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel(
-            "Total number of draws" if kind == "change" else "Quantile", fontsize=ax_labelsize
+            "Total number of draws" if kind == "evolution" else "Quantile", fontsize=ax_labelsize
         )
         ax_.set_ylabel(
             ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
         )
-        if kind == "change":
+        if kind == "evolution":
             ax_.legend(title="type")
         else:
             ax_.set_xlim(0, 1)
