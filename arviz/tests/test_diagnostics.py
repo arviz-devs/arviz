@@ -212,6 +212,7 @@ class TestDiagnostics:
             "bulk",
             "tail",
             "quantile",
+            "local",
             "mean",
             "sd",
             "median",
@@ -236,6 +237,10 @@ class TestDiagnostics:
                 ess_hat = ess(
                     np.random.randn(4, 100), method=method, prob=(0.2, 0.8), relative=relative
                 )
+        elif method == "local":
+            ess_hat = ess(
+                np.random.randn(4, 100), method=method, prob=(0.2, 0.3), relative=relative
+            )
         else:
             ess_hat = ess(np.random.randn(4, 100), method=method, relative=relative)
         assert ess_hat > n_low
@@ -252,6 +257,7 @@ class TestDiagnostics:
             "bulk",
             "tail",
             "quantile",
+            "local",
             "mean",
             "sd",
             "median",
@@ -275,12 +281,16 @@ class TestDiagnostics:
         if (draw < 4) or use_nan:
             if method in ("quantile", "tail"):
                 ess_value = ess(data, method=method, prob=0.34, relative=relative)
+            elif method == "local":
+                ess_value = ess(data, method=method, prob=(0.2, 0.3), relative=relative)
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert np.isnan(ess_value)
         else:
             if method in ("quantile", "tail"):
                 ess_value = ess(data, method=method, prob=0.34, relative=relative)
+            elif method == "local":
+                ess_value = ess(data, method=method, prob=(0.2, 0.3), relative=relative)
             else:
                 ess_value = ess(data, method=method, relative=relative)
             assert not np.isnan(ess_value)
@@ -297,6 +307,13 @@ class TestDiagnostics:
             ess(np.random.randn(4, 100), method="quantile", relative=relative)
         with pytest.raises(TypeError):
             _ess_quantile(np.random.randn(4, 100), prob=None, relative=relative)
+        with pytest.raises(TypeError):
+            ess(np.random.randn(4, 100), method="local", relative=relative)
+
+    @pytest.mark.parametrize("relative", (True, False))
+    def test_effective_sample_size_too_many_probs(self, relative):
+        with pytest.raises(ValueError):
+            ess(np.random.randn(4, 100), method="local", prob=[0.1, 0.2, 0.9], relative=relative)
 
     def test_effective_sample_size_constant(self):
         assert ess(np.ones((4, 100))) == 400
@@ -315,6 +332,7 @@ class TestDiagnostics:
             "bulk",
             "tail",
             "quantile",
+            "local",
             "mean",
             "sd",
             "median",
@@ -330,6 +348,10 @@ class TestDiagnostics:
         n_low = 100 if not relative else 100 / (data.chain.size * data.draw.size)
         if method in ("quantile", "tail"):
             ess_hat = ess(data, var_names=var_names, method=method, prob=0.34, relative=relative)
+        elif method == "local":
+            ess_hat = ess(
+                data, var_names=var_names, method=method, prob=(0.2, 0.3), relative=relative
+            )
         else:
             ess_hat = ess(data, var_names=var_names, method=method, relative=relative)
         assert np.all(ess_hat.mu.values > n_low)  # This might break if the data is regenerated
