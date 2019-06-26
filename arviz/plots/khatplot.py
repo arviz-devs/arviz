@@ -251,6 +251,7 @@ def plot_khat(
         ax.legend(ncol=ncols, title=color)
 
     if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
+        plt.ion()
         _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
 
     return ax
@@ -261,20 +262,28 @@ def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
     annot = ax.annotate(
         "",
         xy=(0, 0),
-        xytext=(10, 10),
+        xytext=(0, 0),
         textcoords="offset points",
-        bbox=dict(boxstyle="round", fc="w"),
+        bbox=dict(boxstyle="round", fc="w", alpha=0.4),
         arrowprops=dict(arrowstyle="->"),
     )
     annot.set_visible(False)
+    xmid = np.mean(ax.get_xlim())
+    ymid = np.mean(ax.get_ylim())
+    offset = 10
 
     def update_annot(ind):
+
         idx = ind["ind"][0]
         pos = sc_plot.get_offsets()[idx]
         annot.xy = pos
+        annot.set_position(
+            (-offset if pos[0] > xmid else offset, -offset if pos[1] > ymid else offset)
+        )
         annot.set_text(coord_labels[idx])
         annot.get_bbox_patch().set_facecolor(rgba_c[idx])
-        annot.get_bbox_patch().set_alpha(0.4)
+        annot.set_ha("right" if pos[0] > xmid else "left")
+        annot.set_va("top" if pos[1] > ymid else "bottom")
 
     def hover(event):
         vis = annot.get_visible()
