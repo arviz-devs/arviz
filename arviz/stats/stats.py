@@ -3,6 +3,7 @@
 import warnings
 import logging
 from collections import OrderedDict
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -1263,6 +1264,7 @@ def apply_test_function(
     ufunc_kwargs=None,
     wrap_data_kwargs=None,
     wrap_pp_kwargs=None,
+    inplace=True,
 ):
     """Apply a Bayesian test function to an InferenceData object.
 
@@ -1292,6 +1294,8 @@ def apply_test_function(
         Output shape of the test function applied to the observed data. If None, the default
         depends on the value of pointwise.
     """
+    out = idata if inplace else deepcopy(idata)
+
     valid_groups = ("observed_data", "posterior_predictive", "both")
     if group not in valid_groups:
         raise ValueError(
@@ -1320,102 +1324,69 @@ def apply_test_function(
         var_names = {}
 
     both_var_names = var_names.pop("both", None)
-    var_names.setdefault("posterior", list(idata.posterior.data_vars))
+    var_names.setdefault("posterior", list(out.posterior.data_vars))
 
-    in_posterior = idata.posterior[var_names["posterior"]]
+    in_posterior = out.posterior[var_names["posterior"]]
     if isinstance(in_posterior, xr.Dataset):
         in_posterior = in_posterior.to_array().squeeze()
 
-    if group in ("posterior_predictive", "both"):
-        if not hasattr(idata, "posterior_predictive"):
-            raise ValueError("InferenceData object must have posterior_predictive group")
+    groups = ("posterior_predictive", "observed_data") if group == "both" else [group]
+    for grp in groups:
+        out_group_shape = out_data_shape if grp == "observed_data" else out_pp_shape
+        out_name_group = out_name_data if grp == "observed_data" else out_name_pp
+        wrap_group_kwargs = wrap_data_kwargs if grp == "observed_data" else wrap_pp_kwargs
+        if not hasattr(out, grp):
+            raise ValueError("InferenceData object must have {} group".format(grp))
         var_names.setdefault(
-            "posterior_predictive",
-            list(idata.posterior_predictive.data_vars)
-            if both_var_names is None
-            else both_var_names,
+            grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names
         )
-        in_pp = idata.posterior_predictive[var_names["posterior_predictive"]]
-        if isinstance(in_pp, xr.Dataset):
-            in_pp = in_pp.to_array(dim="pp_var").squeeze()
+        in_group = getattr(out, grp)[var_names[grp]]
+        if isinstance(in_group, xr.Dataset):
+            in_group = in_group.to_array(dim="{}_var".format(grp)).squeeze()
 
-        if out_pp_shape is None:
-            out_pp_shape = in_pp.shape if pointwise else in_pp.shape[:2]
-        loop_dims = in_pp.dims if pointwise else ("chain", "draw")
+        if pointwise:
+            out_group_shape = in_group.shape if out_group_shape is None else out_group_shape
+            loop_dims = in_group.dims
+        elif grp == "observed_data":
+            out_group_shape = () if out_group_shape is None else out_group_shape
+            loop_dims = ()
+        elif grp == "posterior_predictive":
+            out_group_shape = in_group.shape[:2] if out_group_shape is None else out_group_shape
+            loop_dims = ("chain", "draw")
 
-        wrap_pp_kwargs.setdefault(
+        wrap_group_kwargs.setdefault(
             "input_core_dims",
             [
                 [dim for dim in dataset.dims if dim not in loop_dims]
-                for dataset in [in_pp, in_posterior]
+                for dataset in [in_group, in_posterior]
             ],
         )
-        func_kwargs["out"] = np.empty(out_pp_shape)
+        func_kwargs["out"] = np.empty(out_group_shape)
+
+        out_group = getattr(out, grp)
         try:
-            idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
+            out_group[out_name_group] = _wrap_xarray_ufunc(
                 func,
-                in_pp,
-                in_posterior,
-                func_args=func_args,
-                func_kwargs=func_kwargs,
-                ufunc_kwargs=ufunc_kwargs,
-                **wrap_pp_kwargs,
-            )
-        except IndexError:
-            input_core_dims = sum(*wrap_pp_kwargs["input_core_dims"])
-            wrap_pp_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
-            idata.posterior_predictive[out_name_pp] = _wrap_xarray_ufunc(
-                func,
-                *xr.broadcast(in_pp, in_posterior),
-                func_args=func_args,
-                func_kwargs=func_kwargs,
-                ufunc_kwargs=ufunc_kwargs,
-                **wrap_pp_kwargs,
-            )
-
-    if group in ("observed_data", "both"):
-        if not hasattr(idata, "observed_data"):
-            raise ValueError("InferenceData object must have observed_data group")
-        var_names.setdefault(
-            "observed_data",
-            list(idata.observed_data.data_vars) if both_var_names is None else both_var_names,
-        )
-        in_data = idata.observed_data[var_names["observed_data"]]
-        if isinstance(in_data, xr.Dataset):
-            in_data = in_data.to_array(dim="obs_var").squeeze()
-
-        if out_data_shape is None:
-            out_data_shape = in_data.shape if pointwise else ()
-        loop_dims = in_data.dims if pointwise else ()
-
-        wrap_data_kwargs.setdefault(
-            "input_core_dims",
-            [
-                [dim for dim in dataset.dims if dim not in loop_dims]
-                for dataset in [in_data, in_posterior]
-            ],
-        )
-        func_kwargs["out"] = np.empty(out_data_shape)
-        try:
-            idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
-                func,
-                in_data.values,
+                in_group.values,
                 in_posterior.values,
                 func_args=func_args,
                 func_kwargs=func_kwargs,
                 ufunc_kwargs=ufunc_kwargs,
-                **wrap_data_kwargs,
+                **wrap_group_kwargs,
             )
         except IndexError:
-            input_core_dims = sum(*wrap_data_kwargs["input_core_dims"])
-            wrap_data_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
-            idata.observed_data[out_name_data] = _wrap_xarray_ufunc(
+            input_core_dims = set(
+                wrap_group_kwargs["input_core_dims"][0] + wrap_group_kwargs["input_core_dims"][1]
+            )
+            wrap_group_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
+            out_group[out_name_group] = _wrap_xarray_ufunc(
                 func,
-                *xr.broadcast(in_data, in_posterior),
+                *xr.broadcast(in_group, in_posterior),
                 func_args=func_args,
                 func_kwargs=func_kwargs,
                 ufunc_kwargs=ufunc_kwargs,
-                **wrap_data_kwargs,
+                **wrap_group_kwargs,
             )
+        setattr(out, grp, out_group)
 
-    return idata
+    return out

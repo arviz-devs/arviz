@@ -8,9 +8,21 @@ from xarray import Dataset, DataArray
 
 
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
-from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary, loo_pit, ess
+from ..stats import (
+    compare,
+    hpd,
+    loo,
+    r2_score,
+    waic,
+    psislw,
+    summary,
+    loo_pit,
+    ess,
+    apply_test_function,
+)
 from ..stats.stats import _gpinv
 from ..utils import Numba
+from .helpers import check_multiple_attrs
 
 
 @pytest.fixture(scope="session")
@@ -389,3 +401,79 @@ def test_loo_pit(centered_eight, args):
     else:
         loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
+
+
+def test_loo_pit_bad_input(centered_eight):
+    arr = np.random.random((8, 200))
+    with pytest.raises(ValueError):
+        loo_pit(idata=arr, y="obs")
+    with pytest.raises(ValueError):
+        loo_pit(idata=None, y="obs")
+    with pytest.raises(ValueError):
+        loo_pit(idata=centered_eight, y=arr, y_hat=None)
+
+
+@pytest.mark.parametrize("arg", ["y", "y_hat", "log_weights"])
+def test_loo_pit_bad_input_type(centered_eight, arg):
+    kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
+    kwargs[arg] = 2
+    with pytest.raises(ValueError):
+        loo_pit(idata=centered_eight, **kwargs)
+
+
+def test_loo_pit_bad_input_shape():
+    y = np.random.random(8)
+    y_hat = np.random.random((8, 200))
+    log_weights = np.random.random((8, 200))
+    with pytest.raises(ValueError):
+        loo_pit(y=y, y_hat=y_hat[None, :], log_weights=log_weights)
+    with pytest.raises(ValueError):
+        loo_pit(y=y, y_hat=y_hat[1:3, :], log_weights=log_weights)
+    with pytest.raises(ValueError):
+        loo_pit(y=y, y_hat=y_hat[:, :100], log_weights=log_weights)
+
+
+@pytest.mark.parametrize("group", ["both", "observed_data", "posterior_predictive"])
+@pytest.mark.parametrize(
+    "var_names",
+    [
+        None,
+        {"observed_data": "obs"},
+        {"both": "obs"},
+        {"posterior_predictive": "obs"},
+        {"both": "obs", "posterior": ["theta", "mu"]},
+    ],
+)
+@pytest.mark.parametrize("pointwise", [True, False])
+@pytest.mark.parametrize("out_data_shape", [None, "shape"])
+@pytest.mark.parametrize("out_pp_shape", [None, "shape"])
+@pytest.mark.parametrize("inplace", [True, False])
+def test_apply_test_function(
+    centered_eight, group, var_names, pointwise, out_data_shape, out_pp_shape, inplace
+):
+    if out_data_shape == "shape":
+        out_data_shape = (8,) if pointwise else ()
+    if out_pp_shape == "shape":
+        out_pp_shape = (4, 500, 8) if pointwise else (4, 500)
+    idata = deepcopy(centered_eight)
+    idata_out = apply_test_function(
+        idata,
+        lambda y, theta: np.mean(y),
+        group=group,
+        var_names=var_names,
+        pointwise=pointwise,
+        out_data_shape=out_data_shape,
+        out_pp_shape=out_pp_shape,
+    )
+    if inplace:
+        assert idata is idata_out
+
+    if group == "both":
+        test_dict = {"observed_data": "T", "posterior_predictive": ["T_hat"]}
+    elif group == "observed_data":
+        test_dict = {"observed_data": "T"}
+    elif group == "posterior_predictive":
+        test_dict = {"posterior_predictive": ["T_hat"]}
+
+    fails = check_multiple_attrs(test_dict, idata_out)
+    assert not fails

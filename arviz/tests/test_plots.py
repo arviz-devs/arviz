@@ -1005,5 +1005,3 @@ def test_plot_loo_pit(models, kwargs):
 def test_plot_loo_pit_error(models):
     with pytest.raises(ValueError):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
-
-
