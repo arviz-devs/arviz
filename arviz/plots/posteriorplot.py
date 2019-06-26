@@ -4,6 +4,7 @@ from numbers import Number
 import numpy as np
 from scipy.stats import mode
 
+
 from ..data import convert_to_dataset
 from ..stats import hpd
 from .kdeplot import plot_kde, _fast_kde

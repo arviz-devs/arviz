@@ -30,6 +30,7 @@ from ..plots import (
     plot_dist,
     plot_rank,
     plot_elpd,
+    plot_loo_pit,
 )
 
 np.random.seed(0)
@@ -981,3 +982,28 @@ def test_plot_ess_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError):
         plot_ess(idata, rug=True)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"n_unif": 50, "legend": False},
+        {"use_hpd": True, "color": "gray"},
+        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"ls": "--"}},
+        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"ecdf": True},
+        {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"ls": "--"}},
+        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"hatch": "/"}},
+    ],
+)
+def test_plot_loo_pit(models, kwargs):
+    axes = plot_loo_pit(idata=models.model_1, y="y", **kwargs)
+    assert axes
+
+
+def test_plot_loo_pit_error(models):
+    with pytest.raises(ValueError):
+        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+
+

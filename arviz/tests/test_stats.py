@@ -8,7 +8,7 @@ from xarray import Dataset, DataArray
 
 
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
-from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
+from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary, loo_pit, ess
 from ..stats.stats import _gpinv
 from ..utils import Numba
 
@@ -350,3 +350,42 @@ def test_numba_stats():
     assert state == Numba.numba_flag  # Ensure that inital state = final state
     assert np.allclose(non_numba, with_numba)
     assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "obs"},
+        {"y": "obs", "y_hat": "obs"},
+        {"y": "arr", "y_hat": "obs"},
+        {"y": "obs", "y_hat": "arr"},
+        {"y": "arr", "y_hat": "arr"},
+        {"y": "obs", "y_hat": "obs", "log_weights": "arr"},
+        {"y": "arr", "y_hat": "obs", "log_weights": "arr"},
+        {"y": "obs", "y_hat": "arr", "log_weights": "arr"},
+        {"idata": False},
+    ],
+)
+def test_loo_pit(centered_eight, args):
+    y = args.get("y", None)
+    y_hat = args.get("y_hat", None)
+    log_weights = args.get("log_weights", None)
+    y_arr = centered_eight.observed_data.obs
+    y_hat_arr = centered_eight.posterior_predictive.obs.stack(samples=("chain", "draw"))
+    log_like = centered_eight.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+    n_samples = len(log_like.samples)
+    ess_p = ess(centered_eight.posterior, method="mean")
+    reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+    log_weights_arr = psislw(-log_like, reff=reff)[0]
+
+    if args.get("idata", True):
+        if y == "arr":
+            y = y_arr
+        if y_hat == "arr":
+            y_hat = y_hat_arr
+        if log_weights == "arr":
+            log_weights = log_weights_arr
+        loo_pit_data = loo_pit(idata=centered_eight, y=y, y_hat=y_hat, log_weights=log_weights)
+    else:
+        loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
+    assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))

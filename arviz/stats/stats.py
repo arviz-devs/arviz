@@ -1193,7 +1193,17 @@ def loo_pit(idata=None, y=None, y_hat=None, log_weights=None):
             )
         if log_weights is None:
             log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-            log_weights = psislw(-log_likelihood)[0].values
+            posterior = convert_to_dataset(idata, group="posterior")
+            n_chains = len(posterior.chain)
+            n_samples = len(log_likelihood.samples)
+            ess_p = ess(posterior, method="mean")
+            # this mean is over all data variables
+            reff = (
+                (np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples)
+                if n_chains > 1
+                else 1
+            )
+            log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
                 "log_weights must be None or of types array or DataArray, not {}".format(type(y))

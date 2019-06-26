@@ -51,7 +51,7 @@ def plot_loo_pit(
         In this case, instead of overlaying uniform distributions, the beta ``credible_interval``
         interval around the theoretical uniform CDF is shown. For more information, see
         `Vehtari et al. (2019)`, Appendix G.
-    fill_ecdf : bool, optional
+    ecdf_fill : bool, optional
         Use fill_between to mark the area inside the credible interval. Otherwise, plot the
         border lines.
     n_unif : int, optional
@@ -126,8 +126,8 @@ def plot_loo_pit(
         )
         unif_ecdf = unif_ecdf / n_data_points
 
-        plot_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
-        plot_unif_kwargs.setdefault("drawstyle", "steps" if n_data_points < 100 else "default")
+        plot_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
+        plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
 
         ax.plot(
             np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf - loo_pit, 0)), **plot_kwargs
@@ -137,7 +137,9 @@ def plot_loo_pit(
                 fill_kwargs = {}
             fill_kwargs.setdefault("color", hsv_to_rgb(light_color))
             fill_kwargs.setdefault("alpha", 0.5)
-            fill_kwargs.setdefault("step", "pre" if plot_kwargs["drawstyle"] == "steps" else None)
+            fill_kwargs.setdefault(
+                "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
+            )
             fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
 
             ax.fill_between(unif_ecdf, p975 - unif_ecdf, p025 - unif_ecdf, **fill_kwargs)
@@ -169,7 +171,7 @@ def plot_loo_pit(
 
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
-        if not use_hpd and not ecdf_fill:
+        if not (use_hpd or (ecdf and ecdf_fill)):
             label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
             ax.plot([], label=label, **plot_unif_kwargs)
         ax.legend()
