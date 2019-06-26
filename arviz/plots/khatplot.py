@@ -125,8 +125,8 @@ def plot_khat(
         hover_label = False
         warnings.warn(
             "hover labels are only available with interactive backends. To switch to an "
-            "interactive backend from ipython or jupyter, use `%matplotlib` there should be no need "
-            "to restart the kernel. For other cases, see "
+            "interactive backend from ipython or jupyter, use `%matplotlib` there should be "
+            "no need to restart the kernel. For other cases, see "
             "https://matplotlib.org/3.1.0/tutorials/introductory/usage.html#backends",
             UserWarning,
         )
