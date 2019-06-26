@@ -13,6 +13,7 @@ from ..plots import (
     plot_density,
     plot_trace,
     plot_energy,
+    plot_ess,
     plot_posterior,
     plot_autocorr,
     plot_forest,
@@ -54,6 +55,7 @@ def create_model(seed=10):
     sample_stats = {
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
+        "max_depth": np.random.randn(nchains, ndraws) > 0.90,
         "log_likelihood": np.random.randn(nchains, ndraws, data["J"]),
     }
     prior = {
@@ -923,3 +925,59 @@ def test_plot_elpd_one_model(models):
     model_dict = {"Model 1": models.model_1}
     with pytest.raises(Exception):
         plot_elpd(model_dict)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"], "relative": True, "color": "r"},
+        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+    ],
+)
+@pytest.mark.parametrize("kind", ["local", "quantile", "change"])
+def test_plot_ess(models, kind, kwargs):
+    idata = models.model_1
+    ax = plot_ess(idata, kind=kind, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rug": True},
+        {"rug": True, "rug_kind": "max_depth"},
+        {"rug": True, "rug_kwargs": {"color": "c"}},
+    ],
+)
+@pytest.mark.parametrize("kind", ["local", "quantile"])
+def test_plot_ess_local_quantile(models, kind, kwargs):
+    idata = models.model_1
+    ax = plot_ess(idata, kind=kind, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_ess_change(models):
+    idata = models.model_1
+    ax = plot_ess(idata, kind="change", extra_kwargs={"linestyle": "--"}, color="b")
+    assert np.all(ax)
+
+
+def test_plot_ess_bad_kind(models):
+    idata = models.model_1
+    with pytest.raises(ValueError):
+        plot_ess(idata, kind="bad kind")
+
+
+def test_plot_ess_no_sample_stats(models):
+    idata = models.model_1
+    with pytest.raises(ValueError):
+        plot_ess(idata.posterior, rug=True)
+
+
+def test_plot_ess_no_divergences(models):
+    idata = models.model_1
+    idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
+    with pytest.raises(ValueError):
+        plot_ess(idata, rug=True)

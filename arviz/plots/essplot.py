@@ -149,6 +149,8 @@ def plot_ess(
 
     data = convert_to_dataset(idata, group="posterior")
     var_names = _var_names(var_names, data)
+    n_draws = len(data.draw)
+    n_samples = n_draws * len(data.chain)
 
     if kind == "quantile":
         probs = np.arange(1 / n_points, 1, 1 / n_points)
@@ -179,9 +181,7 @@ def plot_ess(
             dim="ess_dim",
         )
     else:
-        n_draws = len(data.draw)
         first_draw = data.draw.values[0]
-        n_samples = n_draws * len(data.chain)
         ylabel = "{}"
         xdata = np.linspace(n_samples / n_points, n_samples, n_points)
         draw_divisions = np.linspace(n_draws // n_points, n_draws, n_points, dtype=int)
@@ -267,11 +267,11 @@ def plot_ess(
             mask = idata.sample_stats[rug_kind].values.flatten()
             values = np.argsort(values)[mask]
             rug_space = np.max(x) * rug_kwargs.pop("space")
-            rug_x, rug_y = values/(len(mask)-1), np.zeros_like(values) - rug_space
+            rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
 
-        ax_.axhline(min_ess, **hline_kwargs)
+        ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
