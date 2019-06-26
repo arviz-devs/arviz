@@ -195,6 +195,8 @@ def plot_khat(
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
+    else:
+        fig = ax.get_figure()
 
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
