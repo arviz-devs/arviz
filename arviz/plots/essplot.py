@@ -135,7 +135,8 @@ def plot_ess(
 
         >>> extra_kwargs = {"color": "lightsteelblue"}
         >>> az.plot_ess(
-        ...     idata, kind="evolution", var_names=["mu"], color="royalblue", extra_kwargs=extra_kwargs
+        ...     idata, kind="evolution", var_names=["mu"],
+        ...     color="royalblue", extra_kwargs=extra_kwargs
         ... )
 
     """
@@ -164,7 +165,7 @@ def plot_ess(
             dim="ess_dim",
         )
     elif kind == "local":
-        probs = np.linspace(0, 1 - 1 / n_points, n_points)
+        probs = np.linspace(0, 1, n_points, endpoint=False)
         xdata = probs
         ylabel = "{} for small intervals"
         ess_dataset = xr.concat(
