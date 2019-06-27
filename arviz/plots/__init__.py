@@ -3,6 +3,7 @@ from .autocorrplot import plot_autocorr
 from .compareplot import plot_compare
 from .densityplot import plot_density
 from .energyplot import plot_energy
+from .essplot import plot_ess
 from .forestplot import plot_forest
 from .kdeplot import plot_kde, _fast_kde, _fast_kde_2d
 from .parallelplot import plot_parallel
@@ -24,6 +25,7 @@ __all__ = [
     "plot_compare",
     "plot_density",
     "plot_energy",
+    "plot_ess",
     "plot_forest",
     "plot_kde",
     "_fast_kde",
