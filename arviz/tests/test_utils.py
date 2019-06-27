@@ -5,7 +5,7 @@ Tests for arviz.utils.
 from unittest.mock import Mock
 import numpy as np
 import pytest
-from ..utils import _var_names, format_sig_figs, numba_check
+from ..utils import _var_names, format_sig_figs
 from ..data import load_arviz_data, from_dict
 
 

@@ -85,11 +85,29 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         return wrapper
 
 
+def format_sig_figs(value, default=None):
+    """Get a default number of significant figures.
+    Gives the integer part or `default`, whichever is bigger.
+    Examples
+    --------
+    0.1234 --> 0.12
+    1.234  --> 1.2
+    12.34  --> 12
+    123.4  --> 123
+    """
+    if default is None:
+        default = 2
+    if value == 0:
+        return 1
+    return max(int(np.log10(np.abs(value))) + 1, default)
 
 
+'''
 def wrapper(function, *args, **kwargs):
     def wrapped():
         return function(*args, **kwargs
+    
+
 def numba_check(function, *args, **kwargs):
     """Compare the time of a numbified function to a non numbified one."""
 
@@ -112,5 +130,5 @@ def numba_check(function, *args, **kwargs):
         b = timeit.timeit(wrapped_numba, number=1000)
         time[i] = a / b
     return time.mean()
-
+'''
 
