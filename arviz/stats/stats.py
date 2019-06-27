@@ -1145,11 +1145,11 @@ def waic(data, pointwise=False, scale="deviance"):
         )
 
 
-def loo_pit(idata=None, y=None, y_hat=None, log_weights=None):
+def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     """Compute LOO-PIT values.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     idata : InferenceData
         InferenceData object.
     y : array, DataArray or str
@@ -1166,6 +1166,29 @@ def loo_pit(idata=None, y=None, y_hat=None, log_weights=None):
     -------
     loo_pit : array or DataArray
         Value of the LOO-PIT at each observed data point.
+
+    Examples
+    --------
+    Calculate LOO-PIT values using as test quantity the observed values themselves.
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.loo_pit(idata=data, y="obs")
+
+    Calculate LOO-PIT values using as test quantity the square of the difference between
+    each observation and `mu`. Both ``y`` and ``y_hat`` inputs will be array-like,
+    but ``idata`` will still be passed in order to calculate the ``log_weights`` from
+    there.
+
+    .. ipython::
+
+        In [1]: T = data.observed_data.obs - data.posterior.mu.median(dim=("chain", "draw"))
+           ...: T_hat = data.posterior_predictive.obs - data.posterior.mu
+           ...: T_hat = T_hat.stack(samples=("chain", "draw"))
+           ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
+
     """
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
@@ -1268,8 +1291,8 @@ def apply_test_function(
 ):
     """Apply a Bayesian test function to an InferenceData object.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     idata : InferenceData
         InferenceData object on which to apply the test function. This function will add
         new variables to the InferenceData object to store the result without modifying the

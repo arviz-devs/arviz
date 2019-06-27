@@ -12,6 +12,7 @@ from .hpdplot import plot_hpd
 
 def plot_loo_pit(
     idata=None,
+    *,
     y=None,
     y_hat=None,
     log_weights=None,
@@ -50,7 +51,7 @@ def plot_loo_pit(
         (ECDF) and the uniform CDF instead of LOO-PIT kde.
         In this case, instead of overlaying uniform distributions, the beta ``credible_interval``
         interval around the theoretical uniform CDF is shown. For more information, see
-        `Vehtari et al. (2019)`, Appendix G.
+        `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_
     ecdf_fill : bool, optional
         Use fill_between to mark the area inside the credible interval. Otherwise, plot the
         border lines.
@@ -84,6 +85,35 @@ def plot_loo_pit(
     -------
     axes : axes
         Matplotlib axes
+
+    References
+    ----------
+    * Gabry et al. (2017) see https://arxiv.org/abs/1709.01449
+    * https://mc-stan.org/bayesplot/reference/PPC-loo.html
+    * Gelman et al. BDA (2014) Section 6.3
+
+    Examples
+    --------
+    Plot LOO-PIT predictive checks overlaying the KDE of the LOO-PIT values to several
+    realizations of uniform variable sampling with the same number of observations.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data("centered_eight")
+        >>> az.plot_loo_pit(idata=idata, y="obs")
+
+    Fill the area containing the 94% credible interval of the difference between uniform
+    variables empirical CDF and the real uniform CDF. A LOO-PIT ECDF clearly outside of these
+    theoretical boundaries indicates that the observations and the posterior predictive
+    samples do not follow the same distribution.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_loo_pit(idata=idata, y="obs", ecdf=True)
+
     """
     if ecdf and use_hpd:
         raise ValueError("use_hpd is incompatible with ecdf plot")
@@ -108,7 +138,7 @@ def plot_loo_pit(
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
 
-    loo_pit = _loo_pit(idata, y, y_hat, log_weights)
+    loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
     if ecdf:
@@ -130,7 +160,7 @@ def plot_loo_pit(
         plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
 
         ax.plot(
-            np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit_ecdf - loo_pit, 0)), **plot_kwargs
+            np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit - loo_pit_ecdf, 0)), **plot_kwargs
         )
         if ecdf_fill:
             if fill_kwargs is None:

@@ -25,6 +25,7 @@ Plots
     plot_joint
     plot_kde
     plot_khat
+    plot_loo_pit
     plot_pair
     plot_parallel
     plot_posterior
@@ -41,9 +42,11 @@ Stats
 .. autosummary::
     :toctree: generated/
 
+    apply_test_function
     compare
     hpd
     loo
+    loo_pit
     psislw
     r2_score
     summary
