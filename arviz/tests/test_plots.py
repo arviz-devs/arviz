@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name,too-many-lines
 import os
 import matplotlib.pyplot as plt
 from pandas import DataFrame
