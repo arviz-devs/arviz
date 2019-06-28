@@ -34,6 +34,7 @@ from ..plots import (
 )
 
 np.random.seed(0)
+os.environ["ARVIZ_LOAD"] = "EAGER"
 
 
 def create_model(seed=10):

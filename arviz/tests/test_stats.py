@@ -1,4 +1,5 @@
 # pylint: disable=redefined-outer-name
+import os
 from copy import deepcopy
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_almost_equal
@@ -23,6 +24,8 @@ from ..stats import (
 from ..stats.stats import _gpinv
 from ..utils import Numba
 from .helpers import check_multiple_attrs
+
+os.environ["ARVIZ_LOAD"] = "EAGER"
 
 
 @pytest.fixture(scope="session")

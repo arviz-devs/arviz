@@ -1,4 +1,5 @@
 """Data structure for using netcdf groups with xarray."""
+import os
 from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
@@ -60,9 +61,13 @@ class InferenceData:
         with nc.Dataset(filename, mode="r") as data:
             data_groups = list(data.groups)
 
+        arviz_load_mode = os.environ.get("ARVIZ_LOAD", "lazy").lower()
         for group in data_groups:
             with xr.open_dataset(filename, group=group) as data:
-                groups[group] = data
+                if arviz_load_mode == "eager":
+                    groups[group] = data.load()
+                else:
+                    groups[group] = data
         return InferenceData(**groups)
 
     def to_netcdf(self, filename, compress=True):

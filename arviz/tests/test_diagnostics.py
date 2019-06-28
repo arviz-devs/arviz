@@ -32,6 +32,8 @@ from ..utils import Numba
 # See discussion in https://github.com/stan-dev/rstan/pull/618
 GOOD_RHAT = 1.1
 
+os.environ["ARVIZ_LOAD"] = "EAGER"
+
 
 @pytest.fixture(scope="session")
 def data():
