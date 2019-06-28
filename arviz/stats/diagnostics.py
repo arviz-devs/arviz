@@ -592,8 +592,10 @@ def _bfmi(energy):
     """
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    _numba_flag = Numba.numba_flag
-    den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=0)
+    if energy_mat.ndim == 2:
+        den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=0)
+    else:
+        den = np.var(energy, axis=1)
     return num / den
 
 
