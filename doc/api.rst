@@ -17,6 +17,7 @@ Plots
     plot_compare
     plot_density
     plot_energy
+    plot_ess
     plot_forest
     plot_hpd
     plot_joint

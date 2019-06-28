@@ -204,6 +204,13 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
         In [1]: az.ess(data, relative=True, var_names=["mu", "theta_t"])
 
+    Calculate the ess using the "tail" method, leaving the `prob` argument at its default
+    value.
+
+    .. ipython::
+
+        In [1]: az.ess(data, method="tail")
+
     """
     methods = {
         "bulk": _ess_bulk,
@@ -216,6 +223,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         "z_scale": _ess_z_scale,
         "folded": _ess_folded,
         "identity": _ess_identity,
+        "local": _ess_local,
     }
 
     if method not in methods:
@@ -791,6 +799,20 @@ def _ess_quantile(ary, prob, relative=False):
         raise TypeError("Prob not defined.")
     quantile, = _quantile(ary, prob)
     iquantile = ary <= quantile
+    return _ess(_split_chains(iquantile), relative=relative)
+
+
+def _ess_local(ary, prob, relative=False):
+    """Compute the effective sample size for the specific residual."""
+    ary = np.asarray(ary)
+    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
+        return np.nan
+    if prob is None:
+        raise TypeError("Prob not defined.")
+    if len(prob) != 2:
+        raise ValueError("Prob argument in ess local must be upper and lower bound")
+    quantile = _quantile(ary, prob)
+    iquantile = (quantile[0] <= ary) & (ary <= quantile[1])
     return _ess(_split_chains(iquantile), relative=relative)
 
 

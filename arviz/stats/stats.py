@@ -842,7 +842,7 @@ def summary(
     if extend:
         mean = posterior.mean(dim=("chain", "draw"))
 
-        sd = posterior.std(dim=("chain", "draw"))
+        sd = posterior.std(dim=("chain", "draw"), ddof=1)
 
         hpd_lower, hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),

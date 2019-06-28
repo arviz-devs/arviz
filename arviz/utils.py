@@ -1,6 +1,7 @@
 """General utilities."""
 import importlib
 import warnings
+import numpy as np
 
 
 def _var_names(var_names, data):
@@ -80,3 +81,22 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
         return wrapper(function)
     else:
         return wrapper
+
+
+def format_sig_figs(value, default=None):
+    """Get a default number of significant figures.
+
+    Gives the integer part or `default`, whichever is bigger.
+
+    Examples
+    --------
+    0.1234 --> 0.12
+    1.234  --> 1.2
+    12.34  --> 12
+    123.4  --> 123
+    """
+    if default is None:
+        default = 2
+    if value == 0:
+        return 1
+    return max(int(np.log10(np.abs(value))) + 1, default)
