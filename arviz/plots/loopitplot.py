@@ -12,7 +12,6 @@ from .hpdplot import plot_hpd
 
 def plot_loo_pit(
     idata=None,
-    *,
     y=None,
     y_hat=None,
     log_weights=None,
