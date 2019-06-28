@@ -251,7 +251,6 @@ def plot_khat(
         ax.legend(ncol=ncols, title=color)
 
     if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
-        plt.ion()
         _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
 
     return ax
