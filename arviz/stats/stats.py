@@ -1398,13 +1398,12 @@ def apply_test_function(
                 **wrap_group_kwargs,
             )
         except IndexError:
-            input_core_dims = set(
+            excluded_dims = set(
                 wrap_group_kwargs["input_core_dims"][0] + wrap_group_kwargs["input_core_dims"][1]
             )
-            wrap_group_kwargs["input_core_dims"] = [input_core_dims, input_core_dims]
             out_group[out_name_group] = _wrap_xarray_ufunc(
                 func,
-                *xr.broadcast(in_group, in_posterior),
+                *xr.broadcast(in_group, in_posterior, exclude=excluded_dims),
                 func_args=func_args,
                 func_kwargs=func_kwargs,
                 ufunc_kwargs=ufunc_kwargs,
