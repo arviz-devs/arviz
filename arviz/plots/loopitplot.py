@@ -49,8 +49,9 @@ def plot_loo_pit(
         Plot the difference between the LOO-PIT Empirical Cumulative Distribution Function
         (ECDF) and the uniform CDF instead of LOO-PIT kde.
         In this case, instead of overlaying uniform distributions, the beta ``credible_interval``
-        interval around the theoretical uniform CDF is shown. For more information, see
-        `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_
+        interval around the theoretical uniform CDF is shown. This approximation only holds
+        for large S and ECDF values not vary close to 0 nor 1. For more information, see
+        `Vehtari et al. (2019)`, `Appendix G <https://avehtari.github.io/rhat_ess/rhat_ess.html>`_.
     ecdf_fill : bool, optional
         Use fill_between to mark the area inside the credible interval. Otherwise, plot the
         border lines.

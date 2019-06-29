@@ -24,4 +24,6 @@ __all__ = [
     "geweke",
     "autocorr",
     "autocov",
+    "make_ufunc",
+    "wrap_xarray_ufunc",
 ]

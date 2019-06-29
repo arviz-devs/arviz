@@ -77,6 +77,8 @@ Stats utils
 
     autocov
     autocorr
+    make_ufunc
+    wrap_xarray_ufunc
 
 Data
 ----

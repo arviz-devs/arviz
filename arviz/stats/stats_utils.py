@@ -214,7 +214,7 @@ def update_docstring(ufunc, func, n_output=1):
     module = ""
     name = ""
     docstring = ""
-    if hasattr(func, "__module__"):
+    if hasattr(func, "__module__") and isinstance(func.__module__, str):
         module += func.__module__
     if hasattr(func, "__name__"):
         name += func.__name__

@@ -1313,9 +1313,50 @@ def apply_test_function(
     pointwise : bool, optional
         If True, apply the test function to each observation and sample, otherwise, apply
         test function to each sample.
-    out_data_shape : tuple, optional
-        Output shape of the test function applied to the observed data. If None, the default
-        depends on the value of pointwise.
+    out_data_shape, out_pp_shape : tuple, optional
+        Output shape of the test function applied to the observed/posterior predictive data.
+        If None, the default depends on the value of pointwise.
+    out_name_data, out_name_pp : str, optional
+        Name of the variables to add to the observed_data and posterior_predictive datasets
+        respectively. ``out_name_pp`` can be ``None``, in which case will be taken equal to
+        ``out_name_data``.
+    func_args : sequence, optional
+        Passed as is to ``func``
+    func_kwargs : mapping, optional
+        Passed as is to ``func``
+    wrap_data_kwargs, wrap_pp_kwargs : mapping, optional
+        kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
+        are used.
+    inplace : bool, optional
+        If True, add the variables inplace, othewise, return a copy of idata with the variables
+        added.
+
+    Returns
+    -------
+    idata : InferenceData
+        Output InferenceData object. If ``inplace=True``, it is the same input object modified
+        inplace.
+
+    Notes
+    -----
+    This function is provided for convenience to wrap scalar or functions working on low
+    dims to inference data object. It is not optimized to be faster nor as fast as vectorized
+    computations.
+
+    Examples
+    --------
+    Use ``apply_test_function`` to wrap ``np.min`` for illustration purposes. And plot the
+    results.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data("centered_eight")
+        >>> az.apply_test_function(idata, lambda y, theta: np.min(y))
+        >>> T = np.asscalar(idata.observed_data.T)
+        >>> az.plot_posterior(idata, var_names=["T"], group="posterior_predictive", ref_val=T)
+
     """
     out = idata if inplace else deepcopy(idata)
 
@@ -1326,7 +1367,7 @@ def apply_test_function(
         )
 
     if out_name_pp is None:
-        out_name_pp = out_name_data + "_hat"
+        out_name_pp = out_name_data
 
     if func_args is None:
         func_args = tuple()

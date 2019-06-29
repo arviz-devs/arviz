@@ -472,11 +472,9 @@ def test_apply_test_function(
         assert idata is idata_out
 
     if group == "both":
-        test_dict = {"observed_data": "T", "posterior_predictive": ["T_hat"]}
-    elif group == "observed_data":
-        test_dict = {"observed_data": "T"}
-    elif group == "posterior_predictive":
-        test_dict = {"posterior_predictive": ["T_hat"]}
+        test_dict = {"observed_data": "T", "posterior_predictive": ["T"]}
+    else:
+        test_dict = {group: "T"}
 
     fails = check_multiple_attrs(test_dict, idata_out)
     assert not fails
