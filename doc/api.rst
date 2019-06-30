@@ -26,6 +26,7 @@ Plots
     plot_kde
     plot_khat
     plot_loo_pit
+    plot_mcse
     plot_pair
     plot_parallel
     plot_posterior
