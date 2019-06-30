@@ -31,6 +31,7 @@ from ..plots import (
     plot_rank,
     plot_elpd,
     plot_loo_pit,
+    plot_mcse,
 )
 
 np.random.seed(0)
@@ -1075,3 +1076,39 @@ def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"], "color": "r"},
+        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"rug": True, "rug_kwargs": {"color": "r"}},
+    ],
+)
+def test_plot_mcse(models,kwargs):
+    idata = models.model_1
+    ax = plot_mcse(idata, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_mcse_bad_coords(models):
+    idata = models.model_1
+    with pytest.raises(ValueError):
+        plot_mcse(idata, coords={"chain": slice(3)})
+    with pytest.raises(ValueError):
+        plot_mcse(idata, coords={"draw": slice(3)})
+
+
+def test_plot_mcse_no_sample_stats(models):
+    idata = models.model_1
+    with pytest.raises(ValueError):
+        plot_mcse(idata.posterior, rug=True)
+
+
+def test_plot_mcse_no_divergences(models):
+    idata = models.model_1
+    idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
+    with pytest.raises(ValueError):
+        plot_mcse(idata, rug=True)
