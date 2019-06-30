@@ -153,10 +153,10 @@ def plot_mcse(
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
             _, ymax = ax_.get_ylim()
-            yticks = ax_.get_yticks().astype(np.int64)
+            yticks = ax_.get_yticks()
             yticks = yticks[(yticks >= 0) & (yticks < ymax)]
             ax_.set_yticks(yticks)
-            ax_.set_yticklabels(yticks)
+            ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
         else:
             ax_.set_ylim(bottom=0)
 
