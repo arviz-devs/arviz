@@ -213,9 +213,7 @@ def plot_ess(
             dim="ess_dim",
         )
 
-    plotters = list(
-        xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})
-    )
+    plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

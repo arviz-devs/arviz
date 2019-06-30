@@ -91,16 +91,10 @@ def plot_mcse(
 
     probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
     mcse_dataset = xr.concat(
-            [
-                mcse(data, var_names=var_names, method="quantile", prob=p)
-                for p in probs
-            ],
-            dim="mcse_dim",
-        )
-
-    plotters = list(
-        xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"})
+        [mcse(data, var_names=var_names, method="quantile", prob=p) for p in probs], dim="mcse_dim"
     )
+
+    plotters = list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"}))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
@@ -143,12 +137,8 @@ def plot_mcse(
 
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
-        ax_.set_xlabel(
-            "Quantile", fontsize=ax_labelsize, wrap=True
-        )
-        ax_.set_ylabel(
-            "MCSE", fontsize=ax_labelsize, wrap=True
-        )
+        ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
+        ax_.set_ylabel("MCSE", fontsize=ax_labelsize, wrap=True)
         ax_.set_xlim(0, 1)
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])

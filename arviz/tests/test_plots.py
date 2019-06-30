@@ -1034,12 +1034,14 @@ def test_plot_ess_bad_kind(models):
     with pytest.raises(ValueError):
         plot_ess(idata, kind="bad kind")
 
+
 def test_plot_ess_bad_coords(models):
     idata = models.model_1
     with pytest.raises(ValueError):
         plot_ess(idata, coords={"chain": slice(3)})
     with pytest.raises(ValueError):
         plot_ess(idata, coords={"draw": slice(3)})
+
 
 def test_plot_ess_no_sample_stats(models):
     idata = models.model_1
@@ -1087,7 +1089,7 @@ def test_plot_loo_pit_incompatible_args(models):
         {"rug": True, "rug_kwargs": {"color": "r"}},
     ],
 )
-def test_plot_mcse(models,kwargs):
+def test_plot_mcse(models, kwargs):
     idata = models.model_1
     ax = plot_mcse(idata, **kwargs)
     assert np.all(ax)
