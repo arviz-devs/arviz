@@ -1410,13 +1410,11 @@ def apply_test_function(
 
         if pointwise:
             out_group_shape = in_group.shape if out_group_shape is None else out_group_shape
-            loop_dims = in_group.dims
         elif grp == "observed_data":
             out_group_shape = () if out_group_shape is None else out_group_shape
-            loop_dims = ()
         elif grp == "posterior_predictive":
             out_group_shape = in_group.shape[:2] if out_group_shape is None else out_group_shape
-            loop_dims = ("chain", "draw")
+        loop_dims = in_group.dims[:len(out_group_shape)]
 
         wrap_group_kwargs.setdefault(
             "input_core_dims",
