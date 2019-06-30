@@ -147,8 +147,10 @@ def plot_ess(
 
     if coords is None:
         coords = {}
+    if "chain" in coords or "draw" in coords:
+        raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
-    data = convert_to_dataset(idata, group="posterior")
+    data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data)
     n_draws = data.dims["draw"]
     n_samples = n_draws * data.dims["chain"]
@@ -212,7 +214,7 @@ def plot_ess(
         )
 
     plotters = list(
-        xarray_var_iter(get_coords(ess_dataset, coords), var_names=var_names, skip_dims={"ess_dim"})
+        xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})
     )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
