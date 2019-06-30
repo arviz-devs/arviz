@@ -109,7 +109,8 @@ class TestCoordsExceptions:
         with pytest.raises(ValueError) as err:
             get_coords(data, coords)
 
-        assert "Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys" in str(err)
+        flag = "Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys" in str(err)
+        assert flag
 
     def test_invalid_coord_value(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords value"""
@@ -119,7 +120,8 @@ class TestCoordsExceptions:
         with pytest.raises(KeyError) as err:
             get_coords(data, coords)
 
-        assert "Coords should follow mapping format {coord_name:[dim1, dim2]}" in str(err)
+        flag = "Coords should follow mapping format {coord_name:[dim1, dim2]}" in str(err)
+        assert flag
 
     def test_invalid_coord_structure(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords datatype"""
