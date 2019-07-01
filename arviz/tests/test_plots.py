@@ -288,7 +288,7 @@ def test_plot_forest(models, model_fits, args_expected):
 def test_plot_forest_rope_exception():
     with pytest.raises(ValueError) as err:
         plot_forest({"x": [1]}, rope="not_correct_format")
-    assert "Argument `rope` must be None, a dictionary like" in repr(err)
+    assert "Argument `rope` must be None, a dictionary like" in str(err.value)
 
 
 def test_plot_forest_single_value():
@@ -788,8 +788,8 @@ def test_plot_compare_no_ic(models):
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare)
 
-    assert "comp_df must contain one of the following" in repr(err)
-    assert "['waic', 'loo']" in repr(err)
+    assert "comp_df must contain one of the following" in str(err.value)
+    assert "['waic', 'loo']" in str(err.value)
 
 
 @pytest.mark.parametrize(

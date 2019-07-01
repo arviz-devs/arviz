@@ -116,10 +116,10 @@ class TestCoordsExceptions:
         _, _, data = sample_dataset
         coords = {"draw": [1234567]}
 
-        with pytest.raises(
-            KeyError, match=r"Coords should follow mapping format {coord_name:[dim1, dim2]}"
-        ):
+        with pytest.raises(KeyError) as err:
             get_coords(data, coords)
+
+        assert "Coords should follow mapping format {coord_name:[dim1, dim2]}" in str(err.value)
 
     def test_invalid_coord_structure(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords datatype"""
