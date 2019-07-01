@@ -12,6 +12,7 @@ from ..stats.stats_utils import (
     not_valid,
     ELPDData,
     stats_variance_2d,
+    histogram,
 )
 
 
@@ -248,3 +249,10 @@ def test_variance_bad_data():
     assert np.allclose(stats_variance_2d(data), np.var(data))
     assert np.allclose(stats_variance_2d(data, ddof=1), np.var(data, ddof=1))
     assert not np.allclose(stats_variance_2d(data), np.var(data, ddof=1))
+
+
+def test_histogram():
+    school = load_arviz_data("non_centered_eight").posterior["mu"].values
+    k_count = histogram(school)
+    kcount, _ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    assert np.allclose(k_count, kcount)

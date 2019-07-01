@@ -22,7 +22,6 @@ from ..stats.diagnostics import (
     _conv_quantile,
     _split_chains,
     _sqrt,
-    _histogram,
     _angle,
     _circfunc,
     _circular_standard_deviation,
@@ -533,12 +532,6 @@ class TestDiagnostics:
         with pytest.warns(UserWarning):
             summary2 = ks_summary(pareto_tail_indices2)
         assert summary2 is not None
-
-    def test_histogram(self):
-        school = load_arviz_data("non_centered_eight").posterior["mu"].values
-        k_count = _histogram(school)
-        kcount, _ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
-        assert np.allclose(k_count, kcount)
 
     @pytest.mark.parametrize("size", [100, 101])
     @pytest.mark.parametrize("batches", [1, 2, 3, 5, 7])

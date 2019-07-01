@@ -13,6 +13,7 @@ from .stats_utils import (
     not_valid as _not_valid,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     stats_variance_2d as svar,
+    histogram,
 )
 from ..data import convert_to_dataset
 from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
@@ -494,8 +495,11 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
     * Geweke (1992)
     """
     # Filter out invalid intervals
-    _numba_flag = Numba.numba_flag
+    return _geweke(ary, first, last, intervals)
 
+
+def _geweke(ary, first, last, intervals):
+    _numba_flag = Numba.numba_flag
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
@@ -531,12 +535,6 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
     return np.array(zscores)
 
 
-@conditional_jit
-def _histogram(data):
-    kcounts, _ = np.histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
-    return kcounts
-
-
 def ks_summary(pareto_tail_indices):
     """Display a summary of Pareto tail indices.
 
@@ -552,7 +550,7 @@ def ks_summary(pareto_tail_indices):
     """
     _numba_flag = Numba.numba_flag
     if _numba_flag:
-        kcounts = _histogram(pareto_tail_indices)
+        kcounts = histogram(pareto_tail_indices)
     else:
         kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
