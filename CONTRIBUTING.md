@@ -212,10 +212,8 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 
 To run the **benchmark tests** do the following:
 
-- Install airspeed velocity via `pip install asv`
-
-- `cd arviz/`
-
-- `asv run`
+    $ pip install asv
+    $ cd arviz
+    $ asv run
 
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)

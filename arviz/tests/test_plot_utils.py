@@ -117,7 +117,7 @@ class TestCoordsExceptions:
         coords = {"draw": [1234567]}
 
         with pytest.raises(
-            KeyError, match="Coords should follow mapping format {coord_name:[dim1, dim2]}"
+            KeyError, match=r"Coords should follow mapping format {coord_name:[dim1, dim2]}"
         ):
             get_coords(data, coords)
 
