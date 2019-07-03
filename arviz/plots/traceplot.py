@@ -84,7 +84,7 @@ def plot_trace(
 
         >>> import arviz as az
         >>> data = az.load_arviz_data('non_centered_eight')
-        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
+        >>> coords = {'school': ['Choate', 'Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
 
     Show all dimensions of multidimensional variables in the same plot
@@ -99,7 +99,6 @@ def plot_trace(
     .. plot::
         :context: close-figs
 
-        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
 
 
@@ -108,8 +107,7 @@ def plot_trace(
     .. plot::
         :context: close-figs
 
-        >>> lines = (('theta_t',{'theta_t_dim_0':0}, [-1]),)
-        >>> coords = {'theta_t_dim_0': [0, 1], 'school':['Lawrenceville']}
+        >>> lines = (('theta_t',{'school': "Choate"}, [-1]),)
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
