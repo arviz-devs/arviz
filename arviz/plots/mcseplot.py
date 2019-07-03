@@ -4,6 +4,7 @@ import xarray as xr
 
 from ..data import convert_to_dataset
 from ..stats import mcse
+from ..stats.stats_utils import quantile as _quantile
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
@@ -19,6 +20,7 @@ def plot_mcse(
     idata,
     var_names=None,
     coords=None,
+    errorbar=False,
     figsize=None,
     textsize=None,
     rug=False,
@@ -39,6 +41,8 @@ def plot_mcse(
         Variables to be plotted.
     coords : dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    errorbar : bool, optional
+        Plot quantile value +/- mcse instead of plotting mcse.
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -104,7 +108,7 @@ def plot_mcse(
     kwargs.setdefault("linestyle", kwargs.pop("ls", "none"))
     kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
     kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
-    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("marker", "_" if errorbar else "o")
     kwargs.setdefault("zorder", 3)
 
     if ax is None:
@@ -113,7 +117,13 @@ def plot_mcse(
         )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        ax_.plot(probs, x, **kwargs)
+        if errorbar or rug:
+            values = data[var_name].sel(**selection).values.flatten()
+        if errorbar:
+            quantile_values = _quantile(values, probs)
+            ax_.errorbar(probs, quantile_values, yerr=x, **kwargs)
+        else:
+            ax_.plot(probs, x, **kwargs)
         if rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
@@ -127,13 +137,14 @@ def plot_mcse(
             rug_kwargs.setdefault("space", 0.1)
             rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
 
-            values = data[var_name].sel(**selection).values.flatten()
             mask = idata.sample_stats[rug_kind].values.flatten()
             values = np.argsort(values)[mask]
-            rug_space = np.max(x) * rug_kwargs.pop("space")
-            rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
+            y_min, y_max = ax_.get_ylim()
+            y_min = y_min if errorbar else 0
+            rug_space = (y_max - y_min) * rug_kwargs.pop("space")
+            rug_x, rug_y = values / (len(mask) - 1), np.full_like(values, y_min) - rug_space
             ax_.plot(rug_x, rug_y, **rug_kwargs)
-            ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
+            ax_.axhline(y_min, color="k", linewidth=_linewidth, alpha=0.7)
 
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
@@ -147,7 +158,7 @@ def plot_mcse(
             yticks = yticks[(yticks >= 0) & (yticks < ymax)]
             ax_.set_yticks(yticks)
             ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
-        else:
+        elif not errorbar:
             ax_.set_ylim(bottom=0)
 
     return ax
