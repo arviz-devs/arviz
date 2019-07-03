@@ -16,6 +16,8 @@ Plots
     plot_autocorr
     plot_compare
     plot_density
+    plot_dist
+    plot_elpd
     plot_energy
     plot_ess
     plot_forest
@@ -25,11 +27,11 @@ Plots
     plot_khat
     plot_pair
     plot_parallel
-    plot_elpd
     plot_posterior
     plot_ppc
     plot_rank
     plot_trace
+    plot_violin
 
 .. _stats_api:
 
