@@ -23,9 +23,11 @@ def plot_mcse(
     errorbar=False,
     figsize=None,
     textsize=None,
+    extra_methods=False,
     rug=False,
     rug_kind="diverging",
     n_points=20,
+    legend=None,
     ax=None,
     rug_kwargs=None,
     **kwargs
@@ -48,6 +50,9 @@ def plot_mcse(
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    extra_methods : bool, optional
+        Plot mean and sd MCSE as horizontal lines. Only taken into account when
+        ``errorbar=False``.
     rug : bool
         Plot rug plot of values diverging or that reached the max tree depth.
     rug_kind : bool
@@ -55,6 +60,8 @@ def plot_mcse(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
+    legend : bool, optional
+        Show legend of the plot. If ``None`` legend will depend on the value of ``extra_methods``.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
     rug_kwargs : dict
@@ -89,6 +96,8 @@ def plot_mcse(
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
+    if legend is None:
+        legend = extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data)
@@ -97,6 +106,9 @@ def plot_mcse(
     mcse_dataset = xr.concat(
         [mcse(data, var_names=var_names, method="quantile", prob=p) for p in probs], dim="mcse_dim"
     )
+    if extra_methods:
+        mean_mcse = mcse(data, var_names=var_names, method="mean")
+        sd_mcse = mcse(data, var_names=var_names, method="sd")
 
     plotters = list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"}))
     length_plotters = len(plotters)
@@ -123,7 +135,12 @@ def plot_mcse(
             quantile_values = _quantile(values, probs)
             ax_.errorbar(probs, quantile_values, yerr=x, **kwargs)
         else:
-            ax_.plot(probs, x, **kwargs)
+            ax_.plot(probs, x, label="quantile", **kwargs)
+            if extra_methods:
+                mean_mcse_i = np.asscalar(mean_mcse[var_name].sel(**selection))
+                sd_mcse_i = np.asscalar(sd_mcse[var_name].sel(**selection))
+                ax_.axhline(mean_mcse_i, label="mean", ls="--", color="k", alpha=0.7)
+                ax_.axhline(sd_mcse_i, label="sd", ls="-.", color="k", alpha=0.7)
         if rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
@@ -160,5 +177,7 @@ def plot_mcse(
             ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
         elif not errorbar:
             ax_.set_ylim(bottom=0)
+        if legend:
+            ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
 
     return ax

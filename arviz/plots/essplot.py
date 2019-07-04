@@ -26,7 +26,9 @@ def plot_ess(
     rug=False,
     rug_kind="diverging",
     n_points=20,
+    extra_methods=False,
     min_ess=400,
+    legend=None,
     ax=None,
     extra_kwargs=None,
     hline_kwargs=None,
@@ -60,14 +62,20 @@ def plot_ess(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
+    extra_methods : bool, optional
+        Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess : int
         Minimum number of ESS desired.
+    legend : bool, optional
+        Show plot legend. If ``None`` it will depend on the other parameters.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
-    extra_kwargs : dict
-        kwargs used to plot ess tail and differentiate it from ess bulk. If None, the same
-        kwargs are used, thus, the 2 lines will differ in the color which is matplotlib default.
-    hline_kwargs : dict
+    extra_kwargs : dict, optional
+        If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
+        from ess bulk. If None, the same kwargs are used, thus, the 2 lines will
+        differ in the color which is matplotlib default. If not an evolution plot, used
+        for extra methods horizontal lines.
+    hline_kwargs : dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
     rug_kwargs : dict
         kwargs passed to rug plot.
@@ -149,6 +157,9 @@ def plot_ess(
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
+    if legend is None:
+        legend = True if kind == "evolution" else extra_methods
+    extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data)
@@ -213,6 +224,10 @@ def plot_ess(
             dim="ess_dim",
         )
 
+    if extra_methods:
+        mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
+        sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
+
     plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
@@ -235,6 +250,7 @@ def plot_ess(
         }
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
+    kwargs.setdefault("label", kind)
     if hline_kwargs is None:
         hline_kwargs = {}
     hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
@@ -272,6 +288,11 @@ def plot_ess(
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
+        if extra_methods:
+            mean_ess_i = np.asscalar(mean_ess[var_name].sel(**selection))
+            sd_ess_i = np.asscalar(sd_ess[var_name].sel(**selection))
+            ax_.axhline(mean_ess_i, label="mean", ls="--", color="k", alpha=0.7)
+            ax_.axhline(sd_ess_i, label="sd", ls="-.", color="k", alpha=0.7)
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
@@ -283,9 +304,9 @@ def plot_ess(
         ax_.set_ylabel(
             ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
         )
-        if kind == "evolution":
-            ax_.legend(title="type")
-        else:
+        if legend:
+            ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
+        if kind != "evolution":
             ax_.set_xlim(0, 1)
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
