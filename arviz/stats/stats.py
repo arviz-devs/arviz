@@ -1414,7 +1414,7 @@ def apply_test_function(
             out_group_shape = () if out_group_shape is None else out_group_shape
         elif grp == "posterior_predictive":
             out_group_shape = in_group.shape[:2] if out_group_shape is None else out_group_shape
-        loop_dims = in_group.dims[:len(out_group_shape)]
+        loop_dims = in_group.dims[: len(out_group_shape)]
 
         wrap_group_kwargs.setdefault(
             "input_core_dims",

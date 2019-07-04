@@ -349,24 +349,6 @@ def test_multidimensional_log_likelihood(func):
     assert_array_almost_equal(frm[:4], fr1[:4])
 
 
-def test_numba_stats():
-    """Numba test for r2_score"""
-    state = Numba.numba_flag  # Store the current state of Numba
-    set_1 = np.random.randn(100, 100)
-    set_2 = np.random.randn(100, 100)
-    set_3 = np.random.rand(100)
-    set_4 = np.random.rand(100)
-    Numba.disable_numba()
-    non_numba = r2_score(set_1, set_2)
-    non_numba_one_dimensional = r2_score(set_3, set_4)
-    Numba.enable_numba()
-    with_numba = r2_score(set_1, set_2)
-    with_numba_one_dimensional = r2_score(set_3, set_4)
-    assert state == Numba.numba_flag  # Ensure that inital state = final state
-    assert np.allclose(non_numba, with_numba)
-    assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)
-
-
 @pytest.mark.parametrize(
     "args",
     [
