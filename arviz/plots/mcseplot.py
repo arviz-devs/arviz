@@ -1,4 +1,4 @@
-"""Plot quantile MC standard error"""
+"""Plot quantile MC standard error."""
 import numpy as np
 import xarray as xr
 

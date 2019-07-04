@@ -1,5 +1,6 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
@@ -1050,7 +1051,7 @@ def test_plot_ess_no_sample_stats(models):
 
 
 def test_plot_ess_no_divergences(models):
-    idata = models.model_1
+    idata = deepcopy(models.model_1)
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError):
         plot_ess(idata, rug=True)
@@ -1110,7 +1111,7 @@ def test_plot_mcse_no_sample_stats(models):
 
 
 def test_plot_mcse_no_divergences(models):
-    idata = models.model_1
+    idata = deepcopy(models.model_1)
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError):
         plot_mcse(idata, rug=True)
