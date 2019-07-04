@@ -208,4 +208,12 @@ Alternatively, to start a jupyter notebook, there are two steps, first run:
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
+## Running the benchmark tests
+
+To run the **benchmark tests** do the following:
+
+    $ pip install asv
+    $ cd arviz
+    $ asv run
+
 #### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)

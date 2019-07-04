@@ -66,6 +66,8 @@ Here is the citation in BibTeX format
     Quickstart<notebooks/Introduction>
     Example Gallery<examples/index>
     Cookbook<notebooks/InferenceDataCookbook>
+    Numba<notebooks/Numba>
+    InferenceData<notebooks/XarrayforArviZ>
     api
     usage
     about

@@ -135,6 +135,7 @@ html_theme_options = {
         ("Quickstart", "notebooks/Introduction"),
         ("Cookbook", "notebooks/InferenceDataCookbook"),
         ("InferenceData", "notebooks/XarrayforArviZ"),
+        ("Numba", "notebooks/Numba"),
         ("API", "api"),
         ("Usage", "usage"),
         ("About", "about"),

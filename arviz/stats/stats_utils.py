@@ -8,6 +8,7 @@ import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
+from ..utils import conditional_jit
 
 _log = logging.getLogger(__name__)
 
@@ -414,7 +415,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             base += "\n\nThere has been a warning during the calculation. Please check the results."
 
         if kind == "loo" and "pareto_k" in self:
-            counts, _ = np.histogram(self.pareto_k, bins=[-np.inf, 0.5, 0.7, 1, np.inf])
+            counts = histogram(self.pareto_k)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
@@ -425,3 +426,36 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
     def __repr__(self):
         """Alias to ``__str__``."""
         return self.__str__()
+
+
+@conditional_jit
+def stats_variance_1d(data, ddof=0):
+    a_a, b_b = 0, 0
+    for i in data:
+        a_a = a_a + i
+        b_b = b_b + i * i
+    var = b_b / (len(data)) - ((a_a / (len(data))) ** 2)
+    var = var * (len(data) / (len(data) - ddof))
+    return var
+
+
+def stats_variance_2d(data, ddof=0, axis=1):
+    if data.ndim == 1:
+        return stats_variance_1d(data, ddof=ddof)
+    a_a, b_b = data.shape
+    if axis == 1:
+        var = np.zeros(a_a)
+        for i in range(a_a):
+            var[i] = stats_variance_1d(data[i], ddof=ddof)
+        return var
+    else:
+        var = np.zeros(b_b)
+        for i in range(b_b):
+            var[i] = stats_variance_1d(data[:, i], ddof=ddof)
+        return var
+
+
+@conditional_jit
+def histogram(data):
+    kcounts, _ = np.histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    return kcounts

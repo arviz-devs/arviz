@@ -2,7 +2,6 @@
 """Diagnostic functions for ArviZ."""
 from collections.abc import Sequence
 import warnings
-
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -13,10 +12,11 @@ from .stats_utils import (
     autocov as _autocov,
     not_valid as _not_valid,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
+    stats_variance_2d as svar,
+    histogram,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names
-
+from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
@@ -46,7 +46,6 @@ def bfmi(data):
     Examples
     --------
     Compute the BFMI of an InferenceData object
-
     .. ipython::
 
         In [1]: import arviz as az
@@ -169,7 +168,6 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
     Notes
     -----
     The basic ess diagnostic is computed by:
-
     .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
 
@@ -283,7 +281,6 @@ def rhat(data, *, var_names=None, method="rank"):
         Names of variables to include in the rhat report
     method : str
         Select R-hat method. Valid methods are:
-
         - "rank"        # recommended by Vehtari et al. (2019)
         - "split"
         - "folded"
@@ -385,7 +382,6 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         Names of variables to include in the rhat report
     method : str
         Select mcse method. Valid methods are:
-
         - "mean"
         - "sd"
         - "quantile"
@@ -453,6 +449,12 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     )
 
 
+@conditional_vect
+def _sqrt(a_a, b_b):
+    return (a_a + b_b) ** 0.5
+
+
+@conditional_jit
 def geweke(ary, first=0.1, last=0.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
 
@@ -493,6 +495,11 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
     * Geweke (1992)
     """
     # Filter out invalid intervals
+    return _geweke(ary, first, last, intervals)
+
+
+def _geweke(ary, first, last, intervals):
+    _numba_flag = Numba.numba_flag
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             raise ValueError("Invalid intervals for Geweke convergence analysis", (first, last))
@@ -518,7 +525,10 @@ def geweke(ary, first=0.1, last=0.5, intervals=20):
         last_slice = ary[int(end - last * (end - start)) :]
 
         z_score = first_slice.mean() - last_slice.mean()
-        z_score /= np.sqrt(first_slice.var() + last_slice.var())
+        if _numba_flag:
+            z_score /= _sqrt(svar(first_slice), svar(last_slice))
+        else:
+            z_score /= np.sqrt(first_slice.var() + last_slice.var())
 
         zscores.append([start, z_score])
 
@@ -538,7 +548,11 @@ def ks_summary(pareto_tail_indices):
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
-    kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    _numba_flag = Numba.numba_flag
+    if _numba_flag:
+        kcounts = histogram(pareto_tail_indices)
+    else:
+        kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
@@ -576,7 +590,10 @@ def _bfmi(energy):
     """
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
-    den = np.var(energy_mat, axis=1)
+    if energy_mat.ndim == 2:
+        den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=0)
+    else:
+        den = np.var(energy, axis=1)
     return num / den
 
 
@@ -621,6 +638,7 @@ def _z_fold(ary):
 
 def _rhat(ary):
     """Compute the rhat for a 2d array."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary, dtype=float)
     if _not_valid(ary, check_shape=False):
         return np.nan
@@ -629,9 +647,9 @@ def _rhat(ary):
     # Calculate chain mean
     chain_mean = np.mean(ary, axis=1)
     # Calculate chain variance
-    chain_var = np.var(ary, axis=1, ddof=1)
+    chain_var = _numba_var(svar, np.var, ary, axis=1, ddof=1)
     # Calculate between-chain variance
-    between_chain_variance = num_samples * np.var(chain_mean, ddof=1)
+    between_chain_variance = num_samples * _numba_var(svar, np.var, chain_mean, axis=None, ddof=1)
     # Calculate within-chain variance
     within_chain_variance = np.mean(chain_var)
     # Estimate of marginal posterior variance
@@ -691,6 +709,7 @@ def _rhat_identity(ary):
 
 def _ess(ary, relative=False):
     """Compute the effective sample size for a 2D array."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary, dtype=float)
     if _not_valid(ary, check_shape=False):
         return np.nan
@@ -704,7 +723,7 @@ def _ess(ary, relative=False):
     mean_var = np.mean(acov[:, 0]) * n_draw / (n_draw - 1.0)
     var_plus = mean_var * (n_draw - 1.0) / n_draw
     if n_chain > 1:
-        var_plus += np.var(chain_mean, ddof=1)
+        var_plus += _numba_var(svar, np.var, chain_mean, axis=None, ddof=1)
 
     rho_hat_t = np.zeros(n_draw)
     rho_hat_even = 1.0
@@ -881,22 +900,30 @@ def _conv_quantile(ary, prob):
 
 def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ess = _ess_mean(ary)
-    sd = np.std(ary, ddof=1)
+    if _numba_flag:
+        sd = _sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1))
+    else:
+        sd = np.std(ary, ddof=1)
     mcse_mean_value = sd / np.sqrt(ess)
     return mcse_mean_value
 
 
 def _mcse_sd(ary):
     """Compute the Markov Chain sd error."""
+    _numba_flag = Numba.numba_flag
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
     ess = _ess_sd(ary)
-    sd = np.std(ary, ddof=1)
+    if _numba_flag:
+        sd = np.float(_sqrt(svar(np.ravel(ary), ddof=1), np.zeros(1)))
+    else:
+        sd = np.std(ary, ddof=1)
     fac_mcse_sd = np.sqrt(np.exp(1) * (1 - 1 / ess) ** (ess - 1) - 1)
     mcse_sd_value = sd * fac_mcse_sd
     return mcse_sd_value
@@ -909,6 +936,28 @@ def _mcse_quantile(ary, prob):
         return np.nan
     mcse_q, *_ = _conv_quantile(ary, prob)
     return mcse_q
+
+
+def _circfunc(samples, high, low):
+    samples = np.asarray(samples)
+    if samples.size == 0:
+        return np.nan, np.nan
+    return samples, _angle(samples, low, high, np.pi)
+
+
+@conditional_vect
+def _angle(samples, low, high, p_i=np.pi):
+    ang = (samples - low) * 2.0 * p_i / (high - low)
+    return ang
+
+
+def _circular_standard_deviation(samples, high=2 * np.pi, low=0, axis=None):
+    p_i = np.pi
+    samples, ang = _circfunc(samples, high, low)
+    s_s = np.sin(ang).mean(axis=axis)
+    c_c = np.cos(ang).mean(axis=axis)
+    r_r = np.hypot(s_s, c_c)
+    return ((high - low) / 2.0 / p_i) * np.sqrt(-2 * np.log(r_r))
 
 
 def _mc_error(ary, batches=5, circular=False):
@@ -932,6 +981,7 @@ def _mc_error(ary, batches=5, circular=False):
     mc_error : float
         Simulation standard error
     """
+    _numba_flag = Numba.numba_flag
     if ary.ndim > 1:
 
         dims = np.shape(ary)
@@ -944,19 +994,31 @@ def _mc_error(ary, batches=5, circular=False):
             return np.nan
         if batches == 1:
             if circular:
-                std = stats.circstd(ary, high=np.pi, low=-np.pi)
+                if _numba_flag:
+                    std = _circular_standard_deviation(ary, high=np.pi, low=-np.pi)
+                else:
+                    std = stats.circstd(ary, high=np.pi, low=-np.pi)
             else:
-                std = np.std(ary)
+                if _numba_flag:
+                    std = np.float(_sqrt(svar(ary), np.zeros(1)))
+                else:
+                    std = np.std(ary)
             return std / np.sqrt(len(ary))
 
         batched_traces = np.resize(ary, (batches, int(len(ary) / batches)))
 
         if circular:
             means = stats.circmean(batched_traces, high=np.pi, low=-np.pi, axis=1)
-            std = stats.circstd(means, high=np.pi, low=-np.pi)
+            if _numba_flag:
+                std = _circular_standard_deviation(means, high=np.pi, low=-np.pi)
+            else:
+                std = stats.circstd(means, high=np.pi, low=-np.pi)
         else:
             means = np.mean(batched_traces, 1)
-            std = np.std(means)
+            if _numba_flag:
+                std = _sqrt(svar(means), np.zeros(1))
+            else:
+                std = np.std(means)
 
         return std / np.sqrt(batches)
 

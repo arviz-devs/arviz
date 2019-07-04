@@ -4,6 +4,7 @@ import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pandas as pd
+from scipy.stats import circstd
 import pytest
 
 from ..data import load_arviz_data, from_cmdstan
@@ -20,7 +21,12 @@ from ..stats.diagnostics import (
     _z_scale,
     _conv_quantile,
     _split_chains,
+    _sqrt,
+    _angle,
+    _circfunc,
+    _circular_standard_deviation,
 )
+from ..utils import Numba
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
@@ -56,12 +62,9 @@ class TestDiagnostics:
         R code:
         ```
         source('~/monitor.R')
-
         data2 <- read.csv("blocker.2.csv", comment.char = "#")
         data1 <- read.csv("blocker.1.csv", comment.char = "#")
-
         output <- matrix(ncol=15, nrow=length(names(data1))-4)
-
         j = 0
         for (i in 1:length(names(data1))) {
           name = names(data1)[i]
@@ -85,7 +88,6 @@ class TestDiagnostics:
                 mcse_quantile(ary, prob=0.1),
                 mcse_quantile(ary, prob=0.3))
             }
-
         df = data.frame(output, row.names = names(data1)[5:ncol(data1)])
         colnames(df) <- c("rhat_rank",
                           "rhat_raw",
@@ -102,7 +104,6 @@ class TestDiagnostics:
                           "mcse_quantile01",
                           "mcse_quantile10",
                           "mcse_quantile30")
-
         write.csv(df, "reference_values.csv")
         ```
         """
@@ -150,7 +151,7 @@ class TestDiagnostics:
         assert (abs(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 6e-5).all(None)
         assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-14).all(None)
         not_rhat = [col for col in reference.columns if col != "rhat_rank"]
-        assert (abs(reference[not_rhat] - arviz_data[not_rhat]) < 1e-11).all(None)
+        assert (abs((reference[not_rhat] - arviz_data[not_rhat])).values < 1e-8).all(None)
         assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-14).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
@@ -205,6 +206,30 @@ class TestDiagnostics:
     def test_rhat_ndarray(self):
         with pytest.raises(TypeError):
             rhat(np.random.randn(2, 300, 10))
+
+    def test_angle(self):
+        x = np.random.randn(100)
+        high = 8
+        low = 4
+        res = (x - low) * 2 * np.pi / (high - low)
+        assert np.allclose(_angle(x, low, high, np.pi), res)
+
+    def test_circfunc(self):
+        school = load_arviz_data("centered_eight").posterior["mu"].values
+        a_a, b_b = _circfunc(school, 8, 4)
+        assert np.allclose(a_a, school)
+        assert np.allclose(b_b, _angle(school, 4, 8, np.pi))
+
+    @pytest.mark.parametrize(
+        "data", (np.random.randn(100), np.random.randn(100, 100), np.random.randn(100, 100, 100))
+    )
+    def test_circular_standard_deviation_1d(self, data):
+        high = 8
+        low = 4
+        assert np.allclose(
+            _circular_standard_deviation(data, high=high, low=low),
+            circstd(data, high=high, low=low),
+        )
 
     @pytest.mark.parametrize(
         "method",
@@ -455,12 +480,12 @@ class TestDiagnostics:
                 )
             ).all()
         else:
-            assert mcse_mean_hat == mcse_mean_hat_
-            assert mcse_sd_hat == mcse_sd_hat_
-            assert ess_mean_hat == ess_mean_hat_
-            assert ess_sd_hat == ess_sd_hat_
-            assert ess_bulk_hat == ess_bulk_hat_
-            assert ess_tail_hat == ess_tail_hat_
+            assert_almost_equal(mcse_mean_hat, mcse_mean_hat_)
+            assert_almost_equal(mcse_sd_hat, mcse_sd_hat_)
+            assert_almost_equal(ess_mean_hat, ess_mean_hat_)
+            assert_almost_equal(ess_sd_hat, ess_sd_hat_)
+            assert_almost_equal(ess_bulk_hat, ess_bulk_hat_)
+            assert_almost_equal(ess_tail_hat, ess_tail_hat_)
             if chains in (None, 1):
                 assert np.isnan(rhat_hat)
                 assert np.isnan(rhat_hat_)
@@ -471,15 +496,20 @@ class TestDiagnostics:
         first = 0.1
         last = 0.5
         intervals = 100
-
-        gw_stat = geweke(np.random.randn(10000), first=first, last=last, intervals=intervals)
+        data = np.random.randn(100000)
+        gw_stat = geweke(data, first, last, intervals)
 
         # all geweke values should be between -1 and 1 for this many draws from a
         # normal distribution
         assert ((gw_stat[:, 1] > -1) | (gw_stat[:, 1] < 1)).all()
 
         assert gw_stat.shape[0] == intervals
-        assert 10000 * last - gw_stat[:, 0].max() == 1
+        assert 100000 * last - gw_stat[:, 0].max() == 1
+
+    def test_sqrt(self):
+        x = np.random.rand(100)
+        y = np.random.rand(100)
+        assert np.allclose(_sqrt(x, y), np.sqrt(x + y))
 
     def test_geweke_bad_interval(self):
         # lower bound
@@ -542,3 +572,85 @@ class TestDiagnostics:
         if chains is None:
             chains = 1
         assert split_data.shape == (chains * 2, draws // 2)
+
+
+def test_numba_bfmi():
+    """Numba test for bfmi."""
+    state = Numba.numba_flag
+    school = load_arviz_data("centered_eight")
+    data_md = np.random.rand(100, 100, 10)
+    Numba.disable_numba()
+    non_numba = bfmi(school.posterior["mu"].values)
+    non_numba_md = bfmi(data_md)
+    Numba.enable_numba()
+    with_numba = bfmi(school.posterior["mu"].values)
+    with_numba_md = bfmi(data_md)
+    assert np.allclose(non_numba_md, with_numba_md)
+    assert np.allclose(with_numba, non_numba)
+    assert state == Numba.numba_flag
+
+
+@pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
+def test_numba_rhat(method):
+    """Numba test for mcse."""
+    state = Numba.numba_flag
+    school = np.random.rand(100, 100)
+    Numba.disable_numba()
+    non_numba = rhat(school, method=method)
+    Numba.enable_numba()
+    with_numba = rhat(school, method=method)
+    assert np.allclose(with_numba, non_numba)
+    assert Numba.numba_flag == state
+
+
+@pytest.mark.parametrize("method", ("mean", "sd", "quantile"))
+def test_numba_mcse(method, prob=None):
+    """Numba test for mcse."""
+    state = Numba.numba_flag
+    school = np.random.rand(100, 100)
+    if method == "quantile":
+        prob = 0.80
+    Numba.disable_numba()
+    non_numba = mcse(school, method=method, prob=prob)
+    Numba.enable_numba()
+    with_numba = mcse(school, method=method, prob=prob)
+    assert np.allclose(with_numba, non_numba)
+    assert Numba.numba_flag == state
+
+
+def test_ks_summary_numba():
+    """Numba test for ks_summary."""
+    state = Numba.numba_flag
+    data = np.random.randn(100, 100)
+    Numba.disable_numba()
+    non_numba = (ks_summary(data)["Count"]).values
+    Numba.enable_numba()
+    with_numba = (ks_summary(data)["Count"]).values
+    assert np.allclose(non_numba, with_numba)
+    assert Numba.numba_flag == state
+
+
+def test_geweke_numba():
+    """Numba test for geweke."""
+    state = Numba.numba_flag
+    data = np.random.randn(100)
+    Numba.disable_numba()
+    non_numba = geweke(data)
+    Numba.enable_numba()
+    with_numba = geweke(data)
+    assert np.allclose(non_numba, with_numba)
+    assert Numba.numba_flag == state
+
+
+@pytest.mark.parametrize("batches", (1, 20))
+@pytest.mark.parametrize("circular", (True, False))
+def test_mcse_error_numba(batches, circular):
+    """Numba test for mcse_error."""
+    data = np.random.randn(100, 100)
+    state = Numba.numba_flag
+    Numba.disable_numba()
+    non_numba = _mc_error(data, batches=batches, circular=circular)
+    Numba.enable_numba()
+    with_numba = _mc_error(data, batches=batches, circular=circular)
+    assert np.allclose(non_numba, with_numba)
+    assert state == Numba.numba_flag

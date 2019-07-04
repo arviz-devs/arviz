@@ -100,3 +100,86 @@ def format_sig_figs(value, default=None):
     if value == 0:
         return 1
     return max(int(np.log10(np.abs(value))) + 1, default)
+
+
+def conditional_vect(function=None, **kwargs):  # noqa: D202
+    """Use numba's vectorize decorator if numba is installed.
+
+    Notes
+    -----
+        If called without arguments  then return wrapped function.
+        @conditional_vect
+        def my_func():
+            return
+        else called with arguments
+        @conditional_vect(nopython=True)
+        def my_func():
+            return
+
+    """
+
+    def wrapper(function):
+        try:
+            numba = importlib.import_module("numba")
+            return numba.vectorize(**kwargs)(function)
+
+        except ImportError:
+            return function
+
+    if function:
+        return wrapper(function)
+    else:
+        return wrapper
+
+
+def numba_check():
+    """Check if numba is installed."""
+    numba = importlib.util.find_spec("numba")
+    return numba is not None
+
+
+class Numba:
+    """A class to toggle numba states."""
+
+    numba_flag = numba_check()
+
+    @classmethod
+    def disable_numba(cls):
+        """To disable numba."""
+        cls.numba_flag = False
+
+    @classmethod
+    def enable_numba(cls):
+        """To enable numba."""
+        if numba_check():
+            cls.numba_flag = True
+        else:
+            raise ValueError("Numba is not installed")
+
+
+def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
+    """Replace the numpy methods used to calculate variance.
+
+    Parameters
+    ----------
+    numba_function : function()
+        Custom numba function included in stats/stats_utils.py.
+
+    standard_numpy_func: function()
+        Standard function included in the numpy library.
+
+    data : array.
+    axis : axis along which the variance is calculated.
+    ddof : degrees of freedom allowed while calculating variance.
+
+    Returns
+    -------
+    array:
+        variance values calculate by appropriate function for numba speedup
+        if Numba is installed or enabled.
+
+    """
+    if Numba.numba_flag:
+        return numba_function(data, axis=axis, ddof=ddof)
+    else:
+        return standard_numpy_func(data, axis=axis, ddof=ddof)

@@ -92,3 +92,11 @@ Data
     from_pymc3
     from_pyro
     from_pystan
+
+Utils
+-----
+
+.. autosummary::
+	:toctree: generated/
+	
+	Numba

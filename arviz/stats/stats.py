@@ -11,14 +11,15 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset
-from .diagnostics import _multichain_statistics, _mc_error, ess
+from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
     make_ufunc as _make_ufunc,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     logsumexp as _logsumexp,
     ELPDData,
+    stats_variance_2d as svar,
 )
-from ..utils import _var_names
+from ..utils import _var_names, Numba, _numba_var
 
 _log = logging.getLogger(__name__)
 
@@ -703,13 +704,13 @@ def r2_score(y_true, y_pred):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
     """
+    _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:
-        var_y_est = np.var(y_pred)
-        var_e = np.var(y_true - y_pred)
+        var_y_est = _numba_var(svar, np.var, y_pred)
+        var_e = _numba_var(svar, np.var, (y_true - y_pred))
     else:
-        var_y_est = np.var(y_pred.mean(0))
-        var_e = np.var(y_true - y_pred, 0)
-
+        var_y_est = _numba_var(svar, np.var, y_pred.mean(0))
+        var_e = _numba_var(svar, np.var, (y_true - y_pred), axis=0)
     r_squared = var_y_est / (var_y_est + var_e)
 
     return pd.Series([np.mean(r_squared), np.std(r_squared)], index=["r2", "r2_std"])
@@ -859,9 +860,14 @@ def summary(
             kwargs=dict(high=np.pi, low=-np.pi),
             input_core_dims=(("chain", "draw"),),
         )
-
+        _numba_flag = Numba.numba_flag
+        func = None
+        if _numba_flag:
+            func = _circular_standard_deviation
+        else:
+            func = st.circstd
         circ_sd = xr.apply_ufunc(
-            _make_ufunc(st.circstd),
+            _make_ufunc(func),
             posterior,
             kwargs=dict(high=np.pi, low=-np.pi),
             input_core_dims=(("chain", "draw"),),

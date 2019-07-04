@@ -10,6 +10,7 @@ from xarray import Dataset, DataArray
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
 from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
 from ..stats.stats import _gpinv
+from ..utils import Numba
 
 
 @pytest.fixture(scope="session")
@@ -104,6 +105,11 @@ def test_summary_var_names(var_names_expected):
 @pytest.mark.parametrize("include_circ", [True, False])
 def test_summary_include_circ(centered_eight, include_circ):
     assert summary(centered_eight, include_circ=include_circ) is not None
+    state = Numba.numba_flag
+    Numba.disable_numba()
+    assert summary(centered_eight, include_circ=include_circ) is not NotImplementedError
+    Numba.enable_numba()
+    assert state == Numba.numba_flag
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])
@@ -326,3 +332,21 @@ def test_multidimensional_log_likelihood(func):
 
     assert (fr1 == frm).all()
     assert_array_almost_equal(frm[:4], fr1[:4])
+
+
+def test_numba_stats():
+    """Numba test for r2_score"""
+    state = Numba.numba_flag  # Store the current state of Numba
+    set_1 = np.random.randn(100, 100)
+    set_2 = np.random.randn(100, 100)
+    set_3 = np.random.rand(100)
+    set_4 = np.random.rand(100)
+    Numba.disable_numba()
+    non_numba = r2_score(set_1, set_2)
+    non_numba_one_dimensional = r2_score(set_3, set_4)
+    Numba.enable_numba()
+    with_numba = r2_score(set_1, set_2)
+    with_numba_one_dimensional = r2_score(set_3, set_4)
+    assert state == Numba.numba_flag  # Ensure that inital state = final state
+    assert np.allclose(non_numba, with_numba)
+    assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)
