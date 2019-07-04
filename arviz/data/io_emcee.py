@@ -327,7 +327,7 @@ def from_emcee(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_trace(emcee_data, var_names=["eta0"])
+        >>> az.plot_trace(emcee_data, var_names=["var_2"], coords={"var_2_dim_0": 4})
 
     Emcee does not store per-draw sample stats, however, it has a functionality called
     blobs that allows to store any variable on a per-draw basis. It can be used
