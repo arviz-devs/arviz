@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name,too-many-lines
 import os
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from ..data import from_dict, load_arviz_data
-from ..stats import compare, psislw, loo, waic
+from ..stats import compare, loo, waic
 from .helpers import eight_schools_params  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
@@ -421,13 +421,6 @@ def test_plot_kde_inference_data(models):
         plot_kde(models.model_1)
     with pytest.raises(ValueError, match="Xarray"):
         plot_kde(models.model_1.posterior)
-
-
-def test_plot_khat():
-    linewidth = np.random.randn(20000, 10)
-    _, khats = psislw(linewidth)
-    axes = plot_khat(khats)
-    assert axes
 
 
 @pytest.mark.slow
@@ -931,6 +924,33 @@ def test_plot_elpd_one_model(models):
     "kwargs",
     [
         {},
+        {"xlabels": True},
+        {"color": "obs_dim", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "obs_dim", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"obs_dim": slice(2, 4)}},
+        {"color": np.random.uniform(size=8), "show_bins": True},
+        {"color": np.random.uniform(size=(8, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat(models, input_type, kwargs):
+    khats_data = loo(models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if "color" in kwargs and isinstance(kwargs["color"], str) and kwargs["color"] == "obs_dim":
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
         {"var_names": ["theta"], "relative": True, "color": "r"},
         {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
         {"min_ess": 600, "hline_kwargs": {"color": "r"}},
@@ -941,6 +961,48 @@ def test_plot_ess(models, kind, kwargs):
     idata = models.model_1
     ax = plot_ess(idata, kind=kind, **kwargs)
     assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "dim1", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "dim2", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"dim2": slice(2, 4)}},
+        {"color": np.random.uniform(size=35), "show_bins": True},
+        {"color": np.random.uniform(size=(35, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat_multidim(multidim_models, input_type, kwargs):
+    khats_data = loo(multidim_models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if (
+            "color" in kwargs
+            and isinstance(kwargs["color"], str)
+            and kwargs["color"] in ("dim1", "dim2")
+        ):
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, **kwargs)
+    assert axes
+
+
+def test_plot_khat_annotate():
+    khats = np.array([0, 0, 0.6, 0.6, 0.8, 0.9, 0.9, 2, 3, 4, 1.5])
+    axes = plot_khat(khats, annotate=True)
+    assert axes
+
+
+def test_plot_khat_bad_input(models):
+    with pytest.raises(ValueError):
+        plot_khat(models.model_1.sample_stats)
 
 
 @pytest.mark.parametrize(
