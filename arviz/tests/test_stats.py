@@ -436,6 +436,7 @@ def test_loo_pit_bad_input_shape():
 def test_apply_test_function(
     centered_eight, group, var_names, pointwise, out_data_shape, out_pp_shape, inplace
 ):
+    centered_eight = deepcopy(centered_eight)
     if out_data_shape == "shape":
         out_data_shape = (8,) if pointwise else ()
     if out_pp_shape == "shape":
@@ -460,6 +461,19 @@ def test_apply_test_function(
 
     fails = check_multiple_attrs(test_dict, idata_out)
     assert not fails
+
+
+def test_apply_test_function_bad_group(centered_eight):
+    with pytest.raises(ValueError):
+        apply_test_function(centered_eight, lambda y, theta: y, group="bad_group")
+
+
+def test_apply_test_function_missing_group():
+    idata = from_dict(
+        posterior={"a": np.random.random((4, 500, 30))}, observed_data={"y": np.random.random(30)}
+    )
+    with pytest.raises(ValueError):
+        apply_test_function(idata, lambda y, theta: np.mean, group="both")
 
 
 def test_numba_stats():
