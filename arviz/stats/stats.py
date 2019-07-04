@@ -23,7 +23,7 @@ from ..utils import _var_names, Numba, _numba_var
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
+__all__ = ["compare", "hpd", "loo", "loo_pit", "psislw", "r2_score", "summary", "waic"]
 
 
 def compare(
@@ -1132,3 +1132,49 @@ def waic(data, pointwise=False, scale="deviance"):
                 "waic_scale",
             ],
         )
+
+
+def loo_pit(idata, y, y_hat=None):
+    """Compute LOO-PIT values.
+
+    Arguments
+    ---------
+    idata : InferenceData
+        Inference data object containing the observed data, posterior predictive and
+        sample stats (with log likelihood) groups.
+    y : str
+        Name of the observed data variable.
+    y_hat : str, optional
+        Name of the posterior predictive variable corresponding to the `y` argument. If ``None``
+        it will be taken as equal to `y`.
+
+    Returns
+    -------
+    loo_pit : DataArray
+        Value of the LOO-PIT at each observed data point.
+    """
+    if y_hat is None:
+        y_hat = y
+    y = idata.observed_data[y]
+    y_hat = idata.posterior_predictive[y_hat]
+    y_hat = y_hat.stack(samples=("chain", "draw"))
+    log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+    log_weights, _ = psislw(-log_likelihood.values.T)
+
+    return xr.apply_ufunc(
+        _loo_pit,
+        y,
+        y_hat,
+        log_weights.T,
+        input_core_dims=[[], ["samples"], ["samples"]],
+        output_core_dims=[[]],
+    )
+
+
+def _loo_pit(y, y_hat, lw):
+    """Compute LOO-PIT values."""
+    out = np.empty_like(y, dtype=np.float64)
+    for idx in np.ndindex(*y.shape):
+        sel = y_hat[idx] <= y[idx]
+        out[idx] = np.exp(_logsumexp(lw[idx][sel]))
+    return out

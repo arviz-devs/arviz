@@ -11,6 +11,7 @@ from .hpdplot import plot_hpd
 from .jointplot import plot_joint
 from .kdeplot import plot_kde, _fast_kde, _fast_kde_2d
 from .khatplot import plot_khat
+from .loopitplot import plot_loo_pit
 from .pairplot import plot_pair
 from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
@@ -35,6 +36,7 @@ __all__ = [
     "_fast_kde",
     "_fast_kde_2d",
     "plot_khat",
+    "plot_loo_pit",
     "plot_pair",
     "plot_parallel",
     "plot_posterior",

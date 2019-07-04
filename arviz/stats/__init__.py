@@ -10,6 +10,7 @@ __all__ = [
     "compare",
     "hpd",
     "loo",
+    "loo_pit",
     "psislw",
     "r2_score",
     "summary",
