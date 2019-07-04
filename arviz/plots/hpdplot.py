@@ -27,7 +27,7 @@ def plot_hpd(
     x : array-like
         Values to plot
     y : array-like
-        values ​​from which to compute the hpd. Assumed shape (chain, draw, *shape).
+        values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
     credible_interval : float, optional
         Credible interval to plot. Defaults to 0.94.
     color : str
