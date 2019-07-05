@@ -19,7 +19,7 @@ def plot_hpd(
     plot_kwargs=None,
     ax=None,
 ):
-    """
+    r"""
     Plot hpd intervals for regression data.
 
     Parameters
