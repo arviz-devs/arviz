@@ -60,7 +60,7 @@ script:
 
   # Awkward line spacing to avoid travis-ci errors
   - if [[ $NAME == SPHINX ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx arviz:latest bash -c \
-    "sphinx-build doc doc/build -b html";
+    "if [ -d ./doc/build ]; then python -msphinx -M clean doc doc/build; fi && sphinx-build doc doc/build -b html";
     fi
 
 after_success:
