@@ -108,9 +108,6 @@ def plot_mcse(
     mcse_dataset = xr.concat(
         [mcse(data, var_names=var_names, method="quantile", prob=p) for p in probs], dim="mcse_dim"
     )
-    if extra_methods:
-        mean_mcse = mcse(data, var_names=var_names, method="mean")
-        sd_mcse = mcse(data, var_names=var_names, method="sd")
 
     plotters = list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"}))
     length_plotters = len(plotters)
@@ -130,14 +127,17 @@ def plot_mcse(
     extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
     extra_kwargs.setdefault("color", "k")
     extra_kwargs.setdefault("alpha", 0.5)
-    if text_kwargs is None:
-        text_kwargs = {}
-    text_x = text_kwargs.pop("x", 1)
-    text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
-    text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
-    text_kwargs.setdefault("color", extra_kwargs["color"])
-    text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-    text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+    if extra_methods:
+        mean_mcse = mcse(data, var_names=var_names, method="mean")
+        sd_mcse = mcse(data, var_names=var_names, method="sd")
+        if text_kwargs is None:
+            text_kwargs = {}
+        text_x = text_kwargs.pop("x", 1)
+        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+        text_kwargs.setdefault("color", extra_kwargs["color"])
+        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
+        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
     if ax is None:
         _, ax = _create_axes_grid(

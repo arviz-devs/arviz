@@ -222,9 +222,6 @@ def plot_ess(
             dim="ess_dim",
         )
 
-    if extra_methods:
-        mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
-        sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
 
     plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
     length_plotters = len(plotters)
@@ -260,14 +257,17 @@ def plot_ess(
     hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
     hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
     hline_kwargs.setdefault("alpha", 0.7)
-    if text_kwargs is None:
-        text_kwargs = {}
-    text_x = text_kwargs.pop("x", 1)
-    text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
-    text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
-    text_kwargs.setdefault("color", extra_kwargs["color"])
-    text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-    text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+    if extra_methods:
+        mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
+        sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
+        if text_kwargs is None:
+            text_kwargs = {}
+        text_x = text_kwargs.pop("x", 1)
+        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+        text_kwargs.setdefault("color", extra_kwargs["color"])
+        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
+        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
     if ax is None:
         _, ax = _create_axes_grid(
