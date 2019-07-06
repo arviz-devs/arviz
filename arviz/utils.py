@@ -98,12 +98,12 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
             return self.function(*args, **kwargs)
 
 
-class interactive_backend:
-    """Context manager to change temporarily from inline backend to an interactive
-    backend inside an ipython session.
+class interactive_backend: #pylint: disable=invalid-name
+    """Context manager to change backend temporarily in ipython sesson.
 
-    Uses ipython magic to change temporarily from the ipython inline backend to
-    an interactive backend of choice.
+    It uses ipython magic to change temporarily from the ipython inline backend to
+    an interactive backend of choice. It cannot be used outside ipython sessions nor
+    to change backends different than inline -> interactive.
 
     Notes
     -----
@@ -132,7 +132,9 @@ class interactive_backend:
 
     """
 
+    # based on matplotlib.rc_context
     def __init__(self, backend=""):
+        """Initialize context manager."""
         try:
             from IPython import get_ipython
         except ImportError as err:
@@ -146,9 +148,11 @@ class interactive_backend:
         self.ipython.magic("matplotlib {}".format(backend))
 
     def __enter__(self):
+        """Enter context manager."""
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        """Exit context manager."""
         plt.show(block=True)
         self.ipython.magic("matplotlib inline")
 
