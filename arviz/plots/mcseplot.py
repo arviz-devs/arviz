@@ -30,7 +30,8 @@ def plot_mcse(
     ax=None,
     rug_kwargs=None,
     extra_kwargs=None,
-    **kwargs
+    text_kwargs=None,
+    **kwargs,
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
@@ -66,6 +67,9 @@ def plot_mcse(
         kwargs passed to rug plot.
     extra_kwargs : dict, optional
         kwargs passed to ax.plot for extra methods lines.
+    text_kwargs : dict, optional
+        kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
+        key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -126,6 +130,14 @@ def plot_mcse(
     extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
     extra_kwargs.setdefault("color", "k")
     extra_kwargs.setdefault("alpha", 0.5)
+    if text_kwargs is None:
+        text_kwargs = {}
+    text_x = text_kwargs.pop("x", 1)
+    text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+    text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+    text_kwargs.setdefault("color", extra_kwargs["color"])
+    text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
+    text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -144,26 +156,26 @@ def plot_mcse(
                 mean_mcse_i = np.asscalar(mean_mcse[var_name].sel(**selection))
                 sd_mcse_i = np.asscalar(sd_mcse[var_name].sel(**selection))
                 ax_.axhline(mean_mcse_i, **extra_kwargs)
-                ax_.text(
-                    1,
-                    mean_mcse_i,
+                ax_.annotate(
                     "mean",
-                    fontsize=xt_labelsize * 0.7,
-                    alpha=extra_kwargs["alpha"],
-                    color=extra_kwargs["color"],
-                    va="bottom" if mean_mcse_i > sd_mcse_i else "top",
-                    ha="right",
+                    (text_x, mean_mcse_i),
+                    va=text_va
+                    if text_va is not None
+                    else "bottom"
+                    if mean_mcse_i > sd_mcse_i
+                    else "top",
+                    **text_kwargs,
                 )
                 ax_.axhline(sd_mcse_i, **extra_kwargs)
-                ax_.text(
-                    1,
-                    sd_mcse_i,
+                ax_.annotate(
                     "sd",
-                    fontsize=xt_labelsize * 0.7,
-                    alpha=extra_kwargs["alpha"],
-                    color=extra_kwargs["color"],
-                    va="bottom" if sd_mcse_i > mean_mcse_i else "top",
-                    ha="right",
+                    (text_x, sd_mcse_i),
+                    va=text_va
+                    if text_va is not None
+                    else "bottom"
+                    if sd_mcse_i > mean_mcse_i
+                    else "top",
+                    **text_kwargs,
                 )
         if rug:
             if rug_kwargs is None:

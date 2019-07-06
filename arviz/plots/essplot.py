@@ -30,9 +30,10 @@ def plot_ess(
     min_ess=400,
     ax=None,
     extra_kwargs=None,
+    text_kwargs=None,
     hline_kwargs=None,
     rug_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
@@ -70,6 +71,10 @@ def plot_ess(
     extra_kwargs : dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
+    text_kwargs : dict, optional
+        Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
+        for extra methods lines labels. It accepts the additional
+        key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     hline_kwargs : dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
     rug_kwargs : dict
@@ -255,6 +260,14 @@ def plot_ess(
     hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
     hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
     hline_kwargs.setdefault("alpha", 0.7)
+    if text_kwargs is None:
+        text_kwargs = {}
+    text_x = text_kwargs.pop("x", 1)
+    text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+    text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+    text_kwargs.setdefault("color", extra_kwargs["color"])
+    text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
+    text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -290,26 +303,18 @@ def plot_ess(
             mean_ess_i = np.asscalar(mean_ess[var_name].sel(**selection))
             sd_ess_i = np.asscalar(sd_ess[var_name].sel(**selection))
             ax_.axhline(mean_ess_i, **extra_kwargs)
-            ax_.text(
-                1,
-                mean_ess_i,
+            ax_.annotate(
                 "mean",
-                fontsize=xt_labelsize * 0.7,
-                alpha=extra_kwargs["alpha"],
-                color=extra_kwargs["color"],
-                va="bottom",
-                ha="right",
+                (text_x, mean_ess_i),
+                va=text_va if text_va is not None else "bottom" if mean_ess_i > sd_ess_i else "top",
+                **text_kwargs,
             )
             ax_.axhline(sd_ess_i, **extra_kwargs)
-            ax_.text(
-                1,
-                sd_ess_i,
+            ax_.annotate(
                 "sd",
-                fontsize=xt_labelsize * 0.7,
-                alpha=extra_kwargs["alpha"],
-                color=extra_kwargs["color"],
-                va="top",
-                ha="right",
+                (text_x, sd_ess_i),
+                va=text_va if text_va is not None else "bottom" if sd_ess_i > mean_ess_i else "top",
+                **text_kwargs,
             )
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
