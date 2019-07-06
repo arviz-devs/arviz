@@ -104,6 +104,7 @@ Utils
 
 .. autosummary::
       :toctree: generated/
+      :template: class.rst
 
       Numba
       interactive_backend

@@ -131,6 +131,7 @@ class interactive_backend:
         >>> az.plot_trace(idata) # inline
 
     """
+
     def __init__(self, backend=""):
         try:
             from IPython import get_ipython
@@ -141,9 +142,7 @@ class interactive_backend:
             )
         self.ipython = get_ipython()
         if self.ipython is None:
-            raise EnvironmentError(
-                "This context manager can only be used inside ipython sessions"
-            )
+            raise EnvironmentError("This context manager can only be used inside ipython sessions")
         self.ipython.magic("matplotlib {}".format(backend))
 
     def __enter__(self):
