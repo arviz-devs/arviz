@@ -28,7 +28,6 @@ def plot_ess(
     n_points=20,
     extra_methods=False,
     min_ess=400,
-    legend=None,
     ax=None,
     extra_kwargs=None,
     hline_kwargs=None,
@@ -66,15 +65,11 @@ def plot_ess(
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess : int
         Minimum number of ESS desired.
-    legend : bool, optional
-        Show plot legend. If ``None`` it will depend on the other parameters.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
     extra_kwargs : dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
-        from ess bulk. If None, the same kwargs are used, thus, the 2 lines will
-        differ in the color which is matplotlib default. If not an evolution plot, used
-        for extra methods horizontal lines.
+        from ess bulk. Otherwise, passed to extra methods lines.
     hline_kwargs : dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
     rug_kwargs : dict
@@ -157,8 +152,6 @@ def plot_ess(
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
-    if legend is None:
-        legend = True if kind == "evolution" else extra_methods
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
@@ -241,15 +234,20 @@ def plot_ess(
     kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("zorder", 3)
+    if extra_kwargs is None:
+        extra_kwargs = {}
     if kind == "evolution":
-        if extra_kwargs is None:
-            extra_kwargs = {}
         extra_kwargs = {
             **extra_kwargs,
             **{key: item for key, item in kwargs.items() if key not in extra_kwargs},
         }
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
+    else:
+        extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
+        extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+        extra_kwargs.setdefault("color", "k")
+        extra_kwargs.setdefault("alpha", 0.5)
     kwargs.setdefault("label", kind)
     if hline_kwargs is None:
         hline_kwargs = {}
@@ -291,8 +289,28 @@ def plot_ess(
         if extra_methods:
             mean_ess_i = np.asscalar(mean_ess[var_name].sel(**selection))
             sd_ess_i = np.asscalar(sd_ess[var_name].sel(**selection))
-            ax_.axhline(mean_ess_i, label="mean", ls="--", color="k", alpha=0.7)
-            ax_.axhline(sd_ess_i, label="sd", ls="-.", color="k", alpha=0.7)
+            ax_.axhline(mean_ess_i, **extra_kwargs)
+            ax_.text(
+                1,
+                mean_ess_i,
+                "mean",
+                fontsize=xt_labelsize * 0.7,
+                alpha=extra_kwargs["alpha"],
+                color=extra_kwargs["color"],
+                va="bottom",
+                ha="right",
+            )
+            ax_.axhline(sd_ess_i, **extra_kwargs)
+            ax_.text(
+                1,
+                sd_ess_i,
+                "sd",
+                fontsize=xt_labelsize * 0.7,
+                alpha=extra_kwargs["alpha"],
+                color=extra_kwargs["color"],
+                va="top",
+                ha="right",
+            )
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
@@ -304,9 +322,9 @@ def plot_ess(
         ax_.set_ylabel(
             ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
         )
-        if legend:
+        if kind == "evolution":
             ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
-        if kind != "evolution":
+        else:
             ax_.set_xlim(0, 1)
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])

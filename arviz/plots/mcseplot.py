@@ -27,9 +27,9 @@ def plot_mcse(
     rug=False,
     rug_kind="diverging",
     n_points=20,
-    legend=None,
     ax=None,
     rug_kwargs=None,
+    extra_kwargs=None,
     **kwargs
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
@@ -60,12 +60,12 @@ def plot_mcse(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    legend : bool, optional
-        Show legend of the plot. If ``None`` legend will depend on the value of ``extra_methods``.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
     rug_kwargs : dict
         kwargs passed to rug plot.
+    extra_kwargs : dict, optional
+        kwargs passed to ax.plot for extra methods lines.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -96,8 +96,6 @@ def plot_mcse(
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
-    if legend is None:
-        legend = extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data)
@@ -122,6 +120,12 @@ def plot_mcse(
     kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
     kwargs.setdefault("marker", "_" if errorbar else "o")
     kwargs.setdefault("zorder", 3)
+    if extra_kwargs is None:
+        extra_kwargs = {}
+    extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
+    extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+    extra_kwargs.setdefault("color", "k")
+    extra_kwargs.setdefault("alpha", 0.5)
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -139,8 +143,28 @@ def plot_mcse(
             if extra_methods:
                 mean_mcse_i = np.asscalar(mean_mcse[var_name].sel(**selection))
                 sd_mcse_i = np.asscalar(sd_mcse[var_name].sel(**selection))
-                ax_.axhline(mean_mcse_i, label="mean", ls="--", color="k", alpha=0.7)
-                ax_.axhline(sd_mcse_i, label="sd", ls="-.", color="k", alpha=0.7)
+                ax_.axhline(mean_mcse_i, **extra_kwargs)
+                ax_.text(
+                    1,
+                    mean_mcse_i,
+                    "mean",
+                    fontsize=xt_labelsize * 0.7,
+                    alpha=extra_kwargs["alpha"],
+                    color=extra_kwargs["color"],
+                    va="bottom" if mean_mcse_i > sd_mcse_i else "top",
+                    ha="right",
+                )
+                ax_.axhline(sd_mcse_i, **extra_kwargs)
+                ax_.text(
+                    1,
+                    sd_mcse_i,
+                    "sd",
+                    fontsize=xt_labelsize * 0.7,
+                    alpha=extra_kwargs["alpha"],
+                    color=extra_kwargs["color"],
+                    va="bottom" if sd_mcse_i > mean_mcse_i else "top",
+                    ha="right",
+                )
         if rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
@@ -166,7 +190,11 @@ def plot_mcse(
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
-        ax_.set_ylabel("MCSE", fontsize=ax_labelsize, wrap=True)
+        ax_.set_ylabel(
+            r"Value $\pm$ MCSE for quantiles" if errorbar else "MCSE for quantiles",
+            fontsize=ax_labelsize,
+            wrap=True,
+        )
         ax_.set_xlim(0, 1)
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
@@ -177,7 +205,5 @@ def plot_mcse(
             ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
         elif not errorbar:
             ax_.set_ylim(bottom=0)
-        if legend:
-            ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
 
     return ax
