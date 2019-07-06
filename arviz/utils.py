@@ -3,6 +3,7 @@ import importlib
 import functools
 import warnings
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def _var_names(var_names, data):
@@ -95,6 +96,62 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
             return self.numba_fn(*args, **kwargs)
         else:
             return self.function(*args, **kwargs)
+
+
+class interactive_backend:
+    """Context manager to change temporarily from inline backend to an interactive
+    backend inside an ipython session.
+
+    Uses ipython magic to change temporarily from the ipython inline backend to
+    an interactive backend of choice.
+
+    Notes
+    -----
+    The first time ``interactive_backend`` context manager is called, any of the available
+    interactive backends can be chosen. The following times, this same backend must be used
+    unless the kernel is restarted.
+
+    Parameters
+    ----------
+    backend : str, optional
+        Interactive backend to use. It will be passed to ``%matplotlib`` magic, refer to
+        its docs to see available options.
+
+    Examples
+    --------
+    Inside an ipython session (i.e. a jupyter notebook) with the inline backend set:
+
+    .. code::
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data("centered_eight")
+        >>> az.plot_posterior(idata) # inline
+        >>> with az.interactive_backend():
+        ...     az.plot_density(idata) # interactive
+        >>> az.plot_trace(idata) # inline
+
+    """
+    def __init__(self, backend=""):
+        try:
+            from IPython import get_ipython
+        except ImportError as err:
+            raise ImportError(
+                "The exception below was risen while importing Ipython, this "
+                "context manager can only be used inside ipython sessions:\n{}".format(err)
+            )
+        self.ipython = get_ipython()
+        if self.ipython is None:
+            raise EnvironmentError(
+                "This context manager can only be used inside ipython sessions"
+            )
+        self.ipython.magic("matplotlib {}".format(backend))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        plt.show(block=True)
+        self.ipython.magic("matplotlib inline")
 
 
 def conditional_jit(_func=None, **kwargs):

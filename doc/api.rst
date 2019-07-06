@@ -103,6 +103,7 @@ Utils
 -----
 
 .. autosummary::
-	:toctree: generated/
-	
-	Numba
+      :toctree: generated/
+
+      Numba
+      interactive_backend
