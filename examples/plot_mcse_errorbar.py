@@ -2,7 +2,7 @@
 Quantile MCSE Errobar Plot
 ==========================
 
-_thumb: .3, .8
+_thumb: .6, .4
 """
 import arviz as az
 
