@@ -66,7 +66,9 @@ def plot_loo_pit(
     textsize: int, optional
         Text size for labels. If None it will be autoscaled based on figsize.
     color : str or array_like, optional
-        Color of the LOO-PIT estimated pdf plot.
+        Color of the LOO-PIT estimated pdf plot. If ``plot_unif_kwargs`` has no "color" key,
+        an slightly lighter color than this argument will be used for the uniform kde lines.
+        This will ensure that LOO-PIT kde and uniform kde have different default colors.
     legend : bool, optional
         Show the legend of the figure.
     ax : axes, optional

@@ -47,6 +47,9 @@ class InferenceData:
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
+        By default, the datasets of the InferenceData object will be lazily loaded. To
+        modify this behaviour, the environment variable ``ARVIZ_LOAD`` must be set to
+        ``EAGER`` (case insensitive) in order to load objects in memory instead.
 
         Parameters
         ----------

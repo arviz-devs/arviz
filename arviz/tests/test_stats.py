@@ -475,11 +475,17 @@ def test_apply_test_function(
 
 
 def test_apply_test_function_bad_group(centered_eight):
+    """Test error when group is an invalid name."""
     with pytest.raises(ValueError):
         apply_test_function(centered_eight, lambda y, theta: y, group="bad_group")
 
 
 def test_apply_test_function_missing_group():
+    """Test error when InferenceData object is missing a required group.
+
+    The function cannot work if group="both" but InferenceData object has no
+    posterior_predictive group.
+    """
     idata = from_dict(
         posterior={"a": np.random.random((4, 500, 30))}, observed_data={"y": np.random.random(30)}
     )
