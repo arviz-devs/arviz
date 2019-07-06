@@ -407,7 +407,7 @@ def test_loo_pit_bad_input(centered_eight, input_type):
 def test_loo_pit_bad_input_type(centered_eight, arg):
     """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
-    kwargs[arg] = 2 # use int instead of array-like
+    kwargs[arg] = 2  # use int instead of array-like
     with pytest.raises(ValueError, match="not {}".format(type(2))):
         loo_pit(idata=centered_eight, **kwargs)
 
@@ -476,7 +476,7 @@ def test_apply_test_function(
 
 def test_apply_test_function_bad_group(centered_eight):
     """Test error when group is an invalid name."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid group argument"):
         apply_test_function(centered_eight, lambda y, theta: y, group="bad_group")
 
 
@@ -489,8 +489,14 @@ def test_apply_test_function_missing_group():
     idata = from_dict(
         posterior={"a": np.random.random((4, 500, 30))}, observed_data={"y": np.random.random(30)}
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must have posterior_predictive"):
         apply_test_function(idata, lambda y, theta: np.mean, group="both")
+
+
+def test_apply_test_function_should_overwrite_error(centered_eight):
+    """Test error when overwrite=False but out_name is already a present variable."""
+    with pytest.raises(ValueError, match="Should overwrite"):
+        apply_test_function(centered_eight, lambda y, theta: y, out_name_data="obs")
 
 
 def test_numba_stats():

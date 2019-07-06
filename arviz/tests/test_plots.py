@@ -1005,5 +1005,5 @@ def test_plot_loo_pit(models, kwargs):
 
 def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)

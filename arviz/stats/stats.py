@@ -1230,7 +1230,9 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
-                "log_weights must be None or of types array or DataArray, not {}".format(type(log_weights))
+                "log_weights must be None or of types array or DataArray, not {}".format(
+                    type(log_weights)
+                )
             )
 
     if len(y.shape) + 1 != len(y_hat.shape):
@@ -1288,6 +1290,7 @@ def apply_test_function(
     wrap_data_kwargs=None,
     wrap_pp_kwargs=None,
     inplace=True,
+    overwrite=None,
 ):
     """Apply a Bayesian test function to an InferenceData object.
 
@@ -1330,6 +1333,9 @@ def apply_test_function(
     inplace : bool, optional
         If True, add the variables inplace, othewise, return a copy of idata with the variables
         added.
+    overwrite : bool, optional
+        Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
+        dataset. If ``None`` it will be the opposite of inplace.
 
     Returns
     -------
@@ -1365,6 +1371,8 @@ def apply_test_function(
         raise ValueError(
             "Invalid group argument. Must be one of {} not {}.".format(valid_groups, group)
         )
+    if overwrite is None:
+        overwrite = not inplace
 
     if out_name_pp is None:
         out_name_pp = out_name_data
@@ -1401,6 +1409,12 @@ def apply_test_function(
         wrap_group_kwargs = wrap_data_kwargs if grp == "observed_data" else wrap_pp_kwargs
         if not hasattr(out, grp):
             raise ValueError("InferenceData object must have {} group".format(grp))
+        if not overwrite and out_name_group in getattr(out, grp).data_vars:
+            raise ValueError(
+                "Should overwrite: {} variable present in group {}, but overwrite is False".format(
+                    out_name_group, grp
+                )
+            )
         var_names.setdefault(
             grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names
         )
