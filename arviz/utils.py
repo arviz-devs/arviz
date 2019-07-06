@@ -98,7 +98,7 @@ class maybe_numba_fn:  # pylint: disable=invalid-name
             return self.function(*args, **kwargs)
 
 
-class interactive_backend: #pylint: disable=invalid-name
+class interactive_backend:  # pylint: disable=invalid-name
     """Context manager to change backend temporarily in ipython sesson.
 
     It uses ipython magic to change temporarily from the ipython inline backend to
