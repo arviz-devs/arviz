@@ -1146,7 +1146,7 @@ def waic(data, pointwise=False, scale="deviance"):
 
 
 def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
-    """Compute LOO-PIT values.
+    """Compute leave one out (LOO) probability integral transform (PIT) values.
 
     Parameters
     ----------
@@ -1213,7 +1213,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
             raise ValueError(
-                "y_hat must be of types array, DataArray or str, not {}".format(type(y))
+                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
             log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
@@ -1230,7 +1230,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
-                "log_weights must be None or of types array or DataArray, not {}".format(type(y))
+                "log_weights must be None or of types array or DataArray, not {}".format(type(log_weights))
             )
 
     if len(y.shape) + 1 != len(y_hat.shape):

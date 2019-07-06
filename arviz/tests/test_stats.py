@@ -388,34 +388,45 @@ def test_loo_pit(centered_eight, args):
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
 
 
-def test_loo_pit_bad_input(centered_eight):
+@pytest.mark.parametrize("input_type", ["idataarray", "idatanone_ystr", "yarr_yhatnone"])
+def test_loo_pit_bad_input(centered_eight, input_type):
+    """Test incompatible input combinations."""
     arr = np.random.random((8, 200))
-    with pytest.raises(ValueError):
-        loo_pit(idata=arr, y="obs")
-    with pytest.raises(ValueError):
-        loo_pit(idata=None, y="obs")
-    with pytest.raises(ValueError):
-        loo_pit(idata=centered_eight, y=arr, y_hat=None)
+    if input_type == "idataarray":
+        with pytest.raises(ValueError, match=r"type InferenceData or None"):
+            loo_pit(idata=arr, y="obs")
+    elif input_type == "idatanone_ystr":
+        with pytest.raises(ValueError, match=r"all 3.+must be array or DataArray"):
+            loo_pit(idata=None, y="obs")
+    elif input_type == "yarr_yhatnone":
+        with pytest.raises(ValueError, match=r"y_hat.+None.+y.+str"):
+            loo_pit(idata=centered_eight, y=arr, y_hat=None)
 
 
 @pytest.mark.parametrize("arg", ["y", "y_hat", "log_weights"])
 def test_loo_pit_bad_input_type(centered_eight, arg):
+    """Test wrong input type (not None, str not DataArray."""
     kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
-    kwargs[arg] = 2
-    with pytest.raises(ValueError):
+    kwargs[arg] = 2 # use int instead of array-like
+    with pytest.raises(ValueError, match="not {}".format(type(2))):
         loo_pit(idata=centered_eight, **kwargs)
 
 
-def test_loo_pit_bad_input_shape():
+@pytest.mark.parametrize("incompatibility", ["y-y_hat1", "y-y_hat2", "y_hat-log_weights"])
+def test_loo_pit_bad_input_shape(incompatibility):
+    """Test shape incompatiblities."""
     y = np.random.random(8)
     y_hat = np.random.random((8, 200))
     log_weights = np.random.random((8, 200))
-    with pytest.raises(ValueError):
-        loo_pit(y=y, y_hat=y_hat[None, :], log_weights=log_weights)
-    with pytest.raises(ValueError):
-        loo_pit(y=y, y_hat=y_hat[1:3, :], log_weights=log_weights)
-    with pytest.raises(ValueError):
-        loo_pit(y=y, y_hat=y_hat[:, :100], log_weights=log_weights)
+    if incompatibility == "y-y_hat1":
+        with pytest.raises(ValueError, match="1 more dimension"):
+            loo_pit(y=y, y_hat=y_hat[None, :], log_weights=log_weights)
+    elif incompatibility == "y-y_hat2":
+        with pytest.raises(ValueError, match="y has shape"):
+            loo_pit(y=y, y_hat=y_hat[1:3, :], log_weights=log_weights)
+    elif incompatibility == "y_hat-log_weights":
+        with pytest.raises(ValueError, match="must have the same shape"):
+            loo_pit(y=y, y_hat=y_hat[:, :100], log_weights=log_weights)
 
 
 @pytest.mark.parametrize("group", ["both", "observed_data", "posterior_predictive"])
