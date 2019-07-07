@@ -173,7 +173,7 @@ def plot_mcse(
                     va=text_va
                     if text_va is not None
                     else "bottom"
-                    if sd_mcse_i > mean_mcse_i
+                    if sd_mcse_i >= mean_mcse_i
                     else "top",
                     **text_kwargs,
                 )
@@ -210,9 +210,9 @@ def plot_mcse(
         ax_.set_xlim(0, 1)
         if rug:
             ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
-            _, ymax = ax_.get_ylim()
+            y_min, y_max = ax_.get_ylim()
             yticks = ax_.get_yticks()
-            yticks = yticks[(yticks >= 0) & (yticks < ymax)]
+            yticks = yticks[(yticks >= y_min) & (yticks < y_max)]
             ax_.set_yticks(yticks)
             ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
         elif not errorbar:
