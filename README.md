@@ -176,7 +176,7 @@ Additional information can be found in the [Contributing Readme](https://github.
 
 ## Code of Conduct
 ArviZ wishes to maintain a positive community. Additional details
-can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.MD)
+can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md)
 
 ## Sponsors
 [![NumFOCUS](https://i0.wp.com/numfocus.org/wp-content/uploads/2019/06/AffiliatedProject.png)](https://numfocus.org)
