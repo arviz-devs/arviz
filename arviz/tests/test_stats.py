@@ -431,16 +431,17 @@ def test_loo_pit_bad_input_shape(incompatibility):
 
 @pytest.mark.parametrize("pointwise", [True, False])
 @pytest.mark.parametrize("inplace", [True, False])
-@pytest.mark.parametrize("kwargs", [
-    {},
-    {"group": "posterior_predictive", "var_names": {"posterior_predictive": "obs"}},
-    {"group": "observed_data", "var_names": {"both": "obs"}, "out_data_shape": "shape"},
-    {"var_names": {"both": "obs", "posterior": ["theta", "mu"]}},
-    {"group": "observed_data", "out_name_data": "T_name"},
-])
-def test_apply_test_function(
-    centered_eight, pointwise, inplace, kwargs
-):
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"group": "posterior_predictive", "var_names": {"posterior_predictive": "obs"}},
+        {"group": "observed_data", "var_names": {"both": "obs"}, "out_data_shape": "shape"},
+        {"var_names": {"both": "obs", "posterior": ["theta", "mu"]}},
+        {"group": "observed_data", "out_name_data": "T_name"},
+    ],
+)
+def test_apply_test_function(centered_eight, pointwise, inplace, kwargs):
     """Test some usual call cases of apply_test_function"""
     centered_eight = deepcopy(centered_eight)
     group = kwargs.get("group", "both")
