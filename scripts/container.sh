@@ -11,6 +11,7 @@ if [[ $* == *--build* ]]; then
         --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
         --build-arg PYSTAN_VERSION=${PYSTAN_VERSION} \
         --build-arg PYRO_VERSION=${PYRO_VERSION} \
+        --build-arg PYTORCH_VERSION=${PYTORCH_VERSION} \
         --build-arg EMCEE_VERSION=${EMCEE_VERSION} \
         --rm
 fi
