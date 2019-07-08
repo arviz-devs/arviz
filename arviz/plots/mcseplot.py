@@ -153,8 +153,8 @@ def plot_mcse(
         else:
             ax_.plot(probs, x, label="quantile", **kwargs)
             if extra_methods:
-                mean_mcse_i = np.asscalar(mean_mcse[var_name].sel(**selection))
-                sd_mcse_i = np.asscalar(sd_mcse[var_name].sel(**selection))
+                mean_mcse_i = mean_mcse[var_name].sel(**selection).values.item()
+                sd_mcse_i = sd_mcse[var_name].sel(**selection).values.item()
                 ax_.axhline(mean_mcse_i, **extra_kwargs)
                 ax_.annotate(
                     "mean",

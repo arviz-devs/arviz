@@ -222,7 +222,6 @@ def plot_ess(
             dim="ess_dim",
         )
 
-
     plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
@@ -300,13 +299,17 @@ def plot_ess(
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
         if extra_methods:
-            mean_ess_i = np.asscalar(mean_ess[var_name].sel(**selection))
-            sd_ess_i = np.asscalar(sd_ess[var_name].sel(**selection))
+            mean_ess_i = mean_ess[var_name].sel(**selection).values.item()
+            sd_ess_i = sd_ess[var_name].sel(**selection).values.item()
             ax_.axhline(mean_ess_i, **extra_kwargs)
             ax_.annotate(
                 "mean",
                 (text_x, mean_ess_i),
-                va=text_va if text_va is not None else "bottom" if mean_ess_i >= sd_ess_i else "top",
+                va=text_va
+                if text_va is not None
+                else "bottom"
+                if mean_ess_i >= sd_ess_i
+                else "top",
                 **text_kwargs,
             )
             ax_.axhline(sd_ess_i, **extra_kwargs)
