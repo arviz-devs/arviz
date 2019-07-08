@@ -27,7 +27,10 @@ class PyMC3Converter:
             if self.trace is None
             else True
             if any(
-                hasattr(obs, "observations") for obs in self.trace._straces[0].model.observed_RVs
+                hasattr(obs, "observations")
+                for obs in self.trace._straces[  # pylint: disable=protected-access
+                    0
+                ].model.observed_RVs
             )
             else None
         )
