@@ -18,6 +18,7 @@ jobs:
         PYTHON_VERSION: 3.6
         PYSTAN_VERSION: "preview"
         PYRO_VERSION: 0.2.1
+        PYTORCH_VERSION: 0.4.1
         EMCEE_VERSION: 3
         NAME: "UNIT"
       Python_35_Unit_Test:
