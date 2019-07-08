@@ -46,7 +46,7 @@ pip install --upgrade pip
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The link can be determined from the pytorch and the python version
-pip --no-cache-dir "https://download.pytorch.org/whl/cpu/torch-${PYTORCH_VERSION}-cp${PYTHON_VERSION//./}-cp${PYTHON_VERSION//./}m-linux_x86_64.whl"
+pip --no-cache-dir install "https://download.pytorch.org/whl/cpu/torch-${PYTORCH_VERSION}-cp${PYTHON_VERSION//./}-cp${PYTHON_VERSION//./}m-linux_x86_64.whl"
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
   pip --no-cache-dir install pystan
