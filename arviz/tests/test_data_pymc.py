@@ -121,7 +121,9 @@ class TestDataPyMC3:
     def test_multiple_observed_rv_without_observations(self):
         with pm.Model():
             mu = pm.Normal("mu")
-            x = pm.DensityDist("x", pm.Normal.dist(mu, 1.0).logp, observed={"value": 0.1})
+            x = pm.DensityDist(  # pylint disable=unused-variable
+                "x", pm.Normal.dist(mu, 1.0).logp, observed={"value": 0.1}
+            )
             trace = pm.sample(100, chains=2)
         inference_data = from_pymc3(trace=trace)
         assert inference_data
