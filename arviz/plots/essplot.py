@@ -33,7 +33,7 @@ def plot_ess(
     text_kwargs=None,
     hline_kwargs=None,
     rug_kwargs=None,
-    **kwargs,
+    **kwargs
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 

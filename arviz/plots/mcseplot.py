@@ -31,7 +31,7 @@ def plot_mcse(
     rug_kwargs=None,
     extra_kwargs=None,
     text_kwargs=None,
-    **kwargs,
+    **kwargs
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
