@@ -13,6 +13,9 @@ matrix:
     - name: "Python 3.5 Unit Test"
       python: 3.5
       env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
+    - name: "Python 3.7 Unit Test"
+      python: 3.7
+      env: PYTHON_VERSION=3.7 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="UNIT"
     - name: "Python 3.6 Lint"
       python: 3.6
       env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=2 NAME="LINT"

@@ -1,6 +1,6 @@
 <img src="https://arviz-devs.github.io/arviz/_static/logo.png" height=100></img>
 
-[![Build Status](https://travis-ci.org/arviz-devs/arviz.svg?branch=master)](https://travis-ci.org/arviz-devs/arviz) 
+[![Build Status](https://travis-ci.org/arviz-devs/arviz.svg?branch=master)](https://travis-ci.org/arviz-devs/arviz)
 [![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master)
 [![Coverage Status](https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master)](https://coveralls.io/github/arviz-devs/arviz?branch=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
@@ -147,7 +147,7 @@ python setup.py install
 
 ## Dependencies
 
-ArviZ is tested on Python 3.5 and 3.6, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.5, 3.6 and 3.7, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
 
 ## Citation
@@ -170,7 +170,7 @@ Here is the citation in BibTeX format
 
 
 ## Contributions
-ArviZ is a community project and welcomes contributions. 
+ArviZ is a community project and welcomes contributions.
 Additional information can be found in the [Contributing Readme](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md)
 
 
