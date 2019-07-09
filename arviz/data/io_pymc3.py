@@ -22,6 +22,19 @@ class PyMC3Converter:
         self.posterior_predictive = posterior_predictive
         self.coords = coords
         self.dims = dims
+        self.observations = (
+            None
+            if self.trace is None
+            else True
+            if any(
+                hasattr(obs, "observations")
+                for obs in self.trace._straces[  # pylint: disable=protected-access
+                    0
+                ].model.observed_RVs
+            )
+            else None
+        )
+
         import pymc3
 
         self.pymc3 = pymc3
@@ -117,7 +130,7 @@ class PyMC3Converter:
             dims=self.dims,
         )
 
-    @requires("trace")
+    @requires("observations")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
         # This next line is brittle and may not work forever, but is a secret
