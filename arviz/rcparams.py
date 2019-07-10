@@ -69,8 +69,8 @@ class RcParams(dict):
             dict.__setitem__(self, key, cval)
         except KeyError:
             raise KeyError(
-                f"{key} is not a valid rc parameter (see rcParams.keys() for "
-                f"a list of valid parameters)"
+                "{} is not a valid rc parameter (see rcParams.keys() for "
+                "a list of valid parameters)".format(key)
             )
 
     def __repr__(self):
