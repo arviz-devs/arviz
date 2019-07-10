@@ -10,9 +10,8 @@ import locale
 _log = logging.getLogger(__name__)
 
 
-def make_validate_choice(accepted_values):
+def _make_validate_choice(accepted_values):
     """Validate value is in accepted_values."""
-
     def validate_choice(value):
         if value.lower() in accepted_values:
             return value.lower()
@@ -21,7 +20,7 @@ def make_validate_choice(accepted_values):
     return validate_choice
 
 
-def validate_positive_int(value):
+def _validate_positive_int(value):
     """Validate value is a natural number."""
     try:
         value = int(value)
@@ -33,18 +32,18 @@ def validate_positive_int(value):
         raise ValueError("Only positive values are valid")
 
 
-def validate_positive_int_or_none(value):
+def _validate_positive_int_or_none(value):
     """Validate value is a natural number or None."""
     if value is None or isinstance(value, str) and value.lower() == "none":
         return None
     else:
-        return validate_positive_int(value)
+        return _validate_positive_int(value)
 
 
 defaultParams = {
-    "data.load": ("lazy", make_validate_choice(("lazy", "eager"))),
-    "plot.max_subplots": (40, validate_positive_int_or_none),
-    "stats.information_criterion": ("waic", make_validate_choice(("waic", "loo"))),
+    "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
+    "plot.max_subplots": (40, _validate_positive_int_or_none),
+    "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
 }
 
 
@@ -61,6 +60,7 @@ class RcParams(dict):
         self.update(*args, **kwargs)
 
     def __setitem__(self, key, val):
+        """Add validation to __setitem__ function."""
         try:
             try:
                 cval = self.validate[key](val)
@@ -74,6 +74,7 @@ class RcParams(dict):
             )
 
     def __repr__(self):
+        """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__
         indent = len(class_name) + 1
         repr_split = pprint.pformat(dict(self), indent=1, width=80 - indent).split("\n")
@@ -81,17 +82,17 @@ class RcParams(dict):
         return "{}({})".format(class_name, repr_indented)
 
     def __str__(self):
+        """Customize str/print of RcParams objects."""
         return "\n".join(map("{0[0]:<22}: {0[1]}".format, sorted(self.items())))
 
     def __iter__(self):
         """Yield sorted list of keys."""
         yield from sorted(dict.__iter__(self))
 
-    def __len__(self):
-        return dict.__len__(self)
-
     def find_all(self, pattern):
         """
+        Find keys that match a regex pattern.
+
         Return the subset of this RcParams dictionary whose keys match,
         using :func:`re.search`, the given ``pattern``.
 
@@ -104,6 +105,7 @@ class RcParams(dict):
         return RcParams((key, value) for key, value in self.items() if pattern_re.search(key))
 
     def copy(self):
+        """Get a copy of the RcParams object."""
         return {k: dict.__getitem__(self, k) for k in self}
 
 
@@ -124,7 +126,6 @@ def get_arviz_rcfile():
 
     Otherwise, the default defined in ``rcparams.py`` file will be used.
     """
-
     def gen_candidates():
         yield os.path.join(os.getcwd(), "arvizrc")
         arviz_data_dir = os.environ.get("ARVIZ_DATA")
