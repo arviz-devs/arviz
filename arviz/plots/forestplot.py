@@ -4,11 +4,12 @@ from itertools import tee
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 
 from ..data import convert_to_dataset
 from ..stats import hpd
 from ..stats.diagnostics import _ess, _rhat
-from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
+from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from .kdeplot import _fast_kde
 from ..utils import _var_names
 
@@ -37,6 +38,7 @@ def plot_forest(
     markersize=None,
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
+    ridgeplot_kind="auto",
     figsize=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
@@ -90,6 +92,9 @@ def plot_forest(
         a black outline is used.
     ridgeplot_overlap : float
         Overlap height for ridgeplots.
+    ridgeplot_kind : string
+        By default ("auto") continuous variables are plotted using KDEs and discrete ones using
+        histograms. To override this use "hist" to plot histograms and "density" for KDEs
     figsize : tuple
         Figure size. If None it will be defined automatically.
 
@@ -184,7 +189,9 @@ def plot_forest(
             rope,
         )
     elif kind == "ridgeplot":
-        plot_handler.ridgeplot(ridgeplot_overlap, linewidth, ridgeplot_alpha, axes[0])
+        plot_handler.ridgeplot(
+            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0]
+        )
     else:
         raise TypeError(
             "Argument 'kind' must be one of 'forestplot' or "
@@ -204,8 +211,8 @@ def plot_forest(
         ax.grid(False)
         # Remove ticklines on y-axes
         for ticks in ax.yaxis.get_major_ticks():
-            ticks.tick1On = False
-            ticks.tick2On = False
+            ticks.tick1line.set_visible = False
+            ticks.tick2line.set_visible = False
 
         for loc, spine in ax.spines.items():
             if loc in ["left", "right"]:
@@ -305,7 +312,7 @@ class PlotHandler:
         )
         return ax
 
-    def ridgeplot(self, mult, linewidth, alpha, ax):
+    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
@@ -316,6 +323,9 @@ class PlotHandler:
             Width of line on border of ridges
         alpha : float
             Transparency of ridges
+        kind : string
+            By default ("auto") continuous variables are plotted using KDEs and discrete ones using
+            histograms. To override this use "hist" to plot histograms and "density" for KDEs
         ax : Axes
             Axes to draw on
         """
@@ -323,14 +333,27 @@ class PlotHandler:
             alpha = 1.0
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, color in plotter.ridgeplot(mult):
+            for x, y_min, y_max, color in plotter.ridgeplot(mult, ridgeplot_kind):
                 if alpha == 0:
                     border = color
+                    fc = "None"
                 else:
                     border = "k"
-                ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
-                ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
-                ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
+                    fc = to_rgba(color, alpha)
+                if x.dtype.kind == "i":
+                    ax.bar(
+                        x,
+                        y_max - y_min,
+                        bottom=y_min,
+                        linewidth=linewidth,
+                        ec=border,
+                        fc=fc,
+                        zorder=zorder,
+                    )
+                else:
+                    ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
+                    ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
+                    ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
         return ax
 
@@ -541,18 +564,32 @@ class VarHandler:
             ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval)
             yield y, label, ntiles, color
 
-    def ridgeplot(self, mult):
+    def ridgeplot(self, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
         xvals, yvals, pdfs, colors = [], [], [], []
         for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
             values = values.flatten()
-            density, lower, upper = _fast_kde(values)
-            xvals.append(np.linspace(lower, upper, len(density)))
+            values = values[np.isfinite(values)]
+
+            if ridgeplot_kind == "auto":
+                kind = "hist" if all(np.mod(values, 1) == 0) else "density"
+            else:
+                kind = ridgeplot_kind
+
+            if kind == "hist":
+                bins = get_bins(values)
+                density, xs = np.histogram(values, bins=bins, density=True)
+                xs = xs[:-1]
+            elif kind == "density":
+                density, lower, upper = _fast_kde(values)
+                xs = np.linspace(lower, upper, len(density))
+
+            xvals.append(xs)
             pdfs.append(density)
 
-        scaling = max(j.max() for j in pdfs)
+        scaling = max(np.max(j) for j in pdfs)
         for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
             y = y * np.ones_like(x)
             yield x, y, mult * pdf / scaling + y, color
