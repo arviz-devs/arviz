@@ -2,7 +2,7 @@
 pr:
 - master
 
-jobs: 
+jobs:
 - job: build
   pool:
     vmImage: 'ubuntu-latest'
@@ -18,10 +18,17 @@ jobs:
         PYTHON_VERSION: 3.6
         PYSTAN_VERSION: "preview"
         PYRO_VERSION: 0.2.1
+        PYTORCH_VERSION: 0.4.1
         EMCEE_VERSION: 3
         NAME: "UNIT"
       Python_35_Unit_Test:
         PYTHON_VERSION: 3.5
+        PYSTAN_VERSION: "latest"
+        PYRO_VERSION: "latest"
+        EMCEE_VERSION: 2
+        NAME: "UNIT"
+      Python_37_Unit_Test:
+        PYTHON_VERSION: 3.7
         PYSTAN_VERSION: "latest"
         PYRO_VERSION: "latest"
         EMCEE_VERSION: 2
@@ -51,19 +58,19 @@ jobs:
     displayName: 'Build Docker Container'
 
   - script: |
-      if [[ $NAME == UNIT ]]; 
+      if [[ $NAME == UNIT ]];
       then docker run -t  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
       "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --junitxml=junit/test-results.xml --cov=arviz/ --cov-report=xml --cov-report=html";
         fi
     displayName: 'Test ArviZ'
 
   - script: |
-      if [[ $NAME == LINT ]]; 
+      if [[ $NAME == LINT ]];
       then docker run -t arviz:latest bash -c "./scripts/lint.sh";
         fi
-        
+
       # Tests saving plots and deleting files
-      if [[ $NAME == LINT ]]; 
+      if [[ $NAME == LINT ]];
       then docker run  -t --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
       "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --junitxml=junit/test-results.xml --cov=arviz/ --cov-report=xml --cov-report=html";
         fi
