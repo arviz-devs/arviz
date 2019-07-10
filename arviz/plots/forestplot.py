@@ -336,10 +336,10 @@ class PlotHandler:
             for x, y_min, y_max, color in plotter.ridgeplot(mult, ridgeplot_kind):
                 if alpha == 0:
                     border = color
-                    fc = "None"
+                    facecolor = "None"
                 else:
                     border = "k"
-                    fc = to_rgba(color, alpha)
+                    facecolor = to_rgba(color, alpha)
                 if x.dtype.kind == "i":
                     ax.bar(
                         x,
@@ -347,7 +347,7 @@ class PlotHandler:
                         bottom=y_min,
                         linewidth=linewidth,
                         ec=border,
-                        fc=fc,
+                        fc=facecolor,
                         zorder=zorder,
                     )
                 else:
@@ -580,13 +580,13 @@ class VarHandler:
 
             if kind == "hist":
                 bins = get_bins(values)
-                density, xs = np.histogram(values, bins=bins, density=True)
-                xs = xs[:-1]
+                density, x = np.histogram(values, bins=bins, density=True)
+                x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)
-                xs = np.linspace(lower, upper, len(density))
+                x = np.linspace(lower, upper, len(density))
 
-            xvals.append(xs)
+            xvals.append(x)
             pdfs.append(density)
 
         scaling = max(np.max(j) for j in pdfs)
