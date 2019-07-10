@@ -12,6 +12,7 @@ _log = logging.getLogger(__name__)
 
 def _make_validate_choice(accepted_values):
     """Validate value is in accepted_values."""
+
     def validate_choice(value):
         if value.lower() in accepted_values:
             return value.lower()
@@ -40,7 +41,7 @@ def _validate_positive_int_or_none(value):
         return _validate_positive_int(value)
 
 
-defaultParams = {
+defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
@@ -64,8 +65,8 @@ class RcParams(dict):
         try:
             try:
                 cval = self.validate[key](val)
-            except ValueError as ve:
-                raise ValueError("Key %s: %s" % (key, str(ve)))
+            except ValueError as verr:
+                raise ValueError("Key %s: %s" % (key, str(verr)))
             dict.__setitem__(self, key, cval)
         except KeyError:
             raise KeyError(
@@ -126,6 +127,7 @@ def get_arviz_rcfile():
 
     Otherwise, the default defined in ``rcparams.py`` file will be used.
     """
+
     def gen_candidates():
         yield os.path.join(os.getcwd(), "arvizrc")
         arviz_data_dir = os.environ.get("ARVIZ_DATA")
@@ -172,9 +174,9 @@ def read_rcfile(fname):
                     _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
                 try:
                     config[key] = val
-                except ValueError as va:
+                except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
-                    raise ValueError("Bad val {} on {}\n\t{}".format(val, error_details, va))
+                    raise ValueError("Bad val {} on {}\n\t{}".format(val, error_details, str(verr)))
 
         except UnicodeDecodeError:
             _log.warning(
@@ -198,4 +200,4 @@ def rc_params():
     return defaults
 
 
-rcParams = rc_params()
+rcParams = rc_params()  # pylint: disable=invalid-name
