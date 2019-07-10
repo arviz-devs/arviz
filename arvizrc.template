@@ -1,0 +1,14 @@
+#### ArviZ rcParams template ####
+### DATA  ###
+# rcParams related with data loading related functions
+data.load                    : lazy  # Sets the default data loading mode.
+                                     # "lazy" stands for xarray lazy loading,
+                                     # "eager" loads all datasets into memory
+
+### PLOT  ###
+# rcParams related with plotting functions
+plot.max_subplots            : 40    # Maximum number of subplots.
+
+### STATS ###
+# rcParams related with statistical and diagnostic functions
+stats.information_criterion  : waic  # Default information criterion
