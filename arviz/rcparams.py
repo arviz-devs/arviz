@@ -132,9 +132,9 @@ def get_arviz_rcfile():
             yield os.path.join(arviz_data_dir, "arvizrc")
         xdg_base = os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))
         if sys.platform.startswith(("linux", "freebsd")):
-            configdir = Path(xdg_base, "arviz")
+            configdir = str(Path(xdg_base, "arviz"))
         else:
-            configdir = Path.home() / ".arviz"
+            configdir = str(Path.home() / ".arviz")
         yield os.path.join(configdir, "arvizrc")
 
     for fname in gen_candidates():
