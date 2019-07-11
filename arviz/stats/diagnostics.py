@@ -454,7 +454,7 @@ def _sqrt(a_a, b_b):
     return (a_a + b_b) ** 0.5
 
 
-@conditional_jit
+@conditional_jit(forceobj=True)
 def geweke(ary, first=0.1, last=0.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
 

@@ -1,5 +1,6 @@
 """General utilities."""
 import importlib
+import functools
 import warnings
 import numpy as np
 
@@ -50,7 +51,53 @@ def _var_names(var_names, data):
     return var_names
 
 
-def conditional_jit(function=None, **kwargs):  # noqa: D202
+class lazy_property:  # pylint: disable=invalid-name
+    """Used to load numba first time it is needed."""
+
+    def __init__(self, fget):
+        """Lazy load a property with `fget`."""
+        self.fget = fget
+
+        # copy the getter function's docstring and other attributes
+        functools.update_wrapper(self, fget)
+
+    def __get__(self, obj, cls):
+        """Call the function, set the attribute."""
+        if obj is None:
+            return self
+
+        value = self.fget(obj)
+        setattr(obj, self.fget.__name__, value)
+        return value
+
+
+class maybe_numba_fn:  # pylint: disable=invalid-name
+    """Wrap a function to (maybe) use a (lazy) jit-compiled version."""
+
+    def __init__(self, function, **kwargs):
+        """Wrap a function and save compilation keywords."""
+        self.function = function
+        self.kwargs = kwargs
+
+    @lazy_property
+    def numba_fn(self):
+        """Memoized compiled function."""
+        try:
+            numba = importlib.import_module("numba")
+            numba_fn = numba.jit(**self.kwargs)(self.function)
+        except ImportError:
+            numba_fn = self.function
+        return numba_fn
+
+    def __call__(self, *args, **kwargs):
+        """Call the jitted function or normal, depending on flag."""
+        if Numba.numba_flag:
+            return self.numba_fn(*args, **kwargs)
+        else:
+            return self.function(*args, **kwargs)
+
+
+def conditional_jit(_func=None, **kwargs):
     """Use numba's jit decorator if numba is installed.
 
     Notes
@@ -68,19 +115,11 @@ def conditional_jit(function=None, **kwargs):  # noqa: D202
             return
 
     """
-
-    def wrapper(function):
-        try:
-            numba = importlib.import_module("numba")
-            return numba.jit(**kwargs)(function)
-
-        except ImportError:
-            return function
-
-    if function:
-        return wrapper(function)
+    if _func is None:
+        return lambda fn: functools.wraps(fn)(maybe_numba_fn(fn, **kwargs))
     else:
-        return wrapper
+        lazy_numba = maybe_numba_fn(_func, **kwargs)
+        return functools.wraps(_func)(lazy_numba)
 
 
 def format_sig_figs(value, default=None):
