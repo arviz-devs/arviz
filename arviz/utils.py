@@ -2,10 +2,10 @@
 import importlib
 import warnings
 import numpy as np
+import re
 
 
-def _var_names(var_names,
-               data):
+def _var_names(var_names, data):
     """Handle var_names input across arviz.
 
     Parameters
