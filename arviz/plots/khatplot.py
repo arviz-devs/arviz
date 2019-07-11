@@ -25,6 +25,7 @@ def plot_khat(
     bin_format="{1:.1f}%",
     annotate=False,
     hover_label=False,
+    hover_format="{1}",
     figsize=None,
     textsize=None,
     coords=None,
@@ -50,12 +51,14 @@ def plot_khat(
     show_bins : bool, optional
         Show the number of khats which fall in each bin.
     bin_format : str, optional
-        The string is used as formatting guide calling ``show_bins.format(count, pct)``.
+        The string is used as formatting guide calling ``bin_format.format(count, pct)``.
     annotate : bool, optional
         Show the labels of k values larger than 1.
     hover_label : bool, optional
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
         backend.
+    hover_format : str, optional
+        String used to format the hover label via ``hover_format.format(idx, coord_label)``
     figsize : tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -251,12 +254,12 @@ def plot_khat(
         ax.legend(ncol=ncols, title=color)
 
     if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
-        _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c)
+        _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format)
 
     return ax
 
 
-def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
+def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format):
     """Show data point label when hovering over it with mouse."""
     annot = ax.annotate(
         "",
@@ -275,11 +278,12 @@ def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c):
 
         idx = ind["ind"][0]
         pos = sc_plot.get_offsets()[idx]
+        annot_text = hover_format.format(idx, coord_labels[idx])
         annot.xy = pos
         annot.set_position(
             (-offset if pos[0] > xmid else offset, -offset if pos[1] > ymid else offset)
         )
-        annot.set_text(coord_labels[idx])
+        annot.set_text(annot_text)
         annot.get_bbox_patch().set_facecolor(rgba_c[idx])
         annot.set_ha("right" if pos[0] > xmid else "left")
         annot.set_va("top" if pos[1] > ymid else "bottom")

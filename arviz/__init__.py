@@ -26,4 +26,4 @@ if not logging.root.handlers:
 from .data import *
 from .plots import *
 from .stats import *
-from .utils import Numba
+from .utils import Numba, interactive_backend
