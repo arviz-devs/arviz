@@ -16,6 +16,8 @@ from ..utils import _var_names
 
 
 def plot_ess(
+    # disable black until #763 is released
+    # fmt: off
     idata,
     var_names=None,
     kind="local",
@@ -26,12 +28,15 @@ def plot_ess(
     rug=False,
     rug_kind="diverging",
     n_points=20,
+    extra_methods=False,
     min_ess=400,
     ax=None,
     extra_kwargs=None,
+    text_kwargs=None,
     hline_kwargs=None,
     rug_kwargs=None,
     **kwargs
+    # fmt: on
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
@@ -60,14 +65,20 @@ def plot_ess(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
+    extra_methods : bool, optional
+        Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess : int
         Minimum number of ESS desired.
     ax : axes, optional
         Matplotlib axes. Defaults to None.
-    extra_kwargs : dict
-        kwargs used to plot ess tail and differentiate it from ess bulk. If None, the same
-        kwargs are used, thus, the 2 lines will differ in the color which is matplotlib default.
-    hline_kwargs : dict
+    extra_kwargs : dict, optional
+        If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
+        from ess bulk. Otherwise, passed to extra methods lines.
+    text_kwargs : dict, optional
+        Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
+        for extra methods lines labels. It accepts the additional
+        key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+    hline_kwargs : dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
     rug_kwargs : dict
         kwargs passed to rug plot.
@@ -147,8 +158,11 @@ def plot_ess(
 
     if coords is None:
         coords = {}
+    if "chain" in coords or "draw" in coords:
+        raise ValueError("chain and draw are invalid coordinates for this kind of plot")
+    extra_methods = False if kind == "evolution" else extra_methods
 
-    data = convert_to_dataset(idata, group="posterior")
+    data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
     var_names = _var_names(var_names, data)
     n_draws = data.dims["draw"]
     n_samples = n_draws * data.dims["chain"]
@@ -211,9 +225,7 @@ def plot_ess(
             dim="ess_dim",
         )
 
-    plotters = list(
-        xarray_var_iter(get_coords(ess_dataset, coords), var_names=var_names, skip_dims={"ess_dim"})
-    )
+    plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
@@ -226,21 +238,38 @@ def plot_ess(
     kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("zorder", 3)
+    if extra_kwargs is None:
+        extra_kwargs = {}
     if kind == "evolution":
-        if extra_kwargs is None:
-            extra_kwargs = {}
         extra_kwargs = {
             **extra_kwargs,
             **{key: item for key, item in kwargs.items() if key not in extra_kwargs},
         }
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
+    else:
+        extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
+        extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+        extra_kwargs.setdefault("color", "k")
+        extra_kwargs.setdefault("alpha", 0.5)
+    kwargs.setdefault("label", kind)
     if hline_kwargs is None:
         hline_kwargs = {}
     hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
     hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
     hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
     hline_kwargs.setdefault("alpha", 0.7)
+    if extra_methods:
+        mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
+        sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
+        if text_kwargs is None:
+            text_kwargs = {}
+        text_x = text_kwargs.pop("x", 1)
+        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+        text_kwargs.setdefault("color", extra_kwargs["color"])
+        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
+        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -272,6 +301,27 @@ def plot_ess(
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
             ax_.plot(rug_x, rug_y, **rug_kwargs)
             ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
+        if extra_methods:
+            mean_ess_i = mean_ess[var_name].sel(**selection).values.item()
+            sd_ess_i = sd_ess[var_name].sel(**selection).values.item()
+            ax_.axhline(mean_ess_i, **extra_kwargs)
+            ax_.annotate(
+                "mean",
+                (text_x, mean_ess_i),
+                va=text_va
+                if text_va is not None
+                else "bottom"
+                if mean_ess_i >= sd_ess_i
+                else "top",
+                **text_kwargs,
+            )
+            ax_.axhline(sd_ess_i, **extra_kwargs)
+            ax_.annotate(
+                "sd",
+                (text_x, sd_ess_i),
+                va=text_va if text_va is not None else "bottom" if sd_ess_i > mean_ess_i else "top",
+                **text_kwargs,
+            )
 
         ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
 
@@ -284,7 +334,7 @@ def plot_ess(
             ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
         )
         if kind == "evolution":
-            ax_.legend(title="type")
+            ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
         else:
             ax_.set_xlim(0, 1)
         if rug:

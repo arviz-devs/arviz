@@ -10,4 +10,4 @@ az.style.use("arviz-darkgrid")
 
 idata = az.load_arviz_data("radon")
 
-az.plot_ess(idata, var_names=["sigma_y"], kind="quantile")
+az.plot_ess(idata, var_names=["sigma_y"], kind="quantile", color="C4")

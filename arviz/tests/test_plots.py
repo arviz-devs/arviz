@@ -1,5 +1,6 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
+from copy import deepcopy
 import matplotlib.pyplot as plt
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
@@ -31,6 +32,7 @@ from ..plots import (
     plot_rank,
     plot_elpd,
     plot_loo_pit,
+    plot_mcse,
 )
 
 np.random.seed(0)
@@ -953,22 +955,6 @@ def test_plot_khat(models, input_type, kwargs):
     "kwargs",
     [
         {},
-        {"var_names": ["theta"], "relative": True, "color": "r"},
-        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
-        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
-    ],
-)
-@pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
-def test_plot_ess(models, kind, kwargs):
-    idata = models.model_1
-    ax = plot_ess(idata, kind=kind, **kwargs)
-    assert np.all(ax)
-
-
-@pytest.mark.parametrize(
-    "kwargs",
-    [
-        {},
         {"xlabels": True},
         {"color": "dim1", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
         {"color": "dim2", "legend": True, "hover_label": True},
@@ -1010,40 +996,72 @@ def test_plot_khat_bad_input(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
+        {},
+        {"var_names": ["theta"], "relative": True, "color": "r"},
+        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+    ],
+)
+@pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
+def test_plot_ess(models, kind, kwargs):
+    """Test plot_ess arguments common to all kind of plots."""
+    idata = models.model_1
+    ax = plot_ess(idata, kind=kind, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
         {"rug": True},
-        {"rug": True, "rug_kind": "max_depth"},
-        {"rug": True, "rug_kwargs": {"color": "c"}},
+        {"rug": True, "rug_kind": "max_depth", "rug_kwargs": {"color": "c"}},
+        {"extra_methods": True},
+        {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
+        {"extra_methods": True, "rug": True},
     ],
 )
 @pytest.mark.parametrize("kind", ["local", "quantile"])
 def test_plot_ess_local_quantile(models, kind, kwargs):
+    """Test specific arguments in kinds local and quantile of plot_ess."""
     idata = models.model_1
     ax = plot_ess(idata, kind=kind, **kwargs)
     assert np.all(ax)
 
 
 def test_plot_ess_evolution(models):
+    """Test specific arguments in evolution kind of plot_ess."""
     idata = models.model_1
     ax = plot_ess(idata, kind="evolution", extra_kwargs={"linestyle": "--"}, color="b")
     assert np.all(ax)
 
 
 def test_plot_ess_bad_kind(models):
+    """Test error when plot_ess recieves an invalid kind."""
     idata = models.model_1
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid kind"):
         plot_ess(idata, kind="bad kind")
 
 
-def test_plot_ess_no_sample_stats(models):
+@pytest.mark.parametrize("dim", ["chain", "draw"])
+def test_plot_ess_bad_coords(models, dim):
+    """Test error when chain or dim are used as coords to select a data subset."""
     idata = models.model_1
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="invalid coordinates"):
+        plot_ess(idata, coords={dim: slice(3)})
+
+
+def test_plot_ess_no_sample_stats(models):
+    """Test error when rug=True but sample_stats group is not present."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="must contain sample_stats"):
         plot_ess(idata.posterior, rug=True)
 
 
 def test_plot_ess_no_divergences(models):
-    idata = models.model_1
+    """Test error when rug=True, but the variable defined by rug_kind is missing."""
+    idata = deepcopy(models.model_1)
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="not contain diverging"):
         plot_ess(idata, rug=True)
 
 
@@ -1069,3 +1087,44 @@ def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"], "color": "r"},
+        {"rug": True, "rug_kwargs": {"color": "r"}},
+        {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
+        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"extra_methods": True, "rug": True},
+        {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
+    ],
+)
+def test_plot_mcse(models, kwargs):
+    idata = models.model_1
+    ax = plot_mcse(idata, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize("dim", ["chain", "draw"])
+def test_plot_mcse_bad_coords(models, dim):
+    """Test error when chain or dim are used as coords to select a data subset."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="invalid coordinates"):
+        plot_mcse(idata, coords={dim: slice(3)})
+
+
+def test_plot_mcse_no_sample_stats(models):
+    """Test error when rug=True but sample_stats group is not present."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="must contain sample_stats"):
+        plot_mcse(idata.posterior, rug=True)
+
+
+def test_plot_mcse_no_divergences(models):
+    """Test error when rug=True, but the variable defined by rug_kind is missing."""
+    idata = deepcopy(models.model_1)
+    idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
+    with pytest.raises(ValueError, match="not contain diverging"):
+        plot_mcse(idata, rug=True)
