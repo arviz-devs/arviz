@@ -74,7 +74,7 @@ def autocorr(ary, axis=-1):
 
 
 def make_ufunc(
-    func, n_dims=2, n_output=1, index=Ellipsis, ravel=True, check_shape=True
+    func, n_dims=2, n_output=1, n_input=1, index=Ellipsis, ravel=True, check_shape=None
 ):  # noqa: D202
     """Make ufunc from a function taking 1D array input.
 
@@ -87,13 +87,18 @@ def make_ufunc(
     n_output : int, optional
         Select number of results returned by `func`.
         If n_output > 1, ufunc returns a tuple of objects else returns an object.
+    n_input : int, optional
+        Number of **array** inputs to func, i.e. ``n_input=2`` means that func is called
+        with ``func(ary1, ary2, *args, **kwargs)``
     index : int, optional
         Slice ndarray with `index`. Defaults to `Ellipsis`.
     ravel : bool, optional
         If true, ravel the ndarray before calling `func`.
     check_shape: bool, optional
         If false, do not check if the shape of the output is compatible with n_dims and
-        n_output.
+        n_output. By default, True only for n_input=1. If n_input is larger than 1, the last
+        input array is used to check the shape, however, shape checking with multiple inputs
+        may not be correct.
 
     Returns
     -------
@@ -103,23 +108,30 @@ def make_ufunc(
     if n_dims < 1:
         raise TypeError("n_dims must be one or higher.")
 
-    def _ufunc(ary, *args, out=None, **kwargs):
+    if n_input == 1 and check_shape is None:
+        check_shape = True
+    elif check_shape is None:
+        check_shape = False
+
+    def _ufunc(*args, out=None, **kwargs):
         """General ufunc for single-output function."""
+        arys = args[:n_input]
         if out is None:
-            out = np.empty(ary.shape[:-n_dims])
+            out = np.empty(arys[-1].shape[:-n_dims])
         elif check_shape:
-            if out.shape != ary.shape[:-n_dims]:
+            if out.shape != arys[-1].shape[:-n_dims]:
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
-                msg += " Correct shape is {}".format(ary.shape[:-n_dims])
+                msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
                 raise TypeError(msg)
         for idx in np.ndindex(out.shape):
-            ary_idx = ary[idx].ravel() if ravel else ary[idx]
-            out[idx] = np.asarray(func(ary_idx, *args, **kwargs))[index]
+            arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
+            out[idx] = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))[index]
         return out
 
-    def _multi_ufunc(ary, *args, out=None, **kwargs):
+    def _multi_ufunc(*args, out=None, **kwargs):
         """General ufunc for multi-output function."""
-        element_shape = ary.shape[:-n_dims]
+        arys = args[:n_input]
+        element_shape = arys[-1].shape[:-n_dims]
         if out is None:
             out = tuple(np.empty(element_shape) for _ in range(n_output))
         elif check_shape:
@@ -137,8 +149,8 @@ def make_ufunc(
                 msg += " Correct shapes are {}".format(correct_shape)
                 raise TypeError(msg)
         for idx in np.ndindex(element_shape):
-            ary_idx = ary[idx].ravel() if ravel else ary[idx]
-            results = func(ary_idx, *args, **kwargs)
+            arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
+            results = func(*arys_idx, *args[n_input:], **kwargs)
             for i, res in enumerate(results):
                 out[i][idx] = np.asarray(res)[index]
         return out
@@ -153,18 +165,19 @@ def make_ufunc(
 
 
 def wrap_xarray_ufunc(
-    ufunc, dataset, *, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
+    ufunc, *datasets, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
 ):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
     Parameters
     ----------
     ufunc : callable
-    dataset : xarray.dataset
+    datasets : xarray.dataset
     ufunc_kwargs : dict
         Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
             - 'n_output', int, by default 1
+            - 'n_input', int, by default len(datasets)
             - 'index', slice, by default Ellipsis
             - 'ravel', bool, by default True
     func_args : tuple
@@ -180,6 +193,7 @@ def wrap_xarray_ufunc(
     """
     if ufunc_kwargs is None:
         ufunc_kwargs = {}
+    ufunc_kwargs.setdefault("n_input", len(datasets))
     if func_args is None:
         func_args = tuple()
     if func_kwargs is None:
@@ -192,7 +206,7 @@ def wrap_xarray_ufunc(
     )
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
 
-    return apply_ufunc(callable_ufunc, dataset, *func_args, kwargs=func_kwargs, **kwargs)
+    return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
 
 
 def update_docstring(ufunc, func, n_output=1):
@@ -200,7 +214,7 @@ def update_docstring(ufunc, func, n_output=1):
     module = ""
     name = ""
     docstring = ""
-    if hasattr(func, "__module__"):
+    if hasattr(func, "__module__") and isinstance(func.__module__, str):
         module += func.__module__
     if hasattr(func, "__name__"):
         name += func.__name__

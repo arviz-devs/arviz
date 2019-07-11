@@ -6,10 +6,12 @@ from .diagnostics import *
 
 
 __all__ = [
+    "apply_test_function",
     "bfmi",
     "compare",
     "hpd",
     "loo",
+    "loo_pit",
     "psislw",
     "r2_score",
     "summary",
@@ -22,4 +24,6 @@ __all__ = [
     "geweke",
     "autocorr",
     "autocov",
+    "make_ufunc",
+    "wrap_xarray_ufunc",
 ]

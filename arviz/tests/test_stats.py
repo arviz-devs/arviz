@@ -1,4 +1,5 @@
 # pylint: disable=redefined-outer-name
+import os
 from copy import deepcopy
 import numpy as np
 from numpy.testing import assert_allclose, assert_array_almost_equal
@@ -8,9 +9,23 @@ from xarray import Dataset, DataArray
 
 
 from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
-from ..stats import compare, hpd, loo, r2_score, waic, psislw, summary
+from ..stats import (
+    compare,
+    hpd,
+    loo,
+    r2_score,
+    waic,
+    psislw,
+    summary,
+    loo_pit,
+    ess,
+    apply_test_function,
+)
 from ..stats.stats import _gpinv
 from ..utils import Numba
+from .helpers import check_multiple_attrs
+
+os.environ["ARVIZ_LOAD"] = "EAGER"
 
 
 @pytest.fixture(scope="session")
@@ -332,6 +347,158 @@ def test_multidimensional_log_likelihood(func):
 
     assert (fr1 == frm).all()
     assert_array_almost_equal(frm[:4], fr1[:4])
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "obs"},
+        {"y": "obs", "y_hat": "obs"},
+        {"y": "arr", "y_hat": "obs"},
+        {"y": "obs", "y_hat": "arr"},
+        {"y": "arr", "y_hat": "arr"},
+        {"y": "obs", "y_hat": "obs", "log_weights": "arr"},
+        {"y": "arr", "y_hat": "obs", "log_weights": "arr"},
+        {"y": "obs", "y_hat": "arr", "log_weights": "arr"},
+        {"idata": False},
+    ],
+)
+def test_loo_pit(centered_eight, args):
+    y = args.get("y", None)
+    y_hat = args.get("y_hat", None)
+    log_weights = args.get("log_weights", None)
+    y_arr = centered_eight.observed_data.obs
+    y_hat_arr = centered_eight.posterior_predictive.obs.stack(samples=("chain", "draw"))
+    log_like = centered_eight.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+    n_samples = len(log_like.samples)
+    ess_p = ess(centered_eight.posterior, method="mean")
+    reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+    log_weights_arr = psislw(-log_like, reff=reff)[0]
+
+    if args.get("idata", True):
+        if y == "arr":
+            y = y_arr
+        if y_hat == "arr":
+            y_hat = y_hat_arr
+        if log_weights == "arr":
+            log_weights = log_weights_arr
+        loo_pit_data = loo_pit(idata=centered_eight, y=y, y_hat=y_hat, log_weights=log_weights)
+    else:
+        loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
+    assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
+
+
+@pytest.mark.parametrize("input_type", ["idataarray", "idatanone_ystr", "yarr_yhatnone"])
+def test_loo_pit_bad_input(centered_eight, input_type):
+    """Test incompatible input combinations."""
+    arr = np.random.random((8, 200))
+    if input_type == "idataarray":
+        with pytest.raises(ValueError, match=r"type InferenceData or None"):
+            loo_pit(idata=arr, y="obs")
+    elif input_type == "idatanone_ystr":
+        with pytest.raises(ValueError, match=r"all 3.+must be array or DataArray"):
+            loo_pit(idata=None, y="obs")
+    elif input_type == "yarr_yhatnone":
+        with pytest.raises(ValueError, match=r"y_hat.+None.+y.+str"):
+            loo_pit(idata=centered_eight, y=arr, y_hat=None)
+
+
+@pytest.mark.parametrize("arg", ["y", "y_hat", "log_weights"])
+def test_loo_pit_bad_input_type(centered_eight, arg):
+    """Test wrong input type (not None, str not DataArray."""
+    kwargs = {"y": "obs", "y_hat": "obs", "log_weights": None}
+    kwargs[arg] = 2  # use int instead of array-like
+    with pytest.raises(ValueError, match="not {}".format(type(2))):
+        loo_pit(idata=centered_eight, **kwargs)
+
+
+@pytest.mark.parametrize("incompatibility", ["y-y_hat1", "y-y_hat2", "y_hat-log_weights"])
+def test_loo_pit_bad_input_shape(incompatibility):
+    """Test shape incompatiblities."""
+    y = np.random.random(8)
+    y_hat = np.random.random((8, 200))
+    log_weights = np.random.random((8, 200))
+    if incompatibility == "y-y_hat1":
+        with pytest.raises(ValueError, match="1 more dimension"):
+            loo_pit(y=y, y_hat=y_hat[None, :], log_weights=log_weights)
+    elif incompatibility == "y-y_hat2":
+        with pytest.raises(ValueError, match="y has shape"):
+            loo_pit(y=y, y_hat=y_hat[1:3, :], log_weights=log_weights)
+    elif incompatibility == "y_hat-log_weights":
+        with pytest.raises(ValueError, match="must have the same shape"):
+            loo_pit(y=y, y_hat=y_hat[:, :100], log_weights=log_weights)
+
+
+@pytest.mark.parametrize("pointwise", [True, False])
+@pytest.mark.parametrize("inplace", [True, False])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"group": "posterior_predictive", "var_names": {"posterior_predictive": "obs"}},
+        {"group": "observed_data", "var_names": {"both": "obs"}, "out_data_shape": "shape"},
+        {"var_names": {"both": "obs", "posterior": ["theta", "mu"]}},
+        {"group": "observed_data", "out_name_data": "T_name"},
+    ],
+)
+def test_apply_test_function(centered_eight, pointwise, inplace, kwargs):
+    """Test some usual call cases of apply_test_function"""
+    centered_eight = deepcopy(centered_eight)
+    group = kwargs.get("group", "both")
+    var_names = kwargs.get("var_names", None)
+    out_data_shape = kwargs.get("out_data_shape", None)
+    out_pp_shape = kwargs.get("out_pp_shape", None)
+    out_name_data = kwargs.get("out_name_data", "T")
+    if out_data_shape == "shape":
+        out_data_shape = (8,) if pointwise else ()
+    if out_pp_shape == "shape":
+        out_pp_shape = (4, 500, 8) if pointwise else (4, 500)
+    idata = deepcopy(centered_eight)
+    idata_out = apply_test_function(
+        idata,
+        lambda y, theta: np.mean(y),
+        group=group,
+        var_names=var_names,
+        pointwise=pointwise,
+        out_name_data=out_name_data,
+        out_data_shape=out_data_shape,
+        out_pp_shape=out_pp_shape,
+    )
+    if inplace:
+        assert idata is idata_out
+
+    if group == "both":
+        test_dict = {"observed_data": ["T"], "posterior_predictive": ["T"]}
+    else:
+        test_dict = {group: [kwargs.get("out_name_data", "T")]}
+
+    fails = check_multiple_attrs(test_dict, idata_out)
+    assert not fails
+
+
+def test_apply_test_function_bad_group(centered_eight):
+    """Test error when group is an invalid name."""
+    with pytest.raises(ValueError, match="Invalid group argument"):
+        apply_test_function(centered_eight, lambda y, theta: y, group="bad_group")
+
+
+def test_apply_test_function_missing_group():
+    """Test error when InferenceData object is missing a required group.
+
+    The function cannot work if group="both" but InferenceData object has no
+    posterior_predictive group.
+    """
+    idata = from_dict(
+        posterior={"a": np.random.random((4, 500, 30))}, observed_data={"y": np.random.random(30)}
+    )
+    with pytest.raises(ValueError, match="must have posterior_predictive"):
+        apply_test_function(idata, lambda y, theta: np.mean, group="both")
+
+
+def test_apply_test_function_should_overwrite_error(centered_eight):
+    """Test error when overwrite=False but out_name is already a present variable."""
+    with pytest.raises(ValueError, match="Should overwrite"):
+        apply_test_function(centered_eight, lambda y, theta: y, out_name_data="obs")
 
 
 def test_numba_stats():

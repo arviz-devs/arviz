@@ -3,6 +3,7 @@
 import warnings
 import logging
 from collections import OrderedDict
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..data import convert_to_inference_data, convert_to_dataset
+from ..data import convert_to_inference_data, convert_to_dataset, InferenceData
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
     make_ufunc as _make_ufunc,
@@ -23,7 +24,17 @@ from ..utils import _var_names, Numba, _numba_var
 
 _log = logging.getLogger(__name__)
 
-__all__ = ["compare", "hpd", "loo", "psislw", "r2_score", "summary", "waic"]
+__all__ = [
+    "apply_test_function",
+    "compare",
+    "hpd",
+    "loo",
+    "loo_pit",
+    "psislw",
+    "r2_score",
+    "summary",
+    "waic",
+]
 
 
 def compare(
@@ -462,7 +473,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
-            **kwargs
+            **kwargs,
         ).values
     )
     p_loo = lppd - loo_lppd / scale_value
@@ -1071,7 +1082,7 @@ def waic(data, pointwise=False, scale="deviance"):
         log_likelihood,
         func_kwargs={"b_inv": n_samples},
         ufunc_kwargs=ufunc_kwargs,
-        **kwargs
+        **kwargs,
     )
 
     vars_lpd = log_likelihood.var(dim="samples")
@@ -1132,3 +1143,325 @@ def waic(data, pointwise=False, scale="deviance"):
                 "waic_scale",
             ],
         )
+
+
+def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
+    """Compute leave one out (LOO) probability integral transform (PIT) values.
+
+    Parameters
+    ----------
+    idata : InferenceData
+        InferenceData object.
+    y : array, DataArray or str
+        Observed data. If str, idata must be present and contain the observed data group
+    y_hat : array, DataArray or str
+        Posterior predictive samples for ``y``. It must have the same shape as y plus an
+        extra dimension at the end of size n_samples (chains and draws stacked). If str or
+        None, idata must contain the posterior predictive group. If None, y_hat is taken
+        equal to y, thus, y must be str too.
+    log_weights : array or DataArray
+        Smoothed log_weights. It must have the same shape as ``y_hat``
+
+    Returns
+    -------
+    loo_pit : array or DataArray
+        Value of the LOO-PIT at each observed data point.
+
+    Examples
+    --------
+    Calculate LOO-PIT values using as test quantity the observed values themselves.
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: az.loo_pit(idata=data, y="obs")
+
+    Calculate LOO-PIT values using as test quantity the square of the difference between
+    each observation and `mu`. Both ``y`` and ``y_hat`` inputs will be array-like,
+    but ``idata`` will still be passed in order to calculate the ``log_weights`` from
+    there.
+
+    .. ipython::
+
+        In [1]: T = data.observed_data.obs - data.posterior.mu.median(dim=("chain", "draw"))
+           ...: T_hat = data.posterior_predictive.obs - data.posterior.mu
+           ...: T_hat = T_hat.stack(samples=("chain", "draw"))
+           ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
+
+    """
+    if idata is not None and not isinstance(idata, InferenceData):
+        raise ValueError("idata must be of type InferenceData or None")
+
+    if idata is None:
+        if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat, log_weights)):
+            raise ValueError(
+                "all 3 y, y_hat and log_weights must be array or DataArray when idata is None "
+                "but they are of types {}".format([type(arg) for arg in (y, y_hat, log_weights)])
+            )
+
+    else:
+        if y_hat is None and isinstance(y, str):
+            y_hat = y
+        elif y_hat is None:
+            raise ValueError("y_hat cannot be None if y is not a str")
+        if isinstance(y, str):
+            y = idata.observed_data[y].values
+        elif not isinstance(y, (np.ndarray, xr.DataArray)):
+            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+        if isinstance(y_hat, str):
+            y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw")).values
+        elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
+            )
+        if log_weights is None:
+            log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+            posterior = convert_to_dataset(idata, group="posterior")
+            n_chains = len(posterior.chain)
+            n_samples = len(log_likelihood.samples)
+            ess_p = ess(posterior, method="mean")
+            # this mean is over all data variables
+            reff = (
+                (np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples)
+                if n_chains > 1
+                else 1
+            )
+            log_weights = psislw(-log_likelihood, reff=reff)[0].values
+        elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "log_weights must be None or of types array or DataArray, not {}".format(
+                    type(log_weights)
+                )
+            )
+
+    if len(y.shape) + 1 != len(y_hat.shape):
+        raise ValueError(
+            "y_hat must have 1 more dimension than y, but y_hat has {} dims and y has "
+            "{} dims".format(len(y.shape), len(y_hat.shape))
+        )
+
+    if y.shape != y_hat.shape[:-1]:
+        raise ValueError(
+            "y has shape: {} which should be equal to y_hat shape (omitting the last "
+            "dimension): {}".format(y.shape, y_hat.shape)
+        )
+
+    if y_hat.shape != log_weights.shape:
+        raise ValueError(
+            "y_hat and log_weights must have the same shape but have shapes {} and {}".format(
+                y_hat.shape, log_weights.shape
+            )
+        )
+
+    kwargs = {
+        "input_core_dims": [[], ["samples"], ["samples"]],
+        "output_core_dims": [[]],
+        "join": "left",
+    }
+    ufunc_kwargs = {"n_dims": 1}
+
+    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs)
+
+
+def _loo_pit(y, y_hat, log_weights):
+    """Compute LOO-PIT values."""
+    sel = y_hat <= y
+    if np.sum(sel) > 0:
+        value = np.exp(_logsumexp(log_weights[sel]))
+        return min(1, value)
+    else:
+        return 0
+
+
+def apply_test_function(
+    idata,
+    func,
+    group="both",
+    var_names=None,
+    pointwise=False,
+    out_data_shape=None,
+    out_pp_shape=None,
+    out_name_data="T",
+    out_name_pp=None,
+    func_args=None,
+    func_kwargs=None,
+    ufunc_kwargs=None,
+    wrap_data_kwargs=None,
+    wrap_pp_kwargs=None,
+    inplace=True,
+    overwrite=None,
+):
+    """Apply a Bayesian test function to an InferenceData object.
+
+    Parameters
+    ----------
+    idata : InferenceData
+        InferenceData object on which to apply the test function. This function will add
+        new variables to the InferenceData object to store the result without modifying the
+        existing ones.
+    func : callable
+        Callable that calculates the test function. It must have the following call signature
+        ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
+        predictive and ``theta`` the model parameters) even if not all the arguments are
+        used.
+    group : str, optional
+        Group on which to apply the test function. Can be observed_data, posterior_predictive
+        or both.
+    var_names : dict group -> var_names, optional
+        Mapping from group name to the variables to be passed to func. It can be a dict of
+        strings or lists of strings. There is also the option of using ``both`` as key,
+        in which case, the same variables are used in observed data and posterior predictive
+        groups
+    pointwise : bool, optional
+        If True, apply the test function to each observation and sample, otherwise, apply
+        test function to each sample.
+    out_data_shape, out_pp_shape : tuple, optional
+        Output shape of the test function applied to the observed/posterior predictive data.
+        If None, the default depends on the value of pointwise.
+    out_name_data, out_name_pp : str, optional
+        Name of the variables to add to the observed_data and posterior_predictive datasets
+        respectively. ``out_name_pp`` can be ``None``, in which case will be taken equal to
+        ``out_name_data``.
+    func_args : sequence, optional
+        Passed as is to ``func``
+    func_kwargs : mapping, optional
+        Passed as is to ``func``
+    wrap_data_kwargs, wrap_pp_kwargs : mapping, optional
+        kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
+        are used.
+    inplace : bool, optional
+        If True, add the variables inplace, othewise, return a copy of idata with the variables
+        added.
+    overwrite : bool, optional
+        Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
+        dataset. If ``None`` it will be the opposite of inplace.
+
+    Returns
+    -------
+    idata : InferenceData
+        Output InferenceData object. If ``inplace=True``, it is the same input object modified
+        inplace.
+
+    Notes
+    -----
+    This function is provided for convenience to wrap scalar or functions working on low
+    dims to inference data object. It is not optimized to be faster nor as fast as vectorized
+    computations.
+
+    Examples
+    --------
+    Use ``apply_test_function`` to wrap ``np.min`` for illustration purposes. And plot the
+    results.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data("centered_eight")
+        >>> az.apply_test_function(idata, lambda y, theta: np.min(y))
+        >>> T = np.asscalar(idata.observed_data.T)
+        >>> az.plot_posterior(idata, var_names=["T"], group="posterior_predictive", ref_val=T)
+
+    """
+    out = idata if inplace else deepcopy(idata)
+
+    valid_groups = ("observed_data", "posterior_predictive", "both")
+    if group not in valid_groups:
+        raise ValueError(
+            "Invalid group argument. Must be one of {} not {}.".format(valid_groups, group)
+        )
+    if overwrite is None:
+        overwrite = not inplace
+
+    if out_name_pp is None:
+        out_name_pp = out_name_data
+
+    if func_args is None:
+        func_args = tuple()
+
+    if func_kwargs is None:
+        func_kwargs = {}
+
+    if ufunc_kwargs is None:
+        ufunc_kwargs = {}
+    ufunc_kwargs.setdefault("check_shape", False)
+    ufunc_kwargs.setdefault("ravel", False)
+
+    if wrap_data_kwargs is None:
+        wrap_data_kwargs = {}
+    if wrap_pp_kwargs is None:
+        wrap_pp_kwargs = {}
+    if var_names is None:
+        var_names = {}
+
+    both_var_names = var_names.pop("both", None)
+    var_names.setdefault("posterior", list(out.posterior.data_vars))
+
+    in_posterior = out.posterior[var_names["posterior"]]
+    if isinstance(in_posterior, xr.Dataset):
+        in_posterior = in_posterior.to_array().squeeze()
+
+    groups = ("posterior_predictive", "observed_data") if group == "both" else [group]
+    for grp in groups:
+        out_group_shape = out_data_shape if grp == "observed_data" else out_pp_shape
+        out_name_group = out_name_data if grp == "observed_data" else out_name_pp
+        wrap_group_kwargs = wrap_data_kwargs if grp == "observed_data" else wrap_pp_kwargs
+        if not hasattr(out, grp):
+            raise ValueError("InferenceData object must have {} group".format(grp))
+        if not overwrite and out_name_group in getattr(out, grp).data_vars:
+            raise ValueError(
+                "Should overwrite: {} variable present in group {}, but overwrite is False".format(
+                    out_name_group, grp
+                )
+            )
+        var_names.setdefault(
+            grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names
+        )
+        in_group = getattr(out, grp)[var_names[grp]]
+        if isinstance(in_group, xr.Dataset):
+            in_group = in_group.to_array(dim="{}_var".format(grp)).squeeze()
+
+        if pointwise:
+            out_group_shape = in_group.shape if out_group_shape is None else out_group_shape
+        elif grp == "observed_data":
+            out_group_shape = () if out_group_shape is None else out_group_shape
+        elif grp == "posterior_predictive":
+            out_group_shape = in_group.shape[:2] if out_group_shape is None else out_group_shape
+        loop_dims = in_group.dims[: len(out_group_shape)]
+
+        wrap_group_kwargs.setdefault(
+            "input_core_dims",
+            [
+                [dim for dim in dataset.dims if dim not in loop_dims]
+                for dataset in [in_group, in_posterior]
+            ],
+        )
+        func_kwargs["out"] = np.empty(out_group_shape)
+
+        out_group = getattr(out, grp)
+        try:
+            out_group[out_name_group] = _wrap_xarray_ufunc(
+                func,
+                in_group.values,
+                in_posterior.values,
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_group_kwargs,
+            )
+        except IndexError:
+            excluded_dims = set(
+                wrap_group_kwargs["input_core_dims"][0] + wrap_group_kwargs["input_core_dims"][1]
+            )
+            out_group[out_name_group] = _wrap_xarray_ufunc(
+                func,
+                *xr.broadcast(in_group, in_posterior, exclude=excluded_dims),
+                func_args=func_args,
+                func_kwargs=func_kwargs,
+                ufunc_kwargs=ufunc_kwargs,
+                **wrap_group_kwargs,
+            )
+        setattr(out, grp, out_group)
+
+    return out

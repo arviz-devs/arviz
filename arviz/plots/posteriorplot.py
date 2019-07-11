@@ -27,6 +27,7 @@ def plot_posterior(
     credible_interval=0.94,
     round_to: Optional[int] = None,
     point_estimate="mean",
+    group="posterior",
     rope=None,
     ref_val=None,
     kind="kde",
@@ -57,6 +58,8 @@ def plot_posterior(
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
     point_estimate: str
         Must be in ('mode', 'mean', 'median')
+    group : str, optional
+        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
         length should match the number of variables.
@@ -145,7 +148,7 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
-    data = convert_to_dataset(data, group="posterior")
+    data = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, data)
 
     if coords is None:
