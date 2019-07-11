@@ -51,7 +51,7 @@ defaultParams = {  # pylint: disable=invalid-name
 }
 
 
-class RcParams(MutableMapping, dict): # pylint: disable=too-many-ancestors
+class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     """Class to contain ArviZ default parameters.
 
     It is implemented as a dict with validation when setting items.
@@ -234,6 +234,7 @@ class rc_context:
     The 'rc' dictionary takes precedence over the settings loaded from
     'fname'. Passing a dictionary only is also valid.
     """
+
     # Based on mpl.rc_context
 
     def __init__(self, rc=None, fname=None):
