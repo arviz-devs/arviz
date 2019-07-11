@@ -17,6 +17,8 @@ from ..utils import _var_names
 
 
 def plot_mcse(
+    # disable black until #763 is released
+    # fmt: off
     idata,
     var_names=None,
     coords=None,
@@ -32,6 +34,7 @@ def plot_mcse(
     extra_kwargs=None,
     text_kwargs=None,
     **kwargs
+    # fmt: on
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 

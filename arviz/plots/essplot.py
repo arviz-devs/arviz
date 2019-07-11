@@ -16,6 +16,8 @@ from ..utils import _var_names
 
 
 def plot_ess(
+    # disable black until #763 is released
+    # fmt: off
     idata,
     var_names=None,
     kind="local",
@@ -34,6 +36,7 @@ def plot_ess(
     hline_kwargs=None,
     rug_kwargs=None,
     **kwargs
+    # fmt: on
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
