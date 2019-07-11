@@ -4,7 +4,8 @@ import warnings
 import numpy as np
 
 
-def _var_names(var_names, data):
+def _var_names(var_names,
+               data):
     """Handle var_names input across arviz.
 
     Parameters
@@ -16,7 +17,6 @@ def _var_names(var_names, data):
     -------
     var_name: list or None
     """
-
     if var_names is not None:
 
         if isinstance(var_names, str):
