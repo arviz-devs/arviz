@@ -78,9 +78,11 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             )
 
     def __getitem__(self, key):
+        """Use dict getitem method."""
         return dict.__getitem__(self, key)
 
     def __delitem__(self, key):
+        """Raise TypeError if someone ever tries to delete a key from RcParams."""
         raise TypeError("RcParams keys cannot be deleted")
 
     def __repr__(self):
@@ -221,6 +223,16 @@ rcParams = rc_params()  # pylint: disable=invalid-name
 class rc_context:
     """
     Return a context manager for managing rc settings.
+
+    Parameters
+    ----------
+    rc : dict, optional
+        Mapping containing the rcParams to modify temporally.
+    fname : str, optional
+        Filename of the file containig the rcParams to use inside the rc_context.
+
+    Examples
+    --------
     This allows one to do::
         with az.rc_context(fname='pystan.rc'):
             idata = az.load_arviz_data("radon")
@@ -246,7 +258,9 @@ class rc_context:
             rcParams.update(rc)
 
     def __enter__(self):
+        """Define enter method of context manager."""
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        """Define exit method of context manager."""
         rcParams.update(self._orig)
