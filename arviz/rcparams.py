@@ -6,12 +6,15 @@ import re
 import pprint
 import logging
 import locale
+from collections import MutableMapping
 
 _log = logging.getLogger(__name__)
 
 
 def _make_validate_choice(accepted_values):
     """Validate value is in accepted_values."""
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
 
     def validate_choice(value):
         if value.lower() in accepted_values:
@@ -48,7 +51,7 @@ defaultParams = {  # pylint: disable=invalid-name
 }
 
 
-class RcParams(dict):
+class RcParams(MutableMapping, dict): # pylint: disable=too-many-ancestors
     """Class to contain ArviZ default parameters.
 
     It is implemented as a dict with validation when setting items.
@@ -74,6 +77,12 @@ class RcParams(dict):
                 "a list of valid parameters)".format(key)
             )
 
+    def __getitem__(self, key):
+        return dict.__getitem__(self, key)
+
+    def __delitem__(self, key):
+        raise TypeError("RcParams keys cannot be deleted")
+
     def __repr__(self):
         """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__
@@ -89,6 +98,10 @@ class RcParams(dict):
     def __iter__(self):
         """Yield sorted list of keys."""
         yield from sorted(dict.__iter__(self))
+
+    def __len__(self):
+        """Use dict len method."""
+        return dict.__len__(self)
 
     def find_all(self, pattern):
         """
@@ -127,6 +140,8 @@ def get_arviz_rcfile():
 
     Otherwise, the default defined in ``rcparams.py`` file will be used.
     """
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
 
     def gen_candidates():
         yield os.path.join(os.getcwd(), "arvizrc")
@@ -201,3 +216,36 @@ def rc_params():
 
 
 rcParams = rc_params()  # pylint: disable=invalid-name
+
+
+class rc_context:
+    """
+    Return a context manager for managing rc settings.
+    This allows one to do::
+        with az.rc_context(fname='pystan.rc'):
+            idata = az.load_arviz_data("radon")
+            az.plot_posterior(idata, var_names=["gamma"])
+    The plot would have settings from 'screen.rc'
+
+    A dictionary can also be passed to the context manager::
+        with az.rc_context(rc={'plot.max_subplots': None}, fname='pystan.rc'):
+            idata = az.load_arviz_data("radon")
+            az.plot_posterior(idata, var_names=["gamma"])
+    The 'rc' dictionary takes precedence over the settings loaded from
+    'fname'. Passing a dictionary only is also valid.
+    """
+    # Based on mpl.rc_context
+
+    def __init__(self, rc=None, fname=None):
+        self._orig = rcParams.copy()
+        if fname:
+            file_rcparams = read_rcfile(fname)
+            rcParams.update(file_rcparams)
+        if rc:
+            rcParams.update(rc)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        rcParams.update(self._orig)

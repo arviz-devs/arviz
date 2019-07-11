@@ -23,7 +23,7 @@ if not logging.root.handlers:
     _log.setLevel(logging.INFO)
     _log.addHandler(handler)
 
-from .rcparams import rcParams
+from .rcparams import rcParams, rc_context
 from .data import *
 from .plots import *
 from .stats import *
