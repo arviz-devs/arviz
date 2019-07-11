@@ -16,6 +16,7 @@ def _var_names(var_names, data):
     -------
     var_name: list or None
     """
+
     if var_names is not None:
 
         if isinstance(var_names, str):
