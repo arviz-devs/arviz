@@ -83,3 +83,18 @@ class CircStd:
         except ImportError:
             data = np.random.randn(10000, 1000)
             return circstd(data)
+
+
+class cov:
+    def time_numpy_cov(self):
+        try:
+            data = np.random.randn(1000,100)
+            import numba
+
+            @numba.njit
+            def cov():
+                return np.cov(data)
+        except ImportError:
+            data = np.random.randn(1000,100)
+            return np.cov(data)
+
