@@ -210,9 +210,7 @@ def plot_forest(
     for ax in axes:
         ax.grid(False)
         # Remove ticklines on y-axes
-        for ticks in ax.yaxis.get_major_ticks():
-            ticks.tick1line.set_visible = False
-            ticks.tick2line.set_visible = False
+        ax.tick_params(axis="y", left=False, right=False)
 
         for loc, spine in ax.spines.items():
             if loc in ["left", "right"]:
@@ -574,7 +572,7 @@ class VarHandler:
             values = values[np.isfinite(values)]
 
             if ridgeplot_kind == "auto":
-                kind = "hist" if all(np.mod(values, 1) == 0) else "density"
+                kind = "hist" if np.all(np.mod(values, 1) == 0) else "density"
             else:
                 kind = ridgeplot_kind
 
