@@ -61,7 +61,24 @@ See Gelman and Hill (2006) for details on the example, or
 https://docs.pymc.io/notebooks/multilevel_modeling.html#Correlations-among-levels
 by Chris Fonnesbeck for details on this implementation.
 """,
-    )
+    ),
+    "rugby": RemoteFileMetadata(
+        filename="rugby.nc",
+        url="https://ndownloader.figshare.com/files/16254359",
+        checksum="9eecd2c6317e45b0388dd97ae6326adecf94128b5a7d15a52c9fcfac0937e2a6",
+        description="""
+The Six Nations Championship is a yearly rugby competition between Italy, Ireland,
+Scotland, England, France and Wales. Fifteen games are played each year, representing
+all combinations of the six teams.
+
+This example uses and includes results from 2014 - 2017, comprising 60 total
+games. It models latent parameters for each team's attack and defense, as well
+as a parameter for home team advantage.
+
+See https://docs.pymc.io/notebooks/rugby_analytics.html by Peader Coyle
+for more details and references.
+""",
+    ),
 }
 
 
@@ -160,11 +177,14 @@ def load_arviz_data(dataset=None, data_home=None):
             )
         return from_netcdf(file_path)
     else:
-        raise ValueError(
-            "Dataset {} not found! The following are available:\n{}".format(
-                dataset, list_datasets()
+        if dataset is None:
+            return list(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
+        else:
+            raise ValueError(
+                "Dataset {} not found! The following are available:\n{}".format(
+                    dataset, list_datasets()
+                )
             )
-        )
 
 
 def list_datasets():
