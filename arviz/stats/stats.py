@@ -275,7 +275,7 @@ def _ic_matrix(ics, ic_i):
         if len(ic) != rows:
             raise ValueError("The number of observations should be the same across all models")
 
-        ic_i_val[:, idx] = ic
+        ic_i_val[:, idx] = ic.squeeze()
 
     return rows, cols, ic_i_val
 
