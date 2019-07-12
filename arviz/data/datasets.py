@@ -178,7 +178,7 @@ def load_arviz_data(dataset=None, data_home=None):
         return from_netcdf(file_path)
     else:
         if dataset is None:
-            return list(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
+            return dict(itertools.chain(LOCAL_DATASETS.items(), REMOTE_DATASETS.items()))
         else:
             raise ValueError(
                 "Dataset {} not found! The following are available:\n{}".format(
