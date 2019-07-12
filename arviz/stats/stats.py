@@ -88,8 +88,9 @@ def compare(
 
     Returns
     -------
-    A DataFrame, ordered from lowest to highest IC. The index reflects the key with which the
-    models are passed to this function. The columns are:
+    A DataFrame, ordered from best to worst model (measured by information criteria).
+    The index reflects the key with which the models are passed to this function. The columns are:
+    rank : The rank-order of the models. 0 is the best.
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
         If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
@@ -146,7 +147,17 @@ def compare(
         ic_func = waic
         df_comp = pd.DataFrame(
             index=names,
-            columns=["waic", "p_waic", "d_waic", "weight", "se", "dse", "warning", "waic_scale"],
+            columns=[
+                "rank",
+                "waic",
+                "p_waic",
+                "d_waic",
+                "weight",
+                "se",
+                "dse",
+                "warning",
+                "waic_scale",
+            ],
         )
         scale_col = "waic_scale"
 
@@ -154,7 +165,17 @@ def compare(
         ic_func = loo
         df_comp = pd.DataFrame(
             index=names,
-            columns=["loo", "p_loo", "d_loo", "weight", "se", "dse", "warning", "loo_scale"],
+            columns=[
+                "rank",
+                "loo",
+                "p_loo",
+                "d_loo",
+                "weight",
+                "se",
+                "dse",
+                "warning",
+                "loo_scale",
+            ],
         )
         scale_col = "loo_scale"
 
@@ -250,6 +271,7 @@ def compare(
             std_err = ses.loc[val]
             weight = weights[idx]
             df_comp.at[val] = (
+                idx,
                 res[ic],
                 res[p_ic],
                 d_ic,

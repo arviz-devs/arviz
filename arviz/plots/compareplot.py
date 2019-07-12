@@ -9,6 +9,7 @@ def plot_compare(
     insample_dev=True,
     plot_standard_error=True,
     plot_ic_diff=True,
+    order_by_rank=True,
     figsize=None,
     textsize=None,
     plot_kwargs=None,
@@ -28,7 +29,7 @@ def plot_compare(
 
     Parameters
     ----------
-    comp_df: pd.DataFrame
+    comp_df : pd.DataFrame
         Result of the `az.compare()` method
     insample_dev : bool, optional
         Plot in-sample deviance, that is the value of the information criteria without the
@@ -38,6 +39,8 @@ def plot_compare(
     plot_ic_diff : bool, optional
         Plot standard error of the difference in information criteria between each model
          and the top-ranked model. Defaults to True
+    order_by_rank : bool
+        If True (default) ensure the best model is used as reference.
     figsize : tuple, optional
         If None, size is (6, num of models) inches
     textsize: float
@@ -100,6 +103,9 @@ def plot_compare(
             "comp_df must contain one of the following"
             " information criterion: {}".format(_information_criterion)
         )
+
+    if order_by_rank:
+        comp_df.sort_values(by="rank", inplace=True)
 
     if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]
