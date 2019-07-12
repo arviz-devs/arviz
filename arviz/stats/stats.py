@@ -88,8 +88,8 @@ def compare(
 
     Returns
     -------
-    A DataFrame, ordered from best to worst model. The index reflects the key with which the
-    models are passed to this function. The columns are:
+    A DataFrame, ordered from best to worst model (measured by information criteria).
+    The index reflects the key with which the models are passed to this function. The columns are:
     rank : The rank-order of the models. 0 is the best.
     IC : Information Criteria (WAIC or LOO).
         Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
