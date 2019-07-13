@@ -120,7 +120,7 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
         all_counts = []
         for row in ranks:
-            counts, bin_ary = _rank_hist(row, bins=bins, ranks.size)
+            counts, bin_ary = _rank_hist(row, bins, ranks.size)
             all_counts.append(counts)
         all_counts = np.array(all_counts)
         gap = all_counts.max() * 1.05
