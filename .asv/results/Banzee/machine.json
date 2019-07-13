@@ -1,0 +1,9 @@
+{
+    "arch": "x86_64",
+    "cpu": "Intel(R) Core(TM) i3-5005U CPU @ 2.00GHz",
+    "machine": "Banzee",
+    "num_cpu": "4",
+    "os": "Linux 4.15.0-51-generic",
+    "ram": "3957136",
+    "version": 1
+}
