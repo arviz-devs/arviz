@@ -17,4 +17,4 @@ fig, axes = az.plot_forest(rugby_data,
                            ridgeplot_overlap=1.5,
                            colors='blue',
                            figsize=(9, 4))
-axes[0].set_title('Estimated theta for 8 schools model')
+axes[0].set_title('Relative defensive strength\nof Six Nation rugby teams')
