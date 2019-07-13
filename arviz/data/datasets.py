@@ -79,6 +79,29 @@ See https://docs.pymc.io/notebooks/rugby_analytics.html by Peader Coyle
 for more details and references.
 """,
     ),
+    "regression1d": RemoteFileMetadata(
+        filename="regression1d.nc",
+        url="https://ndownloader.figshare.com/files/16254899",
+        checksum="909e8ffe344e196dad2730b1542881ab5729cb0977dd20ba645a532ffa427278",
+        description="""
+A synthetic one dimensional linear regression dataset with latent slope,
+intercept, and noise ("eps"). One hundred data points, fit with PyMC3.
+
+True slope and intercept are included as deterministic variables.
+""",
+    ),
+    "regression10d": RemoteFileMetadata(
+        filename="regression10d.nc",
+        url="https://ndownloader.figshare.com/files/16255736",
+        checksum="c6716ec7e19926ad2a52d6ae4c1d1dd5ddb747e204c0d811757c8e93fcf9f970",
+        description="""
+A synthetic multi-dimensional (10 dimensions) linear regression dataset with
+latent weights ("w"), intercept, and noise ("eps"). Five hundred data points,
+fit with PyMC3.
+
+True weights and intercept are included as deterministic variables.
+""",
+    ),
 }
 
 
