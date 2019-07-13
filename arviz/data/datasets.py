@@ -102,6 +102,30 @@ fit with PyMC3.
 True weights and intercept are included as deterministic variables.
 """,
     ),
+    "classification1d": RemoteFileMetadata(
+        filename="classification1d.nc",
+        url="https://ndownloader.figshare.com/files/16256678",
+        checksum="1cf3806e72c14001f6864bb69d89747dcc09dd55bcbca50aba04e9939daee5a0",
+        description="""
+A synthetic one dimensional logistic regression dataset with latent slope and
+intercept, passed into a Bernoulli random variable. One hundred data points,
+fit with PyMC3.
+
+True slope and intercept are included as deterministic variables.
+""",
+    ),
+    "classification10d": RemoteFileMetadata(
+        filename="classification10d.nc",
+        url="https://ndownloader.figshare.com/files/16256681",
+        checksum="16c9a45e1e6e0519d573cafc4d266d761ba347e62b6f6a79030aaa8e2fde1367",
+        description="""
+A synthetic multi dimensional (10 dimensions) logistic regression dataset with
+latent weights ("w") and intercept, passed into a Bernoulli random variable.
+Five hundred data points, fit with PyMC3.
+
+True weights and intercept are included as deterministic variables.
+""",
+    ),
 }
 
 
