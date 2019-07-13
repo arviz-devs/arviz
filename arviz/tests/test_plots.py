@@ -34,7 +34,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.kdeplot import cov_, stack
+from ..plots.kdeplot import _cov, _stack
 
 np.random.seed(0)
 os.environ["ARVIZ_LOAD"] = "EAGER"
@@ -378,13 +378,13 @@ def test_plot_kde(continuous_model, kwargs):
 
 def test_cov():
     x = np.random.rand(100, 100)
-    assert np.allclose(cov_(x), np.cov(x))
+    assert np.allclose(_cov(x), np.cov(x))
 
 
 def test_stack():
     x = np.random.randn(100, 100, 5)
     y = np.random.randn(100, 100, 5)
-    assert np.allclose(stack(x, y), np.stack((x, y)))
+    assert np.allclose(_stack(x, y), np.stack((x, y)))
 
 
 @pytest.mark.parametrize(

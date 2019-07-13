@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
 
+from ..utils import conditional_jit
+
 
 def make_2d(ary):
     """Convert any array into a 2d numpy array.
@@ -234,6 +236,7 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
+@conditional_jit(cache=True)
 def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.
 
@@ -251,6 +254,16 @@ def purge_duplicates(list_in):
         if item not in _list:
             _list.append(item)
     return _list
+
+
+@conditional_jit(cache=True)
+def _dims(data, var_name, skip_dims):
+    return [dim for dim in data[var_name].dims if dim not in skip_dims]
+
+
+@conditional_jit(cache=True)
+def _zip_dims(new_dims, vals):
+    return [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
 
 
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
@@ -299,9 +312,9 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
 
     for var_name in var_names:
         if var_name in data:
-            new_dims = [dim for dim in data[var_name].dims if dim not in skip_dims]
+            new_dims = _dims(data, var_name, skip_dims)
             vals = [purge_duplicates(data[var_name][dim].values) for dim in new_dims]
-            dims = [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
+            dims = _zip_dims(new_dims, vals)
             if reverse_selections:
                 dims = reversed(dims)
 

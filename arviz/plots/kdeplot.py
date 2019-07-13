@@ -338,12 +338,12 @@ def _histogram(x, n_bins, range_hist=None):
 
 
 @conditional_jit(cache=True)
-def cov_(data):
+def _cov(data):
     return np.cov(data)
 
 
 @conditional_jit(cache=True)
-def stack(x, y):
+def _stack(x, y):
     return np.vstack((x, y))
 
 
@@ -384,13 +384,13 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     d_x = (xmax - xmin) / (n_x - 1)
     d_y = (ymax - ymin) / (n_y - 1)
 
-    xyi = stack((x, y)).T
+    xyi = _stack((x, y)).T
     xyi -= [xmin, ymin]
     xyi /= [d_x, d_y]
     xyi = np.floor(xyi, xyi).T
 
     scotts_factor = len_x ** (-1 / 6)
-    cov = cov_(xyi)
+    cov = _cov(xyi)
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
@@ -400,7 +400,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     y_y = np.arange(kern_ny) - kern_ny / 2
     x_x, y_y = np.meshgrid(x_x, y_y)
 
-    kernel = stack((x_x.flatten(), y_y.flatten()))
+    kernel = _stack((x_x.flatten(), y_y.flatten()))
     kernel = np.dot(inv_cov, kernel) * kernel
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
