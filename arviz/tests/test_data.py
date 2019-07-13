@@ -320,6 +320,7 @@ def test_sel_method(inplace):
 
 @pytest.mark.parametrize("use", ("del", "delattr"))
 def test_del_method(use):
+    # create inference data object
     data = np.random.normal(size=(4, 500, 8))
     idata = from_dict(
         posterior={"a": data[..., 0], "b": data},
@@ -327,6 +328,8 @@ def test_del_method(use):
         observed_data={"b": data[0, 0, :]},
         posterior_predictive={"a": data[..., 0], "b": data},
     )
+
+    # assert inference data object has all attributes
     test_dict = {
         "posterior": ("a", "b"),
         "sample_stats": ("a", "b"),
@@ -335,14 +338,23 @@ def test_del_method(use):
     }
     fails = check_multiple_attrs(test_dict, idata)
     assert not fails
+    # assert _groups attribute contains all groups
+    groups = getattr(idata, "_groups")
+    assert all([group in groups for group in test_dict])
+
+    # Use del method
     if use == "del":
         del idata.sample_stats
     else:
         delattr(idata, "sample_stats")
+
+    # assert attribute has been removed
     test_dict.pop("sample_stats")
     fails = check_multiple_attrs(test_dict, idata)
     assert not fails
     assert not hasattr(idata, "sample_stats")
+    # assert _groups attribute has been updated
+    assert "sample_stats" not in getattr(idata, "_groups")
 
 
 class TestNumpyToDataArray:
@@ -655,23 +667,30 @@ class TestDataNetCDF:
         )
 
     def test_io_function(self, data, eight_schools_params):
+        # create inference data and assert all attributes are present
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
-        groups = inference_data._groups  # pylint: disable=protected-access
-        test_dict = {}
-        for group in groups:
-            if group == "observed_data":
-                test_dict["observed_data"] = ["J", "y", "sigma"]
-            else:
-                test_dict[group] = ["eta", "theta", "mu", "tau"]
+        test_dict = {
+            "posterior": ["eta", "theta", "mu", "tau"],
+            "posterior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats": ["eta", "theta", "mu", "tau"],
+            "prior": ["eta", "theta", "mu", "tau"],
+            "prior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats_prior": ["eta", "theta", "mu", "tau"],
+            "observed_data": ["J", "y", "sigma"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+        # check filename does not exist and save InferenceData
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_function_testfile.nc")
         # az -function
         to_netcdf(inference_data, filepath)
+
+        # Assert InferenceData has been saved correctly
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
         inference_data2 = from_netcdf(filepath)
@@ -682,34 +701,45 @@ class TestDataNetCDF:
 
     @pytest.mark.parametrize("groups_arg", [False, True])
     def test_io_method(self, data, eight_schools_params, groups_arg):
+        # create InferenceData and check it has been properly created
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
-        if groups_arg:
-            groups = ("posterior", "observed_data")
-        else:
-            groups = inference_data._groups  # pylint: disable=protected-access
-        test_dict = {}
-        for group in groups:
-            if group == "observed_data":
-                test_dict["observed_data"] = ["J", "y", "sigma"]
-            else:
-                test_dict[group] = ["eta", "theta", "mu", "tau"]
+        test_dict = {
+            "posterior": ["eta", "theta", "mu", "tau"],
+            "posterior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats": ["eta", "theta", "mu", "tau"],
+            "prior": ["eta", "theta", "mu", "tau"],
+            "prior_predictive": ["eta", "theta", "mu", "tau"],
+            "sample_stats_prior": ["eta", "theta", "mu", "tau"],
+            "observed_data": ["J", "y", "sigma"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+        # check filename does not exist and use to_netcdf method
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_method_testfile.nc")
         assert not os.path.exists(filepath)
         # InferenceData method
-        inference_data.to_netcdf(filepath, groups=groups if groups_arg else None)
+        inference_data.to_netcdf(
+            filepath, groups=("posterior", "observed_data") if groups_arg else None
+        )
+
+        # assert file has been saved correctly
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
         inference_data2 = InferenceData.from_netcdf(filepath)
+        if groups_arg:  # if groups arg, update test dict to contain only saved groups
+            test_dict = {
+                "posterior": ["eta", "theta", "mu", "tau"],
+                "observed_data": ["J", "y", "sigma"],
+            }
+            assert not hasattr(inference_data2, "sample_stats")
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
-        if groups_arg:
-            assert not hasattr(inference_data2, "sample_stats")
+
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
