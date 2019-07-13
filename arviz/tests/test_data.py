@@ -318,6 +318,33 @@ def test_sel_method(inplace):
             assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
 
+@pytest.mark.parametrize("use", ("del", "delattr"))
+def test_del_method(use):
+    data = np.random.normal(size=(4, 500, 8))
+    idata = from_dict(
+        posterior={"a": data[..., 0], "b": data},
+        sample_stats={"a": data[..., 0], "b": data},
+        observed_data={"b": data[0, 0, :]},
+        posterior_predictive={"a": data[..., 0], "b": data},
+    )
+    test_dict = {
+        "posterior": ("a", "b"),
+        "sample_stats": ("a", "b"),
+        "observed_data": ["b"],
+        "posterior_predictive": ("a", "b"),
+    }
+    fails = check_multiple_attrs(test_dict, idata)
+    assert not fails
+    if use == "del":
+        del idata.sample_stats
+    else:
+        delattr(idata, "sample_stats")
+    test_dict.pop("sample_stats")
+    fails = check_multiple_attrs(test_dict, idata)
+    assert not fails
+    assert not hasattr(idata, "sample_stats")
+
+
 class TestNumpyToDataArray:
     def test_1d_dataset(self):
         size = 100
@@ -631,7 +658,15 @@ class TestDataNetCDF:
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
-        assert hasattr(inference_data, "posterior")
+        groups = inference_data._groups  # pylint: disable=protected-access
+        test_dict = {}
+        for group in groups:
+            if group == "observed_data":
+                test_dict["observed_data"] = ["J", "y", "sigma"]
+            else:
+                test_dict[group] = ["eta", "theta", "mu", "tau"]
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_function_testfile.nc")
@@ -640,25 +675,41 @@ class TestDataNetCDF:
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
         inference_data2 = from_netcdf(filepath)
-        assert hasattr(inference_data2, "posterior")
+        fails = check_multiple_attrs(test_dict, inference_data2)
+        assert not fails
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
-    def test_io_method(self, data, eight_schools_params):
+    @pytest.mark.parametrize("groups_arg", [False, True])
+    def test_io_method(self, data, eight_schools_params, groups_arg):
         inference_data = self.get_inference_data(  # pylint: disable=W0612
             data, eight_schools_params
         )
-        assert hasattr(inference_data, "posterior")
+        if groups_arg:
+            groups = ("posterior", "observed_data")
+        else:
+            groups = inference_data._groups  # pylint: disable=protected-access
+        test_dict = {}
+        for group in groups:
+            if group == "observed_data":
+                test_dict["observed_data"] = ["J", "y", "sigma"]
+            else:
+                test_dict[group] = ["eta", "theta", "mu", "tau"]
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "saved_models")
         filepath = os.path.join(data_directory, "io_method_testfile.nc")
         assert not os.path.exists(filepath)
         # InferenceData method
-        inference_data.to_netcdf(filepath)
+        inference_data.to_netcdf(filepath, groups=groups if groups_arg else None)
         assert os.path.exists(filepath)
         assert os.path.getsize(filepath) > 0
         inference_data2 = InferenceData.from_netcdf(filepath)
-        assert hasattr(inference_data2, "posterior")
+        fails = check_multiple_attrs(test_dict, inference_data2)
+        assert not fails
+        if groups_arg:
+            assert not hasattr(inference_data2, "sample_stats")
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
