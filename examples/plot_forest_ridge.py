@@ -8,12 +8,13 @@ import arviz as az
 
 az.style.use('arviz-darkgrid')
 
-non_centered_data = az.load_arviz_data('non_centered_eight')
-fig, axes = az.plot_forest(non_centered_data,
+rugby_data = az.load_arviz_data('rugby')
+fig, axes = az.plot_forest(rugby_data,
                            kind='ridgeplot',
-                           var_names=['theta'],
+                           var_names=['defs'],
+                           linewidth=4,
                            combined=True,
-                           ridgeplot_overlap=3,
-                           colors='white',
-                           figsize=(9, 7))
-axes[0].set_title('Estimated theta for 8 schools model')
+                           ridgeplot_overlap=1.5,
+                           colors='blue',
+                           figsize=(9, 4))
+axes[0].set_title('Relative defensive strength\nof Six Nation rugby teams')
