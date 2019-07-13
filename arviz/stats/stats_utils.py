@@ -470,6 +470,6 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 
 @conditional_jit
-def histogram(data):
-    kcounts, _ = np.histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+def histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf]):
+    kcounts, _ = np.histogram(data, bins=bins)
     return kcounts

@@ -344,7 +344,7 @@ def _cov(data):
 
 @conditional_jit(cache=True)
 def _stack(x, y):
-    return np.vstack((x, y))
+    return np.vstack(tuple(x, y))
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
@@ -384,7 +384,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     d_x = (xmax - xmin) / (n_x - 1)
     d_y = (ymax - ymin) / (n_y - 1)
 
-    xyi = _stack((x, y)).T
+    xyi = _stack(x, y).T
     xyi -= [xmin, ymin]
     xyi /= [d_x, d_y]
     xyi = np.floor(xyi, xyi).T
@@ -400,7 +400,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     y_y = np.arange(kern_ny) - kern_ny / 2
     x_x, y_y = np.meshgrid(x_x, y_y)
 
-    kernel = _stack((x_x.flatten(), y_y.flatten()))
+    kernel = _stack(x_x.flatten(), y_y.flatten())
     kernel = np.dot(inv_cov, kernel) * kernel
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))

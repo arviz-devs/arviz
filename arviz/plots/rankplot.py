@@ -10,7 +10,7 @@ from .plot_utils import (
     _create_axes_grid,
     make_label,
 )
-from ..utils import _var_names
+from ..utils import _var_names, conditional_jit
 
 
 def _sturges_formula(dataset, mult=1):
@@ -120,7 +120,7 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
         all_counts = []
         for row in ranks:
-            counts, bin_ary = np.histogram(row, bins=bins, range=(0, ranks.size))
+            counts, bin_ary = _rank_hist(row, bins=bins, range=(0, ranks.size))
             all_counts.append(counts)
         all_counts = np.array(all_counts)
         gap = all_counts.max() * 1.05
@@ -153,3 +153,8 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         ax.set_title(make_label(var_name, selection), fontsize=titlesize)
 
     return axes
+
+
+@conditional_jit
+def _rank_hist(data, bins, range):
+    return np.histogram(data, bins, range)

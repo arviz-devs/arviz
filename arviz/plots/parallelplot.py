@@ -5,7 +5,8 @@ import numpy as np
 from scipy.stats.mstats import rankdata
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
-from ..utils import _var_names
+from ..utils import _var_names, _numba_var
+from ..stats.stats_utils import stats_variance_2d as svar
 
 
 def plot_parallel(
@@ -99,7 +100,10 @@ def plot_parallel(
     if norm_method is not None:
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
-            standard_deviation = np.std(_posterior, axis=1)
+            if _posterior.ndim <= 2:
+                standard_deviation = np.sqrt(_numba_var(svar, np.var, axis=1))
+            else:
+                standard_deviation = np.std(_posterior, axis=1)
             for i in range(0, np.shape(mean)[0]):
                 _posterior[i, :] = (_posterior[i, :] - mean[i]) / standard_deviation[i]
         elif norm_method == "minmax":
