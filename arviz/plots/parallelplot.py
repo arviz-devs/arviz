@@ -101,7 +101,7 @@ def plot_parallel(
         if norm_method == "normal":
             mean = np.mean(_posterior, axis=1)
             if _posterior.ndim <= 2:
-                standard_deviation = np.sqrt(_numba_var(svar, np.var,_posterior, axis=1))
+                standard_deviation = np.sqrt(_numba_var(svar, np.var, _posterior, axis=1))
             else:
                 standard_deviation = np.std(_posterior, axis=1)
             for i in range(0, np.shape(mean)[0]):

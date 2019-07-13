@@ -384,7 +384,7 @@ def test_cov():
 def test_stack():
     x = np.random.randn(100, 100, 5)
     y = np.random.randn(100, 100, 5)
-    assert np.allclose(_stack(x, y), np.stack((x, y)))
+    assert np.allclose(_stack(x, y), np.vstack((x, y)))
 
 
 @pytest.mark.parametrize(
