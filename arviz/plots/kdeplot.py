@@ -344,7 +344,7 @@ def _cov(data):
 
 @conditional_jit(cache=True)
 def _stack(x, y):
-    return np.vstack(tuple(x, y))
+    return np.vstack((x, y))
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
