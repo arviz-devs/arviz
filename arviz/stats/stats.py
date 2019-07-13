@@ -196,6 +196,7 @@ def compare(
         ics = ics.append([ic_func(dataset, pointwise=True, scale=scale)])
     ics.index = names
     ics.sort_values(by=ic, inplace=True, ascending=ascending)
+    ics[ic_i] = ics[ic_i].apply(lambda x: x.values.flatten())
 
     if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
@@ -263,9 +264,9 @@ def compare(
         for idx, val in enumerate(ics.index):
             res = ics.loc[val]
             if scale_value < 0:
-                diff = (res[ic_i] - min_ic_i_val).values
+                diff = res[ic_i] - min_ic_i_val
             else:
-                diff = (min_ic_i_val - res[ic_i]).values
+                diff = min_ic_i_val - res[ic_i]
             d_ic = np.sum(diff)
             d_std_err = np.sqrt(len(diff) * np.var(diff))
             std_err = ses.loc[val]
