@@ -334,7 +334,7 @@ def plot_ess(
             ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
         )
         if kind == "evolution":
-            ax_.legend(title="Method", fontsize=xt_labelsize)
+            ax_.legend(title="Method", fontsize=xt_labelsize, title_fontsize=xt_labelsize)
         else:
             ax_.set_xlim(0, 1)
         if rug:
