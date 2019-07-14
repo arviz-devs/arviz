@@ -11,6 +11,7 @@ from .plot_utils import (
     default_grid,
     make_label,
     _create_axes_grid,
+    get_bins,
 )
 from ..utils import _var_names
 
@@ -274,7 +275,7 @@ def plot_ppc(
                     legend=legend,
                 )
             else:
-                nbins = round(len(obs_vals) ** 0.5)
+                nbins = len(get_bins(obs_vals))
                 hist, bin_edges = np.histogram(obs_vals, bins=nbins, density=True)
                 hist = np.concatenate((hist[:1], hist))
                 ax.plot(
@@ -325,7 +326,7 @@ def plot_ppc(
                     )
                 else:
                     vals = pp_vals.flatten()
-                    nbins = round(len(obs_vals) ** 0.5)
+                    nbins = len(get_bins(obs_vals))
                     hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                     hist = np.concatenate((hist[:1], hist))
                     ax.plot(
