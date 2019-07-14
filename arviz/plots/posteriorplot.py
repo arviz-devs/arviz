@@ -53,11 +53,11 @@ def plot_posterior(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     credible_interval : float, optional
-        Credible intervals. Defaults to 0.94.
+        Credible intervals. Defaults to 0.94. Use None to hide the credible interval
     round_to : int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
     point_estimate: str
-        Must be in ('mode', 'mean', 'median')
+        Must be in ('mode', 'mean', 'median', None)
     group : str, optional
         Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     rope: tuple or dictionary of tuples
@@ -392,7 +392,8 @@ def _plot_posterior_op(
     plot_height = ax.get_ylim()[1]
 
     format_axes()
-    display_hpd()
+    if credible_interval is not None:
+        display_hpd()
     display_point_estimate()
     display_ref_val()
     display_rope()
