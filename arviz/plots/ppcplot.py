@@ -326,7 +326,7 @@ def plot_ppc(
                     )
                 else:
                     vals = pp_vals.flatten()
-                    nbins = len(get_bins(obs_vals))
+                    nbins = len(get_bins(vals))
                     hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                     hist = np.concatenate((hist[:1], hist))
                     ax.plot(
