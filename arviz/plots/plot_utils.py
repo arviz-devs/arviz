@@ -236,7 +236,7 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
-@conditional_jit(cache=True)
+@conditional_jit(forceobj=True)
 def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.
 
@@ -256,12 +256,10 @@ def purge_duplicates(list_in):
     return _list
 
 
-@conditional_jit(cache=True)
 def _dims(data, var_name, skip_dims):
     return [dim for dim in data[var_name].dims if dim not in skip_dims]
 
 
-@conditional_jit(cache=True)
 def _zip_dims(new_dims, vals):
     return [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
 

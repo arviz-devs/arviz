@@ -15,7 +15,7 @@ from .plot_utils import (
     set_xticklabels,
 )
 from ..stats import ELPDData
-from ..stats.stats_utils import histogram
+from ..utils import conditional_jit
 
 
 def plot_khat(
@@ -229,7 +229,7 @@ def plot_khat(
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
-        hist = histogram(khats, bin_edges)
+        hist, _ = _khat_histogram(khats, bin_edges)
         for idx, count in enumerate(hist):
             ax.text(
                 (n_data_points - 1 + xmax) / 2,
@@ -303,3 +303,8 @@ def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format)
                     fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
+
+
+@conditional_jit
+def _khat_histogram(data, bin_edges):
+    return np.histogram(data, bins=bin_edges)
