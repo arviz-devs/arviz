@@ -10,7 +10,7 @@ from ..stats import hpd
 from ..stats.diagnostics import _ess, _rhat
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from .kdeplot import _fast_kde
-from ..utils import _var_names
+from ..utils import _var_names, conditional_jit
 
 
 def pairwise(iterable):
@@ -284,11 +284,17 @@ class PlotHandler:
 
     def labels_and_ticks(self):
         """Collect labels and ticks from plotters."""
-        labels, idxs = [], []
-        for plotter in self.plotters.values():
-            sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
-            labels.append(sub_labels)
-            idxs.append(sub_idxs)
+        val = self.plotters.values()
+
+        @conditional_jit
+        def labels_idxs():
+            labels, idxs = [], []
+            for plotter in val:
+                sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
+                labels.append(sub_labels)
+                idxs.append(sub_idxs)
+            return labels, idxs
+        labels, idxs = labels_idxs()
         return np.concatenate(labels), np.concatenate(idxs)
 
     def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
