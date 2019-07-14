@@ -616,6 +616,10 @@ def _z_scale(ary):
     return z
 
 
+def _stack(x, y):
+    return np.vstack((x, y))
+
+
 def _split_chains(ary):
     """Split and stack chains."""
     ary = np.asarray(ary)
@@ -625,7 +629,7 @@ def _split_chains(ary):
         ary = np.atleast_2d(ary)
         _, n_draw = ary.shape
     half = n_draw // 2
-    return np.vstack((ary[:, :half], ary[:, -half:]))
+    return _stack(ary[:, :half], ary[:, -half:])
 
 
 def _z_fold(ary):
@@ -1038,7 +1042,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 
