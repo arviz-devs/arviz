@@ -135,6 +135,9 @@ def create_multidimensional_model(seed=10):
 
 @pytest.fixture(scope="module")
 def models():
+    """Fixture containing 2 mock inference data instances for testing."""
+    # blank line to keep black and pydocstyle happy
+
     class Models:
         model_1 = create_model(seed=10)
         model_2 = create_model(seed=11)
@@ -144,6 +147,9 @@ def models():
 
 @pytest.fixture(scope="module")
 def multidim_models():
+    """Fixture containing 2 mock inference data instances with multidimensional data for testing."""
+    # blank line to keep black and pydocstyle happy
+
     class Models:
         model_1 = create_multidimensional_model(seed=10)
         model_2 = create_multidimensional_model(seed=11)
