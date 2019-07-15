@@ -9,13 +9,13 @@ import pytest
 
 from ..data import from_dict, load_arviz_data
 from ..stats import compare, loo, waic
-from .helpers import (
+from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     create_model,
     multidim_models,
     create_multidimensional_model,
-)  # pylint: disable=unused-import
+)
 from ..plots import (
     plot_density,
     plot_trace,
