@@ -42,6 +42,11 @@ class InferenceData:
             options="\n\t> ".join(self._groups)
         )
 
+    def __delattr__(self, group):
+        """Delete a group from the InferenceData object."""
+        self._groups.remove(group)
+        object.__delattr__(self, group)
+
     @staticmethod
     def from_netcdf(filename):
         """Initialize object from a netcdf file.
@@ -73,16 +78,18 @@ class InferenceData:
                     groups[group] = data
         return InferenceData(**groups)
 
-    def to_netcdf(self, filename, compress=True):
+    def to_netcdf(self, filename, compress=True, groups=None):
         """Write InferenceData to file using netcdf4.
 
         Parameters
         ----------
         filename : str
             Location to write to
-        compress : bool
+        compress : bool, optional
             Whether to compress result. Note this saves disk space, but may make
             saving and loading somewhat slower (default: True).
+        groups : list, optional
+            Write only these groups to netcdf file.
 
         Returns
         -------
@@ -91,7 +98,11 @@ class InferenceData:
         """
         mode = "w"  # overwrite first, then append
         if self._groups:  # check's whether a group is present or not.
-            for group in self._groups:
+            if groups is None:
+                groups = self._groups
+            else:
+                groups = [group for group in self._groups if group in groups]
+            for group in groups:
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
