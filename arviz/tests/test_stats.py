@@ -23,7 +23,7 @@ from ..stats import (
 )
 from ..stats.stats import _gpinv
 from ..utils import Numba
-from .helpers import check_multiple_attrs
+from .helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
 
 os.environ["ARVIZ_LOAD"] = "EAGER"
 
@@ -69,8 +69,12 @@ def test_r2_score_multivariate():
 
 
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
-def test_compare_same(centered_eight, method):
-    data_dict = {"first": centered_eight, "second": centered_eight}
+@pytest.mark.parametrize("multidim", [True, False])
+def test_compare_same(centered_eight, multidim_models, method, multidim):
+    if multidim:
+        data_dict = {"first": multidim_models.model_1, "second": multidim_models.model_1}
+    else:
+        data_dict = {"first": centered_eight, "second": centered_eight}
 
     weight = compare(data_dict, method=method)["weight"]
     assert_allclose(weight[0], weight[1])
@@ -95,6 +99,17 @@ def test_compare_different(centered_eight, non_centered_eight, ic, method, scale
     assert_allclose(np.sum(weight), 1.0)
 
 
+@pytest.mark.parametrize("ic", ["waic", "loo"])
+@pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
+def test_compare_different_multidim(multidim_models, ic, method):
+    model_dict = {"model_1": multidim_models.model_1, "model_2": multidim_models.model_2}
+    weight = compare(model_dict, ic=ic, method=method)["weight"]
+
+    # this should hold because the same seed is always used
+    assert weight["model_1"] >= weight["model_2"]
+    assert_allclose(np.sum(weight), 1.0)
+
+
 def test_compare_different_size(centered_eight, non_centered_eight):
     centered_eight = deepcopy(centered_eight)
     centered_eight.posterior = centered_eight.posterior.drop("Choate", "school")
@@ -110,10 +125,9 @@ def test_compare_different_size(centered_eight, non_centered_eight):
 
 
 @pytest.mark.parametrize("var_names_expected", ((None, 10), ("mu", 1), (["mu", "tau"], 2)))
-def test_summary_var_names(var_names_expected):
+def test_summary_var_names(centered_eight, var_names_expected):
     var_names, expected = var_names_expected
-    centered = load_arviz_data("centered_eight")
-    summary_df = summary(centered, var_names=var_names)
+    summary_df = summary(centered_eight, var_names=var_names)
     assert len(summary_df.index) == expected
 
 
@@ -202,10 +216,17 @@ def test_summary_bad_unpack_order(centered_eight, order):
 
 
 @pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
-def test_waic(centered_eight, scale):
+@pytest.mark.parametrize("multidim", (True, False))
+def test_waic(centered_eight, multidim_models, scale, multidim):
     """Test widely available information criterion calculation"""
-    assert waic(centered_eight, scale=scale) is not None
-    assert waic(centered_eight, pointwise=True, scale=scale) is not None
+    if multidim:
+        assert waic(multidim_models.model_1, scale=scale) is not None
+        waic_pointwise = waic(multidim_models.model_1, pointwise=True, scale=scale)
+    else:
+        assert waic(centered_eight, scale=scale) is not None
+        waic_pointwise = waic(centered_eight, pointwise=True, scale=scale)
+    assert waic_pointwise is not None
+    assert "waic_i" in waic_pointwise
 
 
 def test_waic_bad(centered_eight):
@@ -246,8 +267,20 @@ def test_waic_print(centered_eight, scale):
     assert waic_data == waic_pointwise
 
 
-def test_loo(centered_eight):
-    assert loo(centered_eight) is not None
+@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("multidim", (True, False))
+def test_loo(centered_eight, multidim_models, scale, multidim):
+    """Test approximate leave one out criterion calculation"""
+    if multidim:
+        assert loo(multidim_models.model_1, scale=scale) is not None
+        loo_pointwise = loo(multidim_models.model_1, pointwise=True, scale=scale)
+    else:
+        assert loo(centered_eight, scale=scale) is not None
+        loo_pointwise = loo(centered_eight, pointwise=True, scale=scale)
+    assert loo_pointwise is not None
+    assert "loo_i" in loo_pointwise
+    assert "pareto_k" in loo_pointwise
+    assert "loo_scale" in loo_pointwise
 
 
 def test_loo_one_chain(centered_eight):
@@ -255,16 +288,6 @@ def test_loo_one_chain(centered_eight):
     centered_eight.posterior = centered_eight.posterior.drop([1, 2, 3], "chain")
     centered_eight.sample_stats = centered_eight.sample_stats.drop([1, 2, 3], "chain")
     assert loo(centered_eight) is not None
-
-
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
-def test_loo_pointwise(centered_eight, scale):
-    """Test pointwise loo with different scales."""
-    loo_results = loo(centered_eight, scale=scale, pointwise=True)
-    assert loo_results is not None
-    assert hasattr(loo_results, "loo_scale")
-    assert hasattr(loo_results, "pareto_k")
-    assert hasattr(loo_results, "loo_i")
 
 
 def test_loo_bad(centered_eight):
@@ -287,12 +310,16 @@ def test_loo_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     # make one of the khats infinity
     centered_eight.sample_stats["log_likelihood"][:, :, 1] = 10
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning) as record:
         assert loo(centered_eight, pointwise=True) is not None
+    assert len(record) == 1
+    assert "Estimated shape parameter" in str(record[0].message)
     # make all of the khats infinity
-    centered_eight.sample_stats["log_likelihood"][:, :, :] = 0
-    with pytest.warns(UserWarning):
+    centered_eight.sample_stats["log_likelihood"][:, :, :] = 1
+    with pytest.warns(UserWarning) as record:
         assert loo(centered_eight, pointwise=True) is not None
+    assert len(record) == 1
+    assert "Estimated shape parameter" in str(record[0].message)
 
 
 @pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
@@ -305,10 +332,9 @@ def test_loo_print(centered_eight, scale):
     assert loo_data == loo_pointwise[: len(loo_data)]
 
 
-def test_psislw():
-    data = load_arviz_data("centered_eight")
-    pareto_k = loo(data, pointwise=True, reff=0.7)["pareto_k"]
-    log_likelihood = data.sample_stats.log_likelihood  # pylint: disable=no-member
+def test_psislw(centered_eight):
+    pareto_k = loo(centered_eight, pointwise=True, reff=0.7)["pareto_k"]
+    log_likelihood = centered_eight.sample_stats.log_likelihood  # pylint: disable=no-member
     log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
@@ -383,6 +409,46 @@ def test_loo_pit(centered_eight, args):
         if log_weights == "arr":
             log_weights = log_weights_arr
         loo_pit_data = loo_pit(idata=centered_eight, y=y, y_hat=y_hat, log_weights=log_weights)
+    else:
+        loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
+    assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "y"},
+        {"y": "y", "y_hat": "y"},
+        {"y": "arr", "y_hat": "y"},
+        {"y": "y", "y_hat": "arr"},
+        {"y": "arr", "y_hat": "arr"},
+        {"y": "y", "y_hat": "y", "log_weights": "arr"},
+        {"y": "arr", "y_hat": "y", "log_weights": "arr"},
+        {"y": "y", "y_hat": "arr", "log_weights": "arr"},
+        {"idata": False},
+    ],
+)
+def test_loo_pit_multidim(multidim_models, args):
+    y = args.get("y", None)
+    y_hat = args.get("y_hat", None)
+    log_weights = args.get("log_weights", None)
+    idata = multidim_models.model_1
+    y_arr = idata.observed_data.y
+    y_hat_arr = idata.posterior_predictive.y.stack(samples=("chain", "draw"))
+    log_like = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+    n_samples = len(log_like.samples)
+    ess_p = ess(idata.posterior, method="mean")
+    reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+    log_weights_arr = psislw(-log_like, reff=reff)[0]
+
+    if args.get("idata", True):
+        if y == "arr":
+            y = y_arr
+        if y_hat == "arr":
+            y_hat = y_hat_arr
+        if log_weights == "arr":
+            log_weights = log_weights_arr
+        loo_pit_data = loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     else:
         loo_pit_data = loo_pit(idata=None, y=y_arr, y_hat=y_hat_arr, log_weights=log_weights_arr)
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))

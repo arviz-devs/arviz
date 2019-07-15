@@ -9,7 +9,13 @@ import pytest
 
 from ..data import from_dict, load_arviz_data
 from ..stats import compare, loo, waic
-from .helpers import eight_schools_params  # pylint: disable=unused-import
+from .helpers import (
+    eight_schools_params,
+    models,
+    create_model,
+    multidim_models,
+    create_multidimensional_model,
+)  # pylint: disable=unused-import
 from ..plots import (
     plot_density,
     plot_trace,
@@ -37,120 +43,6 @@ from ..plots import (
 
 np.random.seed(0)
 os.environ["ARVIZ_LOAD"] = "EAGER"
-
-
-def create_model(seed=10):
-    """Create model with fake data."""
-    np.random.seed(seed)
-    nchains = 4
-    ndraws = 500
-    data = {
-        "J": 8,
-        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-    }
-    posterior = {
-        "mu": np.random.randn(nchains, ndraws),
-        "tau": abs(np.random.randn(nchains, ndraws)),
-        "eta": np.random.randn(nchains, ndraws, data["J"]),
-        "theta": np.random.randn(nchains, ndraws, data["J"]),
-    }
-    posterior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"]))}
-    sample_stats = {
-        "energy": np.random.randn(nchains, ndraws),
-        "diverging": np.random.randn(nchains, ndraws) > 0.90,
-        "max_depth": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, data["J"]),
-    }
-    prior = {
-        "mu": np.random.randn(nchains, ndraws) / 2,
-        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
-        "eta": np.random.randn(nchains, ndraws, data["J"]) / 2,
-        "theta": np.random.randn(nchains, ndraws, data["J"]) / 2,
-    }
-    prior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"])) / 2}
-    sample_stats_prior = {
-        "energy": np.random.randn(nchains, ndraws),
-        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
-    }
-    model = from_dict(
-        posterior=posterior,
-        posterior_predictive=posterior_predictive,
-        sample_stats=sample_stats,
-        prior=prior,
-        prior_predictive=prior_predictive,
-        sample_stats_prior=sample_stats_prior,
-        observed_data={"y": data["y"]},
-        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
-        coords={"obs_dim": range(data["J"])},
-    )
-    return model
-
-
-def create_multidimensional_model(seed=10):
-    """Create model with fake data."""
-    np.random.seed(seed)
-    nchains = 4
-    ndraws = 500
-    ndim1 = 5
-    ndim2 = 7
-    data = {
-        "y": np.random.normal(size=(ndim1, ndim2)),
-        "sigma": np.random.normal(size=(ndim1, ndim2)),
-    }
-    posterior = {
-        "mu": np.random.randn(nchains, ndraws),
-        "tau": abs(np.random.randn(nchains, ndraws)),
-        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2),
-        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2),
-    }
-    posterior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2)}
-    sample_stats = {
-        "energy": np.random.randn(nchains, ndraws),
-        "diverging": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, ndim1, ndim2),
-    }
-    prior = {
-        "mu": np.random.randn(nchains, ndraws) / 2,
-        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
-        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
-        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
-    }
-    prior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2}
-    sample_stats_prior = {
-        "energy": np.random.randn(nchains, ndraws),
-        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
-    }
-    model = from_dict(
-        posterior=posterior,
-        posterior_predictive=posterior_predictive,
-        sample_stats=sample_stats,
-        prior=prior,
-        prior_predictive=prior_predictive,
-        sample_stats_prior=sample_stats_prior,
-        observed_data={"y": data["y"]},
-        dims={"y": ["dim1", "dim2"], "log_likelihood": ["dim1", "dim2"]},
-        coords={"dim1": range(ndim1), "dim2": range(ndim2)},
-    )
-    return model
-
-
-@pytest.fixture(scope="module")
-def models():
-    class Models:
-        model_1 = create_model(seed=10)
-        model_2 = create_model(seed=11)
-
-    return Models()
-
-
-@pytest.fixture(scope="module")
-def multidim_models():
-    class Models:
-        model_1 = create_multidimensional_model(seed=10)
-        model_2 = create_multidimensional_model(seed=11)
-
-    return Models()
 
 
 @pytest.fixture(scope="function", autouse=True)
