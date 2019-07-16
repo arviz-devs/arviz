@@ -303,7 +303,7 @@ def plot_ppc(
                         pp_x = np.linspace(lower, upper, len(pp_density))
                         pp_densities.extend([pp_x, pp_density])
                     else:
-                        nbins = round(len(vals) ** 0.5)
+                        nbins = len(get_bins(vals))
                         hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                         hist = np.concatenate((hist[:1], hist))
                         pp_densities.extend([bin_edges, hist])
@@ -402,7 +402,7 @@ def plot_ppc(
                     )
                 else:
                     vals = pp_vals.flatten()
-                    nbins = round(len(obs_vals) ** 0.5)
+                    nbins = len(get_bins(vals))
                     hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
                     hist = np.concatenate((hist[:1], hist))
                     ax.plot(
