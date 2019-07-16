@@ -275,8 +275,8 @@ def plot_ppc(
                     legend=legend,
                 )
             else:
-                nbins = len(get_bins(obs_vals))
-                hist, bin_edges = np.histogram(obs_vals, bins=nbins, density=True)
+                bins = get_bins(obs_vals)
+                hist, bin_edges = np.histogram(obs_vals, bins=bins, density=True)
                 hist = np.concatenate((hist[:1], hist))
                 ax.plot(
                     bin_edges,
@@ -303,8 +303,8 @@ def plot_ppc(
                         pp_x = np.linspace(lower, upper, len(pp_density))
                         pp_densities.extend([pp_x, pp_density])
                     else:
-                        nbins = len(get_bins(vals))
-                        hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                        bins = get_bins(vals)
+                        hist, bin_edges = np.histogram(vals, bins=bins, density=True)
                         hist = np.concatenate((hist[:1], hist))
                         pp_densities.extend([bin_edges, hist])
 
@@ -326,8 +326,8 @@ def plot_ppc(
                     )
                 else:
                     vals = pp_vals.flatten()
-                    nbins = len(get_bins(vals))
-                    hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                    bins = get_bins(vals)
+                    hist, bin_edges = np.histogram(vals, bins=bins, density=True)
                     hist = np.concatenate((hist[:1], hist))
                     ax.plot(
                         bin_edges,
@@ -402,8 +402,8 @@ def plot_ppc(
                     )
                 else:
                     vals = pp_vals.flatten()
-                    nbins = len(get_bins(vals))
-                    hist, bin_edges = np.histogram(vals, bins=nbins, density=True)
+                    bins = get_bins(vals)
+                    hist, bin_edges = np.histogram(vals, bins=bins, density=True)
                     hist = np.concatenate((hist[:1], hist))
                     ax.plot(
                         bin_edges,
