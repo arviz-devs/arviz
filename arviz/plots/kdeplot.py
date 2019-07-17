@@ -390,7 +390,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     xyi = np.floor(xyi, xyi).T
 
     scotts_factor = len_x ** (-1 / 6)
-    if np.shape(xyi)[0] <= 10000:
+    if np.shape(xyi)[0] < 10000:
         cov = _cov(xyi)
     else:
         cov = np.cov(xyi)
