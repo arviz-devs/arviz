@@ -401,7 +401,7 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-def plot_kde_2d():
+def test_plot_kde_2d():
     s_x = np.random.randn(100, 100)
     s_y = np.random.randn(100, 100)
     l_x = np.random.randn(10000, 1000)
