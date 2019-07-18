@@ -34,7 +34,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.kdeplot import _cov, _stack
+from ..plots.kdeplot import _cov
 
 np.random.seed(0)
 os.environ["ARVIZ_LOAD"] = "EAGER"
