@@ -13,7 +13,14 @@ class PyMC3Converter:
     """Encapsulate PyMC3 specific logic."""
 
     def __init__(
-        self, *, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
+        self,
+        *,
+        trace=None,
+        prior=None,
+        posterior_predictive=None,
+        coords=None,
+        dims=None,
+        model=None
     ):
         self.trace = trace
         self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
@@ -21,7 +28,13 @@ class PyMC3Converter:
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.coords = coords
+        if coords is None and model is not None and hasattr(model, "coords"):
+            self.coords = model.coords
+
         self.dims = dims
+        if dims is None and model is not None and hasattr(model, "RV_dims"):
+            self.dims = {k: list(v) for k, v in model.RV_dims.items()}
+
         self.observations = (
             None
             if self.trace is None
@@ -174,7 +187,9 @@ class PyMC3Converter:
         )
 
 
-def from_pymc3(trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
+def from_pymc3(
+    trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None, model=None
+):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,
@@ -182,4 +197,5 @@ def from_pymc3(trace=None, *, prior=None, posterior_predictive=None, coords=None
         posterior_predictive=posterior_predictive,
         coords=coords,
         dims=dims,
+        model=model,
     ).to_inference_data()
