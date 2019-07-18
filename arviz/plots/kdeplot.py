@@ -6,7 +6,7 @@ from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-na
 from scipy.sparse import coo_matrix
 import xarray as xr
 from ..data import InferenceData
-from ..utils import conditional_jit
+from ..utils import conditional_jit, _stack
 from .plot_utils import _scale_fig_size
 
 
@@ -340,11 +340,6 @@ def _histogram(x, n_bins, range_hist=None):
 @conditional_jit(cache=True)
 def _cov(data):
     return np.cov(data)
-
-
-@conditional_jit(cache=True)
-def _stack(x, y):
-    return np.vstack((x, y))
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):

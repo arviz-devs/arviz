@@ -16,7 +16,7 @@ from .stats_utils import (
     histogram,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
+from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var, _stack
 
 __all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
 
@@ -615,10 +615,6 @@ def _z_scale(ary):
     z = stats.norm.ppf((rank - 0.5) / size)
     z = z.reshape(ary.shape)
     return z
-
-
-def _stack(x, y):
-    return np.vstack((x, y))
 
 
 def _split_chains(ary):

@@ -298,10 +298,9 @@ class PlotHandler:
                 sub_labels, sub_idxs, _, _ = plotter.labels_ticks_and_vals()
                 labels.append(sub_labels)
                 idxs.append(sub_idxs)
-            return labels, idxs
+            return np.concatenate(labels), np.concatenate(idxs)
 
-        labels, idxs = label_idxs()
-        return np.concatenate(labels), np.concatenate(idxs)
+        return label_idxs()
 
     def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
         """Display ROPE when more than one interval is provided."""

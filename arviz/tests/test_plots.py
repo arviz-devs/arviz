@@ -381,12 +381,6 @@ def test_cov():
     assert np.allclose(_cov(x), np.cov(x))
 
 
-def test_stack():
-    x = np.random.randn(100, 100, 5)
-    y = np.random.randn(100, 100, 5)
-    assert np.allclose(_stack(x, y), np.vstack((x, y)))
-
-
 @pytest.mark.parametrize(
     "kwargs",
     [
