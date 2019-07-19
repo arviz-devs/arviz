@@ -345,9 +345,9 @@ def _cov_1d(x):
 
 
 def _cov(data):
-    if data.ndimn == 1:
+    if data.ndim == 1:
         return _cov_1d(data)
-    elif data.ndimn == 2:
+    elif data.ndim == 2:
         x = data
         avg, _ = np.average(x, axis=1, weights=None, returned=True)
         fact = x.shape[1] - 1
