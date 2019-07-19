@@ -399,17 +399,6 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-def test_plot_kde_2d():
-    s_x = np.random.randn(100, 100)
-    s_y = np.random.randn(100, 100)
-    l_x = np.random.randn(10000, 1000)
-    l_y = np.random.randn(10000, 1000)
-    axes = plot_kde(s_x, s_y)
-    assert axes
-    axes = plot_kde(l_x, l_y)
-    assert axes
-
-
 @pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "dist"}])
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
