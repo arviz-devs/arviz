@@ -337,9 +337,33 @@ def _histogram(x, n_bins, range_hist=None):
     return grid
 
 
+def _cov_1d(x):
+    x = x - x.mean(axis=0)
+    fact = x.shape[1] - 1
+    by_hand = np.dot(x.T, x.conj()) / fact
+    return np.array(by_hand)
+
+
+def _cov_2d(m):
+    assert m.ndimn == 2
+    x = m
+    avg, _ = np.average(x, axis=1, weights=None, returned=True)
+    fact = x.shape[1] - 1
+
+    if fact <= 0:
+        warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+        fact = 0.0
+
+    x -= avg[:, None]
+    x_t = x.T
+    c = _dot(x, x_t.conj())
+    c *= np.true_divide(1, fact)
+    return c.squeeze()
+
+
 @conditional_jit(cache=True)
-def _cov(data):
-    return np.cov(data)
+def _dot(x, y):
+    return np.dot(x, y)
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
@@ -385,10 +409,10 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     xyi = np.floor(xyi, xyi).T
 
     scotts_factor = len_x ** (-1 / 6)
-    if np.shape(xyi)[0] < 10000:
-        cov = _cov(xyi)
-    else:
-        cov = np.cov(xyi)
+    if xyi.ndim == 1:
+        cov = _cov_1d(xyi)
+    elif xyi.ndim == 2:
+        cov = _cov_2d(xyi)
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
