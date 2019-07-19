@@ -376,9 +376,13 @@ def test_plot_kde(continuous_model, kwargs):
     assert axes
 
 
-def test_cov():
-    x = np.random.rand(100, 100)
-    assert np.allclose(_cov(x), np.cov(x))
+@pytest.mark.parametrize("x", (np.random.randn(8), np.random.randn(8, 8), np.random.randn(8, 8, 8)))
+def test_cov(x):
+    if x.ndim <= 2:
+        assert np.allclose(_cov(x), np.cov(x))
+    else:
+        with pytest.raises(ValueError):
+            _cov(x)
 
 
 @pytest.mark.parametrize(

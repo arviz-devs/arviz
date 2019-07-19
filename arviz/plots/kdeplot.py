@@ -344,21 +344,23 @@ def _cov_1d(x):
     return np.array(by_hand)
 
 
-def _cov_2d(m):
-    assert m.ndimn == 2
-    x = m
-    avg, _ = np.average(x, axis=1, weights=None, returned=True)
-    fact = x.shape[1] - 1
-
-    if fact <= 0:
-        warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
-        fact = 0.0
-
-    x -= avg[:, None]
-    x_t = x.T
-    c = _dot(x, x_t.conj())
-    c *= np.true_divide(1, fact)
-    return c.squeeze()
+def _cov(data):
+    if data.ndimn == 1:
+        return _cov_1d(data)
+    elif data.ndimn == 2:
+        x = data
+        avg, _ = np.average(x, axis=1, weights=None, returned=True)
+        fact = x.shape[1] - 1
+        if fact <= 0:
+            warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+            fact = 0.0
+        x -= avg[:, None]
+        x_t = x.T
+        c = _dot(x, x_t.conj())
+        c *= np.true_divide(1, fact)
+        return c.squeeze()
+    else:
+        raise ValueError("{} dimension arrays are not supported".format(data.ndimn))
 
 
 @conditional_jit(cache=True)
