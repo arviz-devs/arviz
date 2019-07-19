@@ -356,9 +356,9 @@ def _cov(data):
             fact = 0.0
         x -= avg[:, None]
         x_t = x.T
-        c = _dot(x, x_t.conj())
-        c *= np.true_divide(1, fact)
-        return c.squeeze()
+        c_c = _dot(x, x_t.conj())
+        c_c *= np.true_divide(1, fact)
+        return c_c.squeeze()
     else:
         raise ValueError("{} dimension arrays are not supported".format(data.ndimn))
 
@@ -411,10 +411,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     xyi = np.floor(xyi, xyi).T
 
     scotts_factor = len_x ** (-1 / 6)
-    if xyi.ndim == 1:
-        cov = _cov_1d(xyi)
-    elif xyi.ndim == 2:
-        cov = _cov_2d(xyi)
+    cov = _cov(xyi)
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
