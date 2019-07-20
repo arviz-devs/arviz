@@ -339,7 +339,7 @@ def _histogram(x, n_bins, range_hist=None):
 
 def _cov_1d(x):
     x = x - x.mean(axis=0)
-    fact = x.shape[1] - 1
+    fact = x.shape[0] - 1
     by_hand = np.dot(x.T, x.conj()) / fact
     return np.array(by_hand)
 
@@ -348,7 +348,7 @@ def _cov(data):
     if data.ndim == 1:
         return _cov_1d(data)
     elif data.ndim == 2:
-        x = data
+        x = data.astype(float)
         avg, _ = np.average(x, axis=1, weights=None, returned=True)
         fact = x.shape[1] - 1
         if fact <= 0:
