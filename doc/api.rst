@@ -93,6 +93,7 @@ Data
     to_netcdf
     from_netcdf
     from_cmdstan
+    from_cmdstanpy
     from_dict
     from_emcee
     from_pymc3
