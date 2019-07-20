@@ -1,8 +1,7 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
-from collections import OrderedDict
+# pylint: disable=redefined-outer-name
 from glob import glob
-import numpy as np
 import os
+import numpy as np
 import pytest
 
 from arviz import from_cmdstanpy
@@ -29,16 +28,18 @@ class TestDataCmdStanPy:
         return files
 
     @pytest.fixture(scope="class")
-    def data(self, eight_schools_params, filepaths):
+    def data(self, filepaths):
         from cmdstanpy import StanFit
         from cmdstanpy.model import CmdStanArgs, SamplerArgs
 
         class Data:
-            args = CmdStanArgs("dummy.stan", "dummy.exe", list(range(1,5)), method_args=SamplerArgs())
+            args = CmdStanArgs(
+                "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
+            )
             obj = StanFit(args)
             obj.csv_files = filepaths
-            obj._validate_csv_files()
-            obj._assemble_sample()
+            obj._validate_csv_files()  # pylint: disable=protected-access
+            obj._assemble_sample()  # pylint: disable=protected-access
 
         return Data
 
@@ -49,7 +50,7 @@ class TestDataCmdStanPy:
             posterior_predictive="y_hat",
             prior=data.obj,
             prior_predictive="y_hat",
-            observed_data={"y" : eight_schools_params["y"]},
+            observed_data={"y": eight_schools_params["y"]},
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
@@ -68,7 +69,7 @@ class TestDataCmdStanPy:
             posterior_predictive=["y_hat"],
             prior=data.obj,
             prior_predictive=["y_hat"],
-            observed_data={"y" : eight_schools_params["y"]},
+            observed_data={"y": eight_schools_params["y"]},
             log_likelihood="log_lik",
             coords={
                 "school": np.arange(eight_schools_params["J"]),
@@ -90,7 +91,7 @@ class TestDataCmdStanPy:
             posterior_predictive=["y_hat", "log_lik"],
             prior=data.obj,
             prior_predictive=["y_hat", "log_lik"],
-            observed_data={"y" : eight_schools_params["y"]},
+            observed_data={"y": eight_schools_params["y"]},
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
         )
@@ -102,7 +103,7 @@ class TestDataCmdStanPy:
             posterior_predictive=None,
             prior=data.obj,
             prior_predictive=None,
-            observed_data={"y" : eight_schools_params["y"]},
+            observed_data={"y": eight_schools_params["y"]},
             coords=None,
             dims=None,
         )
