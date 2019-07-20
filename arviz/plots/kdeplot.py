@@ -360,7 +360,7 @@ def _cov(data):
         c_c *= np.true_divide(1, fact)
         return c_c.squeeze()
     else:
-        raise ValueError("{} dimension arrays are not supported".format(data.ndimn))
+        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
 
 @conditional_jit(cache=True)
@@ -422,7 +422,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     x_x, y_y = np.meshgrid(x_x, y_y)
 
     kernel = _stack(x_x.flatten(), y_y.flatten())
-    kernel = np.dot(inv_cov, kernel) * kernel
+    kernel = _dot(inv_cov, kernel) * kernel
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
 

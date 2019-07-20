@@ -212,11 +212,34 @@ class Fast_KDE_2d:
             y = np.random.randn(10000, 100)
             import numba
 
-            @numba.njit
-            def _cov(data):
-                return np.cov(data)
+            def _cov_1d(x):
+                x = x - x.mean(axis=0)
+                fact = x.shape[0] - 1
+                by_hand = np.dot(x.T, x.conj()) / fact
+                return np.array(by_hand)
 
-            @numba.njit
+            def _cov(data):
+                if data.ndim == 1:
+                    return _cov_1d(data)
+                elif data.ndim == 2:
+                    x = data.astype(float)
+                    avg, _ = np.average(x, axis=1, weights=None, returned=True)
+                    fact = x.shape[1] - 1
+                    if fact <= 0:
+                        warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+                        fact = 0.0
+                    x -= avg[:, None]
+                    x_t = x.T
+                    c_c = _dot(x, x_t.conj())
+                    c_c *= np.true_divide(1, fact)
+                    return c_c.squeeze()
+                else:
+                    raise ValueError("{} dimension arrays are not supported".format(data.ndimn))
+
+            @numba.njit(cache=True)
+            def _dot(x, y):
+                return np.dot(x, y)
+
             def _stack(x, y):
                 return np.vstack((x, y))
 
@@ -253,7 +276,7 @@ class Fast_KDE_2d:
                 x_x, y_y = np.meshgrid(x_x, y_y)
 
                 kernel = _stack(x_x.flatten(), y_y.flatten())
-                kernel = np.dot(inv_cov, kernel) * kernel
+                kernel = _dot(inv_cov, kernel) * kernel
                 kernel = np.exp(-kernel.sum(axis=0) / 2)
                 kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
 
