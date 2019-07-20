@@ -226,7 +226,9 @@ class Fast_KDE_2d:
                     avg, _ = np.average(x, axis=1, weights=None, returned=True)
                     fact = x.shape[1] - 1
                     if fact <= 0:
-                        warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+                        warnings.warn(
+                            "Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2
+                        )
                         fact = 0.0
                     x -= avg[:, None]
                     x_t = x.T
