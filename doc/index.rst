@@ -37,7 +37,7 @@ Installation with pip is recommended
     pip install arviz
 
 ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_,
+`PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
 `Pyro <http://pyro.ai/>`_, and
 `emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
 

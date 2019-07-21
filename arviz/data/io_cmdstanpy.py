@@ -1,4 +1,4 @@
-"""CmdStan-specific conversion code."""
+"""CmdStanPy-specific conversion code."""
 from collections import defaultdict
 from copy import deepcopy
 import logging
@@ -37,6 +37,9 @@ class CmdStanPyConverter:
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
+        if isinstance(log_likelihood, (list, tuple)):
+            if len(log_likelihood) == 1:
+                log_likelihood = log_likelihood[0]
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -291,16 +294,16 @@ def from_cmdstanpy(
     coords=None,
     dims=None
 ):
-    """Convert CmdStan data into an InferenceData object.
+    """Convert CmdStanPy data into an InferenceData object.
 
     Parameters
     ----------
-    posterior : PosteriorSample object
-        PyCmdStan PosteriorSample
+    posterior : StanFit object
+        CmdStanPy StanFit
     posterior_predictive : str, list of str
         Posterior predictive samples for the fit.
-    prior : PosteriorSample
-        PyCmdStan PosteriorSample
+    prior : StanFit
+        CmdStanPy StanFit
     prior_predictive : str, list of str
         Prior predictive samples for the fit.
     observed_data : dict
