@@ -30,6 +30,12 @@ The latest stable version can be installed using pip:
 pip install arviz
 ```
 
+ArviZ is also available through [conda-forge](https://anaconda.org/conda-forge/arviz).
+
+```
+conda install -c conda-forge arviz
+```
+
 ### Development
 The latest development version can be installed from the master branch using pip:
 
@@ -180,4 +186,3 @@ can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/m
 
 ## Sponsors
 [![NumFOCUS](https://i0.wp.com/numfocus.org/wp-content/uploads/2019/06/AffiliatedProject.png)](https://numfocus.org)
-
