@@ -339,9 +339,8 @@ def _histogram(x, n_bins, range_hist=None):
 
 def _cov_1d(x):
     x = x - x.mean(axis=0)
-    fact = x.shape[0] - 1
-    by_hand = np.dot(x.T, x.conj()) / fact
-    return np.array(by_hand)
+    ddof = x.shape[0] - 1
+    return np.dot(x.T, x.conj()) / ddof
 
 
 def _cov(data):
@@ -350,15 +349,14 @@ def _cov(data):
     elif data.ndim == 2:
         x = data.astype(float)
         avg, _ = np.average(x, axis=1, weights=None, returned=True)
-        fact = x.shape[1] - 1
-        if fact <= 0:
+        ddof = x.shape[1] - 1
+        if ddof <= 0:
             warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
-            fact = 0.0
+            ddof = 0.0
         x -= avg[:, None]
-        x_t = x.T
-        c_c = _dot(x, x_t.conj())
-        c_c *= np.true_divide(1, fact)
-        return c_c.squeeze()
+        prod = _dot(x, x.T.conj())
+        prod *= np.true_divide(1, ddof)
+        return prod.squeeze()
     else:
         raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
