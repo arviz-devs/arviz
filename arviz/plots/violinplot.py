@@ -127,7 +127,7 @@ def _violinplot(val, shade, bw, ax, **kwargs_shade):
 def cat_hist(val, shade, ax, **kwargs_shade):
     """Auxiliary function to plot discrete-violinplots."""
     bins = get_bins(val)
-    binned_d, _ = np.histogram(val, bins=bins, normed=True)
+    binned_d, _ = np.histogram(val, bins=bins, density=True)
 
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
     centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
