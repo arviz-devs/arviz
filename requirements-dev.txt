@@ -2,6 +2,7 @@ emcee
 git+https://github.com/pymc-devs/pymc3
 ghp-import
 pystan
+cmdstanpy
 ipython
 nbsphinx
 numpydoc

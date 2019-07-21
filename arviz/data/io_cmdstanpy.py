@@ -114,6 +114,8 @@ class CmdStanPyConverter:
                     coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
 
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        if log_likelihood in data:
+            data["log_likelihood"] = data.pop(log_likelihood)
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
             name = re.sub("__$", "", s_param_)
@@ -193,7 +195,7 @@ class CmdStanPyConverter:
         observed_data = {}
         for key, vals in self.observed_data.items():
             vals = np.atleast_1d(vals)
-            val_dims = self.dims.get(key)
+            val_dims = self.dims.get(key) if self.dims is not None else None
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords
             )
