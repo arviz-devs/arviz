@@ -974,10 +974,9 @@ def waic(data, pointwise=False, scale="deviance"):
     warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
-            """For one or more samples the posterior variance of the log predictive
-        densities exceeds 0.4. This could be indication of WAIC starting to fail see
-        http://arxiv.org/abs/1507.04544 for details
-        """
+            ("For one or more samples the posterior variance of the log predictive "
+             "densities exceeds 0.4. This could be indication of WAIC starting to fail. \n"
+             "See http://arxiv.org/abs/1507.04544 for details")
         )
         warn_mg = True
 
