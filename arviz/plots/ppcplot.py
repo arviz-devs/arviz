@@ -380,11 +380,12 @@ def plot_ppc(
 
             else:
                 # run plot_kde manually with one plot call
-                pp_densities = []
-                for vals in pp_sampled_vals:
+                pp_densities = np.empty((2 * len(pp_sampled_vals), pp_sampled_vals[0].size))
+                for idx, vals in enumerate(pp_sampled_vals):
                     vals = np.array([vals]).flatten()
                     pp_x, pp_density = _empirical_cdf(vals)
-                    pp_densities.extend([pp_x, pp_density])
+                    pp_densities[2 * idx] = pp_x
+                    pp_densities[2 * idx + 1] = pp_density
 
                 ax_i.plot(
                     *pp_densities, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
