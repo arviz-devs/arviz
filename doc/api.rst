@@ -128,3 +128,12 @@ rcParams
    :template: class.rst
 
    rc_context
+
+Wrappers
+--------
+
+.. autosummary::
+      :toctree: generated/
+      :template: class.rst
+
+      SamplingWrapper
