@@ -9,7 +9,7 @@ import pytest
 
 from ..data import load_arviz_data, from_cmdstan
 from ..plots.plot_utils import xarray_var_iter
-from ..stats import bfmi, rhat, ess, mcse, geweke, effective_sample_size
+from ..stats import bfmi, rhat, ess, mcse, geweke
 from ..stats.diagnostics import (
     ks_summary,
     _ess,
