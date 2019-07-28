@@ -273,11 +273,6 @@ class TestDiagnostics:
         assert ess_hat > n_low
         assert ess_hat < n_high
 
-    def test_old_effective_sample_size(self):
-        with pytest.deprecated_call():
-            old_ess = effective_sample_size(np.random.randn(4, 100), method="bulk")
-        assert old_ess
-
     @pytest.mark.parametrize(
         "method",
         (
