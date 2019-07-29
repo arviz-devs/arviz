@@ -18,7 +18,7 @@ from .stats_utils import (
 from ..data import convert_to_dataset
 from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
 
-__all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
+__all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 
 
 def bfmi(data):
@@ -60,72 +60,6 @@ def bfmi(data):
     if not hasattr(dataset, "energy"):
         raise TypeError("Energy variable was not found.")
     return _bfmi(dataset.energy)
-
-
-def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
-    r"""Calculate estimate of the effective sample size.
-
-    Function deprecated. Use `arviz.ess`.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
-        For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
-    var_names : list
-        Names of variables to include in the effective_sample_size_mean report
-    method : str
-        Select ess method. Valid methods are:
-
-        - "bulk"
-        - "tail"     # prob, optional
-        - "quantile" # prob
-        - "mean" (old ess)
-        - "sd"
-        - "median"
-        - "mad" (mean absolute deviance)
-        - "z_scale"
-        - "folded"
-        - "identity"
-
-    relative : bool
-        Return relative ess
-        `ress = ess / N`
-    prob : float, optional
-        probability value for "tail" and "quantile" ess functions.
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the effective sample size for mean, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    References
-    ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
-      Section 15.4.2
-    * Gelman et al. BDA (2014) Formula 11.8
-    """
-    warnings.warn(
-        "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
-    )
-    return ess(data, var_names=var_names, method=method, relative=relative, prob=prob)
 
 
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
