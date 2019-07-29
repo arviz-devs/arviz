@@ -398,7 +398,8 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         - `log` : 1 * log-score (after Vehtari et al. (2017))
         - `negative_log` : -1 * (log-score)
 
-        A high log-score (or a low deviance) indicate a good predictive accuracy of the model.
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
 
     Returns
     -------
@@ -1047,7 +1048,8 @@ def waic(data, pointwise=False, scale="deviance"):
         - `log` : 1 * log-score
         - `negative_log` : -1 * (log-score)
 
-        A high log-score (or a low deviance) indicate a good predictive accuracy of the model.
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
 
     Returns
     -------
