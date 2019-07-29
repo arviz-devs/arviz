@@ -398,6 +398,9 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         - `log` : 1 * log-score (after Vehtari et al. (2017))
         - `negative_log` : -1 * (log-score)
 
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
+
     Returns
     -------
     pandas.Series with the following rows:
@@ -1044,6 +1047,9 @@ def waic(data, pointwise=False, scale="deviance"):
         - `deviance` : (default) -2 * (log-score)
         - `log` : 1 * log-score
         - `negative_log` : -1 * (log-score)
+
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
 
     Returns
     -------
