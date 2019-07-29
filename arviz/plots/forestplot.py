@@ -208,6 +208,7 @@ def plot_forest(
         idx += 1
 
     for ax in axes:
+        ax.grid(False, axis="x")
         # Remove ticklines on y-axes
         ax.tick_params(axis="y", left=False, right=False)
 
