@@ -1,5 +1,4 @@
 """Data structure for using netcdf groups with xarray."""
-import os
 from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
