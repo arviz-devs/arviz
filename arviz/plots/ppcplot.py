@@ -329,8 +329,8 @@ def plot_ppc(
                 if dtype == "f":
                     ax_i.plot(np.transpose(pp_xs), np.transpose(pp_densities), **plot_kwargs)
                 else:
-                    for xs, ys in zip(pp_xs, pp_densities):
-                        ax_i.plot(xs, ys, **plot_kwargs)
+                    for x_s, y_s in zip(pp_xs, pp_densities):
+                        ax_i.plot(x_s, y_s, **plot_kwargs)
 
             if mean:
                 if dtype == "f":
@@ -341,8 +341,8 @@ def plot_ppc(
                     new_d = np.zeros((rep, len_density))
                     bins = np.digitize(pp_xs, new_x, right=True)
                     new_x -= (new_x[1] - new_x[0]) / 2
-                    for i in range(rep):
-                        new_d[i][bins[i]] = pp_densities[i]
+                    for irep in range(rep):
+                        new_d[irep][bins[irep]] = pp_densities[irep]
                     ax_i.plot(
                         new_x,
                         new_d.mean(0),
