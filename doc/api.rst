@@ -109,3 +109,12 @@ Utils
 
       Numba
       interactive_backend
+
+rcParams
+--------
+
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   rc_context

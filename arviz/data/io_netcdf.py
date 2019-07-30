@@ -18,9 +18,9 @@ def from_netcdf(filename):
 
     Notes
     -----
-    By default, the datasets of the InferenceData object will be lazily loaded. To
-    modify this behaviour, the environment variable ``ARVIZ_LOAD`` must be set to
-    ``EAGER`` (case insensitive) in order to load objects in memory instead.
+    By default, the datasets of the InferenceData object will be lazily loaded instead
+    of loaded into memory. This behaviour is regulated by the value of
+    ``az.rcParams["data.load"]``.
     """
     return InferenceData.from_netcdf(filename)
 

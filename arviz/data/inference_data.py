@@ -54,7 +54,8 @@ class InferenceData:
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
-        By default, the datasets of the InferenceData object will be lazily loaded. This
+        By default, the datasets of the InferenceData object will be lazily loaded instead
+        of being loaded into memory. This
         behaviour is regulated by the value of ``az.rcParams["data.load"]``.
 
         Parameters
