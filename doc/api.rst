@@ -64,7 +64,6 @@ Diagnostics
     bfmi
     geweke
     ess
-    effective_sample_size
     rhat
     mcse
 
