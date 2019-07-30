@@ -3,6 +3,7 @@ import numpy as np
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset
+from ..utils import conditional_jit
 
 
 def _get_var_names(posterior):
@@ -48,6 +49,10 @@ class PyroConverter:
 
         self.pyro = pyro
 
+    @conditional_jit(parallel=True)
+    def _expand_dims(self, x):
+        return np.expand_dims(x, 0)
+
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         # Do not make pyro a requirement
@@ -55,7 +60,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support().squeeze(), 0)
+                name: self._expand_dims(samples.enumerate_support().squeeze())
                 if self.posterior.num_chains == 1
                 else samples.enumerate_support().squeeze()
                 for name, samples in self.posterior.marginal(
@@ -69,7 +74,7 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
+                data[var_name] = self._expand_dims(samples.numpy().squeeze())
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -78,7 +83,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: np.expand_dims(samples.enumerate_support().squeeze(), 0)
+                name: self._expand_dims(samples.enumerate_support().squeeze())
                 for name, samples in self.posterior.marginal(
                     sites=self.observed_vars
                 ).empirical.items()
@@ -90,7 +95,7 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = np.expand_dims(samples.numpy().squeeze(), 0)
+                data[var_name] = self._expand_dims(samples.numpy().squeeze())
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):

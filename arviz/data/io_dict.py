@@ -6,6 +6,7 @@ import xarray as xr
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+from ..utils import conditional_jit
 
 
 class DictConverter:
@@ -107,13 +108,17 @@ class DictConverter:
             dims = self.dims
         observed_data = dict()
         for key, vals in data.items():
-            vals = np.atleast_1d(vals)
+            vals = self._one_de(vals)
             val_dims = dims.get(key)
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords
             )
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=None))
+
+    @conditional_jit(parallel=True)
+    def _one_de(self, x):
+        return np.atleast_1d(x)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
