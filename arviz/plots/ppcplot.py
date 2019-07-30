@@ -36,6 +36,7 @@ def plot_ppc(
     animated=False,
     animation_kwargs=None,
     legend=True,
+    ax=None,
 ):
     """
     Plot for posterior predictive checks.
@@ -99,6 +100,8 @@ def plot_ppc(
         Keywords passed to `animation.FuncAnimation`.
     legend : bool
         Add legend to figure. By default True.
+    ax : axes
+        Matplotlib axes. Defaults to None.
 
     Returns
     -------
@@ -247,9 +250,22 @@ def plot_ppc(
         figsize, textsize, rows, cols
     )
 
-    fig, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
+    if ax is None:
+        fig, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
+    else:
+        axes = np.ravel(ax)
+        if len(axes) != length_plotters:
+            raise ValueError(
+                "Found {} variables to plot but {} axes instances. They must be equal.".format(
+                    length_plotters, len(axes)
+                )
+            )
+        if animated:
+            fig = axes[0].get_figure()
+            if not all([ax.get_figure() is fig for ax in axes]):
+                raise ValueError("All axes must be on the same figure for animation to work")
 
-    for i, ax in enumerate(axes):
+    for i, ax_i in enumerate(axes):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
         dtype = posterior_predictive[pp_var_name].dtype.kind
@@ -263,7 +279,7 @@ def plot_ppc(
             plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
-            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
 
             if dtype == "f":
                 plot_kde(
@@ -271,14 +287,14 @@ def plot_ppc(
                     label="Observed {}".format(var_name),
                     plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
                     fill_kwargs={"alpha": 0},
-                    ax=ax,
+                    ax=ax_i,
                     legend=legend,
                 )
             else:
                 bins = get_bins(obs_vals)
                 hist, bin_edges = np.histogram(obs_vals, bins=bins, density=True)
                 hist = np.concatenate((hist[:1], hist))
-                ax.plot(
+                ax_i.plot(
                     bin_edges,
                     hist,
                     label="Observed {}".format(var_name),
@@ -290,7 +306,7 @@ def plot_ppc(
 
             if animated:
                 animate, init = _set_animation(
-                    pp_sampled_vals, ax, dtype=dtype, kind=kind, plot_kwargs=plot_kwargs
+                    pp_sampled_vals, ax_i, dtype=dtype, kind=kind, plot_kwargs=plot_kwargs
                 )
 
             else:
@@ -308,7 +324,7 @@ def plot_ppc(
                         hist = np.concatenate((hist[:1], hist))
                         pp_densities.extend([bin_edges, hist])
 
-                ax.plot(*pp_densities, **plot_kwargs)
+                ax_i.plot(*pp_densities, **plot_kwargs)
 
             if mean:
                 if dtype == "f":
@@ -321,7 +337,7 @@ def plot_ppc(
                             "zorder": 2,
                         },
                         label="Posterior predictive mean {}".format(pp_var_name),
-                        ax=ax,
+                        ax=ax_i,
                         legend=legend,
                     )
                 else:
@@ -329,7 +345,7 @@ def plot_ppc(
                     bins = get_bins(vals)
                     hist, bin_edges = np.histogram(vals, bins=bins, density=True)
                     hist = np.concatenate((hist[:1], hist))
-                    ax.plot(
+                    ax_i.plot(
                         bin_edges,
                         hist,
                         color="C0",
@@ -339,12 +355,12 @@ def plot_ppc(
                         linestyle="--",
                         drawstyle=plot_kwargs["drawstyle"],
                     )
-            ax.tick_params(labelsize=xt_labelsize)
-            ax.set_yticks([])
+            ax_i.tick_params(labelsize=xt_labelsize)
+            ax_i.set_yticks([])
 
         elif kind == "cumulative":
             drawstyle = "default" if dtype == "f" else "steps-pre"
-            ax.plot(
+            ax_i.plot(
                 *_empirical_cdf(obs_vals),
                 color="k",
                 linewidth=linewidth,
@@ -355,7 +371,7 @@ def plot_ppc(
             if animated:
                 animate, init = _set_animation(
                     pp_sampled_vals,
-                    ax,
+                    ax_i,
                     kind=kind,
                     alpha=alpha,
                     drawstyle=drawstyle,
@@ -370,12 +386,12 @@ def plot_ppc(
                     pp_x, pp_density = _empirical_cdf(vals)
                     pp_densities.extend([pp_x, pp_density])
 
-                ax.plot(
+                ax_i.plot(
                     *pp_densities, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
                 )
-            ax.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
             if mean:
-                ax.plot(
+                ax_i.plot(
                     *_empirical_cdf(pp_vals.flatten()),
                     color="C0",
                     linestyle="--",
@@ -383,7 +399,7 @@ def plot_ppc(
                     drawstyle=drawstyle,
                     label="Posterior predictive mean {}".format(pp_var_name)
                 )
-            ax.set_yticks([0, 0.5, 1])
+            ax_i.set_yticks([0, 0.5, 1])
 
         elif kind == "scatter":
             if mean:
@@ -397,7 +413,7 @@ def plot_ppc(
                             "zorder": 3,
                         },
                         label="Posterior predictive mean {}".format(pp_var_name),
-                        ax=ax,
+                        ax=ax_i,
                         legend=legend,
                     )
                 else:
@@ -405,7 +421,7 @@ def plot_ppc(
                     bins = get_bins(vals)
                     hist, bin_edges = np.histogram(vals, bins=bins, density=True)
                     hist = np.concatenate((hist[:1], hist))
-                    ax.plot(
+                    ax_i.plot(
                         bin_edges,
                         hist,
                         color="C0",
@@ -416,7 +432,7 @@ def plot_ppc(
                         drawstyle="steps-pre",
                     )
 
-            _, limit = ax.get_ylim()
+            _, limit = ax_i.get_ylim()
             limit *= 1.05
             y_rows = np.linspace(0, limit, num_pp_samples + 1)
             jitter_scale = y_rows[1] - y_rows[0]
@@ -426,7 +442,7 @@ def plot_ppc(
             obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
             if jitter:
                 obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
-            ax.plot(
+            ax_i.plot(
                 obs_vals,
                 obs_yvals,
                 "o",
@@ -440,7 +456,7 @@ def plot_ppc(
             if animated:
                 animate, init = _set_animation(
                     pp_sampled_vals,
-                    ax,
+                    ax_i,
                     kind=kind,
                     height=y_rows.mean() * 0.5,
                     markersize=markersize,
@@ -452,25 +468,25 @@ def plot_ppc(
                     yvals = np.full_like(vals, y, dtype=np.float64)
                     if jitter:
                         yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
-                    ax.plot(
+                    ax_i.plot(
                         vals, yvals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
                     )
 
-            ax.plot([], "C5o", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot([], "C5o", label="Posterior predictive {}".format(pp_var_name))
 
-            ax.set_yticks([])
+            ax_i.set_yticks([])
 
         if var_name != pp_var_name:
             xlabel = "{} / {}".format(var_name, pp_var_name)
         else:
             xlabel = var_name
-        ax.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
+        ax_i.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
 
         if legend:
             if i == 0:
-                ax.legend(fontsize=xt_labelsize * 0.75)
+                ax_i.legend(fontsize=xt_labelsize * 0.75)
             else:
-                ax.legend([])
+                ax_i.legend([])
 
     if animated:
         ani = animation.FuncAnimation(
