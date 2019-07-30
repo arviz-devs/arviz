@@ -220,7 +220,7 @@ def rc_params():
 rcParams = rc_params()  # pylint: disable=invalid-name
 
 
-class rc_context:
+class rc_context:  # pylint: disable=invalid-name
     """
     Return a context manager for managing rc settings.
 

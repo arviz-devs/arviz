@@ -8,6 +8,8 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
+from ..rcparams import rcParams
+
 
 class InferenceData:
     """Container for accessing netCDF files using xarray."""
@@ -52,9 +54,8 @@ class InferenceData:
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
-        By default, the datasets of the InferenceData object will be lazily loaded. To
-        modify this behaviour, the environment variable ``ARVIZ_LOAD`` must be set to
-        ``EAGER`` (case insensitive) in order to load objects in memory instead.
+        By default, the datasets of the InferenceData object will be lazily loaded. This
+        behaviour is regulated by the value of ``az.rcParams["data.load"]``.
 
         Parameters
         ----------
@@ -69,10 +70,9 @@ class InferenceData:
         with nc.Dataset(filename, mode="r") as data:
             data_groups = list(data.groups)
 
-        arviz_load_mode = os.environ.get("ARVIZ_LOAD", "lazy").lower()
         for group in data_groups:
             with xr.open_dataset(filename, group=group) as data:
-                if arviz_load_mode == "eager":
+                if rcParams["data.load"] == "eager":
                     groups[group] = data.load()
                 else:
                     groups[group] = data
