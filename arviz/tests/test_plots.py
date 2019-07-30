@@ -548,13 +548,17 @@ def test_plot_ppc_ax(models, kind, fig_ax):
     axes = plot_ppc(models.model_1, kind=kind, ax=ax)
     assert axes[0] is ax
 
+
 def test_plot_ppc_bad_ax(models, fig_ax):
     _, ax = fig_ax
     _, ax2 = plt.subplots(1, 2)
     with pytest.raises(ValueError, match="same figure"):
-        plot_ppc(models.model_1, ax=[ax, *ax2], flatten=[], coords={"obs_dim": [1, 2, 3]}, animated=True)
+        plot_ppc(
+            models.model_1, ax=[ax, *ax2], flatten=[], coords={"obs_dim": [1, 2, 3]}, animated=True
+        )
     with pytest.raises(ValueError, match="2 axes"):
         plot_ppc(models.model_1, ax=ax2)
+
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, var_names):
