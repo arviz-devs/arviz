@@ -6,7 +6,7 @@ from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-na
 from scipy.sparse import coo_matrix
 import xarray as xr
 from ..data import InferenceData
-from ..utils import conditional_jit
+from ..utils import conditional_jit, _stack
 from .plot_utils import _scale_fig_size
 
 
@@ -331,10 +331,39 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     return density, xmin, xmax
 
 
-@conditional_jit
+@conditional_jit(cache=True)
 def _histogram(x, n_bins, range_hist=None):
     grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
     return grid
+
+
+def _cov_1d(x):
+    x = x - x.mean(axis=0)
+    ddof = x.shape[0] - 1
+    return np.dot(x.T, x.conj()) / ddof
+
+
+def _cov(data):
+    if data.ndim == 1:
+        return _cov_1d(data)
+    elif data.ndim == 2:
+        x = data.astype(float)
+        avg, _ = np.average(x, axis=1, weights=None, returned=True)
+        ddof = x.shape[1] - 1
+        if ddof <= 0:
+            warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+            ddof = 0.0
+        x -= avg[:, None]
+        prod = _dot(x, x.T.conj())
+        prod *= np.true_divide(1, ddof)
+        return prod.squeeze()
+    else:
+        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
+
+
+@conditional_jit(cache=True)
+def _dot(x, y):
+    return np.dot(x, y)
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
@@ -374,13 +403,13 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     d_x = (xmax - xmin) / (n_x - 1)
     d_y = (ymax - ymin) / (n_y - 1)
 
-    xyi = np.vstack((x, y)).T
+    xyi = _stack(x, y).T
     xyi -= [xmin, ymin]
     xyi /= [d_x, d_y]
     xyi = np.floor(xyi, xyi).T
 
     scotts_factor = len_x ** (-1 / 6)
-    cov = np.cov(xyi)
+    cov = _cov(xyi)
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
@@ -390,8 +419,8 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     y_y = np.arange(kern_ny) - kern_ny / 2
     x_x, y_y = np.meshgrid(x_x, y_y)
 
-    kernel = np.vstack((x_x.flatten(), y_y.flatten()))
-    kernel = np.dot(inv_cov, kernel) * kernel
+    kernel = _stack(x_x.flatten(), y_y.flatten())
+    kernel = _dot(inv_cov, kernel) * kernel
     kernel = np.exp(-kernel.sum(axis=0) / 2)
     kernel = kernel.reshape((int(kern_ny), int(kern_nx)))
 

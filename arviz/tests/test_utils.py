@@ -7,7 +7,7 @@ import importlib
 import numpy as np
 import pytest
 
-from ..utils import _var_names, format_sig_figs, numba_check, Numba, _numba_var
+from ..utils import _var_names, format_sig_figs, numba_check, Numba, _numba_var, _stack
 from ..data import load_arviz_data, from_dict
 from ..stats.stats_utils import stats_variance_2d as svar
 
@@ -231,3 +231,11 @@ def test_numba_var(axis, ddof):
     assert flag == Numba.numba_flag
     assert np.allclose(with_numba_1, non_numba_1)
     assert np.allclose(with_numba_2, non_numba_2)
+
+
+def test_stack():
+    x = np.random.randn(10, 4, 6)
+    y = np.random.randn(100, 4, 6)
+    assert x.shape[1:] == y.shape[1:]
+    assert np.allclose(np.vstack((x, y)), _stack(x, y))
+    assert _stack

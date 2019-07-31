@@ -16,7 +16,7 @@ from .stats_utils import (
     histogram,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
+from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var, _stack
 
 __all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 
@@ -484,7 +484,8 @@ def ks_summary(pareto_tail_indices):
     """
     _numba_flag = Numba.numba_flag
     if _numba_flag:
-        kcounts = histogram(pareto_tail_indices)
+        bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, _ = histogram(pareto_tail_indices, bins)
     else:
         kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
@@ -559,7 +560,7 @@ def _split_chains(ary):
         ary = np.atleast_2d(ary)
         _, n_draw = ary.shape
     half = n_draw // 2
-    return np.vstack((ary[:, :half], ary[:, -half:]))
+    return _stack(ary[:, :half], ary[:, -half:])
 
 
 def _z_fold(ary):
@@ -972,7 +973,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 

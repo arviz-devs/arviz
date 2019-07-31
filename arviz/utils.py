@@ -282,3 +282,8 @@ def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
         return numba_function(data, axis=axis, ddof=ddof)
     else:
         return standard_numpy_func(data, axis=axis, ddof=ddof)
+
+
+def _stack(x, y):
+    assert x.shape[1:] == y.shape[1:]
+    return np.vstack((x, y))

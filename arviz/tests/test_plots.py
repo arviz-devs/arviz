@@ -40,6 +40,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
+from ..plots.kdeplot import _cov
 
 np.random.seed(0)
 os.environ["ARVIZ_LOAD"] = "EAGER"
@@ -265,6 +266,15 @@ def test_plot_joint_bad(models):
 def test_plot_kde(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
+
+
+@pytest.mark.parametrize("x", [np.random.randn(8), np.random.randn(8, 8), np.random.randn(8, 8, 8)])
+def test_cov(x):
+    if x.ndim <= 2:
+        assert np.allclose(_cov(x), np.cov(x))
+    else:
+        with pytest.raises(ValueError):
+            _cov(x)
 
 
 @pytest.mark.parametrize(
