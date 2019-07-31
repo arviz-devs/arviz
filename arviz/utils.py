@@ -311,4 +311,3 @@ def two_de(x):
 def expand_dims(x):
     """Jitting numpy expand_dims."""
     return np.expand_dims(x, 0)
-
