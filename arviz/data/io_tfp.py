@@ -53,7 +53,7 @@ class TfpConverter:
         """Convert the posterior to an xarray dataset."""
         data = {}
         for i, var_name in enumerate(self.var_names):
-            data[var_name] = expand_dims(self.posterior[i], axis=0)
+            data[var_name] = expand_dims(self.posterior[i])
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -115,9 +115,7 @@ class TfpConverter:
 
         data = {}
         with self.tf.Session() as sess:
-            data["obs"] = expand_dims(
-                sess.run(posterior_preds, feed_dict=self.feed_dict)
-            )
+            data["obs"] = expand_dims(sess.run(posterior_preds, feed_dict=self.feed_dict))
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def sample_stats_to_xarray(self):
@@ -144,9 +142,7 @@ class TfpConverter:
         dims = {"log_likelihood": coord_name}
 
         with self.tf.Session() as sess:
-            data["log_likelihood"] = expand_dims(
-                sess.run(log_likelihood, feed_dict=self.feed_dict)
-            )
+            data["log_likelihood"] = expand_dims(sess.run(log_likelihood, feed_dict=self.feed_dict))
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=dims)
 
     def to_inference_data(self):

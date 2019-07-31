@@ -3,7 +3,6 @@ from copy import deepcopy
 import datetime
 import warnings
 
-import numpy as np
 import pkg_resources
 import xarray as xr
 from ..utils import two_de, arange

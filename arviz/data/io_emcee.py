@@ -4,7 +4,7 @@ import xarray as xr
 import numpy as np
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
-from ..utils import conditional_jit, one_de, arange
+from ..utils import one_de, arange
 
 
 def _verify_names(sampler, var_names, arg_names, slices):

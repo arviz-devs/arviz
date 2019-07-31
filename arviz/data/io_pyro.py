@@ -1,6 +1,4 @@
 """pyro-specific conversion code."""
-import numpy as np
-
 from .inference_data import InferenceData
 from .base import dict_to_dataset
 from ..utils import expand_dims
@@ -49,8 +47,6 @@ class PyroConverter:
 
         self.pyro = pyro
 
-
-
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         # Do not make pyro a requirement
@@ -58,7 +54,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: self._expand_dims(samples.enumerate_support().squeeze())
+                name: expand_dims(samples.enumerate_support().squeeze())
                 if self.posterior.num_chains == 1
                 else samples.enumerate_support().squeeze()
                 for name, samples in self.posterior.marginal(

@@ -291,20 +291,24 @@ def _stack(x, y):
 
 @conditional_jit(parallel=True)
 def arange(x):
+    """Jitting numpy arange."""
     return np.arange(x)
 
 
 @conditional_jit(parallel=True)
 def one_de(x):
+    """Jitting numpy atleast_1d."""
     return np.atleast_1d(x)
 
 
 @conditional_jit(parallel=True)
 def two_de(x):
+    """Jitting numpy atleast_2d."""
     return np.atleast_2d(x)
 
 
 @conditional_jit(parallel=True)
 def expand_dims(x):
+    """Jitting numpy expand_dims."""
     return np.expand_dims(x, 0)
 
