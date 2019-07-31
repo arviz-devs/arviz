@@ -4,6 +4,7 @@ import xarray as xr
 import numpy as np
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
+from ..utils import conditional_jit, one_de, arange
 
 
 def _verify_names(sampler, var_names, arg_names, slices):
@@ -43,12 +44,12 @@ def _verify_names(sampler, var_names, arg_names, slices):
         num_args = 0  # emcee only stores the posterior samples
 
     if slices is None:
-        slices = np.arange(ndim)
+        slices = arange(ndim)
         num_vars = ndim
     else:
         num_vars = len(slices)
-    indexs = np.arange(ndim)
-    slicing_try = np.concatenate([np.atleast_1d(indexs[idx]) for idx in slices])
+    indexs = arange(ndim)
+    slicing_try = np.concatenate([one_de(indexs[idx]) for idx in slices])
     if len(set(slicing_try)) != ndim:
         warnings.warn(
             "Check slices: Not all parameters in chain captured. "

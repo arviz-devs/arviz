@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 import pkg_resources
 import xarray as xr
-from ..utils import conditional_jit
+from ..utils import two_de, arange
 
 
 class requires:  # pylint: disable=invalid-name
@@ -26,11 +26,6 @@ class requires:  # pylint: disable=invalid-name
             return func(cls, *args, **kwargs)
 
         return wrapped
-
-
-@conditional_jit(parallel=True)
-def _arange(x):
-    return np.arange(x)
 
 
 def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=None):
@@ -84,14 +79,9 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
-            coords[dim_name] = _arange(dim_len)
+            coords[dim_name] = arange(dim_len)
     coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
     return dims, coords
-
-
-@conditional_jit(parallel=True)
-def _two_de(x):
-    return np.atleast_2d(x)
 
 
 def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
@@ -124,7 +114,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
     """
     # manage and transform copies
     default_dims = ["chain", "draw"]
-    ary = _two_de(ary)
+    ary = two_de(ary)
     n_chains, n_samples, *shape = ary.shape
     if n_chains > n_samples:
         warnings.warn(
@@ -146,9 +136,9 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
         dims = ["chain"] + dims
 
     if "chain" not in coords:
-        coords["chain"] = _arange(n_chains)
+        coords["chain"] = arange(n_chains)
     if "draw" not in coords:
-        coords["draw"] = _arange(n_samples)
+        coords["draw"] = arange(n_samples)
 
     # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}

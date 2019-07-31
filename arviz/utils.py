@@ -287,3 +287,24 @@ def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
 def _stack(x, y):
     assert x.shape[1:] == y.shape[1:]
     return np.vstack((x, y))
+
+
+@conditional_jit(parallel=True)
+def arange(x):
+    return np.arange(x)
+
+
+@conditional_jit(parallel=True)
+def one_de(x):
+    return np.atleast_1d(x)
+
+
+@conditional_jit(parallel=True)
+def two_de(x):
+    return np.atleast_2d(x)
+
+
+@conditional_jit(parallel=True)
+def expand_dims(x):
+    return np.expand_dims(x, 0)
+
