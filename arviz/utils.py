@@ -33,6 +33,13 @@ def _var_names(var_names, data):
         else:
             all_vars = list(data.data_vars)
 
+        existent_vars = np.isin(var_names, all_vars)
+        if not np.all(existent_vars):
+            raise KeyError(
+                "{} var names are not present in dataset".format(
+                    np.array(var_names)[~existent_vars]
+                )
+            )
         excluded_vars = [i[1:] for i in var_names if i.startswith("~") and i not in all_vars]
 
         all_vars_tilde = [i for i in all_vars if i.startswith("~")]
