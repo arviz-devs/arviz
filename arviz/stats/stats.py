@@ -979,7 +979,9 @@ def summary(
         )
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
-    joined = xr.concat(metrics, dim="metric").assign_coords(metric=metric_names)
+    joined = (
+        xr.concat(metrics, dim="metric").assign_coords(metric=metric_names).reset_coords(drop=True)
+    )
 
     if fmt.lower() == "wide":
         dfs = []
