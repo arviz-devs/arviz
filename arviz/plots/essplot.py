@@ -1,6 +1,7 @@
 """Plot quantile or local effective sample sizes."""
 import numpy as np
 import xarray as xr
+from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
 from ..stats import ess
@@ -296,7 +297,7 @@ def plot_ess(
 
             values = data[var_name].sel(**selection).values.flatten()
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = np.argsort(values)[mask]
+            values = rankdata(values)[mask]
             rug_space = np.max(x) * rug_kwargs.pop("space")
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
             ax_.plot(rug_x, rug_y, **rug_kwargs)
