@@ -2,6 +2,10 @@ dist: xenial
 
 language: python
 
+branches:
+  only:
+    - master
+
 matrix:
   include:
     - name: "Python 3.6 Unit Test"
