@@ -124,11 +124,27 @@ def plot_loo_pit(
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
+    loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
+    loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
+
     if plot_kwargs is None:
         plot_kwargs = {}
     plot_kwargs["color"] = color
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
-    plot_kwargs.setdefault("label", "LOO-PIT ECDF" if ecdf else "LOO-PIT")
+    if idata is None:
+        try:
+            label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+        except AttributeError:
+            label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+    elif isinstance(y, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+    elif isinstance(y_hat, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+    else:
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+
+
+    plot_kwargs.setdefault("label", label)
     plot_kwargs.setdefault("zorder", 5)
 
     if plot_unif_kwargs is None:
@@ -140,8 +156,6 @@ def plot_loo_pit(
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
 
-    loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
-    loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
     if ecdf:
         loo_pit.sort()
