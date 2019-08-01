@@ -143,7 +143,6 @@ def plot_loo_pit(
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
 
-
     plot_kwargs.setdefault("label", label)
     plot_kwargs.setdefault("zorder", 5)
 
@@ -155,7 +154,6 @@ def plot_loo_pit(
     plot_unif_kwargs.setdefault("color", hsv_to_rgb(light_color))
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
-
 
     if ecdf:
         loo_pit.sort()
