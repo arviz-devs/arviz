@@ -311,3 +311,9 @@ def two_de(x):
 def expand_dims(x):
     """Jitting numpy expand_dims."""
     return np.expand_dims(x, 0)
+
+
+@conditional_jit(parallel=True)
+def full(shape, x):
+    """Jitting numpy full."""
+    return np.full(shape, x)
