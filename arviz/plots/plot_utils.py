@@ -1,5 +1,5 @@
 """Utilities for plotting."""
-from itertools import product
+from itertools import product, tee
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -264,6 +264,65 @@ def _zip_dims(new_dims, vals):
     return [{k: v for k, v in zip(new_dims, prod)} for prod in product(*vals)]
 
 
+def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
+    """Convert xarray data to an iterator over vectors.
+
+    Iterates over each var_name and all of its coordinates, returning the 1d
+    data.
+
+    Parameters
+    ----------
+    data : xarray.Dataset
+        Posterior data in an xarray
+
+    var_names : iterator of strings (optional)
+        Should be a subset of data.data_vars. Defaults to all of them.
+
+    combined : bool
+        Whether to combine chains or leave them separate
+
+    skip_dims : set
+        dimensions to not iterate over
+
+    reverse_selections : bool
+        Whether to reverse selections before iterating.
+
+    Returns
+    -------
+    Iterator of (var_name: str, selection: dict(str, any))
+        The string is the variable name, the dictionary are coordinate names to values,.
+        To get the values of the variable at these coordinates, do
+        ``data[var_name].sel(**selection)``.
+        and the array are the values of the variable at those coordinates.
+    """
+    if skip_dims is None:
+        skip_dims = set()
+
+    if combined:
+        skip_dims = skip_dims.union({"chain", "draw"})
+    else:
+        skip_dims.add("draw")
+
+    if var_names is None:
+        if isinstance(data, xr.Dataset):
+            var_names = list(data.data_vars)
+        elif isinstance(data, xr.DataArray):
+            var_names = [data.name]
+            data = {data.name: data}
+
+    for var_name in var_names:
+        if var_name in data:
+            new_dims = _dims(data, var_name, skip_dims)
+            vals = [purge_duplicates(data[var_name][dim].values) for dim in new_dims]
+            dims = _zip_dims(new_dims, vals)
+            if reverse_selections:
+                dims = reversed(dims)
+
+            for selection in dims:
+                yield var_name, selection
+
+
+
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
     """Convert xarray data to an iterator over vectors.
 
@@ -293,31 +352,18 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         The string is the variable name, the dictionary are coordinate names to values,
         and the array are the values of the variable at those coordinates.
     """
-    if skip_dims is None:
-        skip_dims = set()
+    data_to_sel = data
+    if var_names is None and isinstance(data, xr.DataArray):
+        data_to_sel = {data.name: data}
 
-    if combined:
-        skip_dims = skip_dims.union({"chain", "draw"})
-    else:
-        skip_dims.add("draw")
-
-    if var_names is None:
-        if isinstance(data, xr.Dataset):
-            var_names = list(data.data_vars)
-        elif isinstance(data, xr.DataArray):
-            var_names = [data.name]
-            data = {data.name: data}
-
-    for var_name in var_names:
-        if var_name in data:
-            new_dims = _dims(data, var_name, skip_dims)
-            vals = [purge_duplicates(data[var_name][dim].values) for dim in new_dims]
-            dims = _zip_dims(new_dims, vals)
-            if reverse_selections:
-                dims = reversed(dims)
-
-            for selection in dims:
-                yield var_name, selection, data[var_name].sel(**selection).values
+    for var_name, selection in xarray_sel_iter(
+        data,
+        var_names=var_names,
+        combined=combined,
+        skip_dims=skip_dims,
+        reverse_selections=reverse_selections
+    ):
+        yield var_name, selection, data_to_sel[var_name].sel(**selection).values
 
 
 def xarray_to_ndarray(data, *, var_names=None, combined=True):
@@ -343,16 +389,21 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     data: np.array
         Data values
     """
-    unpacked_data, unpacked_var_names, = [], []
+    data_to_sel = data
+    if var_names is None and isinstance(data, xr.DataArray):
+        data_to_sel = {data.name: data}
 
-    # Merge chains and variables
-    for var_name, selection, data_array in xarray_var_iter(
-        data, var_names=var_names, combined=combined
-    ):
-        unpacked_data.append(data_array.flatten())
-        unpacked_var_names.append(make_label(var_name, selection))
+    iterator1, iterator2 = tee(xarray_sel_iter(data, var_names=var_names, combined=combined))
+    vars_and_sel = list(iterator1)
+    unpacked_var_names = [make_label(var_name, selection) for var_name, selection in vars_and_sel]
 
-    return unpacked_var_names, np.array(unpacked_data)
+    # Merge chains and variables, check dtype to be compatible with divergences data
+    data0 = data_to_sel[vars_and_sel[0][0]].sel(**vars_and_sel[0][1])
+    unpacked_data = np.empty((len(unpacked_var_names), data0.size), dtype=data0.dtype)
+    for idx, (var_name, selection) in enumerate(iterator2):
+        unpacked_data[idx] = data_to_sel[var_name].sel(**selection).values.flatten()
+
+    return unpacked_var_names, unpacked_data
 
 
 def get_coords(data, coords):
