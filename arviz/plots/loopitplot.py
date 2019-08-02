@@ -3,6 +3,7 @@ import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb
+from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
 from .plot_utils import _scale_fig_size
@@ -131,15 +132,14 @@ def plot_loo_pit(
         plot_kwargs = {}
     plot_kwargs["color"] = color
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
-    if idata is None:
-        try:
-            label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
-        except AttributeError:
-            label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
-    elif isinstance(y, str):
+    if isinstance(y, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+    elif isinstance(y, DataArray):
+            label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
     elif isinstance(y_hat, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+    elif isinstance(y_hat, DataArray):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
 
