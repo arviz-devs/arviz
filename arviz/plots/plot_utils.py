@@ -265,10 +265,10 @@ def _zip_dims(new_dims, vals):
 
 
 def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
-    """Convert xarray data to an iterator over vectors.
+    """Convert xarray data to an iterator over variable names and selections.
 
-    Iterates over each var_name and all of its coordinates, returning the 1d
-    data.
+    Iterates over each var_name and all of its coordinates, returning the variable
+    names and selections that allow properly obtain the data from ``data`` as desired.
 
     Parameters
     ----------
@@ -293,7 +293,6 @@ def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, revers
         The string is the variable name, the dictionary are coordinate names to values,.
         To get the values of the variable at these coordinates, do
         ``data[var_name].sel(**selection)``.
-        and the array are the values of the variable at those coordinates.
     """
     if skip_dims is None:
         skip_dims = set()
