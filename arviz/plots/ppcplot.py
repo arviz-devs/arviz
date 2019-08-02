@@ -379,7 +379,6 @@ def plot_ppc(
                 )
 
             else:
-                # run plot_kde manually with one plot call
                 pp_densities = np.empty((2 * len(pp_sampled_vals), pp_sampled_vals[0].size))
                 for idx, vals in enumerate(pp_sampled_vals):
                     vals = np.array([vals]).flatten()
