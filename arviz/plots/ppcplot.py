@@ -191,9 +191,10 @@ def plot_ppc(
     posterior_predictive = data.posterior_predictive
 
     if var_names is None:
-        var_names = observed.data_vars
+        var_names = list(observed.data_vars)
     var_names = _var_names(var_names, observed)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
+    pp_var_names = _var_names(pp_var_names, posterior_predictive)
 
     if flatten_pp is None and flatten is None:
         flatten_pp = list(posterior_predictive.dims.keys())
