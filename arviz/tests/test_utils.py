@@ -48,6 +48,11 @@ def test_var_names_warning():
         assert _var_names(var_names, data) == expected
 
 
+def test_var_names_key_error(data):
+    with pytest.raises(KeyError, match="bad_var_name"):
+        _var_names(("theta", "tau", "bad_var_name"), data)
+
+
 @pytest.fixture(scope="function")
 def utils_with_numba_import_fail(monkeypatch):
     """Patch numba in utils so when its imported it raises ImportError"""

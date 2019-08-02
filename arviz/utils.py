@@ -49,6 +49,14 @@ def _var_names(var_names, data):
         if excluded_vars:
             var_names = [i for i in all_vars if i not in excluded_vars]
 
+        existent_vars = np.isin(var_names, all_vars)
+        if not np.all(existent_vars):
+            raise KeyError(
+                "{} var names are not present in dataset".format(
+                    np.array(var_names)[~existent_vars]
+                )
+            )
+
     return var_names
 
 
