@@ -21,6 +21,7 @@ from .stats_utils import (
     stats_variance_2d as svar,
 )
 from ..utils import _var_names, Numba, _numba_var
+from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ __all__ = [
 
 def compare(
     dataset_dict,
-    ic="waic",
+    ic=None,
     method="BB-pseudo-BMA",
     b_samples=1000,
     alpha=1,
@@ -57,7 +58,8 @@ def compare(
     dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
     ic : str
-        Information Criterion (WAIC or LOO) used to compare models. Default WAIC.
+        Information Criterion (WAIC or LOO) used to compare models. Defaults to
+        ``rcParams["stats.information_criterion"]``.
     method : str
         Method used to estimate the weights for each model. Available options are:
 
@@ -142,7 +144,7 @@ def compare(
             scale_value = -2
         ascending = True
 
-    ic = ic.lower()
+    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
     if ic == "waic":
         ic_func = waic
         df_comp = pd.DataFrame(

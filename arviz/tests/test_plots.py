@@ -16,6 +16,7 @@ from .helpers import (  # pylint: disable=unused-import
     multidim_models,
     create_multidimensional_model,
 )
+from ..rcparams import rcParams
 from ..plots import (
     plot_density,
     plot_trace,
@@ -43,7 +44,7 @@ from ..plots import (
 from ..plots.kdeplot import _cov
 
 np.random.seed(0)
-os.environ["ARVIZ_LOAD"] = "EAGER"
+rcParams["data.load"] = "eager"
 
 
 @pytest.fixture(scope="function", autouse=True)

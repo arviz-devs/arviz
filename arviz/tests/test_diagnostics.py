@@ -27,12 +27,13 @@ from ..stats.diagnostics import (
     _circular_standard_deviation,
 )
 from ..utils import Numba
+from ..rcparams import rcParams
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
 GOOD_RHAT = 1.1
 
-os.environ["ARVIZ_LOAD"] = "EAGER"
+rcParams["data.load"] = "eager"
 
 
 @pytest.fixture(scope="session")

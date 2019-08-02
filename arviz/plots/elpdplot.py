@@ -13,6 +13,7 @@ from .plot_utils import (
     set_xticklabels,
 )
 from ..stats import waic, loo, ELPDData
+from ..rcparams import rcParams
 
 
 def plot_elpd(
@@ -25,7 +26,7 @@ def plot_elpd(
     legend=False,
     threshold=None,
     ax=None,
-    ic="waic",
+    ic=None,
     scale="deviance",
     plot_kwargs=None,
 ):
@@ -59,7 +60,8 @@ def plot_elpd(
     ax: axes, optional
         Matplotlib axes
     ic : str, optional
-        Information Criterion (WAIC or LOO) used to compare models. Default WAIC. Only taken
+        Information Criterion (WAIC or LOO) used to compare models. Defaults to
+        ``rcParams["stats.information_criterion"]``. Only taken
         into account when input is InferenceData.
     scale : str, optional
         scale argument passed to az.waic or az.loo, see their docs for details. Only taken
@@ -88,7 +90,7 @@ def plot_elpd(
 
     """
     valid_ics = ["waic", "loo"]
-    ic = ic.lower()
+    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
     if ic not in valid_ics:
         raise ValueError(
             ("Information Criteria type {} not recognized." "IC must be in {}").format(
