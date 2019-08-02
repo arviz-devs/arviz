@@ -1010,13 +1010,16 @@ def test_plot_loo_pit_incompatible_args(models):
         plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
 
 
-@pytest.mark.parametrize("args", [
-    {"y": "str"},
-    {"y": "DataArray", "y_hat": "str"},
-    {"y": "ndarray", "y_hat": "str"},
-    {"y": "ndarray", "y_hat": "DataArray"},
-    {"y": "ndarray", "y_hat": "ndarray"},
-])
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "str"},
+        {"y": "DataArray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "DataArray"},
+        {"y": "ndarray", "y_hat": "ndarray"},
+    ],
+)
 def test_plot_loo_pit_label(models, args):
     assert_name = args["y"] != "ndarray" or args.get("y_hat") != "ndarray"
 
@@ -1041,6 +1044,7 @@ def test_plot_loo_pit_label(models, args):
         assert "y" in ax.get_legend_handles_labels()[1][0]
     else:
         assert "y" not in ax.get_legend_handles_labels()[1][0]
+
 
 @pytest.mark.parametrize(
     "kwargs",

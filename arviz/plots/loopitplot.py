@@ -135,7 +135,7 @@ def plot_loo_pit(
     if isinstance(y, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
     elif isinstance(y, DataArray):
-            label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
     elif isinstance(y_hat, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
     elif isinstance(y_hat, DataArray):
