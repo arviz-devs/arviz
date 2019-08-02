@@ -322,7 +322,6 @@ def xarray_sel_iter(data, var_names=None, combined=False, skip_dims=None, revers
                 yield var_name, selection
 
 
-
 def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, reverse_selections=False):
     """Convert xarray data to an iterator over vectors.
 
@@ -361,7 +360,7 @@ def xarray_var_iter(data, var_names=None, combined=False, skip_dims=None, revers
         var_names=var_names,
         combined=combined,
         skip_dims=skip_dims,
-        reverse_selections=reverse_selections
+        reverse_selections=reverse_selections,
     ):
         yield var_name, selection, data_to_sel[var_name].sel(**selection).values
 
