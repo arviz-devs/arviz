@@ -118,11 +118,10 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
 
     for ax, (var_name, selection, var_data) in zip(axes.ravel(), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
-        all_counts = []
-        for row in ranks:
-            counts, bin_ary = _rank_hist(row, bins, ranks.size)
-            all_counts.append(counts)
-        all_counts = np.array(all_counts)
+        bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
+        all_counts = np.empty((len(ranks), len(bin_ary) - 1))
+        for idx, row in enumerate(ranks):
+            all_counts[idx] = _rank_hist(row, bins=bin_ary)[0]
         gap = all_counts.max() * 1.05
         width = bin_ary[1] - bin_ary[0]
 
