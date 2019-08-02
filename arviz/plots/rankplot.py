@@ -155,5 +155,5 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
 
 
 @conditional_jit
-def _rank_hist(data, bins, size):
-    return np.histogram(data, bins, range=(0, size))
+def _rank_hist(data, bins):
+    return np.histogram(data, bins)
