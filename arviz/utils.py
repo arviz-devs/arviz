@@ -307,7 +307,7 @@ def one_de(x):
 
 
 def two_de(x):
-    """Jitting numpy at_least_2d"""
+    """Jitting numpy at_least_2d."""
     if not isinstance(x, np.ndarray):
         return np.atleast_2d(x)
     if x.ndim == 0:
