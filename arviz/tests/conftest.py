@@ -7,6 +7,7 @@ import pytest
 
 _log = logging.getLogger(__name__)
 
+np.random.seed(0)
 
 def pytest_addoption(parser):
     """Definition for command line option to save figures from tests."""

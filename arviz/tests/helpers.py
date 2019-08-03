@@ -39,7 +39,6 @@ def chains():
 
 def create_model(seed=10):
     """Create model with fake data."""
-    np.random.seed(seed)
     nchains = 4
     ndraws = 500
     data = {
@@ -240,9 +239,6 @@ def emcee_schools_model(data, draws, chains):
     sigma = data["sigma"]
     J = data["J"]  # pylint: disable=invalid-name
     ndim = J + 2
-
-    # make reproducible
-    np.random.seed(0)
 
     pos = np.random.normal(size=(chains, ndim))
     pos[:, 1] = np.absolute(pos[:, 1])
