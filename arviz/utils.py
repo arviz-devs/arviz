@@ -3,6 +3,7 @@ import importlib
 import functools
 import warnings
 import numpy as np
+from numpy import newaxis
 import matplotlib.pyplot as plt
 
 
@@ -289,25 +290,35 @@ def _stack(x, y):
     return np.vstack((x, y))
 
 
-@conditional_jit(parallel=True)
 def arange(x):
     """Jitting numpy arange."""
     return np.arange(x)
 
 
-@conditional_jit(parallel=True)
 def one_de(x):
     """Jitting numpy atleast_1d."""
-    return np.atleast_1d(x)
+    if not isinstance(x, np.ndarray):
+        return np.atleast_1d(x)
+    if x.ndim == 0:
+        result = x.reshape(1)
+    else:
+        result = x
+    return result
 
 
-@conditional_jit(parallel=True)
 def two_de(x):
-    """Jitting numpy atleast_2d."""
-    return np.atleast_2d(x)
+    """Jitting numpy at_least_2d"""
+    if not isinstance(x, np.ndarray):
+        return np.atleast_2d(x)
+    if x.ndim == 0:
+        result = x.reshape(1, 1)
+    elif x.ndim == 1:
+        result = x[newaxis, :]
+    else:
+        result = x
+    return result
 
 
-@conditional_jit(parallel=True)
 def expand_dims(x):
     """Jitting numpy expand_dims."""
     return np.expand_dims(x, 0)

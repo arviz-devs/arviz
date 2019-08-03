@@ -1,6 +1,7 @@
 # Write the benchmarking functions here.
 # See "Writing benchmarks" in the asv docs for more information.
 import numpy as np
+from numpy import newaxis
 from scipy.stats import circstd
 from scipy.sparse import coo_matrix
 import scipy.signal as ss
@@ -356,3 +357,44 @@ class Fast_KDE_2d:
                 return grid, xmin, xmax, ymin, ymax
 
             return _fast_kde_2d(x, y)
+
+
+class Data:
+    def time_2d_custom(self):
+        data = np.random.randn(100000)
+
+        def two_de(data):
+            if not isinstance(data, np.ndarray):
+                return np.atleast_2d(data)
+            if data.ndim == 0:
+                result = data.reshape(1, 1)
+            elif data.ndim == 1:
+                result = data[newaxis, :]
+            else:
+                result = data
+            return result
+
+        return two_de(data)
+
+    def time_numpy_2d(self):
+        data = np.random.randn(100000)
+        return np.atleast_2d(data)
+
+    def time_1d_custom(self):
+        x = np.random.randn(100000).tolist()
+
+        def one_de(x):
+            """Jitting numpy atleast_1d."""
+            if not isinstance(x, np.ndarray):
+                return np.atleast_1d(x)
+            if x.ndim == 0:
+                result = x.reshape(1)
+            else:
+                result = x
+            return result
+
+        return one_de(x)
+
+    def time_numpy_1d(self):
+        x = np.random.randn(100000).tolist()
+        return np.atleast_1d(x)
