@@ -305,41 +305,53 @@ def plot_ppc(
                     drawstyle=plot_kwargs["drawstyle"],
                 )
 
+            pp_densities = []
+            pp_xs = []
+            for vals in pp_sampled_vals:
+                vals = np.array([vals]).flatten()
+                if dtype == "f":
+                    pp_density, lower, upper = _fast_kde(vals)
+                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_densities.append(pp_density)
+                    pp_xs.append(pp_x)
+                else:
+                    bins = get_bins(vals)
+                    hist, bin_edges = np.histogram(vals, bins=bins, density=True)
+                    hist = np.concatenate((hist[:1], hist))
+                    pp_densities.append(hist)
+                    pp_xs.append(bin_edges)
+
             if animated:
                 animate, init = _set_animation(
                     pp_sampled_vals, ax_i, dtype=dtype, kind=kind, plot_kwargs=plot_kwargs
                 )
 
             else:
-                # run plot_kde manually with one plot call
-                pp_densities = []
-                for vals in pp_sampled_vals:
-                    vals = np.array([vals]).flatten()
-                    if dtype == "f":
-                        pp_density, lower, upper = _fast_kde(vals)
-                        pp_x = np.linspace(lower, upper, len(pp_density))
-                        pp_densities.extend([pp_x, pp_density])
-                    else:
-                        bins = get_bins(vals)
-                        hist, bin_edges = np.histogram(vals, bins=bins, density=True)
-                        hist = np.concatenate((hist[:1], hist))
-                        pp_densities.extend([bin_edges, hist])
-
-                ax_i.plot(*pp_densities, **plot_kwargs)
+                if dtype == "f":
+                    ax_i.plot(np.transpose(pp_xs), np.transpose(pp_densities), **plot_kwargs)
+                else:
+                    for x_s, y_s in zip(pp_xs, pp_densities):
+                        ax_i.plot(x_s, y_s, **plot_kwargs)
 
             if mean:
                 if dtype == "f":
-                    plot_kde(
-                        pp_vals.flatten(),
-                        plot_kwargs={
-                            "color": "C0",
-                            "linestyle": "--",
-                            "linewidth": linewidth,
-                            "zorder": 2,
-                        },
+                    rep = len(pp_densities)
+                    len_density = len(pp_densities[0])
+
+                    new_x = np.linspace(np.min(pp_xs), np.max(pp_xs), len_density)
+                    new_d = np.zeros((rep, len_density))
+                    bins = np.digitize(pp_xs, new_x, right=True)
+                    new_x -= (new_x[1] - new_x[0]) / 2
+                    for irep in range(rep):
+                        new_d[irep][bins[irep]] = pp_densities[irep]
+                    ax_i.plot(
+                        new_x,
+                        new_d.mean(0),
+                        color="C0",
+                        linestyle="--",
+                        linewidth=linewidth,
+                        zorder=2,
                         label="Posterior predictive mean {}".format(pp_var_name),
-                        ax=ax_i,
-                        legend=legend,
                     )
                 else:
                     vals = pp_vals.flatten()
