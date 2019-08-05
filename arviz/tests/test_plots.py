@@ -1012,6 +1012,42 @@ def test_plot_loo_pit_incompatible_args(models):
 
 
 @pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "str"},
+        {"y": "DataArray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "DataArray"},
+        {"y": "ndarray", "y_hat": "ndarray"},
+    ],
+)
+def test_plot_loo_pit_label(models, args):
+    assert_name = args["y"] != "ndarray" or args.get("y_hat") != "ndarray"
+
+    if args["y"] == "str":
+        y = "y"
+    elif args["y"] == "DataArray":
+        y = models.model_1.observed_data.y
+    elif args["y"] == "ndarray":
+        y = models.model_1.observed_data.y.values
+
+    if args.get("y_hat") == "str":
+        y_hat = "y"
+    elif args.get("y_hat") == "DataArray":
+        y_hat = models.model_1.posterior_predictive.y.stack(samples=("chain", "draw"))
+    elif args.get("y_hat") == "ndarray":
+        y_hat = models.model_1.posterior_predictive.y.stack(samples=("chain", "draw")).values
+    else:
+        y_hat = None
+
+    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat)
+    if assert_name:
+        assert "y" in ax.get_legend_handles_labels()[1][0]
+    else:
+        assert "y" not in ax.get_legend_handles_labels()[1][0]
+
+
+@pytest.mark.parametrize(
     "kwargs",
     [
         {},
