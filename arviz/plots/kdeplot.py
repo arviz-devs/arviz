@@ -340,7 +340,7 @@ def _histogram(x, n_bins, range_hist=None):
 def _cov_1d(x):
     x = x - x.mean(axis=0)
     ddof = x.shape[0] - 1
-    return np.dot(x.T, x.conj()) / ddof
+    return _dot(x.T, x.conj()) / ddof
 
 
 def _cov(data):

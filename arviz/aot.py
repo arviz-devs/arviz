@@ -35,6 +35,19 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 # Remember to flatten the array before when using this method
 @module.export('histogram_stats', 'f8[:](f8[:],f8[:]')
-@module.export('histogram_stats', 'f8[:](i8[:],f8[:]')
 def histogram_stats(data, bins):
     return np.histogram(data, bins=bins)[0]
+
+
+# Remember to flatten the array before when using this method
+@module.export('histogram_kde', 'f8[:](f8[:],i8,(f8,f8)')
+def histogram_plots(x, n_bins, range_hist=None):
+    grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
+    return grid
+
+
+@module.export('dot', 'f8[:], f8[:]')
+@module.export('dot', 'f8[:,:], f8[:,:]')
+def dot(x, y):
+    return np.dot(x, y)
+
