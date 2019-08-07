@@ -1,4 +1,5 @@
 """Autocorrelation plot of data."""
+import warnings
 import numpy as np
 
 from ..data import convert_to_dataset
@@ -11,6 +12,7 @@ from .plot_utils import (
     _create_axes_grid,
 )
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_autocorr(
@@ -88,6 +90,16 @@ def plot_autocorr(
         max_lag = min(100, data["draw"].shape[0])
 
     plotters = list(xarray_var_iter(data, var_names, combined))
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
+            SyntaxWarning,
+        )
+        plotters = plotters[:max_plots]
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

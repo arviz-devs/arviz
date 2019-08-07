@@ -148,12 +148,13 @@ def plot_trace(
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max_plots
     if len(plotters) > max_plots:
-        plotters = plotters[:max_plots]
         warnings.warn(
-            "max_plots is smaller than the number of variables to plot "
-            "generating only max_plots traceplots",
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
             SyntaxWarning,
         )
+        plotters = plotters[:max_plots]
 
     if figsize is None:
         figsize = (12, len(plotters) * 2)
