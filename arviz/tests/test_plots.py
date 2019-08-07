@@ -602,7 +602,10 @@ def test_plot_autocorr_short_chain():
 def test_plot_autocorr_uncombined(models):
     axes = plot_autocorr(models.model_1, combined=False)
     assert axes.shape[0] == 1
-    assert axes.shape[1] == 72
+    max_subplots = (
+        np.inf if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+    )
+    assert axes.shape[1] == min(72, max_subplots)
 
 
 def test_plot_autocorr_combined(models):
