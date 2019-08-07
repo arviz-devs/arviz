@@ -9,6 +9,7 @@ from ..data import convert_to_dataset, convert_to_inference_data
 from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_pair(
@@ -206,6 +207,19 @@ def plot_pair(
         ax.tick_params(labelsize=xt_labelsize)
 
     else:
+        max_plots = (
+            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+        )
+        vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
+        if vars_to_plot < numvars:
+            warnings.warn(
+                "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+                "of resulting pair plots with these variables, generating only a "
+                "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
+                SyntaxWarning,
+            )
+            numvars = vars_to_plot
+
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )

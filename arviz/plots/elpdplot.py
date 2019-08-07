@@ -1,4 +1,5 @@
 """Plot pointwise elpd estimations of inference data."""
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -209,6 +210,19 @@ def plot_elpd(
             ax.legend(handles=handles, ncol=ncols, title=color)
 
     else:
+        max_plots = (
+            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+        )
+        vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
+        if vars_to_plot < numvars:
+            warnings.warn(
+                "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+                "of resulting pair plots with these variables, generating only a "
+                "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
+                SyntaxWarning,
+            )
+            numvars = vars_to_plot
+
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )
