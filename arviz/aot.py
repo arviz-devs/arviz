@@ -51,3 +51,12 @@ def histogram_plots(x, n_bins, range_hist=None):
 def dot(x, y):
     return np.dot(x, y)
 
+
+#Alter the
+@module.export('full', 'f8[:](i8)')
+@module.export('full', 'f8[:,:](i8,i8)')
+@module.export('full', 'f8[:,:,:](i8,i8,i8')
+@module.export('full', 'f8[:,:,:,:](i8,i8,i8,i8')
+def full(shape):
+    """Jitting numpy full."""
+    return np.full(shape, np.nan)
