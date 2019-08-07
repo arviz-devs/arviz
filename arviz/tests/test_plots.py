@@ -16,7 +16,7 @@ from .helpers import (  # pylint: disable=unused-import
     multidim_models,
     create_multidimensional_model,
 )
-from ..rcparams import rcParams
+from ..rcparams import rcParams, rc_context
 from ..plots import (
     plot_density,
     plot_trace,
@@ -149,9 +149,10 @@ def test_plot_trace_discrete(discrete_model):
     assert axes.shape
 
 
-def test_plot_trace_max_plots_warning(models):
+def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(SyntaxWarning):
-        axes = plot_trace(models.model_1, max_plots=1)
+        with rc_context(rc={"plot.max_subplots": 1}):
+            axes = plot_trace(models.model_1)
     assert axes.shape
 
 

@@ -9,6 +9,7 @@ from ..data import convert_to_dataset
 from .distplot import plot_dist
 from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_trace(
@@ -27,7 +28,6 @@ def plot_trace(
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
-    max_plots=40,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -145,6 +145,7 @@ def plot_trace(
         skip_dims = set()
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max_plots
     if len(plotters) > max_plots:
         plotters = plotters[:max_plots]
