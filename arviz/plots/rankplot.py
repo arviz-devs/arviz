@@ -1,4 +1,5 @@
 """Histograms of ranked posterior draws, plotted for each chain."""
+import warnings
 import numpy as np
 import scipy.stats
 
@@ -11,6 +12,7 @@ from .plot_utils import (
     make_label,
 )
 from ..utils import _var_names, conditional_jit
+from ..rcparams import rcParams
 
 
 def _sturges_formula(dataset, mult=1):
@@ -103,18 +105,29 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         posterior_data = posterior_data.sel(**coords)
     var_names = _var_names(var_names, posterior_data)
     plotters = list(xarray_var_iter(posterior_data, var_names=var_names, combined=True))
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
+            SyntaxWarning,
+        )
+        plotters = plotters[:max_plots]
+    length_plotters = len(plotters)
 
     if bins is None:
         # Use double Sturges' formula
         bins = _sturges_formula(posterior_data, mult=2)
 
     if axes is None:
-        rows, cols = default_grid(len(plotters))
+        rows, cols = default_grid(length_plotters)
 
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
             figsize, None, rows=rows, cols=cols
         )
-        _, axes = _create_axes_grid(len(plotters), rows, cols, figsize=figsize, squeeze=False)
+        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     for ax, (var_name, selection, var_data) in zip(axes.ravel(), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)

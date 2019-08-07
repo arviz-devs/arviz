@@ -1,4 +1,5 @@
 """Posterior predictive plot."""
+import warnings
 from numbers import Integral
 import platform
 import logging
@@ -14,6 +15,7 @@ from .plot_utils import (
     get_bins,
 )
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
 
@@ -244,6 +246,17 @@ def plot_ppc(
             combined=True,
         )
     )
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(obs_plotters) if max_plots is None else max_plots
+    if len(obs_plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(obs_plotters)),
+            SyntaxWarning,
+        )
+        obs_plotters = obs_plotters[:max_plots]
+        pp_plotters = pp_plotters[:max_plots]
     length_plotters = len(obs_plotters)
     rows, cols = default_grid(length_plotters)
 

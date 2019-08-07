@@ -1,4 +1,5 @@
 """Plot posterior traces as violin plot."""
+import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -7,6 +8,7 @@ from ..stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_violin(
@@ -66,6 +68,16 @@ def plot_violin(
     var_names = _var_names(var_names, data)
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True))
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
+            SyntaxWarning,
+        )
+        plotters = plotters[:max_plots]
 
     if kwargs_shade is None:
         kwargs_shade = {}
