@@ -52,7 +52,9 @@ class PyMC3Converter:
             return None, None
         else:
             if self.dims is not None:
-                coord_name = self.dims.get(model.observed_RVs[0].name)
+                coord_name = self.dims.get(
+                    "log_likelihood", self.dims.get(model.observed_RVs[0].name)
+                )
             else:
                 coord_name = None
 
