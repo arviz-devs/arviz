@@ -4,13 +4,12 @@ from copy import deepcopy
 import logging
 import re
 
-
 import numpy as np
 import xarray as xr
+import arviz.utils as utils
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
-from ..utils import one_de
 
 _log = logging.getLogger(__name__)
 
@@ -197,7 +196,7 @@ class CmdStanPyConverter:
         """Convert observed data to xarray."""
         observed_data = {}
         for key, vals in self.observed_data.items():
-            vals = one_de(vals)
+            vals = utils.one_de(vals)
             val_dims = self.dims.get(key) if self.dims is not None else None
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords

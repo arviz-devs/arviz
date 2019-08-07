@@ -252,9 +252,11 @@ def test_stack():
 
 @pytest.mark.parametrize("data", [np.random.randn(1000), np.random.randn(1000).tolist()])
 def test_two_de(data):
+    """Test to check for custom atleast_2d. List added to test for a non ndarray case."""
     assert np.allclose(two_de(data), np.atleast_2d(data))
 
 
 @pytest.mark.parametrize("data", [np.random.randn(100), np.random.randn(100).tolist()])
 def test_one_de(data):
+    """Test to check for custom atleast_1d. List added to test for a non ndarray case."""
     assert np.allclose(one_de(data), np.atleast_1d(data))

@@ -1,10 +1,10 @@
 """Dictionary specific conversion code."""
 import warnings
 import xarray as xr
+import arviz.utils as utils
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
-from ..utils import one_de
 
 
 class DictConverter:
@@ -106,7 +106,7 @@ class DictConverter:
             dims = self.dims
         observed_data = dict()
         for key, vals in data.items():
-            vals = one_de(vals)
+            vals = utils.one_de(vals)
             val_dims = dims.get(key)
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords
