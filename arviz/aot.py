@@ -2,7 +2,7 @@ from numba.pycc import CC
 import numba
 import numpy as np
 
-module = CC('numba-compilations')
+module = CC("numba-compilations")
 
 
 @numba.njit
@@ -16,7 +16,7 @@ def stats_variance_1d(data, ddof=0):
     return var
 
 
-@module.export('stats_variance_2d', 'f8[:](f8[:],i8,i8)')
+@module.export("stats_variance_2d", "f8[:](f8[:],i8,i8)")
 def stats_variance_2d(data, ddof=0, axis=1):
     if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
@@ -34,29 +34,29 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 
 # Remember to flatten the array before when using this method
-@module.export('histogram_stats', 'f8[:](f8[:],f8[:]')
+@module.export("histogram_stats", "f8[:](f8[:],f8[:]")
 def histogram_stats(data, bins):
     return np.histogram(data, bins=bins)[0]
 
 
 # Remember to flatten the array before when using this method
-@module.export('histogram_kde', 'f8[:](f8[:],i8,(f8,f8)')
+@module.export("histogram_kde", "f8[:](f8[:],i8,(f8,f8)")
 def histogram_plots(x, n_bins, range_hist=None):
     grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
     return grid
 
 
-@module.export('dot', 'f8[:], f8[:]')
-@module.export('dot', 'f8[:,:], f8[:,:]')
+@module.export("dot", "f8[:], f8[:]")
+@module.export("dot", "f8[:,:], f8[:,:]")
 def dot(x, y):
     return np.dot(x, y)
 
 
-#Alter the
-@module.export('full', 'f8[:](i8)')
-@module.export('full', 'f8[:,:](i8,i8)')
-@module.export('full', 'f8[:,:,:](i8,i8,i8')
-@module.export('full', 'f8[:,:,:,:](i8,i8,i8,i8')
+# Alter the
+@module.export("full", "f8[:](i8)")
+@module.export("full", "f8[:,:](i8,i8)")
+@module.export("full", "f8[:,:,:](i8,i8,i8")
+@module.export("full", "f8[:,:,:,:](i8,i8,i8,i8")
 def full(shape):
     """Jitting numpy full."""
     return np.full(shape, np.nan)
