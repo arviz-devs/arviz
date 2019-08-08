@@ -1,5 +1,4 @@
 """Posterior predictive plot."""
-import warnings
 from numbers import Integral
 import platform
 import logging
@@ -13,9 +12,9 @@ from .plot_utils import (
     make_label,
     _create_axes_grid,
     get_bins,
+    filter_plotters_list,
 )
 from ..utils import _var_names
-from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
 
@@ -233,31 +232,27 @@ def plot_ppc(
     for key in coords.keys():
         coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
 
-    obs_plotters = list(
-        xarray_var_iter(
-            observed.isel(coords), skip_dims=set(flatten), var_names=var_names, combined=True
-        )
+    obs_plotters = filter_plotters_list(
+        list(
+            xarray_var_iter(
+                observed.isel(coords), skip_dims=set(flatten), var_names=var_names, combined=True
+            )
+        ),
+        "plot_ppc",
     )
-    pp_plotters = list(
-        xarray_var_iter(
-            posterior_predictive.isel(coords),
-            var_names=pp_var_names,
-            skip_dims=set(flatten_pp),
-            combined=True,
-        )
-    )
-    max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(obs_plotters) if max_plots is None else max_plots
-    if len(obs_plotters) > max_plots:
-        warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=max_plots, len_plotters=len(obs_plotters)),
-            SyntaxWarning,
-        )
-        obs_plotters = obs_plotters[:max_plots]
-        pp_plotters = pp_plotters[:max_plots]
     length_plotters = len(obs_plotters)
+    pp_plotters = [
+        tup
+        for _, tup in zip(
+            range(length_plotters),
+            xarray_var_iter(
+                posterior_predictive.isel(coords),
+                var_names=pp_var_names,
+                skip_dims=set(flatten_pp),
+                combined=True,
+            ),
+        )
+    ]
     rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(

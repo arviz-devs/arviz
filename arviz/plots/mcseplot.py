@@ -1,5 +1,4 @@
 """Plot quantile MC standard error."""
-import warnings
 import numpy as np
 import xarray as xr
 from scipy.stats import rankdata
@@ -14,9 +13,9 @@ from .plot_utils import (
     default_grid,
     _create_axes_grid,
     get_coords,
+    filter_plotters_list,
 )
 from ..utils import _var_names
-from ..rcparams import rcParams
 
 
 def plot_mcse(
@@ -115,17 +114,10 @@ def plot_mcse(
         [mcse(data, var_names=var_names, method="quantile", prob=p) for p in probs], dim="mcse_dim"
     )
 
-    plotters = list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"}))
-    max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(plotters) if max_plots is None else max_plots
-    if len(plotters) > max_plots:
-        warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
-        )
-        plotters = plotters[:max_plots]
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"})),
+        "plot_mcse",
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

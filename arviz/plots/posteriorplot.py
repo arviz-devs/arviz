@@ -1,5 +1,4 @@
 """Plot posterior densities."""
-import warnings
 from typing import Optional
 from numbers import Number
 import numpy as np
@@ -15,9 +14,9 @@ from .plot_utils import (
     default_grid,
     _create_axes_grid,
     get_coords,
+    filter_plotters_list,
 )
 from ..utils import _var_names, format_sig_figs
-from ..rcparams import rcParams
 
 
 def plot_posterior(
@@ -156,17 +155,10 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
-    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
-    max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(plotters) if max_plots is None else max_plots
-    if len(plotters) > max_plots:
-        warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
-        )
-        plotters = plotters[:max_plots]
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
+        "plot_posterior",
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
