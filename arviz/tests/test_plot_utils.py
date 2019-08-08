@@ -4,7 +4,8 @@ import xarray as xr
 import pytest
 
 from ..data import from_dict
-from ..plots.plot_utils import make_2d, xarray_to_ndarray, xarray_var_iter, get_bins, get_coords
+from ..plots.plot_utils import make_2d, xarray_to_ndarray, xarray_var_iter, get_bins, get_coords, filter_plotters_list
+from ..rcparams import rcParams
 
 
 @pytest.fixture(scope="function")
@@ -128,3 +129,18 @@ class TestCoordsExceptions:
 
         with pytest.raises(TypeError):
             get_coords(data, coords)
+
+
+def test_filter_plotter_list():
+    rcParams["plot.max_subplots"] = 10
+    plotters = list(range(7))
+    plotters_filtered = filter_plotters_list(plotters, "")
+    assert plotters == plotters_filtered
+
+
+def test_filter_plotter_list_warning():
+    rcParams["plot.max_subplots"] = 5
+    plotters = list(range(7))
+    with pytest.warns(SyntaxWarning, match="test warning"):
+        plotters_filtered = filter_plotters_list(plotters, "test warning")
+    assert len(plotters_filtered) == 5
