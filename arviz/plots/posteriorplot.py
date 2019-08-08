@@ -368,11 +368,12 @@ def _plot_posterior_op(
         ax.spines["bottom"].set_color("0.5")
 
     if kind == "kde" and values.dtype.kind == "f":
+        kwargs.setdefault("linewidth", linewidth)
         plot_kde(
             values,
             bw=bw,
             fill_kwargs={"alpha": kwargs.pop("fill_alpha", 0)},
-            plot_kwargs={"linewidth": linewidth},
+            plot_kwargs=kwargs,
             ax=ax,
             rug=False,
         )
