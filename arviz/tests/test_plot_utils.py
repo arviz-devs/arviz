@@ -4,7 +4,14 @@ import xarray as xr
 import pytest
 
 from ..data import from_dict
-from ..plots.plot_utils import make_2d, xarray_to_ndarray, xarray_var_iter, get_bins, get_coords, filter_plotters_list
+from ..plots.plot_utils import (
+    make_2d,
+    xarray_to_ndarray,
+    xarray_var_iter,
+    get_bins,
+    get_coords,
+    filter_plotters_list,
+)
 from ..rcparams import rc_context
 
 
