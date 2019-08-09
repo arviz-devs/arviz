@@ -29,7 +29,6 @@ def test_logsumexp_b(ary_dtype, axis, b, keepdims):
 
     Test tests against b parameter.
     """
-    np.random.seed(17)
     ary = np.random.randn(100, 101).astype(ary_dtype)  # pylint: disable=no-member
     assert _logsumexp(ary=ary, axis=axis, b=b, keepdims=keepdims, copy=True) is not None
     ary = ary.copy()
@@ -57,7 +56,6 @@ def test_logsumexp_b_inv(ary_dtype, axis, b_inv, keepdims):
 
     Test tests against b_inv parameter.
     """
-    np.random.seed(17)
     ary = np.random.randn(100, 101).astype(ary_dtype)  # pylint: disable=no-member
     assert _logsumexp(ary=ary, axis=axis, b_inv=b_inv, keepdims=keepdims, copy=True) is not None
     ary = ary.copy()

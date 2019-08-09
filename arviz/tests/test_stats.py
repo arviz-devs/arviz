@@ -353,7 +353,6 @@ def test_gpinv(probs, kappa, sigma):
 
 @pytest.mark.parametrize("func", [loo, waic])
 def test_multidimensional_log_likelihood(func):
-    np.random.seed(17)
     llm = np.random.rand(4, 23, 15, 2)
     ll1 = llm.reshape(4, 23, 15 * 2)
     statsm = Dataset(dict(log_likelihood=DataArray(llm, dims=["chain", "draw", "a", "b"])))

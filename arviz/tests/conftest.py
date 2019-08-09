@@ -3,9 +3,15 @@
 import os
 import logging
 import pytest
-
+import numpy as np
 
 _log = logging.getLogger(__name__)
+
+
+@pytest.fixture(autouse=True)
+def random_seed():
+    """Reset numpy random seed generator."""
+    np.random.seed(0)
 
 
 def pytest_addoption(parser):

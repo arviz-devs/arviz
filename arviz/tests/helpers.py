@@ -241,9 +241,6 @@ def emcee_schools_model(data, draws, chains):
     J = data["J"]  # pylint: disable=invalid-name
     ndim = J + 2
 
-    # make reproducible
-    np.random.seed(0)
-
     pos = np.random.normal(size=(chains, ndim))
     pos[:, 1] = np.absolute(pos[:, 1])
 

@@ -43,7 +43,6 @@ from ..plots import (
 )
 from ..plots.kdeplot import _cov
 
-np.random.seed(0)
 rcParams["data.load"] = "eager"
 
 
@@ -418,7 +417,6 @@ def test_plot_ppc(models, kind, alpha, animated):
 @pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_multichain(kind, jitter, animated):
-    np.random.seed(23)
     data = from_dict(
         posterior_predictive={
             "x": np.random.randn(4, 100, 30),
