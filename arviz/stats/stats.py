@@ -448,7 +448,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         raise TypeError("Data must include log_likelihood in sample_stats")
     posterior = inference_data.posterior
     log_likelihood = inference_data.sample_stats.log_likelihood
-    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
@@ -488,7 +488,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
         warn_mg = True
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["samples"]]}
+    kwargs = {"input_core_dims": [["sample"]]}
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
         _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
     )
@@ -562,9 +562,9 @@ def psislw(log_weights, reff=1.0):
     kss : array
         Pareto tail indices
     """
-    if hasattr(log_weights, "samples"):
-        n_samples = len(log_weights.samples)
-        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "samples"]
+    if hasattr(log_weights, "sample"):
+        n_samples = len(log_weights.sample)
+        shape = [size for size, dim in zip(log_weights.shape, log_weights.dims) if dim != "sample"]
     else:
         n_samples = log_weights.shape[-1]
         shape = log_weights.shape[:-1]
@@ -579,12 +579,12 @@ def psislw(log_weights, reff=1.0):
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
-    kwargs = {"input_core_dims": [["samples"]], "output_core_dims": [["sample"], []]}
+    kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
         _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
     )
     if isinstance(log_weights, xr.DataArray):
-        log_weights = log_weights.rename("log_weights").rename(sample="samples")
+        log_weights = log_weights.rename("log_weights").rename(sample="sample")
     if isinstance(pareto_shape, xr.DataArray):
         pareto_shape = pareto_shape.rename("pareto_shape")
     return log_weights, pareto_shape
@@ -1103,13 +1103,13 @@ def waic(data, pointwise=False, scale="deviance"):
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
-    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs = {"input_core_dims": [["samples"]]}
+    kwargs = {"input_core_dims": [["sample"]]}
     lppd_i = _wrap_xarray_ufunc(
         _logsumexp,
         log_likelihood,
@@ -1118,7 +1118,7 @@ def waic(data, pointwise=False, scale="deviance"):
         **kwargs,
     )
 
-    vars_lpd = log_likelihood.var(dim="samples")
+    vars_lpd = log_likelihood.var(dim="sample")
     warn_mg = False
     if np.any(vars_lpd > 0.4):
         warnings.warn(
@@ -1220,7 +1220,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
         In [1]: T = data.observed_data.obs - data.posterior.mu.median(dim=("chain", "draw"))
            ...: T_hat = data.posterior_predictive.obs - data.posterior.mu
-           ...: T_hat = T_hat.stack(samples=("chain", "draw"))
+           ...: T_hat = T_hat.stack(sample=("chain", "draw"))
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
@@ -1244,16 +1244,16 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
         if isinstance(y_hat, str):
-            y_hat = idata.posterior_predictive[y_hat].stack(samples=("chain", "draw")).values
+            y_hat = idata.posterior_predictive[y_hat].stack(sample=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
             raise ValueError(
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
-            log_likelihood = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
+            log_likelihood = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
-            n_samples = len(log_likelihood.samples)
+            n_samples = len(log_likelihood.sample)
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
@@ -1289,7 +1289,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         )
 
     kwargs = {
-        "input_core_dims": [[], ["samples"], ["samples"]],
+        "input_core_dims": [[], ["sample"], ["sample"]],
         "output_core_dims": [[]],
         "join": "left",
     }

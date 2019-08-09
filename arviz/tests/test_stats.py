@@ -336,7 +336,7 @@ def test_loo_print(centered_eight, scale):
 def test_psislw(centered_eight):
     pareto_k = loo(centered_eight, pointwise=True, reff=0.7)["pareto_k"]
     log_likelihood = centered_eight.sample_stats.log_likelihood  # pylint: disable=no-member
-    log_likelihood = log_likelihood.stack(samples=("chain", "draw"))
+    log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
 
@@ -394,9 +394,9 @@ def test_loo_pit(centered_eight, args):
     y_hat = args.get("y_hat", None)
     log_weights = args.get("log_weights", None)
     y_arr = centered_eight.observed_data.obs
-    y_hat_arr = centered_eight.posterior_predictive.obs.stack(samples=("chain", "draw"))
-    log_like = centered_eight.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-    n_samples = len(log_like.samples)
+    y_hat_arr = centered_eight.posterior_predictive.obs.stack(sample=("chain", "draw"))
+    log_like = centered_eight.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+    n_samples = len(log_like.sample)
     ess_p = ess(centered_eight.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
@@ -434,9 +434,9 @@ def test_loo_pit_multidim(multidim_models, args):
     log_weights = args.get("log_weights", None)
     idata = multidim_models.model_1
     y_arr = idata.observed_data.y
-    y_hat_arr = idata.posterior_predictive.y.stack(samples=("chain", "draw"))
-    log_like = idata.sample_stats.log_likelihood.stack(samples=("chain", "draw"))
-    n_samples = len(log_like.samples)
+    y_hat_arr = idata.posterior_predictive.y.stack(sample=("chain", "draw"))
+    log_like = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+    n_samples = len(log_like.sample)
     ess_p = ess(idata.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
     log_weights_arr = psislw(-log_like, reff=reff)[0]
