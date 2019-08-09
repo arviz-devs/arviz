@@ -2,8 +2,8 @@
 import logging
 import numpy as np
 import xarray as xr
-import arviz.utils as utils
 
+from .. import utils
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 

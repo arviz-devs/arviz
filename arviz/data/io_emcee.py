@@ -2,8 +2,8 @@
 import warnings
 import xarray as xr
 import numpy as np
-import arviz.utils as utils
 
+from .. import utils
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
 

@@ -4,7 +4,8 @@ import datetime
 import warnings
 import pkg_resources
 import xarray as xr
-import arviz.utils as utils
+
+from .. import utils
 
 
 class requires:  # pylint: disable=invalid-name
