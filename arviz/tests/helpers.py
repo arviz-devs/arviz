@@ -39,6 +39,7 @@ def chains():
 
 def create_model(seed=10):
     """Create model with fake data."""
+    np.random.seed(seed)
     nchains = 4
     ndraws = 500
     data = {
