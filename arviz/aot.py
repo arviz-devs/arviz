@@ -56,6 +56,7 @@ def histogram_stats(data, bins):
 # Remember to flatten the array before when using this method
 @module.export("histogram_kde", "i8[:](i8[:],i8,i8,i8)")
 @module.export("histogram_kde", "f8[:](f8[:],i8,f8,f8)")
+@module.export("histogram_kde", "f8[:](f8[:],f8[:],f8,f8)")
 def histogram_plots(x, n_bins, xmax, xmin):
     grid, _ = np.histogram(x, bins=n_bins, range=(xmax, xmin))
     return grid
