@@ -64,3 +64,10 @@ target/
 .idea/
 
 saved_animations/
+
+bin/
+get-pip.py
+lib64
+pyvenv.cfg
+share/
+
