@@ -9,7 +9,13 @@ from .. import utils
 
 
 class requires:  # pylint: disable=invalid-name
-    """Decorator to return None if an object does not have the required attribute."""
+    """Decorator to return None if an object does not have the required attribute.
+
+    If the decorator is called various times on the same function with different
+    attributes, it will return None if one of them is missing. If instead a list
+    of attributes is passed, it will return None if all attributes in the list are
+    missing. Both functionalities can be combines as desired.
+    """
 
     def __init__(self, *props):
         self.props = props
@@ -20,7 +26,8 @@ class requires:  # pylint: disable=invalid-name
         def wrapped(cls, *args, **kwargs):
             """Return None if not all props are available."""
             for prop in self.props:
-                if getattr(cls, prop) is None:
+                prop = [prop] if isinstance(prop, str) else prop
+                if all([getattr(cls, prop_i) is None for prop_i in prop]):
                     return None
             return func(cls, *args, **kwargs)
 
