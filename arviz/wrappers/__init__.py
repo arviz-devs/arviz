@@ -1,3 +1,4 @@
+"""Sampling wrappers."""
 from .base import SamplingWrapper
 
 

@@ -1,3 +1,4 @@
+"""Base class for sampling wrappers."""
 import numpy as np
 
 
@@ -65,7 +66,7 @@ class SamplingWrapper:
             Observed data whose index is *not* ``idx``
         excluded_observed_data
             Observed data whose index is ``idx``
-            """
+        """
         raise NotImplementedError("sel_observations method must be implemented for each subclass")
 
     def sample(self, modified_observed_data):
@@ -100,7 +101,8 @@ class SamplingWrapper:
         Returns
         -------
         idata_current: InferenceData
-            InferenceData object containing the samples in ``fitted_model``"""
+            InferenceData object containing the samples in ``fitted_model``
+        """
         raise NotImplementedError("get_inference_data method must be implemented for each subclass")
 
     def point_log_likelihood(self, observation, parameters):
@@ -117,7 +119,8 @@ class SamplingWrapper:
         -------
         point_log_likelihood: float
             Value of the log likelihood of ``observation`` given ``parameters``
-            according to ``self.model``"""
+            according to ``self.model``
+        """
         if self.log_like_fun is None:
             raise NotImplementedError(
                 "If log_like_fun is None, point_log_likelihood method must "
