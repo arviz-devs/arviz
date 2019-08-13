@@ -4,6 +4,7 @@ import numpy as np
 from .stats import loo
 from .stats_utils import logsumexp as _logsumexp
 
+__all__ = ["reloo"]
 
 def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale="deviance"):
     """Recalculate exact Leave-One-Out cross validation refitting where the approximation fails.
@@ -59,6 +60,14 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale="deviance"):
     nor intended, however, if needed, this function can be used to achieve the result.
 
     """
+    required_methods = ("sel_observations", "sample", "get_inference_data", "log_likelihood__i")
+    not_implemented = wrapper.check_implemented_methods(required_methods)
+    if not_implemented:
+        raise TypeError(
+            "Passed wrapper instance does not implement all methods required for reloo "
+            "to work. Check the documentation of SamplingWrapper. {} must be "
+            "implemented and were not found.".format(not_implemented)
+        )
     if loo_orig is None:
         loo_orig = loo(wrapper.idata_orig, pointwise=True, scale=scale)
     loo_refitted = loo_orig.copy()

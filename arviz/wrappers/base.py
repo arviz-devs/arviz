@@ -2,7 +2,7 @@
 import numpy as np
 
 
-from ..data import InferenceData
+# from ..data import InferenceData
 from ..stats import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 
@@ -37,8 +37,8 @@ class SamplingWrapper:
     ):
         self.model = model
 
-        if not isinstance(idata_orig, InferenceData) or idata_orig is not None:
-            raise TypeError("idata_orig must be of InferenceData type or None")
+        # if not isinstance(idata_orig, InferenceData) or idata_orig is not None:
+        #     raise TypeError("idata_orig must be of InferenceData type or None")
         self.idata_orig = idata_orig
 
         if log_like_fun is None or callable(log_like_fun):
@@ -158,7 +158,17 @@ class SamplingWrapper:
         )
         return log_like_idx
 
-    def _check_implemented_methods(self, methods):
+    def _check_method_is_implemented(self, method, *args):
+        """Check a given method is implemented."""
+        try:
+            getattr(self, method)(*args)
+        except NotImplementedError:
+            return False
+        except:  # pylint: disable=bare-except
+            return True
+        return True
+
+    def check_implemented_methods(self, methods):
         """Check that all methods listed are implemented.
 
         Not all functions that require refitting need to have all the methods implemented in
@@ -169,33 +179,38 @@ class SamplingWrapper:
         ----------
         methods: list
             Check all elements in methods are implemented.
+
+        Returns
+        -------
+            List with all non implemented methods
         """
-        supported_methods = (
+        supported_methods_1arg = (
             "sel_observations",
             "sample",
             "get_inference_data",
-            "point_log_likelihood",
         )
+        supported_methods_2args = (
+            "point_log_likelihood",
+            "log_likelihood__i",
+        )
+        supported_methods = [*supported_methods_1arg, *supported_methods_2args]
         bad_methods = [method for method in methods if method not in supported_methods]
         if bad_methods:
             raise ValueError(
                 "Not all method(s) in {} supported. Supported methods in SamplingWrapper "
                 "subclasses are:{}".format(bad_methods, supported_methods)
             )
+
         not_implemented = []
-        for method in supported_methods[:-1]:
-            if method in methods:
-                try:
-                    getattr(self, method)(1)
-                except NotImplementedError:
+        for method in methods:
+            if method in supported_methods_1arg:
+                if self._check_method_is_implemented(method, 1):
+                    continue
+                else:
                     not_implemented.append(method)
-                except:  # pylint: disable=bare-except
-                    pass
-        if "point_log_likelihood" in methods:
-            try:
-                self.point_log_likelihood(1, 1)
-            except NotImplementedError:
-                not_implemented.append("point_log_likelihood")
-            except:  # pylint: disable=bare-except
-                pass
+            elif method in supported_methods_2args:
+                if self._check_method_is_implemented(method, 1, 1):
+                    continue
+                else:
+                    not_implemented.append(method)
         return not_implemented
