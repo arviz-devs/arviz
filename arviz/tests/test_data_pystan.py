@@ -54,7 +54,7 @@ class TestDataPyStan:
             prior=data.obj,
             prior_predictive=["y_hat"],
             observed_data=["y"],
-            log_likelihood="log_lik",
+            log_likelihood={"log_likelihood": "log_lik"},
             coords={
                 "school": np.arange(eight_schools_params["J"]),
                 "log_likelihood_dim": np.arange(eight_schools_params["J"]),
@@ -105,7 +105,7 @@ class TestDataPyStan:
 
     def test_sampler_stats(self, data, eight_schools_params):
         inference_data = self.get_inference_data(data, eight_schools_params)
-        test_dict = {"sample_stats": ["lp", "diverging"]}
+        test_dict = {"sample_stats": ["diverging"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -119,7 +119,8 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "observed_data": ["y"],
             "constant_data": ["sigma"],
-            "sample_stats": ["log_likelihood"],
+            "sample_stats": ["diverging"],
+            "log_likelihoods": ["log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -128,19 +129,20 @@ class TestDataPyStan:
         test_dict = {
             "posterior_predictive": ["y_hat"],
             "observed_data": ["y"],
-            "sample_stats_prior": ["lp"],
-            "sample_stats": ["lp"],
+            "sample_stats_prior": ["diverging"],
+            "sample_stats": ["diverging"],
+            "log_likelihoods": ["log_likelihood"],
             "prior_predictive": ["y_hat"],
         }
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
         # inference_data 3
         test_dict = {
-            "posterior_predictive": ["y_hat"],
+            "posterior_predictive": ["y_hat", "log_lik"],
             "constant_data": ["sigma"],
-            "sample_stats_prior": ["lp"],
-            "sample_stats": ["lp"],
-            "prior_predictive": ["y_hat"],
+            "sample_stats_prior": ["diverging"],
+            "sample_stats": ["diverging"],
+            "prior_predictive": ["y_hat", "log_lik"],
         }
         fails = check_multiple_attrs(test_dict, inference_data3)
         assert not fails
@@ -185,7 +187,7 @@ class TestDataPyStan:
             model = StanModel(model_code=model_code)
             fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
             posterior = from_pystan(posterior=fit)
-            test_dict = {"posterior": ["y", "x", "z"], "sample_stats": ["lp"]}
+            test_dict = {"posterior": ["y", "x", "z"], "sample_stats": ["diverging"]}
             fails = check_multiple_attrs(test_dict, posterior)
             assert not fails
 

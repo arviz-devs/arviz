@@ -213,7 +213,11 @@ class TestDataPyMC3:
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
         inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["x"], "observed_data": ["y1", "y2"], "sample_stats": ["lp"]}
+        test_dict = {
+            "posterior": ["x"],
+            "observed_data": ["y1", "y2"],
+            "log_likelihoods": ["y1", "y2", "lp"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
