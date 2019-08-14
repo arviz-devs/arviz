@@ -172,7 +172,7 @@ class PyMC3Converter:
         if self.observations is not None:
             model_vars.extend(
                 [
-                    obs.observations.name
+                    obs.name
                     for obs in self.observations.values()
                     if hasattr(obs, "name")
                 ]

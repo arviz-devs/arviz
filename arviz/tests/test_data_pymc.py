@@ -139,3 +139,16 @@ class TestDataPyMC3:
 
         inference_data = from_pymc3(trace=trace)
         assert inference_data
+
+    def test_constant_data(self):
+        with pm.Model():
+            x = pm.Data('x', [1., 2., 3.])
+            y = pm.Data('y', [1., 2., 3.])
+            beta = pm.Normal('beta', 0, 1)
+            obs = pm.Normal('obs', x * beta, 1, observed=y)
+            trace = pm.sample(100, tune=100)
+
+        inference_data = from_pymc3(trace=trace)
+        test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
