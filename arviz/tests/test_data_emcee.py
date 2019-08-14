@@ -29,12 +29,14 @@ class TestDataEmcee:
         ),
         (
             {
+                "arg_groups": ["observed_data", "constant_data"],
                 "blob_names": ["log_likelihood", "y"],
                 "blob_groups": ["sample_stats", "posterior_predictive"],
             },
             {
                 "posterior": ["var_0", "var_1", "var_7"],
-                "observed_data": ["arg_0", "arg_1"],
+                "observed_data": ["arg_0"],
+                "constant_data": ["arg_1"],
                 "sample_stats": ["log_likelihood"],
                 "posterior_predictive": ["y"],
             },
@@ -46,11 +48,13 @@ class TestDataEmcee:
                 "var_names": ["mu", "tau", "eta"],
                 "slices": [0, 1, slice(2, None)],
                 "arg_names": ["y", "sigma"],
+                "arg_groups": ["observed_data", "constant_data"],
                 "coords": {"school": range(8)},
             },
             {
                 "posterior": ["mu", "tau", "eta"],
-                "observed_data": ["y", "sigma"],
+                "observed_data": ["y"],
+                "constant_data": ["sigma"],
                 "sample_stats": ["log_likelihood", "y"],
             },
         ),
@@ -87,9 +91,11 @@ class TestDataEmcee:
     @pytest.mark.parametrize("test_args", arg_list)
     def test_inference_data_reader(self, test_args):
         kwargs, test_dict = test_args
-        kwargs = {k: i for k, i in kwargs.items() if k != "arg_names"}
+        kwargs = {k: i for k, i in kwargs.items() if k not in ("arg_names", "arg_groups")}
         inference_data = self.get_inference_data_reader(**kwargs)
         test_dict.pop("observed_data")
+        if "constant_data" in test_dict:
+            test_dict.pop("constant_data")
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
