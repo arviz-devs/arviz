@@ -166,7 +166,9 @@ class PyMC3Converter:
     @requires("model")
     def constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        model_vars = [var.name for var in self.model.basic_RVs]
+        model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+            self.trace.varnames, include_transformed=True
+        )
         if self.observations is not None:
             model_vars.extend(
                 [
@@ -175,6 +177,7 @@ class PyMC3Converter:
                     if hasattr(obs, "name")
                 ]
             )
+            model_vars.extend(self.observations.keys())
         constant_data_vars = {
             name: var for name, var in self.model.named_vars.items() if name not in model_vars
         }
