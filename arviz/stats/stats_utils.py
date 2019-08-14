@@ -395,13 +395,13 @@ def get_log_likelihood(idata, var_name=None):
         )
         return idata.sample_stats.log_likelihood
     if not hasattr(idata, "log_likelihoods"):
-        raise ValueError("log likelihood not found in inference data object")
+        raise TypeError("log likelihood not found in inference data object")
     if var_name is None:
         var_names = list(idata.log_likelihoods.data_vars)
         if "lp" in var_names:
             var_names.remove("lp")
         if len(var_names) > 1:
-            raise ValueError(
+            raise TypeError(
                 "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
             )
         return idata.log_likelihoods[var_names[0]]
@@ -409,7 +409,7 @@ def get_log_likelihood(idata, var_name=None):
         try:
             log_likelihood = idata.log_likelihoods[var_name]
         except KeyError:
-            raise ValueError("No log likelihood data found for {}".format(var_name))
+            raise TypeError("No log likelihood data named {} found".format(var_name))
         return log_likelihood
 
 

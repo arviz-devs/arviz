@@ -7,6 +7,7 @@ from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 from .. import utils
 
 
+# pylint: disable=too-many-instance-attributes
 class DictConverter:
     """Encapsulate Dictionary specific logic."""
 
@@ -16,20 +17,24 @@ class DictConverter:
         posterior=None,
         posterior_predictive=None,
         sample_stats=None,
+        log_likelihoods=None,
         prior=None,
         prior_predictive=None,
         sample_stats_prior=None,
         observed_data=None,
+        constant_data=None,
         coords=None,
         dims=None
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
         self.sample_stats = sample_stats
+        self.log_likelihoods = log_likelihoods
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.sample_stats_prior = sample_stats_prior
         self.observed_data = observed_data
+        self.constant_data = constant_data
         self.coords = coords
         self.dims = dims
 
@@ -53,6 +58,23 @@ class DictConverter:
     def sample_stats_to_xarray(self):
         """Convert sample_stats samples to xarray."""
         data = self.sample_stats
+        if not isinstance(data, dict):
+            raise TypeError("DictConverter.sample_stats is not a dictionary")
+
+        if "log_likelihood" in data:
+            warnings.warn(
+                "log_likelihood found in sample_stats."
+                " Storing log_likelihood data in sample_stats will be deprecated in favour "
+                "of storing them in log_likelihoods group.",
+                PendingDeprecationWarning,
+            )
+
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+
+    @requires("log_likelihoods")
+    def log_likelihoods_to_xarray(self):
+        """Convert log_likelihoods samples to xarray."""
+        data = self.log_likelihoods
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats is not a dictionary")
 
@@ -114,6 +136,26 @@ class DictConverter:
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=None))
 
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant_data to xarray."""
+        data = self.constant_data
+        if not isinstance(data, dict):
+            raise TypeError("DictConverter.observed_data is not a dictionary")
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        constant_data = dict()
+        for key, vals in data.items():
+            vals = np.atleast_1d(vals)
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=None))
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -124,25 +166,29 @@ class DictConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihoods": self.log_likelihoods_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
             }
         )
 
 
-# pylint disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 def from_dict(
     posterior=None,
     *,
     posterior_predictive=None,
     sample_stats=None,
+    log_likelihoods=None,
     prior=None,
     prior_predictive=None,
     sample_stats_prior=None,
     observed_data=None,
+    constant_data=None,
     coords=None,
     dims=None
 ):
@@ -153,10 +199,12 @@ def from_dict(
     posterior : dict
     posterior_predictive : dict
     sample_stats : dict
-        "log_likelihood" variable for stats needs to be here.
+    log_likelihoods : dict
+        For stats functions, it is recommended to store "log_likelihood" data here.
     prior : dict
     prior_predictive : dict
     observed_data : dict
+    constant_data : dict
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -171,10 +219,12 @@ def from_dict(
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
+        log_likelihoods=log_likelihoods,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
         observed_data=observed_data,
+        constant_data=constant_data,
         coords=coords,
         dims=dims,
     ).to_inference_data()

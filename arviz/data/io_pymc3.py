@@ -100,10 +100,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             get_from = None
             if predictions is not None:
                 get_from = predictions
-            elif prior is not None:
-                get_from = prior
             elif posterior_predictive is not None:
                 get_from = posterior_predictive
+            elif prior is not None:
+                get_from = prior
             if get_from is None:
                 # pylint: disable=line-too-long
                 raise ValueError(
@@ -194,6 +194,15 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             dims = None
 
         return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
+
+
+    @requires("trace")
+    @requires("model")
+    def log_likelihoods_to_xarray(self):
+        """Extract log likelihood and log_p data from PyMC3 trace."""
+        data = self._extract_log_likelihood()
+        data["lp"] = np.array(self.trace.get_sampler_stats("model_logp", combine=False))
+        return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
         """Take Dict of variables to numpy ndarrays (samples) and translate into dataset."""
