@@ -79,9 +79,13 @@ class TestDataPyStan:
             prior_predictive=["y_hat", "log_lik"],
             constant_data=["sigma"],
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "y": ["school"],
+            dims={
+                "theta": ["school"],
+                "y": ["school"],
                 "sigma": ["school"],
-                  "y_hat": ["school"], "eta": ["school"]},
+                "y_hat": ["school"],
+                "eta": ["school"],
+            },
             posterior_model=data.model,
             prior_model=data.model,
         )
