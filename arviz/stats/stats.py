@@ -22,6 +22,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
     histogram,
+    get_log_likelihood as _get_log_likelihood,
 )
 from ..utils import _var_names, Numba, _numba_var
 from ..rcparams import rcParams
@@ -481,11 +482,9 @@ def loo(data, pointwise=False, reff=None, scale=None):
 
     """
     inference_data = convert_to_inference_data(data)
-    if not hasattr(inference_data, "sample_stats"):
-        raise TypeError("Must be able to extract a sample_stats group from data.")
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    posterior = inference_data.posterior
+    log_likelihood = _get_log_likelihood(inference_data)
+
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
@@ -1160,14 +1159,7 @@ def waic(data, pointwise=False, scale=None):
     `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("sample_stats",):
-        if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data.".format(group=group)
-            )
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data)
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
     if scale == "deviance":
@@ -1300,6 +1292,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
+    y_str = ""
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
 
@@ -1316,6 +1309,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif y_hat is None:
             raise ValueError("y_hat cannot be None if y is not a str")
         if isinstance(y, str):
+            y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
@@ -1326,7 +1320,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
-            log_likelihood = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+            if y_str:
+                try:
+                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                except ValueError:
+                    log_likelihood = _get_log_likelihood(idata)
+            else:
+                log_likelihood = _get_log_likelihood(idata)
+            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)
