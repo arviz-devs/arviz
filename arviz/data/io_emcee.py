@@ -1,5 +1,7 @@
 """emcee-specific conversion code."""
 import warnings
+from collections import OrderedDict
+
 import xarray as xr
 import numpy as np
 
@@ -145,7 +147,7 @@ class EmceeConverter:
                 "all arg_groups values should be either 'observed_data' or 'constant_data' "
                 ", not {}".format(bad_groups)
             )
-        obs_const_dict = {group: {} for group in arg_groups_set}
+        obs_const_dict = {group: OrderedDict() for group in arg_groups_set}
         for idx, (arg_name, group) in enumerate(zip(self.arg_names, self.arg_groups)):
             # Use emcee3 syntax, else use emcee2
             arg_array = np.atleast_1d(
@@ -165,13 +167,13 @@ class EmceeConverter:
         return obs_const_dict
 
     def blobs_to_dict(self):
-        """Convert blobs to dictionary {groupname: xr.Dataset}."""
-        # Omit blob conversion if blob_names is none.
-        # I should return {} instead of None when avoided
-        if self.blob_names is None:
-            return {}
-        elif self.blob_groups is None:
-            self.blob_groups = ["sample_stats" for _ in self.blob_names]
+        """Convert blobs to dictionary {groupname: xr.Dataset}.
+
+        It also stores lp values in log likelihoods group.
+        """
+        self.blob_names = [] if self.blob_names is None else self.blob_names
+        if self.blob_groups is None:
+            self.blob_groups = ["log_likelihoods" for _ in self.blob_names]
         if len(self.blob_names) != len(self.blob_groups):
             raise ValueError(
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
@@ -186,20 +188,25 @@ class EmceeConverter:
             blobs = np.expand_dims(blobs, axis=-1)
         blobs = blobs.swapaxes(0, 2)
         nblobs, nwalkers, ndraws, *_ = blobs.shape
-        if len(self.blob_names) != nblobs and len(self.blob_names) != 1:
+        if len(self.blob_names) != nblobs and len(self.blob_names) > 1:
             raise ValueError(
                 "Incorrect number of blob names. Expected {}, found {}".format(
                     nblobs, len(self.blob_names)
                 )
             )
+        if "lp" in self.blob_names:
+            raise ValueError(
+                "'lp' is automatically loaded from sampler, it cannot be used as blob name"
+            )
         blob_groups_set = set(self.blob_groups)
+        blob_groups_set.add("log_likelihoods")
         idata_groups = ("posterior", "observed_data", "constant_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
             raise SyntaxError(
                 "{} groups should not come from blobs. Using them here would "
                 "overwrite their actual values".format(idata_groups)
             )
-        blob_dict = {group: {} for group in blob_groups_set}
+        blob_dict = {group: OrderedDict() for group in blob_groups_set}
         if len(self.blob_names) == 1:
             blob_dict[self.blob_groups[0]][self.blob_names[0]] = blobs.swapaxes(0, 2).swapaxes(0, 1)
         else:
@@ -213,6 +220,13 @@ class EmceeConverter:
                     blob = np.stack(blob)
                     blob = blob.reshape((nwalkers, ndraws, -1))
                 blob_dict[group][name] = np.squeeze(blob)
+
+        # store lp in log_likelihoods group
+        blob_dict["log_likelihoods"]["lp"] = (
+                self.sampler.get_log_prob().swapaxes(0, 1)
+                if hasattr(self.sampler, "get_log_prob")
+                else self.sampler.lnprobability
+            )
         for key, values in blob_dict.items():
             blob_dict[key] = dict_to_dataset(
                 values, library=self.emcee, coords=self.coords, dims=self.dims
@@ -264,7 +278,7 @@ def from_emcee(
         A list of the groups where blob_names variables
         should be assigned respectively. If blob_names!=None
         and blob_groups is None, all variables are assigned
-        to sample_stats group
+        to log_likelihoods group
     coords : dict[str] -> list[str] (Optional)
         Map of dimensions to coordinates
     dims : dict[str] -> list[str] (Optional)
@@ -396,7 +410,8 @@ def from_emcee(
         >>> )
 
     Or in the case of even more complicated blobs, each corresponding to a different
-    group of the InferenceData object:
+    group of the InferenceData object. Moreover, the ``EnsembleSampler`` ``args`` argument
+    can be stored in observed or constant data groups if desired:
 
     .. plot::
         :context: close-figs
@@ -420,8 +435,9 @@ def from_emcee(
         >>>     var_names = ["mu", "tau", "eta"],
         >>>     slices=[0, 1, slice(2,None)],
         >>>     arg_names=["y","sigma"],
+        >>>     arg_groups=["observed_data", "constant_data"]
         >>>     blob_names=["log_likelihood", "y"],
-        >>>     blob_groups=["sample_stats", "posterior_predictive"],
+        >>>     blob_groups=["log_likelihoods", "posterior_predictive"],
         >>>     dims=dims,
         >>>     coords={"school": range(8)}
         >>> )
