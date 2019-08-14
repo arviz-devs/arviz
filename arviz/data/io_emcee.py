@@ -171,6 +171,7 @@ class EmceeConverter:
 
         It also stores lp values in log likelihoods group.
         """
+        store_blobs = not self.blob_names is None
         self.blob_names = [] if self.blob_names is None else self.blob_names
         if self.blob_groups is None:
             self.blob_groups = ["log_likelihoods" for _ in self.blob_names]
@@ -178,26 +179,27 @@ class EmceeConverter:
             raise ValueError(
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
             )
-        if int(self.emcee.__version__[0]) >= 3:
-            blobs = self.sampler.get_blobs()
-        else:
-            blobs = np.array(self.sampler.blobs)
-        if blobs is None or blobs.size == 0:
-            raise ValueError("No blobs in sampler, blob_names must be None")
-        if len(blobs.shape) == 2:
-            blobs = np.expand_dims(blobs, axis=-1)
-        blobs = blobs.swapaxes(0, 2)
-        nblobs, nwalkers, ndraws, *_ = blobs.shape
-        if len(self.blob_names) != nblobs and len(self.blob_names) > 1:
-            raise ValueError(
-                "Incorrect number of blob names. Expected {}, found {}".format(
-                    nblobs, len(self.blob_names)
+        if store_blobs:
+            if int(self.emcee.__version__[0]) >= 3:
+                blobs = self.sampler.get_blobs()
+            else:
+                blobs = np.array(self.sampler.blobs)
+            if (blobs is None or blobs.size == 0) and self.blob_names:
+                raise ValueError("No blobs in sampler, blob_names must be None")
+            if len(blobs.shape) == 2:
+                blobs = np.expand_dims(blobs, axis=-1)
+            blobs = blobs.swapaxes(0, 2)
+            nblobs, nwalkers, ndraws, *_ = blobs.shape
+            if len(self.blob_names) != nblobs and len(self.blob_names) > 1:
+                raise ValueError(
+                    "Incorrect number of blob names. Expected {}, found {}".format(
+                        nblobs, len(self.blob_names)
+                    )
                 )
-            )
-        if "lp" in self.blob_names:
-            raise ValueError(
-                "'lp' is automatically loaded from sampler, it cannot be used as blob name"
-            )
+            if "lp" in self.blob_names:
+                raise ValueError(
+                    "'lp' is automatically loaded from sampler, it cannot be used as blob name"
+                )
         blob_groups_set = set(self.blob_groups)
         blob_groups_set.add("log_likelihoods")
         idata_groups = ("posterior", "observed_data", "constant_data")
