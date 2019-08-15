@@ -252,18 +252,18 @@ class PyStan3Converter:
     def sample_stats_to_xarray(self):
         """Extract sample_stats from posterior."""
         posterior = self.posterior
-        data = get_sample_stats_stan3(posterior)
+        data = get_sample_stats_stan3(posterior, ignore="lp__")
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     def log_likelihoods_to_xarray(self):
         """Store log_likelihoods and lp in log_likelihoods group."""
         fit = self.posterior
-        model = self.posterior_model
 
         # log_likelihood values
         log_likelihood = self.log_likelihood
         if log_likelihood is not None:
+            model = self.posterior_model
             if isinstance(log_likelihood, str):
                 log_likelihood = [log_likelihood]
             if isinstance(log_likelihood, (list, tuple)):
@@ -274,8 +274,12 @@ class PyStan3Converter:
                 ]
                 for obs_var_name, log_like_name in log_likelihood.items()
             }
-            return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
-        return None
+        else:
+            data = {}
+
+        data["lp"] = get_sample_stats_stan3(fit, variables="lp__")["lp"]
+
+        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -361,6 +365,7 @@ class PyStan3Converter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihoods": self.log_likelihoods_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
@@ -513,12 +518,19 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     return data
 
 
-def get_sample_stats_stan3(fit):
+def get_sample_stats_stan3(fit, variables=None, ignore=None):
     """Extract sample stats from PyStan3 fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
+    if isinstance(variables, str):
+        variables = [variables]
+    if isinstance(ignore, str):
+        ignore = [ignore]
+
     data = OrderedDict()
     for key in fit.sample_and_sampler_param_names:
+        if (variables and key not in variables) or (ignore and key in ignore):
+            continue
         new_shape = -1, fit.num_chains
         values = fit._draws[fit._parameter_indexes(key)]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
