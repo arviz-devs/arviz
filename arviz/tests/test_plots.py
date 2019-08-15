@@ -646,7 +646,14 @@ def test_plot_rank(models, kwargs):
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},
         {"bins": None, "kind": "hist"},
-        {"ref_val": {"theta": [{"school": ["Choate", "Deerfield"], "ref_val": -1}, {"school": "Lawrenceville", "ref_val": 3}]}},
+        {
+            "ref_val": {
+                "theta": [
+                    {"school": ["Choate", "Deerfield"], "ref_val": -1},
+                    {"school": "Lawrenceville", "ref_val": 3},
+                ]
+            }
+        },
     ],
 )
 def test_plot_posterior(models, kwargs):
