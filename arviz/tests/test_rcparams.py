@@ -7,7 +7,8 @@ from xarray.core.indexing import MemoryCachedArray
 
 from ..data import load_arviz_data
 from ..stats import compare
-from ..rcparams import rcParams, rc_context, _validate_positive_int_or_none
+from ..rcparams import rcParams, rc_context, _validate_positive_int_or_none, read_rcfile
+
 from .helpers import models  # pylint: disable=unused-import
 
 
@@ -42,6 +43,14 @@ def test_del_key_error():
 def test_rcparams_find_all():
     data_rcparams = rcParams.find_all("data")
     assert len(data_rcparams)
+
+
+### Test arvizrc.template file is up to date ###
+def test_rctemplate_updated():
+    fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../arvizrc.template")
+    rc_pars_template = read_rcfile(fname)
+    assert all(key in rc_pars_template.keys() for key in rcParams.keys())
+    assert all(value == rc_pars_template[key] for key, value in rcParams.items())
 
 
 ### Test validation functions ###
