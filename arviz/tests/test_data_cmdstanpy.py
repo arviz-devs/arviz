@@ -37,7 +37,7 @@ class TestDataCmdStanPy:
                 "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
             )
             obj = StanFit(args)
-            obj.csv_files = filepaths
+            obj._csv_files = filepaths  # pylint: disable=protected-access
             obj._validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_sample()  # pylint: disable=protected-access
 
