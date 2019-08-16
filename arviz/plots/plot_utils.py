@@ -1,4 +1,5 @@
 """Utilities for plotting."""
+import warnings
 from itertools import product, tee
 
 import numpy as np
@@ -7,6 +8,7 @@ import matplotlib as mpl
 import xarray as xr
 
 from ..utils import conditional_jit
+from ..rcparams import rcParams
 
 
 def make_2d(ary):
@@ -488,3 +490,20 @@ def set_xticklabels(ax, coord_labels):
     else:
         ax.set_xticks(xticks)
         ax.set_xticklabels(coord_labels[xticks])
+
+
+def filter_plotters_list(plotters, plot_kind):
+    """Cut list of plotters so that it is at most of lenght "plot.max_subplots"."""
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}) in {plot_kind}, generating only "
+            "{max_plots} plots".format(
+                max_plots=max_plots, len_plotters=len(plotters), plot_kind=plot_kind
+            ),
+            SyntaxWarning,
+        )
+        return plotters[:max_plots]
+    return plotters

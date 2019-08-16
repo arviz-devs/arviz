@@ -9,6 +9,7 @@ from .plot_utils import (
     default_grid,
     _create_axes_grid,
     make_label,
+    filter_plotters_list,
 )
 from ..utils import _var_names, conditional_jit
 
@@ -102,19 +103,22 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)
     var_names = _var_names(var_names, posterior_data)
-    plotters = list(xarray_var_iter(posterior_data, var_names=var_names, combined=True))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(posterior_data, var_names=var_names, combined=True)), "plot_rank"
+    )
+    length_plotters = len(plotters)
 
     if bins is None:
         # Use double Sturges' formula
         bins = _sturges_formula(posterior_data, mult=2)
 
     if axes is None:
-        rows, cols = default_grid(len(plotters))
+        rows, cols = default_grid(length_plotters)
 
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
             figsize, None, rows=rows, cols=cols
         )
-        _, axes = _create_axes_grid(len(plotters), rows, cols, figsize=figsize, squeeze=False)
+        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 
     for ax, (var_name, selection, var_data) in zip(axes.ravel(), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)

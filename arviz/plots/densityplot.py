@@ -1,4 +1,5 @@
 """KDE and histogram plots for multiple variables."""
+import warnings
 import numpy as np
 
 from ..data import convert_to_dataset
@@ -12,6 +13,7 @@ from .plot_utils import (
     _create_axes_grid,
 )
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 # pylint:disable-msg=too-many-function-args
@@ -175,6 +177,25 @@ def plot_density(
             if label not in all_labels:
                 all_labels.append(label)
     length_plotters = max(length_plotters)
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = length_plotters if max_plots is None else max_plots
+    if length_plotters > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}) in plot_density, generating only "
+            "{max_plots} plots".format(max_plots=max_plots, len_plotters=length_plotters),
+            SyntaxWarning,
+        )
+        all_labels = all_labels[:max_plots]
+        to_plot = [
+            [
+                (var_name, selection, values)
+                for var_name, selection, values in plotters
+                if make_label(var_name, selection) in all_labels
+            ]
+            for plotters in to_plot
+        ]
+        length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(

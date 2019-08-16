@@ -9,6 +9,7 @@ from .plot_utils import (
     make_label,
     xarray_var_iter,
     _create_axes_grid,
+    filter_plotters_list,
 )
 from ..utils import _var_names
 
@@ -87,7 +88,9 @@ def plot_autocorr(
     if max_lag is None:
         max_lag = min(100, data["draw"].shape[0])
 
-    plotters = list(xarray_var_iter(data, var_names, combined))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

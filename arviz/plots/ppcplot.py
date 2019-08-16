@@ -12,6 +12,7 @@ from .plot_utils import (
     make_label,
     _create_axes_grid,
     get_bins,
+    filter_plotters_list,
 )
 from ..utils import _var_names
 
@@ -231,20 +232,27 @@ def plot_ppc(
     for key in coords.keys():
         coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
 
-    obs_plotters = list(
-        xarray_var_iter(
-            observed.isel(coords), skip_dims=set(flatten), var_names=var_names, combined=True
-        )
-    )
-    pp_plotters = list(
-        xarray_var_iter(
-            posterior_predictive.isel(coords),
-            var_names=pp_var_names,
-            skip_dims=set(flatten_pp),
-            combined=True,
-        )
+    obs_plotters = filter_plotters_list(
+        list(
+            xarray_var_iter(
+                observed.isel(coords), skip_dims=set(flatten), var_names=var_names, combined=True
+            )
+        ),
+        "plot_ppc",
     )
     length_plotters = len(obs_plotters)
+    pp_plotters = [
+        tup
+        for _, tup in zip(
+            range(length_plotters),
+            xarray_var_iter(
+                posterior_predictive.isel(coords),
+                var_names=pp_var_names,
+                skip_dims=set(flatten_pp),
+                combined=True,
+            ),
+        )
+    ]
     rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(

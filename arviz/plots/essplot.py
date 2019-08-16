@@ -12,6 +12,7 @@ from .plot_utils import (
     default_grid,
     _create_axes_grid,
     get_coords,
+    filter_plotters_list,
 )
 from ..utils import _var_names
 
@@ -226,7 +227,9 @@ def plot_ess(
             dim="ess_dim",
         )
 
-    plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})), "plot_ess"
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

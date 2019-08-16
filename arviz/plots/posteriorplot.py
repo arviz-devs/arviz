@@ -14,6 +14,7 @@ from .plot_utils import (
     default_grid,
     _create_axes_grid,
     get_coords,
+    filter_plotters_list,
 )
 from ..utils import _var_names, format_sig_figs
 
@@ -154,7 +155,10 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
-    plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
+        "plot_posterior",
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 

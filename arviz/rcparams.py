@@ -1,4 +1,4 @@
-"""ArviZ rcparams."""
+"""ArviZ rcparams. Based on matplotlib's implementation."""
 import sys
 import os
 from pathlib import Path
