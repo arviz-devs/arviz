@@ -10,7 +10,7 @@ command -v conda >/dev/null 2>&1 || {
 # if no python specified, use Travis version, or else 3.6
 PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
-PYTORCH_VERSION=${PYTORCH_VERSION:-1.1.0}
+PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
 EMCEE_VERSION=${EMCEE_VERSION:-2}
 
@@ -46,7 +46,11 @@ pip install --upgrade pip
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The link can be determined from the pytorch and the python version
-pip --no-cache-dir install "https://download.pytorch.org/whl/cpu/torch-${PYTORCH_VERSION}-cp${PYTHON_VERSION//./}-cp${PYTHON_VERSION//./}m-linux_x86_64.whl"
+if [ "$PYTORCH_VERSION" = "latest" ]; then
+    pip --no-cache-dir install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+else
+    pip --no-cache-dir install torch==${PYTORCH_VERSION} torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
   pip --no-cache-dir install pystan
