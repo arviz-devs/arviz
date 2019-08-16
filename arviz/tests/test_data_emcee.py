@@ -25,7 +25,11 @@ class TestDataEmcee:
         ({}, {"posterior": ["var_0", "var_1", "var_7"], "observed_data": ["arg_0", "arg_1"]}),
         (
             {"var_names": ["mu", "tau", "eta"], "slices": [0, 1, slice(2, None)]},
-            {"posterior": ["mu", "tau", "eta"], "observed_data": ["arg_0", "arg_1"], "log_likelihoods": ["lp"]},
+            {
+                "posterior": ["mu", "tau", "eta"],
+                "observed_data": ["arg_0", "arg_1"],
+                "log_likelihoods": ["lp"],
+            },
         ),
         (
             {

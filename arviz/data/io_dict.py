@@ -49,7 +49,7 @@ class DictConverter:
             warnings.warn(
                 "log_likelihood found in posterior."
                 " For stats functions log_likelihood needs to be in sample_stats.",
-                UserWarning,
+                SyntaxWarning,
             )
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
@@ -76,7 +76,7 @@ class DictConverter:
         """Convert log_likelihoods samples to xarray."""
         data = self.log_likelihoods
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.sample_stats is not a dictionary")
+            raise TypeError("DictConverter.log_likelihoods is not a dictionary")
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
@@ -141,14 +141,14 @@ class DictConverter:
         """Convert constant_data to xarray."""
         data = self.constant_data
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.observed_data is not a dictionary")
+            raise TypeError("DictConverter.constant_data is not a dictionary")
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
         constant_data = dict()
         for key, vals in data.items():
-            vals = np.atleast_1d(vals)
+            vals = utils.one_de(vals)
             val_dims = dims.get(key)
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords

@@ -1,4 +1,5 @@
 """PyStan-specific conversion code."""
+import warnings
 from collections import OrderedDict
 import re
 
@@ -92,6 +93,12 @@ class PyStanConverter:
             data = {}
 
         # lp__
+        if "lp" in data:
+            warnings.warn(
+                "Found log_likelihood named 'lp'. It will be overwritten by the "
+                "model's log probablility.",
+                SyntaxWarning,
+            )
         stat_lp = get_draws(fit, variables="lp__")
         data["lp"] = stat_lp["lp__"]
 
@@ -277,6 +284,12 @@ class PyStan3Converter:
         else:
             data = {}
 
+        if "lp" in data:
+            warnings.warn(
+                "Found log_likelihood named 'lp'. It will be overwritten by the "
+                "model's log probablility.",
+                SyntaxWarning,
+            )
         data["lp"] = get_sample_stats_stan3(fit, variables="lp__")["lp"]
 
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)

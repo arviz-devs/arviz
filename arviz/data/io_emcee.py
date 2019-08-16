@@ -196,10 +196,6 @@ class EmceeConverter:
                         nblobs, len(self.blob_names)
                     )
                 )
-            if "lp" in self.blob_names:
-                raise ValueError(
-                    "'lp' is automatically loaded from sampler, it cannot be used as blob name"
-                )
         blob_groups_set = set(self.blob_groups)
         blob_groups_set.add("log_likelihoods")
         idata_groups = ("posterior", "observed_data", "constant_data")
@@ -209,6 +205,15 @@ class EmceeConverter:
                 "overwrite their actual values".format(idata_groups)
             )
         blob_dict = {group: OrderedDict() for group in blob_groups_set}
+        if any(
+            group == "log_likelihoods" and name == "lp"
+            for group, name in zip(self.blob_groups, self.blob_names)
+        ):
+            warnings.warn(
+                "Found variable to be stored in log_likelihoods named 'lp'. It will be "
+                "overwritten by the model's log probablility.",
+                SyntaxWarning,
+            )
         if len(self.blob_names) == 1:
             blob_dict[self.blob_groups[0]][self.blob_names[0]] = blobs.swapaxes(0, 2).swapaxes(0, 1)
         else:
@@ -225,10 +230,10 @@ class EmceeConverter:
 
         # store lp in log_likelihoods group
         blob_dict["log_likelihoods"]["lp"] = (
-                self.sampler.get_log_prob().swapaxes(0, 1)
-                if hasattr(self.sampler, "get_log_prob")
-                else self.sampler.lnprobability
-            )
+            self.sampler.get_log_prob().swapaxes(0, 1)
+            if hasattr(self.sampler, "get_log_prob")
+            else self.sampler.lnprobability
+        )
         for key, values in blob_dict.items():
             blob_dict[key] = dict_to_dataset(
                 values, library=self.emcee, coords=self.coords, dims=self.dims

@@ -81,7 +81,8 @@ class TestDataPyMC3:
         inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging"],
+            "log_likelihoods": ["obs", "lp"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
             "prior_predictive": ["obs"],
@@ -200,7 +201,7 @@ class TestDataPyMC3:
         (y_missing,) = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["x"], "observed_data": ["y"], "sample_stats": ["log_likelihood"]}
+        test_dict = {"posterior": ["x"], "observed_data": ["y"], "log_likelihoods": ["y"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -237,6 +238,7 @@ class TestDataPyMC3:
         assert not hasattr(inference_data, "observed_data")
         assert hasattr(inference_data, "posterior")
         assert hasattr(inference_data, "sample_stats")
+        assert hasattr(inference_data, "log_likelihoods")
 
     def test_single_observation(self):
         with pm.Model():
