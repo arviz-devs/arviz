@@ -261,9 +261,9 @@ def test_two_de(data):
 def test_one_de(data):
     """Test to check for custom atleast_1d. List added to test for a non ndarray case."""
     assert np.allclose(one_de(data), np.atleast_1d(data))
-    
-    
+
+
 @pytest.mark.parametrize("data", [np.random.randn(100), np.random.randn(100).tolist()])
 def test_expand_dims(data):
     """Test to check for custom expand_dims. List added to test for a non ndarray case."""
-    assert np.allclose(expand_dims(data), np.expand_dims(data,0))
+    assert np.allclose(expand_dims(data), np.expand_dims(data, 0))

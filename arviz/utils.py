@@ -322,7 +322,7 @@ def two_de(x):
 def expand_dims(x):
     """Jitting numpy expand_dims."""
     if not isinstance(x, np.ndarray):
-        return np.expand_dims(x,0)
+        return np.expand_dims(x, 0)
     shape = x.shape
     return x.reshape(shape[:0] + (1,) + shape[0:])
 
