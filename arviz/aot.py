@@ -1,6 +1,6 @@
-from numba.pycc import CC
 import numpy as np
 import numba
+from numba.pycc import CC
 
 module = CC("numba_compilations")
 
