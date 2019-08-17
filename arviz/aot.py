@@ -2,11 +2,10 @@ from numba.pycc import CC
 import numpy as np
 import numba
 
-module = CC("numba-compilations")
-
+module = CC("numba_compilations")
 
 @module.export("stats_variance_1d", "(f8[:],i8)")
-def stats_variance_1d(data, ddof=0):  # perform type conversion before calling the function.
+def stats_variance_1d(data, ddof=0):
     a_a, b_b = 0, 0
     for i in data:
         a_a = a_a + i
@@ -27,7 +26,7 @@ def stats_variance_1d_2d(data, ddof=0):
     return var
 
 
-@module.export("stats_variance_2d", "f8[:](f8[:,:],i8,i8)")  # perform type conversion before calling the function.
+@module.export("stats_variance_2d", "f8[:](f8[:,:],i8,i8)")
 def stats_variance_2d(data, ddof=0, axis=1):
     a_a, b_b = data.shape
     if axis == 1:
