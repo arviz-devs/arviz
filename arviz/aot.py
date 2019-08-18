@@ -3,10 +3,10 @@ import numpy as np
 import numba
 from numba.pycc import CC
 
-module = CC("numba_compilations")
+MODULE = CC("numba_compilations")
 
 
-@module.export("stats_variance_1d", "(f8[:],i8)")
+@MODULE.export("stats_variance_1d", "(f8[:],i8)")
 def stats_variance_1d(data, ddof=0):
     """Pre compiled method to get 1d variance."""
     a_a, b_b = 0, 0
@@ -29,7 +29,7 @@ def _stats_variance_1d_2d(data, ddof=0):
     return var
 
 
-@module.export("stats_variance_2d", "f8[:](f8[:,:],i8,i8)")
+@MODULE.export("stats_variance_2d", "f8[:](f8[:,:],i8,i8)")
 def stats_variance_2d(data, ddof=0, axis=1):
     """Pre compiled method to get 2d variance."""
     a_a, b_b = data.shape
@@ -46,4 +46,4 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 
 if __name__ == "__main__":
-    module.compile()
+    MODULE.compile()
