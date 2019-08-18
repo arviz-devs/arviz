@@ -10,7 +10,6 @@ import re
 import numpy as np
 import pandas as pd
 import xarray as xr
-import arviz.utils as utils
 
 from .. import utils
 from .inference_data import InferenceData

@@ -1,7 +1,7 @@
 """pyro-specific conversion code."""
 from .inference_data import InferenceData
 from .base import dict_to_dataset
-from ..utils import expand_dims
+from .. import utils
 
 
 def _get_var_names(posterior):
@@ -54,7 +54,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: expand_dims(samples.enumerate_support().squeeze())
+                name: utils.expand_dims(samples.enumerate_support().squeeze())
                 if self.posterior.num_chains == 1
                 else samples.enumerate_support().squeeze()
                 for name, samples in self.posterior.marginal(
@@ -68,7 +68,8 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = expand_dims(samples.numpy().squeeze())
+                samples = samples.numpy().squeeze()
+                data[var_name] = utils.expand_dims(samples)
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -77,7 +78,7 @@ class PyroConverter:
 
         try:  # Try pyro>=0.3 release syntax
             data = {
-                name: expand_dims(samples.enumerate_support().squeeze())
+                name: utils.expand_dims(samples.enumerate_support().squeeze())
                 for name, samples in self.posterior.marginal(
                     sites=self.observed_vars
                 ).empirical.items()
@@ -89,7 +90,8 @@ class PyroConverter:
                 samples = EmpiricalMarginal(
                     self.posterior, sites=var_name
                 ).get_samples_and_weights()[0]
-                data[var_name] = expand_dims(samples.numpy().squeeze())
+                samples = samples.numpy().squeeze()
+                data[var_name] = utils.expand_dims(samples)
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
