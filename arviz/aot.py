@@ -1,3 +1,4 @@
+"""Numba Ahead of Time compilation script."""
 import numpy as np
 import numba
 from numba.pycc import CC
