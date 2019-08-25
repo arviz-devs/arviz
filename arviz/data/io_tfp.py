@@ -4,7 +4,7 @@ import xarray as xr
 
 from .inference_data import InferenceData
 from .base import dict_to_dataset, generate_dims_coords, make_attrs
-
+from .. import utils
 
 # pylint: disable=too-many-instance-attributes
 class TfpConverter:
@@ -53,7 +53,7 @@ class TfpConverter:
         """Convert the posterior to an xarray dataset."""
         data = {}
         for i, var_name in enumerate(self.var_names):
-            data[var_name] = np.expand_dims(self.posterior[i], axis=0)
+            data[var_name] = utils.expand_dims(self.posterior[i])
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -75,7 +75,7 @@ class TfpConverter:
 
         name = "obs"
         val_dims = dims.get(name)
-        vals = np.atleast_1d(vals)
+        vals = utils.one_de(vals)
         val_dims, coords = generate_dims_coords(vals.shape, name, dims=val_dims, coords=self.coords)
         # coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
 
@@ -115,9 +115,7 @@ class TfpConverter:
 
         data = {}
         with self.tf.Session() as sess:
-            data["obs"] = np.expand_dims(
-                sess.run(posterior_preds, feed_dict=self.feed_dict), axis=0
-            )
+            data["obs"] = utils.expand_dims(sess.run(posterior_preds, feed_dict=self.feed_dict))
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def sample_stats_to_xarray(self):
@@ -144,8 +142,8 @@ class TfpConverter:
         dims = {"log_likelihood": coord_name}
 
         with self.tf.Session() as sess:
-            data["log_likelihood"] = np.expand_dims(
-                sess.run(log_likelihood, feed_dict=self.feed_dict), axis=0
+            data["log_likelihood"] = utils.expand_dims(
+                sess.run(log_likelihood, feed_dict=self.feed_dict)
             )
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=dims)
 

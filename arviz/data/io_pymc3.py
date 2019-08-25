@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import xarray as xr
 
+from .. import utils
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
@@ -64,7 +65,7 @@ class PyMC3Converter:
             """Compute log likelihood for each observed point."""
             log_like_vals = []
             for var, log_like in cached:
-                log_like_val = np.atleast_1d(log_like(point))
+                log_like_val = utils.one_de(log_like(point))
                 if var.missing_values:
                     log_like_val = log_like_val[~var.observations.mask]
                 log_like_vals.append(log_like_val)
@@ -115,7 +116,7 @@ class PyMC3Converter:
             elif shape[0] == self.nchains * self.ndraws:
                 data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
             else:
-                data[k] = np.expand_dims(ary, 0)
+                data[k] = utils.expand_dims(ary)
                 _log.warning(
                     "posterior predictive shape not compatible with number of chains and draws. "
                     "This can mean that some draws or even whole chains are not represented."
@@ -126,7 +127,7 @@ class PyMC3Converter:
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
         return dict_to_dataset(
-            {k: np.expand_dims(v, 0) for k, v in self.prior.items()},
+            {k: utils.expand_dims(v) for k, v in self.prior.items()},
             library=self.pymc3,
             coords=self.coords,
             dims=self.dims,
@@ -148,7 +149,7 @@ class PyMC3Converter:
         for name, vals in observations.items():
             if hasattr(vals, "get_value"):
                 vals = vals.get_value()
-            vals = np.atleast_1d(vals)
+            vals = utils.one_de(vals)
             val_dims = dims.get(name)
             val_dims, coords = generate_dims_coords(
                 vals.shape, name, dims=val_dims, coords=self.coords

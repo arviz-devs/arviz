@@ -2,10 +2,10 @@
 from copy import deepcopy
 import datetime
 import warnings
-
-import numpy as np
 import pkg_resources
 import xarray as xr
+
+from .. import utils
 
 
 class requires:  # pylint: disable=invalid-name
@@ -78,7 +78,7 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
-            coords[dim_name] = np.arange(dim_len)
+            coords[dim_name] = utils.arange(dim_len)
     coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
     return dims, coords
 
@@ -113,7 +113,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
     """
     # manage and transform copies
     default_dims = ["chain", "draw"]
-    ary = np.atleast_2d(ary)
+    ary = utils.two_de(ary)
     n_chains, n_samples, *shape = ary.shape
     if n_chains > n_samples:
         warnings.warn(
@@ -135,9 +135,9 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
         dims = ["chain"] + dims
 
     if "chain" not in coords:
-        coords["chain"] = np.arange(n_chains)
+        coords["chain"] = utils.arange(n_chains)
     if "draw" not in coords:
-        coords["draw"] = np.arange(n_samples)
+        coords["draw"] = utils.arange(n_samples)
 
     # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}

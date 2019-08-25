@@ -7,14 +7,13 @@ import os
 import logging
 import re
 
-
 import numpy as np
 import pandas as pd
 import xarray as xr
 
+from .. import utils
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords
-
 
 _log = logging.getLogger(__name__)
 
@@ -345,7 +344,7 @@ class CmdStanConverter:
         for key, vals in observed_data_raw.items():
             if variables is not None and key not in variables:
                 continue
-            vals = np.atleast_1d(vals)
+            vals = utils.one_de(vals)
             val_dims = self.dims.get(key)
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords
@@ -655,7 +654,7 @@ def _unpack_dataframes(dfs):
     sample = {}
     for key, cols_locs in col_groups.items():
         ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        sample[key] = np.full((chains, draws, *ndim), np.nan)
+        sample[key] = utils.full((chains, draws, *ndim), np.nan)
         for col, loc in cols_locs:
             for chain_id, df in enumerate(dfs):
                 draw = df[col].values

@@ -7,7 +7,17 @@ import importlib
 import numpy as np
 import pytest
 
-from ..utils import _var_names, format_sig_figs, numba_check, Numba, _numba_var, _stack
+from ..utils import (
+    _var_names,
+    format_sig_figs,
+    numba_check,
+    Numba,
+    _numba_var,
+    _stack,
+    one_de,
+    two_de,
+    expand_dims,
+)
 from ..data import load_arviz_data, from_dict
 from ..stats.stats_utils import stats_variance_2d as svar
 
@@ -244,3 +254,21 @@ def test_stack():
     assert x.shape[1:] == y.shape[1:]
     assert np.allclose(np.vstack((x, y)), _stack(x, y))
     assert _stack
+
+
+@pytest.mark.parametrize("data", [np.random.randn(1000), np.random.randn(1000).tolist()])
+def test_two_de(data):
+    """Test to check for custom atleast_2d. List added to test for a non ndarray case."""
+    assert np.allclose(two_de(data), np.atleast_2d(data))
+
+
+@pytest.mark.parametrize("data", [np.random.randn(100), np.random.randn(100).tolist()])
+def test_one_de(data):
+    """Test to check for custom atleast_1d. List added to test for a non ndarray case."""
+    assert np.allclose(one_de(data), np.atleast_1d(data))
+
+
+@pytest.mark.parametrize("data", [np.random.randn(100), np.random.randn(100).tolist()])
+def test_expand_dims(data):
+    """Test to check for custom expand_dims. List added to test for a non ndarray case."""
+    assert np.allclose(expand_dims(data), np.expand_dims(data, 0))

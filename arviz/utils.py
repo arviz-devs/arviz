@@ -3,6 +3,7 @@ import importlib
 import functools
 import warnings
 import numpy as np
+from numpy import newaxis
 import matplotlib.pyplot as plt
 
 
@@ -295,3 +296,46 @@ def _numba_var(numba_function, standard_numpy_func, data, axis=None, ddof=0):
 def _stack(x, y):
     assert x.shape[1:] == y.shape[1:]
     return np.vstack((x, y))
+
+
+def arange(x):
+    """Jitting numpy arange."""
+    return np.arange(x)
+
+
+def one_de(x):
+    """Jitting numpy atleast_1d."""
+    if not isinstance(x, np.ndarray):
+        return np.atleast_1d(x)
+    if x.ndim == 0:
+        result = x.reshape(1)
+    else:
+        result = x
+    return result
+
+
+def two_de(x):
+    """Jitting numpy at_least_2d."""
+    if not isinstance(x, np.ndarray):
+        return np.atleast_2d(x)
+    if x.ndim == 0:
+        result = x.reshape(1, 1)
+    elif x.ndim == 1:
+        result = x[newaxis, :]
+    else:
+        result = x
+    return result
+
+
+def expand_dims(x):
+    """Jitting numpy expand_dims."""
+    if not isinstance(x, np.ndarray):
+        return np.expand_dims(x, 0)
+    shape = x.shape
+    return x.reshape(shape[:0] + (1,) + shape[0:])
+
+
+@conditional_jit(parallel=True)
+def full(shape, x):
+    """Jitting numpy full."""
+    return np.full(shape, x)
