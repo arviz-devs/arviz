@@ -1,5 +1,6 @@
 # Write the benchmarking functions here.
-# See "Writing benchmarks" in the asv docs for more information.
+# See "Writing benchmarks" in the airspeed velocity docs for more information.
+# https://asv.readthedocs.io/en/stable/
 import numpy as np
 from numpy import newaxis
 from scipy.stats import circstd
