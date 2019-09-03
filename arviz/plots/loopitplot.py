@@ -149,8 +149,8 @@ def plot_loo_pit(
     if plot_unif_kwargs is None:
         plot_unif_kwargs = {}
     light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
-    light_color[1] /= 2
-    light_color[2] += (1 - light_color[2]) / 2
+    light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
+    light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation
     plot_unif_kwargs.setdefault("color", hsv_to_rgb(light_color))
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
