@@ -1,5 +1,5 @@
 emcee
-git+https://github.com/pymc-devs/pymc3
+pymc3 @ git+https://github.com/pymc-devs/pymc3
 ghp-import
 pystan
 cmdstanpy
