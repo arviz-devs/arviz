@@ -234,15 +234,19 @@ class rc_context:  # pylint: disable=invalid-name
     Examples
     --------
     This allows one to do::
+
         with az.rc_context(fname='pystan.rc'):
             idata = az.load_arviz_data("radon")
             az.plot_posterior(idata, var_names=["gamma"])
+
     The plot would have settings from 'screen.rc'
 
     A dictionary can also be passed to the context manager::
+
         with az.rc_context(rc={'plot.max_subplots': None}, fname='pystan.rc'):
             idata = az.load_arviz_data("radon")
             az.plot_posterior(idata, var_names=["gamma"])
+
     The 'rc' dictionary takes precedence over the settings loaded from
     'fname'. Passing a dictionary only is also valid.
     """
