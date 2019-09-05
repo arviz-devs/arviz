@@ -126,14 +126,14 @@ def plot_posterior(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu', 'theta_tilde'], ref_val=0)
+        >>> az.plot_posterior(data, var_names=['mu', 'theta'], ref_val=0)
 
     Show point estimate of distribution
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu', 'theta_tilde'], point_estimate='mode')
+        >>> az.plot_posterior(data, var_names=['mu', 'theta'], point_estimate='mode')
 
     Plot posterior as a histogram
 
