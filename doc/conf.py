@@ -38,6 +38,10 @@ arviz.rcParams["data.load"] = "eager"
 # ones.
 sys.path.insert(0, os.path.abspath("sphinxext"))
 
+thumb_directory = "example_thumbs"
+if not os.path.isdir(thumb_directory):
+    os.mkdir(thumb_directory)
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -149,7 +153,7 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_static_path = ["_static", "example_thumbs"]
+html_static_path = ["_static", thumb_directory]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
