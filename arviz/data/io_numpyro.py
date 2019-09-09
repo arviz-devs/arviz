@@ -16,6 +16,10 @@ class NumPyroConverter:
         ----------
         posterior : numpyro.mcmc.MCMC
             Fitted MCMC object from NumPyro
+        prior: dict
+            Prior samples from a NumPyro model
+        posterior_predictive : dict
+            Posterior predictive samples for the posterior
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
