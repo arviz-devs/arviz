@@ -1,9 +1,12 @@
 """NumPyro-specific conversion code."""
+import logging
 import numpy as np
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset
 from .. import utils
+
+_log = logging.getLogger(__name__)
 
 
 class NumPyroConverter:
@@ -25,7 +28,9 @@ class NumPyroConverter:
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
         """
-        import jax, numpyro
+        import jax
+        import numpyro
+
         self.posterior = posterior
         self.prior = jax.device_get(prior)
         self.posterior_predictive = jax.device_get(posterior_predictive)
@@ -33,16 +38,15 @@ class NumPyroConverter:
         self.dims = dims
         self.numpyro = numpyro
 
-        posterior_fields = jax.device_get(posterior._samples)
+        posterior_fields = jax.device_get(posterior._samples)  # pylint: disable=protected-access
         # handle the case we run MCMC with a general potential_fn
         # (instead of a NumPyro model) whose args is not a dictionary
         # (e.g. f(x) = x ** 2)
-        samples = posterior_fields['z']
+        samples = posterior_fields["z"]
         tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
         if not isinstance(samples, dict):
-            posterior_fields['z'] = {
-                'Param:{}'.format(i): jax.device_get(v)
-                for i, v in enumerate(tree_flatten_samples)
+            posterior_fields["z"] = {
+                "Param:{}".format(i): jax.device_get(v) for i, v in enumerate(tree_flatten_samples)
             }
         self._posterior_fields = posterior_fields
         self.nchains, self.ndraws = tree_flatten_samples[0].shape[:2]
@@ -50,18 +54,22 @@ class NumPyroConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        data = self._posterior_fields['z']
+        data = self._posterior_fields["z"]
         return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from NumPyro posterior."""
         # match PyMC3 stat names
-        rename_key = {"potential_energy": "lp", "adapt_state.step_size": "step_size",
-                      "num_steps": "tree_size", "accept_prob": "mean_tree_accept"}
+        rename_key = {
+            "potential_energy": "lp",
+            "adapt_state.step_size": "step_size",
+            "num_steps": "tree_size",
+            "accept_prob": "mean_tree_accept",
+        }
         data = {}
         for stat, value in self._posterior_fields.items():
-            if stat == 'z' or not isinstance(value, np.ndarray):
+            if stat == "z" or not isinstance(value, np.ndarray):
                 continue
             name = rename_key.get(stat, stat)
             data[name] = value

@@ -323,16 +323,21 @@ def numpyro_schools_model(data, draws, chains):
     from numpyro.mcmc import MCMC, NUTS
 
     def model():
-        mu = numpyro.sample('mu', dist.Normal(0, 5))
-        tau = numpyro.sample('tau', dist.HalfCauchy(5))
+        mu = numpyro.sample("mu", dist.Normal(0, 5))
+        tau = numpyro.sample("tau", dist.HalfCauchy(5))
         # TODO: use numpyro.plate or `sample_shape` kwargs instead of
         # multiplying with np.ones(J) in future versions of NumPyro
-        theta = numpyro.sample('theta', dist.Normal(mu * np.ones(data['J']), tau))
-        numpyro.sample('obs', dist.Normal(theta, data['sigma']), obs=data['y'])
+        theta = numpyro.sample("theta", dist.Normal(mu * np.ones(data["J"]), tau))
+        numpyro.sample("obs", dist.Normal(theta, data["sigma"]), obs=data["y"])
 
-    mcmc = MCMC(NUTS(model), num_warmup=draws, num_samples=draws,
-                num_chains=chains, chain_method='sequential')
-    mcmc.run(jax.random.PRNGKey(0), collect_fields=('z', 'diverging'))
+    mcmc = MCMC(
+        NUTS(model),
+        num_warmup=draws,
+        num_samples=draws,
+        num_chains=chains,
+        chain_method="sequential",
+    )
+    mcmc.run(jax.random.PRNGKey(0), collect_fields=("z", "diverging"))
     return mcmc
 
 
