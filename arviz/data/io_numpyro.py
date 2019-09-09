@@ -56,8 +56,17 @@ class NumPyroConverter:
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from NumPyro posterior."""
-        data = {k: v.copy() for k, v in self._posterior_fields.items()
-                if k != 'z' and isinstance(v, np.ndarray)}
+        # match PyMC3 stat names
+        rename_key = {"potential_energy": "lp", "adapt_state.step_size": "step_size",
+                      "num_steps": "tree_size", "accept_prob": "mean_tree_accept"}
+        data = {}
+        for stat, value in self._posterior_fields.items():
+            if stat == 'z' or not isinstance(value, np.ndarray):
+                continue
+            name = rename_key.get(stat, stat)
+            data[name] = value
+            if stat == "num_steps":
+                data["depth"] = np.log2(value).astype(int) + 1
         # TODO: extract log_likelihood using NumPyro predictive utilities
         return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
 

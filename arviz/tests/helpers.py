@@ -316,6 +316,7 @@ def pyro_centered_schools(data, draws, chains):
 
 
 def numpyro_schools_model(data, draws, chains):
+    """Centered eight schools implementation in NumPyro."""
     import jax
     import numpyro
     import numpyro.distributions as dist
