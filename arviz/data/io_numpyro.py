@@ -75,7 +75,7 @@ class NumPyroConverter:
             data[name] = value
             if stat == "num_steps":
                 data["depth"] = np.log2(value).astype(int) + 1
-        # TODO: extract log_likelihood using NumPyro predictive utilities
+        # TODO extract log_likelihood using NumPyro predictive utilities  # pylint: disable=fixme
         return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
 
     @requires("posterior_predictive")
@@ -113,8 +113,8 @@ class NumPyroConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        # TODO: implement observed_data_to_xarray when model args, kwargs are stored
-        # in the next version of NumPyro
+        # TODO implement observed_data_to_xarray when model args,  # pylint: disable=fixme
+        # kwargs are stored in the next version of NumPyro
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
