@@ -98,6 +98,7 @@ Data
     from_pymc3
     from_pyro
     from_pystan
+    from_numpyro
 
 Utils
 -----

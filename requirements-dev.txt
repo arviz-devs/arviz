@@ -18,3 +18,4 @@ sphinx-bootstrap-theme
 sphinx-gallery
 black; python_version == '3.6'
 numba
+numpyro

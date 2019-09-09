@@ -7,6 +7,7 @@ from .base import dict_to_dataset
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_emcee import from_emcee
+from .io_numpyro import from_numpyro
 from .io_pymc3 import from_pymc3
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
@@ -84,6 +85,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         return from_emcee(sampler=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("pyro"):
         return from_pyro(posterior=kwargs.pop(group), **kwargs)
+    elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("numpyro"):
+        return from_numpyro(posterior=kwargs.pop(group), **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
@@ -108,6 +111,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             "pymc3 trace",
             "emcee fit",
             "pyro mcmc fit",
+            "numpyro mcmc fit",
             "cmdstan fit csv",
             "cmdstanpy fit",
         )
