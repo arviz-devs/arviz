@@ -96,6 +96,8 @@ class NumPyroConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
+        # TODO: implement observed_data_to_xarray when model args, kwargs are stored
+        # in the next version of NumPyro
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
