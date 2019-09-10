@@ -95,7 +95,6 @@ Data
     from_cmdstanpy
     from_dict
     from_emcee
-    from_numpyro
     from_pymc3
     from_pyro
     from_numpyro
