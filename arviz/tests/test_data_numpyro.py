@@ -10,7 +10,7 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
-class TestDataPyro:
+class TestDataNumPyro:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):
         class Data:
