@@ -43,9 +43,10 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     default_dims : list[str]
-        Dimensions that are not part of the variable's shape. In the case of
-        variables from Monte Carlo traces, these might contain, e.g., ``n_chains``
-        and ``n_draws``.`
+        Dimension names that are not part of the variable's shape. For example,
+        when manipulating Monte Carlo traces, the ``default_dims`` would be
+        ``["chain" , "draw"]`` which Arviz uses as its own names for dimensions
+        of MCMC traces.
 
     Returns
     -------
