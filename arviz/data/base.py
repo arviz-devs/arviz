@@ -35,13 +35,18 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     shape : tuple[int]
         Shape of the variable
     var_name : str
-        Name of the variable. Used in the default name, if necessary
+        Name of the variable. If no dimension name(s) is provided, ArviZ
+        will generate a default dimension name using ``var_name``, e.g.,
+        ``"foo_dim_0"`` for the first dimension if ``var_name`` is ``"foo"``.
     dims : list
         List of dimensions for the variable
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     default_dims : list[str]
-        Dimensions that do not apply to the variable's shape
+        Dimension names that are not part of the variable's shape. For example,
+        when manipulating Monte Carlo traces, the ``default_dims`` would be
+        ``["chain" , "draw"]`` which ArviZ uses as its own names for dimensions
+        of MCMC traces.
 
     Returns
     -------
@@ -59,8 +64,13 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
             (
                 "In variable {var_name}, there are "
                 + "more dims ({dims_len}) given than exist ({shape_len}). "
-                + "Passed array should have shape (chains, draws, *shape)"
-            ).format(var_name=var_name, dims_len=len(dims), shape_len=len(shape)),
+                + "Passed array should have shape ({defaults}*shape)"
+            ).format(
+                var_name=var_name,
+                dims_len=len(dims),
+                shape_len=len(shape),
+                defaults=",".join(default_dims) + ", " if default_dims is not None else "",
+            ),
             SyntaxWarning,
         )
     if coords is None:
