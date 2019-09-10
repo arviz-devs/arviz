@@ -65,8 +65,12 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 "In variable {var_name}, there are "
                 + "more dims ({dims_len}) given than exist ({shape_len}). "
                 + "Passed array should have shape ({defaults}*shape)"
-            ).format(var_name=var_name, dims_len=len(dims), shape_len=len(shape),
-                     defaults=",".join(default_dims) + ", " if default_dims is not None else ""),
+            ).format(
+                var_name=var_name,
+                dims_len=len(dims),
+                shape_len=len(shape),
+                defaults=",".join(default_dims) + ", " if default_dims is not None else "",
+            ),
             SyntaxWarning,
         )
     if coords is None:
