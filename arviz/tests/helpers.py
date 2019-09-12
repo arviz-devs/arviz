@@ -315,6 +315,32 @@ def pyro_centered_schools(data, draws, chains):
     return posterior
 
 
+def numpyro_schools_model(data, draws, chains):
+    """Centered eight schools implementation in NumPyro."""
+    import jax
+    import numpyro
+    import numpyro.distributions as dist
+    from numpyro.mcmc import MCMC, NUTS
+
+    def model():
+        mu = numpyro.sample("mu", dist.Normal(0, 5))
+        tau = numpyro.sample("tau", dist.HalfCauchy(5))
+        # TODO: use numpyro.plate or `sample_shape` kwargs instead of  # pylint: disable=fixme
+        # multiplying with np.ones(J) in future versions of NumPyro
+        theta = numpyro.sample("theta", dist.Normal(mu * np.ones(data["J"]), tau))
+        numpyro.sample("obs", dist.Normal(theta, data["sigma"]), obs=data["y"])
+
+    mcmc = MCMC(
+        NUTS(model),
+        num_warmup=draws,
+        num_samples=draws,
+        num_chains=chains,
+        chain_method="sequential",
+    )
+    mcmc.run(jax.random.PRNGKey(0), collect_fields=("z", "diverging"))
+    return mcmc
+
+
 def tfp_schools_model(num_schools, treatment_stddevs):
     """Non-centered eight schools model for tfp."""
     import tensorflow_probability.python.edward2 as ed
@@ -461,6 +487,7 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),
         ("pyro", pyro_centered_schools),
+        ("numpyro", numpyro_schools_model),
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}
@@ -477,6 +504,11 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
             # httpstan caches models automatically
             _log.info("Generating and loading stan model")
             models["pystan"] = func(eight_schools_data, draws, chains)
+            continue
+        elif library.__name__ == "numpyro":
+            # NumPyro does not support pickling
+            _log.info("Generating and loading NumPyro model")
+            models["numpyro"] = func(eight_schools_data, draws, chains)
             continue
 
         py_version = sys.version_info

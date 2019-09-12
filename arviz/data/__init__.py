@@ -11,6 +11,7 @@ from .io_pymc3 import from_pymc3
 from .io_pystan import from_pystan
 from .io_emcee import from_emcee
 from .io_pyro import from_pyro
+from .io_numpyro import from_numpyro
 from .io_tfp import from_tfp
 
 __all__ = [
@@ -30,6 +31,7 @@ __all__ = [
     "from_cmdstanpy",
     "from_dict",
     "from_pyro",
+    "from_numpyro",
     "from_tfp",
     "from_netcdf",
     "to_netcdf",
