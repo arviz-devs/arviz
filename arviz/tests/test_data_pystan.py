@@ -31,11 +31,13 @@ class TestDataPyStan:
             prior=data.obj,
             prior_predictive="y_hat",
             observed_data="y",
+            constant_data="sigma",
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
+                "sigma": ["school"],
                 "log_lik": ["school"],
                 "y_hat": ["school"],
                 "eta": ["school"],
@@ -51,7 +53,7 @@ class TestDataPyStan:
             posterior_predictive=["y_hat"],
             prior=data.obj,
             prior_predictive=["y_hat"],
-            observed_data="y",
+            observed_data=["y"],
             log_likelihood="log_lik",
             coords={
                 "school": np.arange(eight_schools_params["J"]),
@@ -75,9 +77,15 @@ class TestDataPyStan:
             posterior_predictive=["y_hat", "log_lik"],
             prior=data.obj,
             prior_predictive=["y_hat", "log_lik"],
-            observed_data="y",
+            constant_data=["sigma"],
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "y": ["school"], "y_hat": ["school"], "eta": ["school"]},
+            dims={
+                "theta": ["school"],
+                "y": ["school"],
+                "sigma": ["school"],
+                "y_hat": ["school"],
+                "eta": ["school"],
+            },
             posterior_model=data.model,
             prior_model=data.model,
         )
@@ -89,7 +97,6 @@ class TestDataPyStan:
             posterior_predictive=None,
             prior=data.obj,
             prior_predictive=None,
-            observed_data="y",
             coords=None,
             dims=None,
             posterior_model=data.model,
@@ -111,6 +118,7 @@ class TestDataPyStan:
         test_dict = {
             "posterior": ["theta"],
             "observed_data": ["y"],
+            "constant_data": ["sigma"],
             "sample_stats": ["log_likelihood"],
             "prior": ["theta"],
         }
@@ -129,7 +137,7 @@ class TestDataPyStan:
         # inference_data 3
         test_dict = {
             "posterior_predictive": ["y_hat"],
-            "observed_data": ["y"],
+            "constant_data": ["sigma"],
             "sample_stats_prior": ["lp"],
             "sample_stats": ["lp"],
             "prior_predictive": ["y_hat"],

@@ -17,6 +17,13 @@ class PyMC3Converter:
         self, *, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
     ):
         self.trace = trace
+        # This next line is brittle and may not work forever, but is a secret
+        # way to access the model from the trace.
+        self.model = (
+            None
+            if trace is None
+            else self.trace._straces[0].model  # pylint: disable=protected-access
+        )
         self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
         self.ndraws = len(trace)
         self.prior = prior
@@ -35,31 +42,31 @@ class PyMC3Converter:
             )
             else None
         )
+        if self.observations is not None:
+            self.observations = {obs.name: obs.observations for obs in self.model.observed_RVs}
 
         import pymc3
 
         self.pymc3 = pymc3
 
     @requires("trace")
+    @requires("model")
     def _extract_log_likelihood(self):
         """Compute log likelihood of each observation.
 
         Return None if there is not exactly 1 observed random variable.
         """
-        # This next line is brittle and may not work forever, but is a secret
-        # way to access the model from the trace.
-        model = self.trace._straces[0].model  # pylint: disable=protected-access
-        if len(model.observed_RVs) != 1:
+        if len(self.model.observed_RVs) != 1:
             return None, None
         else:
             if self.dims is not None:
                 coord_name = self.dims.get(
-                    "log_likelihood", self.dims.get(model.observed_RVs[0].name)
+                    "log_likelihood", self.dims.get(self.model.observed_RVs[0].name)
                 )
             else:
                 coord_name = None
 
-        cached = [(var, var.logp_elemwise) for var in model.observed_RVs]
+        cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
 
         def log_likelihood_vals_point(point):
             """Compute log likelihood for each observed point."""
@@ -134,19 +141,15 @@ class PyMC3Converter:
         )
 
     @requires("observations")
+    @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
-        # This next line is brittle and may not work forever, but is a secret
-        # way to access the model from the trace.
-        model = self.trace._straces[0].model  # pylint: disable=protected-access
-
-        observations = {obs.name: obs.observations for obs in model.observed_RVs}
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
         observed_data = {}
-        for name, vals in observations.items():
+        for name, vals in self.observations.items():
             if hasattr(vals, "get_value"):
                 vals = vals.get_value()
             vals = utils.one_de(vals)
@@ -158,6 +161,41 @@ class PyMC3Converter:
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pymc3))
+
+    @requires("trace")
+    @requires("model")
+    def constant_data_to_xarray(self):
+        """Convert constant data to xarray."""
+        model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+            self.trace.varnames, include_transformed=True
+        )
+        if self.observations is not None:
+            model_vars.extend(
+                [obs.name for obs in self.observations.values() if hasattr(obs, "name")]
+            )
+            model_vars.extend(self.observations.keys())
+        constant_data_vars = {
+            name: var for name, var in self.model.named_vars.items() if name not in model_vars
+        }
+        if not constant_data_vars:
+            return None
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        constant_data = {}
+        for name, vals in constant_data_vars.items():
+            if hasattr(vals, "get_value"):
+                vals = vals.get_value()
+            vals = np.atleast_1d(vals)
+            val_dims = dims.get(name)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, name, dims=val_dims, coords=self.coords
+            )
+            # filter coords based on the dims
+            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
+            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -173,6 +211,7 @@ class PyMC3Converter:
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
             }
         )
 

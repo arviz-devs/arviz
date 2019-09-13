@@ -21,6 +21,7 @@ class PyStanConverter:
         prior=None,
         prior_predictive=None,
         observed_data=None,
+        constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
@@ -30,6 +31,7 @@ class PyStanConverter:
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
+        self.constant_data = constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -121,26 +123,32 @@ class PyStanConverter:
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
-    @requires("observed_data")
-    def observed_data_to_xarray(self):
+    @requires(["observed_data", "constant_data"])
+    def observed_and_constant_data_to_xarray(self):
         """Convert observed data to xarray."""
         posterior = self.posterior
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
-        observed_names = self.observed_data
-        if isinstance(observed_names, str):
-            observed_names = [observed_names]
-        observed_data = OrderedDict()
-        for key in observed_names:
-            vals = np.atleast_1d(posterior.data[key])
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
+        obs_const_dict = {}
+        for group_name in ("observed_data", "constant_data"):
+            names = getattr(self, group_name)
+            if names is None:
+                continue
+            names = [names] if isinstance(names, str) else names
+            data = OrderedDict()
+            for key in names:
+                vals = np.atleast_1d(posterior.data[key])
+                val_dims = dims.get(key)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
+                data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+            obs_const_dict[group_name] = xr.Dataset(
+                data_vars=data, attrs=make_attrs(library=self.pystan)
             )
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pystan))
+        return obs_const_dict
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -149,6 +157,7 @@ class PyStanConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
+        obs_const_dict = self.observed_and_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
@@ -157,7 +166,7 @@ class PyStanConverter:
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
-                "observed_data": self.observed_data_to_xarray(),
+                **({} if obs_const_dict is None else obs_const_dict),
             }
         )
 
@@ -176,6 +185,7 @@ class PyStan3Converter:
         prior_model=None,
         prior_predictive=None,
         observed_data=None,
+        constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
@@ -187,6 +197,7 @@ class PyStan3Converter:
         self.prior_model = prior_model
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
+        self.constant_data = constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -285,26 +296,32 @@ class PyStan3Converter:
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior_model")
-    @requires("observed_data")
-    def observed_data_to_xarray(self):
+    @requires(["observed_data", "constant_data"])
+    def observed_and_constant_data_to_xarray(self):
         """Convert observed data to xarray."""
         posterior_model = self.posterior_model
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
-        observed_names = self.observed_data
-        if isinstance(observed_names, str):
-            observed_names = [observed_names]
-        observed_data = OrderedDict()
-        for key in observed_names:
-            vals = np.atleast_1d(posterior_model.data[key])
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
+        obs_const_dict = {}
+        for group_name in ("observed_data", "constant_data"):
+            names = getattr(self, group_name)
+            if names is None:
+                continue
+            names = [names] if isinstance(names, str) else names
+            data = OrderedDict()
+            for key in names:
+                vals = np.atleast_1d(posterior_model.data[key])
+                val_dims = dims.get(key)
+                val_dims, coords = generate_dims_coords(
+                    vals.shape, key, dims=val_dims, coords=self.coords
+                )
+                data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+            obs_const_dict[group_name] = xr.Dataset(
+                data_vars=data, attrs=make_attrs(library=self.stan)
             )
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.stan))
+        return obs_const_dict
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -313,6 +330,7 @@ class PyStan3Converter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
+        obs_const_dict = self.observed_and_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
@@ -321,7 +339,7 @@ class PyStan3Converter:
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
-                "observed_data": self.observed_data_to_xarray(),
+                **({} if obs_const_dict is None else obs_const_dict),
             }
         )
 
@@ -543,6 +561,7 @@ def from_pystan(
     prior=None,
     prior_predictive=None,
     observed_data=None,
+    constant_data=None,
     log_likelihood=None,
     coords=None,
     dims=None,
@@ -566,6 +585,9 @@ def from_pystan(
         Observed data is extracted from the `posterior.data`.
         PyStan3 needs model object for the extraction.
         See `posterior_model`.
+    constant_data : str or list of str
+        Constants relevant to the model (i.e. x values in a linear
+        regression).
     log_likelihood : str
         Pointwise log_likelihood for the data.
         log_likelihood is extracted from the posterior.
@@ -595,6 +617,7 @@ def from_pystan(
             prior_model=prior_model,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
+            constant_data=constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,
@@ -606,6 +629,7 @@ def from_pystan(
             prior=prior,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
+            constant_data=constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,

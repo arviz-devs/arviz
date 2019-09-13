@@ -92,6 +92,7 @@ class EmceeConverter:
         var_names=None,
         slices=None,
         arg_names=None,
+        arg_groups=None,
         blob_names=None,
         blob_groups=None,
         coords=None,
@@ -102,6 +103,7 @@ class EmceeConverter:
         self.var_names = var_names
         self.slices = slices
         self.arg_names = arg_names
+        self.arg_groups = arg_groups
         self.blob_names = blob_names
         self.blob_groups = blob_groups
         self.coords = coords
@@ -122,14 +124,29 @@ class EmceeConverter:
             )
         return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
 
-    def observed_data_to_xarray(self):
-        """Convert observed data to xarray."""
+    def args_to_xarray(self):
+        """Convert emcee args to observed and constant_data xarray Datasets."""
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
-        observed_data = {}
-        for idx, arg_name in enumerate(self.arg_names):
+        if self.arg_groups is None:
+            self.arg_groups = ["observed_data" for _ in self.arg_names]
+        if len(self.arg_names) != len(self.arg_groups):
+            raise ValueError(
+                "arg_names and arg_groups must have the same length, or arg_groups be None"
+            )
+        arg_groups_set = set(self.arg_groups)
+        bad_groups = [
+            group for group in arg_groups_set if group not in ("observed_data", "constant_data")
+        ]
+        if bad_groups:
+            raise SyntaxError(
+                "all arg_groups values should be either 'observed_data' or 'constant_data' "
+                ", not {}".format(bad_groups)
+            )
+        obs_const_dict = {group: {} for group in arg_groups_set}
+        for idx, (arg_name, group) in enumerate(zip(self.arg_names, self.arg_groups)):
             # Use emcee3 syntax, else use emcee2
             arg_array = np.atleast_1d(
                 self.sampler.log_prob_fn.args[idx]
@@ -142,8 +159,10 @@ class EmceeConverter:
             )
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in arg_dims}
-            observed_data[arg_name] = xr.DataArray(arg_array, dims=arg_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.emcee))
+            obs_const_dict[group][arg_name] = xr.DataArray(arg_array, dims=arg_dims, coords=coords)
+        for key, values in obs_const_dict.items():
+            obs_const_dict[key] = xr.Dataset(data_vars=values, attrs=make_attrs(library=self.emcee))
+        return obs_const_dict
 
     def blobs_to_dict(self):
         """Convert blobs to dictionary {groupname: xr.Dataset}."""
@@ -172,7 +191,7 @@ class EmceeConverter:
                 )
             )
         blob_groups_set = set(self.blob_groups)
-        idata_groups = ("posterior", "observed_data")
+        idata_groups = ("posterior", "observed_data", "constant_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
             raise SyntaxError(
                 "{} groups should not come from blobs. Using them here would "
@@ -201,12 +220,9 @@ class EmceeConverter:
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         blobs_dict = self.blobs_to_dict()
+        obs_const_dict = self.args_to_xarray()
         return InferenceData(
-            **{
-                "posterior": self.posterior_to_xarray(),
-                "observed_data": self.observed_data_to_xarray(),
-                **blobs_dict,
-            }
+            **{"posterior": self.posterior_to_xarray(), **obs_const_dict, **blobs_dict}
         )
 
 
@@ -215,6 +231,7 @@ def from_emcee(
     var_names=None,
     slices=None,
     arg_names=None,
+    arg_groups=None,
     blob_names=None,
     blob_groups=None,
     coords=None,
@@ -233,6 +250,10 @@ def from_emcee(
         for multidimensional variables.
     arg_names : list[str] (Optional)
         A list of names for args in the sampler
+    arg_groups : list of str, optional
+        A list of the group names (either ``observed_data`` or ``constant_data``) where
+        args in the sampler are stored. If None, all args will be stored in observed
+        data group.
     blob_names : list[str] (Optional)
         A list of names for blobs in the sampler. When None,
         blobs are omitted, independently of them being present
@@ -415,6 +436,7 @@ def from_emcee(
         var_names=var_names,
         slices=slices,
         arg_names=arg_names,
+        arg_groups=arg_groups,
         blob_names=blob_names,
         blob_groups=blob_groups,
         coords=coords,
