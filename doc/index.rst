@@ -36,7 +36,7 @@ Installation using pip
 
     pip install arviz
 
-Alternative you can use conda-forge
+Alternatively you can use conda-forge
 
 .. code:: bash
 
