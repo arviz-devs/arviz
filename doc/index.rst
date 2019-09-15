@@ -30,13 +30,26 @@ The goal is to provide backend-agnostic tools for diagnostics and visualizations
 
 
 
-Installation with pip is recommended
+Installation using pip
 
 .. code:: bash
 
     pip install arviz
 
-ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
+Alternatively you can use conda-forge
+
+.. code:: bash
+
+    conda install -c conda-forge arviz
+
+For the latest (unstable) version
+
+.. code:: bash
+
+    pip install git+https://github.com/arviz-devs/arviz
+
+
+ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
 `Pyro <http://pyro.ai/>`_, and
 `emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
