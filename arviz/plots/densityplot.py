@@ -1,4 +1,5 @@
 """KDE and histogram plots for multiple variables."""
+from typing import Optional, Tuple
 import warnings
 import numpy as np
 
@@ -31,6 +32,7 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
+    grid: Optional[Tuple[int, int]] = None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -196,7 +198,7 @@ def plot_density(
             for plotters in to_plot
         ]
         length_plotters = max_plots
-    rows, cols = default_grid(length_plotters, max_cols=3)
+    rows, cols = default_grid(length_plotters, max_cols=3) if grid is None else grid
 
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
