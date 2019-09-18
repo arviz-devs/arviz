@@ -100,6 +100,7 @@ Data
     from_numpyro
     from_pystan
     from_tfp
+    concat
 
 Utils
 -----
