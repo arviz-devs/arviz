@@ -86,7 +86,8 @@ Data
 .. autosummary::
     :toctree: generated/
 
-
+    
+    concat
     convert_to_inference_data
     load_arviz_data
     to_netcdf
