@@ -19,13 +19,12 @@ class PyMC3Converter:
         self.trace = trace
         # This next line is brittle and may not work forever, but is a secret
         # way to access the model from the trace.
-        self.model = (
-            None
-            if trace is None
-            else self.trace._straces[0].model  # pylint: disable=protected-access
-        )
-        self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-        self.ndraws = len(trace)
+        if trace is not None:
+            self.model = self.trace._straces[0].model  # pylint: disable=protected-access
+            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+            self.ndraws = len(trace)
+        else:
+            self.model = self.nchains = self.ndraws = 0
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.coords = coords
