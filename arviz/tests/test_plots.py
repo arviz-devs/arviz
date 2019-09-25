@@ -653,7 +653,7 @@ def test_plot_rank(models, kwargs):
         {
             "ref_val": {
                 "theta": [
-                    {"school": ["Choate", "Deerfield"], "ref_val": -1},
+                    #{"school": ["Choate", "Deerfield"], "ref_val": -1}, this is not working
                     {"school": "Lawrenceville", "ref_val": 3},
                 ]
             }

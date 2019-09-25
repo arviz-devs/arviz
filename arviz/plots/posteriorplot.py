@@ -65,7 +65,8 @@ def plot_posterior(
         Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
         length should match the number of variables.
     ref_val: float or dictionary of floats
-        display the percentage below and above the values in ref_val. If a list is provided, its
+        display the percentage below and above the values in ref_val. Must be None (default),
+        a constant, a list or a dictionary like see an example below. If a list is provided, its
         length should match the number of variables.
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
@@ -135,6 +136,22 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu', 'theta'], point_estimate='mode')
 
+    Show reference values using variable names and coordinates
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_posterior(data, ref_val= {"theta": [{"school": "Deerfield", "ref_val": 4},
+                                                        {"school": "Choate", "ref_val": 3}]})
+
+    Show reference values using a list
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_posterior(data, ref_val=[1] + [5] * 8 + [1])
+
+
     Plot posterior as a histogram
 
     .. plot::
@@ -171,9 +188,10 @@ def plot_posterior(
         _, ax = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
         )
-
+    idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(
+            idx,
             x.flatten(),
             var_name,
             selection,
@@ -190,13 +208,14 @@ def plot_posterior(
             xt_labelsize=xt_labelsize,
             **kwargs
         )
-
+        idx += 1
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
 
     return ax
 
 
 def _plot_posterior_op(
+    idx,
     values,
     var_name,
     selection,
@@ -234,12 +253,14 @@ def _plot_posterior_op(
                     break
             if val is None:
                 return
+        elif isinstance(ref_val, list):
+            val = ref_val[idx]
         elif isinstance(ref_val, Number):
             val = ref_val
         else:
             raise ValueError(
-                "Argument `ref_val` must be None, a constant, or a "
-                'dictionary like {"var_name": {"ref_val": (lo, hi)}}'
+                "Argument `ref_val` must be None, a constant, a list or a "
+                'dictionary like {"var_name": [{"ref_val": ref_val}]}'
             )
         less_than_ref_probability = (values < val).mean()
         greater_than_ref_probability = (values >= val).mean()
