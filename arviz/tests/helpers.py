@@ -1,4 +1,4 @@
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, comparison-with-callable
 """Test helper functions."""
 import gzip
 import importlib
@@ -242,7 +242,7 @@ def emcee_schools_model(data, draws, chains):
     ndim = J + 2
 
     pos = np.random.normal(size=(chains, ndim))
-    pos[:, 1] = np.absolute(pos[:, 1])
+    pos[:, 1] = np.absolute(pos[:, 1])  #  pylint: disable=unsupported-assignment-operation
 
     if emcee_version() < 3:
         sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(y, sigma))
