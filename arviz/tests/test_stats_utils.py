@@ -1,4 +1,5 @@
 """Tests for stats_utils."""
+#  pylint: disable=no-member
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 import pytest
@@ -182,7 +183,7 @@ def test_nan(how):
 @pytest.mark.parametrize("axis", (-1, 0, 1))
 def test_nan_axis(axis):
     data = np.random.randn(4, 100)
-    data[0, 0] = np.nan
+    data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
     axis_ = (len(data.shape) + axis) if axis < 0 else axis
     assert not_valid(data, check_shape=False, nan_kwargs=dict(how="any"))
     assert not_valid(data, check_shape=False, nan_kwargs=dict(how="any", axis=axis)).any()

@@ -174,7 +174,7 @@ class TestDiagnostics:
     def test_rhat_nan(self, method):
         """Confirm R-hat statistic returns nan."""
         data = np.random.randn(4, 100)
-        data[0, 0] = np.nan
+        data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
         rhat_data = rhat(data, method=method)
         assert np.isnan(rhat_data)
         if method == "rank":
@@ -552,7 +552,7 @@ class TestDiagnostics:
     @pytest.mark.parametrize("func", ("_conv_quantile", "_z_scale"))
     def test_nan_behaviour(self, func):
         data = np.random.randn(100, 4)
-        data[0, 0] = np.nan
+        data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
         if func == "_conv_quantile":
             assert np.isnan(_conv_quantile(data, 0.5)).all(None)
         else:
