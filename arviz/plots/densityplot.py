@@ -1,8 +1,12 @@
 """KDE and histogram plots for multiple variables."""
 import warnings
+from typing import Dict, List, Any, Optional, Tuple, TYPE_CHECKING
 import numpy as np
 
 from ..data import convert_to_dataset
+
+if TYPE_CHECKING:
+    from ..data import InferenceData
 from ..stats import hpd
 from .kdeplot import _fast_kde
 from .plot_utils import (
@@ -11,6 +15,7 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     _create_axes_grid,
+    get_coords,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -22,6 +27,7 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
+    coords: Optional[Dict[str, List[Any]]] = None,
     credible_interval=0.94,
     point_estimate="mean",
     colors="cycle",
@@ -31,6 +37,7 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
+    grid: Optional[Tuple[int, int]] = None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -51,9 +58,11 @@ def plot_density(
         List with names for the datasets passed as "data." Useful when plotting more than one
         dataset.  Must be the same shape as the data parameter.  Defaults to None.
     var_names: Optional[List[str]]
-        List of variables to plot.  If multiple datasets are supplied and var_names is not None,
-        will print the same set of variables for each dataset.  Defaults to None, which results in
+        List of variables to plot.  If multiple datasets are supplied and ``var_names`` is not ``None``,
+        will print the same set of variables for each dataset.  Defaults to ``None``, which results in
         all the variables being plotted.
+    coords : Tuple[str, List[str]], mapping, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     credible_interval : float
         Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
@@ -135,9 +144,13 @@ def plot_density(
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
     if not isinstance(data, (list, tuple)):
-        datasets = [convert_to_dataset(data, group=group)]
-    else:
-        datasets = [convert_to_dataset(datum, group=group) for datum in data]
+        data = [data]
+
+    if coords is None:
+        coords = {}
+    datasets = [
+        get_coords(convert_to_dataset(datum, group=group), coords) for datum in data
+    ]  # type: List[InferenceData]
 
     var_names = _var_names(var_names, datasets)
 
@@ -196,7 +209,7 @@ def plot_density(
             for plotters in to_plot
         ]
         length_plotters = max_plots
-    rows, cols = default_grid(length_plotters, max_cols=3)
+    rows, cols = default_grid(length_plotters, max_cols=3) if grid is None else grid
 
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
