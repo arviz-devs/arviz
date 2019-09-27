@@ -64,3 +64,6 @@ target/
 .idea/
 
 saved_animations/
+
+# mypy
+.mypy_cache
