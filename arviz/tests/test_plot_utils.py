@@ -125,6 +125,7 @@ def test_xarray_var_data_array(sample_dataset):  # pylint: disable=invalid-name
 
 
 class TestCoordsExceptions:
+    # test coord exceptions on datasets
     def test_invalid_coord_name(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords name"""
         _, _, data = sample_dataset
@@ -140,10 +141,10 @@ class TestCoordsExceptions:
         _, _, data = sample_dataset
         coords = {"draw": [1234567]}
 
-        with pytest.raises(KeyError) as err:
+        with pytest.raises(
+            KeyError, match=r"Coords should follow mapping format {coord_name:\[dim1, dim2\]}"
+        ):
             get_coords(data, coords)
-
-        assert "Coords should follow mapping format {coord_name:[dim1, dim2]}" in str(err.value)
 
     def test_invalid_coord_structure(self, sample_dataset):  # pylint: disable=invalid-name
         """Assert that nicer exception appears when user enters wrong coords datatype"""
@@ -153,6 +154,26 @@ class TestCoordsExceptions:
         with pytest.raises(TypeError):
             get_coords(data, coords)
 
+    # test coord exceptions on dataset list
+    def test_invalid_coord_name_list(self, sample_dataset):  # pylint: disable=invalid-name
+        """Assert that nicer exception appears when user enters wrong coords name"""
+        _, _, data = sample_dataset
+        coords = {"NOT_A_COORD_NAME": [1]}
+
+        with pytest.raises(
+            ValueError, match=r"data\[1\]:.+Coords {'NOT_A_COORD_NAME'} are invalid coordinate keys"
+        ):
+            get_coords((data, data), ({"draw": [0, 1]}, coords))
+
+    def test_invalid_coord_value_list(self, sample_dataset):  # pylint: disable=invalid-name
+        """Assert that nicer exception appears when user enters wrong coords value"""
+        _, _, data = sample_dataset
+        coords = {"draw": [1234567]}
+
+        with pytest.raises(
+            KeyError, match=r"data\[0\]:.+Coords should follow mapping format {coord_name:\[dim1, dim2\]}"
+        ):
+            get_coords((data, data), (coords, {"draw": [0,1]}))
 
 def test_filter_plotter_list():
     plotters = list(range(7))
