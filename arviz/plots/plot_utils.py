@@ -238,6 +238,33 @@ def make_label(var_name, selection, position="below"):
     return "{}{}{}".format(var_name, sep, sel)
 
 
+def format_sig_figs(value, default=None):
+    """Get a default number of significant figures.
+
+    Gives the integer part or `default`, whichever is bigger.
+
+    Examples
+    --------
+    0.1234 --> 0.12
+    1.234  --> 1.2
+    12.34  --> 12
+    123.4  --> 123
+    """
+    if default is None:
+        default = 2
+    if value == 0:
+        return 1
+    return max(int(np.log10(np.abs(value))) + 1, default)
+
+
+def round_num(n, round_to):
+    """
+    Returns a string representing a number with `round_to` significant figures.
+    """
+    sig_figs = format_sig_figs(n, round_to)
+    return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
+
+
 @conditional_jit(forceobj=True)
 def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.

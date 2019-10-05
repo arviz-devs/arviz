@@ -282,7 +282,7 @@ def _d_helper(
     """
     if vec.dtype.kind == "f":
         if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval)
+            hpd_ = hpd(vec, credible_interval, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
@@ -302,7 +302,7 @@ def _d_helper(
             ax.fill_between(x, density, color=color, alpha=shade)
 
     else:
-        xmin, xmax = hpd(vec, credible_interval)
+        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
         bins = range(xmin, xmax + 2)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype="step", align="left")

@@ -12,7 +12,6 @@ def plot_hpd(
     y,
     credible_interval=0.94,
     color="C1",
-    circular=False,
     smooth=True,
     smooth_kwargs=None,
     fill_kwargs=None,
@@ -32,9 +31,6 @@ def plot_hpd(
         Credible interval to plot. Defaults to 0.94.
     color : str
         Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
-    circular : bool, optional
-        Whether to compute the hpd taking into account `x` is a circular variable
-        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     smooth : boolean
         If True the result will be smoothed by first computing a linear interpolation of the data
         over a regular grid and then applying the Savitzky-Golay filter to the interpolated data.
@@ -80,7 +76,7 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
-    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular)
+    hpd_ = hpd(y, credible_interval=credible_interval, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:

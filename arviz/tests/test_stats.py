@@ -44,13 +44,7 @@ def non_centered_eight():
 def test_hpd():
     normal_sample = np.random.randn(5000000)
     interval = hpd(normal_sample)
-    assert_array_almost_equal(interval, [-1.88, 1.88], 2)
-
-
-def test_hpd_bad_ci():
-    normal_sample = np.random.randn(10)
-    with pytest.raises(ValueError):
-        hpd(normal_sample, credible_interval=2)
+    assert_array_almost_equal(interval[0], [-1.9, 1.9], 1)
 
 
 def test_r2_score():

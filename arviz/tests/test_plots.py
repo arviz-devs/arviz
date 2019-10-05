@@ -723,7 +723,7 @@ def test_plot_compare_no_ic(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"color": "0.5", "circular": True},
+        {"color": "0.5"},
         {"fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
