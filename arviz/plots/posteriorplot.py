@@ -355,7 +355,7 @@ def _plot_posterior_op(
             values, credible_interval=credible_interval, multimodal=multimodal
         )  # type: np.ndarray
 
-        for hpdi in hpd_intervals:
+        for hpdi in np.atleast_2d(hpd_intervals):
             ax.plot(
                 hpdi,
                 (plot_height * 0.02, plot_height * 0.02),
