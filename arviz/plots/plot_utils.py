@@ -260,6 +260,13 @@ def format_sig_figs(value, default=None):
 def round_num(n, round_to):
     """
     Returns a string representing a number with `round_to` significant figures.
+
+    Parameters
+    ----------
+    n : float
+        number to round
+    round_to : int
+        number of significant figures
     """
     sig_figs = format_sig_figs(n, round_to)
     return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
