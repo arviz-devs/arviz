@@ -84,8 +84,13 @@ Data
 ----
 
 .. autosummary::
-    :toctree: generated/
+   :toctree: generated/
+   :template: class_members.rst
 
+   InferenceData
+
+.. autosummary::
+    :toctree: generated/
 
     convert_to_inference_data
     load_arviz_data
