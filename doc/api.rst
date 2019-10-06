@@ -80,6 +80,8 @@ Stats utils
     make_ufunc
     wrap_xarray_ufunc
 
+.. _data_api:
+
 Data
 ----
 

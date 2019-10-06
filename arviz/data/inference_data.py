@@ -11,19 +11,53 @@ from ..rcparams import rcParams
 
 
 class InferenceData:
-    """Container for accessing netCDF files using xarray."""
+    """Container for inference data storage using xarray.
+
+    For a detailed introduction on ``InferenceData`` objects and its usage, see
+    :doc:`/notebooks/XarrayforArviZ`. This page is provides help and documentation
+    on ``InferenceData`` methods and its low level implementation.
+    """
 
     def __init__(self, **kwargs):
         """Initialize InferenceData object from keyword xarray datasets.
-
-        Examples
-        --------
-        InferenceData(posterior=posterior, prior=prior)
 
         Parameters
         ----------
         kwargs :
             Keyword arguments of xarray datasets
+
+        Examples
+        --------
+        Initiate an InferenceData object from scratch, not recommended. InferenceData
+        objects should be initialized using ``from_xyz`` methods, see :ref:`data_api` for more
+        details.
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: import numpy as np
+               ...: import xarray as xr
+               ...: dataset = xr.Dataset(
+               ...:     {
+               ...:         "a": (["chain", "draw", "a_dim"], np.random.normal(size=(4, 100, 3))),
+               ...:         "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
+               ...:     },
+               ...:     coords={
+               ...:         "chain": (["chain"], np.arange(4)),
+               ...:         "draw": (["draw"], np.arange(100)),
+               ...:         "a_dim": (["a_dim"], ["x", "y", "z"]),
+               ...:     }
+               ...: )
+               ...: idata = az.InferenceData(posterior=dataset, prior=dataset)
+               ...: idata
+
+        We have created an ``InferenceData`` object with two groups. Now we can check its
+        contents:
+
+        .. ipython::
+
+            In [1]: idata.posterior
+
         """
         self._groups = []
         for key, dataset in kwargs.items():
@@ -119,12 +153,15 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, inplace=True, **kwargs):
+    def sel(self, inplace=False, **kwargs):
         """Perform an xarray selection on all groups.
 
         Loops over all groups to perform Dataset.sel(key=item)
         for every kwarg if key is a dimension of the dataset.
-        The selection is performed inplace.
+        One example could be performing a burn in cut on the InferenceData object
+        or discarding a chain. The selection is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted.
 
         Parameters
         ----------
@@ -132,6 +169,36 @@ class InferenceData:
             If True, modify the InferenceData object inplace, otherwise, return the modified copy.
         **kwargs : mapping
             It must be accepted by Dataset.sel()
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection inplace and return `None`
+
+        Examples
+        --------
+        Use ``sel`` to discard one chain of the InferenceData object. We first check the
+        dimensions of the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("centered_eight")
+               ...: del idata.prior  # prior group only has 1 chain currently
+               ...: print(idata.posterior.coords)
+               ...: print(idata.posterior_predictive.coords)
+               ...: print(idata.observed_data.coords)
+
+        In order to remove the third chain:
+
+        .. ipython::
+
+            In [1]: idata_subset = idata.sel(chain=[0, 1, 3])
+               ...: print(idata_subset.posterior.coords)
+               ...: print(idata_subset.posterior_predictive.coords)
+               ...: print(idata_subset.observed_data.coords)
+
         """
         out = self if inplace else deepcopy(self)
         for group in self._groups:
