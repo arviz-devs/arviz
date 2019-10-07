@@ -50,10 +50,10 @@ class TfpConverter:
         self.ed = ed  # pylint: disable=invalid-name
 
         if int(self.tf.__version__[0]) > 1:
-            import tensorflow.compat.v1 as tf
+            import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
             tf.disable_v2_behavior()
             self.tf = tf  # pylint: disable=invalid-name
-
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""

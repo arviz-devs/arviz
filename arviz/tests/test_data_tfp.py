@@ -43,10 +43,11 @@ class TestDataTfp:
     def get_inference_data3(self, data, eight_schools_params):
         """Read with observed Tensor var_names and dims."""
         import tensorflow as tf
-        if int(tf.__version__[0]) > 1:
-            import tensorflow.compat.v1 as tf
-            tf.disable_v2_behavior()
 
+        if int(tf.__version__[0]) > 1:
+            import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
+            tf.disable_v2_behavior()
 
         inference_data = from_tfp(
             data.obj,
