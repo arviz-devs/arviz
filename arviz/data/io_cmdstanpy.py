@@ -297,12 +297,12 @@ def from_cmdstanpy(
 
     Parameters
     ----------
-    posterior : StanFit object
-        CmdStanPy StanFit
+    posterior : StanMCMC object
+        CmdStanPy StanMCMC
     posterior_predictive : str, list of str
         Posterior predictive samples for the fit.
-    prior : StanFit
-        CmdStanPy StanFit
+    prior : StanMCMC
+        CmdStanPy StanMCMC
     prior_predictive : str, list of str
         Prior predictive samples for the fit.
     observed_data : dict
