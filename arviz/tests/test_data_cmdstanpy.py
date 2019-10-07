@@ -32,7 +32,7 @@ class TestDataCmdStanPy:
 
     @pytest.fixture(scope="class")
     def data(self, filepaths):
-        from cmdstanpy import StanMCMC
+        from cmdstanpy import StanFit
         from cmdstanpy.model import CmdStanArgs, SamplerArgs
 
         class Data:
