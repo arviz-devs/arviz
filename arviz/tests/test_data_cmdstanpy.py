@@ -1,8 +1,10 @@
 # pylint: disable=redefined-outer-name
 from glob import glob
 import os
+import sys
 import numpy as np
 import pytest
+
 
 from arviz import from_cmdstanpy
 from .helpers import (  # pylint: disable=unused-import
