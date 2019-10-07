@@ -32,15 +32,16 @@ class TestDataCmdStanPy:
 
     @pytest.fixture(scope="class")
     def data(self, filepaths):
-        from cmdstanpy import StanFit
+        from cmdstanpy import Runset, StanFit
         from cmdstanpy.model import CmdStanArgs, SamplerArgs
 
         class Data:
             args = CmdStanArgs(
                 "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
             )
-            obj = StanFit(args)
-            obj._csv_files = filepaths  # pylint: disable=protected-access
+            runset_obj = Runset(args)
+            runset_obj._csv_files = filepaths  # pylint: disable=protected-access
+            obj = StanFit(runset_obj)
             obj._validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_sample()  # pylint: disable=protected-access
 
