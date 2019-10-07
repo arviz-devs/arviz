@@ -15,6 +15,7 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="CmdStanPy is supported only Python 3.6+")
 class TestDataCmdStanPy:
     @pytest.fixture(scope="session")
     def data_directory(self):
