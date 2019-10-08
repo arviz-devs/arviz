@@ -13,9 +13,9 @@ from ..rcparams import rcParams
 class InferenceData:
     """Container for inference data storage using xarray.
 
-    For a detailed introduction on ``InferenceData`` objects and its usage, see
-    :doc:`/notebooks/XarrayforArviZ`. This page is provides help and documentation
-    on ``InferenceData`` methods and its low level implementation.
+    For a detailed introduction to ``InferenceData`` objects and their usage, see
+    :doc:`/notebooks/XarrayforArviZ`. This page provides help and documentation
+    on ``InferenceData`` methods and their low level implementation.
     """
 
     def __init__(self, **kwargs):
@@ -174,7 +174,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform selection inplace and return `None`
+            When `inplace==True` perform selection in place and return `None`
 
         Examples
         --------
