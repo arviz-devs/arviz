@@ -1,8 +1,10 @@
 # pylint: disable=redefined-outer-name
 from glob import glob
 import os
+import sys
 import numpy as np
 import pytest
+
 
 from arviz import from_cmdstanpy
 from .helpers import (  # pylint: disable=unused-import
@@ -15,6 +17,7 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6), reason="CmdStanPy is supported only Python 3.6+")
 class TestDataCmdStanPy:
     @pytest.fixture(scope="session")
     def data_directory(self):
@@ -30,14 +33,16 @@ class TestDataCmdStanPy:
     @pytest.fixture(scope="class")
     def data(self, filepaths):
         from cmdstanpy import StanFit
+        from cmdstanpy.stanfit import RunSet
         from cmdstanpy.model import CmdStanArgs, SamplerArgs
 
         class Data:
             args = CmdStanArgs(
                 "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
             )
-            obj = StanFit(args)
-            obj._csv_files = filepaths  # pylint: disable=protected-access
+            runset_obj = RunSet(args)
+            runset_obj._csv_files = filepaths  # pylint: disable=protected-access
+            obj = StanFit(runset_obj)
             obj._validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_sample()  # pylint: disable=protected-access
 
