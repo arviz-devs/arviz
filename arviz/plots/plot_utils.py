@@ -259,7 +259,7 @@ def format_sig_figs(value, default=None):
 
 def round_num(n, round_to):
     """
-    Returns a string representing a number with `round_to` significant figures.
+    Return a string representing a number with `round_to` significant figures.
 
     Parameters
     ----------
