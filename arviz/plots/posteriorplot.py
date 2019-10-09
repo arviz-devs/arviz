@@ -28,7 +28,7 @@ def plot_posterior(
     figsize=None,
     textsize=None,
     credible_interval=0.94,
-    multimodal=True,
+    multimodal=False,
     round_to: Optional[int] = None,
     point_estimate="mean",
     group="posterior",

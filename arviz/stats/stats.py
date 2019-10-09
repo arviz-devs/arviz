@@ -307,7 +307,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, multimodal=True):
+def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -319,9 +319,13 @@ def hpd(ary, credible_interval=0.94, multimodal=True):
         An array containing posterior samples
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
+    circular : bool, optional
+        Whether to compute the hpd taking into account `x` is a circular variable
+        (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
+        Only works if multimodal is False.
     multimodal : bool
-        If true (default) it may compute more than one hpd interval if the distribution is
-        multimodal and the modes are well separated.
+        If true it may compute more than one hpd interval if the distribution is multimodal and the
+        modes are well separated.
 
     Returns
     -------
@@ -341,7 +345,15 @@ def hpd(ary, credible_interval=0.94, multimodal=True):
     """
     if ary.ndim > 1:
         hpd_array = np.array(
-            [hpd(row, credible_interval=credible_interval, multimodal=multimodal) for row in ary.T]
+            [
+                hpd(
+                    row,
+                    credible_interval=credible_interval,
+                    circular=circular,
+                    multimodal=multimodal,
+                )
+                for row in ary.T
+            ]
         )
         return hpd_array
 
@@ -377,6 +389,11 @@ def hpd(ary, credible_interval=0.94, multimodal=True):
         ary = ary.copy()
         n = len(ary)
 
+        if circular:
+            mean = st.circmean(ary, high=np.pi, low=-np.pi)
+            ary = ary - mean
+            ary = np.arctan2(np.sin(ary), np.cos(ary))
+
         ary = np.sort(ary)
         interval_idx_inc = int(np.floor(credible_interval * n))
         n_intervals = n - interval_idx_inc
@@ -391,6 +408,12 @@ def hpd(ary, credible_interval=0.94, multimodal=True):
         min_idx = np.argmin(interval_width)
         hdi_min = ary[min_idx]
         hdi_max = ary[min_idx + interval_idx_inc]
+
+        if circular:
+            hdi_min = hdi_min + mean
+            hdi_max = hdi_max + mean
+            hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
+            hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
         hpd_intervals = np.array([hdi_min, hdi_max])
 
@@ -940,6 +963,14 @@ def summary(
             input_core_dims=(("chain", "draw"),),
         )
 
+        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
+            _make_ufunc(hpd, n_output=2),
+            posterior,
+            kwargs=dict(credible_interval=credible_interval, circular=True),
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(2)),
+        )
+
     mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
         _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
         posterior,
@@ -982,8 +1013,16 @@ def summary(
             )
         )
     if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_mcse))
-        metric_names.extend(("circular_mean", "circular_sd", "circular_mcse"))
+        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
+        metric_names.extend(
+            (
+                "circular_mean",
+                "circular_sd",
+                "circular_hpd_{:g}%".format(100 * alpha / 2),
+                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "circular_mcse",
+            )
+        )
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
     joined = (
