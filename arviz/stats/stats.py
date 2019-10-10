@@ -315,7 +315,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
 
     Parameters
     ----------
-    x : Numpy array
+    ary : Numpy array
         An array containing posterior samples
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
