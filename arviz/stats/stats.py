@@ -12,6 +12,8 @@ from scipy.optimize import minimize
 import xarray as xr
 
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData
+from ..plots.kdeplot import _fast_kde
+from ..plots.plot_utils import get_bins
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
     make_ufunc as _make_ufunc,
@@ -305,27 +307,30 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, circular=False):
+def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
-    The HPD is the minimum width Bayesian credible interval (BCI). This implementation works only
-    for unimodal distributions.
+    The HPD is the minimum width Bayesian credible interval (BCI).
 
     Parameters
     ----------
-    x : Numpy array
+    ary : Numpy array
         An array containing posterior samples
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
     circular : bool, optional
         Whether to compute the hpd taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
+        Only works if multimodal is False.
+    multimodal : bool
+        If true it may compute more than one hpd interval if the distribution is multimodal and the
+        modes are well separated.
 
     Returns
     -------
     np.ndarray
-        lower and upper value of the interval.
+        lower(s) and upper(s) values of the interval(s).
 
     Examples
     --------
@@ -340,40 +345,79 @@ def hpd(ary, credible_interval=0.94, circular=False):
     """
     if ary.ndim > 1:
         hpd_array = np.array(
-            [hpd(row, credible_interval=credible_interval, circular=circular) for row in ary.T]
+            [
+                hpd(
+                    row,
+                    credible_interval=credible_interval,
+                    circular=circular,
+                    multimodal=multimodal,
+                )
+                for row in ary.T
+            ]
         )
         return hpd_array
-    # Make a copy of trace
-    ary = ary.copy()
-    n = len(ary)
 
-    if circular:
-        mean = st.circmean(ary, high=np.pi, low=-np.pi)
-        ary = ary - mean
-        ary = np.arctan2(np.sin(ary), np.cos(ary))
+    if multimodal:
+        if ary.dtype.kind == "f":
+            density, lower, upper = _fast_kde(ary)
+            range_x = upper - lower
+            dx = range_x / len(density)
+            bins = np.linspace(lower, upper, len(density))
+        else:
+            bins = get_bins(ary)
+            density, _ = np.histogram(ary, bins=bins, density=True)
+            dx = np.diff(bins)[0]
 
-    ary = np.sort(ary)
-    interval_idx_inc = int(np.floor(credible_interval * n))
-    n_intervals = n - interval_idx_inc
-    interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+        density *= dx
 
-    if len(interval_width) == 0:
-        raise ValueError(
-            "Too few elements for interval calculation. "
-            "Check that credible_interval meets condition 0 =< credible_interval < 1"
-        )
+        idx = np.argsort(-density)
+        intervals = bins[idx][density[idx].cumsum() <= credible_interval]
+        intervals.sort()
 
-    min_idx = np.argmin(interval_width)
-    hdi_min = ary[min_idx]
-    hdi_max = ary[min_idx + interval_idx_inc]
+        intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    if circular:
-        hdi_min = hdi_min + mean
-        hdi_max = hdi_max + mean
-        hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
-        hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+        hpd_intervals = []
+        for interval in intervals_splitted:
+            if interval.size == 0:
+                hpd_intervals.append((bins[0], bins[0]))
+            else:
+                hpd_intervals.append((interval[0], interval[-1]))
 
-    return np.array([hdi_min, hdi_max])
+        hpd_intervals = np.array(hpd_intervals)
+
+    else:
+        ary = ary.copy()
+        n = len(ary)
+
+        if circular:
+            mean = st.circmean(ary, high=np.pi, low=-np.pi)
+            ary = ary - mean
+            ary = np.arctan2(np.sin(ary), np.cos(ary))
+
+        ary = np.sort(ary)
+        interval_idx_inc = int(np.floor(credible_interval * n))
+        n_intervals = n - interval_idx_inc
+        interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+
+        if len(interval_width) == 0:
+            raise ValueError(
+                "Too few elements for interval calculation. "
+                "Check that credible_interval meets condition 0 =< credible_interval < 1"
+            )
+
+        min_idx = np.argmin(interval_width)
+        hdi_min = ary[min_idx]
+        hdi_max = ary[min_idx + interval_idx_inc]
+
+        if circular:
+            hdi_min = hdi_min + mean
+            hdi_max = hdi_max + mean
+            hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
+            hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+
+        hpd_intervals = np.array([hdi_min, hdi_max])
+
+    return hpd_intervals
 
 
 def loo(data, pointwise=False, reff=None, scale="deviance"):
@@ -887,7 +931,7 @@ def summary(
         hpd_lower, hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval),
+            kwargs=dict(credible_interval=credible_interval, multimodal=False),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
