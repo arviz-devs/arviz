@@ -152,3 +152,29 @@ class TestDataPyMC3:
         test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+    def test_no_trace(self):
+        with pm.Model():
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            trace = pm.sample(100, tune=100)
+            prior = pm.sample_prior_predictive()
+            posterior_predictive = pm.sample_posterior_predictive(trace)
+
+        # Only prior
+        inference_data = from_pymc3(prior=prior)
+        test_dict = {"prior": ["beta", "obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        # Only posterior_predictive
+        inference_data = from_pymc3(posterior_predictive=posterior_predictive)
+        test_dict = {"posterior_predictive": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        # Prior and posterior_predictive but no trace
+        inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive)
+        test_dict = {"prior": ["beta", "obs"], "posterior_predictive": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
