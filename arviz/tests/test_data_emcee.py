@@ -128,7 +128,7 @@ class TestDataEmcee:
         fails = check_multiple_attrs({"sample_stats": ["mix"]}, inference_data)
         assert not fails
 
-    def test_single_blob(self, data):
+    def test_single_blob(self):
         sampler = emcee.EnsembleSampler(6, 1, lambda x: (-x ** 2, 3))
         sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
         inference_data = from_emcee(sampler, blob_names=["blob"])
