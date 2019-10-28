@@ -182,6 +182,8 @@ class EmceeConverter:
             blobs = np.array(self.sampler.blobs)
         if blobs is None or blobs.size == 0:
             raise ValueError("No blobs in sampler, blob_names must be None")
+        if len(blobs.shape) == 2:
+            blobs = np.expand_dims(blobs, axis=-1)
         blobs = blobs.swapaxes(0, 2)
         nblobs, nwalkers, ndraws, *_ = blobs.shape
         if len(self.blob_names) != nblobs and len(self.blob_names) != 1:
