@@ -9,6 +9,7 @@ from .helpers import (  # pylint: disable=unused-import
     load_cached_models,
 )
 
+
 @pytest.mark.skip(reason="Temporarily skip for Pyro tests, until fix is provided")
 class TestDataPyro:
     @pytest.fixture(scope="class")
