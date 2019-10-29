@@ -58,9 +58,13 @@ class TfpConverter:
             self.tf = tf  # pylint: disable=invalid-name
 
     def handle_chain_location(self, ary):
+        """Move the axis corresponding to the chain to first position.
+
+        If there is only one chain which has no axis, add it.
+        """
         if self.chain_dim is None:
             return utils.expand_dims(ary)
-        return ary.swapaxes(0, chain_dim)
+        return ary.swapaxes(0, self.chain_dim)
 
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
@@ -128,7 +132,9 @@ class TfpConverter:
 
         data = {}
         with self.tf.Session() as sess:
-            data["obs"] = self.handle_chain_location(sess.run(posterior_preds, feed_dict=self.feed_dict))
+            data["obs"] = self.handle_chain_location(
+                sess.run(posterior_preds, feed_dict=self.feed_dict)
+            )
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def sample_stats_to_xarray(self):
