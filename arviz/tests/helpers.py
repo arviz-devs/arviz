@@ -325,9 +325,7 @@ def numpyro_schools_model(data, draws, chains):
     def model():
         mu = numpyro.sample("mu", dist.Normal(0, 5))
         tau = numpyro.sample("tau", dist.HalfCauchy(5))
-        # TODO: use numpyro.plate or `sample_shape` kwargs instead of  # pylint: disable=fixme
-        # multiplying with np.ones(J) in future versions of NumPyro
-        theta = numpyro.sample("theta", dist.Normal(mu * np.ones(data["J"]), tau))
+        theta = numpyro.sample("theta", dist.Normal(mu, tau), sample_shape=(data["J"],))
         numpyro.sample("obs", dist.Normal(theta, data["sigma"]), obs=data["y"])
 
     mcmc = MCMC(
