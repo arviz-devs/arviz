@@ -42,7 +42,7 @@ class NumPyroConverter:
         # handle the case we run MCMC with a general potential_fn
         # (instead of a NumPyro model) whose args is not a dictionary
         # (e.g. f(x) = x ** 2)
-        samples = self.posterior.get_samples(group_by_chain=True)
+        samples = jax.device_get(self.posterior.get_samples(group_by_chain=True))
         tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
         if not isinstance(samples, dict):
             samples = {
@@ -79,9 +79,10 @@ class NumPyroConverter:
         }
         data = {}
         for stat, value in self.posterior.get_extra_fields(group_by_chain=True).items():
-            if stat == "z" or not isinstance(value, np.ndarray):
+            if isinstance(value, (dict, tuple)):
                 continue
             name = rename_key.get(stat, stat)
+            value = value.copy()
             data[name] = value
             if stat == "num_steps":
                 data["depth"] = np.log2(value).astype(int) + 1
