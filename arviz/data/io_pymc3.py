@@ -136,7 +136,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Compute log likelihood for each observed point."""
         log_like_val = utils.one_de(log_like_fun(point))
         if var.missing_values:
-            log_like_val = log_like_val[~var.observations.mask]
+            log_like_val = np.where(var.observations.mask, np.nan, log_like_val)
         return log_like_val
 
     @requires("trace")
