@@ -4,43 +4,31 @@ from .base import dict_to_dataset
 from .. import utils
 
 
-def _get_var_names(posterior):
-    """Extract latent and observed variable names from pyro.MCMC.
-
-    Parameters
-    ----------
-    posterior : pyro.MCMC
-        Fitted MCMC object from Pyro
-
-    Returns
-    -------
-    list[str], list[str]
-    observed and latent variable names from the MCMC trace.
-    """
-    sample_point = posterior.exec_traces[0]
-    nodes = [node for node in sample_point.nodes.values() if node["type"] == "sample"]
-    observed = [node["name"] for node in nodes if node["is_observed"]]
-    latent = [node["name"] for node in nodes if not node["is_observed"]]
-    return observed, latent
-
-
 class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
-    def __init__(self, *, posterior, coords=None, dims=None):
+    def __init__(self, *, posterior, prior=None, posterior_predictive=None, observed_data=None, coords=None, dims=None):
         """Convert pyro data into an InferenceData object.
 
         Parameters
         ----------
-        posterior : pyro.MCMC
+        posterior : pyro.infer.MCMC
             Fitted MCMC object from Pyro
+        prior: dict
+            Prior samples from a Pyro model
+        posterior_predictive : dict
+            Posterior predictive samples for the posterior
+        observed_data : dict
+            Observed data used in the sampling.
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
         """
         self.posterior = posterior
-        self.observed_vars, self.latent_vars = _get_var_names(posterior)
+        self.prior = prior
+        self.posterior_predictive = posterior_predictive
+        self.observed_data = observed_data
         self.coords = coords
         self.dims = dims
         import pyro
@@ -72,28 +60,6 @@ class PyroConverter:
                 data[var_name] = utils.expand_dims(samples)
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
-    def observed_data_to_xarray(self):
-        """Convert observed data to xarray."""
-        from pyro.infer import EmpiricalMarginal
-
-        try:  # Try pyro>=0.3 release syntax
-            data = {
-                name: utils.expand_dims(samples.enumerate_support().squeeze())
-                for name, samples in self.posterior.marginal(
-                    sites=self.observed_vars
-                ).empirical.items()
-            }
-        except AttributeError:  # Use pyro<0.3 release syntax
-            data = {}
-            for var_name in self.observed_vars:
-                # pylint: disable=no-member
-                samples = EmpiricalMarginal(
-                    self.posterior, sites=var_name
-                ).get_samples_and_weights()[0]
-                samples = samples.numpy().squeeze()
-                data[var_name] = utils.expand_dims(samples)
-        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
-
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         return InferenceData(
@@ -104,16 +70,29 @@ class PyroConverter:
         )
 
 
-def from_pyro(posterior=None, *, coords=None, dims=None):
-    """Convert pyro data into an InferenceData object.
+def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, observed_data=None, coords=None, dims=None):
+    """Convert Pyro data into an InferenceData object.
 
     Parameters
     ----------
-    posterior : pyro.MCMC
+    posterior : pyro.infer.MCMC
         Fitted MCMC object from Pyro
+    prior: dict
+        Prior samples from a Pyro model
+    posterior_predictive : dict
+        Posterior predictive samples for the posterior
+    observed_data : dict
+        Observed data used in the sampling.
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
     """
-    return PyroConverter(posterior=posterior, coords=coords, dims=dims).to_inference_data()
+    return PyroConverter(
+        posterior=posterior,
+        prior=prior,
+        posterior_predictive=posterior_predictive,
+        observed_data=observed_data,
+        coords=coords,
+        dims=dims,
+    ).to_inference_data()
