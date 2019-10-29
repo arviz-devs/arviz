@@ -9,7 +9,7 @@ python -m pydocstyle --convention=numpy ${SRC_DIR}/arviz/
 echo "Success!"
 
 echo "Checking code style with black..."
-python -m black -l 100 --check arviz/
+python -m black -l 100 --check arviz/ examples/
 echo "Success!"
 
 echo "Checking code style with pylint..."
