@@ -751,7 +751,7 @@ def _ess_quantile(ary, prob, relative=False):
         return np.nan
     if prob is None:
         raise TypeError("Prob not defined.")
-    quantile, = _quantile(ary, prob)
+    (quantile,) = _quantile(ary, prob)
     iquantile = ary <= quantile
     return _ess(_split_chains(iquantile), relative=relative)
 

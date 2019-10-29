@@ -540,7 +540,7 @@ def _set_animation(
 
             ax.set_ylim(0, max_max)
 
-            line, = ax.plot(x_vals, y_vals, **plot_kwargs)
+            (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
             def animate(i):
                 y_vals, lower, upper = _fast_kde(pp_sampled_vals[i])
@@ -551,7 +551,7 @@ def _set_animation(
         else:
             vals = pp_sampled_vals[0]
             y_vals, x_vals = np.histogram(vals, bins="auto", density=True)
-            line, = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
+            (line,) = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
 
             max_max = max(
                 [
@@ -569,7 +569,7 @@ def _set_animation(
 
     elif kind == "cumulative":
         x_vals, y_vals = _empirical_cdf(pp_sampled_vals[0])
-        line, = ax.plot(
+        (line,) = ax.plot(
             x_vals, y_vals, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
         )
 
@@ -581,7 +581,7 @@ def _set_animation(
     elif kind == "scatter":
         x_vals = pp_sampled_vals[0]
         y_vals = np.full_like(x_vals, height, dtype=np.float64)
-        line, = ax.plot(
+        (line,) = ax.plot(
             x_vals, y_vals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
         )
 
