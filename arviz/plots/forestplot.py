@@ -117,7 +117,7 @@ def plot_forest(
 
         >>> import arviz as az
         >>> non_centered_data = az.load_arviz_data('non_centered_eight')
-        >>> fig, axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest(non_centered_data,
         >>>                            kind='forestplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,
@@ -130,7 +130,7 @@ def plot_forest(
     .. plot::
         :context: close-figs
 
-        >>> fig, axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,

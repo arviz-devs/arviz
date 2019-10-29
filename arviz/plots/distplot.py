@@ -8,7 +8,7 @@ from .plot_utils import get_bins
 def plot_dist(
     values,
     values2=None,
-    color="C0",
+    color=None,
     kind="auto",
     cumulative=False,
     label=None,

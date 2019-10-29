@@ -9,7 +9,7 @@ import arviz as az
 az.style.use("arviz-darkgrid")
 
 rugby_data = az.load_arviz_data("rugby")
-fig, axes = az.plot_forest(
+axes = az.plot_forest(
     rugby_data,
     kind="ridgeplot",
     var_names=["defs"],
