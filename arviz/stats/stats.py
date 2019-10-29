@@ -663,7 +663,7 @@ def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
     xcutoff = max(x[x_sort_ind[cutoff_ind]], cutoffmin)
 
     expxcutoff = np.exp(xcutoff)
-    tailinds, = np.where(x > xcutoff)  # pylint: disable=unbalanced-tuple-unpacking
+    (tailinds,) = np.where(x > xcutoff)  # pylint: disable=unbalanced-tuple-unpacking
     x_tail = x[tailinds]
     tail_len = len(x_tail)
     if tail_len <= 4:

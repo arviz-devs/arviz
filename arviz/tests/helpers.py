@@ -217,7 +217,7 @@ def _emcee_lnprior(theta):
     if tau < 0:
         return -np.inf
     prior_tau = -np.log(tau ** 2 + 25 ** 2)
-    prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+    prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
     prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
@@ -226,7 +226,7 @@ def _emcee_lnprob(theta, y, sigma):
     """Proper function to allow pickling."""
     mu, tau, eta = theta[0], theta[1], theta[2:]
     prior = _emcee_lnprior(theta)
-    like_vect = -((mu + tau * eta - y) / sigma) ** 2
+    like_vect = -(((mu + tau * eta - y) / sigma) ** 2)
     like = np.sum(like_vect)
     return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
 
