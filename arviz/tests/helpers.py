@@ -320,7 +320,7 @@ def numpyro_schools_model(data, draws, chains):
     import jax
     import numpyro
     import numpyro.distributions as dist
-    from numpyro.mcmc import MCMC, NUTS
+    from numpyro.infer import MCMC, NUTS
 
     def model():
         mu = numpyro.sample("mu", dist.Normal(0, 5))
@@ -335,7 +335,7 @@ def numpyro_schools_model(data, draws, chains):
         num_chains=chains,
         chain_method="sequential",
     )
-    mcmc.run(jax.random.PRNGKey(0), collect_fields=("z", "diverging"))
+    mcmc.run(jax.random.PRNGKey(0), extra_fields=["diverging"])
     return mcmc
 
 

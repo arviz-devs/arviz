@@ -13,6 +13,8 @@ _log = logging.getLogger(__name__)
 class NumPyroConverter:
     """Encapsulate NumPyro specific logic."""
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, *, posterior, prior=None, posterior_predictive=None, coords=None, dims=None):
         """Convert NumPyro data into an InferenceData object.
 
@@ -52,13 +54,17 @@ class NumPyroConverter:
         self.nchains, self.ndraws = tree_flatten_samples[0].shape[:2]
         self.model = self.posterior.sampler.model
         # model arguments and keyword arguments
-        self._args, self._kwargs = self.posterior._args, self.posterior._kwargs  # pylint: disable=protected-access
+        self._args = self.posterior._args  # pylint: disable=protected-access
+        self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
         observations = {}
         if self.model is not None:
             seeded_model = numpyro.handlers.seed(self.model, jax.random.PRNGKey(0))
             trace = numpyro.handlers.trace(seeded_model).get_trace(*self._args, **self._kwargs)
-            observations = {name: site["value"] for name, site in trace.items()
-                            if site["type"] == "sample" and site["is_observed"]}
+            observations = {
+                name: site["value"]
+                for name, site in trace.items()
+                if site["type"] == "sample" and site["is_observed"]
+            }
         self.observations = observations if observations else None
 
     @requires("posterior")
@@ -92,7 +98,8 @@ class NumPyroConverter:
         if self.observations is not None and len(self.observations) == 1:
             samples = self.posterior.get_samples(group_by_chain=False)
             log_likelihood = self.numpyro.infer.log_likelihood(
-                self.model, samples, *self._args, **self._kwargs)
+                self.model, samples, *self._args, **self._kwargs
+            )
             obs_name, log_likelihood = list(log_likelihood.items())[0]
             if self.dims is not None:
                 coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
