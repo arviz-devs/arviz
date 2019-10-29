@@ -21,6 +21,7 @@ class TestDataPyro:
     def get_inference_data(self, data):
         return from_pyro(posterior=data.obj)
 
+    @pytest.mark.xfail
     def test_inference_data(self, data):
         inference_data = self.get_inference_data(data)
         assert hasattr(inference_data, "posterior")
