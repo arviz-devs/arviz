@@ -20,6 +20,7 @@ def plot_joint(
     fill_last=True,
     joint_kwargs=None,
     marginal_kwargs=None,
+    ax_tuple=None,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
@@ -51,6 +52,9 @@ def plot_joint(
         Additional keywords modifying the join distribution (central subplot)
     marginal_kwargs : dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
+    ax_tuple : tuple of axes, optional
+        Tuple containing (axjoin, ax_hist_x, ax_hist_y). If None, a new figure and axes
+        will be created.
 
     Returns
     -------
@@ -126,19 +130,24 @@ def plot_joint(
     marginal_kwargs.setdefault("plot_kwargs", {})
     marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
 
-    # Instantiate figure and grid
-    fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
-    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+    if ax_tuple is None:
+        # Instantiate figure and grid
+        fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
+        grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
-    # Set up main plot
-    axjoin = fig.add_subplot(grid[1:, :-1])
+        # Set up main plot
+        axjoin = fig.add_subplot(grid[1:, :-1])
+        # Set up top KDE
+        ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+        # Set up right KDE
+        ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
+    elif len(ax_tuple) == 3:
+        axjoin, ax_hist_x, ax_hist_y = ax_tuple
+    else:
+        raise ValueError("ax_tuple must be of lenght 3 but found {}".format(len(ax_tuple)))
 
-    # Set up top KDE
-    ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+    # Personalize axes
     ax_hist_x.tick_params(labelleft=False, labelbottom=False)
-
-    # Set up right KDE
-    ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
     ax_hist_y.tick_params(labelleft=False, labelbottom=False)
 
     # Set labels for axes

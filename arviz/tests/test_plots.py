@@ -236,6 +236,10 @@ def test_plot_joint(models, kind):
     axjoin, _, _ = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind)
     assert axjoin
 
+def test_plot_joint_ax_tuple(models):
+    ax_tuple = plot_joint(models.model_1, var_names=("mu", "tau"))
+    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax_tuple=ax_tuple)
+    assert axjoin
 
 def test_plot_joint_discrete(discrete_model):
     axjoin, _, _ = plot_joint(discrete_model)
@@ -248,6 +252,10 @@ def test_plot_joint_bad(models):
 
     with pytest.raises(Exception):
         plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
+
+    with pytest.raises(ValueError, match="ax_tuple.+3.+5"):
+        _, axes = plt.subplots(5, 1)
+        plot_joint(models.model_1, var_names=("mu", "tau"), ax_tuple=axes)
 
 
 @pytest.mark.parametrize(

@@ -171,9 +171,11 @@ class TestCoordsExceptions:
         coords = {"draw": [1234567]}
 
         with pytest.raises(
-            KeyError, match=r"data\[0\]:.+Coords should follow mapping format {coord_name:\[dim1, dim2\]}"
+            KeyError,
+            match=r"data\[0\]:.+Coords should follow mapping format {coord_name:\[dim1, dim2\]}",
         ):
-            get_coords((data, data), (coords, {"draw": [0,1]}))
+            get_coords((data, data), (coords, {"draw": [0, 1]}))
+
 
 def test_filter_plotter_list():
     plotters = list(range(7))
