@@ -1,33 +1,80 @@
 """PyMC3-specific conversion code."""
 import logging
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
+
 import numpy as np
 import xarray as xr
-
 from .. import utils
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
+if TYPE_CHECKING:
+    import pymc3 as pm
+
 _log = logging.getLogger(__name__)
+
+Coords = Dict[str, List[Any]]
+Dims = Dict[str, List[str]]
 
 
 class PyMC3Converter:
     """Encapsulate PyMC3 specific logic."""
 
+    model = None  # type: Optional[pm.Model]
+    nchains = None  # type: int
+    ndraws = None  # type: int
+    posterior_predictive = None  # Type: Optional[Dict[str, np.ndarray]]
+    prior = None  # Type: Optional[Dict[str, np.ndarray]]
+
     def __init__(
-        self, *, trace=None, prior=None, posterior_predictive=None, coords=None, dims=None
+        self,
+        *,
+        trace=None,
+        prior=None,
+        posterior_predictive=None,
+        coords: Optional[Coords] = None,
+        dims: Optional[Dims] = None,
+        model=None
     ):
+        import pymc3
+
+        self.pymc3 = pymc3
+
         self.trace = trace
+
         # This next line is brittle and may not work forever, but is a secret
         # way to access the model from the trace.
-        self.model = (
-            None
-            if trace is None
-            else self.trace._straces[0].model  # pylint: disable=protected-access
-        )
-        self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-        self.ndraws = len(trace)
+        if trace is not None:
+            self.model = self.trace._straces[0].model  # pylint: disable=protected-access
+            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+            self.ndraws = len(trace)
+        else:
+            self.model = None
+            self.nchains = self.ndraws = 0
+
+        # this permits us to get the model from command-line argument or from with model:
+        try:
+            self.model = self.pymc3.modelcontext(model or self.model)
+        except TypeError:
+            self.model = None
+
         self.prior = prior
         self.posterior_predictive = posterior_predictive
+
+        def arbitrary_element(dct: Dict[Any, np.ndarray]) -> np.ndarray:
+            return next(iter(dct.values()))
+
+        if trace is None:
+            # if you have a posterior_predictive built with keep_dims,
+            # you'll lose here, but there's nothing I can do about that.
+            self.nchains = 1
+            aelem = (
+                arbitrary_element(prior)
+                if posterior_predictive is None
+                else arbitrary_element(posterior_predictive)
+            )
+            self.ndraws = aelem.shape[0]
+
         self.coords = coords
         self.dims = dims
         self.observations = (
@@ -44,10 +91,6 @@ class PyMC3Converter:
         )
         if self.observations is not None:
             self.observations = {obs.name: obs.observations for obs in self.model.observed_RVs}
-
-        import pymc3
-
-        self.pymc3 = pymc3
 
     @requires("trace")
     @requires("model")
@@ -216,7 +259,9 @@ class PyMC3Converter:
         )
 
 
-def from_pymc3(trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
+def from_pymc3(
+    trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None, model=None
+):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,
@@ -224,4 +269,5 @@ def from_pymc3(trace=None, *, prior=None, posterior_predictive=None, coords=None
         posterior_predictive=posterior_predictive,
         coords=coords,
         dims=dims,
+        model=model,
     ).to_inference_data()

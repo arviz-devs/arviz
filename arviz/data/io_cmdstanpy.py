@@ -271,7 +271,7 @@ def _unpack_frame(data, columns, valid_cols):
             sample[key] = np.full((chains, draws, *ndim), np.nan)
         if shape_location is None:
             # reorder draw, chain -> chain, draw
-            i, = column_locs[key]
+            (i,) = column_locs[key]
             sample[key] = np.swapaxes(data[..., i], 0, 1)
         else:
             for i, shape_loc in zip(column_locs[key], shape_location):
@@ -297,12 +297,12 @@ def from_cmdstanpy(
 
     Parameters
     ----------
-    posterior : StanFit object
-        CmdStanPy StanFit
+    posterior : CmdStanMCMC object
+        CmdStanPy CmdStanMCMC
     posterior_predictive : str, list of str
         Posterior predictive samples for the fit.
-    prior : StanFit
-        CmdStanPy StanFit
+    prior : CmdStanMCMC
+        CmdStanPy CmdStanMCMC
     prior_predictive : str, list of str
         Prior predictive samples for the fit.
     observed_data : dict

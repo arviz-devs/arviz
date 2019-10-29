@@ -10,6 +10,7 @@ from .helpers import (  # pylint: disable=unused-import
 )
 
 
+@pytest.mark.xfail(reason="Temporary xfail for Pyro tests.")
 class TestDataPyro:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):

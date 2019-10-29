@@ -80,7 +80,7 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
-    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular)
+    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:

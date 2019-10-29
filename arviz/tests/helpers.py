@@ -217,7 +217,7 @@ def _emcee_lnprior(theta):
     if tau < 0:
         return -np.inf
     prior_tau = -np.log(tau ** 2 + 25 ** 2)
-    prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+    prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
     prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
@@ -226,7 +226,7 @@ def _emcee_lnprob(theta, y, sigma):
     """Proper function to allow pickling."""
     mu, tau, eta = theta[0], theta[1], theta[2:]
     prior = _emcee_lnprior(theta)
-    like_vect = -((mu + tau * eta - y) / sigma) ** 2
+    like_vect = -(((mu + tau * eta - y) / sigma) ** 2)
     like = np.sum(like_vect)
     return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
 
@@ -344,6 +344,11 @@ def tfp_schools_model(num_schools, treatment_stddevs):
     import tensorflow_probability.python.edward2 as ed
     import tensorflow as tf
 
+    if int(tf.__version__[0]) > 1:
+        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
+        tf.disable_v2_behavior()
+
     avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu`
     avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
     school_effects_standard = ed.Normal(
@@ -361,6 +366,11 @@ def tfp_noncentered_schools(data, draws, chains):
     import tensorflow_probability as tfp
     import tensorflow_probability.python.edward2 as ed
     import tensorflow as tf
+
+    if int(tf.__version__[0]) > 1:
+        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
+        tf.disable_v2_behavior()
 
     del chains
 
@@ -438,7 +448,12 @@ def pystan_noncentered_schools(data, draws, chains):
 
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(
-            data=data, iter=draws, warmup=0, chains=chains, check_hmc_diagnostics=False
+            data=data,
+            iter=draws,
+            warmup=0,
+            chains=chains,
+            check_hmc_diagnostics=False,
+            control=dict(adapt_engaged=False),
         )
     else:
         import stan  # pylint: disable=import-error

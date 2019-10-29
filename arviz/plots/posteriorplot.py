@@ -15,8 +15,10 @@ from .plot_utils import (
     _create_axes_grid,
     get_coords,
     filter_plotters_list,
+    format_sig_figs,
+    round_num,
 )
-from ..utils import _var_names, format_sig_figs
+from ..utils import _var_names
 
 
 def plot_posterior(
@@ -26,6 +28,7 @@ def plot_posterior(
     figsize=None,
     textsize=None,
     credible_interval=0.94,
+    multimodal=False,
     round_to: Optional[int] = None,
     point_estimate="mean",
     group="posterior",
@@ -55,6 +58,9 @@ def plot_posterior(
         on figsize.
     credible_interval : float, optional
         Credible intervals. Defaults to 0.94. Use None to hide the credible interval
+    multimodal : bool
+        If true (default) it may compute more than one credible interval if the distribution is
+        multimodal and the modes are well separated.
     round_to : int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
     point_estimate: str
@@ -142,7 +148,7 @@ def plot_posterior(
         :context: close-figs
 
         >>> az.plot_posterior(data, ref_val= {"theta": [{"school": "Deerfield", "ref_val": 4},
-                                                        {"school": "Choate", "ref_val": 3}]})
+        ...                                             {"school": "Choate", "ref_val": 3}]})
 
     Show reference values using a list
 
@@ -202,6 +208,7 @@ def plot_posterior(
             point_estimate=point_estimate,
             round_to=round_to,
             credible_interval=credible_interval,
+            multimodal=multimodal,
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
@@ -226,6 +233,7 @@ def _plot_posterior_op(
     kind,
     point_estimate,
     credible_interval,
+    multimodal,
     ref_val,
     rope,
     ax_labelsize,
@@ -234,8 +242,6 @@ def _plot_posterior_op(
     **kwargs
 ):  # noqa: D202
     """Artist to draw posterior."""
-
-    significant_fig_func = lambda v: format_sig_figs(v, default=round_to)
 
     def format_as_percent(x, round_to=0):
         return "{0:.{1:d}f}%".format(100 * x, round_to)
@@ -306,7 +312,7 @@ def _plot_posterior_op(
             (plot_height * 0.02, plot_height * 0.02),
             lw=linewidth * 5,
             color="C2",
-            solid_capstyle="round",
+            solid_capstyle="butt",
             zorder=0,
             alpha=0.7,
         )
@@ -330,7 +336,7 @@ def _plot_posterior_op(
                 point_value = mode(values)[0][0]
         elif point_estimate == "median":
             point_value = np.median(values)
-        sig_figs = significant_fig_func(point_value)
+        sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
         )
@@ -345,40 +351,39 @@ def _plot_posterior_op(
     def display_hpd():
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hpd_intervals = hpd(values, credible_interval=credible_interval)  # type: np.ndarray
+        hpd_intervals = hpd(
+            values, credible_interval=credible_interval, multimodal=multimodal
+        )  # type: np.ndarray
 
-        def round_num(n: float) -> str:
-            sig_figs = significant_fig_func(n)
-            return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
-
-        ax.plot(
-            hpd_intervals,
-            (plot_height * 0.02, plot_height * 0.02),
-            lw=linewidth * 2,
-            color="k",
-            solid_capstyle="round",
-        )
-        ax.text(
-            hpd_intervals[0],
-            plot_height * 0.07,
-            round_num(hpd_intervals[0]),
-            size=ax_labelsize,
-            horizontalalignment="center",
-        )
-        ax.text(
-            hpd_intervals[1],
-            plot_height * 0.07,
-            round_num(hpd_intervals[1]),
-            size=ax_labelsize,
-            horizontalalignment="center",
-        )
-        ax.text(
-            (hpd_intervals[0] + hpd_intervals[1]) / 2,
-            plot_height * 0.3,
-            format_as_percent(credible_interval) + " HPD",
-            size=ax_labelsize,
-            horizontalalignment="center",
-        )
+        for hpdi in np.atleast_2d(hpd_intervals):
+            ax.plot(
+                hpdi,
+                (plot_height * 0.02, plot_height * 0.02),
+                lw=linewidth * 2,
+                color="k",
+                solid_capstyle="butt",
+            )
+            ax.text(
+                hpdi[0],
+                plot_height * 0.07,
+                round_num(hpdi[0], round_to),
+                size=ax_labelsize,
+                horizontalalignment="center",
+            )
+            ax.text(
+                hpdi[1],
+                plot_height * 0.07,
+                round_num(hpdi[1], round_to),
+                size=ax_labelsize,
+                horizontalalignment="center",
+            )
+            ax.text(
+                (hpdi[0] + hpdi[1]) / 2,
+                plot_height * 0.3,
+                format_as_percent(credible_interval) + " HPD",
+                size=ax_labelsize,
+                horizontalalignment="center",
+            )
 
     def format_axes():
         ax.yaxis.set_ticks([])

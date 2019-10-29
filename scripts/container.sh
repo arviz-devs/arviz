@@ -13,6 +13,7 @@ if [[ $* == *--build* ]]; then
         --build-arg PYRO_VERSION=${PYRO_VERSION} \
         --build-arg PYTORCH_VERSION=${PYTORCH_VERSION} \
         --build-arg EMCEE_VERSION=${EMCEE_VERSION} \
+        --build-arg TF_VERSION=${TF_VERSION} \
         --rm
 fi
 

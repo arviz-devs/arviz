@@ -47,6 +47,20 @@ def test_hpd():
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
+def test_hpd_multimodal():
+    normal_sample = np.concatenate(
+        (np.random.normal(-4, 1, 2500000), np.random.normal(2, 0.5, 2500000))
+    )
+    intervals = hpd(normal_sample, multimodal=True)
+    assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
+
+
+def test_hpd_circular():
+    normal_sample = np.random.vonmises(np.pi, 1, 5000000)
+    interval = hpd(normal_sample, circular=True)
+    assert_array_almost_equal(interval, [0.6, -0.6], 1)
+
+
 def test_hpd_bad_ci():
     normal_sample = np.random.randn(10)
     with pytest.raises(ValueError):

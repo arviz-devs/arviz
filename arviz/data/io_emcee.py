@@ -182,6 +182,8 @@ class EmceeConverter:
             blobs = np.array(self.sampler.blobs)
         if blobs is None or blobs.size == 0:
             raise ValueError("No blobs in sampler, blob_names must be None")
+        if len(blobs.shape) == 2:
+            blobs = np.expand_dims(blobs, axis=-1)
         blobs = blobs.swapaxes(0, 2)
         nblobs, nwalkers, ndraws, *_ = blobs.shape
         if len(self.blob_names) != nblobs and len(self.blob_names) != 1:
@@ -316,13 +318,15 @@ def from_emcee(
         >>> sampler.run_mcmc(pos, draws);
 
     And convert the sampler to an InferenceData object. As emcee does not store variable
-    names, they must be passed to the converter in order to have them:
+    names, they must be passed to the converter in order to have them. It can also be useful
+    to perform a burn in cut to the MCMC samples (see :meth:`arviz.InferenceData.sel` for
+    more details):
 
     .. plot::
         :context: close-figs
 
         >>> var_names = ['mu', 'tau']+['eta{}'.format(i) for i in range(J)]
-        >>> emcee_data = az.from_emcee(sampler, var_names=var_names)
+        >>> emcee_data = az.from_emcee(sampler, var_names=var_names).sel(draw=slice(100, None))
 
     From an InferenceData object, ArviZ's native data structure, the posterior plot
     of the first 3 variables can be done in one line:

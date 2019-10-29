@@ -97,7 +97,7 @@ class TestDataPyMC3:
             trace = pm.sample(100, chains=2)
 
         # make sure that data is really missing
-        y_missing, = model.missing_values
+        (y_missing,) = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
         test_dict = {"posterior": ["x"], "observed_data": ["y"], "sample_stats": ["log_likelihood"]}
@@ -150,5 +150,31 @@ class TestDataPyMC3:
 
         inference_data = from_pymc3(trace=trace)
         test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+    def test_no_trace(self):
+        with pm.Model():
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            trace = pm.sample(100, tune=100)
+            prior = pm.sample_prior_predictive()
+            posterior_predictive = pm.sample_posterior_predictive(trace)
+
+        # Only prior
+        inference_data = from_pymc3(prior=prior)
+        test_dict = {"prior": ["beta", "obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        # Only posterior_predictive
+        inference_data = from_pymc3(posterior_predictive=posterior_predictive)
+        test_dict = {"posterior_predictive": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        # Prior and posterior_predictive but no trace
+        inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive)
+        test_dict = {"prior": ["beta", "obs"], "posterior_predictive": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails

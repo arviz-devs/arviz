@@ -12,11 +12,12 @@ PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
-EMCEE_VERSION=${EMCEE_VERSION:-2}
+EMCEE_VERSION=${EMCEE_VERSION:-latest}
+TF_VERSION=${TF_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}_TF_${TF_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -70,10 +71,16 @@ else
   pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
 fi
 
-if [ "$EMCEE_VERSION" = "2" ]; then
+if [ "$EMCEE_VERSION" = "latest" ]; then
   pip --no-cache-dir install emcee
 else
-  pip --no-cache-dir install git+https://github.com/dfm/emcee.git
+  pip --no-cache-dir install "emcee<3"
+fi
+
+if [ "$TF_VERSION" = "latest" ]; then
+  pip --no-cache-dir install tensorflow
+else
+  pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
 fi
 
 #  Install editable using the setup.py
