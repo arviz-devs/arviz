@@ -163,7 +163,7 @@ tools:
 
   ```bash
   $ pip install black
-  $ black arviz/
+  $ black arviz/ examples/
   ```
 
 * Your code passes pylint
