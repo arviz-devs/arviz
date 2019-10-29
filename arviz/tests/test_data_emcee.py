@@ -113,13 +113,13 @@ class TestDataEmcee:
             from_emcee(data.obj, slices=slices)
 
     def test_no_blobs_error(self):
-        sampler = emcee.EnsembleSampler(6, 1, lambda x: -x ** 2)
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: -(x ** 2))
         sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
         with pytest.raises(ValueError):
             from_emcee(sampler, blob_names=["inexistent"])
 
     def test_peculiar_blobs(self, data):
-        sampler = emcee.EnsembleSampler(6, 1, lambda x: (-x ** 2, (np.random.normal(x), 3)))
+        sampler = emcee.EnsembleSampler(6, 1, lambda x: (-(x ** 2), (np.random.normal(x), 3)))
         sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
         inference_data = from_emcee(sampler, blob_names=["normal", "threes"])
         fails = check_multiple_attrs({"sample_stats": ["normal", "threes"]}, inference_data)

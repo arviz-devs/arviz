@@ -97,7 +97,7 @@ class TestDataPyMC3:
             trace = pm.sample(100, chains=2)
 
         # make sure that data is really missing
-        y_missing, = model.missing_values
+        (y_missing,) = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
         test_dict = {"posterior": ["x"], "observed_data": ["y"], "sample_stats": ["log_likelihood"]}
