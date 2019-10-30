@@ -263,7 +263,7 @@ def emcee_schools_model(data, draws, chains):
     return sampler
 
 
-# pylint:disable=no-member,no-value-for-parameter
+# pylint:disable=no-member,no-value-for-parameter,invalid-name
 def _pyro_noncentered_model(J, sigma, y=None):
     import pyro
     import pyro.distributions as dist
@@ -281,8 +281,8 @@ def pyro_noncentered_schools(data, draws, chains):
     import torch
     from pyro.infer import MCMC, NUTS
 
-    y = torch.tensor(data["y"]).float()
-    sigma = torch.tensor(data["sigma"]).float()
+    y = torch.from_numpy(data["y"]).float()
+    sigma = torch.from_numpy(data["sigma"]).float()
 
     nuts_kernel = NUTS(_pyro_noncentered_model, jit_compile=True, ignore_jit_warnings=True)
     posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=draws, num_chains=chains)
