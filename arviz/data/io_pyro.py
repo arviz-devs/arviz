@@ -1,14 +1,19 @@
-"""pyro-specific conversion code."""
+"""Pyro-specific conversion code."""
+import logging
+import numpy as np
+
 from .inference_data import InferenceData
-from .base import dict_to_dataset
+from .base import requires, dict_to_dataset
 from .. import utils
+
+_log = logging.getLogger(__name__)
 
 
 class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
-    def __init__(self, *, posterior, prior=None, posterior_predictive=None, observed_data=None, coords=None, dims=None):
-        """Convert pyro data into an InferenceData object.
+    def __init__(self, *, posterior, prior=None, posterior_predictive=None, coords=None, dims=None):
+        """Convert Pyro data into an InferenceData object.
 
         Parameters
         ----------
@@ -18,59 +23,80 @@ class PyroConverter:
             Prior samples from a Pyro model
         posterior_predictive : dict
             Posterior predictive samples for the posterior
-        observed_data : dict
-            Observed data used in the sampling.
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
         """
         self.posterior = posterior
+        self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
         self.prior = prior
         self.posterior_predictive = posterior_predictive
-        self.observed_data = observed_data
         self.coords = coords
         self.dims = dims
         import pyro
 
         self.pyro = pyro
 
+    @requires("posterior")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        # Do not make pyro a requirement
-        from pyro.infer import EmpiricalMarginal
-
-        try:  # Try pyro>=0.3 release syntax
-            data = {
-                name: utils.expand_dims(samples.enumerate_support().squeeze())
-                if self.posterior.num_chains == 1
-                else samples.enumerate_support().squeeze()
-                for name, samples in self.posterior.marginal(
-                    sites=self.latent_vars
-                ).empirical.items()
-            }
-        except AttributeError:  # Use pyro<0.3 release syntax
-            data = {}
-            for var_name in self.latent_vars:
-                # pylint: disable=no-member
-                samples = EmpiricalMarginal(
-                    self.posterior, sites=var_name
-                ).get_samples_and_weights()[0]
-                samples = samples.numpy().squeeze()
-                data[var_name] = utils.expand_dims(samples)
+        data = self.posterior.get_samples(group_by_chain=True)
+        data = {k: v.detach().cpu().numpy() for k, v in data.items()}
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    def sample_stats_to_xarray(self):
+        """Extract sample_stats from Pyro posterior."""
+        divergences = self.posterior.diagnostics()["divergences"]
+        diverging = np.zeros((self.nchains, self.ndraws), dtype=np.bool)
+        for i, k in enumerate(sorted(divergences)):
+            diverging[i, divergences[k]] = 1
+        data = {"diverging": diverging}
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
+
+    @requires("posterior_predictive")
+    def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
+        data = {}
+        for k, ary in self.posterior_predictive.items():
+            ary = ary.detach().cpu().numpy()
+            shape = ary.shape
+            if shape[0] == self.nchains and shape[1] == self.ndraws:
+                data[k] = ary
+            elif shape[0] == self.nchains * self.ndraws:
+                data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
+            else:
+                data[k] = utils.expand_dims(ary)
+                _log.warning(
+                    "posterior predictive shape not compatible with number of chains and draws. "
+                    "This can mean that some draws or even whole chains are not represented."
+                )
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
+
+    @requires("prior")
+    def prior_to_xarray(self):
+        """Convert prior samples to xarray."""
+        return dict_to_dataset(
+            {k: utils.expand_dims(v.detach().cpu().numpy()) for k, v in self.prior.items()},
+            library=self.pyro,
+            coords=self.coords,
+            dims=self.dims,
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
-                "observed_data": self.observed_data_to_xarray(),
+                "sample_stats": self.sample_stats_to_xarray(),
+                "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "prior": self.prior_to_xarray(),
             }
         )
 
 
-def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, observed_data=None, coords=None, dims=None):
+def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
     """Convert Pyro data into an InferenceData object.
 
     Parameters
@@ -92,7 +118,6 @@ def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, observed
         posterior=posterior,
         prior=prior,
         posterior_predictive=posterior_predictive,
-        observed_data=observed_data,
         coords=coords,
         dims=dims,
     ).to_inference_data()

@@ -264,54 +264,32 @@ def emcee_schools_model(data, draws, chains):
 
 
 # pylint:disable=no-member,no-value-for-parameter
-def _pyro_centered_model(sigma):
-    """Centered model setup."""
+def _pyro_noncentered_model(J, sigma, y=None):
     import pyro
-    import torch
     import pyro.distributions as dist
 
-    mu = pyro.sample("mu", dist.Normal(torch.zeros(1), 10 * torch.ones(1)))
-    tau = pyro.sample("tau", dist.HalfCauchy(scale=25 * torch.ones(1)))
-
-    theta = pyro.sample("theta", dist.Normal(mu * torch.ones(8), tau * torch.ones(8)))
-
-    return pyro.sample("obs", dist.Normal(theta, sigma))
-
-
-def _pyro_conditioned_model(model, sigma, y):
-    """Condition the model."""
-    import pyro
-
-    return pyro.poutine.condition(model, data={"obs": y})(sigma)
+    mu = pyro.sample("mu", dist.Normal(0, 5))
+    tau = pyro.sample("tau", dist.HalfCauchy(5))
+    with pyro.plate("J", J):
+        eta = pyro.sample("eta", dist.Normal(0, 1))
+        theta = mu + tau * eta
+        return pyro.sample("obs", dist.Normal(theta, sigma), obs=y)
 
 
-def pyro_centered_schools(data, draws, chains):
-    """Centered eight schools implementation in Pyro.
-
-    Note there is not really a deterministic node in pyro, so I do not
-    know how to do a non-centered implementation.
-    """
+def pyro_noncentered_schools(data, draws, chains):
+    """Non-centered eight schools implementation in Pyro."""
     import torch
-    from pyro.infer.mcmc import MCMC, NUTS
+    from pyro.infer import MCMC, NUTS
 
-    del chains
-    y = torch.Tensor(data["y"]).type(torch.Tensor)
-    sigma = torch.Tensor(data["sigma"]).type(torch.Tensor)
+    y = torch.tensor(data["y"]).float()
+    sigma = torch.tensor(data["sigma"]).float()
 
-    nuts_kernel = NUTS(_pyro_conditioned_model, adapt_step_size=True)
-    posterior = MCMC(  # pylint:disable=not-callable
-        nuts_kernel, num_samples=draws, warmup_steps=500
-    ).run(_pyro_centered_model, sigma, y)
+    nuts_kernel = NUTS(_pyro_noncentered_model, jit_compile=True, ignore_jit_warnings=True)
+    posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=draws, num_chains=chains)
+    posterior.run(data["J"], sigma, y)
 
     # This block lets the posterior be pickled
-    for trace in posterior.exec_traces:
-        for node in trace.nodes.values():
-            node.pop("fn", None)
-    posterior.kernel = None
-    posterior.run = None
-    posterior.logger = None
-    if hasattr(posterior, "sampler"):
-        posterior.sampler = None
+    posterior.sampler = None
     return posterior
 
 
@@ -501,7 +479,7 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         ("pystan", pystan_noncentered_schools),
         ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),
-        ("pyro", pyro_centered_schools),
+        ("pyro", pyro_noncentered_schools),
         ("numpyro", numpyro_schools_model),
     )
     data_directory = os.path.join(here, "saved_models")
