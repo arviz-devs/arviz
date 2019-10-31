@@ -59,7 +59,7 @@ class PyroConverter:
         divergences = self.posterior.diagnostics()["divergences"]
         diverging = np.zeros((self.nchains, self.ndraws), dtype=np.bool)
         for i, k in enumerate(sorted(divergences)):
-            diverging[i, divergences[k]] = 1
+            diverging[i, divergences[k]] = True
         data = {"diverging": diverging}
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
@@ -115,8 +115,6 @@ def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, coords=N
         Prior samples from a Pyro model
     posterior_predictive : dict
         Posterior predictive samples for the posterior
-    observed_data : dict
-        Observed data used in the sampling.
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
