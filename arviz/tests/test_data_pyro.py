@@ -1,9 +1,13 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
+import numpy as np
 import pytest
+import torch
+from pyro.infer import Predictive
 
 from ..data.io_pyro import from_pyro
 from .helpers import (  # pylint: disable=unused-import
     chains,
+    check_multiple_attrs,
     draws,
     eight_schools_params,
     load_cached_models,
@@ -18,9 +22,30 @@ class TestDataPyro:
 
         return Data
 
-    def get_inference_data(self, data):
-        return from_pyro(posterior=data.obj)
+    def get_inference_data(self, data, eight_schools_params):
+        posterior_samples = data.obj.get_samples()
+        model = data.obj.kernel.model
+        posterior_predictive = Predictive(model, posterior_samples).get_samples(
+            eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
+        )
+        prior = Predictive(model, num_samples=500).get_samples(
+            eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
+        )
+        return from_pyro(
+            posterior=data.obj,
+            prior=prior,
+            posterior_predictive=posterior_predictive,
+            coords={"school": np.arange(eight_schools_params["J"])},
+            dims={"theta": ["school"], "eta": ["school"]},
+        )
 
-    def test_inference_data(self, data):
-        inference_data = self.get_inference_data(data)
-        assert hasattr(inference_data, "posterior")
+    def test_inference_data(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params)
+        test_dict = {
+            "posterior": ["mu", "tau", "eta"],
+            "sample_stats": ["diverging"],
+            "posterior_predictive": ["obs"],
+            "prior": ["mu", "tau", "eta", "obs"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails

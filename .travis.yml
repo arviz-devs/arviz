@@ -11,9 +11,9 @@ matrix:
     - name: "Python 3.6 Unit Test"
       python: 3.6
       env: PYTHON_VERSION=3.6 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=latest NAME="UNIT"
-    - name: "Python 3.6 Unit Test - PyStan=3 Emcee=2 TF=1"
+    - name: "Python 3.6 Unit Test - PyStan=3 Pyro=0.5.1 Emcee=2 TF=1"
       python: 3.6
-      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=latest EMCEE_VERSION=2 TF_VERSION=1 NAME="UNIT"
+      env: PYTHON_VERSION=3.6 PYSTAN_VERSION=preview PYRO_VERSION=0.5.1 PYTORCH_VERSION=1.3.0 EMCEE_VERSION=2 TF_VERSION=1 NAME="UNIT"
     - name: "Python 3.5 Unit Test"
       python: 3.5
       env: PYTHON_VERSION=3.5 PYSTAN_VERSION=latest PYRO_VERSION=latest EMCEE_VERSION=latest NAME="UNIT"

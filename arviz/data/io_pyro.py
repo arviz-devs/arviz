@@ -12,7 +12,12 @@ _log = logging.getLogger(__name__)
 class PyroConverter:
     """Encapsulate Pyro specific logic."""
 
-    def __init__(self, *, posterior, prior=None, posterior_predictive=None, coords=None, dims=None):
+    nchains = None  # type: int
+    ndraws = None  # type: int
+
+    def __init__(
+        self, *, posterior=None, prior=None, posterior_predictive=None, coords=None, dims=None
+    ):
         """Convert Pyro data into an InferenceData object.
 
         Parameters
@@ -29,7 +34,10 @@ class PyroConverter:
             Map variable names to their coordinates
         """
         self.posterior = posterior
-        self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
+        if posterior is not None:
+            self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
+        else:
+            self.nchains = self.ndraws = 0
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.coords = coords

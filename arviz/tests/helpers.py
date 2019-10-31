@@ -284,7 +284,7 @@ def pyro_noncentered_schools(data, draws, chains):
     y = torch.from_numpy(data["y"]).float()
     sigma = torch.from_numpy(data["sigma"]).float()
 
-    nuts_kernel = NUTS(_pyro_noncentered_model, jit_compile=True, ignore_jit_warnings=True)
+    nuts_kernel = NUTS(_pyro_noncentered_model)
     posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=draws, num_chains=chains)
     posterior.run(data["J"], sigma, y)
 
