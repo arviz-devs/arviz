@@ -1,82 +1,71 @@
-# Design for netcdf storage format for mcmc traces
+# InferenceData schema specification
+The `InferenceData` schema scheme defines a data structure compatible with [NetCDF](https://www.unidata.ucar.edu/software/netcdf/) with 3 goals in mind, usefulness in the analysis of Bayesian inference results, reproducibility of Bayesian inference analysis and interoperability between different inference backends and programming languages.
 
-/
-All data relating to a mcmc run.
+Currently there are 2 implementations of this design:
+* [ArviZ](https://arviz-devs.github.io/arviz/) in Python which integrates with:
+  - [emcee](https://emcee.readthedocs.io/en/stable/)
+  - [PyMC3](https://docs.pymc.io)
+  - [pyro](https://pyro.ai/)
+      and [numpyro](https://pyro.ai/numpyro/)
+  - [PyStan](https://pystan.readthedocs.io/en/latest/index.html),
+      [CmdStan](https://mc-stan.org/users/interfaces/cmdstan)
+      and [CmdStanPy](https://cmdstanpy.readthedocs.io/en/latest/index.html)
+  - [tensorflow-probability](https://www.tensorflow.org/probability)
+* [ArviZ.jl](https://github.com/sethaxen/ArviZ.jl) in julia which integrates with:
+  - [Turing](https://turing.ml/dev/).
 
-attrs:
-backend: "stan" or "pymc3"
-version: str
-model_name?: str
-comment?: str
-model_version?: str
-timestamp: int
-author?: str
+## Current design
+`InferenceData` stores all quantites relevant in order to fulfill its goals in different groups. Each group, described below, stores a conceptually different quantity generally represented by several multidimensional labeled variables.
 
-/coords
-For each dimension, we store a corresponding variable here, that contains the labels for that dimension.
+Each group should have one entry per variable, with the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). Dimensions must be named and explicit their index values, called coordinates. Coordinates can have repeated identifiers and may not be numerical. Variable names must not share names with dimensions.
 
-/model
-Each backend can store a representation of the model in here. (I guess
-source code for stan, no clue for pymc3 at this point.)
+Moreover, each group contains the following attributes:
+* `created_at`: the date of creation of the group.
+* `inference_library`: the library used to run the inference.
+* `inference_library_version`: version of the inference library used.
 
-/sample_stats
-Statistics computed while sampling, like step size (step_size), depth, diverging, energy (for HMC), log probability (lp), and log likelihood (log_likelihood).
+`InferenceData` data objects contain any combination the groups described below.
 
-/initial_point
-    One point in parameter space for each chain, where that chain started.
-    TODO We could also store that as an attribute to each var in /trace
+#### `posterior`
+Samples from the posterior distribution p(theta|y).
 
-/tuning_trace?
-    Same as /trace, but optional. It contains the trace during tuning. Optional. (only if store_tune=True or so?)
+#### `sample_stats`
+Information and diagnostics about each `posterior` sample, provided by the inference backend. It may vary depending on the algorithm used by the backend (i.e. an affine invariant sampler has no energy associated). The name convention used for `sample_stats` variables is the following:
+* `lp`: unnormalized log probability of the sample
+* `step_size`
+* `step_size_bar`
+* `tune`: boolean variable indicating if the sampler is tuning or sampling
+* `depth`:
+* `tree_size`:
+* `mean_tree_accept`:
+* `diverging`: HMC-NUTS only, boolean variable indicating divergent transitions
+* `energy`: HMC-NUTS only
+* `energy_error`
+* `max_energy_error`
 
-/tuning_advi?
-    Some data about an initialization advi run? History of convergence stats, final sd and mu params? Optional
+#### `observed_data`
+Observed data on which the `posterior` is conditional. It should only contain data which is modeled as a random variable. Each variable should have a counterpart in `posterior_predictive`. The `posterior_predictive` counterpart variable may have a different name.
 
-/divergences
-    Points in parameter space where the leapfrog starts that lead to a divergence (excluding tuning).
-    Does stan have access to that info? We could also just store the accepted point of a divergent trajectory.
+#### `posterior_predictive`
+Posterior predictive samples p(y|y) corresponding to the posterior predictive pdf evaluated at the `observed_data`. Samples should match with `posterior` ones and each variable should have a counterpart in `observed_data`. The `observed_data` counterpart variable may have a different name.
 
-/observed_data
-    All data that is used in observed variables (or the data (or transformed?) data sections in stan.)
+#### `constant_data`
+Model constants, data included in the model which is not modeled as a random variable (i.e. the x in a linear regression). It should be the data used to generate the `posterior` and `posterior_predictive` samples.
 
-/warnings
-    A list of warnings during sampling. Eg low effective_n, divergences....
-    TODO Not sure about the format. Can we somehow share at least part of that between stan/pymc?
-    They mostly produce the same warnings I think.
+#### `prior`
+p(theta)
 
-/prior?
-Samples from the prior distribution. Same shapes as in trace. (except for (sample, chain))
+#### `sample_stats_prior`
 
-/prior_predictive?
-Samples from the prior predictive distribution. Same vars as in /data
+#### `prior_predictive`
 
-/posterior_predictive?
-Samples from the posterior predicitve distribution. Same vars as in /data
+## Planned features
 
-/trace
-TODO We could call this /posterior
+### Sampler parameters
 
-    attrs:
-            The final parameters for the sampler. ie the final mass matrix and step size.
+### Out of sample posterior_predictive samples
+#### `predictions`
+Out of sample posterior predictive samples p(y'|y).
 
-    /trace//var1
-            One entry for each variable. The first two dimensions should always be
-            `(chain, sample)`. I guess the decision whether or not we want to expose a stacked version `draw=('chain', 'sample')`
-            is up to arviz.
-
-            Variable names must not share names with coordinate names.
-
-            attrs:
-                is_free: Whether or not the variable is a free variable for the sampler, or a transformed one
-                domain: One of (“reals”, “pos-reals”, “integers”, “sym-pos-def”, "interval"...)
-                TODO For stuff like sym-pos-def we need to know along which dims it is a matrix.
-                TODO This data could also be stored in /model
-                sym_pos_axis: [dim_idx1, dim_idx2]
-                interval_lower:
-                interval_upper
-                TODO How would this deal with cases where the lower and upper bounds depend on the index?
-
-
-
-TODO: In order to reproduce the run, it may make sense to also store some data on the random state (in numpy, this is a tuple of arrays), as
-well as some version info.  Hopefully just `PyMC3, (3, 4, 1)` or similar works.
+#### `constant_data_predictions`
+Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`.
