@@ -15,7 +15,13 @@ class NumPyroConverter:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, *, posterior, prior=None, posterior_predictive=None, coords=None, dims=None):
+    model = None  # type: Optional[callable]
+    nchains = None  # type: int
+    ndraws = None  # type: int
+
+    def __init__(
+        self, *, posterior=None, prior=None, posterior_predictive=None, coords=None, dims=None
+    ):
         """Convert NumPyro data into an InferenceData object.
 
         Parameters
@@ -41,21 +47,26 @@ class NumPyroConverter:
         self.dims = dims
         self.numpyro = numpyro
 
-        # handle the case we run MCMC with a general potential_fn
-        # (instead of a NumPyro model) whose args is not a dictionary
-        # (e.g. f(x) = x ** 2)
-        samples = jax.device_get(self.posterior.get_samples(group_by_chain=True))
-        tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
-        if not isinstance(samples, dict):
-            samples = {
-                "Param:{}".format(i): jax.device_get(v) for i, v in enumerate(tree_flatten_samples)
-            }
-        self._samples = samples
-        self.nchains, self.ndraws = tree_flatten_samples[0].shape[:2]
-        self.model = self.posterior.sampler.model
-        # model arguments and keyword arguments
-        self._args = self.posterior._args  # pylint: disable=protected-access
-        self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
+        if posterior is not None:
+            samples = jax.device_get(self.posterior.get_samples(group_by_chain=True))
+            if not isinstance(samples, dict):
+                # handle the case we run MCMC with a general potential_fn
+                # (instead of a NumPyro model) whose args is not a dictionary
+                # (e.g. f(x) = x ** 2)
+                tree_flatten_samples = jax.tree_util.tree_flatten(samples)[0]
+                samples = {
+                    "Param:{}".format(i): jax.device_get(v)
+                    for i, v in enumerate(tree_flatten_samples)
+                }
+            self._samples = samples
+            self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
+            self.model = self.posterior.sampler.model
+            # model arguments and keyword arguments
+            self._args = self.posterior._args  # pylint: disable=protected-access
+            self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
+        else:
+            self.nchains = self.ndraws = 0
+
         observations = {}
         if self.model is not None:
             seeded_model = numpyro.handlers.seed(self.model, jax.random.PRNGKey(0))
