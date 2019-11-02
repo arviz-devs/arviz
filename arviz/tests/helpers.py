@@ -318,7 +318,7 @@ def numpyro_schools_model(data, draws, chains):
         num_chains=chains,
         chain_method="sequential",
     )
-    mcmc.run(PRNGKey(0), extra_fields=("diverging", "num_steps", "energy"), **data)
+    mcmc.run(PRNGKey(0), extra_fields=("num_steps", "energy"), **data)
 
     # This block lets the posterior be pickled
     mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
