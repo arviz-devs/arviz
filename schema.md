@@ -15,7 +15,7 @@ Currently there are 2 implementations of this design:
   - [Turing](https://turing.ml/dev/).
 
 ## Current design
-`InferenceData` stores all quantites relevant in order to fulfill its goals in different groups. Each group, described below, stores a conceptually different quantity generally represented by several multidimensional labeled variables.
+`InferenceData` stores all quantities relevant in order to fulfill its goals in different groups. Each group, described below, stores a conceptually different quantity generally represented by several multidimensional labeled variables.
 
 Each group should have one entry per variable, with the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). Dimensions must be named and explicit their index values, called coordinates. Coordinates can have repeated identifiers and may not be numerical. Variable names must not share names with dimensions.
 
