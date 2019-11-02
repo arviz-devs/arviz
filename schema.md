@@ -11,7 +11,7 @@ Currently there are 2 implementations of this design:
       [CmdStan](https://mc-stan.org/users/interfaces/cmdstan)
       and [CmdStanPy](https://cmdstanpy.readthedocs.io/en/latest/index.html)
   - [tensorflow-probability](https://www.tensorflow.org/probability)
-* [ArviZ.jl](https://github.com/sethaxen/ArviZ.jl) in julia which integrates with:
+* [ArviZ.jl](https://github.com/sethaxen/ArviZ.jl) in Julia which integrates with:
   - [Turing](https://turing.ml/dev/).
 
 ## Current design
