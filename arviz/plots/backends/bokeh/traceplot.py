@@ -200,15 +200,25 @@ def _plot_trace_bokeh(
     for i in range(len(plotters)):
         if i != 0:
             _axes = [
-                bkp.figure(height=figsize[1], width=figsize[0], tools=TOOLS),
                 bkp.figure(
-                    height=figsize[1], width=figsize[0], x_range=axes[0][1].x_range, tools=TOOLS
+                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                ),
+                bkp.figure(
+                    height=figsize[1],
+                    width=figsize[0],
+                    x_range=axes[0][1].x_range,
+                    tools=TOOLS,
+                    output_backend="webgl",
                 ),
             ]
         else:
             _axes = [
-                bkp.figure(height=figsize[1], width=figsize[0], tools=TOOLS),
-                bkp.figure(height=figsize[1], width=figsize[0], tools=TOOLS),
+                bkp.figure(
+                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                ),
+                bkp.figure(
+                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                ),
             ]
         axes.append(_axes)
 
@@ -306,6 +316,9 @@ def _plot_trace_bokeh(
         #        line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
         #    )
 
+    # if legend:
+    #    axes[idx, col].legend.location = "top_left"
+    #    axes[idx, col].legend.click_policy="mute"
     grid = gridplot([list(item) for item in axes], toolbar_location="above")
     bkp.show(grid)
 
@@ -327,7 +340,17 @@ def _plot_chains_bokeh(
     rug_kwargs,
 ):
     for chain_idx, row in enumerate(value):
+        # do this manually?
+        # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
         axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], **trace_kwargs)
+        axes[idx, 1].scatter(
+            data.draw.values,
+            row,
+            radius=0.1,
+            line_color=colors[chain_idx],
+            fill_color=colors[chain_idx],
+            alpha=0.5,
+        )
 
         if not combined:
             plot_kwargs["line_color"] = colors[chain_idx]
