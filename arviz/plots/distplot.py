@@ -181,7 +181,7 @@ def _plot_dist_mpl(
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
-        _histplot_op(
+        _histplot_mpl_op(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
     elif kind == "kde":
