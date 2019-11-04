@@ -84,239 +84,40 @@ def plot_dist(
     -------
     ax : matplotlib axes
     """
+    dist_plot_args = dict(
+        # Internal API
+        # User Facing API that can be simplified
+        values=values,
+        values2=values2,
+        color=color,
+        kind=kind,
+        cumulative=cumulative,
+        label=label,
+        rotated=rotated,
+        rug=rug,
+        bw=bw,
+        quantiles=quantiles,
+        contour=contour,
+        fill_last=fill_last,
+        textsize=textsize,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        rug_kwargs=rug_kwargs,
+        contour_kwargs=contour_kwargs,
+        hist_kwargs=hist_kwargs,
+        ax=ax,
+    )
+
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        ax = _plot_dist_mpl(
-            values=values,
-            values2=values2,
-            color=color,
-            kind=kind,
-            cumulative=cumulative,
-            label=label,
-            rotated=rotated,
-            rug=rug,
-            bw=bw,
-            quantiles=quantiles,
-            contour=contour,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            hist_kwargs=hist_kwargs,
-            ax=ax,
-        )
+        from .backends.matplotlib.distplot import _plot_dist_mpl
+
+        ax = _plot_dist_mpl(**dist_plot_args)
     elif backend == "bokeh":
-        ax = _plot_dist_bokeh(
-            values=values,
-            values2=values2,
-            color=color,
-            kind=kind,
-            cumulative=cumulative,
-            label=label,
-            rotated=rotated,
-            rug=rug,
-            bw=bw,
-            quantiles=quantiles,
-            contour=contour,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            hist_kwargs=hist_kwargs,
-            ax=ax,
-        )
+        from .backends.bokeh.distplot import _plot_dist_bokeh
+
+        ax = _plot_dist_bokeh(**dist_plot_args)
     else:
         raise NotImplementedError(
             'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
         )
-    return ax
-
-
-def _plot_dist_mpl(
-    values,
-    values2=None,
-    color="C0",
-    kind="auto",
-    cumulative=False,
-    label=None,
-    rotated=False,
-    rug=False,
-    bw=4.5,
-    quantiles=None,
-    contour=True,
-    fill_last=True,
-    textsize=None,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    hist_kwargs=None,
-    ax=None,
-):
-    if ax is None:
-        ax = plt.gca()
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    hist_kwargs.setdefault("bins", None)
-    hist_kwargs.setdefault("cumulative", cumulative)
-    hist_kwargs.setdefault("color", color)
-    hist_kwargs.setdefault("label", label)
-    hist_kwargs.setdefault("rwidth", 0.9)
-    hist_kwargs.setdefault("align", "left")
-    hist_kwargs.setdefault("density", True)
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-
-    if rotated:
-        hist_kwargs.setdefault("orientation", "horizontal")
-    else:
-        hist_kwargs.setdefault("orientation", "vertical")
-
-    if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "kde"
-
-    if kind == "hist":
-        _histplot_mpl_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
-        )
-    elif kind == "kde":
-        plot_kwargs.setdefault("color", color)
-        legend = label is not None
-
-        plot_kde(
-            values,
-            values2,
-            cumulative=cumulative,
-            rug=rug,
-            label=label,
-            bw=bw,
-            quantiles=quantiles,
-            rotated=rotated,
-            contour=contour,
-            legend=legend,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            ax=ax,
-            backend="matplotlib",
-        )
-    return ax
-
-
-def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
-    """Add a histogram for the data to the axes."""
-    if values2 is not None:
-        raise NotImplementedError("Insert hexbin plot here")
-
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
-    ax.hist(values, bins=bins, **hist_kwargs)
-    if rotated:
-        ax.set_yticks(bins[:-1])
-    else:
-        ax.set_xticks(bins[:-1])
-    if hist_kwargs["label"] is not None:
-        ax.legend()
-    return ax
-
-
-def _plot_dist_bokeh(
-    values,
-    values2=None,
-    color="C0",
-    kind="auto",
-    cumulative=False,
-    label=None,
-    rotated=False,
-    rug=False,
-    bw=4.5,
-    quantiles=None,
-    contour=True,
-    fill_last=True,
-    textsize=None,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    hist_kwargs=None,
-    ax=None,
-):
-    import bokeh.plotting as bkp
-
-    if ax is None:
-        ax = bkp.plotting.figure(sizing_mode="stretch_both")
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    hist_kwargs.setdefault("bins", None)
-    hist_kwargs.setdefault("cumulative", cumulative)
-    hist_kwargs.setdefault("legend", label)
-    hist_kwargs.setdefault("fill_color", color)
-    hist_kwargs.setdefault("line_color", color)
-    hist_kwargs.setdefault("density", True)
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-
-    if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "density"
-
-    if kind == "hist":
-        _histplot_bokeh_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
-        )
-    elif kind == "density":
-        plot_kwargs.setdefault("color", color)
-        legend = label is not None
-
-        plot_kde(
-            values,
-            values2,
-            cumulative=cumulative,
-            rug=rug,
-            label=label,
-            bw=bw,
-            quantiles=quantiles,
-            rotated=rotated,
-            contour=contour,
-            legend=legend,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            ax=ax,
-            backend="bokeh",
-        )
-    return ax
-
-
-def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
-    """Add a histogram for the data to the axes."""
-    if values2 is not None:
-        raise NotImplementedError("Insert hexbin plot here")
-
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
-
-    density = hist_kwargs.pop("density", True)
-    hist, edges = np.histogram(values, density=density, bins=bins)
-    if hist_kwargs.pop("cumulative", False):
-        hist = np.cumsum(hist)
-        hist /= hist[-1]
-    if rotated:
-        ax.quad(top=edges[:-1], bottom=edges[1:], left=0, right=hist, **hist_kwargs)
-    else:
-        ax.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], **hist_kwargs)
     return ax

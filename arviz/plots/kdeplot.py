@@ -164,13 +164,12 @@ def plot_kde(
             density_q = density.cumsum() / density.sum()
 
         # This is just a hack placeholder for now
-        xmin, xmax, ymin, ymax, gridsize = [None]*5
+        xmin, xmax, ymin, ymax, gridsize = [None] * 5
     else:
         gridsize = (128, 128) if contour else (256, 256)
         density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
 
-        lower, upper, density_q = [None]*3
-
+        lower, upper, density_q = [None] * 3
 
     kde_plot_args = dict(
         # Internal API
@@ -183,7 +182,6 @@ def plot_kde(
         ymin=ymin,
         ymax=ymax,
         gridsize=gridsize,
-
         # User Facing API that can be simplified
         values=values,
         values2=values2,
@@ -204,19 +202,15 @@ def plot_kde(
         pcolormesh_kwargs=pcolormesh_kwargs,
         ax=ax,
         legend=legend,
-
-
     )
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.distplot import _plot_kde_mpl
-        ax = _plot_kde_mpl(
-          **kde_plot_args
-        )
+        from .backends.matplotlib.kdeplot import _plot_kde_mpl
+
+        ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
-        from .backends.bokeh.distplot import _plot_kde_bokeh
-        ax = _plot_kde_bokeh(
-            **kde_plot_args
-        )
+        from .backends.bokeh.kdeplot import _plot_kde_bokeh
+
+        ax = _plot_kde_bokeh(**kde_plot_args)
     else:
         raise NotImplementedError(
             'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)

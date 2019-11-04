@@ -1,6 +1,3 @@
-
-
-
 def _plot_kde_bokeh(
     density,
     lower,
