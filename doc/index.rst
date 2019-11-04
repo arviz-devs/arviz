@@ -51,7 +51,7 @@ For the latest (unstable) version
 
 ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
-`Pyro <http://pyro.ai/>`_, and
+`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_, and
 `emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
 
 Contributions and issue reports are very welcome at

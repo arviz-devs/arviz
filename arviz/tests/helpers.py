@@ -293,29 +293,35 @@ def pyro_noncentered_schools(data, draws, chains):
     return posterior
 
 
-def numpyro_schools_model(data, draws, chains):
-    """Centered eight schools implementation in NumPyro."""
-    import jax
+# pylint:disable=no-member,no-value-for-parameter,invalid-name
+def _numpyro_noncentered_model(J, sigma, y=None):
     import numpyro
     import numpyro.distributions as dist
-    from numpyro.mcmc import MCMC, NUTS
 
-    def model():
-        mu = numpyro.sample("mu", dist.Normal(0, 5))
-        tau = numpyro.sample("tau", dist.HalfCauchy(5))
-        # TODO: use numpyro.plate or `sample_shape` kwargs instead of  # pylint: disable=fixme
-        # multiplying with np.ones(J) in future versions of NumPyro
-        theta = numpyro.sample("theta", dist.Normal(mu * np.ones(data["J"]), tau))
-        numpyro.sample("obs", dist.Normal(theta, data["sigma"]), obs=data["y"])
+    mu = numpyro.sample("mu", dist.Normal(0, 5))
+    tau = numpyro.sample("tau", dist.HalfCauchy(5))
+    with numpyro.plate("J", J):
+        eta = numpyro.sample("eta", dist.Normal(0, 1))
+        theta = mu + tau * eta
+        return numpyro.sample("obs", dist.Normal(theta, sigma), obs=y)
+
+
+def numpyro_schools_model(data, draws, chains):
+    """Centered eight schools implementation in NumPyro."""
+    from jax.random import PRNGKey
+    from numpyro.infer import MCMC, NUTS
 
     mcmc = MCMC(
-        NUTS(model),
+        NUTS(_numpyro_noncentered_model),
         num_warmup=draws,
         num_samples=draws,
         num_chains=chains,
         chain_method="sequential",
     )
-    mcmc.run(jax.random.PRNGKey(0), collect_fields=("z", "diverging"))
+    mcmc.run(PRNGKey(0), extra_fields=("num_steps", "energy"), **data)
+
+    # This block lets the posterior be pickled
+    mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
     return mcmc
 
 
@@ -497,11 +503,6 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
             # httpstan caches models automatically
             _log.info("Generating and loading stan model")
             models["pystan"] = func(eight_schools_data, draws, chains)
-            continue
-        elif library.__name__ == "numpyro":
-            # NumPyro does not support pickling
-            _log.info("Generating and loading NumPyro model")
-            models["numpyro"] = func(eight_schools_data, draws, chains)
             continue
 
         py_version = sys.version_info
