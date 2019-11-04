@@ -16,7 +16,6 @@ def _plot_kde_mpl(
     gridsize,
     values,
     values2=None,
-    cumulative=False,
     rug=False,
     label=None,
     bw=4.5,
@@ -70,11 +69,6 @@ def _plot_kde_mpl(
         rug_space = max(density) * rug_kwargs.pop("space")
 
         x = np.linspace(lower, upper, len(density))
-
-        # if cumulative:
-        #     density_q = density
-        # else:
-        #     density_q = density.cumsum() / density.sum()
 
         fill_func = ax.fill_between
         fill_x, fill_y = x, density

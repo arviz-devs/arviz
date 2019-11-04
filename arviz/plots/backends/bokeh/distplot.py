@@ -1,4 +1,6 @@
-from ..kdeplot import plot_kde
+import bokeh.plotting as bkp
+
+from ...kdeplot import plot_kde
 
 
 def _plot_dist_bokeh(
@@ -22,7 +24,6 @@ def _plot_dist_bokeh(
     hist_kwargs=None,
     ax=None,
 ):
-    import bokeh.plotting as bkp
 
     if ax is None:
         ax = bkp.plotting.figure(sizing_mode="stretch_both")

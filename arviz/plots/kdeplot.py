@@ -185,10 +185,8 @@ def plot_kde(
         # User Facing API that can be simplified
         values=values,
         values2=values2,
-        # cumulative=cumulative,
         rug=rug,
         label=label,
-        # bw=bw,
         quantiles=quantiles,
         rotated=rotated,
         contour=contour,

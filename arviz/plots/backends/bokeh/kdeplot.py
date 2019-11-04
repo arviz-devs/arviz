@@ -1,3 +1,8 @@
+import bokeh.plotting as bkp
+import matplotlib.pyplot as plt
+import numpy as np
+
+
 def _plot_kde_bokeh(
     density,
     lower,
@@ -10,7 +15,6 @@ def _plot_kde_bokeh(
     gridsize,
     values,
     values2=None,
-    cumulative=False,
     rug=False,
     label=None,
     bw=4.5,
@@ -28,8 +32,6 @@ def _plot_kde_bokeh(
     ax=None,
     legend=True,
 ):
-    import bokeh.plotting as bkp
-
     if ax is None:
         ax = bkp.figure(sizing_mode="stretch_both")
 
@@ -68,17 +70,9 @@ def _plot_kde_bokeh(
         # plot_kwargs.setdefault("line_width", linewidth)
         # rug_kwargs.setdefault("markersize", 2 * markersize)
 
-        # density, lower, upper = _fast_kde(values, cumulative, bw)
-
         # rug_space = max(density) * rug_kwargs.pop("space")
 
-        # x = np.linspace(lower, upper, len(density))
-        #
-        # if cumulative:
-        #     density_q = density
-        # else:
-        #     density_q = density.cumsum() / density.sum()
-
+        x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)
         """
         fill_func = ax.fill_between

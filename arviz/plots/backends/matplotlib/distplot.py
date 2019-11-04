@@ -1,7 +1,7 @@
 """
 Matplotlib Backbend for distplot
 """
-from ..kdeplot import plot_kde
+from ...kdeplot import plot_kde
 
 
 def _plot_dist_mpl(
