@@ -115,7 +115,7 @@ def plot_dist(
         plot_kwargs.setdefault("color", color)
         legend = label is not None
 
-        plot_kde(
+        _, line = plot_kde(
             values,
             values2,
             cumulative=cumulative,
@@ -134,7 +134,7 @@ def plot_dist(
             contour_kwargs=contour_kwargs,
             ax=ax,
         )
-    return ax
+    return ax, line
 
 
 def _histplot_op(values, values2, rotated, ax, hist_kwargs):

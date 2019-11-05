@@ -2,6 +2,8 @@
 import warnings
 from itertools import cycle
 import matplotlib.pyplot as plt
+from mpld3 import plugins
+
 from matplotlib.lines import Line2D
 import numpy as np
 
@@ -181,15 +183,17 @@ def plot_trace(
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
-    _, axes = plt.subplots(
+    fig, axes = plt.subplots(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
     )
 
+    lines_trace = []
+    lines_dist = []
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
-            _plot_chains(
+            line, dist_lines = _plot_chains(
                 axes,
                 idx,
                 value,
@@ -203,10 +207,12 @@ def plot_trace(
                 fill_kwargs,
                 rug_kwargs,
             )
+            lines_trace.append(line)
+            lines_dist.append(dist_lines)
         else:
             value = value.reshape((value.shape[0], value.shape[1], -1))
             for sub_idx in range(value.shape[2]):
-                _plot_chains(
+                line, dist_lines = _plot_chains(
                     axes,
                     idx,
                     value[..., sub_idx],
@@ -220,7 +226,8 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                 )
-
+                lines_trace.append(line)
+                lines_dist.append(dist_lines)
         if value[0].dtype.kind == "i":
             xticks = get_bins(value)
             axes[idx, 0].set_xticks(xticks[:-1])
@@ -285,6 +292,7 @@ def plot_trace(
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
         axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
+
     if legend:
         handles = [
             Line2D([], [], color=color, label=chain_id)
@@ -292,7 +300,10 @@ def plot_trace(
         ]
         if combined:
             handles.insert(0, Line2D([], [], color=colors[-1], label="combined"))
-        axes[0, 1].legend(handles=handles, title="chain")
+        #axes[0, 1].legend(handles=handles, title="chain")
+        didi = zip(*lines_trace, *lines_dist)
+        plugins.connect(fig, plugins.InteractiveLegendPlugin(didi, data.chain.values, ax=axes[0, 0]))
+
     return axes
 
 
@@ -310,12 +321,15 @@ def _plot_chains(
     fill_kwargs,
     rug_kwargs,
 ):
+    lines = []
+    dist_lines = []
     for chain_idx, row in enumerate(value):
-        axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
+        line = axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
+        lines.extend(line)
 
         if not combined:
             plot_kwargs["color"] = colors[chain_idx]
-            plot_dist(
+            _, line = plot_dist(
                 row,
                 textsize=xt_labelsize,
                 ax=axes[idx, 0],
@@ -324,10 +338,10 @@ def _plot_chains(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
             )
-
+            dist_lines.extend(line)
     if combined:
         plot_kwargs["color"] = colors[-1]
-        plot_dist(
+        _, line = plot_dist(
             value.flatten(),
             textsize=xt_labelsize,
             ax=axes[idx, 0],
@@ -336,3 +350,5 @@ def _plot_chains(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
         )
+        dist_lines.append(line)
+    return lines, dist_lines

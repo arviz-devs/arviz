@@ -225,10 +225,10 @@ def plot_kde(
         else:
             fill_kwargs.setdefault("alpha", 0)
             if fill_kwargs.get("alpha") == 0:
-                ax.plot(x, density, label=label, **plot_kwargs)
+                line = ax.plot(x, density, label=label, **plot_kwargs)
                 fill_func(fill_x, fill_y, **fill_kwargs)
             else:
-                ax.plot(x, density, **plot_kwargs)
+                line = ax.plot(x, density, **plot_kwargs)
                 fill_func(fill_x, fill_y, label=label, **fill_kwargs)
         if legend and label:
             ax.legend()
@@ -259,7 +259,7 @@ def plot_kde(
         else:
             ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 
-    return ax
+    return ax, line
 
 
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
