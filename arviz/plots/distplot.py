@@ -109,11 +109,11 @@ def plot_dist(
     )
 
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.distplot import _plot_dist_mpl
+        from .backends.matplotlib.mpl_distplot import _plot_dist_mpl
 
         ax = _plot_dist_mpl(**dist_plot_args)
     elif backend == "bokeh":
-        from .backends.bokeh.distplot import _plot_dist_bokeh
+        from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
         ax = _plot_dist_bokeh(**dist_plot_args)
     else:

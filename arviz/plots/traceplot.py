@@ -113,7 +113,7 @@ def plot_trace(
 
     """
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.traceplot import _plot_trace_mpl
+        from .backends.matplotlib.mpl_traceplot import _plot_trace_mpl
 
         axes = _plot_trace_mpl(
             data,
@@ -133,7 +133,7 @@ def plot_trace(
             trace_kwargs=trace_kwargs,
         )
     elif backend.lower() == "bokeh":
-        from .backends.bokeh.traceplot import _plot_trace_bokeh
+        from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
 
         axes = _plot_trace_bokeh(
             data,

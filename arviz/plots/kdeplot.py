@@ -202,11 +202,11 @@ def plot_kde(
         legend=legend,
     )
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.kdeplot import _plot_kde_mpl
+        from .backends.matplotlib.mpl_kdeplot import _plot_kde_mpl
 
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
-        from .backends.bokeh.kdeplot import _plot_kde_bokeh
+        from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
 
         ax = _plot_kde_bokeh(**kde_plot_args)
     else:
