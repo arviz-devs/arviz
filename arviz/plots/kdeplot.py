@@ -8,6 +8,7 @@ import xarray as xr
 from ..data import InferenceData
 from ..utils import conditional_jit, _stack
 from .plot_utils import _scale_fig_size
+from ..stats.stats_utils import histogram
 
 
 def plot_kde(
@@ -312,7 +313,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
         return np.array([np.nan]), np.nan, np.nan
 
     d_x = (xmax - xmin) / (n_bins - 1)
-    grid = _histogram(x, n_bins, range_hist=(xmin, xmax))
+    grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax), density=False)
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
@@ -329,12 +330,6 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
         density = density.cumsum() / density.sum()
 
     return density, xmin, xmax
-
-
-@conditional_jit(cache=True)
-def _histogram(x, n_bins, range_hist=None):
-    grid, _ = np.histogram(x, bins=n_bins, range=range_hist)
-    return grid
 
 
 def _cov_1d(x):
