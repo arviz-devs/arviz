@@ -40,6 +40,7 @@ def _plot_trace_bokeh(
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
+    show=True,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -319,8 +320,9 @@ def _plot_trace_bokeh(
     # if legend:
     #    axes[idx, col].legend.location = "top_left"
     #    axes[idx, col].legend.click_policy="mute"
-    grid = gridplot([list(item) for item in axes], toolbar_location="above")
-    bkp.show(grid)
+    if show:
+        grid = gridplot([list(item) for item in axes], toolbar_location="above")
+        bkp.show(grid)
 
     return axes
 
@@ -363,6 +365,7 @@ def _plot_chains_bokeh(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
+                show=False,
             )
 
     if combined:
@@ -376,4 +379,5 @@ def _plot_chains_bokeh(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
+            show=False,
         )

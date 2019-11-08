@@ -23,6 +23,7 @@ def _plot_dist_bokeh(
     contour_kwargs=None,
     hist_kwargs=None,
     ax=None,
+    show=True,
 ):
 
     if ax is None:
@@ -70,9 +71,13 @@ def _plot_dist_bokeh(
             contour_kwargs=contour_kwargs,
             ax=ax,
             backend="bokeh",
+            show=False,
         )
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","density","hist"}}'.format(kind))
+
+    if show:
+        bkp.show(ax)
     return ax
 
 

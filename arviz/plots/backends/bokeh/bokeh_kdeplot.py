@@ -31,6 +31,7 @@ def _plot_kde_bokeh(
     pcolormesh_kwargs=None,
     ax=None,
     legend=True,
+    show=True,
 ):
     if ax is None:
         ax = bkp.figure(sizing_mode="stretch_both")
@@ -142,4 +143,6 @@ def _plot_kde_bokeh(
         else:
             ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
 
+    if show:
+        bkp.show(ax)
     return ax
