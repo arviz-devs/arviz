@@ -214,7 +214,7 @@ def _plot_trace_bokeh(
     # THIS IS BROKEN --> USE xarray_sel_iter
     cds_data = {}
     draw_name = "draw"
-    for var_name, *_ in plotters:
+    for var_name, _, value in plotters:
         for chain_idx, _ in enumerate(data.chain.values):
             if chain_idx not in cds_data:
                 cds_data[chain_idx] = {}
@@ -226,7 +226,7 @@ def _plot_trace_bokeh(
     for chain_idx in cds_data:
         cds_data[chain_idx][draw_name] = data.draw.values
 
-    cds_data = {chain_idx : ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
+    cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
@@ -236,8 +236,8 @@ def _plot_trace_bokeh(
                 axes[idx, 0],
                 axes[idx, 1],
                 cds_data,
-                var_name,
                 draw_name,
+                var_name,
                 colors,
                 combined,
                 legend,
@@ -255,8 +255,8 @@ def _plot_trace_bokeh(
                     axes[idx, 0],
                     axes[idx, 1],
                     cds_data,
-                    var_name,
                     draw_name,
+                    var_name,
                     colors,
                     combined,
                     legend,
@@ -274,37 +274,37 @@ def _plot_trace_bokeh(
             axes[idx, col].title = _title
 
         # TODO
-        #if False:  # divergences:
-            # div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
-            # divs = divergence_data.sel(**div_selection).values
-            # # if combined:
-            # #     divs = divs.flatten()
-            # divs = np.atleast_2d(divs)
-            #
-            # for chain, chain_divs in enumerate(divs):
-            #     div_draws = data.draw.values[chain_divs]
-            #     div_idxs = np.arange(len(chain_divs))[chain_divs]
-            #     if div_idxs.size > 0:
-            #         if divergences == "top":
-            #             ylocs = [ylim[1] for ylim in ylims]
-            #         else:
-            #             ylocs = [ylim[0] for ylim in ylims]
-            #         values = value[chain, div_idxs]
-            #         axes[idx, 1].circle(
-            #             div_draws,
-            #             np.zeros_like(div_idxs) + ylocs[1],
-            #             # marker="|",
-            #             line_color="black",
-            #             line_alpha=hist_kwargs["alpha"],
-            #         )
-            #         axes[idx, 0].circle(
-            #             values,
-            #             np.zeros_like(values) + ylocs[0],
-            #             # marker="|",
-            #             line_color="black",
-            #             line_alpha=trace_kwargs["alpha"],
-            #             # zorder=-5,
-            #         )
+        # if False:  # divergences:
+        # div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
+        # divs = divergence_data.sel(**div_selection).values
+        # # if combined:
+        # #     divs = divs.flatten()
+        # divs = np.atleast_2d(divs)
+        #
+        # for chain, chain_divs in enumerate(divs):
+        #     div_draws = data.draw.values[chain_divs]
+        #     div_idxs = np.arange(len(chain_divs))[chain_divs]
+        #     if div_idxs.size > 0:
+        #         if divergences == "top":
+        #             ylocs = [ylim[1] for ylim in ylims]
+        #         else:
+        #             ylocs = [ylim[0] for ylim in ylims]
+        #         values = value[chain, div_idxs]
+        #         axes[idx, 1].circle(
+        #             div_draws,
+        #             np.zeros_like(div_idxs) + ylocs[1],
+        #             # marker="|",
+        #             line_color="black",
+        #             line_alpha=hist_kwargs["alpha"],
+        #         )
+        #         axes[idx, 0].circle(
+        #             values,
+        #             np.zeros_like(values) + ylocs[0],
+        #             # marker="|",
+        #             line_color="black",
+        #             line_alpha=trace_kwargs["alpha"],
+        #             # zorder=-5,
+        #         )
 
         # TODO
         # for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
@@ -321,6 +321,9 @@ def _plot_trace_bokeh(
             for col in (0, 1):
                 axes[idx, col].legend.location = "top_left"
                 axes[idx, col].legend.click_policy = "hide"
+        else:
+            for col in (0, 1):
+                axes[idx, col].legend.visible = False
 
     if show:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
@@ -345,6 +348,7 @@ def _plot_chains_bokeh(
     fill_kwargs,
     rug_kwargs,
 ):
+    marker = trace_kwargs.pop("marker", True)
     for chain_idx, cds in data.items():
         # do this manually?
         # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
@@ -354,33 +358,34 @@ def _plot_chains_bokeh(
                 y=y_name,
                 source=cds,
                 line_color=colors[chain_idx],
-                legend_label="chain {} - line".format(chain_idx),
+                legend_label="chain {}".format(chain_idx),
                 **trace_kwargs
             )
-            ax_trace.circle(
-                x=x_name,
-                y=y_name,
-                source=cds,
-                radius=0.8,
-                line_color=colors[chain_idx],
-                fill_color=colors[chain_idx],
-                alpha=0.5,
-                legend_label="chain {} - scatter".format(chain_idx),
-            )
+            if marker:
+                ax_trace.circle(
+                    x=x_name,
+                    y=y_name,
+                    source=cds,
+                    radius=0.48,
+                    line_color=colors[chain_idx],
+                    fill_color=colors[chain_idx],
+                    alpha=0.5,
+                )
         else:
             # tmp hack
-            ax_trace.line(x=x_name,
-            y=y_name,
-            source=cds, line_color=colors[chain_idx], **trace_kwargs)
-            ax_trace.circle(
-                x=x_name,
-                y=y_name,
-                source=cds,
-                radius=1,
-                line_color=colors[chain_idx],
-                fill_color=colors[chain_idx],
-                alpha=0.5,
+            ax_trace.line(
+                x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
             )
+            if marker:
+                ax_trace.circle(
+                    x=x_name,
+                    y=y_name,
+                    source=cds,
+                    radius=0.48,
+                    line_color=colors[chain_idx],
+                    fill_color=colors[chain_idx],
+                    alpha=0.5,
+                )
         if not combined:
             if legend:
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
@@ -389,6 +394,7 @@ def _plot_chains_bokeh(
                 cds.data[y_name],
                 textsize=xt_labelsize,
                 ax=ax_density,
+                color=colors[chain_idx],
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,
@@ -398,11 +404,13 @@ def _plot_chains_bokeh(
             )
 
     if combined:
-        plot_kwargs["line_color"] = colors[-1]
         plot_dist(
-            np.concatenate([item for _data in data.values() for item in _data.data[y_name].values]).flatten(),
+            np.concatenate(
+                [item for _data in data.values() for item in _data.data[y_name].values]
+            ).flatten(),
             textsize=xt_labelsize,
             ax=ax_density,
+            color=colors[-1],
             hist_kwargs=hist_kwargs,
             plot_kwargs=plot_kwargs,
             fill_kwargs=fill_kwargs,

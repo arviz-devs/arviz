@@ -1,7 +1,9 @@
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource
+import numpy as np
 
 from ...kdeplot import plot_kde
+from ...plot_utils import get_bins
 
 
 def _plot_dist_bokeh(
@@ -38,7 +40,7 @@ def _plot_dist_bokeh(
             hist_kwargs = {}
         hist_kwargs.setdefault("bins", None)
         hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("legend", label)
+        hist_kwargs.setdefault("legend_label", label)
         hist_kwargs.setdefault("fill_color", color)
         hist_kwargs.setdefault("line_color", color)
         hist_kwargs.setdefault("density", True)
@@ -50,7 +52,7 @@ def _plot_dist_bokeh(
         if plot_kwargs is None:
             plot_kwargs = {}
 
-        plot_kwargs.setdefault("color", color)
+        plot_kwargs.setdefault("line_color", color)
         legend = label is not None
 
         plot_kde(
@@ -90,6 +92,10 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
     bins = hist_kwargs.pop("bins")
     if bins is None:
         bins = get_bins(values)
+
+    legend_label = hist_kwargs.pop("legend_label", None)
+    if legend_label:
+        hist_kwargs["legend_label"] = legend_label
 
     density = hist_kwargs.pop("density", True)
     hist, edges = np.histogram(values, density=density, bins=bins)

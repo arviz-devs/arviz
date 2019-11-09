@@ -36,6 +36,8 @@ def _plot_kde_bokeh(
     if ax is None:
         ax = bkp.figure(sizing_mode="stretch_both")
 
+    if legend and label is not None:
+        plot_kwargs["legend_label"] = label
     # TODO: handle
     # figsize = ax.get_figure().get_size_inches()
 
