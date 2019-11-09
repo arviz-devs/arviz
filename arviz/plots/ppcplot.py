@@ -21,7 +21,7 @@ _log = logging.getLogger(__name__)
 
 def plot_ppc(
     data,
-    kind="density",
+    kind="kde",
     alpha=None,
     mean=True,
     figsize=None,
@@ -48,9 +48,9 @@ def plot_ppc(
         InferenceData object containing the observed and posterior
         predictive data.
     kind : str
-        Type of plot to display (density, cumulative, or scatter). Defaults to density.
+        Type of plot to display (kde, cumulative, or scatter). Defaults to kde.
     alpha : float
-        Opacity of posterior predictive density curves. Defaults to 0.2 for kind = density
+        Opacity of posterior predictive density curves. Defaults to 0.2 for kind = kde
         and cumulative, for scatter defaults to 0.7
     mean : bool
         Whether or not to plot the mean posterior predictive distribution. Defaults to True
@@ -156,8 +156,8 @@ def plot_ppc(
                 '`data` argument must have the group "{group}" for ppcplot'.format(group=group)
             )
 
-    if kind.lower() not in ("density", "cumulative", "scatter"):
-        raise TypeError("`kind` argument must be either `density`, `cumulative`, or `scatter`")
+    if kind.lower() not in ("kde", "cumulative", "scatter"):
+        raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
 
     if data_pairs is None:
         data_pairs = {}
@@ -284,7 +284,7 @@ def plot_ppc(
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
-        if kind == "density":
+        if kind == "kde":
             plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
@@ -530,7 +530,7 @@ def _set_animation(
     markersize=None,
     plot_kwargs=None,
 ):
-    if kind == "density":
+    if kind == "kde":
         length = len(pp_sampled_vals)
         if dtype == "f":
             y_vals, lower, upper = _fast_kde(pp_sampled_vals[0])

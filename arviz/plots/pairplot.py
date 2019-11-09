@@ -45,7 +45,7 @@ def plot_pair(
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
     kind : str
-        Type of plot to display (kde or hexbin)
+        Type of plot to display (scatter, kde or hexbin)
     gridsize : int or (int, int), optional
         Only works for kind=hexbin.
         The number of hexagons in the x-direction. The corresponding number of hexagons in the

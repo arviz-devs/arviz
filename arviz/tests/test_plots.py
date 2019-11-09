@@ -395,7 +395,7 @@ def test_plot_pair_divergences_warning(has_sample_stats):
     assert np.all(ax)
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc(models, kind, alpha, animated):
@@ -414,7 +414,7 @@ def test_plot_ppc(models, kind, alpha, animated):
     assert axes
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_multichain(kind, jitter, animated):
@@ -442,7 +442,7 @@ def test_plot_ppc_multichain(kind, jitter, animated):
         assert np.all(axes)
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_discrete(kind, animated):
     data = from_dict(
@@ -458,7 +458,7 @@ def test_plot_ppc_discrete(kind, animated):
     assert axes
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_save_animation(models, kind):
     animation_kwargs = {"blit": False}
     axes, anim = plot_ppc(
@@ -479,7 +479,7 @@ def test_plot_ppc_save_animation(models, kind):
     assert os.path.getsize(path)
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_discrete_save_animation(kind):
     data = from_dict(
         observed_data={"obs": np.random.randint(1, 100, 15)},
@@ -516,7 +516,7 @@ def test_non_linux_blit(models, monkeypatch, system, caplog):
     animation_kwargs = {"blit": True}
     axes, anim = plot_ppc(
         models.model_1,
-        kind="density",
+        kind="kde",
         animated=True,
         animation_kwargs=animation_kwargs,
         num_pp_samples=5,
@@ -540,7 +540,7 @@ def test_plot_ppc_grid(models):
     assert len(axes) == 1
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_bad(models, kind):
     data = from_dict(posterior={"mu": np.random.randn()})
     with pytest.raises(TypeError):
@@ -551,7 +551,7 @@ def test_plot_ppc_bad(models, kind):
         plot_ppc(models.model_1, num_pp_samples="bad_val")
 
 
-@pytest.mark.parametrize("kind", ["density", "cumulative", "scatter"])
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_ax(models, kind, fig_ax):
     """Test ax argument of plot_ppc."""
     _, ax = fig_ax
