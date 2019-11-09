@@ -210,16 +210,34 @@ def _plot_trace_bokeh(
         axes.append(_axes)
 
     axes = np.array(axes)
-    column_data_sources = []
+
+    # THIS IS BROKEN --> USE xarray_sel_iter
+    cds_data = {}
+    draw_name = "draw"
+    for var_name, *_ in plotters:
+        for chain_idx, _ in enumerate(data.chain.values):
+            if chain_idx not in cds_data:
+                cds_data[chain_idx] = {}
+            cds_data[chain_idx][var_name] = data[var_name][chain_idx].values
+
+    while any(key == draw_name for key in cds_data[0]):
+        draw_name += "w"
+
+    for chain_idx in cds_data:
+        cds_data[chain_idx][draw_name] = data.draw.values
+
+    cds_data = {chain_idx : ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
+
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
-            cdss = _plot_chains_bokeh(
-                axes,
-                idx,
-                value,
-                data,
+            _plot_chains_bokeh(
+                axes[idx, 0],
+                axes[idx, 1],
+                cds_data,
+                var_name,
+                draw_name,
                 colors,
                 combined,
                 legend,
@@ -233,13 +251,15 @@ def _plot_trace_bokeh(
         else:
             value = value.reshape((value.shape[0], value.shape[1], -1))
             for sub_idx in range(value.shape[2]):
-                cdss = _plot_chains_bokeh(
-                    axes,
-                    idx,
-                    value[..., sub_idx],
-                    data,
+                _plot_chains_bokeh(
+                    axes[idx, 0],
+                    axes[idx, 1],
+                    cds_data,
+                    var_name,
+                    draw_name,
                     colors,
                     combined,
+                    legend,
                     xt_labelsize,
                     trace_kwargs,
                     hist_kwargs,
@@ -247,7 +267,6 @@ def _plot_trace_bokeh(
                     fill_kwargs,
                     rug_kwargs,
                 )
-        column_data_sources.append(cdss)
 
         for col in (0, 1):
             _title = Title()
@@ -255,37 +274,37 @@ def _plot_trace_bokeh(
             axes[idx, col].title = _title
 
         # TODO
-        if False:  # divergences:
-            div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
-            divs = divergence_data.sel(**div_selection).values
-            # if combined:
-            #     divs = divs.flatten()
-            divs = np.atleast_2d(divs)
-
-            for chain, chain_divs in enumerate(divs):
-                div_draws = data.draw.values[chain_divs]
-                div_idxs = np.arange(len(chain_divs))[chain_divs]
-                if div_idxs.size > 0:
-                    if divergences == "top":
-                        ylocs = [ylim[1] for ylim in ylims]
-                    else:
-                        ylocs = [ylim[0] for ylim in ylims]
-                    values = value[chain, div_idxs]
-                    axes[idx, 1].circle(
-                        div_draws,
-                        np.zeros_like(div_idxs) + ylocs[1],
-                        # marker="|",
-                        line_color="black",
-                        line_alpha=hist_kwargs["alpha"],
-                    )
-                    axes[idx, 0].circle(
-                        values,
-                        np.zeros_like(values) + ylocs[0],
-                        # marker="|",
-                        line_color="black",
-                        line_alpha=trace_kwargs["alpha"],
-                        # zorder=-5,
-                    )
+        #if False:  # divergences:
+            # div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
+            # divs = divergence_data.sel(**div_selection).values
+            # # if combined:
+            # #     divs = divs.flatten()
+            # divs = np.atleast_2d(divs)
+            #
+            # for chain, chain_divs in enumerate(divs):
+            #     div_draws = data.draw.values[chain_divs]
+            #     div_idxs = np.arange(len(chain_divs))[chain_divs]
+            #     if div_idxs.size > 0:
+            #         if divergences == "top":
+            #             ylocs = [ylim[1] for ylim in ylims]
+            #         else:
+            #             ylocs = [ylim[0] for ylim in ylims]
+            #         values = value[chain, div_idxs]
+            #         axes[idx, 1].circle(
+            #             div_draws,
+            #             np.zeros_like(div_idxs) + ylocs[1],
+            #             # marker="|",
+            #             line_color="black",
+            #             line_alpha=hist_kwargs["alpha"],
+            #         )
+            #         axes[idx, 0].circle(
+            #             values,
+            #             np.zeros_like(values) + ylocs[0],
+            #             # marker="|",
+            #             line_color="black",
+            #             line_alpha=trace_kwargs["alpha"],
+            #             # zorder=-5,
+            #         )
 
         # TODO
         # for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
@@ -311,44 +330,38 @@ def _plot_trace_bokeh(
 
 
 def _plot_chains_bokeh(
-    axes,
-    idx,
-    value,
+    ax_density,
+    ax_trace,
     data,
+    x_name,
+    y_name,
     colors,
     combined,
-    legend,
     xt_labelsize,
+    legend,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
-    cds_traces = None,
 ):
-    build_cds = cds_traces is None
-    if build_cds:
-        cds_traces = {}
-    for chain_idx, cds_trace in enumerate(value) if build_cds else cds_traces.items():
+    for chain_idx, cds in data.items():
         # do this manually?
         # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
-        if build_cds:
-            cds_trace = ColumnDataSource({"x" : data.draw.values, "y" : cds_trace})
-            cds_traces["chain_idx"] = cds_trace
         if legend:
-            axes[idx, 1].line(
-                x="x",
-                y="y",
-                source=cds_trace,
+            ax_trace.line(
+                x=x_name,
+                y=y_name,
+                source=cds,
                 line_color=colors[chain_idx],
                 legend_label="chain {} - line".format(chain_idx),
                 **trace_kwargs
             )
-            axes[idx, 1].circle(
-                x="x",
-                y="y",
-                source=cds_trace,
-                radius=1,
+            ax_trace.circle(
+                x=x_name,
+                y=y_name,
+                source=cds,
+                radius=0.8,
                 line_color=colors[chain_idx],
                 fill_color=colors[chain_idx],
                 alpha=0.5,
@@ -356,13 +369,13 @@ def _plot_chains_bokeh(
             )
         else:
             # tmp hack
-            axes[idx, 1].line(x="x",
-            y="y",
-            source=cds_trace, line_color=colors[chain_idx], **trace_kwargs)
-            axes[idx, 1].circle(
-                x="x",
-                y="y",
-                source=cds_trace,
+            ax_trace.line(x=x_name,
+            y=y_name,
+            source=cds, line_color=colors[chain_idx], **trace_kwargs)
+            ax_trace.circle(
+                x=x_name,
+                y=y_name,
+                source=cds,
                 radius=1,
                 line_color=colors[chain_idx],
                 fill_color=colors[chain_idx],
@@ -373,9 +386,9 @@ def _plot_chains_bokeh(
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
             plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
-                cds_trace.data["y"],
+                cds.data[y_name],
                 textsize=xt_labelsize,
-                ax=axes[idx, 0],
+                ax=ax_density,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,
@@ -387,9 +400,9 @@ def _plot_chains_bokeh(
     if combined:
         plot_kwargs["line_color"] = colors[-1]
         plot_dist(
-            value.flatten(),
+            np.concatenate([item for _data in data.values() for item in _data.data[y_name].values]).flatten(),
             textsize=xt_labelsize,
-            ax=axes[idx, 0],
+            ax=ax_density,
             hist_kwargs=hist_kwargs,
             plot_kwargs=plot_kwargs,
             fill_kwargs=fill_kwargs,
@@ -397,4 +410,3 @@ def _plot_chains_bokeh(
             backend="bokeh",
             show=False,
         )
-    return cds_traces
