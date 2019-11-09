@@ -107,7 +107,7 @@ def plot_dist(
         contour_kwargs=contour_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
-        **kwargs
+        **kwargs,
     )
 
     if backend is None or backend.lower() in ("mpl", "matplotlib"):

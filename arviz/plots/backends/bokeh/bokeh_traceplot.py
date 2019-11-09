@@ -11,6 +11,7 @@ from ...plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label
 from ....utils import _var_names
 from ....rcparams import rcParams
 
+
 def _plot_trace_bokeh(
     data,
     var_names=None,
@@ -188,9 +189,10 @@ def _plot_trace_bokeh(
     if backend_kwargs is None:
         backend_kwargs = dict()
 
-    backend_kwargs.setdefault("tools",("pan,wheel_zoom,box_zoom,"
-                                       "lasso_select,poly_select,"
-                                       "undo,redo,reset,save,hover"))
+    backend_kwargs.setdefault(
+        "tools",
+        ("pan,wheel_zoom,box_zoom," "lasso_select,poly_select," "undo,redo,reset,save,hover"),
+    )
     backend_kwargs.setdefault("output_backend", "webgl")
     backend_kwargs.setdefault("height", figsize[1])
     backend_kwargs.setdefault("width", figsize[0])
@@ -199,23 +201,11 @@ def _plot_trace_bokeh(
     for i in range(len(plotters)):
         if i != 0:
             _axes = [
-                bkp.figure(
-                    **backend_kwargs
-                ),
-                bkp.figure(
-                    x_range=axes[0][1].x_range,
-                    **backend_kwargs
-                ),
+                bkp.figure(**backend_kwargs),
+                bkp.figure(x_range=axes[0][1].x_range, **backend_kwargs),
             ]
         else:
-            _axes = [
-                bkp.figure(
-                    **backend_kwargs
-                ),
-                bkp.figure(
-                    **backend_kwargs
-                ),
-            ]
+            _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
         axes.append(_axes)
 
     axes = np.array(axes)
@@ -309,7 +299,7 @@ def _plot_trace_bokeh(
         if legend:
             for col in (0, 1):
                 axes[idx, col].legend.location = "top_left"
-                axes[idx, col].legend.click_policy="hide"
+                axes[idx, col].legend.click_policy = "hide"
 
     if show:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
@@ -337,7 +327,13 @@ def _plot_chains_bokeh(
         # do this manually?
         # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
         if legend:
-            axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], legend_label="chain {} - line".format(chain_idx), **trace_kwargs)
+            axes[idx, 1].line(
+                data.draw.values,
+                row,
+                line_color=colors[chain_idx],
+                legend_label="chain {} - line".format(chain_idx),
+                **trace_kwargs
+            )
             axes[idx, 1].circle(
                 data.draw.values,
                 row,
@@ -345,7 +341,7 @@ def _plot_chains_bokeh(
                 line_color=colors[chain_idx],
                 fill_color=colors[chain_idx],
                 alpha=0.5,
-                legend_label="chain {} - scatter".format(chain_idx)
+                legend_label="chain {} - scatter".format(chain_idx),
             )
         else:
             # tmp hack
