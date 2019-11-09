@@ -1,4 +1,5 @@
 import bokeh.plotting as bkp
+from bokeh.models import ColumnDataSource
 
 from ...kdeplot import plot_kde
 

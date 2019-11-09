@@ -1,4 +1,5 @@
 import bokeh.plotting as bkp
+from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
 from itertools import cycle
@@ -209,12 +210,12 @@ def _plot_trace_bokeh(
         axes.append(_axes)
 
     axes = np.array(axes)
-
+    column_data_sources = []
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
-            _plot_chains_bokeh(
+            cdss = _plot_chains_bokeh(
                 axes,
                 idx,
                 value,
@@ -232,7 +233,7 @@ def _plot_trace_bokeh(
         else:
             value = value.reshape((value.shape[0], value.shape[1], -1))
             for sub_idx in range(value.shape[2]):
-                _plot_chains_bokeh(
+                cdss = _plot_chains_bokeh(
                     axes,
                     idx,
                     value[..., sub_idx],
@@ -246,6 +247,7 @@ def _plot_trace_bokeh(
                     fill_kwargs,
                     rug_kwargs,
                 )
+        column_data_sources.append(cdss)
 
         for col in (0, 1):
             _title = Title()
@@ -322,21 +324,30 @@ def _plot_chains_bokeh(
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
+    cds_traces = None,
 ):
-    for chain_idx, row in enumerate(value):
+    build_cds = cds_traces is None
+    if build_cds:
+        cds_traces = {}
+    for chain_idx, cds_trace in enumerate(value) if build_cds else cds_traces.items():
         # do this manually?
         # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
+        if build_cds:
+            cds_trace = ColumnDataSource({"x" : data.draw.values, "y" : cds_trace})
+            cds_traces["chain_idx"] = cds_trace
         if legend:
             axes[idx, 1].line(
-                data.draw.values,
-                row,
+                x="x",
+                y="y",
+                source=cds_trace,
                 line_color=colors[chain_idx],
                 legend_label="chain {} - line".format(chain_idx),
                 **trace_kwargs
             )
             axes[idx, 1].circle(
-                data.draw.values,
-                row,
+                x="x",
+                y="y",
+                source=cds_trace,
                 radius=1,
                 line_color=colors[chain_idx],
                 fill_color=colors[chain_idx],
@@ -345,10 +356,13 @@ def _plot_chains_bokeh(
             )
         else:
             # tmp hack
-            axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], **trace_kwargs)
+            axes[idx, 1].line(x="x",
+            y="y",
+            source=cds_trace, line_color=colors[chain_idx], **trace_kwargs)
             axes[idx, 1].circle(
-                data.draw.values,
-                row,
+                x="x",
+                y="y",
+                source=cds_trace,
                 radius=1,
                 line_color=colors[chain_idx],
                 fill_color=colors[chain_idx],
@@ -359,7 +373,7 @@ def _plot_chains_bokeh(
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
             plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
-                row,
+                cds_trace.data["y"],
                 textsize=xt_labelsize,
                 ax=axes[idx, 0],
                 hist_kwargs=hist_kwargs,
@@ -383,3 +397,4 @@ def _plot_chains_bokeh(
             backend="bokeh",
             show=False,
         )
+    return cds_traces
