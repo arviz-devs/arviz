@@ -30,6 +30,7 @@ def plot_kde(
     ax=None,
     legend=True,
     backend=None,
+    **kwargs,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
 
@@ -200,6 +201,7 @@ def plot_kde(
         pcolormesh_kwargs=pcolormesh_kwargs,
         ax=ax,
         legend=legend,
+        **kwargs,
     )
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
         from .backends.matplotlib.mpl_kdeplot import _plot_kde_mpl

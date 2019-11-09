@@ -11,19 +11,6 @@ from ...plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label
 from ....utils import _var_names
 from ....rcparams import rcParams
 
-TOOLS = (
-    "pan,xpan,ypan,"
-    "xwheel_pan,ywheel_pan,"
-    "wheel_zoom,xwheel_zoom,ywheel_zoom,"
-    "zoom_in,xzoom_in,yzoom_in,"
-    "zoom_out,xzoom_out,yzoom_out,"
-    "box_zoom,box_select,"
-    "lasso_select,poly_select,"
-    "tap,undo,redo,reset,save,"
-    "crosshair,hover"
-)
-
-
 def _plot_trace_bokeh(
     data,
     var_names=None,
@@ -40,6 +27,7 @@ def _plot_trace_bokeh(
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
+    backend_kwargs=None,
     show=True,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
@@ -192,33 +180,40 @@ def _plot_trace_bokeh(
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, textsize, rows=len(plotters), cols=2
     )
-    figsize = int(figsize[0] * 70 // 2), int(figsize[1] * 70 // len(plotters))
+    figsize = int(figsize[0] * 90 // 2), int(figsize[1] * 90 // len(plotters))
 
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)
+
+    if backend_kwargs is None:
+        backend_kwargs = dict()
+
+    backend_kwargs.setdefault("tools",("pan,wheel_zoom,box_zoom,"
+                                       "lasso_select,poly_select,"
+                                       "undo,redo,reset,save,hover"))
+    backend_kwargs.setdefault("output_backend", "webgl")
+    backend_kwargs.setdefault("height", figsize[1])
+    backend_kwargs.setdefault("width", figsize[0])
 
     axes = []
     for i in range(len(plotters)):
         if i != 0:
             _axes = [
                 bkp.figure(
-                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                    **backend_kwargs
                 ),
                 bkp.figure(
-                    height=figsize[1],
-                    width=figsize[0],
                     x_range=axes[0][1].x_range,
-                    tools=TOOLS,
-                    output_backend="webgl",
+                    **backend_kwargs
                 ),
             ]
         else:
             _axes = [
                 bkp.figure(
-                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                    **backend_kwargs
                 ),
                 bkp.figure(
-                    height=figsize[1], width=figsize[0], tools=TOOLS, output_backend="webgl"
+                    **backend_kwargs
                 ),
             ]
         axes.append(_axes)
@@ -236,6 +231,7 @@ def _plot_trace_bokeh(
                 data,
                 colors,
                 combined,
+                legend,
                 xt_labelsize,
                 trace_kwargs,
                 hist_kwargs,
@@ -283,26 +279,19 @@ def _plot_trace_bokeh(
                     else:
                         ylocs = [ylim[0] for ylim in ylims]
                     values = value[chain, div_idxs]
-                    axes[idx, 1].scatter(
+                    axes[idx, 1].circle(
                         div_draws,
                         np.zeros_like(div_idxs) + ylocs[1],
                         # marker="|",
                         line_color="black",
-                        # markeredgewidth=1.5,
-                        # markersize=30,
-                        # linestyle="None",
-                        alpha=hist_kwargs["alpha"],
-                        # zorder=-5,
+                        line_alpha=hist_kwargs["alpha"],
                     )
-                    axes[idx, 0].scatter(
+                    axes[idx, 0].circle(
                         values,
                         np.zeros_like(values) + ylocs[0],
                         # marker="|",
                         line_color="black",
-                        # markeredgewidth=1.5,
-                        # markersize=30,
-                        # linestyle="None",
-                        alpha=trace_kwargs["alpha"],
+                        line_alpha=trace_kwargs["alpha"],
                         # zorder=-5,
                     )
 
@@ -317,9 +306,11 @@ def _plot_trace_bokeh(
         #        line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
         #    )
 
-    # if legend:
-    #    axes[idx, col].legend.location = "top_left"
-    #    axes[idx, col].legend.click_policy="mute"
+        if legend:
+            for col in (0, 1):
+                axes[idx, col].legend.location = "top_left"
+                axes[idx, col].legend.click_policy="hide"
+
     if show:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
         bkp.show(grid)
@@ -334,6 +325,7 @@ def _plot_chains_bokeh(
     data,
     colors,
     combined,
+    legend,
     xt_labelsize,
     trace_kwargs,
     hist_kwargs,
@@ -344,17 +336,31 @@ def _plot_chains_bokeh(
     for chain_idx, row in enumerate(value):
         # do this manually?
         # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
-        axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], **trace_kwargs)
-        axes[idx, 1].scatter(
-            data.draw.values,
-            row,
-            radius=0.1,
-            line_color=colors[chain_idx],
-            fill_color=colors[chain_idx],
-            alpha=0.5,
-        )
-
+        if legend:
+            axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], legend_label="chain {} - line".format(chain_idx), **trace_kwargs)
+            axes[idx, 1].circle(
+                data.draw.values,
+                row,
+                radius=1,
+                line_color=colors[chain_idx],
+                fill_color=colors[chain_idx],
+                alpha=0.5,
+                legend_label="chain {} - scatter".format(chain_idx)
+            )
+        else:
+            # tmp hack
+            axes[idx, 1].line(data.draw.values, row, line_color=colors[chain_idx], **trace_kwargs)
+            axes[idx, 1].circle(
+                data.draw.values,
+                row,
+                radius=1,
+                line_color=colors[chain_idx],
+                fill_color=colors[chain_idx],
+                alpha=0.5,
+            )
         if not combined:
+            if legend:
+                plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
             plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
                 row,

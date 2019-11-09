@@ -26,6 +26,7 @@ def plot_dist(
     hist_kwargs=None,
     ax=None,
     backend=None,
+    **kwargs,
 ):
     """Plot distribution as histogram or kernel density estimates.
 
@@ -106,6 +107,7 @@ def plot_dist(
         contour_kwargs=contour_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
+        **kwargs
     )
 
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
