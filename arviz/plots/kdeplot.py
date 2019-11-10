@@ -147,7 +147,6 @@ def plot_kde(
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
 
     """
-
     if isinstance(values, xr.Dataset):
         raise ValueError(
             "Xarray dataset object detected.Use plot_posterior, plot_density, plot_joint"
