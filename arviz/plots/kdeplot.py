@@ -81,10 +81,12 @@ def plot_kde(
     ax : matplotlib axes
     legend : bool
         Add legend to the figure. By default True.
+    backend : str {"matplotlib", "bokeh"}
+        Select backend engine.
 
     Returns
     -------
-    ax : matplotlib axes
+    ax : {matplotlib axes, bokeh figures}
 
     Examples
     --------
@@ -207,6 +209,12 @@ def plot_kde(
 
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
+        try:
+            import bokeh
+
+            assert bokeh.__version__ >= "1.4.0"
+        except (ImportError, AssertionError):
+            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
 
         ax = _plot_kde_bokeh(**kde_plot_args)

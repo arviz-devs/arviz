@@ -1,6 +1,6 @@
 """Bokeh Traceplot."""
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, Spans
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
 from itertools import cycle
@@ -35,8 +35,11 @@ def _plot_trace_bokeh(
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
-    If `divergences` data is available in `sample_stats`, will plot the location of divergences as
-    dashed vertical lines.
+    NOTE: EXPERIMENTAL CODE
+
+    Not implemented:
+        If `divergences` data is available in `sample_stats`, will plot the location of divergences as
+        dashed vertical lines.
 
     Parameters
     ----------
@@ -48,6 +51,7 @@ def _plot_trace_bokeh(
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
+        NOT IMPLEMENTED
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
@@ -74,9 +78,14 @@ def _plot_trace_bokeh(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `bokeh.plotting.lines`
+    backend_kwargs : dict
+        Extra keyword arguments passed to `bokeh.plotting.figure`
+    show : bool
+        Call `bokeh.plotting.show` for gridded plots `bokeh.layouts.gridplot(axes.tolist())`
     Returns
     -------
-    axes : bokeh figures
+    ndarray
+        axes (bokeh figures)
 
 
     Examples
@@ -273,49 +282,30 @@ def _plot_trace_bokeh(
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
 
-        # TODO
-        # if False:  # divergences:
-        # div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
-        # divs = divergence_data.sel(**div_selection).values
-        # # if combined:
-        # #     divs = divs.flatten()
-        # divs = np.atleast_2d(divs)
-        #
-        # for chain, chain_divs in enumerate(divs):
-        #     div_draws = data.draw.values[chain_divs]
-        #     div_idxs = np.arange(len(chain_divs))[chain_divs]
-        #     if div_idxs.size > 0:
-        #         if divergences == "top":
-        #             ylocs = [ylim[1] for ylim in ylims]
-        #         else:
-        #             ylocs = [ylim[0] for ylim in ylims]
-        #         values = value[chain, div_idxs]
-        #         axes[idx, 1].circle(
-        #             div_draws,
-        #             np.zeros_like(div_idxs) + ylocs[1],
-        #             # marker="|",
-        #             line_color="black",
-        #             line_alpha=hist_kwargs["alpha"],
-        #         )
-        #         axes[idx, 0].circle(
-        #             values,
-        #             np.zeros_like(values) + ylocs[0],
-        #             # marker="|",
-        #             line_color="black",
-        #             line_alpha=trace_kwargs["alpha"],
-        #             # zorder=-5,
-        #         )
+        for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
+            if isinstance(vlines, (float, int)):
+                line_values = [vlines]
+            else:
+                line_values = np.atleast_1d(vlines).ravel()
 
-        # TODO
-        # for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
-        #    if isinstance(vlines, (float, int)):
-        #        line_values = [vlines]
-        #    else:
-        #        line_values = np.atleast_1d(vlines).ravel()
-        #    axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
-        #    axes[idx, 1].hlines(
-        #        line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
-        #    )
+            for line_value in line_values:
+                vline = Span(
+                    location=line_value,
+                    dimension="height",
+                    line_color="black",
+                    line_width=1.5,
+                    alpha=0.75,
+                )
+                hline = Span(
+                    location=line_value,
+                    dimension="width",
+                    line_color="black",
+                    line_width=1.5,
+                    alpha=trace_kwargs["alpha"],
+                )
+
+                axes[idx, 0].renderers.append(vline)
+                axes[idx, 1].renderers.append(hline)
 
         if legend:
             for col in (0, 1):

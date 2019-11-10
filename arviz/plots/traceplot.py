@@ -60,6 +60,9 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
+    backend : str {"matplotlib", "bokeh"}
+        Select backend engine.
+
     Returns
     -------
     axes : matplotlib axes
@@ -122,6 +125,12 @@ def plot_trace(
             trace_kwargs=trace_kwargs,
         )
     elif backend.lower() == "bokeh":
+        try:
+            import bokeh
+
+            assert bokeh.__version__ >= "1.4.0"
+        except (ImportError, AssertionError):
+            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
 
         axes = _plot_trace_bokeh(

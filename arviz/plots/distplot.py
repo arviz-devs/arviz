@@ -77,6 +77,8 @@ def plot_dist(
     hist_kwargs : dict
         Keywords passed to the histogram.
     ax : matplotlib axes
+    backend : str {"matplotlib", "bokeh"}
+        Select backend engine.
 
     Returns
     -------
@@ -134,6 +136,12 @@ def plot_dist(
 
         ax = _plot_dist_mpl(**dist_plot_args)
     elif backend == "bokeh":
+        try:
+            import bokeh
+
+            assert bokeh.__version__ >= "1.4.0"
+        except (ImportError, AssertionError):
+            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
         ax = _plot_dist_bokeh(**dist_plot_args)

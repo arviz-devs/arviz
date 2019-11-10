@@ -39,18 +39,14 @@ def _plot_kde_bokeh(
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label
-    # TODO: handle
-    # figsize = ax.get_figure().get_size_inches()
 
-    # figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
-
-    # if isinstance(values, xr.Dataset):
-    #     raise ValueError(
-    #         "Xarray dataset object detected.Use plot_posterior, plot_density, plot_joint"
-    #         "or plot_pair instead of plot_kde"
-    #     )
-    # if isinstance(values, InferenceData):
-    #     raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
+    if isinstance(values, xr.Dataset):
+        raise ValueError(
+            "Xarray dataset object detected.Use plot_posterior, plot_density, plot_joint"
+            "or plot_pair instead of plot_kde"
+        )
+    if isinstance(values, InferenceData):
+        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
 
     if values2 is None:
         if plot_kwargs is None:
@@ -66,85 +62,15 @@ def _plot_kde_bokeh(
 
         if rug_kwargs is None:
             rug_kwargs = {}
-        # rug_kwargs.setdefault("marker", "_" if rotated else "|")
-        # rug_kwargs.setdefault("linestyle", "None")
-        # rug_kwargs.setdefault("color", default_color)
-        # rug_kwargs.setdefault("space", 0.2)
-
-        # plot_kwargs.setdefault("line_width", linewidth)
-        # rug_kwargs.setdefault("markersize", 2 * markersize)
-
-        # rug_space = max(density) * rug_kwargs.pop("space")
+        else:
+            # todo: add warning
+            pass
 
         x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)
-        """
-        fill_func = ax.fill_between
-        fill_x, fill_y = x, density
-        if rotated:
-            x, density = density, x
-            fill_func = ax.fill_betweenx
-
-        ax.tick_params(labelsize=xt_labelsize)
-
-        if rotated:
-            ax.set_xlim(0, auto=True)
-            rug_x, rug_y = np.zeros_like(values) - rug_space, values
-        else:
-            ax.set_ylim(0, auto=True)
-            rug_x, rug_y = values, np.zeros_like(values) - rug_space
-
-        if rug:
-            ax.plot(rug_x, rug_y, **rug_kwargs)
-
-        if quantiles is not None:
-            fill_kwargs.setdefault("alpha", 0.75)
-
-            idx = [np.sum(density_q < quant) for quant in quantiles]
-
-            fill_func(
-                fill_x,
-                fill_y,
-                where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
-                **fill_kwargs
-            )
-        else:
-            fill_kwargs.setdefault("alpha", 0)
-            if fill_kwargs.get("alpha") == 0:
-                ax.plot(x, density, label=label, **plot_kwargs)
-                fill_func(fill_x, fill_y, **fill_kwargs)
-            else:
-                ax.plot(x, density, **plot_kwargs)
-                fill_func(fill_x, fill_y, label=label, **fill_kwargs)
-        """
     else:
         # todo
-        raise NotImplementedError("Sorry")
-        if contour_kwargs is None:
-            contour_kwargs = {}
-        contour_kwargs.setdefault("colors", "0.5")
-        if contourf_kwargs is None:
-            contourf_kwargs = {}
-        if pcolormesh_kwargs is None:
-            pcolormesh_kwargs = {}
-
-        gridsize = (128, 128) if contour else (256, 256)
-
-        density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
-        g_s = complex(gridsize[0])
-        x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
-
-        ax.grid(False)
-        ax.set_xlim(xmin, xmax)
-        ax.set_ylim(ymin, ymax)
-        if contour:
-            qcfs = ax.contourf(x_x, y_y, density, antialiased=True, **contourf_kwargs)
-            qcs = ax.contour(x_x, y_y, density, **contour_kwargs)
-            if not fill_last:
-                qcfs.collections[0].set_alpha(0)
-                qcs.collections[0].set_alpha(0)
-        else:
-            ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
+        raise NotImplementedError("Use matplotlib backend")
 
     if show:
         bkp.show(ax)
