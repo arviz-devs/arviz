@@ -82,7 +82,7 @@ def plot_dist(
     -------
     ax : matplotlib axes
     """
-    if kind not in ["auto", "density", "hist"]:
+    if kind not in ["auto", "kde", "hist"]:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if kind == "auto":
