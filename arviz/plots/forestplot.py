@@ -9,6 +9,7 @@ from matplotlib.colors import to_rgba
 from ..data import convert_to_dataset
 from ..stats import hpd
 from ..stats.diagnostics import _ess, _rhat
+from ..stats.stats_utils import histogram
 from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, get_coords
 from .kdeplot import _fast_kde
 from ..utils import _var_names, conditional_jit
@@ -601,7 +602,7 @@ class VarHandler:
 
             if kind == "hist":
                 bins = get_bins(values)
-                density, x = np.histogram(values, bins=bins, density=True)
+                density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)

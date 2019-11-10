@@ -11,7 +11,8 @@ from .plot_utils import (
     make_label,
     filter_plotters_list,
 )
-from ..utils import _var_names, conditional_jit
+from ..utils import _var_names
+from ..stats.stats_utils import histogram
 
 
 def _sturges_formula(dataset, mult=1):
@@ -125,7 +126,7 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):
-            all_counts[idx] = _rank_hist(row, bins=bin_ary)[0]
+            all_counts[idx], _ = histogram(row, bins=bin_ary)
         gap = all_counts.max() * 1.05
         width = bin_ary[1] - bin_ary[0]
 
@@ -156,8 +157,3 @@ def plot_rank(data, var_names=None, coords=None, bins=None, ref_line=True, figsi
         ax.set_title(make_label(var_name, selection), fontsize=titlesize)
 
     return axes
-
-
-@conditional_jit
-def _rank_hist(data, bins):
-    return np.histogram(data, bins)

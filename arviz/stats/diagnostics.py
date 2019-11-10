@@ -487,7 +487,7 @@ def ks_summary(pareto_tail_indices):
         bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
         kcounts, _ = histogram(pareto_tail_indices, bins)
     else:
-        kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, _ = histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)

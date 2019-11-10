@@ -23,6 +23,7 @@ from .stats_utils import (
     stats_variance_2d as svar,
 )
 from ..utils import _var_names, Numba, _numba_var
+from ..stats.stats_utils import histogram
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
@@ -365,7 +366,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
             bins = np.linspace(lower, upper, len(density))
         else:
             bins = get_bins(ary)
-            density, _ = np.histogram(ary, bins=bins, density=True)
+            density, _ = histogram(ary, bins=bins)
             dx = np.diff(bins)[0]
 
         density *= dx

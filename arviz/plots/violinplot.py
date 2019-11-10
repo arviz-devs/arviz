@@ -4,6 +4,7 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from ..stats import hpd
+from ..stats.stats_utils import histogram
 from .kdeplot import _fast_kde
 from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label, filter_plotters_list
 from ..utils import _var_names
@@ -129,7 +130,7 @@ def _violinplot(val, shade, bw, ax, **kwargs_shade):
 def cat_hist(val, shade, ax, **kwargs_shade):
     """Auxiliary function to plot discrete-violinplots."""
     bins = get_bins(val)
-    binned_d, _ = np.histogram(val, bins=bins, density=True)
+    binned_d, _ = histogram(val, bins=bins)
 
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
     centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
