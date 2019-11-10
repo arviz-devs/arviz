@@ -27,7 +27,7 @@ Currently there are 2 beta implementations of this design:
    1. [`prior_predictive`](#prior_predictive)
 1. [Planned features](#planned-features)
    1. [Sampler parameters](#sampler-parameters)
-   1. [Out of sample posterior_predictive samples](#Out-of-sample-posterior-predictive-samples)
+   1. [Out of sample posterior_predictive samples](#out-of-sample-posterior_predictive-samples)
 1. [Examples](#examples)
 
 ## Current design
