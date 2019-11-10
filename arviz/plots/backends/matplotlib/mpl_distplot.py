@@ -5,7 +5,6 @@ from ...kdeplot import plot_kde
 import matplotlib.pyplot as plt
 
 
-
 def _plot_dist_mpl(
     values,
     values2=None,
