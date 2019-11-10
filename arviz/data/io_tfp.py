@@ -19,6 +19,7 @@ class TfpConverter:
         feed_dict=None,
         posterior_predictive_samples=100,
         posterior_predictive_size=1,
+        chain_dim=None,
         observed=None,
         coords=None,
         dims=None
@@ -38,6 +39,7 @@ class TfpConverter:
         self.posterior_predictive_samples = posterior_predictive_samples
         self.posterior_predictive_size = posterior_predictive_size
         self.observed = observed
+        self.chain_dim = chain_dim
         self.coords = coords
         self.dims = dims
 
@@ -55,11 +57,20 @@ class TfpConverter:
             tf.disable_v2_behavior()
             self.tf = tf  # pylint: disable=invalid-name
 
+    def handle_chain_location(self, ary):
+        """Move the axis corresponding to the chain to first position.
+
+        If there is only one chain which has no axis, add it.
+        """
+        if self.chain_dim is None:
+            return utils.expand_dims(ary)
+        return ary.swapaxes(0, self.chain_dim)
+
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
         data = {}
         for i, var_name in enumerate(self.var_names):
-            data[var_name] = utils.expand_dims(self.posterior[i])
+            data[var_name] = self.handle_chain_location(self.posterior[i])
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def observed_data_to_xarray(self):
@@ -121,7 +132,9 @@ class TfpConverter:
 
         data = {}
         with self.tf.Session() as sess:
-            data["obs"] = utils.expand_dims(sess.run(posterior_preds, feed_dict=self.feed_dict))
+            data["obs"] = self.handle_chain_location(
+                sess.run(posterior_preds, feed_dict=self.feed_dict)
+            )
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=self.dims)
 
     def sample_stats_to_xarray(self):
@@ -148,7 +161,7 @@ class TfpConverter:
         dims = {"log_likelihood": coord_name}
 
         with self.tf.Session() as sess:
-            data["log_likelihood"] = utils.expand_dims(
+            data["log_likelihood"] = self.handle_chain_location(
                 sess.run(log_likelihood, feed_dict=self.feed_dict)
             )
         return dict_to_dataset(data, library=self.tfp, coords=self.coords, dims=dims)
@@ -178,6 +191,7 @@ def from_tfp(
     feed_dict=None,
     posterior_predictive_samples=100,
     posterior_predictive_size=1,
+    chain_dim=None,
     observed=None,
     coords=None,
     dims=None
@@ -190,6 +204,7 @@ def from_tfp(
         feed_dict=feed_dict,
         posterior_predictive_samples=posterior_predictive_samples,
         posterior_predictive_size=posterior_predictive_size,
+        chain_dim=chain_dim,
         observed=observed,
         coords=coords,
         dims=dims,
