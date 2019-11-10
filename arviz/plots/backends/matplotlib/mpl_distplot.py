@@ -32,7 +32,7 @@ def _plot_dist_mpl(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
 
-    elif kind == "density":
+    elif kind == "kde":
         if plot_kwargs is None:
             plot_kwargs = {}
 
