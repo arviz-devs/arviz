@@ -1,3 +1,4 @@
+"""Bokeh Traceplot"""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
