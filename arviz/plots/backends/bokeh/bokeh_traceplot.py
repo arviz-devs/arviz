@@ -294,14 +294,14 @@ def _plot_trace_bokeh(
                     dimension="height",
                     line_color="black",
                     line_width=1.5,
-                    alpha=0.75,
+                    line_alpha=0.75,
                 )
                 hline = Span(
                     location=line_value,
                     dimension="width",
                     line_color="black",
                     line_width=1.5,
-                    alpha=trace_kwargs["alpha"],
+                    line_alpha=trace_kwargs["alpha"],
                 )
 
                 axes[idx, 0].renderers.append(vline)
