@@ -1,1 +1,1 @@
-"""Arviz plotting backends"""
+"""Arviz plotting backends."""

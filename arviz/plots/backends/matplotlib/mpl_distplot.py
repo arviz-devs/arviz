@@ -1,4 +1,4 @@
-"""Matplotlib distplot"""
+"""Matplotlib distplot."""
 from ...kdeplot import plot_kde
 import matplotlib.pyplot as plt
 

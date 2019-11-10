@@ -1,4 +1,4 @@
-"""Bokeh Traceplot"""
+"""Bokeh Traceplot."""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
@@ -115,7 +115,6 @@ def _plot_trace_bokeh(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
-
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging

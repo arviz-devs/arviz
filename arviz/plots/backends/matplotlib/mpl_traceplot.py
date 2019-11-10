@@ -1,4 +1,4 @@
-"""Matplotlib traceplot"""
+"""Matplotlib Traceplot."""
 from itertools import cycle
 import warnings
 

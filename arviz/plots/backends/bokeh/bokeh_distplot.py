@@ -1,4 +1,4 @@
-"""Bokeh Distplot"""
+"""Bokeh Distplot."""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource
 import numpy as np

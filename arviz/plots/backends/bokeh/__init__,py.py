@@ -1,1 +1,1 @@
-"""Boken Plotting Backend"""
+"""Boken Plotting Backend."""
