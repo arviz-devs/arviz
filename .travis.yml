@@ -79,3 +79,6 @@ after_success:
 
   - if [[ $NAME == LINT ]]; then sed -i 's/\/opt\/arviz/\/home\/travis\/build\/arviz-devs\/arviz/g' .coverage; fi
   - if [[ $NAME == LINT ]]; then coveralls; fi
+
+notifications:
+  webhooks: https://coveralls.io/webhook
