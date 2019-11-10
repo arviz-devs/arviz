@@ -23,7 +23,7 @@ def plot_dist(
     hist_kwargs=None,
     ax=None,
     backend=None,
-    **kwargs,
+    **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
 
