@@ -33,12 +33,12 @@ def _plot_dist_bokeh(
         ax = bkp.plotting.figure(sizing_mode="stretch_both")
 
     if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "density"
+        kind = "hist" if values.dtype.kind == "i" else "kde"
 
         _histplot_bokeh_op(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
-    elif kind == "density":
+    elif kind == "kde":
         if plot_kwargs is None:
             plot_kwargs = {}
 
@@ -67,7 +67,7 @@ def _plot_dist_bokeh(
             show=False,
         )
     else:
-        raise TypeError('Invalid "kind":{}. Select from {{"auto","density","hist"}}'.format(kind))
+        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if show:
         bkp.show(ax)
