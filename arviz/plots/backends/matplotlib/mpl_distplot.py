@@ -5,6 +5,7 @@ from ...kdeplot import plot_kde
 import matplotlib.pyplot as plt
 
 
+
 def _plot_dist_mpl(
     values,
     values2=None,
@@ -25,17 +26,13 @@ def _plot_dist_mpl(
     contour_kwargs=None,
     hist_kwargs=None,
     ax=None,
-
-    # Internal API
-    bins=None
-
 ):
     if ax is None:
         ax = plt.gca()
 
     if kind == "hist":
         ax = _histplot_mpl_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs, bins=bins
+            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
 
     elif kind == "density":
@@ -69,10 +66,12 @@ def _plot_dist_mpl(
     return ax
 
 
-def _histplot_mpl_op(values, values2, rotated, ax, bins, hist_kwargs):
+def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
+
+    bins = hist_kwargs.pop("bins")
 
     ax.hist(values, bins=bins, **hist_kwargs)
     if rotated:

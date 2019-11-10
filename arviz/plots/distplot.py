@@ -85,19 +85,19 @@ def plot_dist(
     if kind not in ["auto","density","hist"]:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
-    if hist_kwargs:
-        bins = hist_kwargs.pop("bins", get_bins(values))
-    else:
-        bins = None
+    if kind == "auto":
+        kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
         if hist_kwargs is None:
             hist_kwargs = {}
-        hist_kwargs.setdefault("bins", None)
+
+        hist_kwargs.setdefault("bins", get_bins(values))
         hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("legend_label", label)
-        hist_kwargs.setdefault("fill_color", color)
-        hist_kwargs.setdefault("line_color", color)
+        hist_kwargs.setdefault("color", color)
+        hist_kwargs.setdefault("label", label)
+        hist_kwargs.setdefault("rwidth", 0.9)
+        hist_kwargs.setdefault("align", "left")
         hist_kwargs.setdefault("density", True)
 
         if rotated:
@@ -105,12 +105,7 @@ def plot_dist(
         else:
             hist_kwargs.setdefault("orientation", "vertical")
 
-    if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "kde"
-
     dist_plot_args = dict(
-        # Internal API
-        bins=bins,
         # User Facing API that can be simplified
         values=values,
         values2=values2,
