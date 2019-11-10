@@ -546,7 +546,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
-            **kwargs
+            **kwargs,
         ).values
     )
     p_loo = lppd - loo_lppd / scale_value
