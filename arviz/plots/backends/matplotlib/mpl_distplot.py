@@ -34,7 +34,7 @@ def _plot_dist_mpl(
         ax = plt.gca()
 
     if kind == "hist":
-        _histplot_mpl_op(
+        ax = _histplot_mpl_op(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs, bins=bins
         )
 
@@ -45,7 +45,7 @@ def _plot_dist_mpl(
         plot_kwargs.setdefault("color", color)
         legend = label is not None
 
-        plot_kde(
+        ax = plot_kde(
             values,
             values2,
             cumulative=cumulative,
@@ -66,6 +66,8 @@ def _plot_dist_mpl(
             backend="matplotlib",
         )
 
+    return ax
+
 
 def _histplot_mpl_op(values, values2, rotated, ax, bins, hist_kwargs):
     """Add a histogram for the data to the axes."""
@@ -77,6 +79,6 @@ def _histplot_mpl_op(values, values2, rotated, ax, bins, hist_kwargs):
         ax.set_yticks(bins[:-1])
     else:
         ax.set_xticks(bins[:-1])
-    if hist_kwargs["label"] is not None:
+    if hist_kwargs.get("label") is not None:
         ax.legend()
     return ax
