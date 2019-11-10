@@ -1,6 +1,6 @@
 """Bokeh Traceplot."""
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Spans
+from bokeh.models import ColumnDataSource, Span
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
 from itertools import cycle
