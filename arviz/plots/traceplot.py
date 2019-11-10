@@ -1,15 +1,4 @@
 """Plot kde or histograms and values from MCMC samples."""
-import warnings
-from itertools import cycle
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import numpy as np
-
-from ..data import convert_to_dataset
-from .distplot import plot_dist
-from .plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
-from ..utils import _var_names
-from ..rcparams import rcParams
 
 
 def plot_trace(
