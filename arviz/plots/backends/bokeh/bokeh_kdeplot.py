@@ -40,14 +40,6 @@ def _plot_kde_bokeh(
     if legend and label is not None:
         plot_kwargs["legend_label"] = label
 
-    if isinstance(values, xr.Dataset):
-        raise ValueError(
-            "Xarray dataset object detected.Use plot_posterior, plot_density, plot_joint"
-            "or plot_pair instead of plot_kde"
-        )
-    if isinstance(values, InferenceData):
-        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
-
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}
