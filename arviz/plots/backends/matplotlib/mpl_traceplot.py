@@ -1,4 +1,6 @@
 from itertools import cycle
+import warnings
+
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np

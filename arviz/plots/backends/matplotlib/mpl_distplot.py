@@ -2,6 +2,7 @@
 Matplotlib Backbend for distplot
 """
 from ...kdeplot import plot_kde
+import matplotlib.pyplot as plt
 
 
 def _plot_dist_mpl(
@@ -24,31 +25,17 @@ def _plot_dist_mpl(
     contour_kwargs=None,
     hist_kwargs=None,
     ax=None,
+
+    # Internal API
+    bins=None
+
 ):
     if ax is None:
         ax = plt.gca()
 
-    if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "density"
-
     if kind == "hist":
-        if hist_kwargs is None:
-            hist_kwargs = {}
-        hist_kwargs.setdefault("bins", None)
-        hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("color", color)
-        hist_kwargs.setdefault("label", label)
-        hist_kwargs.setdefault("rwidth", 0.9)
-        hist_kwargs.setdefault("align", "left")
-        hist_kwargs.setdefault("density", True)
-
-        if rotated:
-            hist_kwargs.setdefault("orientation", "horizontal")
-        else:
-            hist_kwargs.setdefault("orientation", "vertical")
-
         _histplot_mpl_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
+            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs, bins=bins
         )
 
     elif kind == "density":
@@ -78,19 +65,13 @@ def _plot_dist_mpl(
             ax=ax,
             backend="matplotlib",
         )
-    else:
-        raise TypeError('Invalid "kind":{}. Select from {{"auto","density","hist"}}'.format(kind))
-    return ax
 
 
-def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
+def _histplot_mpl_op(values, values2, rotated, ax, bins, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
 
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
     ax.hist(values, bins=bins, **hist_kwargs)
     if rotated:
         ax.set_yticks(bins[:-1])

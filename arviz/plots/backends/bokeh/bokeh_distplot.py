@@ -3,7 +3,6 @@ from bokeh.models import ColumnDataSource
 import numpy as np
 
 from ...kdeplot import plot_kde
-from ...plot_utils import get_bins
 
 
 def _plot_dist_bokeh(
@@ -34,16 +33,6 @@ def _plot_dist_bokeh(
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "density"
-
-    if kind == "hist":
-        if hist_kwargs is None:
-            hist_kwargs = {}
-        hist_kwargs.setdefault("bins", None)
-        hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("legend_label", label)
-        hist_kwargs.setdefault("fill_color", color)
-        hist_kwargs.setdefault("line_color", color)
-        hist_kwargs.setdefault("density", True)
 
         _histplot_bokeh_op(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
@@ -84,14 +73,10 @@ def _plot_dist_bokeh(
     return ax
 
 
-def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
+def _histplot_bokeh_op(values, values2, rotated, ax, bins, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
-
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
 
     legend_label = hist_kwargs.pop("legend_label", None)
     if legend_label:
