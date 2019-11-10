@@ -9,7 +9,7 @@ from matplotlib.colors import to_rgba
 from ..data import convert_to_dataset
 from ..stats import hpd
 from ..stats.diagnostics import _ess, _rhat
-from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
+from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, get_coords
 from .kdeplot import _fast_kde
 from ..utils import _var_names, conditional_jit
 
@@ -26,6 +26,7 @@ def plot_forest(
     kind="forestplot",
     model_names=None,
     var_names=None,
+    coords=None,
     combined=False,
     credible_interval=0.94,
     rope=None,
@@ -40,6 +41,7 @@ def plot_forest(
     ridgeplot_overlap=2,
     ridgeplot_kind="auto",
     figsize=None,
+    ax=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
 
@@ -59,6 +61,8 @@ def plot_forest(
     var_names: list[str], optional
         List of variables to plot (defaults to None, which results in all
         variables plotted)
+    coords : dict, optional
+        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     combined : bool
         Flag for combining multiple chains into a single chain. If False (default),
         chains will be plotted separately.
@@ -97,6 +101,8 @@ def plot_forest(
         histograms. To override this use "hist" to plot histograms and "density" for KDEs
     figsize : tuple
         Figure size. If None it will be defined automatically.
+    ax : axes, optional
+        Matplotlib axes. Defaults to None.
 
     Returns
     -------
@@ -111,7 +117,7 @@ def plot_forest(
 
         >>> import arviz as az
         >>> non_centered_data = az.load_arviz_data('non_centered_eight')
-        >>> fig, axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest(non_centered_data,
         >>>                            kind='forestplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,
@@ -124,7 +130,7 @@ def plot_forest(
     .. plot::
         :context: close-figs
 
-        >>> fig, axes = az.plot_forest(non_centered_data,
+        >>> axes = az.plot_forest(non_centered_data,
         >>>                            kind='ridgeplot',
         >>>                            var_names=['theta'],
         >>>                            combined=True,
@@ -136,7 +142,12 @@ def plot_forest(
     if not isinstance(data, (list, tuple)):
         data = [data]
 
-    datasets = [convert_to_dataset(datum) for datum in reversed(data)]
+    if coords is None:
+        coords = {}
+    datasets = get_coords(
+        [convert_to_dataset(datum) for datum in reversed(data)],
+        list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords,
+    )
 
     var_names = _var_names(var_names, datasets)
 
@@ -167,14 +178,17 @@ def plot_forest(
     if markersize is None:
         markersize = auto_markersize
 
-    fig, axes = plt.subplots(
-        nrows=1,
-        ncols=ncols,
-        figsize=figsize,
-        gridspec_kw={"width_ratios": width_ratios},
-        sharey=True,
-        constrained_layout=True,
-    )
+    if ax is None:
+        _, axes = plt.subplots(
+            nrows=1,
+            ncols=ncols,
+            figsize=figsize,
+            gridspec_kw={"width_ratios": width_ratios},
+            sharey=True,
+            constrained_layout=True,
+        )
+    else:
+        axes = ax
 
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
@@ -207,20 +221,20 @@ def plot_forest(
         plot_handler.plot_rhat(axes[idx], xt_labelsize, titlesize, markersize)
         idx += 1
 
-    for ax in axes:
+    for ax_ in axes:
         if kind == "ridgeplot":
-            ax.grid(False)
+            ax_.grid(False)
         else:
-            ax.grid(False, axis="y")
+            ax_.grid(False, axis="y")
         # Remove ticklines on y-axes
-        ax.tick_params(axis="y", left=False, right=False)
+        ax_.tick_params(axis="y", left=False, right=False)
 
-        for loc, spine in ax.spines.items():
+        for loc, spine in ax_.spines.items():
             if loc in ["left", "right"]:
                 spine.set_visible(False)
 
         if len(plot_handler.data) > 1:
-            plot_handler.make_bands(ax)
+            plot_handler.make_bands(ax_)
 
     labels, ticks = plot_handler.labels_and_ticks()
     axes[0].set_yticks(ticks)
@@ -231,7 +245,7 @@ def plot_forest(
         y_max += ridgeplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
 
-    return fig, axes
+    return axes
 
 
 class PlotHandler:

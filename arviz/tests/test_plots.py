@@ -179,7 +179,7 @@ def test_plot_trace_max_subplots_warning(models):
 def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
-    _, axes = plot_forest(obj, **args)
+    axes = plot_forest(obj, **args)
     assert axes.shape == (expected,)
 
 
@@ -190,7 +190,7 @@ def test_plot_forest_rope_exception():
 
 
 def test_plot_forest_single_value():
-    _, axes = plot_forest({"x": [1]})
+    axes = plot_forest({"x": [1]})
     assert axes.shape
 
 
@@ -237,6 +237,12 @@ def test_plot_joint(models, kind):
     assert axjoin
 
 
+def test_plot_joint_ax_tuple(models):
+    ax = plot_joint(models.model_1, var_names=("mu", "tau"))
+    axjoin, _, _ = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax)
+    assert axjoin
+
+
 def test_plot_joint_discrete(discrete_model):
     axjoin, _, _ = plot_joint(discrete_model)
     assert axjoin
@@ -248,6 +254,10 @@ def test_plot_joint_bad(models):
 
     with pytest.raises(Exception):
         plot_joint(models.model_1, var_names=("mu", "tau", "eta"))
+
+    with pytest.raises(ValueError, match="ax.+3.+5"):
+        _, axes = plt.subplots(5, 1)
+        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes)
 
 
 @pytest.mark.parametrize(

@@ -20,6 +20,7 @@ def plot_joint(
     fill_last=True,
     joint_kwargs=None,
     marginal_kwargs=None,
+    ax=None,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
@@ -51,6 +52,9 @@ def plot_joint(
         Additional keywords modifying the join distribution (central subplot)
     marginal_kwargs : dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
+    ax : tuple of axes, optional
+        Tuple containing (axjoin, ax_hist_x, ax_hist_y). If None, a new figure and axes
+        will be created.
 
     Returns
     -------
@@ -95,6 +99,23 @@ def plot_joint(
         >>>                 kind='kde',
         >>>                 figsize=(6, 6))
 
+    Overlayed plots:
+
+    .. plot::
+        :context: close-figs
+
+        >>> data2 = az.load_arviz_data("centered_eight")
+        >>> kde_kwargs = {"contourf_kwargs": {"alpha": 0}, "contour_kwargs": {"colors": "k"}}
+        >>> ax = az.plot_joint(
+        ...     data, var_names=("mu", "tau"), kind="kde", fill_last=False,
+        ...     joint_kwargs=kde_kwargs, marginal_kwargs={"color": "k"}
+        ... )
+        >>> kde_kwargs["contour_kwargs"]["colors"] = "r"
+        >>> az.plot_joint(
+        ...     data2, var_names=("mu", "tau"), kind="kde", fill_last=False,
+        ...     joint_kwargs=kde_kwargs, marginal_kwargs={"color": "r"}, ax=ax
+        ... )
+
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
@@ -126,19 +147,24 @@ def plot_joint(
     marginal_kwargs.setdefault("plot_kwargs", {})
     marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
 
-    # Instantiate figure and grid
-    fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
-    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+    if ax is None:
+        # Instantiate figure and grid
+        fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
+        grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
-    # Set up main plot
-    axjoin = fig.add_subplot(grid[1:, :-1])
+        # Set up main plot
+        axjoin = fig.add_subplot(grid[1:, :-1])
+        # Set up top KDE
+        ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+        # Set up right KDE
+        ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
+    elif len(ax) == 3:
+        axjoin, ax_hist_x, ax_hist_y = ax
+    else:
+        raise ValueError("ax must be of lenght 3 but found {}".format(len(ax)))
 
-    # Set up top KDE
-    ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+    # Personalize axes
     ax_hist_x.tick_params(labelleft=False, labelbottom=False)
-
-    # Set up right KDE
-    ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
     ax_hist_y.tick_params(labelleft=False, labelbottom=False)
 
     # Set labels for axes
@@ -163,8 +189,8 @@ def plot_joint(
         axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
         axjoin.grid(False)
 
-    for val, ax, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
-        plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax, **marginal_kwargs)
+    for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
+        plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())
