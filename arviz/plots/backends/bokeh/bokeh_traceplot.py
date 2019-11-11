@@ -424,6 +424,10 @@ def _plot_chains_bokeh(
     fill_kwargs,
     rug_kwargs,
 ):
+    if isinstance(y_name, tuple):
+        y_name, y_names = y_name
+    else:
+        y_names = [y_name]
     marker = trace_kwargs.pop("marker", True)
     for chain_idx, cds in data.items():
         if legend:
@@ -438,27 +442,26 @@ def _plot_chains_bokeh(
             if marker:
                 ax_trace.circle(
                     x=x_name,
-                    y=y_name,
+                    y=_y_name,
                     source=cds,
-                    radius=0.48,
                     line_color=colors[chain_idx],
-                    fill_color=colors[chain_idx],
-                    alpha=0.5,
+                    legend_label="chain {}".format(chain_idx),
+                    **trace_kwargs
                 )
-        else:
-            # tmp hack
-            ax_trace.line(
-                x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
-            )
-            if marker:
-                ax_trace.circle(
-                    x=x_name,
-                    y=y_name,
-                    source=cds,
-                    radius=0.48,
-                    line_color=colors[chain_idx],
-                    fill_color=colors[chain_idx],
-                    alpha=0.5,
+                if marker:
+                    ax_trace.circle(
+                        x=x_name,
+                        y=_y_name,
+                        source=cds,
+                        radius=0.48,
+                        line_color=colors[chain_idx],
+                        fill_color=colors[chain_idx],
+                        alpha=0.5,
+                    )
+            else:
+                # tmp hack
+                ax_trace.line(
+                    x=x_name, y=_y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
                 )
         if not combined:
             rug_kwargs["cds"] = cds
@@ -466,7 +469,7 @@ def _plot_chains_bokeh(
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
             plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
-                cds.data[y_name],
+                np.concatenate([item.data[_y_name] for item in data.values()]).flatten(),
                 textsize=xt_labelsize,
                 ax=ax_density,
                 color=colors[chain_idx],
