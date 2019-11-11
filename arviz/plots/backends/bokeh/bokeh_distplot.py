@@ -30,11 +30,12 @@ def _plot_dist_bokeh(
 ):
 
     if ax is None:
-        ax = bkp.plotting.figure(sizing_mode="stretch_both")
+        ax = bkp.figure(sizing_mode="stretch_both")
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
+    if kind == "hist":
         _histplot_bokeh_op(
             values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
         )
@@ -74,15 +75,27 @@ def _plot_dist_bokeh(
     return ax
 
 
-def _histplot_bokeh_op(values, values2, rotated, ax, bins, hist_kwargs):
+def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
 
-    legend_label = hist_kwargs.pop("legend_label", None)
+    legend_label = hist_kwargs.pop("label", None)
     if legend_label:
         hist_kwargs["legend_label"] = legend_label
 
+    color = hist_kwargs.pop("color", False)
+    if color:
+        hist_kwargs["fill_color"] = color
+        hist_kwargs["line_color"] = color
+
+    # remove defaults for mpl
+    hist_kwargs.pop("rwidth", None)
+    hist_kwargs.pop("align", None)
+    hist_kwargs.pop("density", None)
+    hist_kwargs.pop("orientation", None)
+
+    bins = hist_kwargs.pop("bins")
     density = hist_kwargs.pop("density", True)
     hist, edges = np.histogram(values, density=density, bins=bins)
     if hist_kwargs.pop("cumulative", False):

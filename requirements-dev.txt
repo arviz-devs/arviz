@@ -19,3 +19,4 @@ sphinx-gallery
 black; python_version == '3.6'
 numba
 numpyro>=0.2.1
+bokeh>=1.4.0

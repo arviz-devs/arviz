@@ -54,7 +54,7 @@ install:
 script:
   # Tests command is default in dockerfile cmd
   - if [[ $NAME == UNIT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-    "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/";
+    "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/ --durations=0";
     fi
 
   - if [[ $NAME == LINT ]]; then docker run arviz:latest bash -c "./scripts/lint.sh";
@@ -62,7 +62,7 @@ script:
 
   # Tests saving plots and deleting files
   - if [[ $NAME == LINT ]]; then docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_test arviz:latest bash -c \
-    "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/";
+    "mkdir -p test_images/new_folder && pytest -v arviz/tests/ --save -k plot_khat --cov=arviz/ --durations=0";
     fi
 
   # Awkward line spacing to avoid travis-ci errors
