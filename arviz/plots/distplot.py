@@ -1,7 +1,4 @@
 """Plot distribution as histogram or kernel density estimates."""
-import matplotlib.pyplot as plt
-
-from .kdeplot import plot_kde
 from .plot_utils import get_bins
 
 
@@ -25,6 +22,8 @@ def plot_dist(
     contour_kwargs=None,
     hist_kwargs=None,
     ax=None,
+    backend=None,
+    **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
 
@@ -78,78 +77,76 @@ def plot_dist(
     hist_kwargs : dict
         Keywords passed to the histogram.
     ax : matplotlib axes
+    backend : str {"matplotlib", "bokeh"}
+        Select backend engine.
 
     Returns
     -------
     ax : matplotlib axes
     """
-    if ax is None:
-        ax = plt.gca()
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    hist_kwargs.setdefault("bins", None)
-    hist_kwargs.setdefault("cumulative", cumulative)
-    hist_kwargs.setdefault("color", color)
-    hist_kwargs.setdefault("label", label)
-    hist_kwargs.setdefault("rwidth", 0.9)
-    hist_kwargs.setdefault("align", "left")
-    hist_kwargs.setdefault("density", True)
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-
-    if rotated:
-        hist_kwargs.setdefault("orientation", "horizontal")
-    else:
-        hist_kwargs.setdefault("orientation", "vertical")
+    if kind not in ["auto", "kde", "hist"]:
+        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
-        _histplot_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
-        )
-    elif kind == "kde":
-        plot_kwargs.setdefault("color", color)
-        legend = label is not None
+        if hist_kwargs is None:
+            hist_kwargs = {}
 
-        plot_kde(
-            values,
-            values2,
-            cumulative=cumulative,
-            rug=rug,
-            label=label,
-            bw=bw,
-            quantiles=quantiles,
-            rotated=rotated,
-            contour=contour,
-            legend=legend,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            ax=ax,
-        )
-    return ax
+        hist_kwargs.setdefault("bins", get_bins(values))
+        hist_kwargs.setdefault("cumulative", cumulative)
+        hist_kwargs.setdefault("color", color)
+        hist_kwargs.setdefault("label", label)
+        hist_kwargs.setdefault("rwidth", 0.9)
+        hist_kwargs.setdefault("align", "left")
+        hist_kwargs.setdefault("density", True)
 
+        if rotated:
+            hist_kwargs.setdefault("orientation", "horizontal")
+        else:
+            hist_kwargs.setdefault("orientation", "vertical")
 
-def _histplot_op(values, values2, rotated, ax, hist_kwargs):
-    """Add a histogram for the data to the axes."""
-    if values2 is not None:
-        raise NotImplementedError("Insert hexbin plot here")
+    dist_plot_args = dict(
+        # User Facing API that can be simplified
+        values=values,
+        values2=values2,
+        color=color,
+        kind=kind,
+        cumulative=cumulative,
+        label=label,
+        rotated=rotated,
+        rug=rug,
+        bw=bw,
+        quantiles=quantiles,
+        contour=contour,
+        fill_last=fill_last,
+        textsize=textsize,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        rug_kwargs=rug_kwargs,
+        contour_kwargs=contour_kwargs,
+        hist_kwargs=hist_kwargs,
+        ax=ax,
+        **kwargs,
+    )
 
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
-    ax.hist(values, bins=bins, **hist_kwargs)
-    if rotated:
-        ax.set_yticks(bins[:-1])
+    if backend is None or backend.lower() in ("mpl", "matplotlib"):
+        from .backends.matplotlib.mpl_distplot import _plot_dist_mpl
+
+        ax = _plot_dist_mpl(**dist_plot_args)
+    elif backend == "bokeh":
+        try:
+            import bokeh
+
+            assert bokeh.__version__ >= "1.4.0"
+        except (ImportError, AssertionError):
+            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
+
+        ax = _plot_dist_bokeh(**dist_plot_args)
     else:
-        ax.set_xticks(bins[:-1])
-    if hist_kwargs["label"] is not None:
-        ax.legend()
+        raise NotImplementedError(
+            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
+        )
     return ax
