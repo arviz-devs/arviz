@@ -1,6 +1,5 @@
 """Tests use the 'bokeh' backend."""
 # pylint: disable=redefined-outer-name,too-many-lines
-import bokeh.plotting as bkp
 from pandas import DataFrame
 import numpy as np
 import pytest
