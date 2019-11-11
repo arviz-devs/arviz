@@ -6,6 +6,7 @@ from bokeh.layouts import gridplot
 from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 
 from ....data import convert_to_dataset
 from ...distplot import plot_dist
@@ -395,9 +396,7 @@ def _plot_chains_bokeh(
 
     if combined:
         plot_dist(
-            np.concatenate(
-                [item for _data in data.values() for item in _data.data[y_name].values]
-            ).flatten(),
+            np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
             textsize=xt_labelsize,
             ax=ax_density,
             color=colors[-1],

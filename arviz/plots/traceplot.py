@@ -18,6 +18,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
+    **kwargs
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -149,6 +150,7 @@ def plot_trace(
             rug_kwargs=rug_kwargs,
             hist_kwargs=hist_kwargs,
             trace_kwargs=trace_kwargs,
+            **kwargs,
         )
     else:
         raise NotImplementedError(
