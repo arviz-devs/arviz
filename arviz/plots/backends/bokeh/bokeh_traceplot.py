@@ -387,7 +387,6 @@ def _plot_trace_bokeh(
 
 
 def _plot_chains_bokeh(
-    *,
     ax_density,
     ax_trace,
     data,
