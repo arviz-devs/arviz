@@ -267,6 +267,10 @@ def _plot_trace_bokeh(
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
     for idx, (var_name, selection, value) in enumerate(plotters):
+        if rug:
+            rug_kwargs["y"] = var_name
+            rug_kwargs["cds"] = cds_data[idx]
+
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
@@ -407,6 +411,7 @@ def _plot_trace_bokeh(
 
 
 def _plot_chains_bokeh(
+    *,
     ax_density,
     ax_trace,
     data,
@@ -446,7 +451,7 @@ def _plot_chains_bokeh(
                     source=cds,
                     line_color=colors[chain_idx],
                     legend_label="chain {}".format(chain_idx),
-                    **trace_kwargs
+                    **trace_kwargs,
                 )
                 if marker:
                     ax_trace.circle(
