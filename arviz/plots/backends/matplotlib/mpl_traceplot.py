@@ -21,6 +21,7 @@ def _plot_trace_mpl(
     divergences="bottom",
     figsize=None,
     textsize=None,
+    rug=False,
     lines=None,
     compact=False,
     combined=False,
@@ -52,6 +53,8 @@ def _plot_trace_mpl(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    rug : bool
+        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous variables.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -199,6 +202,7 @@ def _plot_trace_mpl(
                 colors,
                 combined,
                 xt_labelsize,
+                rug,
                 trace_kwargs,
                 hist_kwargs,
                 plot_kwargs,
@@ -216,6 +220,7 @@ def _plot_trace_mpl(
                     colors,
                     combined,
                     xt_labelsize,
+                    rug,
                     trace_kwargs,
                     hist_kwargs,
                     plot_kwargs,
@@ -306,6 +311,7 @@ def _plot_chains_mpl(
     colors,
     combined,
     xt_labelsize,
+    rug,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
@@ -320,6 +326,7 @@ def _plot_chains_mpl(
             plot_dist(
                 row,
                 textsize=xt_labelsize,
+                rug=rug,
                 ax=axes[idx, 0],
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
@@ -332,6 +339,7 @@ def _plot_chains_mpl(
         plot_dist(
             value.flatten(),
             textsize=xt_labelsize,
+            rug=rug,
             ax=axes[idx, 0],
             hist_kwargs=hist_kwargs,
             plot_kwargs=plot_kwargs,

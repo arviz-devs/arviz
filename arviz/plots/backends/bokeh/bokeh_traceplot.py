@@ -22,6 +22,7 @@ def _plot_trace_bokeh(
     divergences="bottom",
     figsize=None,
     textsize=None,
+    rug=False,
     lines=None,
     compact=False,
     combined=False,
@@ -59,6 +60,8 @@ def _plot_trace_bokeh(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    rug : bool
+        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous variables.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -355,6 +358,7 @@ def _plot_chains_bokeh(
     colors,
     combined,
     xt_labelsize,
+    rug,
     legend,
     trace_kwargs,
     hist_kwargs,
@@ -414,6 +418,7 @@ def _plot_chains_bokeh(
                     textsize=xt_labelsize,
                     ax=ax_density,
                     color=colors[chain_idx],
+                    rug=rug,
                     hist_kwargs=hist_kwargs,
                     plot_kwargs=plot_kwargs,
                     fill_kwargs=fill_kwargs,
@@ -429,6 +434,7 @@ def _plot_chains_bokeh(
                 textsize=xt_labelsize,
                 ax=ax_density,
                 color=colors[-1],
+                rug=rug,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,

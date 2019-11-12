@@ -8,6 +8,7 @@ def plot_trace(
     divergences="bottom",
     figsize=None,
     textsize=None,
+    rug=False,
     lines=None,
     compact=False,
     combined=False,
@@ -41,6 +42,8 @@ def plot_trace(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    rug : bool
+        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous variables.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -115,6 +118,7 @@ def plot_trace(
             divergences=divergences,
             figsize=figsize,
             textsize=textsize,
+            rug=rug,
             lines=lines,
             compact=compact,
             combined=combined,
@@ -141,6 +145,7 @@ def plot_trace(
             divergences=divergences,
             figsize=figsize,
             textsize=textsize,
+            rug=rug,
             lines=lines,
             compact=compact,
             combined=combined,
