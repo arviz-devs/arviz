@@ -2,7 +2,7 @@
 from .inference_data import InferenceData, concat
 from .io_netcdf import from_netcdf, to_netcdf
 from .datasets import load_arviz_data, list_datasets, clear_data_home
-from .base import numpy_to_data_array, dict_to_dataset
+from .base import numpy_to_data_array, dict_to_dataset, CoordSpec, DimSpec
 from .converters import convert_to_dataset, convert_to_inference_data
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
@@ -35,4 +35,6 @@ __all__ = [
     "from_tfp",
     "from_netcdf",
     "to_netcdf",
+    "CoordSpec",
+    "DimSpec"
 ]
