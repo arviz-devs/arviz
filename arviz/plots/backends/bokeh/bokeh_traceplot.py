@@ -250,15 +250,19 @@ def _plot_trace_bokeh(
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
     for idx, (var_name, selection, value) in enumerate(plotters):
+        if rug:
+            rug_kwargs["y"] = var_name
+            rug_kwargs["cds"] = cds_data[idx]
+
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
             _plot_chains_bokeh(
-                axes[idx, 0],
-                axes[idx, 1],
-                cds_data,
-                draw_name,
-                (
+                ax_density=axes[idx, 0],
+                ax_trace=axes[idx, 1],
+                data=cds_data,
+                x_name=draw_name,
+                y_name=(
                     var_name,
                     [
                         name
@@ -266,25 +270,26 @@ def _plot_trace_bokeh(
                         if name.split("_arviz_multidim_extra_")[0] == var_name
                     ],
                 ),
-                colors,
-                combined,
-                legend,
-                xt_labelsize,
-                trace_kwargs,
-                hist_kwargs,
-                plot_kwargs,
-                fill_kwargs,
-                rug_kwargs,
+                colors=colors,
+                combined=combined,
+                xt_labelsize=xt_labelsize,
+                rug=rug,
+                legend=legend,
+                trace_kwargs=trace_kwargs,
+                hist_kwargs=hist_kwargs,
+                plot_kwargs=plot_kwargs,
+                fill_kwargs=fill_kwargs,
+                rug_kwargs=rug_kwargs,
             )
         else:
             value = value.reshape((value.shape[0], value.shape[1], -1))
             for sub_idx in range(value.shape[2]):
                 _plot_chains_bokeh(
-                    axes[idx, 0],
-                    axes[idx, 1],
-                    cds_data,
-                    draw_name,
-                    (
+                    ax_density=axes[idx, 0],
+                    ax_trace=axes[idx, 1],
+                    data=cds_data,
+                    x_name=draw_name,
+                    y_name=(
                         var_name,
                         [
                             name
@@ -292,15 +297,16 @@ def _plot_trace_bokeh(
                             if name.split("_arviz_multidim_extra_")[0] == var_name
                         ],
                     ),
-                    colors,
-                    combined,
-                    legend,
-                    xt_labelsize,
-                    trace_kwargs,
-                    hist_kwargs,
-                    plot_kwargs,
-                    fill_kwargs,
-                    rug_kwargs,
+                    colors=colors,
+                    combined=combined,
+                    xt_labelsize=xt_labelsize,
+                    rug=rug,
+                    legend=legend,
+                    trace_kwargs=trace_kwargs,
+                    hist_kwargs=hist_kwargs,
+                    plot_kwargs=plot_kwargs,
+                    fill_kwargs=fill_kwargs,
+                    rug_kwargs=rug_kwargs,
                 )
 
         for col in (0, 1):
@@ -350,6 +356,7 @@ def _plot_trace_bokeh(
 
 
 def _plot_chains_bokeh(
+    *,
     ax_density,
     ax_trace,
     data,
@@ -382,7 +389,7 @@ def _plot_chains_bokeh(
                     source=cds,
                     line_color=colors[chain_idx],
                     legend_label="chain {}".format(chain_idx),
-                    **trace_kwargs
+                    **trace_kwargs,
                 )
                 if marker:
                     ax_trace.circle(
