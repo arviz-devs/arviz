@@ -43,12 +43,8 @@ def plot_trace(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     rug : bool
-<<<<<<< HEAD
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
-=======
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous variables.
->>>>>>> 4ed9a0f... fixes
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
