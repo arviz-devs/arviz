@@ -36,5 +36,5 @@ __all__ = [
     "from_netcdf",
     "to_netcdf",
     "CoordSpec",
-    "DimSpec"
+    "DimSpec",
 ]

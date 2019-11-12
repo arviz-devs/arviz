@@ -803,8 +803,8 @@ def r2_score(y_true, y_pred):
 
 def summary(
     data,
-    var_names: Optional[List[str]]=None,
-    fmt: str="wide",
+    var_names: Optional[List[str]] = None,
+    fmt: str = "wide",
     round_to=None,
     include_circ=None,
     stat_funcs=None,
@@ -812,8 +812,8 @@ def summary(
     credible_interval=0.94,
     order="C",
     index_origin=0,
-    coords: Optional[CoordSpec]=None,
-    dims: Optional[DimSpec]=None
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -896,11 +896,11 @@ def summary(
            ...: )
 
     """
-    extra_args = {} # type: Dict[str, Any]
+    extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
-        extra_args['coords'] = coords
+        extra_args["coords"] = coords
     if dims is not None:
-        extra_args['dims'] = dims
+        extra_args["dims"] = dims
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]
