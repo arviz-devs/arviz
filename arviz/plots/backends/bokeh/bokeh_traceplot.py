@@ -1,6 +1,6 @@
 """Bokeh Traceplot."""
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Span
+from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
 from itertools import cycle
@@ -347,6 +347,37 @@ def _plot_trace_bokeh(
             for col in (0, 1):
                 if axes[idx, col].legend:
                     axes[idx, col].legend.visible = False
+
+        if divergences:
+            div_density_kwargs = {}
+            div_density_kwargs.setdefault("size", 14)
+            div_density_kwargs.setdefault("line_color", "black")
+            div_density_kwargs.setdefault("line_width", 1)
+            div_density_kwargs.setdefault("line_alpha", 0.50)
+            div_density_kwargs.setdefault("angle", np.pi / 2)
+
+            div_trace_kwargs = {}
+            div_trace_kwargs.setdefault("size", 14)
+            div_trace_kwargs.setdefault("line_color", "black")
+            div_trace_kwargs.setdefault("line_width", 1)
+            div_trace_kwargs.setdefault("line_alpha", 0.50)
+            div_trace_kwargs.setdefault("angle", np.pi / 2)
+
+            div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
+            divs = divergence_data.sel(**div_selection).values
+            divs = np.atleast_2d(divs)
+
+            for chain, chain_divs in enumerate(divs):
+                div_draws = data.draw.values[chain_divs]
+                div_idxs = np.arange(len(chain_divs))[chain_divs]
+                if div_idxs.size > 0:
+                    values = value[chain, div_idxs]
+                    tmp_cds = ColumnDataSource({"y": values, "x": div_idxs})
+                    glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
+                    glyph_trace = Dash(x="x", y=value.min(), **div_trace_kwargs)
+
+                    axes[idx, 0].add_glyph(tmp_cds, glyph_density)
+                    axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
     if show:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
