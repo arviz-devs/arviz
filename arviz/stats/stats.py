@@ -485,9 +485,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     """
     inference_data = convert_to_inference_data(data)
     if not hasattr(inference_data, "sample_stats"):
-        raise TypeError(
-            "Must be able to extract a sample_stats group from data!"
-        )
+        raise TypeError("Must be able to extract a sample_stats group from data!")
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     log_likelihood = inference_data.sample_stats.log_likelihood
@@ -507,9 +505,7 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     if reff is None:
         if not hasattr(inference_data, "posterior"):
-            raise TypeError(
-                "Must be able to extract a posterior group from data!"
-            )
+            raise TypeError("Must be able to extract a posterior group from data!")
         posterior = inference_data.posterior
         n_chains = len(posterior.chain)
         if n_chains == 1:
