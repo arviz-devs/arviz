@@ -105,7 +105,6 @@ def plot_rank(
     length_plotters = len(plotters)
 
     if bins is None:
-        # Use double Sturges' formula
         bins = _sturges_formula(posterior_data, mult=2)
 
     if axes is None:

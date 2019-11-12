@@ -639,7 +639,7 @@ def test_plot_autocorr_var_names(models, var_names):
         {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
         {"var_names": "mu", "ref_line": False},
-        {"var_names": "mu", "kind":"vlines"},
+        {"var_names": "mu", "kind": "vlines"},
     ],
 )
 def test_plot_rank(models, kwargs):
