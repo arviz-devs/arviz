@@ -225,21 +225,35 @@ def _plot_trace_bokeh(
     axes = np.array(axes)
 
     cds_data = {}
+    cds_var_groups = {}
     draw_name = "draw"
-    for var_name, _, value in plotters:
+
+    for var_name, selection, value in list(
+        xarray_var_iter(data, var_names=var_names, combined=True)
+    ):
+        if selection:
+            cds_name = "{}_ARVIZ_CDS_SELECTION_{}".format(
+                var_name,
+                "_".join(
+                    item
+                    for key, value in selection.items()
+                    for item in (
+                        [key, value] if isinstance(value, (float, int, str)) else [key, *value]
+                    )
+                ),
+            )
+        else:
+            cds_name = var_name
+
+        if var_name not in cds_var_groups:
+            cds_var_groups[var_name] = []
+        cds_var_groups[var_name].append(cds_name)
+
         for chain_idx, _ in enumerate(data.chain.values):
             if chain_idx not in cds_data:
                 cds_data[chain_idx] = {}
-            _data = data[var_name][chain_idx].values
-            if len(_data.shape[1:]):
-                for idx in np.ndindex(*_data.shape[1:]):
-                    _var_name = "{}_arviz_multidim_extra_{}".format(
-                        var_name, "_".join(str(item) for item in idx)
-                    )
-                    idx = [slice(None)] + list(idx)
-                    cds_data[chain_idx][_var_name] = _data[tuple(idx)]
-            else:
-                cds_data[chain_idx][var_name] = _data
+            _data = value[chain_idx]
+            cds_data[chain_idx][cds_name] = _data
 
     while any(key == draw_name for key in cds_data[0]):
         draw_name += "w"
@@ -250,31 +264,37 @@ def _plot_trace_bokeh(
     cds_data = {chain_idx: ColumnDataSource(cds) for chain_idx, cds in cds_data.items()}
 
     for idx, (var_name, selection, value) in enumerate(plotters):
-        if rug:
-            rug_kwargs["y"] = var_name
-            rug_kwargs["cds"] = cds_data[idx]
-
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
+            y_name = (
+                var_name
+                if not selection
+                else "{}_ARVIZ_CDS_SELECTION_{}".format(
+                    var_name,
+                    "_".join(
+                        item
+                        for key, value in selection.items()
+                        for item in (
+                            [key, value] if isinstance(value, (float, int, str)) else [key, *value]
+                        )
+                    ),
+                )
+            )
+            if rug:
+                rug_kwargs["y"] = y_name
             _plot_chains_bokeh(
                 ax_density=axes[idx, 0],
                 ax_trace=axes[idx, 1],
                 data=cds_data,
                 x_name=draw_name,
-                y_name=(
-                    var_name,
-                    [
-                        name
-                        for name in cds_data[0].data.keys()
-                        if name.split("_arviz_multidim_extra_")[0] == var_name
-                    ],
-                ),
+                y_name=y_name,
                 colors=colors,
                 combined=combined,
                 xt_labelsize=xt_labelsize,
                 rug=rug,
                 legend=legend,
+                compact=compact,
                 trace_kwargs=trace_kwargs,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
@@ -282,26 +302,21 @@ def _plot_trace_bokeh(
                 rug_kwargs=rug_kwargs,
             )
         else:
-            value = value.reshape((value.shape[0], value.shape[1], -1))
-            for sub_idx in range(value.shape[2]):
+            for y_name in cds_var_groups[var_name]:
+                if rug:
+                    rug_kwargs["y"] = y_name
                 _plot_chains_bokeh(
                     ax_density=axes[idx, 0],
                     ax_trace=axes[idx, 1],
                     data=cds_data,
                     x_name=draw_name,
-                    y_name=(
-                        var_name,
-                        [
-                            name
-                            for name in cds_data[0].data.keys()
-                            if name.split("_arviz_multidim_extra_")[0] == var_name
-                        ],
-                    ),
+                    y_name=y_name,
                     colors=colors,
                     combined=combined,
                     xt_labelsize=xt_labelsize,
                     rug=rug,
                     legend=legend,
+                    compact=compact,
                     trace_kwargs=trace_kwargs,
                     hist_kwargs=hist_kwargs,
                     plot_kwargs=plot_kwargs,
@@ -397,80 +412,59 @@ def _plot_chains_bokeh(
     xt_labelsize,
     rug,
     legend,
+    compact,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
 ):
-    if isinstance(y_name, tuple):
-        y_name, y_names = y_name
-    else:
-        y_names = [y_name]
     marker = trace_kwargs.pop("marker", True)
     for chain_idx, cds in data.items():
-        for _y_name in y_names:
-            # do this manually?
-            # https://stackoverflow.com/questions/36561476/change-color-of-non-selected-bokeh-lines
-            if legend:
-                ax_trace.line(
+        if legend:
+            ax_trace.line(
+                x=x_name,
+                y=y_name,
+                source=cds,
+                line_color=colors[chain_idx],
+                legend_label="chain {}".format(chain_idx),
+                **trace_kwargs,
+            )
+            if marker:
+                ax_trace.circle(
                     x=x_name,
-                    y=_y_name,
+                    y=y_name,
                     source=cds,
+                    radius=0.48,
                     line_color=colors[chain_idx],
-                    legend_label="chain {}".format(chain_idx),
-                    **trace_kwargs,
+                    fill_color=colors[chain_idx],
+                    alpha=0.5,
                 )
-                if marker:
-                    ax_trace.circle(
-                        x=x_name,
-                        y=_y_name,
-                        source=cds,
-                        radius=0.48,
-                        line_color=colors[chain_idx],
-                        fill_color=colors[chain_idx],
-                        alpha=0.5,
-                    )
-            else:
-                # tmp hack
-                ax_trace.line(
-                    x=x_name, y=_y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
+        else:
+            # tmp hack
+            ax_trace.line(
+                x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
+            )
+            if marker:
+                ax_trace.circle(
+                    x=x_name,
+                    y=y_name,
+                    source=cds,
+                    radius=0.48,
+                    line_color=colors[chain_idx],
+                    fill_color=colors[chain_idx],
+                    alpha=0.5,
                 )
-                if marker:
-                    ax_trace.circle(
-                        x=x_name,
-                        y=_y_name,
-                        source=cds,
-                        radius=0.48,
-                        line_color=colors[chain_idx],
-                        fill_color=colors[chain_idx],
-                        alpha=0.5,
-                    )
-            if not combined:
-                if legend:
-                    plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
-                plot_kwargs["line_color"] = colors[chain_idx]
-                plot_dist(
-                    cds.data[_y_name],
-                    textsize=xt_labelsize,
-                    ax=ax_density,
-                    color=colors[chain_idx],
-                    rug=rug,
-                    hist_kwargs=hist_kwargs,
-                    plot_kwargs=plot_kwargs,
-                    fill_kwargs=fill_kwargs,
-                    rug_kwargs=rug_kwargs,
-                    backend="bokeh",
-                    show=False,
-                )
-
-    if combined:
-        for _y_name in y_names:
+        if not combined:
+            rug_kwargs["cds"] = cds
+            if legend:
+                plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
+            plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
-                np.concatenate([item.data[_y_name] for item in data.values()]).flatten(),
+                cds.data[y_name],
                 textsize=xt_labelsize,
                 ax=ax_density,
-                color=colors[-1],
+                color=colors[chain_idx],
                 rug=rug,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
@@ -479,3 +473,19 @@ def _plot_chains_bokeh(
                 backend="bokeh",
                 show=False,
             )
+
+    if combined:
+        rug_kwargs["cds"] = data
+        plot_dist(
+            np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
+            textsize=xt_labelsize,
+            ax=ax_density,
+            color=colors[-1],
+            rug=rug,
+            hist_kwargs=hist_kwargs,
+            plot_kwargs=plot_kwargs,
+            fill_kwargs=fill_kwargs,
+            rug_kwargs=rug_kwargs,
+            backend="bokeh",
+            show=False,
+        )

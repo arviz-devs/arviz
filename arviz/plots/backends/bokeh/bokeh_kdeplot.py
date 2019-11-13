@@ -70,8 +70,13 @@ def _plot_kde_bokeh(
             rug_kwargs.setdefault("line_width", 1)
             rug_kwargs.setdefault("line_alpha", 0.35)
             rug_kwargs.setdefault("angle", np.pi / 2)
-            glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
-            ax.add_glyph(cds_rug, glyph)
+            if isinstance(cds_rug, dict):
+                for _cds_rug in cds_rug.values():
+                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    ax.add_glyph(_cds_rug, glyph)
+            else:
+                glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                ax.add_glyph(cds_rug, glyph)
 
         x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)
