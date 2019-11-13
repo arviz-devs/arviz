@@ -1,5 +1,6 @@
 """Bokeh KDE Plot."""
 import bokeh.plotting as bkp
+from bokeh.models import ColumnDataSource, Dash
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -52,11 +53,30 @@ def _plot_kde_bokeh(
 
         fill_kwargs.setdefault("color", default_color)
 
-        if rug_kwargs is None:
-            rug_kwargs = {}
-        else:
-            # todo: add warning
-            pass
+        if rug:
+            if rug_kwargs is None:
+                rug_kwargs = {}
+
+            rug_kwargs = rug_kwargs.copy()
+            if "cds" in rug_kwargs:
+                cds_rug = rug_kwargs.pop("cds")
+                rug_varname = rug_kwargs.pop("y", "y")
+            else:
+                rug_varname = "y"
+                cds_rug = ColumnDataSource({rug_varname: values})
+
+            rug_kwargs.setdefault("size", 8)
+            rug_kwargs.setdefault("line_color", plot_kwargs["line_color"])
+            rug_kwargs.setdefault("line_width", 1)
+            rug_kwargs.setdefault("line_alpha", 0.35)
+            rug_kwargs.setdefault("angle", np.pi / 2)
+            if isinstance(cds_rug, dict):
+                for _cds_rug in cds_rug.values():
+                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    ax.add_glyph(_cds_rug, glyph)
+            else:
+                glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                ax.add_glyph(cds_rug, glyph)
 
         x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)

@@ -53,6 +53,8 @@ def continuous_model():
         {"combined": True},
         {"compact": True},
         {"combined": True, "compact": True, "legend": True},
+        {"divergences": "top"},
+        {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
     ],
@@ -80,7 +82,13 @@ def test_plot_kde(continuous_model):
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{"cumulative": True}, {"cumulative": True, "plot_kwargs": {"line_dash": "dashed"}},],
+    "kwargs",
+    [
+        {"cumulative": True},
+        {"cumulative": True, "plot_kwargs": {"line_dash": "dashed"}},
+        {"rug": True},
+        {"rug": True, "rug_kwargs": {"line_alpha": 0.2}},
+    ],
 )
 def test_plot_kde_cumulative(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], backend="bokeh", show=False, **kwargs)
