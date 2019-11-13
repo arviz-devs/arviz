@@ -30,7 +30,7 @@ def _plot_dist_bokeh(
 ):
 
     if ax is None:
-        ax = bkp.figure(sizing_mode="stretch_both")
+        ax = bkp.figure(width=500, height=500)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"

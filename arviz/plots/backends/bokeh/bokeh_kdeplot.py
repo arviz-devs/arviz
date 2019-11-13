@@ -1,9 +1,10 @@
 """Bokeh KDE Plot."""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash
+from bokeh.palettes import Viridis11
 import matplotlib.pyplot as plt
 import numpy as np
-
+import warnings
 
 def _plot_kde_bokeh(
     density,
@@ -36,7 +37,7 @@ def _plot_kde_bokeh(
     show=True,
 ):
     if ax is None:
-        ax = bkp.figure(sizing_mode="stretch_both")
+        ax = bkp.figure(width=500, height=500, output_backend="webgl")
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label
@@ -81,8 +82,22 @@ def _plot_kde_bokeh(
         x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)
     else:
-        # todo
-        raise NotImplementedError("Use matplotlib backend")
+        if contour_kwargs is None:
+            contour_kwargs = {}
+        contour_kwargs.setdefault("colors", "0.5")
+        if contourf_kwargs is None:
+            contourf_kwargs = {}
+        if pcolormesh_kwargs is None:
+            pcolormesh_kwargs = {}
+
+        if contour:
+            warnings.warn(
+                "contour and contourf are not yet impelented on bokeh backend."
+                "Use matplotlib interface to get these objects. Falls back to mpl",
+                UserWarning,
+            )
+        ax.image(image=[density.T], x=xmin, y=ymin, dw=(xmax-xmin)/density.shape[0], dh=(ymax-ymin)/density.shape[1], palette=Viridis11, **pcolormesh_kwargs)
+        ax.x_range.range_padding = ax.y_range.range_padding = 0
 
     if show:
         bkp.show(ax)
