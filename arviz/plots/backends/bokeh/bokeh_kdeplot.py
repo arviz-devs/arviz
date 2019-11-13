@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import warnings
 
+
 def _plot_kde_bokeh(
     density,
     lower,
@@ -96,7 +97,15 @@ def _plot_kde_bokeh(
                 "Use matplotlib interface to get these objects. Falls back to mpl",
                 UserWarning,
             )
-        ax.image(image=[density.T], x=xmin, y=ymin, dw=(xmax-xmin)/density.shape[0], dh=(ymax-ymin)/density.shape[1], palette=Viridis11, **pcolormesh_kwargs)
+        ax.image(
+            image=[density.T],
+            x=xmin,
+            y=ymin,
+            dw=(xmax - xmin) / density.shape[0],
+            dh=(ymax - ymin) / density.shape[1],
+            palette=Viridis11,
+            **pcolormesh_kwargs
+        )
         ax.x_range.range_padding = ax.y_range.range_padding = 0
 
     if show:
