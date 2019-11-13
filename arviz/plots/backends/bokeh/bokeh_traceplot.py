@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
+from collections.abc import Iterable
 from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
@@ -235,10 +236,12 @@ def _plot_trace_bokeh(
             cds_name = "{}_ARVIZ_CDS_SELECTION_{}".format(
                 var_name,
                 "_".join(
-                    item
+                    str(item)
                     for key, value in selection.items()
                     for item in (
-                        [key, value] if isinstance(value, (float, int, str)) else [key, *value]
+                        [key, value]
+                        if (isinstance(value, str) or not isinstance(value, Iterable))
+                        else [key, *value]
                     )
                 ),
             )
@@ -273,10 +276,12 @@ def _plot_trace_bokeh(
                 else "{}_ARVIZ_CDS_SELECTION_{}".format(
                     var_name,
                     "_".join(
-                        item
+                        str(item)
                         for key, value in selection.items()
                         for item in (
-                            [key, value] if isinstance(value, (float, int, str)) else [key, *value]
+                            (key, value)
+                            if (isinstance(value, str) or not isinstance(value, Iterable))
+                            else (key, *value)
                         )
                     ),
                 )
@@ -476,6 +481,8 @@ def _plot_chains_bokeh(
 
     if combined:
         rug_kwargs["cds"] = data
+        if legend:
+            plot_kwargs["legend_label"] = "combined chains"
         plot_dist(
             np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
             textsize=xt_labelsize,
