@@ -94,6 +94,18 @@ def plot_rank(
         >>> import arviz as az
         >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_rank(data, var_names='tau')
+
+    Use vlines to compare results for centered vs noncentered models
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> centered_data = az.load_arviz_data('centered_eight')
+        >>> noncentered_data = az.load_arviz_data('noncentered_eight')
+        >>> ax = plt.subplots(1, 2, figsize=(12, 3))
+        >>> az.plot_rank(centered_data, var_names="mu", kind='vlines', axes=ax[0])
+        >>> az.plot_rank(noncentered_data, var_names="mu", kind='vlines', axes=ax[1]
     """
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
