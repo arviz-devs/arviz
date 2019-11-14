@@ -153,7 +153,7 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, inplace=False, **kwargs):
+    def sel(self, inplace=False, chain_prior=False, **kwargs):
         """Perform an xarray selection on all groups.
 
         Loops over all groups to perform Dataset.sel(key=item)
@@ -165,8 +165,12 @@ class InferenceData:
 
         Parameters
         ----------
-        inplace : bool
-            If True, modify the InferenceData object inplace, otherwise, return the modified copy.
+        inplace : bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        chain_prior: bool, optional
+            If ``False``, do not select prior related groups using ``chain`` dim.
+            Otherwise, use selection on ``chain`` if present
         **kwargs : mapping
             It must be accepted by Dataset.sel()
 
@@ -204,6 +208,8 @@ class InferenceData:
         for group in self._groups:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
+            if not chain_prior and "prior" in group:
+                valid_keys -= {"chain"}
             dataset = dataset.sel(**{key: kwargs[key] for key in valid_keys})
             setattr(out, group, dataset)
         if inplace:

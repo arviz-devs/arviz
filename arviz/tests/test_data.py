@@ -317,6 +317,20 @@ def test_sel_method(inplace):
             assert np.all(dataset.chain.values == np.arange(0, 4, 2))
             assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
+def test_sel_method_chain_prior():
+    idata = load_arviz_data("centered_eight")
+    original_groups = getattr(idata, "_groups")
+    idata_subset = idata.sel(inplace=False, chain_prior=False, chain=[0,1,3])
+    groups = getattr(idata_subset, "_groups")
+    assert np.all(np.isin(groups, original_groups))
+    for group in groups:
+        dataset = getattr(idata, group)
+        assert "chain" in dataset.dims
+        if "prior" not in group:
+            assert np.all(dataset.chain.values == np.array([0,1,3]))
+    with pytest.raises(KeyError):
+        idata.sel(inplace=False, chain_prior=True, chain=[0,1,3])
+
 
 @pytest.mark.parametrize("use", ("del", "delattr"))
 def test_del_method(use):
