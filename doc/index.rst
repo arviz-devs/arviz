@@ -51,8 +51,15 @@ For the latest (unstable) version
 
 ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
-`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_, and
-`emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
+`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_,
+`emcee <https://emcee.readthedocs.io/en/stable/>`_, and
+`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for PyMC4, Edward2, and Edward are on the roadmap.
+
+A Julia wrapper, `ArviZ.jl <https://github.com/arviz-devs/ArviZ.jl>`_ is
+also available. It provides built-in support for
+`Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
+<https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
+<https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
 Contributions and issue reports are very welcome at
 `the github repository <https://github.com/arviz-devs/arviz>`_.
