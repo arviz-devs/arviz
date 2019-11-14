@@ -69,7 +69,9 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             return from_cmdstan(**kwargs)
         else:
             if coords is not None or dims is not None:
-                raise TypeError("Cannot use coords or dims arguments reading InferenceData from netcdf.")
+                raise TypeError(
+                    "Cannot use coords or dims arguments reading InferenceData from netcdf."
+                )
             return InferenceData.from_netcdf(obj)
     elif (
         obj.__class__.__name__ in {"StanFit4Model", "CmdStanMCMC"}

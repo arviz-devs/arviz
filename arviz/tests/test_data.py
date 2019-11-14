@@ -88,8 +88,8 @@ def test_load_local_arviz_data():
         "Lawrenceville",
         "Phillips Exeter",
     }
-    assert inference_data.posterior['theta'].dims == \
-        ('chain', 'draw', 'school')
+    assert inference_data.posterior["theta"].dims == ("chain", "draw", "school")
+
 
 def test_clear_data_home():
     resource = REMOTE_DATASETS["test_remote"]
@@ -769,8 +769,8 @@ class TestDataNetCDF:
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
-class TestConversions:
 
+class TestConversions:
     def test_id_conversion_idempotent(self):
         stored = load_arviz_data("centered_eight")
         inference_data = convert_to_inference_data(stored)
@@ -785,8 +785,7 @@ class TestConversions:
             "Lawrenceville",
             "Phillips Exeter",
         }
-        assert inference_data.posterior['theta'].dims == \
-            ('chain', 'draw', 'school')
+        assert inference_data.posterior["theta"].dims == ("chain", "draw", "school")
 
     def test_dataset_conversion_idempotent(self):
         inference_data = load_arviz_data("centered_eight")
@@ -802,37 +801,30 @@ class TestConversions:
             "Lawrenceville",
             "Phillips Exeter",
         }
-        assert data_set['theta'].dims == \
-            ('chain', 'draw', 'school')
+        assert data_set["theta"].dims == ("chain", "draw", "school")
 
     def test_id_conversion_args(self):
         stored = load_arviz_data("centered_eight")
-        IVIES = [
-            'Yale', 'Harvard', 'MIT',
-            'Princeton', 'Cornell', 'Dartmouth',
-            'Columbia', 'Brown',
-        ]
+        IVIES = ["Yale", "Harvard", "MIT", "Princeton", "Cornell", "Dartmouth", "Columbia", "Brown"]
         # test dictionary argument...
         # I reverse engineered a dictionary out of the centered_eight
         # data. That's what this block of code does.
         d = stored.posterior.to_dict()
-        d = d['data_vars']
-        test_dict = {} # type: Dict[str, np.ndarray]
+        d = d["data_vars"]
+        test_dict = {}  # type: Dict[str, np.ndarray]
         for var_name in d:
-            data = d[var_name]['data']
+            data = d[var_name]["data"]
             # this is a list of chains that is a list of samples...
             chain_arrs = []
-            for chain in data: # list of samples
+            for chain in data:  # list of samples
                 chain_arrs.append(np.array(chain))
             data_arr = np.stack(chain_arrs)
             test_dict[var_name] = data_arr
 
-        inference_data = convert_to_inference_data(test_dict,
-                                                   dims={'theta': ['Ivies']},
-                                                   coords={'Ivies': IVIES})
+        inference_data = convert_to_inference_data(
+            test_dict, dims={"theta": ["Ivies"]}, coords={"Ivies": IVIES}
+        )
 
         assert isinstance(inference_data, InferenceData)
-        assert set(inference_data.posterior.coords["Ivies"].values) == \
-            set(IVIES)
-        assert inference_data.posterior['theta'].dims == \
-            ('chain', 'draw', 'Ivies')
+        assert set(inference_data.posterior.coords["Ivies"].values) == set(IVIES)
+        assert inference_data.posterior["theta"].dims == ("chain", "draw", "Ivies")
