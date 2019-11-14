@@ -321,6 +321,15 @@ def test_loo_bad_scale(centered_eight):
         loo(centered_eight, scale="bad_scale")
 
 
+def test_loo_bad_no_posterior_reff(centered_eight):
+    loo(centered_eight, reff=None)
+    centered_eight = deepcopy(centered_eight)
+    del centered_eight.posterior
+    with pytest.raises(TypeError):
+        loo(centered_eight, reff=None)
+    loo(centered_eight, reff=0.7)
+
+
 def test_loo_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     # make one of the khats infinity
