@@ -1,11 +1,15 @@
 """Low level converters usually used by other functions."""
 from copy import deepcopy
+from typing import Dict, List, Any
 import datetime
 import warnings
 import pkg_resources
 import xarray as xr
 
 from .. import utils
+
+CoordSpec = Dict[str, List[Any]]
+DimSpec = Dict[str, List[str]]
 
 
 class requires:  # pylint: disable=invalid-name

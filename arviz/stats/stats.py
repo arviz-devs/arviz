@@ -4,6 +4,7 @@ import warnings
 import logging
 from collections import OrderedDict
 from copy import deepcopy
+from typing import Optional, List, Union
 
 import numpy as np
 import pandas as pd
@@ -11,7 +12,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..data import convert_to_inference_data, convert_to_dataset, InferenceData
+from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from ..plots.kdeplot import _fast_kde
 from ..plots.plot_utils import get_bins
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
@@ -802,8 +803,8 @@ def r2_score(y_true, y_pred):
 
 def summary(
     data,
-    var_names=None,
-    fmt="wide",
+    var_names: Optional[List[str]] = None,
+    fmt: str = "wide",
     round_to=None,
     include_circ=None,
     stat_funcs=None,
@@ -811,7 +812,9 @@ def summary(
     credible_interval=0.94,
     order="C",
     index_origin=0,
-):
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None,
+) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
     Parameters
@@ -845,12 +848,18 @@ def summary(
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
     index_origin : int
         If fmt is "wide, select n-based indexing for multivariate parameters. Defaults to 0.
+    coords: Dict[str, List[Any]], optional
+        Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
+    dims: Dict[str, List[str]], optional
+        Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
 
     Returns
     -------
-    pandas.DataFrame
-        With summary statistics for each variable. Defaults statistics are: `mean`, `sd`,
-        `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail` and `r_hat`.
+    pandas.DataFrame or xarray.Dataset
+        Return type dicated by `fmt` argument.
+        Return value will contain summary statistics for each variable. Default statistics are:
+        `mean`, `sd`, `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
+        `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
     Examples
@@ -887,7 +896,12 @@ def summary(
            ...: )
 
     """
-    posterior = convert_to_dataset(data, group="posterior")
+    extra_args = {}  # type: Dict[str, Any]
+    if coords is not None:
+        extra_args["coords"] = coords
+    if dims is not None:
+        extra_args["dims"] = dims
+    posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]
 
@@ -1056,6 +1070,7 @@ def summary(
         df.index = list(df.index)
         summary_df = df
     else:
+        # format is 'xarray'
         summary_df = joined
     if (round_to is not None) and (round_to not in ("None", "none")):
         summary_df = summary_df.round(round_to)

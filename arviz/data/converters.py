@@ -57,6 +57,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
 
     # Cases that convert to InferenceData
     if isinstance(obj, InferenceData):
+        if coords is not None or dims is not None:
+            raise TypeError("Cannot use coords or dims arguments with InferenceData value.")
         return obj
     elif isinstance(obj, str):
         if obj.endswith(".csv"):
@@ -66,6 +68,10 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
                 kwargs["prior"] = kwargs.pop(group)
             return from_cmdstan(**kwargs)
         else:
+            if coords is not None or dims is not None:
+                raise TypeError(
+                    "Cannot use coords or dims arguments reading InferenceData from netcdf."
+                )
             return InferenceData.from_netcdf(obj)
     elif (
         obj.__class__.__name__ in {"StanFit4Model", "CmdStanMCMC"}
@@ -105,14 +111,14 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         allowable_types = (
             "xarray dataset",
             "dict",
-            "netcdf file",
+            "netcdf filename",
             "numpy array",
             "pystan fit",
             "pymc3 trace",
             "emcee fit",
             "pyro mcmc fit",
             "numpyro mcmc fit",
-            "cmdstan fit csv",
+            "cmdstan fit csv filename",
             "cmdstanpy fit",
         )
         raise ValueError(
