@@ -11,15 +11,22 @@ from collections import MutableMapping
 _log = logging.getLogger(__name__)
 
 
-def _make_validate_choice(accepted_values):
+def _make_validate_choice(accepted_values, allow_none=False):
     """Validate value is in accepted_values."""
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
     def validate_choice(value):
+        if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
+            return None
+        value = str(value)
         if value.lower() in accepted_values:
             return value.lower()
-        raise ValueError("{} is not one of {}".format(value, accepted_values))
+        raise ValueError(
+            "{} is not one of {}{}".format(
+                value, accepted_values, " nor None" if allow_none else ""
+            )
+        )
 
     return validate_choice
 
@@ -65,8 +72,13 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
     "plot.backend": ("matplotlib", _make_validate_choice(("matplotlib", "bokeh"))),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
+    "plot.point_estimate": (
+        "mean",
+        _make_validate_choice(("mean", "median", "mode"), allow_none=True),
+    ),
     "stats.credible_interval": (0.94, _validate_probability),
     "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
+    "stats.ic_scale": ("deviance", _make_validate_choice(("deviance", "log", "negative_log"))),
 }
 
 

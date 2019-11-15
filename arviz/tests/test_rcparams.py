@@ -10,6 +10,7 @@ from ..stats import compare
 from ..rcparams import (
     rcParams,
     rc_context,
+    _make_validate_choice,
     _validate_positive_int_or_none,
     _validate_probability,
     read_rcfile,
@@ -66,6 +67,21 @@ def test_choice_bad_values(param):
     msg = "{}: bad_value is not one of".format(param.replace(".", r"\."))
     with pytest.raises(ValueError, match=msg):
         rcParams[param] = "bad_value"
+
+
+@pytest.mark.parametrize(
+    "args", [("not one.+nor None", 0), (False, None), (False, "accepted")],
+)
+def test_validate_choice_none(args):
+    accepted_values = ("accepted", "good", "arviz")
+    validate_choice = _make_validate_choice(accepted_values, allow_none=True)
+    raise_error, value = args
+    if raise_error:
+        with pytest.raises(ValueError, match=raise_error):
+            validate_choice(value)
+    else:
+        value = validate_choice(value)
+        assert value in accepted_values or value is None
 
 
 @pytest.mark.parametrize(

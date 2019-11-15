@@ -9,8 +9,10 @@ data.load                    : lazy  # Sets the default data loading mode.
 # rcParams related with plotting functions
 plot.backend                 : matplotlib  # Plotting backend.
 plot.max_subplots            : 40    # Maximum number of subplots.
+plot.point_estimate          : mean
 
 ### STATS ###
 # rcParams related with statistical and diagnostic functions
-stats.credible_interval      : 0.94  # Default credible interval
-stats.information_criterion  : waic  # Default information criterion
+stats.credible_interval      : 0.94
+stats.information_criterion  : waic
+stats.ic_scale               : deviance
