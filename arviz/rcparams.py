@@ -44,10 +44,28 @@ def _validate_positive_int_or_none(value):
         return _validate_positive_int(value)
 
 
+def _validate_float(value):
+    """Validate value is a float."""
+    try:
+        value = float(value)
+    except ValueError:
+        raise ValueError("Could not convert to float")
+    return value
+
+
+def _validate_probability(value):
+    """Validate a probability: a float between 0 and 1."""
+    value = _validate_float(value)
+    if (value < 0) or (value > 1):
+        raise ValueError("Only values between 0 and 1 are valid.")
+    return value
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
-    "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.backend": ("matplotlib", _make_validate_choice(("matplotlib", "bokeh"))),
+    "plot.max_subplots": (40, _validate_positive_int_or_none),
+    "stats.credible_interval": (0.94, _validate_probability),
     "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
 }
 
