@@ -12,6 +12,9 @@
 ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
 Includes functions for posterior analysis, model checking, comparison and diagnostics.
 
+### ArviZ in other languages
+ArviZ also has a Julia wrapper available [ArviZ.jl](https://arviz-devs.github.io/ArviZ.jl/dev/).
+
 ## Documentation
 
 The ArviZ documentation can be found in the [official docs](https://arviz-devs.github.io/arviz/index.html).
