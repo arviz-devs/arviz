@@ -47,6 +47,7 @@ def _validate_positive_int_or_none(value):
 defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
+    "plot.backend": ("matplotlib", _make_validate_choice(("matplotlib", "bokeh"))),
     "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
 }
 

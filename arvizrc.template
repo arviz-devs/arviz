@@ -8,6 +8,7 @@ data.load                    : lazy  # Sets the default data loading mode.
 ### PLOT  ###
 # rcParams related with plotting functions
 plot.max_subplots            : 40    # Maximum number of subplots.
+plot.backend                 : matplotlib  # Plotting backend.
 
 ### STATS ###
 # rcParams related with statistical and diagnostic functions
