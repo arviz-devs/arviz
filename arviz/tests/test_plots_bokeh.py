@@ -117,7 +117,7 @@ def test_plot_dist(continuous_model, kwargs):
     assert axes
 
 
-def test_plot_kde_1D(continuous_model):
+def test_plot_kde_1d(continuous_model):
     axes = plot_kde(continuous_model["y"], backend="bokeh", show=False)
     assert axes
 
