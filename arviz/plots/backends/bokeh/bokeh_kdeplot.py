@@ -148,13 +148,19 @@ def _plot_kde_bokeh(
             ax.y_range = Range1d(ymin, ymax)
 
         else:
+
+            cmap = pcolormesh_kwargs.pop("cmap", "viridis")
+            if isinstance(cmap, str):
+                cmap = get_cmap("viridis")
+            colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, len(levels_scaled) + 1))]
+
             ax.image(
                 image=[density.T],
                 x=xmin,
                 y=ymin,
                 dw=(xmax - xmin) / density.shape[0],
                 dh=(ymax - ymin) / density.shape[1],
-                palette=Viridis[256],
+                palette=colors,
                 **pcolormesh_kwargs
             )
             ax.x_range.range_padding = ax.y_range.range_padding = 0

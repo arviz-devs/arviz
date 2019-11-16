@@ -99,3 +99,17 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
     assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"contour": True, "fill_last": False},
+        {"contour": True, "contourf_kwargs": {"cmap": "plasma"},},
+        {"contour": False},
+        {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+    ],
+)
+def test_plot_kde(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
