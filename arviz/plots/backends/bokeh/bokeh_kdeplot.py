@@ -52,12 +52,10 @@ def _plot_kde_bokeh(
             plot_kwargs = {}
         plot_kwargs.setdefault("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"][0])
 
-        default_color = plot_kwargs.get("color")
-
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault("color", default_color)
+        fill_kwargs.setdefault("fill_color", plt.rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if rug:
             if rug_kwargs is None:
@@ -85,20 +83,28 @@ def _plot_kde_bokeh(
                 ax.add_glyph(cds_rug, glyph)
 
         x = np.linspace(lower, upper, len(density))
-        ax.line(x, density, **plot_kwargs)
 
         if quantiles is not None:
-            pass
-            #fill_kwargs.setdefault("alpha", 0.75)
+            fill_kwargs.setdefault("fill_alpha", 0.75)
+            fill_kwargs.setdefault("line_color", None)
 
-            #idx = [np.sum(density_q < quant) for quant in quantiles]
+            quantiles = sorted(np.clip(quantiles, 0, 1))
+            if quantiles[0] != 0:
+                quantiles = [0] + quantiles
+            if quantiles[-1] != 1:
+                quantiles = quantiles + [1]
 
-            #fill_func(
-            #    fill_x,
-            #    fill_y,
-            #    where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
-            #    **fill_kwargs
-            #)
+            for quant_0, quant_1 in zip(quantiles[:-1], quantiles[1:]):
+                idx = (density_q > quant_0) & (density_q < quant_1)
+                if idx.sum():
+                    patch_x = np.concatenate((x[idx], [x[idx][-1]], x[idx][::-1], [x[idx][0]]))
+                    patch_y = np.concatenate(
+                        (np.zeros_like(density[idx]), [density[idx][-1]], density[idx][::-1], [0])
+                    )
+                    ax.patch(patch_x, patch_y, **fill_kwargs)
+        else:
+            ax.line(x, density, **plot_kwargs)
+
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
