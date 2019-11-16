@@ -448,7 +448,7 @@ def _plot_chains_bokeh(
                 if marker:
                     ax_trace.circle(
                         x=x_name,
-                        y=_y_name,
+                        y=y_name,
                         source=cds,
                         radius=0.48,
                         line_color=colors[chain_idx],
