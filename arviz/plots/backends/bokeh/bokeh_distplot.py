@@ -24,13 +24,15 @@ def _plot_dist_bokeh(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
     show=True,
 ):
 
     if ax is None:
-        ax = bkp.figure(sizing_mode="stretch_both")
+        ax = bkp.figure(width=500, height=500)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
@@ -63,6 +65,8 @@ def _plot_dist_bokeh(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             contour_kwargs=contour_kwargs,
+            contourf_kwargs=contourf_kwargs,
+            pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="bokeh",
             show=False,

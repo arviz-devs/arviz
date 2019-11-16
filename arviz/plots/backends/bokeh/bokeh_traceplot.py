@@ -427,39 +427,20 @@ def _plot_chains_bokeh(
     marker = trace_kwargs.pop("marker", True)
     for chain_idx, cds in data.items():
         if legend:
-            ax_trace.line(
+            trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
+        ax_trace.line(
+            x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs,
+        )
+        if marker:
+            ax_trace.circle(
                 x=x_name,
                 y=y_name,
                 source=cds,
+                radius=0.30,
                 line_color=colors[chain_idx],
-                legend_label="chain {}".format(chain_idx),
-                **trace_kwargs,
+                fill_color=colors[chain_idx],
+                alpha=0.5,
             )
-            if marker:
-                ax_trace.circle(
-                    x=x_name,
-                    y=y_name,
-                    source=cds,
-                    radius=0.48,
-                    line_color=colors[chain_idx],
-                    fill_color=colors[chain_idx],
-                    alpha=0.5,
-                )
-        else:
-            # tmp hack
-            ax_trace.line(
-                x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs
-            )
-            if marker:
-                ax_trace.circle(
-                    x=x_name,
-                    y=y_name,
-                    source=cds,
-                    radius=0.48,
-                    line_color=colors[chain_idx],
-                    fill_color=colors[chain_idx],
-                    alpha=0.5,
-                )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:

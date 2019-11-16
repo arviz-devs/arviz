@@ -20,6 +20,8 @@ def plot_dist(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
     backend=None,
@@ -74,6 +76,10 @@ def plot_dist(
         the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
     ax : matplotlib axes
@@ -126,6 +132,8 @@ def plot_dist(
         fill_kwargs=fill_kwargs,
         rug_kwargs=rug_kwargs,
         contour_kwargs=contour_kwargs,
+        contourf_kwargs=contourf_kwargs,
+        pcolormesh_kwargs=pcolormesh_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
         **kwargs,
