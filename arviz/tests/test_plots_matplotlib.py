@@ -326,7 +326,7 @@ def test_plot_dist_2d_kde(continuous_model, kwargs):
     "kwargs", [{"plot_kwargs": {"linestyle": "-"}}, {"cumulative": True}, {"rug": True}]
 )
 def test_plot_kde_quantiles(continuous_model, kwargs):
-    axes = plot_kde(continuous_model["x"], **kwargs)
+    axes = plot_kde(continuous_model["x"], quantiles=[0.05, 0.5, 0.95], **kwargs)
     assert axes
 
 
