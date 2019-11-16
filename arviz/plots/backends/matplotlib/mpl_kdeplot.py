@@ -19,7 +19,6 @@ def _plot_kde_mpl(
     values2=None,
     rug=False,
     label=None,
-    bw=4.5,
     quantiles=None,
     rotated=False,
     contour=True,

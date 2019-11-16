@@ -1,14 +1,15 @@
+# pylint: disable=c-extension-no-member
 """Bokeh KDE Plot."""
+from collections.abc import Callable
+from numbers import Integral
+
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Range1d
-from collections.abc import Callable
 import matplotlib._contour as _contour
 from matplotlib.colors import rgb2hex
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import rcParams
 from matplotlib.cm import get_cmap
-from numbers import Integral
 import numpy as np
-import warnings
 
 
 def _plot_kde_bokeh(
@@ -25,7 +26,6 @@ def _plot_kde_bokeh(
     values2=None,
     rug=False,
     label=None,
-    bw=4.5,
     quantiles=None,
     rotated=False,
     contour=True,
@@ -50,12 +50,12 @@ def _plot_kde_bokeh(
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}
-        plot_kwargs.setdefault("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"][0])
+        plot_kwargs.setdefault("line_color", rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault("fill_color", plt.rcParams["axes.prop_cycle"].by_key()["color"][0])
+        fill_kwargs.setdefault("fill_color", rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if rug:
             if rug_kwargs is None:
@@ -67,19 +67,26 @@ def _plot_kde_bokeh(
                 rug_varname = rug_kwargs.pop("y", "y")
             else:
                 rug_varname = "y"
-                cds_rug = ColumnDataSource({rug_varname: values})
+                cds_rug = ColumnDataSource({rug_varname: np.asarray(values)})
 
             rug_kwargs.setdefault("size", 8)
             rug_kwargs.setdefault("line_color", plot_kwargs["line_color"])
             rug_kwargs.setdefault("line_width", 1)
             rug_kwargs.setdefault("line_alpha", 0.35)
-            rug_kwargs.setdefault("angle", np.pi / 2)
+            if not rotated:
+                rug_kwargs.setdefault("angle", np.pi / 2)
             if isinstance(cds_rug, dict):
                 for _cds_rug in cds_rug.values():
-                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    if not rotated:
+                        glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                    else:
+                        glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
                     ax.add_glyph(_cds_rug, glyph)
             else:
-                glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                if not rotated:
+                    glyph = Dash(x=rug_varname, y=0.0, **rug_kwargs)
+                else:
+                    glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
                 ax.add_glyph(cds_rug, glyph)
 
         x = np.linspace(lower, upper, len(density))
@@ -101,9 +108,15 @@ def _plot_kde_bokeh(
                     patch_y = np.concatenate(
                         (np.zeros_like(density[idx]), [density[idx][-1]], density[idx][::-1], [0])
                     )
-                    ax.patch(patch_x, patch_y, **fill_kwargs)
+                    if not rotated:
+                        ax.patch(patch_x, patch_y, **fill_kwargs)
+                    else:
+                        ax.patch(patch_y, patch_x, **fill_kwargs)
         else:
-            ax.line(x, density, **plot_kwargs)
+            if not rotated:
+                ax.line(x, density, **plot_kwargs)
+            else:
+                ax.line(density, x, **plot_kwargs)
 
     else:
         if contour_kwargs is None:
