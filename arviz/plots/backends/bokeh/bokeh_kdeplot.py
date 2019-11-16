@@ -1,7 +1,7 @@
 """Bokeh KDE Plot."""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Range1d
-from collections import Callable
+from collections.abc import Callable
 import matplotlib._contour as _contour
 from matplotlib.colors import rgb2hex
 import matplotlib.pyplot as plt

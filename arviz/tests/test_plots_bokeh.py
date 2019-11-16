@@ -140,5 +140,5 @@ def test_plot_kde_2d(continuous_model, kwargs):
     "kwargs", [{"plot_kwargs": {"line_dash": "solid"}}, {"cumulative": True}, {"rug": True}]
 )
 def test_plot_kde_quantiles(continuous_model, kwargs):
-    axes = plot_kde(continuous_model["x"], **kwargs)
+    axes = plot_kde(continuous_model["x"], show=False, backend="bokeh", **kwargs)
     assert axes
