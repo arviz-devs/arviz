@@ -1,7 +1,7 @@
 """Bokeh KDE Plot."""
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Range1d
-from bokeh.palettes import Viridis
+from collections import Callable
 import matplotlib._contour as _contour
 from matplotlib.colors import rgb2hex
 import matplotlib.pyplot as plt
@@ -121,8 +121,11 @@ def _plot_kde_bokeh(
 
             cmap = contourf_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
-                cmap = get_cmap("viridis")
-            colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, len(levels_scaled) + 1))]
+                cmap = get_cmap(cmap)
+            if isinstance(cmap, Callable):
+                colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, len(levels_scaled) + 1))]
+            else:
+                colors = cmap
 
             contour_kwargs.update(contourf_kwargs)
             contour_kwargs.setdefault("line_color", "black")
@@ -151,8 +154,11 @@ def _plot_kde_bokeh(
 
             cmap = pcolormesh_kwargs.pop("cmap", "viridis")
             if isinstance(cmap, str):
-                cmap = get_cmap("viridis")
-            colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, len(levels_scaled) + 1))]
+                cmap = get_cmap(cmap)
+            if isinstance(cmap, Callable):
+                colors = [rgb2hex(item) for item in cmap(np.linspace(0, 1, 256))]
+            else:
+                colors = cmap
 
             ax.image(
                 image=[density.T],

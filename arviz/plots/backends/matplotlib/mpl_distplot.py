@@ -21,6 +21,8 @@ def _plot_dist_mpl(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
 ):
@@ -56,6 +58,8 @@ def _plot_dist_mpl(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             contour_kwargs=contour_kwargs,
+            contourf_kwargs=contourf_kwargs,
+            pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="matplotlib",
         )
