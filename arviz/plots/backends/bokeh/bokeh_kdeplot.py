@@ -86,6 +86,19 @@ def _plot_kde_bokeh(
 
         x = np.linspace(lower, upper, len(density))
         ax.line(x, density, **plot_kwargs)
+
+        if quantiles is not None:
+            pass
+            #fill_kwargs.setdefault("alpha", 0.75)
+
+            #idx = [np.sum(density_q < quant) for quant in quantiles]
+
+            #fill_func(
+            #    fill_x,
+            #    fill_y,
+            #    where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
+            #    **fill_kwargs
+            #)
     else:
         if contour_kwargs is None:
             contour_kwargs = {}
