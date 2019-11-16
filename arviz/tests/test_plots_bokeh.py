@@ -76,8 +76,24 @@ def test_plot_trace_max_subplots_warning(models):
     assert axes.shape
 
 
-def test_plot_kde(continuous_model):
-    axes = plot_kde(continuous_model["y"], backend="bokeh", show=False)
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"plot_kwargs": {"line_dash": "solid"}},
+        {"contour": True, "fill_last": False},
+        {
+            "contour": True,
+            "contourf_kwargs": {"cmap": "plasma"},
+            "contour_kwargs": {"line_width": 1},
+        },
+        {"contour": False},
+        {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+    ],
+)
+def test_plot_kde(continuous_model, kwargs):
+    axes = plot_kde(
+        continuous_model["x"], continuous_model["y"], backend="bokeh", show=False, **kwargs
+    )
     assert axes
 
 
@@ -101,6 +117,11 @@ def test_plot_dist(continuous_model, kwargs):
     assert axes
 
 
+def test_plot_kde_1D(continuous_model):
+    axes = plot_kde(continuous_model["y"], backend="bokeh", show=False)
+    assert axes
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -112,4 +133,12 @@ def test_plot_dist(continuous_model, kwargs):
 )
 def test_plot_kde_2d(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{"plot_kwargs": {"line_dash": "solid"}}, {"cumulative": True}, {"rug": True}]
+)
+def test_plot_kde_quantiles(continuous_model, kwargs):
+    axes = plot_kde(continuous_model["x"], **kwargs)
     assert axes
