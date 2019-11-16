@@ -110,6 +110,6 @@ def test_plot_dist(continuous_model, kwargs):
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
     ],
 )
-def test_plot_kde(continuous_model, kwargs):
+def test_plot_kde_2d(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
