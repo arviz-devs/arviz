@@ -11,15 +11,37 @@ from collections import MutableMapping
 _log = logging.getLogger(__name__)
 
 
-def _make_validate_choice(accepted_values):
-    """Validate value is in accepted_values."""
+def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
+    """Validate value is in accepted_values.
+
+    Parameters
+    ----------
+    accepted_values : iterable
+        Iterable containing all accepted_values.
+    allow_none: boolean, optional
+        Whether to accept ``None`` in addition to the values in ``accepted_values``.
+    typeof: type, optional
+        Type the values should be converted to.
+    """
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
     def validate_choice(value):
-        if value.lower() in accepted_values:
-            return value.lower()
-        raise ValueError("{} is not one of {}".format(value, accepted_values))
+        if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
+            return None
+        try:
+            value = typeof(value)
+        except (ValueError, TypeError):
+            raise ValueError("Could not convert to {}".format(typeof.__name__))
+        if isinstance(value, str):
+            value = value.lower()
+        if value in accepted_values:
+            return value
+        raise ValueError(
+            "{} is not one of {}{}".format(
+                value, accepted_values, " nor None" if allow_none else ""
+            )
+        )
 
     return validate_choice
 
@@ -44,10 +66,35 @@ def _validate_positive_int_or_none(value):
         return _validate_positive_int(value)
 
 
+def _validate_float(value):
+    """Validate value is a float."""
+    try:
+        value = float(value)
+    except ValueError:
+        raise ValueError("Could not convert to float")
+    return value
+
+
+def _validate_probability(value):
+    """Validate a probability: a float between 0 and 1."""
+    value = _validate_float(value)
+    if (value < 0) or (value > 1):
+        raise ValueError("Only values between 0 and 1 are valid.")
+    return value
+
+
 defaultParams = {  # pylint: disable=invalid-name
-    "data.load": ("lazy", _make_validate_choice(("lazy", "eager"))),
+    "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
+    "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
+    "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
-    "stats.information_criterion": ("waic", _make_validate_choice(("waic", "loo"))),
+    "plot.point_estimate": (
+        "mean",
+        _make_validate_choice({"mean", "median", "mode"}, allow_none=True),
+    ),
+    "stats.credible_interval": (0.94, _validate_probability),
+    "stats.information_criterion": ("waic", _make_validate_choice({"waic", "loo"})),
+    "stats.ic_scale": ("deviance", _make_validate_choice({"deviance", "log", "negative_log"})),
 }
 
 
