@@ -13,9 +13,10 @@ tensorflow
 tensorflow-probability
 pytest
 pytest-cov
-Sphinx
+Sphinx>=1.8.3
 sphinx-bootstrap-theme
 sphinx-gallery
+m2r
 black; python_version == '3.6'
 numba
 numpyro
