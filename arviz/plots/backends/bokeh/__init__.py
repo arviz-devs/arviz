@@ -1,4 +1,4 @@
-"""Boken Plotting Backend."""
+"""Bokeh Plotting Backend."""
 
 
 def output_notebook(*args, **kwargs):
