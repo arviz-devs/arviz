@@ -295,7 +295,7 @@ def test_cov(x):
         {"cumulative": True},
         {"cumulative": True, "plot_kwargs": {"linestyle": "--"}},
         {"rug": True},
-        {"rug": True, "rug_kwargs": {"alpha": 0.2}},
+        {"rug": True, "rug_kwargs": {"alpha": 0.2}, rotated: True},
     ],
 )
 def test_plot_kde_cumulative(continuous_model, kwargs):
