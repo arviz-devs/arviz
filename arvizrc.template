@@ -1,18 +1,19 @@
 #### ArviZ rcParams template ####
 ### DATA  ###
 # rcParams related with data loading related functions
+data.index_origin            : 0     # index origin, must be either 0 or 1
 data.load                    : lazy  # Sets the default data loading mode.
                                      # "lazy" stands for xarray lazy loading,
                                      # "eager" loads all datasets into memory
 
 ### PLOT  ###
 # rcParams related with plotting functions
-plot.backend                 : matplotlib  # Plotting backend.
-plot.max_subplots            : 40    # Maximum number of subplots.
-plot.point_estimate          : mean
+plot.backend                 : matplotlib  # One of bokeh, matplotlib
+plot.max_subplots            : 40          # Maximum number of subplots.
+plot.point_estimate          : mean        # One of mean, median, mode or None
 
 ### STATS ###
 # rcParams related with statistical and diagnostic functions
 stats.credible_interval      : 0.94
-stats.information_criterion  : waic
-stats.ic_scale               : deviance
+stats.information_criterion  : waic       # One of loo, waic
+stats.ic_scale               : deviance   # One of deviance, log, negative_log
