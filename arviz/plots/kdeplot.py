@@ -62,7 +62,7 @@ def plot_kde(
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -217,6 +217,7 @@ def plot_kde(
             raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
 
+        kde_plot_args.pop("textsize")
         ax = _plot_kde_bokeh(**kde_plot_args)
     else:
         raise NotImplementedError(

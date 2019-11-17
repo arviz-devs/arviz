@@ -1,6 +1,5 @@
 """Bokeh Distplot."""
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource
 import numpy as np
 
 from ...kdeplot import plot_kde
@@ -19,7 +18,6 @@ def _plot_dist_bokeh(
     quantiles=None,
     contour=True,
     fill_last=True,
-    textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
     rug_kwargs=None,
@@ -60,7 +58,6 @@ def _plot_dist_bokeh(
             contour=contour,
             legend=legend,
             fill_last=fill_last,
-            textsize=textsize,
             plot_kwargs=plot_kwargs,
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,

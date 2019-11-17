@@ -1,17 +1,20 @@
+# pylint: disable=all
 """Bokeh Traceplot."""
+from collections.abc import Iterable
+from itertools import cycle
+import warnings
+
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
-from collections.abc import Iterable
-from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
+
 
 from ....data import convert_to_dataset
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
 from ....utils import _var_names
 from ....rcparams import rcParams
 
@@ -22,7 +25,6 @@ def _plot_trace_bokeh(
     coords=None,
     divergences="bottom",
     figsize=None,
-    textsize=None,
     rug=False,
     lines=None,
     compact=False,
@@ -38,12 +40,6 @@ def _plot_trace_bokeh(
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
-    NOTE: EXPERIMENTAL CODE
-
-    Not implemented:
-        If `divergences` data is available in `sample_stats`, will plot the location of divergences as
-        dashed vertical lines.
-
     Parameters
     ----------
     data : obj
@@ -58,11 +54,9 @@ def _plot_trace_bokeh(
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
-    textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
     rug : bool
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous variables.
+        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
+        variables.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
@@ -193,9 +187,7 @@ def _plot_trace_bokeh(
 
     hist_kwargs.setdefault("alpha", 0.35)
 
-    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
-        figsize, textsize, rows=len(plotters), cols=2
-    )
+    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
     figsize = int(figsize[0] * 90 // 2), int(figsize[1] * 90 // len(plotters))
 
     trace_kwargs.setdefault("line_width", linewidth)
@@ -296,10 +288,8 @@ def _plot_trace_bokeh(
                 y_name=y_name,
                 colors=colors,
                 combined=combined,
-                xt_labelsize=xt_labelsize,
                 rug=rug,
                 legend=legend,
-                compact=compact,
                 trace_kwargs=trace_kwargs,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
@@ -318,10 +308,8 @@ def _plot_trace_bokeh(
                     y_name=y_name,
                     colors=colors,
                     combined=combined,
-                    xt_labelsize=xt_labelsize,
                     rug=rug,
                     legend=legend,
-                    compact=compact,
                     trace_kwargs=trace_kwargs,
                     hist_kwargs=hist_kwargs,
                     plot_kwargs=plot_kwargs,
@@ -371,15 +359,15 @@ def _plot_trace_bokeh(
         if divergences:
             div_density_kwargs = {}
             div_density_kwargs.setdefault("size", 14)
-            div_density_kwargs.setdefault("line_color", "black")
-            div_density_kwargs.setdefault("line_width", 1)
+            div_density_kwargs.setdefault("line_color", "red")
+            div_density_kwargs.setdefault("line_width", 2)
             div_density_kwargs.setdefault("line_alpha", 0.50)
             div_density_kwargs.setdefault("angle", np.pi / 2)
 
             div_trace_kwargs = {}
             div_trace_kwargs.setdefault("size", 14)
-            div_trace_kwargs.setdefault("line_color", "black")
-            div_trace_kwargs.setdefault("line_width", 1)
+            div_trace_kwargs.setdefault("line_color", "red")
+            div_trace_kwargs.setdefault("line_width", 2)
             div_trace_kwargs.setdefault("line_alpha", 0.50)
             div_trace_kwargs.setdefault("angle", np.pi / 2)
 
@@ -388,13 +376,16 @@ def _plot_trace_bokeh(
             divs = np.atleast_2d(divs)
 
             for chain, chain_divs in enumerate(divs):
-                div_draws = data.draw.values[chain_divs]
                 div_idxs = np.arange(len(chain_divs))[chain_divs]
                 if div_idxs.size > 0:
                     values = value[chain, div_idxs]
                     tmp_cds = ColumnDataSource({"y": values, "x": div_idxs})
+                    if divergences == "top":
+                        y_div_trace = value.max()
+                    else:
+                        y_div_trace = value.min()
                     glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
-                    glyph_trace = Dash(x="x", y=value.min(), **div_trace_kwargs)
+                    glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
 
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
                     axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
@@ -414,10 +405,8 @@ def _plot_chains_bokeh(
     y_name,
     colors,
     combined,
-    xt_labelsize,
     rug,
     legend,
-    compact,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
@@ -448,7 +437,6 @@ def _plot_chains_bokeh(
             plot_kwargs["line_color"] = colors[chain_idx]
             plot_dist(
                 cds.data[y_name],
-                textsize=xt_labelsize,
                 ax=ax_density,
                 color=colors[chain_idx],
                 rug=rug,
@@ -466,7 +454,6 @@ def _plot_chains_bokeh(
             plot_kwargs["legend_label"] = "combined chains"
         plot_dist(
             np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
-            textsize=xt_labelsize,
             ax=ax_density,
             color=colors[-1],
             rug=rug,

@@ -30,7 +30,6 @@ def _plot_kde_bokeh(
     rotated=False,
     contour=True,
     fill_last=True,
-    textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
     rug_kwargs=None,
