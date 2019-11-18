@@ -1,3 +1,4 @@
+# pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
 from .plot_utils import get_bins
 
@@ -64,7 +65,7 @@ def plot_dist(
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -152,6 +153,7 @@ def plot_dist(
             raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
+        dist_plot_args.pop("textsize")
         ax = _plot_dist_bokeh(**dist_plot_args)
     else:
         raise NotImplementedError(

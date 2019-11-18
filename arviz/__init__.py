@@ -28,3 +28,4 @@ from .data import *
 from .plots import *
 from .stats import *
 from .utils import Numba, interactive_backend
+from .plots import backends

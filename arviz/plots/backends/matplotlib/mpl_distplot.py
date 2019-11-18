@@ -1,6 +1,7 @@
 """Matplotlib distplot."""
-from ...kdeplot import plot_kde
 import matplotlib.pyplot as plt
+
+from ...kdeplot import plot_kde
 
 
 def _plot_dist_mpl(

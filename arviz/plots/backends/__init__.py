@@ -1,1 +1,2 @@
-"""Arviz plotting backends."""
+"""ArviZ plotting backends."""
+from .bokeh import *

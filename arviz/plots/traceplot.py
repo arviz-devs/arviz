@@ -41,7 +41,7 @@ def plot_trace(
         If None, size is (12, variables * 2)
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on figsize. Not implemented for bokeh backend.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
@@ -145,7 +145,6 @@ def plot_trace(
             coords=coords,
             divergences=divergences,
             figsize=figsize,
-            textsize=textsize,
             rug=rug,
             lines=lines,
             compact=compact,

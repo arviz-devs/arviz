@@ -103,7 +103,7 @@ def test_plot_kde(continuous_model, kwargs):
         {"cumulative": True},
         {"cumulative": True, "plot_kwargs": {"line_dash": "dashed"}},
         {"rug": True},
-        {"rug": True, "rug_kwargs": {"line_alpha": 0.2}},
+        {"rug": True, "rug_kwargs": {"line_alpha": 0.2}, "rotated": True},
     ],
 )
 def test_plot_kde_cumulative(continuous_model, kwargs):
