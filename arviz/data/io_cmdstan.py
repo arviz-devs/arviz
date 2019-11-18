@@ -300,7 +300,7 @@ class CmdStanConverter:
                 name = re.sub("__$", "", key_)
                 name = "diverging" if name == "divergent" else name
                 rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
         return dict_to_dataset(data, coords=coords, dims=dims)
