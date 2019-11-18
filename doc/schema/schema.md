@@ -18,22 +18,22 @@ Currently there are 2 beta implementations of this design:
  <li><a class="reference internal" href="#current-design">Current Design</a>
   <ol>
     <li><a class="reference internal" href="#posterior">posterior</a></li>
-    <li><a class="reference internal" href="#sample_stats">sample_stats</a></li>
-    <li><a class="reference internal" href="#posterior_predictive">posterior_predictive</a></li>
-    <li><a class="reference internal" href="#observed_data">observed_data</a></li>
-    <li><a class="reference internal" href="#constant_data">constant_data</a></li>
+    <li><a class="reference internal" href="#sample-stats">sample_stats</a></li>
+    <li><a class="reference internal" href="#posterior-predictive">posterior_predictive</a></li>
+    <li><a class="reference internal" href="#observed-data">observed_data</a></li>
+    <li><a class="reference internal" href="#constant-data">constant_data</a></li>
     <li><a class="reference internal" href="#prior">prior</a></li>
-    <li><a class="reference internal" href="#sample_stats_prior">sample_stats_prior</a></li>
-    <li><a class="reference internal" href="#prior_predictive">prior_predictive</a></li>
+    <li><a class="reference internal" href="#sample-stats-prior">sample_stats_prior</a></li>
+    <li><a class="reference internal" href="#prior-predictive">prior_predictive</a></li>
   </ol>
  </li>
  <li><a class="reference internal" href="#planned-features">Planned Features</a>
   <ol>
     <li><a class="reference internal" href="#sampler-parameters">Sampler parameters</a>
-    <li><a class="reference internal" href="#out-of-sample-posterior_predictive-samples">Out of sample posterior_predictive samples</a>
+    <li><a class="reference internal" href="#out-of-sample-posterior-predictive-samples">Out of sample posterior_predictive samples</a>
     <ol>
       <li><a class="reference internal" href="#predictions">predictions</a>
-      <li><a class="reference internal" href="#predictions_constant_data">predictions_constant_data</a>
+      <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
     </ol>
   </ol>
  </li>
