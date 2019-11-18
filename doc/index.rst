@@ -25,7 +25,11 @@ ArviZ: Exploratory analysis of Bayesian models
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
 
-The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects. See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ.
+The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
+by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
+See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ usage
+and :doc:`here <schema/schema>` for more on ``InferenceData`` structure
+and specification.
 
 
 

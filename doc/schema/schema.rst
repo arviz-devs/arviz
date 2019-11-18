@@ -1,0 +1,1 @@
+.. mdinclude:: schema.md
