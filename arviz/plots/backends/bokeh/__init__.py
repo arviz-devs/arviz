@@ -2,14 +2,14 @@
 
 
 def output_notebook(*args, **kwargs):
-    """Wraps bokeh.plotting.output_notebook."""
+    """Wrap bokeh.plotting.output_notebook."""
     import bokeh.plotting as bkp
 
     return bkp.output_notebook(*args, **kwargs)
 
 
 def output_file(*args, **kwargs):
-    """Wraps bokeh.plotting.output_file."""
+    """Wrap bokeh.plotting.output_file."""
     import bokeh.plotting as bkp
 
     return bkp.output_file(*args, **kwargs)
