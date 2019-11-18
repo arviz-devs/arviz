@@ -12,6 +12,34 @@ Currently there are 2 beta implementations of this design:
   - [CmdStan.jl](https://github.com/StanJulia/CmdStan.jl), [StanSample.jl](https://github.com/StanJulia/StanSample.jl) and [Stan.jl](https://github.com/StanJulia/Stan.jl)
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
 
+## Contents
+
+<ol class="simple">
+ <li><a class="reference internal" href="#current-design">Current Design</a>
+  <ol>
+    <li><a class="reference internal" href="#posterior">posterior</a></li>
+    <li><a class="reference internal" href="#sample_stats">sample_stats</a></li>
+    <li><a class="reference internal" href="#posterior_predictive">posterior_predictive</a></li>
+    <li><a class="reference internal" href="#observed_data">observed_data</a></li>
+    <li><a class="reference internal" href="#constant_data">constant_data</a></li>
+    <li><a class="reference internal" href="#prior">prior</a></li>
+    <li><a class="reference internal" href="#sample_stats_prior">sample_stats_prior</a></li>
+    <li><a class="reference internal" href="#prior_predictive">prior_predictive</a></li>
+  </ol>
+ </li>
+ <li><a class="reference internal" href="#planned-features">Planned Features</a>
+  <ol>
+    <li><a class="reference internal" href="#sampler-parameters">Sampler parameters</a>
+    <li><a class="reference internal" href="#out-of-sample-posterior_predictive-samples">Out of sample posterior_predictive samples</a>
+    <ol>
+      <li><a class="reference internal" href="#predictions">predictions</a>
+      <li><a class="reference internal" href="#predictions_constant_data">predictions_constant_data</a>
+    </ol>
+  </ol>
+ </li>
+ <li><a class="reference internal" href="#examples">Examples</a></li>
+</ol>
+
 ## Current design
 `InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Each group, described below, stores a conceptually different quantity. In general, each quantity will be represented by several multidimensional labeled variables.
 
