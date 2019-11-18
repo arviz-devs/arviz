@@ -224,7 +224,7 @@ class CmdStanConverter:
                 name = re.sub("__$", "", key_)
                 name = "diverging" if name == "divergent" else name
                 rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
         return dict_to_dataset(data, coords=coords, dims=dims)
@@ -300,7 +300,7 @@ class CmdStanConverter:
                 name = re.sub("__$", "", key_)
                 name = "diverging" if name == "divergent" else name
                 rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
         return dict_to_dataset(data, coords=coords, dims=dims)
@@ -654,7 +654,8 @@ def _unpack_dataframes(dfs):
     sample = {}
     for key, cols_locs in col_groups.items():
         ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        sample[key] = utils.full((chains, draws, *ndim), np.nan)
+        dtype = dfs[0][cols_locs[0][0]].dtype
+        sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
         for col, loc in cols_locs:
             for chain_id, df in enumerate(dfs):
                 draw = df[col].values

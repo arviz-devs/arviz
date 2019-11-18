@@ -317,6 +317,6 @@ def expand_dims(x):
 
 
 @conditional_jit(parallel=True)
-def full(shape, x):
+def full(shape, x, dtype=None):
     """Jitting numpy full."""
-    return np.full(shape, x)
+    return np.full(shape, x, dtype=dtype)
