@@ -35,7 +35,7 @@ def plot_mcse(
     text_kwargs=None,
     **kwargs
 ):
-    """Plot Monte Carlo Standard Error
+    """Plot quantile or local Monte Carlo Standard Error.
 
     Parameters
     ----------
