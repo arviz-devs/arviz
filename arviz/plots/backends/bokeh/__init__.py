@@ -2,18 +2,21 @@
 
 
 def output_notebook(*args, **kwargs):
+    """ArviZ wrapper for bokeh.plotting.output_notebook."""
     import bokeh.plotting as bkp
 
     return bkp.output_notebook(*args, **kwargs)
 
 
 def output_file(*args, **kwargs):
+    """ArviZ wrapper for bokeh.plotting.output_file."""
     import bokeh.plotting as bkp
 
     return bkp.output_file(*args, **kwargs)
 
 
 def copy_docstring(lib, function):
+    """Extract docstring from function."""
     import importlib
 
     try:
@@ -26,5 +29,5 @@ def copy_docstring(lib, function):
     return doc
 
 
-output_notebook.__doc__ = copy_docstring("bokeh.plotting", "output_notebook")
-output_file.__doc__ = copy_docstring("bokeh.plotting", "output_file")
+output_notebook.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_notebook")
+output_file.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_file")
