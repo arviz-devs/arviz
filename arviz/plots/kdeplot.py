@@ -1,4 +1,4 @@
-# pylint disable=unexpected-keyword-arg
+# pylint: disable=unexpected-keyword-arg
 """One-dimensional kernel density estimate plots."""
 import warnings
 import numpy as np

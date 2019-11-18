@@ -1,4 +1,4 @@
-# pylint disable=unexpected-keyword-arg
+# pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
 from .plot_utils import get_bins
 
