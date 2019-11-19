@@ -188,7 +188,7 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     return n_items // ideal + 1, ideal
 
 
-def _create_axes_grid(length_plotters, rows, cols, **kwargs):
+def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     """Create figure and axes for grids with multiple plots.
 
     Parameters
@@ -206,13 +206,54 @@ def _create_axes_grid(length_plotters, rows, cols, **kwargs):
     ax : matplotlib axes
     """
     kwargs.setdefault("constrained_layout", True)
-    fig, ax = plt.subplots(rows, cols, **kwargs)
-    ax = np.ravel(ax)
-    extra = (rows * cols) - length_plotters
-    if extra:
-        for i in range(1, extra + 1):
-            ax[-i].set_axis_off()
-        ax = ax[:-extra]
+
+    if backend == "bokeh":
+        import bokeh.plotting as bkp
+        from bokeh.models import Range1d
+
+        figsize = kwargs.get("figsize", (6 * 2, int(np.ceil(length_plotters/2)) * 4))
+        figsize = int(figsize[0] * 90 // cols), int(figsize[1] * 90 // rows)
+
+        bokeh_kwargs = {}
+        bokeh_kwargs["height"] = figsize[1]
+        bokeh_kwargs["width"] = figsize[0]
+
+        bokeh_kwargs.setdefault(
+            "tools",
+            ("pan,wheel_zoom,box_zoom," "lasso_select,poly_select," "undo,redo,reset,save,hover"),
+        )
+        bokeh_kwargs.setdefault("output_backend", "webgl")
+
+        sharex = kwargs.get("sharex", False)
+        sharey = kwargs.get("sharey", False)
+        fig = None
+        ax = []
+        extra = (rows * cols) - length_plotters
+        for row in range(int(np.ceil(length_plotters/2))):
+            row_ax = []
+            for col in range(2):
+                if (row == 0) and (col == 0) and (sharex or sharey):
+                    bokeh_ax = bkp.figure(**bokeh_kwargs)
+                    row_ax.append(bokeh_ax)
+                    if sharex:
+                        bokeh_kwargs["x_range"] = bokeh_ax.x_range
+                    if sharey:
+                        bokeh_kwargs["y_range"] = bokeh_ax.y_range
+                else:
+                    if row * 2 + (col + 1) > length_plotters:
+                        row_ax.append(None)
+                    else:
+                        row_ax.append(bkp.figure(**bokeh_kwargs))
+            ax.append(row_ax)
+        ax = np.array(ax)
+    else:
+        fig, ax = plt.subplots(rows, cols, **kwargs)
+        ax = np.ravel(ax)
+        extra = (rows * cols) - length_plotters
+        if extra:
+            for i in range(1, extra + 1):
+                ax[-i].set_axis_off()
+            ax = ax[:-extra]
     return fig, ax
 
 
