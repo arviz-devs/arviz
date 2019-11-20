@@ -208,12 +208,10 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
-        import bokeh.plotting as bkp
-        from bokeh.models import Range1d
+        from bokeh.plotting import figure
 
-        figsize = kwargs.get("figsize", (6 * 2, int(np.ceil(length_plotters/2)) * 4))
-        figsize = int(figsize[0] * 90 // cols), int(figsize[1] * 90 // rows)
-
+        figsize = kwargs.get("figsize", (int(rows * 0.5 * 12 / cols), 12))
+        figsize = int(figsize[0] * 60 // cols), int(figsize[1] * 60 // rows)
         bokeh_kwargs = {}
         bokeh_kwargs["height"] = figsize[1]
         bokeh_kwargs["width"] = figsize[0]
@@ -229,21 +227,21 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
         fig = None
         ax = []
         extra = (rows * cols) - length_plotters
-        for row in range(int(np.ceil(length_plotters/2))):
+        for row in range(rows):
             row_ax = []
-            for col in range(2):
+            for col in range(cols):
                 if (row == 0) and (col == 0) and (sharex or sharey):
-                    bokeh_ax = bkp.figure(**bokeh_kwargs)
+                    bokeh_ax = figure(**bokeh_kwargs)
                     row_ax.append(bokeh_ax)
                     if sharex:
                         bokeh_kwargs["x_range"] = bokeh_ax.x_range
                     if sharey:
                         bokeh_kwargs["y_range"] = bokeh_ax.y_range
                 else:
-                    if row * 2 + (col + 1) > length_plotters:
+                    if row * cols + (col + 1) > length_plotters:
                         row_ax.append(None)
                     else:
-                        row_ax.append(bkp.figure(**bokeh_kwargs))
+                        row_ax.append(figure(**bokeh_kwargs))
             ax.append(row_ax)
         ax = np.array(ax)
     else:

@@ -2,11 +2,9 @@
 import numpy as np
 
 from ..data import convert_to_dataset
-from ..stats import autocorr
 from .plot_utils import (
     _scale_fig_size,
     default_grid,
-    make_label,
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
@@ -15,7 +13,15 @@ from ..utils import _var_names
 
 
 def plot_autocorr(
-    data, var_names=None, max_lag=None, combined=False, figsize=None, textsize=None, ax=None, backend=None, show=True,
+    data,
+    var_names=None,
+    max_lag=None,
+    combined=False,
+    figsize=None,
+    textsize=None,
+    ax=None,
+    backend=None,
+    show=True,
 ):
     """Bar plot of the autocorrelation function for a sequence of data.
 
@@ -99,10 +105,18 @@ def plot_autocorr(
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    print(figsize)
 
     if ax is None:
         _, axes = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True, backend=backend,
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            sharex=True,
+            sharey=True,
+            backend=backend,
         )
     else:
         axes = ax
@@ -111,10 +125,8 @@ def plot_autocorr(
 
     autocorr_plot_args = dict(
         axes=axes,
-        data=data,
-        var_names=var_names,
-        max_lag=max_lag,
         plotters=plotters,
+        max_lag=max_lag,
         combined=combined,
         linewidth=linewidth,
         xt_labelsize=xt_labelsize,
@@ -123,13 +135,15 @@ def plot_autocorr(
 
     if backend == "bokeh":
         from .backends.bokeh.bokeh_autocorrplot import _plot_autocorr
+
         autocorr_plot_args.pop("xt_labelsize")
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
         autocorr_plot_args["show"] = show
-        axes = _plot_autocorr(**autocorr_plot_args)
+        axes = _plot_autocorr(**autocorr_plot_args)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_autocorrplot import _plot_autocorr
+
         axes = _plot_autocorr(**autocorr_plot_args)
 
     return axes
