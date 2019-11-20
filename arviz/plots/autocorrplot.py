@@ -105,7 +105,6 @@ def plot_autocorr(
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    print(figsize)
 
     if ax is None:
         _, axes = _create_axes_grid(
