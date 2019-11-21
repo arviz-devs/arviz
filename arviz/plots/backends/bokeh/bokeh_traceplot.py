@@ -198,7 +198,19 @@ def _plot_trace_bokeh(
 
     backend_kwargs.setdefault(
         "tools",
-        ("pan,wheel_zoom,box_zoom," "lasso_select,poly_select," "undo,redo,reset,save,hover"),
+        ",".join(
+            [
+                "pan",
+                "wheel_zoom",
+                "box_zoom",
+                "lasso_select",
+                "poly_select",
+                "undo",
+                "redo",
+                "reset",
+                "save,hover",
+            ]
+        ),
     )
     backend_kwargs.setdefault("output_backend", "webgl")
     backend_kwargs.setdefault("height", figsize[1])
