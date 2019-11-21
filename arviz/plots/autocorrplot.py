@@ -2,11 +2,9 @@
 import numpy as np
 
 from ..data import convert_to_dataset
-from ..stats import autocorr
 from .plot_utils import (
     _scale_fig_size,
     default_grid,
-    make_label,
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
@@ -15,7 +13,15 @@ from ..utils import _var_names
 
 
 def plot_autocorr(
-    data, var_names=None, max_lag=None, combined=False, figsize=None, textsize=None, ax=None
+    data,
+    var_names=None,
+    max_lag=None,
+    combined=False,
+    figsize=None,
+    textsize=None,
+    ax=None,
+    backend=None,
+    show=True,
 ):
     """Bar plot of the autocorrelation function for a sequence of data.
 
@@ -42,10 +48,12 @@ def plot_autocorr(
         on figsize.
     ax: axes
         Matplotlib axes
+    backend: str
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
 
     Returns
     -------
-    axes : matplotlib axes
+    axes : matplotlib axes or bokeh.figure
 
     Examples
     --------
@@ -100,27 +108,41 @@ def plot_autocorr(
 
     if ax is None:
         _, axes = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, sharex=True, sharey=True
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            sharex=True,
+            sharey=True,
+            backend=backend,
         )
     else:
         axes = ax
 
     axes = np.atleast_2d(axes)  # in case of only 1 plot
-    for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
-        x_prime = x
 
-        if combined:
-            x_prime = x.flatten()
+    autocorr_plot_args = dict(
+        axes=axes,
+        plotters=plotters,
+        max_lag=max_lag,
+        combined=combined,
+        linewidth=linewidth,
+        xt_labelsize=xt_labelsize,
+        titlesize=titlesize,
+    )
 
-        y = autocorr(x_prime)
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_autocorrplot import _plot_autocorr
 
-        ax_.vlines(x=np.arange(0, max_lag), ymin=0, ymax=y[0:max_lag], lw=linewidth)
-        ax_.hlines(0, 0, max_lag, "steelblue")
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax_.tick_params(labelsize=xt_labelsize)
+        autocorr_plot_args.pop("xt_labelsize")
+        autocorr_plot_args.pop("titlesize")
+        autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
+        autocorr_plot_args["show"] = show
+        axes = _plot_autocorr(**autocorr_plot_args)  # pylint: disable=unexpected-keyword-arg
+    else:
+        from .backends.matplotlib.mpl_autocorrplot import _plot_autocorr
 
-    if axes.size > 0:
-        axes[0, 0].set_xlim(0, max_lag)
-        axes[0, 0].set_ylim(-1, 1)
+        axes = _plot_autocorr(**autocorr_plot_args)
 
     return axes
