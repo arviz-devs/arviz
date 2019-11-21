@@ -13,6 +13,7 @@ from .helpers import (  # pylint: disable=unused-import
 )
 from ..rcparams import rcParams, rc_context
 from ..plots import (
+    plot_autocorr,
     plot_trace,
     plot_kde,
     plot_dist,
@@ -144,3 +145,33 @@ def test_plot_kde_quantiles(continuous_model, kwargs):
         continuous_model["x"], quantiles=[0.05, 0.5, 0.95], show=False, backend="bokeh", **kwargs
     )
     assert axes
+
+
+def test_plot_autocorr_short_chain():
+    """Check that logic for small chain defaulting doesn't cause exception"""
+    chain = np.arange(10)
+    axes = plot_autocorr(chain, backend="bokeh", show=False)
+    assert axes
+
+
+def test_plot_autocorr_uncombined(models):
+    axes = plot_autocorr(models.model_1, combined=False, backend="bokeh", show=False)
+    assert axes.shape[0] == 10
+    max_subplots = (
+        np.inf if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+    )
+    assert len([ax for ax in axes.ravel() if ax is not None]) == min(72, max_subplots)
+
+
+def test_plot_autocorr_combined(models):
+    axes = plot_autocorr(models.model_1, combined=True, backend="bokeh", show=False)
+    assert axes.shape[0] == 6
+    assert axes.shape[1] == 3
+
+
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_autocorr_var_names(models, var_names):
+    axes = plot_autocorr(
+        models.model_1, var_names=var_names, combined=True, backend="bokeh", show=False
+    )
+    assert axes.shape
