@@ -1,10 +1,10 @@
 """KDE and histogram plots for multiple variables."""
+from itertools import cycle
 import warnings
-import numpy as np
+
+import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
-from ..stats import hpd
-from .kdeplot import _fast_kde
 from .plot_utils import (
     _scale_fig_size,
     make_label,
@@ -31,6 +31,8 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
+    backend=None,
+    show=True,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -160,7 +162,12 @@ def plot_density(
         )
 
     if colors == "cycle":
-        colors = ["C{}".format(idx % 10) for idx in range(n_data)]
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
@@ -202,126 +209,41 @@ def plot_density(
         figsize, textsize, rows, cols
     )
 
-    _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+    _, ax = _create_axes_grid(
+        length_plotters, rows, cols, figsize=figsize, squeeze=False, backend=backend
+    )
 
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
-    for m_idx, plotters in enumerate(to_plot):
-        for var_name, selection, values in plotters:
-            label = make_label(var_name, selection)
-            _d_helper(
-                values.flatten(),
-                label,
-                colors[m_idx],
-                bw,
-                titlesize,
-                xt_labelsize,
-                linewidth,
-                markersize,
-                credible_interval,
-                point_estimate,
-                hpd_markers,
-                outline,
-                shade,
-                axis_map[label],
-            )
+    plot_density_kwargs = dict(
+        ax=ax,
+        all_labels=all_labels,
+        to_plot=to_plot,
+        colors=colors,
+        bw=bw,
+        titlesize=titlesize,
+        xt_labelsize=xt_labelsize,
+        linewidth=linewidth,
+        markersize=markersize,
+        credible_interval=credible_interval,
+        point_estimate=point_estimate,
+        hpd_markers=hpd_markers,
+        outline=outline,
+        shade=shade,
+        n_data=n_data,
+        data_labels=data_labels,
+    )
 
-    if n_data > 1:
-        for m_idx, label in enumerate(data_labels):
-            ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax[0].legend(fontsize=xt_labelsize)
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_densityplot import _plot_density
+
+        plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
+        plot_density_kwargs.pop("titlesize")
+        plot_density_kwargs.pop("xt_labelsize")
+        plot_density_kwargs["show"] = show
+        plot_density_kwargs.pop("n_data")
+        _plot_density(**plot_density_kwargs)  # pylint: disable=unexpected-keyword-arg
+    else:
+        from .backends.matplotlib.mpl_densityplot import _plot_density
+
+        _plot_density(**plot_density_kwargs)
 
     return ax
-
-
-def _d_helper(
-    vec,
-    vname,
-    color,
-    bw,
-    titlesize,
-    xt_labelsize,
-    linewidth,
-    markersize,
-    credible_interval,
-    point_estimate,
-    hpd_markers,
-    outline,
-    shade,
-    ax,
-):
-    """Plot an individual dimension.
-
-    Parameters
-    ----------
-    vec : array
-        1D array from trace
-    vname : str
-        variable name
-    color : str
-        matplotlib color
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
-    titlesize : float
-        font size for title
-    xt_labelsize : float
-       fontsize for xticks
-    linewidth : float
-        Thickness of lines
-    markersize : float
-        Size of markers
-    credible_interval : float
-        Credible intervals. Defaults to 0.94
-    point_estimate : str or None
-        'mean' or 'median'
-    shade : float
-        Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
-        (opaque). Defaults to 0.
-    ax : matplotlib axes
-    """
-    if vec.dtype.kind == "f":
-        if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval, multimodal=False)
-            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
-        else:
-            new_vec = vec
-
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= credible_interval
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
-
-        if outline:
-            ax.plot(x, density, color=color, lw=linewidth)
-            ax.plot([xmin, xmin], [-ymin / 100, ymin], color=color, ls="-", lw=linewidth)
-            ax.plot([xmax, xmax], [-ymax / 100, ymax], color=color, ls="-", lw=linewidth)
-
-        if shade:
-            ax.fill_between(x, density, color=color, alpha=shade)
-
-    else:
-        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
-        bins = range(xmin, xmax + 2)
-        if outline:
-            ax.hist(vec, bins=bins, color=color, histtype="step", align="left")
-        if shade:
-            ax.hist(vec, bins=bins, color=color, alpha=shade)
-
-    if hpd_markers:
-        ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
-        ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
-
-    if point_estimate is not None:
-        if point_estimate == "mean":
-            est = np.mean(vec)
-        elif point_estimate == "median":
-            est = np.median(vec)
-        ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
-
-    ax.set_yticks([])
-    ax.set_title(vname, fontsize=titlesize, wrap=True)
-    for pos in ["left", "right", "top"]:
-        ax.spines[pos].set_visible(False)
-    ax.tick_params(labelsize=xt_labelsize)

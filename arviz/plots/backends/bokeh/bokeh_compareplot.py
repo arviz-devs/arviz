@@ -1,3 +1,4 @@
+"""Bokeh Compareplot."""
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
@@ -125,8 +126,8 @@ def _compareplot(
     else:
         scale = "Deviance"
     ax.xaxis.axis_label = scale
-    ax.y_range._property_values["start"] = -1 + step
-    ax.y_range._property_values["end"] = 0 - step
+    ax.y_range._property_values["start"] = -1 + step  # pylint: disable=protected-access
+    ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
     if show:
         bkp.show(ax)

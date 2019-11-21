@@ -1,6 +1,5 @@
 """Summary plot for model comparison."""
 import numpy as np
-import matplotlib.pyplot as plt
 from .plot_utils import _scale_fig_size
 
 
@@ -131,7 +130,7 @@ def plot_compare(
         compareplot_kwargs.pop("ax_labelsize")
         compareplot_kwargs.pop("xt_labelsize")
         compareplot_kwargs["show"] = show
-        ax = _compareplot(**compareplot_kwargs)
+        ax = _compareplot(**compareplot_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_compareplot import _compareplot
 

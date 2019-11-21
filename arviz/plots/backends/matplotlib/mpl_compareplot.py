@@ -1,3 +1,4 @@
+"""Matplotlib Compareplot."""
 import matplotlib.pyplot as plt
 
 
