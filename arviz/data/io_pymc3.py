@@ -173,15 +173,34 @@ class PyMC3Converter:
                 )
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
-    @requires("prior")
-    def prior_to_xarray(self):
+    def priors_to_xarray(self):
         """Convert prior samples to xarray."""
-        return dict_to_dataset(
-            {k: utils.expand_dims(v) for k, v in self.prior.items()},
-            library=self.pymc3,
-            coords=self.coords,
-            dims=self.dims,
-        )
+        if self.prior is None:
+            return {"prior": None, "prior_predictive": None}
+        if self.trace is not None:
+            prior_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+                self.trace.varnames, include_transformed=False
+            )
+            prior_predictive_vars = [key for key in self.prior.keys() if key in prior_vars]
+        else:
+            prior_vars = list(self.prior.keys())
+            prior_predictive_vars = None
+
+        priors_dict = {}
+        for group, var_names in zip(
+            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+        ):
+            priors_dict[group] = (
+                None
+                if var_names is None
+                else dict_to_dataset(
+                    {k: utils.expand_dims(self.prior[k]) for k in var_names},
+                    library=self.pymc3,
+                    coords=self.coords,
+                    dims=self.dims,
+                )
+            )
+        return priors_dict
 
     @requires("observations")
     @requires("model")
@@ -252,7 +271,7 @@ class PyMC3Converter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
-                "prior": self.prior_to_xarray(),
+                **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
                 "constant_data": self.constant_data_to_xarray(),
             }
