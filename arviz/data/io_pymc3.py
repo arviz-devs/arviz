@@ -181,7 +181,7 @@ class PyMC3Converter:
             prior_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
                 self.trace.varnames, include_transformed=False
             )
-            prior_predictive_vars = [key for key in self.prior.keys() if key in prior_vars]
+            prior_predictive_vars = [key for key in self.prior.keys() if key not in prior_vars]
         else:
             prior_vars = list(self.prior.keys())
             prior_predictive_vars = None
