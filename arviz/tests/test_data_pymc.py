@@ -45,7 +45,7 @@ class TestDataPyMC3:
             "sample_stats": ["diverging", "log_likelihood"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
-            "posterior_predictive": ["obs"],
+            "prior_predictive": ["obs"],
             "observed_data": ["obs"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)

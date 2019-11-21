@@ -60,14 +60,13 @@ class TestDataPyro:
         prior = Predictive(model, num_samples=500).get_samples(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
-        idata = from_pyro(prior=prior, posterior_predictive=posterior_predictive,
+        idata = from_pyro(
+            prior=prior,
+            posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
-                          )
-        test_dict = {
-            "posterior_predictive": ["obs"],
-            "prior": ["mu", "tau", "eta", "obs"]
-        }
+        )
+        test_dict = {"posterior_predictive": ["obs"], "prior": ["mu", "tau", "eta", "obs"]}
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
 
