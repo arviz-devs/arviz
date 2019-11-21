@@ -1,3 +1,4 @@
+"""Matplotlib Autocorrplot."""
 import numpy as np
 
 from ....stats import autocorr
