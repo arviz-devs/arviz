@@ -14,10 +14,13 @@ from .helpers import (  # pylint: disable=unused-import
 from ..rcparams import rcParams, rc_context
 from ..plots import (
     plot_autocorr,
+    plot_compare,
+    plot_density,
     plot_trace,
     plot_kde,
     plot_dist,
 )
+from ..stats import compare
 
 rcParams["data.load"] = "eager"
 
@@ -43,6 +46,47 @@ def discrete_model():
 def continuous_model():
     """Simple fixture for random continuous model"""
     return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"point_estimate": "mean"},
+        {"point_estimate": "median"},
+        {"credible_interval": 0.94},
+        {"credible_interval": 1},
+        {"outline": True},
+        {"hpd_markers": ["v"]},
+        {"shade": 1},
+    ],
+)
+def test_plot_density_float(models, kwargs):
+    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
+    axes = plot_density(obj, backend="bokeh", show=False, **kwargs)
+    assert axes.shape[0] >= 6
+    assert axes.shape[0] >= 3
+
+
+def test_plot_density_discrete(discrete_model):
+    axes = plot_density(discrete_model, shade=0.9, backend="bokeh", show=False)
+    assert axes.shape[0] == 1
+
+
+def test_plot_density_bad_kwargs(models):
+    obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
+    with pytest.raises(ValueError):
+        plot_density(obj, point_estimate="bad_value", backend="bokeh", show=False)
+
+    with pytest.raises(ValueError):
+        plot_density(
+            obj,
+            data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
+            backend="bokeh",
+            show=False,
+        )
+
+    with pytest.raises(ValueError):
+        plot_density(obj, credible_interval=2, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -175,3 +219,37 @@ def test_plot_autocorr_var_names(models, var_names):
         models.model_1, var_names=var_names, combined=True, backend="bokeh", show=False
     )
     assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
+)
+def test_plot_compare(models, kwargs):
+
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
+
+    axes = plot_compare(model_compare, backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+def test_plot_compare_manual(models):
+    """Test compare plot without scale column"""
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
+
+    # remove "scale" column
+    del model_compare["waic_scale"]
+    axes = plot_compare(model_compare, backend="bokeh", show=False)
+    assert axes
+
+
+def test_plot_compare_no_ic(models):
+    """Check exception is raised if model_compare doesn't contain a valid information criterion"""
+    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
+
+    # Drop column needed for plotting
+    model_compare = model_compare.drop("waic", axis=1)
+    with pytest.raises(ValueError) as err:
+        plot_compare(model_compare, backend="bokeh", show=False)
+
+    assert "comp_df must contain one of the following" in str(err.value)
+    assert "['waic', 'loo']" in str(err.value)
