@@ -1,3 +1,4 @@
+"""Bokeh Autocorrplot."""
 import numpy as np
 import bokeh.plotting as bkp
 from bokeh.models.annotations import Title
