@@ -35,6 +35,23 @@ def test_rc_context_file():
     assert rcParams["data.load"] == "lazy"
 
 
+def test_bad_rc_file():
+    """Test bad value raises error."""
+    path = os.path.dirname(os.path.abspath(__file__))
+    with pytest.raises(ValueError, match="Bad val "):
+        read_rcfile(path + "/bad.rcparams")
+
+
+def test_warning_rc_file(caplog):
+    """Test invalid lines and duplicated keys log warnings and bad value raises error."""
+    path = os.path.dirname(os.path.abspath(__file__))
+    read_rcfile(path + "/test.rcparams")
+    records = caplog.records
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
+    assert "Duplicate key" in caplog.text
+
+
 def test_bad_key():
     """Test the error when using unexistent keys in rcParams is correct."""
     with pytest.raises(KeyError, match="bad_key is not a valid rc"):
@@ -47,9 +64,36 @@ def test_del_key_error():
         del rcParams["data.load"]
 
 
+def test_pop_error():
+    """Check rcParams pop error."""
+    with pytest.raises(TypeError, match=r"keys cannot be deleted.*get\(key\)"):
+        rcParams.pop("data.load")
+
+
+def test_popitem_error():
+    """Check rcParams popitem error."""
+    with pytest.raises(TypeError, match=r"keys cannot be deleted.*get\(key\)"):
+        rcParams.popitem()
+
+
+def test_setdefaults_error():
+    """Check rcParams popitem error."""
+    with pytest.raises(TypeError, match="Use arvizrc"):
+        rcParams.setdefault("data.load", "eager")
+
+
 def test_rcparams_find_all():
     data_rcparams = rcParams.find_all("data")
     assert len(data_rcparams)
+
+
+def test_rcparams_repr_str():
+    """Check both repr and str print all keys."""
+    repr_str = rcParams.__repr__()
+    str_str = rcParams.__str__()
+    assert repr_str[:8] == "RcParams"
+    for string in (repr_str, str_str):
+        assert all([key in string for key in rcParams.keys()])
 
 
 ### Test arvizrc.template file is up to date ###
