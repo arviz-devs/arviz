@@ -82,15 +82,31 @@ class PyroConverter:
                 )
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
-    @requires("prior")
-    def prior_to_xarray(self):
+    def priors_to_xarray(self):
         """Convert prior samples to xarray."""
-        return dict_to_dataset(
-            {k: utils.expand_dims(v.detach().cpu().numpy()) for k, v in self.prior.items()},
-            library=self.pyro,
-            coords=self.coords,
-            dims=self.dims,
-        )
+        if self.prior is None:
+            return {"prior": None, "prior_predictive": None}
+        if self.posterior is not None:
+            prior_vars = list(self.posterior.get_samples().keys())
+            prior_predictive_vars = [key for key in self.prior.keys() if key not in prior_vars]
+        else:
+            prior_vars = self.prior.keys()
+            prior_predictive_vars = None
+        priors_dict = {}
+        for group, var_names in zip(
+            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+        ):
+            priors_dict[group] = (
+                None
+                if var_names is None
+                else dict_to_dataset(
+                    {k: utils.expand_dims(self.prior[k].detach().cpu().numpy()) for k in var_names},
+                    library=self.pyro,
+                    coords=self.coords,
+                    dims=self.dims,
+                )
+            )
+        return priors_dict
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
@@ -99,7 +115,7 @@ class PyroConverter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
-                "prior": self.prior_to_xarray(),
+                **self.priors_to_xarray(),
             }
         )
 
