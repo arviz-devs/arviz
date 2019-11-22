@@ -151,7 +151,8 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     def setdefault(self, key, default=None):
         """Raise error when using setdefault, defaults are handled on initialization."""
         raise TypeError(
-            "Defaults in RcParams are handled on object initialization during library import. Use arvizrc file instead."
+            "Defaults in RcParams are handled on object initialization during library"
+            "import. Use arvizrc file instead."
             ""
         )
 
