@@ -41,7 +41,20 @@ def _plot_kde_bokeh(
     show=True,
 ):
     if ax is None:
-        ax = bkp.figure(width=500, height=500, output_backend="webgl")
+        tools = ",".join(
+            [
+                "pan",
+                "wheel_zoom",
+                "box_zoom",
+                "lasso_select",
+                "poly_select",
+                "undo",
+                "redo",
+                "reset",
+                "save,hover",
+            ]
+        )
+        ax = bkp.figure(width=500, height=500, output_backend="webgl", tools=tools)
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label

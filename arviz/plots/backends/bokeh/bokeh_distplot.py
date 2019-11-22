@@ -30,7 +30,20 @@ def _plot_dist_bokeh(
 ):
 
     if ax is None:
-        ax = bkp.figure(width=500, height=500)
+        tools = ",".join(
+            [
+                "pan",
+                "wheel_zoom",
+                "box_zoom",
+                "lasso_select",
+                "poly_select",
+                "undo",
+                "redo",
+                "reset",
+                "save,hover",
+            ]
+        )
+        ax = bkp.figure(width=500, height=500, output_backend="webgl", tools=tools)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"

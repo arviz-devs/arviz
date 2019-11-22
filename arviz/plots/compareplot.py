@@ -1,6 +1,5 @@
 """Summary plot for model comparison."""
 import numpy as np
-import matplotlib.pyplot as plt
 from .plot_utils import _scale_fig_size
 
 
@@ -14,6 +13,8 @@ def plot_compare(
     textsize=None,
     plot_kwargs=None,
     ax=None,
+    backend=None,
+    show=True,
 ):
     """
     Summary plot for model comparison.
@@ -83,9 +84,6 @@ def plot_compare(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
-
     if plot_kwargs is None:
         plot_kwargs = {}
 
@@ -108,71 +106,34 @@ def plot_compare(
     if order_by_rank:
         comp_df.sort_values(by="rank", inplace=True)
 
-    if plot_ic_diff:
-        yticks_labels[0] = comp_df.index[0]
-        yticks_labels[2::2] = comp_df.index[1:]
-        ax.set_yticks(yticks_pos)
-        ax.errorbar(
-            x=comp_df[information_criterion].iloc[1:],
-            y=yticks_pos[1::2],
-            xerr=comp_df.dse[1:],
-            color=plot_kwargs.get("color_dse", "grey"),
-            fmt=plot_kwargs.get("marker_dse", "^"),
-            mew=linewidth,
-            elinewidth=linewidth,
-        )
-
-    else:
-        yticks_labels = comp_df.index
-        ax.set_yticks(yticks_pos[::2])
-
-    if plot_standard_error:
-        ax.errorbar(
-            x=comp_df[information_criterion],
-            y=yticks_pos[::2],
-            xerr=comp_df.se,
-            color=plot_kwargs.get("color_ic", "k"),
-            fmt=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=linewidth,
-        )
-    else:
-        ax.plot(
-            comp_df[information_criterion],
-            yticks_pos[::2],
-            color=plot_kwargs.get("color_ic", "k"),
-            marker=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=0,
-        )
-
-    if insample_dev:
-        ax.plot(
-            comp_df[information_criterion] - (2 * comp_df["p_" + information_criterion]),
-            yticks_pos[::2],
-            color=plot_kwargs.get("color_insample_dev", "k"),
-            marker=plot_kwargs.get("marker_insample_dev", "o"),
-            mew=linewidth,
-            lw=0,
-        )
-
-    ax.axvline(
-        comp_df[information_criterion].iloc[0],
-        ls=plot_kwargs.get("ls_min_ic", "--"),
-        color=plot_kwargs.get("color_ls_min_ic", "grey"),
-        lw=linewidth,
+    compareplot_kwargs = dict(
+        ax=ax,
+        comp_df=comp_df,
+        figsize=figsize,
+        plot_ic_diff=plot_ic_diff,
+        plot_standard_error=plot_standard_error,
+        insample_dev=insample_dev,
+        yticks_pos=yticks_pos,
+        yticks_labels=yticks_labels,
+        linewidth=linewidth,
+        plot_kwargs=plot_kwargs,
+        information_criterion=information_criterion,
+        ax_labelsize=ax_labelsize,
+        xt_labelsize=xt_labelsize,
+        step=step,
     )
 
-    scale_col = information_criterion + "_scale"
-    if scale_col in comp_df:
-        scale = comp_df[scale_col].iloc[0].capitalize()
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_compareplot import _compareplot
+
+        compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")
+        compareplot_kwargs.pop("ax_labelsize")
+        compareplot_kwargs.pop("xt_labelsize")
+        compareplot_kwargs["show"] = show
+        ax = _compareplot(**compareplot_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
-        scale = "Deviance"
-    ax.set_xlabel(scale, fontsize=ax_labelsize)
-    ax.set_yticklabels(yticks_labels)
-    ax.set_ylim(-1 + step, 0 - step)
-    ax.tick_params(labelsize=xt_labelsize)
+        from .backends.matplotlib.mpl_compareplot import _compareplot
+
+        ax = _compareplot(**compareplot_kwargs)
 
     return ax
