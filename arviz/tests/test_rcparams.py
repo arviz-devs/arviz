@@ -30,7 +30,7 @@ def test_rc_context_dict():
 def test_rc_context_file():
     path = os.path.dirname(os.path.abspath(__file__))
     rcParams["data.load"] = "lazy"
-    with rc_context(fname=path + "/test.rcparams"):
+    with rc_context(fname=os.path.join(path, "test.rcparams")):
         assert rcParams["data.load"] == "eager"
     assert rcParams["data.load"] == "lazy"
 
@@ -39,13 +39,13 @@ def test_bad_rc_file():
     """Test bad value raises error."""
     path = os.path.dirname(os.path.abspath(__file__))
     with pytest.raises(ValueError, match="Bad val "):
-        read_rcfile(path + "/bad.rcparams")
+        read_rcfile(os.path.join(path, "bad.rcparams"))
 
 
 def test_warning_rc_file(caplog):
     """Test invalid lines and duplicated keys log warnings and bad value raises error."""
     path = os.path.dirname(os.path.abspath(__file__))
-    read_rcfile(path + "/test.rcparams")
+    read_rcfile(os.path.join(path, "test.rcparams"))
     records = caplog.records
     assert len(records) == 1
     assert records[0].levelname == "WARNING"
@@ -91,7 +91,7 @@ def test_rcparams_repr_str():
     """Check both repr and str print all keys."""
     repr_str = rcParams.__repr__()
     str_str = rcParams.__str__()
-    assert repr_str.startsWith("RcParams")
+    assert repr_str.startswith("RcParams")
     for string in (repr_str, str_str):
         assert all([key in string for key in rcParams.keys()])
 
