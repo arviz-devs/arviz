@@ -91,7 +91,7 @@ def test_rcparams_repr_str():
     """Check both repr and str print all keys."""
     repr_str = rcParams.__repr__()
     str_str = rcParams.__str__()
-    assert repr_str[:8] == "RcParams"
+    assert repr_str.startsWith("RcParams")
     for string in (repr_str, str_str):
         assert all([key in string for key in rcParams.keys()])
 
