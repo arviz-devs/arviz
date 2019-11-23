@@ -9,7 +9,6 @@ import numpy as np
 
 from ...plot_utils import (
     _scale_fig_size,
-    format_coords_as_labels,
 )
 from ....rcparams import rcParams
 
@@ -39,7 +38,8 @@ def _plot_elpd(
             "undo",
             "redo",
             "reset",
-            "save,hover",
+            "save",
+            "hover",
         ]
     )
 
