@@ -132,6 +132,42 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
         """Raise TypeError if someone ever tries to delete a key from RcParams."""
         raise TypeError("RcParams keys cannot be deleted")
 
+    def clear(self):
+        """Raise TypeError if someone ever tries to delete all keys from RcParams."""
+        raise TypeError("RcParams keys cannot be deleted")
+
+    def pop(self, key, default=None):
+        """Raise TypeError if someone ever tries to delete a key from RcParams."""
+        raise TypeError(
+            "RcParams keys cannot be deleted. Use .get(key) of RcParams[key] to check values"
+        )
+
+    def popitem(self):
+        """Raise TypeError if someone ever tries to delete a key from RcParams."""
+        raise TypeError(
+            "RcParams keys cannot be deleted. Use .get(key) of RcParams[key] to check values"
+        )
+
+    def setdefault(self, key, default=None):
+        """Raise error when using setdefault, defaults are handled on initialization."""
+        raise TypeError(
+            "Defaults in RcParams are handled on object initialization during library"
+            "import. Use arvizrc file instead."
+            ""
+        )
+
+    def items(self):
+        """Explicit use of MutableMapping attributes."""
+        return MutableMapping.items(self)
+
+    def keys(self):
+        """Explicit use of MutableMapping attributes."""
+        return MutableMapping.keys(self)
+
+    def values(self):
+        """Explicit use of MutableMapping attributes."""
+        return MutableMapping.values(self)
+
     def __repr__(self):
         """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__

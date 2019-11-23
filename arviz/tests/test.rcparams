@@ -1,1 +1,5 @@
 data.load : eager
+plot.max_subplots : 30
+plot.point_estimate : median
+plot.backend : bokeh
+plot.max_subplots : 20

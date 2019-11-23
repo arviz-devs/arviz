@@ -30,9 +30,26 @@ def test_rc_context_dict():
 def test_rc_context_file():
     path = os.path.dirname(os.path.abspath(__file__))
     rcParams["data.load"] = "lazy"
-    with rc_context(fname=path + "/test.rcparams"):
+    with rc_context(fname=os.path.join(path, "test.rcparams")):
         assert rcParams["data.load"] == "eager"
     assert rcParams["data.load"] == "lazy"
+
+
+def test_bad_rc_file():
+    """Test bad value raises error."""
+    path = os.path.dirname(os.path.abspath(__file__))
+    with pytest.raises(ValueError, match="Bad val "):
+        read_rcfile(os.path.join(path, "bad.rcparams"))
+
+
+def test_warning_rc_file(caplog):
+    """Test invalid lines and duplicated keys log warnings and bad value raises error."""
+    path = os.path.dirname(os.path.abspath(__file__))
+    read_rcfile(os.path.join(path, "test.rcparams"))
+    records = caplog.records
+    assert len(records) == 1
+    assert records[0].levelname == "WARNING"
+    assert "Duplicate key" in caplog.text
 
 
 def test_bad_key():
@@ -47,9 +64,42 @@ def test_del_key_error():
         del rcParams["data.load"]
 
 
+def test_clear_error():
+    """Check that rcParams cannot be cleared."""
+    with pytest.raises(TypeError, match="keys cannot be deleted"):
+        rcParams.clear()
+
+
+def test_pop_error():
+    """Check rcParams pop error."""
+    with pytest.raises(TypeError, match=r"keys cannot be deleted.*get\(key\)"):
+        rcParams.pop("data.load")
+
+
+def test_popitem_error():
+    """Check rcParams popitem error."""
+    with pytest.raises(TypeError, match=r"keys cannot be deleted.*get\(key\)"):
+        rcParams.popitem()
+
+
+def test_setdefaults_error():
+    """Check rcParams popitem error."""
+    with pytest.raises(TypeError, match="Use arvizrc"):
+        rcParams.setdefault("data.load", "eager")
+
+
 def test_rcparams_find_all():
     data_rcparams = rcParams.find_all("data")
     assert len(data_rcparams)
+
+
+def test_rcparams_repr_str():
+    """Check both repr and str print all keys."""
+    repr_str = rcParams.__repr__()
+    str_str = rcParams.__str__()
+    assert repr_str.startswith("RcParams")
+    for string in (repr_str, str_str):
+        assert all([key in string for key in rcParams.keys()])
 
 
 ### Test arvizrc.template file is up to date ###
@@ -71,9 +121,7 @@ def test_choice_bad_values(param):
 
 @pytest.mark.parametrize("allow_none", (True, False))
 @pytest.mark.parametrize("typeof", (str, int))
-@pytest.mark.parametrize(
-    "args", [("not one", 10), (False, None), (False, 4)],
-)
+@pytest.mark.parametrize("args", [("not one", 10), (False, None), (False, 4)])
 def test_make_validate_choice(args, allow_none, typeof):
     accepted_values = set(typeof(value) for value in (0, 1, 4, 6))
     validate_choice = _make_validate_choice(accepted_values, allow_none=allow_none, typeof=typeof)
