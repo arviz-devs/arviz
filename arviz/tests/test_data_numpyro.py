@@ -45,7 +45,8 @@ class TestDataNumPyro:
             "posterior": ["mu", "tau", "eta"],
             "sample_stats": ["diverging", "tree_size", "depth", "log_likelihood"],
             "posterior_predictive": ["obs"],
-            "prior": ["mu", "tau", "eta", "obs"],
+            "prior": ["mu", "tau", "eta"],
+            "prior_predictive": ["obs"],
             "observed_data": ["obs"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
