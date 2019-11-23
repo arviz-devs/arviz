@@ -50,7 +50,7 @@ def _compareplot(
             for dtype in (int, float)
             if (dtype(key) - key == 0)
         }
-        print(ax.yaxis.major_label_overrides)
+
         # create the coordinates for the errorbars
         err_xs = []
         err_ys = []
