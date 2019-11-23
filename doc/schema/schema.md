@@ -43,7 +43,7 @@ Currently there are 2 beta implementations of this design:
 ## Current design
 `InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Each group, described below, stores a conceptually different quantity. In general, each quantity will be represented by several multidimensional labeled variables.
 
-Each group should have one entry per variable and each variable should be named. When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). For groups like `observed_data` or `constant_data` these two initial dimensions are omitted. Dimensions must be named and specify their index values, called coordinates. Coordinates can have repeated identifiers and may not be numerical. Variables must not share names with dimensions.
+Each group should have one entry per variable and each variable should be named. When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). For groups like `observed_data` or `constant_data` these two initial dimensions are omitted. Dimensions must be named and specify their index values, called coordinates. For example, `chain` would be a dimension with coordinates `[0, 1, 2, 3]`. Coordinates can have repeated identifiers and must not necessarily be numerical values. Variables must not share names with dimensions.
 
 Moreover, each group contains the following attributes:
 * `created_at`: the date of creation of the group.
@@ -95,7 +95,7 @@ Parameters of the sampling algorithm and sampling backend to be used for analysi
 
 ### Out of sample `posterior_predictive` samples
 #### `predictions`
-Out of sample posterior predictive samples p(y'|y). Sample should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` may not share coordinates.
+Out of sample posterior predictive samples p(y'|y). Samples should match `posterior samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinates.
 
 #### `predictions_constant_data`
 Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` may not share coordinates.
