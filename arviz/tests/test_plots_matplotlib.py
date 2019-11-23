@@ -748,7 +748,7 @@ def test_plot_hpd(models, data, kwargs):
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
 def test_fast_kde_scipy(limits):
-    data = np.random.normal(0, 1, 1000)
+    data = np.random.normal(0, 1, 10000)
     if limits[0] is None:
         x = np.linspace(data.min(), data.max(), 200)  # pylint: disable=no-member
     else:

@@ -302,7 +302,7 @@ def plot_ppc(
                 )
             else:
                 bins = get_bins(obs_vals)
-                hist, bin_edges = histogram(obs_vals, bins=bins)
+                _, hist, bin_edges = histogram(obs_vals, bins=bins)
                 hist = np.concatenate((hist[:1], hist))
                 ax_i.plot(
                     bin_edges,
@@ -325,7 +325,7 @@ def plot_ppc(
                     pp_xs.append(pp_x)
                 else:
                     bins = get_bins(vals)
-                    hist, bin_edges = histogram(vals, bins=bins)
+                    _, hist, bin_edges = histogram(vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
                     pp_densities.append(hist)
                     pp_xs.append(bin_edges)
@@ -365,7 +365,7 @@ def plot_ppc(
                 else:
                     vals = pp_vals.flatten()
                     bins = get_bins(vals)
-                    hist, bin_edges = histogram(vals, bins=bins)
+                    _, hist, bin_edges = histogram(vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
                     ax_i.plot(
                         bin_edges,
@@ -441,7 +441,7 @@ def plot_ppc(
                 else:
                     vals = pp_vals.flatten()
                     bins = get_bins(vals)
-                    hist, bin_edges = histogram(vals, bins=bins)
+                    _, hist, bin_edges = histogram(vals, bins=bins)
                     hist = np.concatenate((hist[:1], hist))
                     ax_i.plot(
                         bin_edges,
@@ -551,17 +551,17 @@ def _set_animation(
 
         else:
             vals = pp_sampled_vals[0]
-            y_vals, x_vals = histogram(vals, bins="auto")
+            _, y_vals, x_vals = histogram(vals, bins="auto")
             (line,) = ax.plot(x_vals[:-1], y_vals, **plot_kwargs)
 
             max_max = max(
-                [max(histogram(pp_sampled_vals[i], bins="auto")[0]) for i in range(length)]
+                [max(histogram(pp_sampled_vals[i], bins="auto")[1]) for i in range(length)]
             )
 
             ax.set_ylim(0, max_max)
 
             def animate(i):
-                y_vals, x_vals = histogram(pp_sampled_vals[i], bins="auto")
+                _, y_vals, x_vals = histogram(pp_sampled_vals[i], bins="auto")
                 line.set_data(x_vals[:-1], y_vals)
                 return (line,)
 

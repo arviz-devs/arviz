@@ -276,8 +276,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
 
-    d_x = (xmax - xmin) / (n_bins - 1)
-    grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax), density=False)
+    _, grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
@@ -286,7 +285,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     npad = min(n_bins, 2 * kern_nx)
     grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
     density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
-    norm_factor = len_x * d_x * (2 * np.pi * log_len_x ** 2 * scotts_factor ** 2) ** 0.5
+    norm_factor = (2 * np.pi * log_len_x ** 2 * scotts_factor ** 2) ** 0.5
 
     density /= norm_factor
 

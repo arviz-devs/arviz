@@ -430,7 +430,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
 
         if kind == "loo" and "pareto_k" in self:
             bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
-            counts, _ = histogram(self.pareto_k.values, bins, density=False)
+            counts, *_ = histogram(self.pareto_k.values, bins)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
@@ -471,5 +471,7 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 
 @conditional_jit(cache=True)
-def histogram(data, bins, range_hist=None, density=True):
-    return np.histogram(data, bins=bins, range=range_hist, density=density)
+def histogram(data, bins, range_hist=None):
+    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
+    hist_dens = hist / (hist.sum() * (bin_edges[1] - bin_edges[0]))
+    return hist, hist_dens, bin_edges

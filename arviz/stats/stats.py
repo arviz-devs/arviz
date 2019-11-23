@@ -367,7 +367,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
             bins = np.linspace(lower, upper, len(density))
         else:
             bins = get_bins(ary)
-            density, _ = histogram(ary, bins=bins)
+            _, density, _ = histogram(ary, bins=bins)
             dx = np.diff(bins)[0]
 
         density *= dx

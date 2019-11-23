@@ -141,7 +141,7 @@ def plot_rank(
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):
-            all_counts[idx], _ = histogram(row, bins=bin_ary)
+            _, all_counts[idx], _ = histogram(row, bins=bin_ary)
         gap = all_counts.max() * 1.05
         width = bin_ary[1] - bin_ary[0]
 

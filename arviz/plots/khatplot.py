@@ -229,7 +229,7 @@ def plot_khat(
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
-        hist, _ = histogram(khats, bin_edges)
+        _, hist, _ = histogram(khats, bin_edges)
         for idx, count in enumerate(hist):
             ax.text(
                 (n_data_points - 1 + xmax) / 2,
