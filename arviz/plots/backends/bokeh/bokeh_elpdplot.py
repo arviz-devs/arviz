@@ -7,9 +7,7 @@ from bokeh.layouts import gridplot
 import numpy as np
 
 
-from ...plot_utils import (
-    _scale_fig_size,
-)
+from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
 
