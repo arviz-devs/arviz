@@ -131,7 +131,7 @@ def _plot_elpd(
                     threshold,
                     coord_labels,
                     xlabels,
-                    j == numvars - 1,
+                    j == numvars - 2,
                     i == 0,
                     plot_kwargs,
                 )
@@ -173,16 +173,20 @@ def _plot_atomic_elpd(
             )
     if ylabels_shown:
         ax_.yaxis.axis_label = "ELPD difference"
+    else:
+        ax_.yaxis.minor_tick_line_color = None
+        ax_.yaxis.major_label_text_font_size = "0pt"
+
     if xlabels_shown:
         if xlabels:
             ax_.xaxis.ticker = np.arange(0, len(coord_labels))
             ax_.xaxis.major_label_overrides = {
-                key: str(value)
+                str(key): str(value)
                 for key, value in zip(np.arange(0, len(coord_labels)), list(coord_labels))
             }
     else:
-        # TODO: show only labels on bottom row
-        pass
+        ax_.xaxis.minor_tick_line_color = None
+        ax_.xaxis.major_label_text_font_size = "0pt"
     title = Title()
     title.text = "{} - {}".format(model1, model2)
     ax_.title = title
