@@ -83,7 +83,7 @@ class PyroConverter:
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     def priors_to_xarray(self):
-        """Convert prior samples to xarray."""
+        """Convert prior samples (and if possible prior predictive too) to xarray."""
         if self.prior is None:
             return {"prior": None, "prior_predictive": None}
         if self.posterior is not None:
