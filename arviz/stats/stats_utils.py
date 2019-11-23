@@ -473,5 +473,5 @@ def stats_variance_2d(data, ddof=0, axis=1):
 @conditional_jit(cache=True)
 def histogram(data, bins, range_hist=None):
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
-    hist_dens = hist / (hist.sum() * (bin_edges[1] - bin_edges[0]))
+    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
