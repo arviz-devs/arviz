@@ -64,6 +64,12 @@ def test_del_key_error():
         del rcParams["data.load"]
 
 
+def test_clear_error():
+    """Check that rcParams cannot be cleared."""
+    with pytest.raises(TypeError, match="keys cannot be deleted"):
+        rcParams.clear()
+
+
 def test_pop_error():
     """Check rcParams pop error."""
     with pytest.raises(TypeError, match=r"keys cannot be deleted.*get\(key\)"):
@@ -115,9 +121,7 @@ def test_choice_bad_values(param):
 
 @pytest.mark.parametrize("allow_none", (True, False))
 @pytest.mark.parametrize("typeof", (str, int))
-@pytest.mark.parametrize(
-    "args", [("not one", 10), (False, None), (False, 4)],
-)
+@pytest.mark.parametrize("args", [("not one", 10), (False, None), (False, 4)])
 def test_make_validate_choice(args, allow_none, typeof):
     accepted_values = set(typeof(value) for value in (0, 1, 4, 6))
     validate_choice = _make_validate_choice(accepted_values, allow_none=allow_none, typeof=typeof)
