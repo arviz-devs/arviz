@@ -280,6 +280,7 @@ def test_plot_elpd(models, add_model, use_elpddata, kwargs):
         assert axes.shape[0] == axes.shape[1]
         assert axes.shape[0] == len(model_dict) - 1
 
+
 @pytest.mark.parametrize(
     "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"},],
 )
