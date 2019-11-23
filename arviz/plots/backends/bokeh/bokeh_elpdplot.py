@@ -43,7 +43,6 @@ def _plot_elpd(
         ]
     )
 
-
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
@@ -59,38 +58,9 @@ def _plot_elpd(
             )
 
         ydata = pointwise_data[0] - pointwise_data[1]
-        ax.cross(
-            np.asarray(xdata),
-            np.asarray(ydata),
-            line_color=plot_kwargs.get("color", "black"),
-            size=plot_kwargs.get("s"),
+        _plot_atomic_elpd(
+            ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
-        if threshold is not None:
-            diff_abs = np.abs(ydata - ydata.mean())
-            bool_ary = diff_abs > threshold * ydata.std()
-            if coord_labels is None:
-                coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
-            for outlier in outliers:
-                label = coord_labels[outlier]
-                ax.text(
-                    x=np.asarray(outlier),
-                    y=np.asarray(ydata[outlier]),
-                    text=label,
-                    text_color="black",
-                )
-
-        title = Title()
-        title.text = "{} - {}".format(*models)
-        ax.title = title
-
-        ax.yaxis.axis_label = "ELPD difference"
-        if xlabels:
-            ax.xaxis.ticker = np.arange(0, len(coord_labels))
-            ax.xaxis.major_label_overrides = {
-                key: str(value)
-                for key, value in zip(np.arange(0, len(coord_labels)), list(coord_labels))
-            }
 
         if show:
             bkp.show(ax, toolbar_location="above")
@@ -152,41 +122,67 @@ def _plot_elpd(
 
                 var2 = pointwise_data[j + 1]
                 ydata = var1 - var2
-                ax[j, i].cross(
-                    np.asarray(xdata),
-                    np.asarray(ydata),
-                    line_color=plot_kwargs.get("color", "black"),
-                    size=plot_kwargs.get("s"),
+                _plot_atomic_elpd(
+                    ax[j, i],
+                    xdata,
+                    ydata,
+                    models[i],
+                    models[j + 1],
+                    threshold,
+                    coord_labels,
+                    xlabels,
+                    j == numvars - 1,
+                    i == 0,
+                    plot_kwargs,
                 )
-                if threshold is not None:
-                    diff_abs = np.abs(ydata - ydata.mean())
-                    bool_ary = diff_abs > threshold * ydata.std()
-                    if coord_labels is None:
-                        coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
-                    for outlier in outliers:
-                        label = coord_labels[outlier]
-                        ax[j, i].text(
-                            x=np.asarray(outlier),
-                            y=np.asarray(ydata[outlier]),
-                            text=label,
-                            text_color="black",
-                        )
-
-                if i == 0:
-                    ax[j, i].yaxis.axis_label = "ELPD difference"
-
-                title = Title()
-                title.text = "{} - {}".format(models[i], models[j + 1])
-                ax[j, i].title = title
-
-        if xlabels:
-            ax[j, i].xaxis.ticker = np.arange(0, len(coord_labels))
-            ax[j, i].xaxis.major_label_overrides = {
-                key: str(value)
-                for key, value in zip(np.arange(0, len(coord_labels)), list(coord_labels))
-            }
 
         if show:
             bkp.show(gridplot([list(item) for item in ax], toolbar_location="above"))
     return ax
+
+
+def _plot_atomic_elpd(
+    ax_,
+    xdata,
+    ydata,
+    model1,
+    model2,
+    threshold,
+    coord_labels,
+    xlabels,
+    xlabels_shown,
+    ylabels_shown,
+    plot_kwargs,
+):
+    ax_.cross(
+        np.asarray(xdata),
+        np.asarray(ydata),
+        line_color=plot_kwargs.get("color", "black"),
+        size=plot_kwargs.get("s"),
+    )
+    if threshold is not None:
+        diff_abs = np.abs(ydata - ydata.mean())
+        bool_ary = diff_abs > threshold * ydata.std()
+        if coord_labels is None:
+            coord_labels = xdata.astype(str)
+        outliers = np.argwhere(bool_ary).squeeze()
+        for outlier in outliers:
+            label = coord_labels[outlier]
+            ax_.text(
+                x=np.asarray(outlier), y=np.asarray(ydata[outlier]), text=label, text_color="black",
+            )
+    if ylabels_shown:
+        ax_.yaxis.axis_label = "ELPD difference"
+    if xlabels_shown:
+        if xlabels:
+            ax_.xaxis.ticker = np.arange(0, len(coord_labels))
+            ax_.xaxis.major_label_overrides = {
+                key: str(value)
+                for key, value in zip(np.arange(0, len(coord_labels)), list(coord_labels))
+            }
+    else:
+        # TODO: show only labels on bottom row
+        pass
+    title = Title()
+    title.text = "{} - {}".format(model1, model2)
+    ax_.title = title
