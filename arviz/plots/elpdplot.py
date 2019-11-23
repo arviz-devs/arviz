@@ -7,6 +7,7 @@ from matplotlib.lines import Line2D
 from ..data import convert_to_inference_data
 from .plot_utils import (
     get_coords,
+    format_coords_as_labels,
     color_from_dim,
 )
 from ..stats import waic, loo, ELPDData
@@ -115,6 +116,7 @@ def plot_elpd(
                 set(scales)
             )
         )
+    backend = rcParams["plot.backend"] if backend is None else backend.lower()
     numvars = len(compare_dict)
     models = list(compare_dict.keys())
 
@@ -129,6 +131,8 @@ def plot_elpd(
         get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models
     ]
     xdata = np.arange(pointwise_data[0].size)
+    coord_labels = format_coords_as_labels(pointwise_data[0]) if xlabels else None
+
     markersize = None
     if isinstance(color, str):
         if color in pointwise_data[0].dims:
@@ -162,6 +166,9 @@ def plot_elpd(
     if numvars < 2:
         raise Exception("Number of models to compare must be 2 or greater.")
 
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
+
     elpd_plot_kwargs = dict(
         ax=ax,
         models=models,
@@ -172,6 +179,7 @@ def plot_elpd(
         plot_kwargs=plot_kwargs,
         markersize=markersize,
         xlabels=xlabels,
+        coord_labels=coord_labels,
         xdata=xdata,
         threshold=threshold,
         legend=legend,
@@ -187,7 +195,7 @@ def plot_elpd(
         elpd_plot_kwargs.pop("color")
         elpd_plot_kwargs["show"] = show
         ax = _plot_elpd(**elpd_plot_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
+    elif backend == "matplotlib":
         from .backends.matplotlib.mpl_elpdplot import _plot_elpd
 
         ax = _plot_elpd(**elpd_plot_kwargs)

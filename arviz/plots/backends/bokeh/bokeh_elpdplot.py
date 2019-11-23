@@ -24,6 +24,7 @@ def _plot_elpd(
     plot_kwargs,
     markersize,
     xlabels,
+    coord_labels,
     xdata,
     threshold,
     show,
@@ -42,8 +43,6 @@ def _plot_elpd(
         ]
     )
 
-    if xlabels:
-        coord_labels = format_coords_as_labels(pointwise_data[0])
 
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
@@ -60,8 +59,6 @@ def _plot_elpd(
             )
 
         ydata = pointwise_data[0] - pointwise_data[1]
-        print(np.asarray(xdata).shape)
-        print(np.asarray(ydata).shape)
         ax.cross(
             np.asarray(xdata),
             np.asarray(ydata),
@@ -69,12 +66,9 @@ def _plot_elpd(
             size=plot_kwargs.get("s"),
         )
         if threshold is not None:
-            ydata = ydata.values.flatten()
             diff_abs = np.abs(ydata - ydata.mean())
             bool_ary = diff_abs > threshold * ydata.std()
-            try:
-                coord_labels
-            except NameError:
+            if coord_labels is None:
                 coord_labels = xdata.astype(str)
             outliers = np.argwhere(bool_ary).squeeze()
             for outlier in outliers:
@@ -157,19 +151,17 @@ def _plot_elpd(
                     continue
 
                 var2 = pointwise_data[j + 1]
+                ydata = var1 - var2
                 ax[j, i].cross(
                     np.asarray(xdata),
-                    np.asarray(var1 - var2),
+                    np.asarray(ydata),
                     line_color=plot_kwargs.get("color", "black"),
                     size=plot_kwargs.get("s"),
                 )
                 if threshold is not None:
-                    ydata = (var1 - var2).values.flatten()
                     diff_abs = np.abs(ydata - ydata.mean())
                     bool_ary = diff_abs > threshold * ydata.std()
-                    try:
-                        coord_labels
-                    except NameError:
+                    if coord_labels is None:
                         coord_labels = xdata.astype(str)
                     outliers = np.argwhere(bool_ary).squeeze()
                     for outlier in outliers:

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 from ...plot_utils import (
     _scale_fig_size,
-    format_coords_as_labels,
     set_xticklabels,
 )
 from ....rcparams import rcParams
@@ -23,15 +22,13 @@ def _plot_elpd(
     plot_kwargs,
     markersize,
     xlabels,
+    coord_labels,
     xdata,
     threshold,
     legend,
     handles,
     color,
 ):
-
-    if xlabels:
-        coord_labels = format_coords_as_labels(pointwise_data[0])
 
     if numvars == 2:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
@@ -45,12 +42,9 @@ def _plot_elpd(
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
         if threshold is not None:
-            ydata = ydata.values.flatten()
             diff_abs = np.abs(ydata - ydata.mean())
             bool_ary = diff_abs > threshold * ydata.std()
-            try:
-                coord_labels
-            except NameError:
+            if coord_labels is None:
                 coord_labels = xdata.astype(str)
             outliers = np.argwhere(bool_ary).squeeze()
             for outlier in outliers:
@@ -115,12 +109,10 @@ def _plot_elpd(
                 var2 = pointwise_data[j + 1]
                 ax[j, i].scatter(xdata, var1 - var2, **plot_kwargs)
                 if threshold is not None:
-                    ydata = (var1 - var2).values.flatten()
+                    ydata = var1 - var2
                     diff_abs = np.abs(ydata - ydata.mean())
                     bool_ary = diff_abs > threshold * ydata.std()
-                    try:
-                        coord_labels
-                    except NameError:
+                    if coord_labels is None:
                         coord_labels = xdata.astype(str)
                     outliers = np.argwhere(bool_ary).squeeze()
                     for outlier in outliers:
