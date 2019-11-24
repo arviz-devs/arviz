@@ -5,16 +5,23 @@ from typing import Dict, List, Any, Optional, TYPE_CHECKING
 import numpy as np
 import xarray as xr
 from .. import utils
-from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+from .inference_data import InferenceData, concat
+from .base import (
+    requires,
+    dict_to_dataset,
+    generate_dims_coords,
+    make_attrs,
+    CoordSpec,
+    DimSpec,
+    get_predictions_dims,
+    get_posterior_var_names,
+    get_posterior_nchains_ndraws,
+)
 
 if TYPE_CHECKING:
     import pymc3 as pm
 
 _log = logging.getLogger(__name__)
-
-Coords = Dict[str, List[Any]]
-Dims = Dict[str, List[str]]
 
 
 class PyMC3Converter:
@@ -32,13 +39,15 @@ class PyMC3Converter:
         trace=None,
         prior=None,
         posterior_predictive=None,
-        coords: Optional[Coords] = None,
-        dims: Optional[Dims] = None,
-        model=None
+        coords: Optional[CoordSpec] = None,
+        dims: Optional[DimSpec] = None,
+        model=None,
+        predictions=False,
     ):
         import pymc3
 
         self.pymc3 = pymc3
+        self.predictions = predictions
 
         self.trace = trace
 
@@ -48,9 +57,13 @@ class PyMC3Converter:
             self.model = self.trace._straces[0].model  # pylint: disable=protected-access
             self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
             self.ndraws = len(trace)
+            self.posterior_var_names = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+                self.trace.varnames, include_transformed=False
+            )
         else:
             self.model = None
             self.nchains = self.ndraws = 0
+            self.posterior_var_names = None
 
         # this permits us to get the model from command-line argument or from with model:
         try:
@@ -79,14 +92,9 @@ class PyMC3Converter:
         self.dims = dims
         self.observations = (
             None
-            if self.trace is None
+            if self.model is None
             else True
-            if any(
-                hasattr(obs, "observations")
-                for obs in self.trace._straces[  # pylint: disable=protected-access
-                    0
-                ].model.observed_RVs
-            )
+            if any(hasattr(obs, "observations") for obs in self.model.observed_RVs)
             else None
         )
         if self.observations is not None:
@@ -130,11 +138,8 @@ class PyMC3Converter:
     @requires("trace")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        var_names = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-            self.trace.varnames, include_transformed=False
-        )
         data = {}
-        for var_name in var_names:
+        for var_name in self.posterior_var_names:
             data[var_name] = np.array(self.trace.get_values(var_name, combine=False, squeeze=False))
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
@@ -224,20 +229,20 @@ class PyMC3Converter:
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pymc3))
 
-    @requires("trace")
+    @requires("posterior_var_names")
     @requires("model")
     def constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-            self.trace.varnames, include_transformed=True
-        )
+        model_vars = list(self.posterior_var_names)
         if self.observations is not None:
             model_vars.extend(
                 [obs.name for obs in self.observations.values() if hasattr(obs, "name")]
             )
             model_vars.extend(self.observations.keys())
         constant_data_vars = {
-            name: var for name, var in self.model.named_vars.items() if name not in model_vars
+            name: var
+            for name, var in self.model.named_vars.items()
+            if name not in model_vars and not self.pymc3.util.is_transformed_name(name)
         }
         if not constant_data_vars:
             return None
@@ -266,6 +271,13 @@ class PyMC3Converter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
+        if self.predictions:
+            return InferenceData(
+                **{
+                    "predictions": self.posterior_predictive_to_xarray(),
+                    "constant_data_predictions": self.constant_data_to_xarray(),
+                }
+            )
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
@@ -289,4 +301,40 @@ def from_pymc3(
         coords=coords,
         dims=dims,
         model=model,
+        predictions=False,
     ).to_inference_data()
+
+
+def add_predictions_pymc3(
+    idata,
+    predictions,
+    model=None,
+    dims: Optional[DimSpec] = None,
+    coords: Optional[CoordSpec] = None,
+    inplace: Optional[bool] = False,
+):
+    """Add predictions to existing InferenceData object.
+
+    Parameters
+    ----------
+    idata : InferenceData
+    predictions : dict
+    model : pymc3.Model, optional
+    dims : dict, optional
+        If None, the dimensions for ``predictions`` and ``constant_data_predictions`` will
+        be taken from the ``posterior_predictive`` (or ``observed_data``) and
+        ``constant_data`` groups respectively.
+    coords : dict, optional
+    inplace: bool, optional
+        Add predictions data inplace or return a new InferenceData object
+    """
+    import pymc3 as pm
+
+    dims = get_predictions_dims(idata, dims)
+    converter = PyMC3Converter(
+        posterior_predictive=predictions, model=model, dims=dims, coords=coords, predictions=True
+    )
+    converter.posterior_var_names = get_posterior_var_names(idata)
+    converter.nchains, converter.ndraws = get_posterior_nchains_ndraws(idata)
+    idata_predictions = converter.to_inference_data()
+    return concat(idata, idata_predictions, inplace=inplace, dim=None)

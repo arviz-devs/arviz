@@ -230,3 +230,54 @@ def make_attrs(attrs=None, library=None):
     if attrs is not None:
         default_attrs.update(attrs)
     return default_attrs
+
+
+def get_predictions_dims(idata, dims=None):
+    """Get the dimensions for the predictions and constant data predictions."""
+    if dims is not None:
+        return dims
+    dims = {}
+    if hasattr(idata, "posterior_predictive"):
+        dataset = idata.posterior_predictive
+        for var_name in dataset.data_vars:
+            dims[var_name] = list(dataset[var_name].dims)[2:]
+    if hasattr(idata, "observed_data"):
+        dataset = idata.observed_data
+        for var_name in dataset.data_vars:
+            dims[var_name] = list(dataset[var_name].dims)
+    if hasattr(idata, "constant_data"):
+        dataset = idata.constant_data
+        for var_name in dataset.data_vars:
+            dims[var_name] = list(dataset[var_name].dims)
+    return dims
+
+
+def get_posterior_var_names(idata):
+    """Get the variable names of the posterior variables.
+
+    It firts tries to get them from the posterior group, otherwise the names are taken
+    from the prior group.
+    """
+    if hasattr(idata, "posterior"):
+        return list(idata.posterior.data_vars)
+    if hasattr(idata, "prior"):
+        return list(idata.prior.data_vars)
+    return []
+
+
+def get_posterior_nchains_ndraws(idata):
+    """Get number of chains and number of draws.
+
+    Try to get number of chains and draws from posterior, sample_stats or
+    posterior_predictive.
+    """
+    if hasattr(idata, "posterior"):
+        dataset = idata.posterior
+        return len(dataset.chain), len(dataset.draw)
+    if hasattr(idata, "sample_stats"):
+        dataset = idata.sample_stats
+        return len(dataset.chain), len(dataset.draw)
+    if hasattr(idata, "posterior_predictive"):
+        dataset = idata.posterior_predictive
+        return len(dataset.chain), len(dataset.draw)
+    return -1, -1
