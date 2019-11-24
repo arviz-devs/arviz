@@ -1,5 +1,5 @@
 # Azure Pipelines config for ArviZ
-pr:
+trigger:
 - master
 
 jobs:
