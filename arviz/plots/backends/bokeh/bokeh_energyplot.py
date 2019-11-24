@@ -51,11 +51,15 @@ def _plot_energy(
                 backend="bokeh",
                 show=False,
             )
-    elif kind == "hist":
+    elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()
         hist_kwargs.update(**fill_kwargs)
 
         for alpha, color, label, value in series:
+            hist_kwargs["fill_alpha"] = alpha
+            hist_kwargs["fill_color"] = color
+            hist_kwargs["line_color"] = None
+            hist_kwargs["line_alpha"] = alpha
             _histplot_bokeh_op(
                 value.flatten(), values2=None, rotated=False, ax=ax, hist_kwargs=hist_kwargs
             )

@@ -32,7 +32,7 @@ def plot_energy(
     data : xarray dataset, or object that can be converted (must represent
            `sample_stats` and have an `energy` variable)
     kind : str
-        Type of plot to display (kde or histogram)
+        Type of plot to display {"kde", "histogram")
     bfmi : bool
         If True add to the plot the value of the estimated Bayesian fraction of missing information
     figsize : tuple
@@ -132,6 +132,8 @@ def plot_energy(
         plot_energy_kwargs.pop("xt_labelsize")
         plot_energy_kwargs["line_width"] = plot_energy_kwargs.pop("linewidth")
         plot_energy_kwargs["show"] = show
+        if kind in {"hist", "histogram"}:
+            plot_energy_kwargs["legend"] = False
         ax = _plot_energy(**plot_energy_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_energyplot import _plot_energy

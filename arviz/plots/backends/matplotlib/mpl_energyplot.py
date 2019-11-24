@@ -39,7 +39,7 @@ def _plot_energy(
                 ax=ax,
                 legend=False,
             )
-    elif kind == "hist":
+    elif kind in {"hist", "histogram"}:
         for alpha, color, label, value in series:
             ax.hist(
                 value.flatten(),
