@@ -17,6 +17,7 @@ from ..plots import (
     plot_compare,
     plot_density,
     plot_elpd,
+    plot_energy,
     plot_trace,
     plot_kde,
     plot_dist,
@@ -304,3 +305,13 @@ def test_plot_elpd_multidim(multidim_models, add_model, use_elpddata, kwargs):
     if add_model:
         assert axes.shape[0] == axes.shape[1]
         assert axes.shape[0] == len(model_dict) - 1
+
+
+@pytest.mark.parametrize("kind", ["kde", "hist"])
+def test_plot_energy(models, kind):
+    assert plot_energy(models.model_1, kind=kind, backend="bokeh", show=False)
+
+
+def test_plot_energy_bad(models):
+    with pytest.raises(ValueError):
+        plot_energy(models.model_1, kind="bad_kind", backend="bokeh", show=False)

@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 
 from ...kdeplot import plot_kde
+from ...plot_utils import get_bins
 
 
 def _plot_dist_bokeh(
@@ -109,7 +110,9 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
     hist_kwargs.pop("density", None)
     hist_kwargs.pop("orientation", None)
 
-    bins = hist_kwargs.pop("bins")
+    bins = hist_kwargs.pop("bins", None)
+    if bins is None:
+        bins = get_bins(values)
     density = hist_kwargs.pop("density", True)
     hist, edges = np.histogram(values, density=density, bins=bins)
     if hist_kwargs.pop("cumulative", False):
