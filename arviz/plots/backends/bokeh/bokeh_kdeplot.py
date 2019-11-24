@@ -125,6 +125,16 @@ def _plot_kde_bokeh(
                     else:
                         ax.patch(patch_y, patch_x, **fill_kwargs)
         else:
+            if fill_kwargs.get("fill_alpha", False):
+                patch_x = np.concatenate((x, [x[-1]], x[::-1], [x[0]]))
+                patch_y = np.concatenate(
+                    (np.zeros_like(density), [density[-1]], density[::-1], [0])
+                )
+                if not rotated:
+                    ax.patch(patch_x, patch_y, **fill_kwargs)
+                else:
+                    ax.patch(patch_y, patch_x, **fill_kwargs)
+
             if not rotated:
                 ax.line(x, density, **plot_kwargs)
             else:

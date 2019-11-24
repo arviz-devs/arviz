@@ -1,10 +1,9 @@
 """Plot energy transition distribution in HMC inference."""
+from itertools import cycle
+from matplotlib.pyplot import rcParams
 import numpy as np
-import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
-from ..stats import bfmi as e_bfmi
-from .kdeplot import plot_kde
 from .plot_utils import _scale_fig_size
 
 
@@ -21,6 +20,8 @@ def plot_energy(
     fill_kwargs=None,
     plot_kwargs=None,
     ax=None,
+    backend=None,
+    show=True,
 ):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
@@ -83,9 +84,6 @@ def plot_energy(
     """
     energy = convert_to_dataset(data, group="sample_stats").energy.values
 
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
-
     if fill_kwargs is None:
         fill_kwargs = {}
 
@@ -94,6 +92,18 @@ def plot_energy(
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
+    _colors = [
+        prop for _, prop in zip(range(10), cycle(rcParams["axes.prop_cycle"].by_key()["color"]))
+    ]
+    if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
+        fill_color[1].startswith("C") and len(fill_color[1]) == 2
+    ):
+        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+    elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
+        fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
+    elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
+        fill_color = tuple(list(fill_color[1:]) + [_colors[int(fill_color[0][1:]) % 10]])
+
     series = zip(
         fill_alpha,
         fill_color,
@@ -101,45 +111,31 @@ def plot_energy(
         (energy - energy.mean(), np.diff(energy)),
     )
 
-    if kind == "kde":
-        for alpha, color, label, value in series:
-            fill_kwargs["alpha"] = alpha
-            fill_kwargs["color"] = color
-            plot_kwargs.setdefault("color", color)
-            plot_kwargs.setdefault("alpha", 0)
-            plot_kwargs.setdefault("linewidth", linewidth)
-            plot_kde(
-                value,
-                bw=bw,
-                label=label,
-                textsize=xt_labelsize,
-                fill_kwargs=fill_kwargs,
-                plot_kwargs=plot_kwargs,
-                ax=ax,
-                legend=False,
-            )
-    elif kind == "hist":
-        for alpha, color, label, value in series:
-            ax.hist(
-                value.flatten(),
-                bins="auto",
-                density=True,
-                alpha=alpha,
-                label=label,
-                color=color,
-                **plot_kwargs
-            )
+    plot_energy_kwargs = dict(
+        ax=ax,
+        series=series,
+        energy=energy,
+        kind=kind,
+        bfmi=bfmi,
+        figsize=figsize,
+        xt_labelsize=xt_labelsize,
+        linewidth=linewidth,
+        fill_kwargs=fill_kwargs,
+        plot_kwargs=plot_kwargs,
+        bw=bw,
+        legend=legend,
+    )
 
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_energyplot import _plot_energy
+
+        plot_energy_kwargs.pop("xt_labelsize")
+        plot_energy_kwargs["line_width"] = plot_energy_kwargs.pop("linewidth")
+        plot_energy_kwargs["show"] = show
+        ax = _plot_energy(**plot_energy_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
-        raise ValueError("Plot type {} not recognized.".format(kind))
+        from .backends.matplotlib.mpl_energyplot import _plot_energy
 
-    if bfmi:
-        for idx, val in enumerate(e_bfmi(energy)):
-            ax.plot([], label="chain {:>2} BFMI = {:.2f}".format(idx, val), alpha=0)
-    if legend:
-        ax.legend()
-
-    ax.set_xticks([])
-    ax.set_yticks([])
+        ax = _plot_energy(**plot_energy_kwargs)
 
     return ax
