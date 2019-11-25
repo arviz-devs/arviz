@@ -1,5 +1,6 @@
 """Tests use the 'bokeh' backend."""
 # pylint: disable=redefined-outer-name,too-many-lines
+from copy import deepcopy
 from pandas import DataFrame
 import numpy as np
 import pytest
@@ -18,6 +19,7 @@ from ..plots import (
     plot_density,
     plot_elpd,
     plot_energy,
+    plot_ess,
     plot_trace,
     plot_kde,
     plot_dist,
@@ -315,3 +317,82 @@ def test_plot_energy(models, kind):
 def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
         plot_energy(models.model_1, kind="bad_kind", backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"], "relative": True, "color": "r"},
+        {"coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"min_ess": 600, "hline_kwargs": {"color": "r"}},
+    ],
+)
+@pytest.mark.parametrize("kind", ["local", "quantile", "evolution"])
+def test_plot_ess(models, kind, kwargs):
+    """Test plot_ess arguments common to all kind of plots."""
+    idata = models.model_1
+    ax = plot_ess(idata, kind=kind, backend="bokeh", show=False, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"rug": True},
+        {"rug": True, "rug_kind": "max_depth", "rug_kwargs": {"color": "c"}},
+        {"extra_methods": True},
+        {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
+        {"extra_methods": True, "rug": True},
+    ],
+)
+@pytest.mark.parametrize("kind", ["local", "quantile"])
+def test_plot_ess_local_quantile(models, kind, kwargs):
+    """Test specific arguments in kinds local and quantile of plot_ess."""
+    idata = models.model_1
+    ax = plot_ess(idata, kind=kind, backend="bokeh", show=False, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_ess_evolution(models):
+    """Test specific arguments in evolution kind of plot_ess."""
+    idata = models.model_1
+    ax = plot_ess(
+        idata,
+        kind="evolution",
+        extra_kwargs={"linestyle": "--"},
+        color="b",
+        backend="bokeh",
+        show=False,
+    )
+    assert np.all(ax)
+
+
+def test_plot_ess_bad_kind(models):
+    """Test error when plot_ess recieves an invalid kind."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="Invalid kind"):
+        plot_ess(idata, kind="bad kind", backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize("dim", ["chain", "draw"])
+def test_plot_ess_bad_coords(models, dim):
+    """Test error when chain or dim are used as coords to select a data subset."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="invalid coordinates"):
+        plot_ess(idata, coords={dim: slice(3)}, backend="bokeh", show=False)
+
+
+def test_plot_ess_no_sample_stats(models):
+    """Test error when rug=True but sample_stats group is not present."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="must contain sample_stats"):
+        plot_ess(idata.posterior, rug=True, backend="bokeh", show=False)
+
+
+def test_plot_ess_no_divergences(models):
+    """Test error when rug=True, but the variable defined by rug_kind is missing."""
+    idata = deepcopy(models.model_1)
+    idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
+    with pytest.raises(ValueError, match="not contain diverging"):
+        plot_ess(idata, rug=True, backend="bokeh", show=False)
