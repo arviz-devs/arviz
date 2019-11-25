@@ -63,8 +63,10 @@ def _plot_ess(
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
         if kind == "evolution":
+            ax_.line(np.asarray(xdata), np.asarray(x), legend_label="bulk")
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
-            ax_.line(np.asarray(xdata), np.asarray(ess_tail))
+            ax_.line(np.asarray(xdata), np.asarray(ess_tail), color="orange", legend_label="tail")
+            ax_.circle(np.asarray(xdata), np.asarray(ess_tail), size=6, color="orange")
         elif rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
