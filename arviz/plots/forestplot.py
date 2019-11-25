@@ -602,7 +602,7 @@ class VarHandler:
 
             if kind == "hist":
                 bins = get_bins(values)
-                density, x = histogram(values, bins=bins)
+                _, density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)

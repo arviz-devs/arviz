@@ -7,6 +7,7 @@ import numpy as np
 from ....stats import hpd
 from ...kdeplot import _fast_kde
 from ...plot_utils import make_label
+from ....stats.stats_utils import histogram
 
 
 def _plot_density(
@@ -125,7 +126,7 @@ def _d_helper(
         xmin, xmax = hpd(vec, credible_interval, multimodal=False)
         bins = range(xmin, xmax + 2)
 
-        hist, edges = np.histogram(vec, density=True, bins=bins)
+        _, hist, edges = histogram(vec, bins=bins)
 
         if outline:
             ax.quad(
