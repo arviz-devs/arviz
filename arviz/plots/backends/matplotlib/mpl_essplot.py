@@ -6,8 +6,6 @@ from scipy.stats import rankdata
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
-    get_coords,
-    filter_plotters_list,
 )
 
 
