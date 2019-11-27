@@ -37,6 +37,7 @@ def _plot_forest(
     linewidth,
     markersize,
     kind,
+    ncols,
     credible_interval,
     quartiles,
     rope,
@@ -79,11 +80,11 @@ def _plot_forest(
         )
 
         axes = []
-        for i, width_r in enumerate(width_ratios):
+        for i, width_r in zip(range(ncols), width_ratios):
             if i == 0:
                 ax = bkp.figure(
                     height=int(figsize[0]) * 80,
-                    width=int(figsize[1] * (width_r / sum(width_ratios))) * 100,
+                    width=int(figsize[1] * (width_r / sum(width_ratios)) * 100),
                     output_backend="webgl",
                     tools=tools,
                 )
@@ -91,13 +92,12 @@ def _plot_forest(
             else:
                 ax = bkp.figure(
                     height=figsize[0] * 80,
-                    width=int(figsize[1] * (width_r / sum(width_ratios))) * 100,
+                    width=int(figsize[1] * (width_r / sum(width_ratios)) * 100),
                     y_range=_y_range,
                 )
             axes.append(ax)
     else:
         axes = ax
-
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
@@ -306,10 +306,6 @@ class PlotHandler:
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
-        xt_textsize : float
-            Size of tick text
-        titlesize : float
-            Size of title text
         linewidth : float
             Width of forestplot line
         markersize : float
@@ -317,34 +313,8 @@ class PlotHandler:
         ax : Axes
             Axes to draw on
         """
-        # Quantiles to be calculated
-        endpoint = 100 * (1 - credible_interval) / 2
-        if quartiles:
-            qlist = [endpoint, 25, 50, 75, 100 - endpoint]
-        else:
-            qlist = [endpoint, 50, 100 - endpoint]
-
-        for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
-                if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
-
-                mid = len(values) // 2
-                param_iter = zip(
-                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
-                )
-                for width, j in param_iter:
-                    ax.line(
-                        [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
-                    )
-                ax.circle(
-                    x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
-                )
-        _title = Title()
-        _title.text = "{:.1%} Credible Interval".format(credible_interval)
-        ax.title = _title
         if rope is None or isinstance(rope, dict):
-            return
+            pass
         elif len(rope) == 2:
             cds = ColumnDataSource(
                 {
@@ -375,6 +345,33 @@ class PlotHandler:
                 '{"var_name": {"rope": (lo, hi)}}, or an '
                 "iterable of length 2"
             )
+        # Quantiles to be calculated
+        endpoint = 100 * (1 - credible_interval) / 2
+        if quartiles:
+            qlist = [endpoint, 25, 50, 75, 100 - endpoint]
+        else:
+            qlist = [endpoint, 50, 100 - endpoint]
+
+        for plotter in self.plotters.values():
+            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+                if isinstance(rope, dict):
+                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+
+                mid = len(values) // 2
+                param_iter = zip(
+                    np.linspace(2 * linewidth, linewidth, mid, endpoint=True)[-1::-1], range(mid)
+                )
+                for width, j in param_iter:
+                    ax.line(
+                        [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
+                    )
+                ax.circle(
+                    x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
+                )
+        _title = Title()
+        _title.text = "{:.1%} Credible Interval".format(credible_interval)
+        ax.title = _title
+
         return ax
 
     def plot_neff(self, ax, markersize):

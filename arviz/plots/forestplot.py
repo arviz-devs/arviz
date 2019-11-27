@@ -173,7 +173,6 @@ def plot_forest(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_forestplot import _plot_forest
 
-        plot_forest_kwargs.pop("ncols")
         plot_forest_kwargs["show"] = show
         axes = _plot_forest(**plot_forest_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
