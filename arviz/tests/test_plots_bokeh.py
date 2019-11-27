@@ -24,6 +24,7 @@ from ..plots import (
     plot_trace,
     plot_kde,
     plot_dist,
+    plot_hpd,
 )
 from ..stats import compare, loo, waic
 
@@ -450,3 +451,17 @@ def test_plot_forest_bad(models, model_fits):
             backend="bokeh",
             show=False,
         )
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"color": "0.5", "circular": True},
+        {"fill_kwargs": {"alpha": 0}},
+        {"plot_kwargs": {"alpha": 0}},
+        {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
+        {"smooth": False},
+    ],
+)
+def test_plot_hpd(models, data, kwargs):
+    plot_hpd(data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs)
