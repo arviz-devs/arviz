@@ -1,3 +1,4 @@
+# pylint: disable=all
 """Bokeh forestplot."""
 from collections import defaultdict, OrderedDict
 from itertools import cycle, tee
