@@ -1,8 +1,4 @@
 """Forest plot."""
-from itertools import tee
-
-import numpy as np
-
 from ..data import convert_to_dataset
 from .plot_utils import get_coords
 from ..utils import _var_names
@@ -177,8 +173,9 @@ def plot_forest(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_forestplot import _plot_forest
 
+        plot_forest_kwargs.pop("ncols")
         plot_forest_kwargs["show"] = show
-        axes = _plot_forest(**plot_forest_kwargs)
+        axes = _plot_forest(**plot_forest_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_forestplot import _plot_forest
 

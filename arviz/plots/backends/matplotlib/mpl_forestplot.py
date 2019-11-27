@@ -1,6 +1,6 @@
 """Matplotlib forestplot."""
 from collections import defaultdict, OrderedDict
-from itertools import cycle, tee
+from itertools import tee
 
 import numpy as np
 import matplotlib.pyplot as plt

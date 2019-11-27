@@ -4,8 +4,9 @@ from itertools import cycle, tee
 
 import numpy as np
 import bokeh.plotting as bkp
-from bokeh.models import Band
+from bokeh.models import Band, ColumnDataSource
 from bokeh.models.annotations import Title
+from bokeh.models.tickers import FixedTicker
 from bokeh.layouts import gridplot
 import matplotlib.pyplot as plt
 
@@ -36,7 +37,6 @@ def _plot_forest(
     linewidth,
     markersize,
     kind,
-    ncols,
     credible_interval,
     quartiles,
     rope,
@@ -55,9 +55,7 @@ def _plot_forest(
     if figsize is None:
         figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
-    (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(
-        figsize, textsize, 1.1, 1
-    )
+    (figsize, _, _, _, auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
 
     if linewidth is None:
         linewidth = auto_linewidth
@@ -66,17 +64,34 @@ def _plot_forest(
         markersize = auto_markersize
 
     if ax is None:
+        tools = ",".join(
+            [
+                "pan",
+                "wheel_zoom",
+                "box_zoom",
+                "lasso_select",
+                "poly_select",
+                "undo",
+                "redo",
+                "reset",
+                "save,hover",
+            ]
+        )
+
         axes = []
-        for i, (col, wr) in enumerate(zip(range(ncols), width_ratios)):
+        for i, width_r in enumerate(width_ratios):
             if i == 0:
                 ax = bkp.figure(
-                    height=int(figsize[0]) * 80, width=int(figsize[1] / ncols * wr) * 60
+                    height=int(figsize[0]) * 80,
+                    width=int(figsize[1] * (width_r / sum(width_ratios))) * 100,
+                    output_backend="webgl",
+                    tools=tools,
                 )
                 _y_range = ax.y_range
             else:
                 ax = bkp.figure(
                     height=figsize[0] * 80,
-                    width=int(figsize[1] / ncols * wr) * 60,
+                    width=int(figsize[1] * (width_r / sum(width_ratios))) * 100,
                     y_range=_y_range,
                 )
             axes.append(ax)
@@ -86,14 +101,7 @@ def _plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval,
-            quartiles,
-            xt_labelsize,
-            titlesize,
-            linewidth,
-            markersize,
-            axes[0],
-            rope,
+            credible_interval, quartiles, linewidth, markersize, axes[0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -107,29 +115,28 @@ def _plot_forest(
 
     idx = 1
     if ess:
-        plot_handler.plot_neff(axes[idx], xt_labelsize, titlesize, markersize)
+        plot_handler.plot_neff(axes[idx], markersize)
         idx += 1
 
     if r_hat:
-        plot_handler.plot_rhat(axes[idx], xt_labelsize, titlesize, markersize)
+        plot_handler.plot_rhat(axes[idx], markersize)
         idx += 1
 
-    for ax_ in axes:
+    for i, ax_ in enumerate(axes):
         if kind == "ridgeplot":
             ax_.xgrid.grid_line_color = None
             ax_.ygrid.grid_line_color = None
         else:
             ax_.ygrid.grid_line_color = None
-        # Remove ticklines on y-axes
-        # ax_.tick_params(axis="y", left=False, right=False)
 
-        ax.outline_line_color = None
+        if i != 0:
+            ax_.yaxis.visible = False
 
-        if len(plot_handler.data) > 1:
-            plot_handler.make_bands(ax_)
+        ax_.outline_line_color = None
 
     labels, ticks = plot_handler.labels_and_ticks()
-    axes[0].yaxis.ticker = ticks
+
+    axes[0].yaxis.ticker = FixedTicker(ticks=ticks)
     axes[0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
 
     all_plotters = list(plot_handler.plotters.values())
@@ -137,9 +144,9 @@ def _plot_forest(
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
 
-    axes[0].y_range._property_values["start"] = -all_plotters[
+    axes[0].y_range._property_values["start"] = -all_plotters[  # pylint: disable=protected-access
         0
-    ].group_offset  # pylint: disable=protected-access
+    ].group_offset
     axes[0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
     if show:
@@ -290,9 +297,7 @@ class PlotHandler:
                     patch.level = "overlay"
         return ax
 
-    def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
-    ):
+    def forestplot(self, credible_interval, quartiles, linewidth, markersize, ax, rope):
         """Draw forestplot for each plotter.
 
         Parameters
@@ -341,22 +346,29 @@ class PlotHandler:
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:
-            """
-            vband = Band(
-                base=rope,
-                lower=0,
-                upper=self.y_max(),
-                line_color=[
+            cds = ColumnDataSource(
+                {
+                    "x": rope,
+                    "lower": [-2 * self.y_max(), -2 * self.y_max()],
+                    "upper": [self.y_max() * 2, self.y_max() * 2],
+                }
+            )
+
+            band = Band(
+                base="x",
+                lower="lower",
+                upper="upper",
+                fill_color=[
                     color
                     for _, color in zip(
-                        range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                        range(4), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
                     )
                 ][2],
                 line_alpha=0.5,
+                source=cds,
             )
 
-            ax.renderers.append(vband)
-            """
+            ax.renderers.append(band)
         else:
             raise ValueError(
                 "Argument `rope` must be None, a dictionary like"
@@ -365,67 +377,43 @@ class PlotHandler:
             )
         return ax
 
-    def plot_neff(self, ax, xt_labelsize, titlesize, markersize):
+    def plot_neff(self, ax, markersize):
         """Draw effective n for each plotter."""
+        max_ess = 0
         for plotter in self.plotters.values():
             for y, ess, color in plotter.ess():
                 if ess is not None:
                     ax.circle(
                         x=ess, y=y, fill_color=color, size=markersize, line_color="black",
                     )
-        ax.x_range._property_values["start"] = 0
+                if ess > max_ess:
+                    max_ess = ess
+        ax.x_range._property_values["start"] = 0  # pylint: disable=protected-access
+        ax.x_range._property_values["end"] = 1.07 * max_ess  # pylint: disable=protected-access
 
         _title = Title()
         _title.text = "ess"
         ax.title = _title
 
+        ax.xaxis[0].ticker.desired_num_ticks = 3
+
         return ax
 
-    def plot_rhat(self, ax, xt_labelsize, titlesize, markersize):
+    def plot_rhat(self, ax, markersize):
         """Draw r-hat for each plotter."""
         for plotter in self.plotters.values():
             for y, r_hat, color in plotter.r_hat():
                 if r_hat is not None:
                     ax.circle(x=r_hat, y=y, fill_color=color, size=markersize, line_color="black")
-        ax.x_range._property_values["start"] = 0.9
-        ax.x_range._property_values["end"] = 2.1
+        ax.x_range._property_values["start"] = 0.9  # pylint: disable=protected-access
+        ax.x_range._property_values["end"] = 2.1  # pylint: disable=protected-access
 
         _title = Title()
         _title.text = "r_hat"
         ax.title = _title
-        return ax
 
-    def make_bands(self, ax):
-        """Draw shaded horizontal bands for each plotter."""
-        y_vals, y_prev, is_zero = [0], None, False
-        prev_color_index = 0
-        for plotter in self.plotters.values():
-            for y, *_, color in plotter.iterator():
-                if self.colors.index(color) < prev_color_index:
-                    if not is_zero and y_prev is not None:
-                        y_vals.append((y + y_prev) * 0.5)
-                        is_zero = True
-                else:
-                    is_zero = False
-                prev_color_index = self.colors.index(color)
-                y_prev = y
+        ax.xaxis[0].ticker.desired_num_ticks = 3
 
-        offset = plotter.group_offset  # pylint: disable=undefined-loop-variable
-
-        y_vals.append(y_prev + offset)
-        for idx, (y_start, y_stop) in enumerate(pairwise(y_vals)):
-            pass
-            """
-            hband = Band(
-                base=0,
-                lower=y_start,
-                upper=y_stop,
-                line_color="black",
-                line_alpha=0.1 * (idx % 2),
-            )
-
-            ax.renderers.append(hband)
-            """
         return ax
 
     def fig_height(self):
