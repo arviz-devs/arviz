@@ -20,6 +20,7 @@ from ..plots import (
     plot_elpd,
     plot_energy,
     plot_ess,
+    plot_forest,
     plot_trace,
     plot_kde,
     plot_dist,
@@ -396,3 +397,56 @@ def test_plot_ess_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_ess(idata, rug=True, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
+@pytest.mark.parametrize(
+    "args_expected",
+    [
+        ({}, 1),
+        ({"var_names": "mu"}, 1),
+        ({"var_names": "mu", "rope": (-1, 1)}, 1),
+        ({"r_hat": True, "quartiles": False}, 2),
+        ({"var_names": ["mu"], "colors": "black", "ess": True, "combined": True}, 2),
+        ({"kind": "ridgeplot", "r_hat": True, "ess": True}, 3),
+        ({"kind": "ridgeplot", "r_hat": True, "ess": True, "ridgeplot_alpha": 0}, 3),
+        (
+            {
+                "var_names": ["mu", "tau"],
+                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+            },
+            1,
+        ),
+    ],
+)
+def test_plot_forest(models, model_fits, args_expected):
+    obj = [getattr(models, model_fit) for model_fit in model_fits]
+    args, expected = args_expected
+    axes = plot_forest(obj, backend="bokeh", show=False, **args)
+    assert axes.shape == (expected,)
+
+
+def test_plot_forest_rope_exception():
+    with pytest.raises(ValueError) as err:
+        plot_forest({"x": [1]}, rope="not_correct_format", backend="bokeh", show=False)
+    assert "Argument `rope` must be None, a dictionary like" in str(err.value)
+
+
+def test_plot_forest_single_value():
+    axes = plot_forest({"x": [1]}, backend="bokeh", show=False)
+    assert axes.shape
+
+
+@pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
+def test_plot_forest_bad(models, model_fits):
+    obj = [getattr(models, model_fit) for model_fit in model_fits]
+    with pytest.raises(TypeError):
+        plot_forest(obj, kind="bad_kind", backend="bokeh", show=False)
+
+    with pytest.raises(ValueError):
+        plot_forest(
+            obj,
+            model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)],
+            backend="bokeh",
+            show=False,
+        )
