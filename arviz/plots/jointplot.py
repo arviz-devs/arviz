@@ -162,11 +162,12 @@ def plot_joint(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_jointplot import _plot_joint
 
+        plot_joint_kwargs.pop("ax_labelsize")
         plot_joint_kwargs["marginal_kwargs"]["plot_kwargs"]["line_width"] = plot_joint_kwargs[
             "marginal_kwargs"
         ]["plot_kwargs"].pop("linewidth")
         plot_joint_kwargs["show"] = show
-        axes = _plot_joint(**plot_joint_kwargs)
+        axes = _plot_joint(**plot_joint_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_jointplot import _plot_joint
 

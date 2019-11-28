@@ -1,7 +1,6 @@
 """Bokeh jointplot."""
 import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ...distplot import plot_dist
@@ -13,7 +12,6 @@ def _plot_joint(
     ax,
     figsize,
     plotters,
-    ax_labelsize,
     xt_labelsize,
     kind,
     contour,

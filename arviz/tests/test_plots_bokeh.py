@@ -457,7 +457,7 @@ def test_plot_forest_bad(models, model_fits):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"color": "0.5", "circular": True},
+        {"color": "C5", "circular": True},
         {"fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
@@ -499,6 +499,6 @@ def test_plot_joint_bad(models):
     with pytest.raises(Exception):
         plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
 
-    with pytest.raises(ValueError, match="ax.+3.+5"):
+    with pytest.raises(ValueError):
         _, axes = list(range(5))
         plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
