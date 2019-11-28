@@ -8,16 +8,29 @@ import numpy as np
 
 def _plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
     if ax is None:
-        ax = bkp.figure()
+        tools = ",".join(
+            [
+                "pan",
+                "wheel_zoom",
+                "box_zoom",
+                "lasso_select",
+                "poly_select",
+                "undo",
+                "redo",
+                "reset",
+                "save,hover",
+            ]
+        )
+        ax = bkp.figure(width=500, height=300, output_backend="webgl", tools=tools)
 
-        color = plot_kwargs.pop("color")
-        if len(color) == 2 and color[0] == "C":
-            color = [
-                prop
-                for _, prop in zip(
-                    range(int(color[1:])), cycle(rcParams["axes.prop_cycle"].by_key()["color"])
-                )
-            ][-1]
+    color = plot_kwargs.pop("color")
+    if len(color) == 2 and color[0] == "C":
+        color = [
+            prop
+            for _, prop in zip(
+                range(int(color[1:])), cycle(rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ][-1]
     plot_kwargs.setdefault("line_color", color)
     plot_kwargs.setdefault("line_alpha", plot_kwargs.pop("alpha", 0))
 
