@@ -1,4 +1,4 @@
-"""Matplotlib jointplot."""
+"""Bokeh jointplot."""
 import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
 import matplotlib.pyplot as plt

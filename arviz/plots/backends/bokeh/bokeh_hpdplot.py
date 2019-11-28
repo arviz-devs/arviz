@@ -1,4 +1,4 @@
-"""Matplotlib hpdplot."""
+"""Bokeh hpdplot."""
 from itertools import cycle
 
 import bokeh.plotting as bkp
