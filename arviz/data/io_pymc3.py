@@ -1,6 +1,6 @@
 """PyMC3-specific conversion code."""
 import logging
-from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from typing import Dict, Any, Optional
 
 import numpy as np
 import xarray as xr
@@ -18,12 +18,10 @@ from .base import (
     get_posterior_nchains_ndraws,
 )
 
-if TYPE_CHECKING:
-    import pymc3 as pm
-
 _log = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-instance-attributes
 class PyMC3Converter:
     """Encapsulate PyMC3 specific logic."""
 
@@ -42,7 +40,7 @@ class PyMC3Converter:
         coords: Optional[CoordSpec] = None,
         dims: Optional[DimSpec] = None,
         model=None,
-        predictions=False,
+        predictions=False
     ):
         import pymc3
 
@@ -328,8 +326,6 @@ def add_predictions_pymc3(
     inplace: bool, optional
         Add predictions data inplace or return a new InferenceData object
     """
-    import pymc3 as pm
-
     dims = get_predictions_dims(idata, dims)
     converter = PyMC3Converter(
         posterior_predictive=predictions, model=model, dims=dims, coords=coords, predictions=True

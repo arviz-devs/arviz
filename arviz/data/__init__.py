@@ -7,7 +7,7 @@ from .converters import convert_to_dataset, convert_to_inference_data
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_dict import from_dict
-from .io_pymc3 import from_pymc3
+from .io_pymc3 import from_pymc3, add_predictions_pymc3
 from .io_pystan import from_pystan
 from .io_emcee import from_emcee
 from .io_pyro import from_pyro
@@ -24,6 +24,7 @@ __all__ = [
     "dict_to_dataset",
     "convert_to_dataset",
     "convert_to_inference_data",
+    "add_predictions_pymc3",
     "from_pymc3",
     "from_pystan",
     "from_emcee",
