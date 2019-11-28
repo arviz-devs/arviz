@@ -465,10 +465,10 @@ def test_plot_forest_bad(models, model_fits):
     ],
 )
 def test_plot_hpd(models, data, kwargs):
-    axes = plot_hpd(
+    axis = plot_hpd(
         data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
     )
-    assert axes[1, 0]
+    assert axis
 
 
 @pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
