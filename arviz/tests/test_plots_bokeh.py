@@ -502,3 +502,72 @@ def test_plot_joint_bad(models):
     with pytest.raises(ValueError):
         _, axes = list(range(5))
         plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "obs_dim", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "obs_dim", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"obs_dim": slice(2, 4)}},
+        {"color": np.random.uniform(size=8), "show_bins": True},
+        {"color": np.random.uniform(size=(8, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat(models, input_type, kwargs):
+    khats_data = loo(models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if "color" in kwargs and isinstance(kwargs["color"], str) and kwargs["color"] == "obs_dim":
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "dim1", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "dim2", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"dim2": slice(2, 4)}},
+        {"color": np.random.uniform(size=35), "show_bins": True},
+        {"color": np.random.uniform(size=(35, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat_multidim(multidim_models, input_type, kwargs):
+    khats_data = loo(multidim_models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if (
+            "color" in kwargs
+            and isinstance(kwargs["color"], str)
+            and kwargs["color"] in ("dim1", "dim2")
+        ):
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+def test_plot_khat_annotate():
+    khats = np.array([0, 0, 0.6, 0.6, 0.8, 0.9, 0.9, 2, 3, 4, 1.5])
+    axes = plot_khat(khats, annotate=True, backend="bokeh", show=False,)
+    assert axes
+
+
+def test_plot_khat_bad_input(models):
+    with pytest.raises(ValueError):
+        plot_khat(models.model_1.sample_stats, backend="bokeh", show=False)
