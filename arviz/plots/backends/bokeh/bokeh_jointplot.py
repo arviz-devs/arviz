@@ -92,6 +92,7 @@ def _plot_joint(
     else:
         if gridsize == "auto":
             gridsize = int(len(x) ** 0.35)
+            gridsize = gridsize / 10
 
         axjoin.hexbin(x, y, size=gridsize, **joint_kwargs)
 
