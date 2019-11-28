@@ -59,8 +59,9 @@ def _plot_joint(
             y_range=axjoin.y_range,
         )
 
-    elif len(ax) == 3:
-        axjoin, ax_hist_x, ax_hist_y = ax
+    elif len(ax) == 2 and len(ax[0]) == 2 and len(ax[1]) == 2:
+        ax_hist_x, _ = ax[0]
+        axjoin, ax_hist_y = ax[1]
     else:
         raise ValueError("ax must be of lenght 3 but found {}".format(len(ax)))
 

@@ -25,6 +25,7 @@ from ..plots import (
     plot_kde,
     plot_dist,
     plot_hpd,
+    plot_joint,
 )
 from ..stats import compare, loo, waic
 
@@ -464,4 +465,40 @@ def test_plot_forest_bad(models, model_fits):
     ],
 )
 def test_plot_hpd(models, data, kwargs):
-    plot_hpd(data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs)
+    axes = plot_hpd(
+        data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
+    )
+    assert axes[1, 0]
+
+
+@pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
+def test_plot_joint(models, kind):
+    axes = plot_joint(
+        models.model_1, var_names=("mu", "tau"), kind=kind, backend="bokeh", show=False
+    )
+    assert axes[1, 0]
+
+
+def test_plot_joint_ax_tuple(models):
+    ax = plot_joint(models.model_1, var_names=("mu", "tau"), backend="bokeh", show=False)
+    axes = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax, backend="bokeh", show=False)
+    assert axes[1, 0]
+
+
+def test_plot_joint_discrete(discrete_model):
+    axes = plot_joint(discrete_model, backend="bokeh", show=False)
+    assert axes[1, 0]
+
+
+def test_plot_joint_bad(models):
+    with pytest.raises(ValueError):
+        plot_joint(
+            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False
+        )
+
+    with pytest.raises(Exception):
+        plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
+
+    with pytest.raises(ValueError, match="ax.+3.+5"):
+        _, axes = list(range(5))
+        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
