@@ -140,15 +140,31 @@ class NumPyroConverter:
                 )
         return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
 
-    @requires("prior")
-    def prior_to_xarray(self):
-        """Convert prior samples to xarray."""
-        return dict_to_dataset(
-            {k: utils.expand_dims(v) for k, v in self.prior.items()},
-            library=self.numpyro,
-            coords=self.coords,
-            dims=self.dims,
-        )
+    def priors_to_xarray(self):
+        """Convert prior samples (and if possible prior predictive too) to xarray."""
+        if self.prior is None:
+            return {"prior": None, "prior_predictive": None}
+        if self.posterior is not None:
+            prior_vars = list(self._samples.keys())
+            prior_predictive_vars = [key for key in self.prior.keys() if key not in prior_vars]
+        else:
+            prior_vars = self.prior.keys()
+            prior_predictive_vars = None
+        priors_dict = {}
+        for group, var_names in zip(
+            ("prior", "prior_predictive"), (prior_vars, prior_predictive_vars)
+        ):
+            priors_dict[group] = (
+                None
+                if var_names is None
+                else dict_to_dataset(
+                    {k: utils.expand_dims(self.prior[k]) for k in var_names},
+                    library=self.numpyro,
+                    coords=self.coords,
+                    dims=self.dims,
+                )
+            )
+        return priors_dict
 
     @requires("observations")
     @requires("model")
@@ -182,7 +198,7 @@ class NumPyroConverter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
-                "prior": self.prior_to_xarray(),
+                **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
             }
         )
