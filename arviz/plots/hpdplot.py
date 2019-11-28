@@ -1,6 +1,5 @@
 """Plot hpd intervals for regression data."""
 import numpy as np
-from matplotlib.pyplot import gca
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
@@ -18,6 +17,8 @@ def plot_hpd(
     fill_kwargs=None,
     plot_kwargs=None,
     ax=None,
+    backend=None,
+    show=True,
 ):
     r"""
     Plot hpd intervals for regression data.
@@ -62,9 +63,6 @@ def plot_hpd(
     fill_kwargs.setdefault("color", color)
     fill_kwargs.setdefault("alpha", 0.5)
 
-    if ax is None:
-        ax = gca()
-
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -95,7 +93,18 @@ def plot_hpd(
         x_data = x[idx]
         y_data = hpd_[idx]
 
-    ax.plot(x_data, y_data, **plot_kwargs)
-    ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)
+    hpdplot_kwargs = dict(
+        ax=ax, x_data=x_data, y_data=y_data, plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs,
+    )
+
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_hpdplot import _plot_hpdplot
+
+        hpdplot_kwargs["show"] = show
+        ax = _plot_hpdplot(**hpdplot_kwargs)
+    else:
+        from .backends.matplotlib.mpl_hpdplot import _plot_hpdplot
+
+        ax = _plot_hpdplot(**hpdplot_kwargs)
 
     return ax

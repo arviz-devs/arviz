@@ -1,10 +1,6 @@
 """Joint scatter plot of two variables."""
-import matplotlib.pyplot as plt
-
 from ..data import convert_to_dataset
-from .distplot import plot_dist
-from .kdeplot import plot_kde
-from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
+from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords
 from ..utils import _var_names
 
 
@@ -21,6 +17,8 @@ def plot_joint(
     joint_kwargs=None,
     marginal_kwargs=None,
     ax=None,
+    backend=None,
+    show=True,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
@@ -147,52 +145,32 @@ def plot_joint(
     marginal_kwargs.setdefault("plot_kwargs", {})
     marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
 
-    if ax is None:
-        # Instantiate figure and grid
-        fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
-        grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+    plot_joint_kwargs = dict(
+        ax=ax,
+        figsize=figsize,
+        plotters=plotters,
+        ax_labelsize=ax_labelsize,
+        xt_labelsize=xt_labelsize,
+        kind=kind,
+        contour=contour,
+        fill_last=fill_last,
+        joint_kwargs=joint_kwargs,
+        gridsize=gridsize,
+        marginal_kwargs=marginal_kwargs,
+    )
 
-        # Set up main plot
-        axjoin = fig.add_subplot(grid[1:, :-1])
-        # Set up top KDE
-        ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
-        # Set up right KDE
-        ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
-    elif len(ax) == 3:
-        axjoin, ax_hist_x, ax_hist_y = ax
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_jointplot import _plot_joint
+
+        plot_joint_kwargs.pop("ax_labelsize")
+        plot_joint_kwargs["marginal_kwargs"]["plot_kwargs"]["line_width"] = plot_joint_kwargs[
+            "marginal_kwargs"
+        ]["plot_kwargs"].pop("linewidth")
+        plot_joint_kwargs["show"] = show
+        axes = _plot_joint(**plot_joint_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
-        raise ValueError("ax must be of lenght 3 but found {}".format(len(ax)))
+        from .backends.matplotlib.mpl_jointplot import _plot_joint
 
-    # Personalize axes
-    ax_hist_x.tick_params(labelleft=False, labelbottom=False)
-    ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+        axes = _plot_joint(**plot_joint_kwargs)
 
-    # Set labels for axes
-    x_var_name = make_label(plotters[0][0], plotters[0][1])
-    y_var_name = make_label(plotters[1][0], plotters[1][1])
-
-    axjoin.set_xlabel(x_var_name, fontsize=ax_labelsize)
-    axjoin.set_ylabel(y_var_name, fontsize=ax_labelsize)
-    axjoin.tick_params(labelsize=xt_labelsize)
-
-    # Flatten data
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
-
-    if kind == "scatter":
-        axjoin.scatter(x, y, **joint_kwargs)
-    elif kind == "kde":
-        plot_kde(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
-    else:
-        if gridsize == "auto":
-            gridsize = int(len(x) ** 0.35)
-        axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
-        axjoin.grid(False)
-
-    for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
-        plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
-
-    ax_hist_x.set_xlim(axjoin.get_xlim())
-    ax_hist_y.set_ylim(axjoin.get_ylim())
-
-    return axjoin, ax_hist_x, ax_hist_y
+    return axes
