@@ -216,6 +216,14 @@ def plot_khat(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_khatplot import _plot_khat
 
+        plot_khat_kwargs.pop("hover_label")
+        plot_khat_kwargs.pop("kwargs")
+        plot_khat_kwargs.pop("ax_labelsize")
+        plot_khat_kwargs.pop("xt_labelsize")
+        plot_khat_kwargs.pop("hlines_kwargs")
+        plot_khat_kwargs.pop("xlabels")
+        plot_khat_kwargs.pop("legend")
+        plot_khat_kwargs.pop("color_mapping")
         plot_khat_kwargs["show"] = show
         ax = _plot_khat(**plot_khat_kwargs)
     else:

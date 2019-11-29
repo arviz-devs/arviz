@@ -226,7 +226,7 @@ def _plot_kde_bokeh(
             ax.x_range.range_padding = ax.y_range.range_padding = 0
 
     if show:
-        bkp.show(ax)
+        bkp.show(ax, toolbar_location="above")
     return ax
 
 

@@ -89,6 +89,6 @@ def _plot_energy(
         ax.legend.click_policy = "hide"
 
     if show:
-        bkp.show(ax)
+        bkp.show(ax, toolbar_location="above")
 
     return ax

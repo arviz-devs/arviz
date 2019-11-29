@@ -53,6 +53,6 @@ def _plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
     )
 
     if show:
-        bkp.show(ax)
+        bkp.show(ax, toolbar_location="above")
 
     return ax

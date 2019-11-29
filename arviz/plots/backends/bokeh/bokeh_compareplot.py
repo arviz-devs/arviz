@@ -130,6 +130,6 @@ def _compareplot(
     ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
     if show:
-        bkp.show(ax)
+        bkp.show(ax, toolbar_location="above")
 
     return ax

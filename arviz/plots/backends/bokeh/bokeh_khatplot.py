@@ -1,36 +1,24 @@
 """Matplotlib kdeplot."""
 from collections.abc import Iterable
-import warnings
 
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Span
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 
-from ...plot_utils import set_xticklabels
 from ....stats.stats_utils import histogram
 
 
 def _plot_khat(
-    hover_label,
     ax,
     figsize,
     xdata,
     khats,
     rgba_c,
-    kwargs,
     annotate,
     coord_labels,
-    ax_labelsize,
-    xt_labelsize,
     show_bins,
     linewidth,
-    hlines_kwargs,
-    xlabels,
-    legend,
-    color_mapping,
     n_data_points,
     bin_format,
     show,
@@ -65,9 +53,8 @@ def _plot_khat(
     if annotate:
         idxs = xdata[khats > 1]
         for idx in idxs:
-            ax.text(
-                idx, khats[idx], coord_labels[idx],
-            )
+            cds = ColumnDataSource({"x": [idx], "y": [khats[idx]], "text": [coord_labels[idx]],})
+            ax.text(x="x", y="y", text="text", source=cds)
 
     for hline in [0, 0.5, 0.7, 1]:
         _hline = Span(
@@ -82,7 +69,7 @@ def _plot_khat(
 
     ymin = min(khats)
     ymax = max(khats)
-    xmax = len(khats) + 0.1
+    xmax = len(khats)
 
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
@@ -97,10 +84,18 @@ def _plot_khat(
                 }
             )
             ax.text(x="x", y="y", text="text", source=cds)
+        ax.x_range._property_values["end"] = xmax + 1  # pylint: disable=protected-access
     ax.xaxis.axis_label = "Data Point"
     ax.yaxis.axis_label = "Shape parameter k"
 
+    if ymin > 0:
+        ax.y_range._property_values["start"] = -0.02  # pylint: disable=protected-access
+    if ymax < 1:
+        ax.y_range._property_values["end"] = 1.02  # pylint: disable=protected-access
+    elif ymax > 1 & annotate:
+        ax.y_range._property_values["end"] = 1.1 * ymax  # pylint: disable=protected-access
+
     if show:
-        bkp.show(ax)
+        bkp.show(ax, toolbar_location="above")
 
     return ax
