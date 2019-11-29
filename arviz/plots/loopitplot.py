@@ -1,8 +1,7 @@
 """Plot LOO-PIT predictive checks of inference data."""
 import numpy as np
 import scipy.stats as stats
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb
+from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
@@ -30,6 +29,8 @@ def plot_loo_pit(
     plot_unif_kwargs=None,
     hpd_kwargs=None,
     fill_kwargs=None,
+    backend=None,
+    show=True,
 ):
     """Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.
 
@@ -122,15 +123,13 @@ def plot_loo_pit(
         raise ValueError("use_hpd is incompatible with ecdf plot")
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 
     loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
     if plot_kwargs is None:
         plot_kwargs = {}
-    plot_kwargs["color"] = color
+    plot_kwargs["color"] = to_hex(color)
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
@@ -151,9 +150,18 @@ def plot_loo_pit(
     light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
     light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
     light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation
-    plot_unif_kwargs.setdefault("color", hsv_to_rgb(light_color))
+    plot_unif_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
     plot_unif_kwargs.setdefault("alpha", 0.5)
     plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
+
+    loo_pit_ecdf = None
+    unif_ecdf = None
+    p975 = None
+    p025 = None
+    loo_pit_kde = None
+    unif = None
+    unif_densities = None
+    x_vals = None
 
     if ecdf:
         loo_pit.sort()
@@ -173,22 +181,15 @@ def plot_loo_pit(
         plot_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
         plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
 
-        ax.plot(
-            np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit - loo_pit_ecdf, 0)), **plot_kwargs
-        )
         if ecdf_fill:
             if fill_kwargs is None:
                 fill_kwargs = {}
-            fill_kwargs.setdefault("color", hsv_to_rgb(light_color))
+            fill_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
             fill_kwargs.setdefault("alpha", 0.5)
             fill_kwargs.setdefault(
                 "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
             )
             fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
-
-            ax.fill_between(unif_ecdf, p975 - unif_ecdf, p025 - unif_ecdf, **fill_kwargs)
-        else:
-            ax.plot(unif_ecdf, p975 - unif_ecdf, unif_ecdf, p025 - unif_ecdf, **plot_unif_kwargs)
     else:
         loo_pit_kde, _, _ = _fast_kde(loo_pit, xmin=0, xmax=1)
 
@@ -197,26 +198,55 @@ def plot_loo_pit(
         if use_hpd:
             if hpd_kwargs is None:
                 hpd_kwargs = {}
-            hpd_kwargs.setdefault("color", hsv_to_rgb(light_color))
+            hpd_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
             hpd_fill_kwargs = hpd_kwargs.pop("fill_kwargs", {})
             hpd_fill_kwargs.setdefault("label", "Uniform HPD")
             hpd_kwargs["fill_kwargs"] = hpd_fill_kwargs
             hpd_kwargs["credible_interval"] = credible_interval
 
             unif_densities = np.empty((n_unif, len(loo_pit_kde)))
-            for idx in range(n_unif):
-                unif_densities[idx, :], _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
-            plot_hpd(x_vals, unif_densities, **hpd_kwargs)
-        else:
-            for idx in range(n_unif):
-                unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
-                ax.plot(x_vals, unif_density, **plot_unif_kwargs)
-        ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
 
-    ax.tick_params(labelsize=xt_labelsize)
-    if legend:
-        if not (use_hpd or (ecdf and ecdf_fill)):
-            label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
-            ax.plot([], label=label, **plot_unif_kwargs)
-        ax.legend()
+    loo_pit_kwargs = dict(
+        ax=ax,
+        figsize=figsize,
+        ecdf=ecdf,
+        loo_pit=loo_pit,
+        loo_pit_ecdf=loo_pit_ecdf,
+        unif_ecdf=unif_ecdf,
+        p975=p975,
+        p025=p025,
+        fill_kwargs=fill_kwargs,
+        ecdf_fill=ecdf_fill,
+        use_hpd=use_hpd,
+        x_vals=x_vals,
+        unif_densities=unif_densities,
+        hpd_kwargs=hpd_kwargs,
+        n_unif=n_unif,
+        unif=unif,
+        plot_unif_kwargs=plot_unif_kwargs,
+        loo_pit_kde=loo_pit_kde,
+        xt_labelsize=xt_labelsize,
+        legend=legend,
+        credible_interval=credible_interval,
+        plot_kwargs=plot_kwargs,
+    )
+
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_loopitplot import _plot_loo_pit
+
+        if (
+            loo_pit_kwargs["hpd_kwargs"] is not None
+            and "fill_kwargs" in loo_pit_kwargs["hpd_kwargs"]
+            and loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"] is not None
+            and "label" in loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"]
+        ):
+            loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"].pop("label")
+        loo_pit_kwargs.pop("legend")
+        loo_pit_kwargs["show"] = show
+        ax = _plot_loo_pit(**loo_pit_kwargs)
+    else:
+        from .backends.matplotlib.mpl_loopitplot import _plot_loo_pit
+
+        ax = _plot_loo_pit(**loo_pit_kwargs)
+
     return ax

@@ -1,4 +1,4 @@
-"""Matplotlib kdeplot."""
+"""Matplotlib khatplot."""
 import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
