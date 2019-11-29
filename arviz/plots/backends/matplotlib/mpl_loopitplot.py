@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ....stats import loo_pit as _loo_pit
 from ...kdeplot import _fast_kde
 from ...hpdplot import plot_hpd
 

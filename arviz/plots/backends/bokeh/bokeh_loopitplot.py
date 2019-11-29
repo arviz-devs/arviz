@@ -1,9 +1,7 @@
 """Bokeh loopitplot."""
 import numpy as np
 import bokeh.plotting as bkp
-import matplotlib.pyplot as plt
 
-from ....stats import loo_pit as _loo_pit
 from ...kdeplot import _fast_kde
 from ...hpdplot import plot_hpd
 
@@ -27,8 +25,6 @@ def _plot_loo_pit(
     unif,
     plot_unif_kwargs,
     loo_pit_kde,
-    xt_labelsize,
-    credible_interval,
     plot_kwargs,
     show,
 ):
@@ -129,7 +125,6 @@ def _plot_loo_pit(
             plot_hpd(x_vals, unif_densities, backend="bokeh", ax=ax, show=False, **hpd_kwargs)
         else:
             for idx in range(n_unif):
-                plot_unif_kwargs
                 unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
                 ax.line(
                     x_vals,

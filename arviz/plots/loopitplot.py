@@ -7,7 +7,6 @@ from xarray import DataArray
 from ..stats import loo_pit as _loo_pit
 from .plot_utils import _scale_fig_size
 from .kdeplot import _fast_kde
-from .hpdplot import plot_hpd
 
 
 def plot_loo_pit(
@@ -242,8 +241,10 @@ def plot_loo_pit(
         ):
             loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"].pop("label")
         loo_pit_kwargs.pop("legend")
+        loo_pit_kwargs.pop("xt_labelsize")
+        loo_pit_kwargs.pop("credible_interval")
         loo_pit_kwargs["show"] = show
-        ax = _plot_loo_pit(**loo_pit_kwargs)
+        ax = _plot_loo_pit(**loo_pit_kwargs) #  pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_loopitplot import _plot_loo_pit
 
