@@ -244,7 +244,7 @@ def plot_loo_pit(
         loo_pit_kwargs.pop("xt_labelsize")
         loo_pit_kwargs.pop("credible_interval")
         loo_pit_kwargs["show"] = show
-        ax = _plot_loo_pit(**loo_pit_kwargs) #  pylint: disable=unexpected-keyword-arg
+        ax = _plot_loo_pit(**loo_pit_kwargs)  #  pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_loopitplot import _plot_loo_pit
 

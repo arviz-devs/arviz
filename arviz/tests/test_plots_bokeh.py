@@ -17,15 +17,17 @@ from ..plots import (
     plot_autocorr,
     plot_compare,
     plot_density,
+    plot_dist,
     plot_elpd,
     plot_energy,
     plot_ess,
     plot_forest,
-    plot_trace,
-    plot_kde,
-    plot_dist,
     plot_hpd,
     plot_joint,
+    plot_kde,
+    plot_khat,
+    plot_loo_pit,
+    plot_trace,
 )
 from ..stats import compare, loo, waic
 
@@ -571,3 +573,58 @@ def test_plot_khat_annotate():
 def test_plot_khat_bad_input(models):
     with pytest.raises(ValueError):
         plot_khat(models.model_1.sample_stats, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"n_unif": 50},
+        {"use_hpd": True, "color": "gray"},
+        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"alpha": 0.9}},
+        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"ecdf": True},
+        {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
+        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color", "red"}},
+    ],
+)
+def test_plot_loo_pit(models, kwargs):
+    axes = plot_loo_pit(idata=models.model_1, y="y", **kwargs)
+    assert axes
+
+
+def test_plot_loo_pit_incompatible_args(models):
+    """Test error when both ecdf and use_hpd are True."""
+    with pytest.raises(ValueError, match="incompatible"):
+        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "str"},
+        {"y": "DataArray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "DataArray"},
+        {"y": "ndarray", "y_hat": "ndarray"},
+    ],
+)
+def test_plot_loo_pit_label(models, args):
+    if args["y"] == "str":
+        y = "y"
+    elif args["y"] == "DataArray":
+        y = models.model_1.observed_data.y
+    elif args["y"] == "ndarray":
+        y = models.model_1.observed_data.y.values
+
+    if args.get("y_hat") == "str":
+        y_hat = "y"
+    elif args.get("y_hat") == "DataArray":
+        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw"))
+    elif args.get("y_hat") == "ndarray":
+        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw")).values
+    else:
+        y_hat = None
+
+    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat)
+    assert ax
