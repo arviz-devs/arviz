@@ -585,7 +585,7 @@ def test_plot_khat_bad_input(models):
         {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
-        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color", "red"}},
+        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color": "red"}},
     ],
 )
 def test_plot_loo_pit(models, kwargs):

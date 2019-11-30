@@ -86,7 +86,7 @@ def _plot_loo_pit(
                     fill_alpha=fill_kwargs.get("alpha", 1.0),
                 )
         else:
-            if fill_kwargs.get("drawstyle") == "steps-mid":
+            if fill_kwargs is not None and fill_kwargs.get("drawstyle") == "steps-mid":
                 ax.step(
                     unif_ecdf,
                     p975 - unif_ecdf,
@@ -96,7 +96,6 @@ def _plot_loo_pit(
                     mode="center",
                 )
                 ax.step(
-                    unif_ecdf,
                     unif_ecdf,
                     p025 - unif_ecdf,
                     line_color=plot_unif_kwargs.get("color", "black"),
@@ -113,7 +112,6 @@ def _plot_loo_pit(
                     line_width=plot_unif_kwargs.get("linewidth", 1.0),
                 )
                 ax.line(
-                    unif_ecdf,
                     unif_ecdf,
                     p025 - unif_ecdf,
                     line_color=plot_unif_kwargs.get("color", "black"),
