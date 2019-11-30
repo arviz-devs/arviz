@@ -1,5 +1,6 @@
 """Matplotlib khatplot."""
 import warnings
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +11,7 @@ from ....stats.stats_utils import histogram
 
 def _plot_khat(
     hover_label,
+    hover_format,
     ax,
     figsize,
     xdata,
@@ -26,6 +28,8 @@ def _plot_khat(
     xlabels,
     legend,
     color_mapping,
+    cmap,
+    color,
     n_data_points,
     bin_format,
 ):

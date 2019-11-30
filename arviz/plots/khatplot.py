@@ -1,5 +1,4 @@
 """Pareto tail indices plot."""
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba_array
 import matplotlib.cm as cm
@@ -11,7 +10,6 @@ from .plot_utils import (
     get_coords,
     color_from_dim,
     format_coords_as_labels,
-    set_xticklabels,
 )
 from ..stats import ELPDData
 
@@ -169,6 +167,7 @@ def plot_khat(
     kwargs.setdefault("s", markersize)
     kwargs.setdefault("marker", "+")
     color_mapping = None
+    cmap = None
     if isinstance(color, str):
         if color in dims:
             colors, color_mapping = color_from_dim(khats, color)
@@ -193,6 +192,7 @@ def plot_khat(
 
     plot_khat_kwargs = dict(
         hover_label=hover_label,
+        hover_format=hover_format,
         ax=ax,
         figsize=figsize,
         xdata=xdata,
@@ -209,6 +209,8 @@ def plot_khat(
         xlabels=xlabels,
         legend=legend,
         color_mapping=color_mapping,
+        cmap=cmap,
+        color=color,
         n_data_points=n_data_points,
         bin_format=bin_format,
     )
@@ -217,6 +219,7 @@ def plot_khat(
         from .backends.bokeh.bokeh_khatplot import _plot_khat
 
         plot_khat_kwargs.pop("hover_label")
+        plot_khat_kwargs.pop("hover_format")
         plot_khat_kwargs.pop("kwargs")
         plot_khat_kwargs.pop("ax_labelsize")
         plot_khat_kwargs.pop("xt_labelsize")
@@ -225,7 +228,7 @@ def plot_khat(
         plot_khat_kwargs.pop("legend")
         plot_khat_kwargs.pop("color_mapping")
         plot_khat_kwargs["show"] = show
-        ax = _plot_khat(**plot_khat_kwargs)
+        ax = _plot_khat(**plot_khat_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_khatplot import _plot_khat
 
