@@ -227,6 +227,8 @@ def plot_khat(
         plot_khat_kwargs.pop("xlabels")
         plot_khat_kwargs.pop("legend")
         plot_khat_kwargs.pop("color_mapping")
+        plot_khat_kwargs.pop("cmap")
+        plot_khat_kwargs.pop("color")
         plot_khat_kwargs["show"] = show
         ax = _plot_khat(**plot_khat_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
