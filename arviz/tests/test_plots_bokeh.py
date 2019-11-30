@@ -17,15 +17,17 @@ from ..plots import (
     plot_autocorr,
     plot_compare,
     plot_density,
+    plot_dist,
     plot_elpd,
     plot_energy,
     plot_ess,
     plot_forest,
-    plot_trace,
-    plot_kde,
-    plot_dist,
     plot_hpd,
     plot_joint,
+    plot_kde,
+    plot_khat,
+    plot_loo_pit,
+    plot_trace,
 )
 from ..stats import compare, loo, waic
 
@@ -502,3 +504,129 @@ def test_plot_joint_bad(models):
     with pytest.raises(ValueError):
         _, axes = list(range(5))
         plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "obs_dim", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "obs_dim", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"obs_dim": slice(2, 4)}},
+        {"color": np.random.uniform(size=8), "show_bins": True},
+        {"color": np.random.uniform(size=(8, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat(models, input_type, kwargs):
+    khats_data = loo(models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if "color" in kwargs and isinstance(kwargs["color"], str) and kwargs["color"] == "obs_dim":
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"xlabels": True},
+        {"color": "dim1", "xlabels": True, "show_bins": True, "bin_format": "{0}"},
+        {"color": "dim2", "legend": True, "hover_label": True},
+        {"color": "blue", "coords": {"dim2": slice(2, 4)}},
+        {"color": np.random.uniform(size=35), "show_bins": True},
+        {"color": np.random.uniform(size=(35, 3)), "show_bins": True, "annotate": True},
+    ],
+)
+@pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
+def test_plot_khat_multidim(multidim_models, input_type, kwargs):
+    khats_data = loo(multidim_models.model_1, pointwise=True)
+
+    if input_type == "data_array":
+        khats_data = khats_data.pareto_k
+    elif input_type == "array":
+        khats_data = khats_data.pareto_k.values
+        if (
+            "color" in kwargs
+            and isinstance(kwargs["color"], str)
+            and kwargs["color"] in ("dim1", "dim2")
+        ):
+            kwargs["color"] = None
+
+    axes = plot_khat(khats_data, backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+def test_plot_khat_annotate():
+    khats = np.array([0, 0, 0.6, 0.6, 0.8, 0.9, 0.9, 2, 3, 4, 1.5])
+    axes = plot_khat(khats, annotate=True, backend="bokeh", show=False)
+    assert axes
+
+
+def test_plot_khat_bad_input(models):
+    with pytest.raises(ValueError):
+        plot_khat(models.model_1.sample_stats, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"n_unif": 50},
+        {"use_hpd": True, "color": "gray"},
+        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"alpha": 0.9}},
+        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"ecdf": True},
+        {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
+        {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color": "red"}},
+    ],
+)
+def test_plot_loo_pit(models, kwargs):
+    axes = plot_loo_pit(idata=models.model_1, y="y", backend="bokeh", show=False, **kwargs)
+    assert axes
+
+
+def test_plot_loo_pit_incompatible_args(models):
+    """Test error when both ecdf and use_hpd are True."""
+    with pytest.raises(ValueError, match="incompatible"):
+        plot_loo_pit(
+            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False
+        )
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"y": "str"},
+        {"y": "DataArray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "str"},
+        {"y": "ndarray", "y_hat": "DataArray"},
+        {"y": "ndarray", "y_hat": "ndarray"},
+    ],
+)
+def test_plot_loo_pit_label(models, args):
+    if args["y"] == "str":
+        y = "y"
+    elif args["y"] == "DataArray":
+        y = models.model_1.observed_data.y
+    elif args["y"] == "ndarray":
+        y = models.model_1.observed_data.y.values
+
+    if args.get("y_hat") == "str":
+        y_hat = "y"
+    elif args.get("y_hat") == "DataArray":
+        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw"))
+    elif args.get("y_hat") == "ndarray":
+        y_hat = models.model_1.posterior_predictive.y.stack(sample=("chain", "draw")).values
+    else:
+        y_hat = None
+
+    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat, backend="bokeh", show=False)
+    assert ax
