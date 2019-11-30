@@ -27,6 +27,7 @@ from ..plots import (
     plot_kde,
     plot_khat,
     plot_loo_pit,
+    plot_mcse,
     plot_trace,
 )
 from ..stats import compare, loo, waic
@@ -630,3 +631,44 @@ def test_plot_loo_pit_label(models, args):
 
     ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat, backend="bokeh", show=False)
     assert ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"], "color": "r"},
+        {"rug": True, "rug_kwargs": {"color": "r"}},
+        {"errorbar": True, "rug": True, "rug_kind": "max_depth"},
+        {"errorbar": True, "coords": {"theta_dim_0": slice(4)}, "n_points": 10},
+        {"extra_methods": True, "rug": True},
+        {"extra_methods": True, "extra_kwargs": {"ls": ":"}, "text_kwargs": {"x": 0, "ha": "left"}},
+    ],
+)
+def test_plot_mcse(models, kwargs):
+    idata = models.model_1
+    ax = plot_mcse(idata, backend="bokeh", show=False, **kwargs)
+    assert np.all(ax)
+
+
+@pytest.mark.parametrize("dim", ["chain", "draw"])
+def test_plot_mcse_bad_coords(models, dim):
+    """Test error when chain or dim are used as coords to select a data subset."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="invalid coordinates"):
+        plot_mcse(idata, coords={dim: slice(3)}, backend="bokeh", show=False)
+
+
+def test_plot_mcse_no_sample_stats(models):
+    """Test error when rug=True but sample_stats group is not present."""
+    idata = models.model_1
+    with pytest.raises(ValueError, match="must contain sample_stats"):
+        plot_mcse(idata.posterior, rug=True, backend="bokeh", show=False)
+
+
+def test_plot_mcse_no_divergences(models):
+    """Test error when rug=True, but the variable defined by rug_kind is missing."""
+    idata = deepcopy(models.model_1)
+    idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
+    with pytest.raises(ValueError, match="not contain diverging"):
+        plot_mcse(idata, rug=True, backend="bokeh", show=False)
