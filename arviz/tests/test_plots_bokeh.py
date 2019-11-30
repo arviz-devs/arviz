@@ -566,7 +566,7 @@ def test_plot_khat_multidim(multidim_models, input_type, kwargs):
 
 def test_plot_khat_annotate():
     khats = np.array([0, 0, 0.6, 0.6, 0.8, 0.9, 0.9, 2, 3, 4, 1.5])
-    axes = plot_khat(khats, annotate=True, backend="bokeh", show=False,)
+    axes = plot_khat(khats, annotate=True, backend="bokeh", show=False)
     assert axes
 
 
@@ -589,14 +589,16 @@ def test_plot_khat_bad_input(models):
     ],
 )
 def test_plot_loo_pit(models, kwargs):
-    axes = plot_loo_pit(idata=models.model_1, y="y", **kwargs)
+    axes = plot_loo_pit(idata=models.model_1, y="y", backend="bokeh", show=False, **kwargs)
     assert axes
 
 
 def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
     with pytest.raises(ValueError, match="incompatible"):
-        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+        plot_loo_pit(
+            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False
+        )
 
 
 @pytest.mark.parametrize(
@@ -626,5 +628,5 @@ def test_plot_loo_pit_label(models, args):
     else:
         y_hat = None
 
-    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat)
+    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat, backend="bokeh", show=False)
     assert ax
