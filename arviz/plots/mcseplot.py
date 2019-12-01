@@ -1,17 +1,13 @@
 """Plot quantile MC standard error."""
 import numpy as np
 import xarray as xr
-from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
 from ..stats import mcse
-from ..stats.stats_utils import quantile as _quantile
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
-    make_label,
     default_grid,
-    _create_axes_grid,
     get_coords,
     filter_plotters_list,
 )
@@ -33,6 +29,8 @@ def plot_mcse(
     rug_kwargs=None,
     extra_kwargs=None,
     text_kwargs=None,
+    backend=None,
+    show=True,
     **kwargs
 ):
     """Plot quantile or local Monte Carlo Standard Error.
@@ -98,6 +96,11 @@ def plot_mcse(
         ... )
 
     """
+    mean_mcse = None
+    sd_mcse = None
+    text_x = None
+    text_va = None
+
     if coords is None:
         coords = {}
     if "chain" in coords or "draw" in coords:
@@ -144,83 +147,50 @@ def plot_mcse(
         text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
         text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
 
-    if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
-        )
+    mcse_kwargs = dict(
+        ax=ax,
+        plotters=plotters,
+        length_plotters=length_plotters,
+        rows=rows,
+        cols=cols,
+        figsize=figsize,
+        errorbar=errorbar,
+        rug=rug,
+        data=data,
+        probs=probs,
+        kwargs=kwargs,
+        extra_methods=extra_methods,
+        mean_mcse=mean_mcse,
+        sd_mcse=sd_mcse,
+        text_x=text_x,
+        text_va=text_va,
+        text_kwargs=text_kwargs,
+        rug_kwargs=rug_kwargs,
+        extra_kwargs=extra_kwargs,
+        idata=idata,
+        rug_kind=rug_kind,
+        _markersize=_markersize,
+        _linewidth=_linewidth,
+        xt_labelsize=xt_labelsize,
+        ax_labelsize=ax_labelsize,
+        titlesize=titlesize,
+    )
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        if errorbar or rug:
-            values = data[var_name].sel(**selection).values.flatten()
-        if errorbar:
-            quantile_values = _quantile(values, probs)
-            ax_.errorbar(probs, quantile_values, yerr=x, **kwargs)
-        else:
-            ax_.plot(probs, x, label="quantile", **kwargs)
-            if extra_methods:
-                mean_mcse_i = mean_mcse[var_name].sel(**selection).values.item()
-                sd_mcse_i = sd_mcse[var_name].sel(**selection).values.item()
-                ax_.axhline(mean_mcse_i, **extra_kwargs)
-                ax_.annotate(
-                    "mean",
-                    (text_x, mean_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if mean_mcse_i > sd_mcse_i
-                    else "top",
-                    **text_kwargs,
-                )
-                ax_.axhline(sd_mcse_i, **extra_kwargs)
-                ax_.annotate(
-                    "sd",
-                    (text_x, sd_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if sd_mcse_i >= mean_mcse_i
-                    else "top",
-                    **text_kwargs,
-                )
-        if rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
-            if not hasattr(idata, "sample_stats"):
-                raise ValueError("InferenceData object must contain sample_stats for rug plot")
-            if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
-            rug_kwargs.setdefault("marker", "|")
-            rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
-            rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
-            rug_kwargs.setdefault("space", 0.1)
-            rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_mcseplot import _plot_mcse
 
-            mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
-            y_min, y_max = ax_.get_ylim()
-            y_min = y_min if errorbar else 0
-            rug_space = (y_max - y_min) * rug_kwargs.pop("space")
-            rug_x, rug_y = values / (len(mask) - 1), np.full_like(values, y_min) - rug_space
-            ax_.plot(rug_x, rug_y, **rug_kwargs)
-            ax_.axhline(y_min, color="k", linewidth=_linewidth, alpha=0.7)
+        mcse_kwargs.pop("kwargs")
+        mcse_kwargs.pop("text_x")
+        mcse_kwargs.pop("text_va")
+        mcse_kwargs.pop("text_kwargs")
+        mcse_kwargs.pop("xt_labelsize")
+        mcse_kwargs.pop("ax_labelsize")
+        mcse_kwargs.pop("titlesize")
+        mcse_kwargs["show"] = show
+        ax = _plot_mcse(**mcse_kwargs)  #  pylint: disable=unexpected-keyword-arg
+    else:
+        from .backends.matplotlib.mpl_mcseplot import _plot_mcse
 
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax_.tick_params(labelsize=xt_labelsize)
-        ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
-        ax_.set_ylabel(
-            r"Value $\pm$ MCSE for quantiles" if errorbar else "MCSE for quantiles",
-            fontsize=ax_labelsize,
-            wrap=True,
-        )
-        ax_.set_xlim(0, 1)
-        if rug:
-            ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
-            y_min, y_max = ax_.get_ylim()
-            yticks = ax_.get_yticks()
-            yticks = yticks[(yticks >= y_min) & (yticks < y_max)]
-            ax_.set_yticks(yticks)
-            ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
-        elif not errorbar:
-            ax_.set_ylim(bottom=0)
+        ax = _plot_mcse(**mcse_kwargs)
 
     return ax
