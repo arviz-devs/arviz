@@ -155,7 +155,6 @@ def _plot_pair(
                 )
 
                 if kind == "scatter":
-                    print(var1, var2)
                     ax[j, i].circle(var1, var2, source=source)
 
                 elif kind == "kde":
@@ -173,8 +172,10 @@ def _plot_pair(
                     )
 
                 else:
+                    var1_ = _posterior[i]
+                    var2_ = _posterior[j + 1]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1, var2, size=0.5, source=source)
+                    ax[j, i].hexbin(var1_, var2_, size=0.5)
 
                 if divergences:
                     var1_ = _posterior[i]

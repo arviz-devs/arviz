@@ -5,6 +5,7 @@ from pandas import DataFrame
 import numpy as np
 import pytest
 
+from ..data import load_arviz_data
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -28,6 +29,7 @@ from ..plots import (
     plot_khat,
     plot_loo_pit,
     plot_mcse,
+    plot_pair,
     plot_trace,
 )
 from ..stats import compare, loo, waic
@@ -56,6 +58,14 @@ def discrete_model():
 def continuous_model():
     """Simple fixture for random continuous model"""
     return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
+
+
+@pytest.fixture(scope="function")
+def get_ax():
+    from bokeh.plotting import figure
+
+    ax = figure()
+    return ax
 
 
 @pytest.mark.parametrize(
@@ -672,3 +682,52 @@ def test_plot_mcse_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_mcse(idata, rug=True, backend="bokeh", show=False)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]},},
+        {"divergences": True, "var_names": ["theta", "mu"],},
+        {"kind": "kde", "var_names": ["theta"]},
+        {"kind": "hexbin", "var_names": ["theta"]},
+        {"kind": "hexbin", "var_names": ["theta"]},
+        {
+            "kind": "hexbin",
+            "var_names": ["theta"],
+            "coords": {"theta_dim_0": [0, 1]},
+            "textsize": 20,
+        },
+    ],
+)
+def test_plot_pair(models, kwargs):
+    ax = plot_pair(models.model_1, backend="bokeh", show=False, **kwargs)
+    assert np.any(ax)
+
+
+@pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}])
+def test_plot_pair_2var(discrete_model, get_ax, kwargs):
+    ax = plot_pair(discrete_model, ax=get_ax, backend="bokeh", show=False, **kwargs)
+    assert ax
+
+
+def test_plot_pair_bad(models):
+    with pytest.raises(ValueError):
+        plot_pair(models.model_1, kind="bad_kind", backend="bokeh", show=False)
+    with pytest.raises(Exception):
+        plot_pair(models.model_1, var_names=["mu"], backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize("has_sample_stats", [True, False])
+def test_plot_pair_divergences_warning(has_sample_stats):
+    data = load_arviz_data("centered_eight")
+    if has_sample_stats:
+        # sample_stats present, diverging field missing
+        data.sample_stats = data.sample_stats.rename({"diverging": "diverging_missing"})
+    else:
+        # sample_stats missing
+        data = data.posterior  # pylint: disable=no-member
+    with pytest.warns(SyntaxWarning):
+        ax = plot_pair(data, divergences=True)
+    assert np.any(ax)

@@ -188,12 +188,12 @@ def plot_pair(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_pairplot import _plot_pair
 
-        pairplot_kwargs.pop("gridsize")
-        pairplot_kwargs.pop("colorbar")
-        pairplot_kwargs.pop("divergences_kwargs")
-        pairplot_kwargs.pop("hexbin_values")
+        pairplot_kwargs.pop("gridsize", None)
+        pairplot_kwargs.pop("colorbar", None)
+        pairplot_kwargs.pop("divergences_kwargs", None)
+        pairplot_kwargs.pop("hexbin_values", None)
         pairplot_kwargs["show"] = show
-        ax = _plot_pair(**pairplot_kwargs)
+        ax = _plot_pair(**pairplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_pairplot import _plot_pair
 
