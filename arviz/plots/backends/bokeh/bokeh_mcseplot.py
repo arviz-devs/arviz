@@ -99,24 +99,12 @@ def _plot_mcse(
                         values,
                         min(
                             0,
-                            min(quantile_values) - (max(quantile_values) - min(quantile_values)) * 0.05,
+                            min(quantile_values)
+                            - (max(quantile_values) - min(quantile_values)) * 0.05,
                         ),
                     ),
                 )
-            else:
-               rug_x, rug_y = (
-                    values / (len(mask) - 1),
-                    np.full_like(
-                        values,
-                        0,
-                    ),
-                )
 
-            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
-            cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
-            ax_.add_glyph(cds_rug, glyph)
-
-            if not errorbar:
                 hline = Span(
                     location=min(
                         0,
@@ -128,7 +116,25 @@ def _plot_mcse(
                     line_alpha=0.7,
                 )
 
-                ax_.renderers.append(hline)
+            else:
+                rug_x, rug_y = (
+                    values / (len(mask) - 1),
+                    np.full_like(values, 0,),
+                )
+
+                hline = Span(
+                    location=0,
+                    dimension="width",
+                    line_color="black",
+                    line_width=_linewidth,
+                    line_alpha=0.7,
+                )
+
+            ax_.renderers.append(hline)
+
+            glyph = Dash(x="rug_x", y="rug_y", **_rug_kwargs)
+            cds_rug = ColumnDataSource({"rug_x": np.asarray(rug_x), "rug_y": np.asarray(rug_y)})
+            ax_.add_glyph(cds_rug, glyph)
 
         title = Title()
         title.text = make_label(var_name, selection)
