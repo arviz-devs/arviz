@@ -218,7 +218,20 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
 
         bokeh_kwargs.setdefault(
             "tools",
-            ("pan,wheel_zoom,box_zoom," "lasso_select,poly_select," "undo,redo,reset,save,hover"),
+            ",".join(
+                (
+                    "pan",
+                    "wheel_zoom",
+                    "box_zoom",
+                    "lasso_select",
+                    "poly_select",
+                    "undo",
+                    "redo",
+                    "reset",
+                    "save",
+                    "hover",
+                )
+            ),
         )
         bokeh_kwargs.setdefault("output_backend", "webgl")
 

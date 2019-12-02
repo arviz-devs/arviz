@@ -1,19 +1,11 @@
 """Matplotlib rankplot."""
-from itertools import cycle
 import numpy as np
 import scipy.stats
 
-from ....data import convert_to_dataset
 from ...plot_utils import (
-    _scale_fig_size,
-    xarray_var_iter,
-    default_grid,
     _create_axes_grid,
     make_label,
-    filter_plotters_list,
-    _sturges_formula,
 )
-from ....utils import _var_names
 from ....stats.stats_utils import histogram
 
 

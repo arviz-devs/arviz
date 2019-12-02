@@ -1,21 +1,16 @@
 """Histograms of ranked posterior draws, plotted for each chain."""
 from itertools import cycle
-import numpy as np
 import matplotlib.pyplot as plt
-import scipy.stats
 
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
     xarray_var_iter,
     default_grid,
-    _create_axes_grid,
-    make_label,
     filter_plotters_list,
     _sturges_formula,
 )
 from ..utils import _var_names
-from ..stats.stats_utils import histogram
 
 
 def plot_rank(
@@ -163,8 +158,10 @@ def plot_rank(
     if backend == "bokeh":
         from .backends.bokeh.bokeh_rankplot import _plot_rank
 
+        rankplot_kwargs.pop("ax_labelsize")
+        rankplot_kwargs.pop("titlesize")
         rankplot_kwargs["show"] = show
-        axes = _plot_rank(**rankplot_kwargs)
+        axes = _plot_rank(**rankplot_kwargs)  # pylint: disable=unexpected-keyword-arg
     else:
         from .backends.matplotlib.mpl_rankplot import _plot_rank
 
