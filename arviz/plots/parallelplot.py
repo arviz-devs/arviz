@@ -1,6 +1,6 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
-import matplotlib.pyplot as plt
 import numpy as np
+
 
 from scipy.stats.mstats import rankdata
 from ..data import convert_to_dataset
@@ -21,6 +21,8 @@ def plot_parallel(
     shadend=0.025,
     ax=None,
     norm_method=None,
+    backend=None,
+    show=True,
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -118,22 +120,34 @@ def plot_parallel(
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    parallel_kwargs = dict(
+        ax=ax,
+        colornd=colornd,
+        colord=colord,
+        shadend=shadend,
+        diverging_mask=diverging_mask,
+        _posterior=_posterior,
+        textsize=textsize,
+        var_names=var_names,
+        xt_labelsize=xt_labelsize,
+        legend=legend,
+        figsize=figsize,
+    )
 
-    ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_parallelplot import _plot_parallel
 
-    if np.any(diverging_mask):
-        ax.plot(_posterior[:, diverging_mask], color=colord, lw=1)
+        parallel_kwargs["show"] = show
+        parallel_kwargs.pop("textsize")
+        parallel_kwargs.pop("xt_labelsize")
+        parallel_kwargs.pop("legend")
+        parallel_kwargs.pop("colord")
+        parallel_kwargs.pop("colornd")
+        parallel_kwargs.pop("shadend")
+        ax = _plot_parallel(**parallel_kwargs)  # pylint: disable=unexpected-keyword-arg
+    else:
+        from .backends.matplotlib.mpl_parallelplot import _plot_parallel
 
-    ax.tick_params(labelsize=textsize)
-    ax.set_xticks(range(len(var_names)))
-    ax.set_xticklabels(var_names)
-
-    if legend:
-        ax.plot([], color=colornd, label="non-divergent")
-        if np.any(diverging_mask):
-            ax.plot([], color=colord, label="divergent")
-        ax.legend(fontsize=xt_labelsize)
+        ax = _plot_parallel(**parallel_kwargs)
 
     return ax
