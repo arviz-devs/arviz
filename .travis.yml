@@ -50,6 +50,7 @@ install:
   - if [[ $NAME == UNIT ]]; then pip install coveralls ; fi
   - if [[ $NAME == LINT ]]; then pip install coveralls ; fi
   - if [[ $NAME == SPHINX ]]; then pip install ghp-import ; fi
+  - if [[ $NAME == SPHINX ]]; then conda install selenium phantomjs ; fi
 
 script:
   # Tests command is default in dockerfile cmd

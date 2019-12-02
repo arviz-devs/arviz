@@ -108,6 +108,9 @@ INDEX_TEMPLATE = """
 Example gallery
 ===============
 
+Matplotlib
+----------
+
 {toctree}
 
 {contents}
@@ -115,6 +118,14 @@ Example gallery
 .. raw:: html
 
     <div style="clear: both"></div>
+
+Bokeh
+-----
+
+.. cssclass:: gallery clearfix
+
+.. bokeh-gallery:: {examples_source}/../bokeh/gallery.json
+
 """
 
 
@@ -293,12 +304,12 @@ class ExampleGenerator(object):
         create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
     def toctree_entry(self):
-        return "   ./%s\n\n" % op.splitext(self.htmlfilename)[0]
+        return "   ./%s\n\n" % op.join("matplotlib", op.splitext(self.htmlfilename)[0])
 
     def contents_entry(self):
         return (".. raw:: html\n\n"
                 "    <div class='figure align-center'>\n"
-                "    <a href=./{0}>\n"
+                "    <a href=./matplotlib/{0}>\n"
                 "    <img src=../_static/{1}>\n"
                 "    <span class='figure-label'>\n"
                 "    <p>{2}</p>\n"
@@ -315,11 +326,11 @@ def main(app):
     working_dir = os.getcwd()
     os.chdir(app.builder.srcdir)
     static_dir = op.join(app.builder.srcdir, '_static')
-    target_dir = op.join(app.builder.srcdir, 'examples')
-    image_dir = op.join(app.builder.srcdir, 'examples/_images')
+    target_dir = op.join(app.builder.srcdir, 'examples/matplotlib')
+    image_dir = op.join(app.builder.srcdir, 'examples/matplotlib/_images')
     thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
     source_dir = op.abspath(op.join(app.builder.srcdir,
-                                              '..', 'examples'))
+                                              '..', 'examples', 'matplotlib'))
     if not op.exists(static_dir):
         os.makedirs(static_dir)
 
@@ -349,7 +360,7 @@ def main(app):
         ex = ExampleGenerator(filename, target_dir)
 
         banner_data.append({"title": ex.pagetitle,
-                            "url": op.join('examples', ex.htmlfilename),
+                            "url": op.join('examples', 'matplotlib', ex.htmlfilename),
                             "thumb": op.join(ex.thumbfilename)})
         shutil.copyfile(filename, op.join(target_dir, ex.pyfilename))
         output = RST_TEMPLATE.format(sphinx_tag=ex.sphinxtag,
@@ -367,11 +378,12 @@ def main(app):
         banner_data = (4 * banner_data)[:10]
 
     # write index file
-    index_file = op.join(target_dir, 'index.rst')
+    index_file = op.join(target_dir, '..', 'index.rst')
     with open(index_file, 'w') as index:
         index.write(INDEX_TEMPLATE.format(sphinx_tag="example_gallery",
                                           toctree=toctree,
-                                          contents=contents))
+                                          contents=contents,
+                                          examples_source=source_dir))
 
     os.chdir(working_dir)
 
