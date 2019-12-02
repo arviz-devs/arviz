@@ -83,6 +83,7 @@ def plot_elpd(
     Examples
     --------
     Compare pointwise WAIC for centered and non centered models of the 8school problem
+    using matplotlib.
 
     .. plot::
         :context: close-figs
@@ -94,6 +95,17 @@ def plot_elpd(
         >>>     {"centered model": idata1, "non centered model": idata2},
         >>>     xlabels=True
         >>> )
+
+    .. bokeh-plot::
+        :source-position: above
+
+        import arviz as az
+        idata1 = az.load_arviz_data("centered_eight")
+        idata2 = az.load_arviz_data("non_centered_eight")
+        az.plot_elpd(
+            {"centered model": idata1, "non centered model": idata2},
+            backend="bokeh"
+        )
 
     """
     valid_ics = ["waic", "loo"]
