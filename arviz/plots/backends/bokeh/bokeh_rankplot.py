@@ -77,11 +77,21 @@ def _plot_rank(
         elif kind == "vlines":
             ymin = np.full(len(all_counts), all_counts.mean())
             for idx, counts in enumerate(all_counts):
-                ax.plot(bin_ary, counts, "o", color=colors[idx])
-                ax.vlines(bin_ary, ymin, counts, lw=2, color=colors[idx])
-            ax.set_ylim(0, all_counts.mean() * 2)
+                ax.circle(bin_ary, counts, fill_color=colors[idx], line_color=colors[idx])
+
+                x_locations = [(bin, bin) for bin in bin_ary]
+                y_locations = [(ymin[idx], counts_) for counts_ in counts]
+                ax.multi_line(
+                    x_locations,
+                    y_locations,
+                    line_dash="solid",
+                    line_color=colors[idx],
+                    line_width=3,
+                )
+
             if ref_line:
-                ax.axhline(y=all_counts.mean(), linestyle="--", color="k")
+                hline = Span(location=all_counts.mean(), line_dash="dashed", line_color="black")
+                ax.add_layout(hline)
 
         if labels:
             ax.xaxis.axis_label = "Rank (all chains)"
