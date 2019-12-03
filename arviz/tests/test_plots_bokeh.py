@@ -1,6 +1,7 @@
 """Tests use the 'bokeh' backend."""
 # pylint: disable=redefined-outer-name,too-many-lines
 from copy import deepcopy
+import bokeh.plotting as bkp
 from pandas import DataFrame
 import numpy as np
 import pytest
@@ -759,7 +760,7 @@ def test_plot_violin(models, var_names):
 
 
 def test_plot_violin_ax(models):
-    _, ax = plt.subplots(1)
+    ax = bkp.figure()
     axes = plot_violin(models.model_1, var_names="mu", ax=ax, backend="bokeh", show=False)
     assert axes.shape
 
