@@ -1,5 +1,4 @@
 """Matplotlib Violinplot."""
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ....stats import hpd
@@ -25,12 +24,9 @@ def _plot_violin(
     quartiles,
 ):
     if ax is None:
-        fig, ax = _create_axes_grid(
+        _, ax = _create_axes_grid(
             len(plotters), rows, cols, sharey=sharey, figsize=figsize, squeeze=False
         )
-
-    else:
-        fig = ax.figure
 
     ax = np.atleast_1d(ax.flatten())
 

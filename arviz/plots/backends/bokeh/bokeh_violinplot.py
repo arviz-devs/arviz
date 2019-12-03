@@ -2,7 +2,6 @@
 import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ....stats import hpd
@@ -23,8 +22,6 @@ def _plot_violin(
     bw,
     credible_interval,
     linewidth,
-    ax_labelsize,
-    xt_labelsize,
     quartiles,
     show,
 ):
