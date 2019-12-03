@@ -1,19 +1,16 @@
 """Histograms of ranked posterior draws, plotted for each chain."""
-import numpy as np
-import scipy.stats
+from itertools import cycle
+import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
     xarray_var_iter,
     default_grid,
-    _create_axes_grid,
-    make_label,
     filter_plotters_list,
     _sturges_formula,
 )
 from ..utils import _var_names
-from ..stats.stats_utils import histogram
 
 
 def plot_rank(
@@ -27,6 +24,8 @@ def plot_rank(
     labels=True,
     figsize=None,
     axes=None,
+    backend=None,
+    show=True,
 ):
     """Plot rank order statistics of chains.
 
@@ -126,60 +125,46 @@ def plot_rank(
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
             figsize, None, rows=rows, cols=cols
         )
-        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
     else:
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None)
 
     chains = len(posterior_data.chain)
     if colors == "cycle":
-        colors = ["C{}".format(idx % 10) for idx in range(chains)]
+        colors = [
+            prop
+            for _, prop in zip(
+                range(chains), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
     elif isinstance(colors, str):
         colors = [colors] * chains
 
-    for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
-        ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
-        bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
-        all_counts = np.empty((len(ranks), len(bin_ary) - 1))
-        for idx, row in enumerate(ranks):
-            _, all_counts[idx], _ = histogram(row, bins=bin_ary)
-        gap = all_counts.max() * 1.05
-        width = bin_ary[1] - bin_ary[0]
+    rankplot_kwargs = dict(
+        axes=axes,
+        length_plotters=length_plotters,
+        rows=rows,
+        cols=cols,
+        figsize=figsize,
+        plotters=plotters,
+        bins=bins,
+        kind=kind,
+        colors=colors,
+        ref_line=ref_line,
+        labels=labels,
+        ax_labelsize=ax_labelsize,
+        titlesize=titlesize,
+    )
 
-        # Center the bins
-        bin_ary = (bin_ary[1:] + bin_ary[:-1]) / 2
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_rankplot import _plot_rank
 
-        y_ticks = []
-        if kind == "bars":
-            for idx, counts in enumerate(all_counts):
-                y_ticks.append(idx * gap)
-                ax.bar(
-                    bin_ary,
-                    counts,
-                    bottom=y_ticks[-1],
-                    width=width,
-                    align="center",
-                    color=colors[idx],
-                    edgecolor=ax.get_facecolor(),
-                )
-                if ref_line:
-                    ax.axhline(y=y_ticks[-1] + counts.mean(), linestyle="--", color="k")
-            if labels:
-                ax.set_ylabel("Chain", fontsize=ax_labelsize)
-        elif kind == "vlines":
-            ymin = np.full(len(all_counts), all_counts.mean())
-            for idx, counts in enumerate(all_counts):
-                ax.plot(bin_ary, counts, "o", color=colors[idx])
-                ax.vlines(bin_ary, ymin, counts, lw=2, color=colors[idx])
-            ax.set_ylim(0, all_counts.mean() * 2)
-            if ref_line:
-                ax.axhline(y=all_counts.mean(), linestyle="--", color="k")
+        rankplot_kwargs.pop("ax_labelsize")
+        rankplot_kwargs.pop("titlesize")
+        rankplot_kwargs["show"] = show
+        axes = _plot_rank(**rankplot_kwargs)  # pylint: disable=unexpected-keyword-arg
+    else:
+        from .backends.matplotlib.mpl_rankplot import _plot_rank
 
-        if labels:
-            ax.set_xlabel("Rank (all chains)", fontsize=ax_labelsize)
-            ax.set_yticks(y_ticks)
-            ax.set_yticklabels(np.arange(len(y_ticks)))
-            ax.set_title(make_label(var_name, selection), fontsize=titlesize)
-        else:
-            ax.set_yticks([])
+        axes = _plot_rank(**rankplot_kwargs)
 
     return axes
