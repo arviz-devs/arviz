@@ -550,8 +550,8 @@ def test_bad_inference_data():
 
 def test_inference_concat_keeps_all_fields():
     """From failures observed in issue #907"""
-    idata1 = from_dict(posterior={'A': [1, 2, 3, 4]}, sample_stats={"B": [2, 3, 4, 5]})
-    idata2 = from_dict(prior={'C': [1, 2, 3, 4]}, observed_data={"D": [2, 3, 4, 5]})
+    idata1 = from_dict(posterior={"A": [1, 2, 3, 4]}, sample_stats={"B": [2, 3, 4, 5]})
+    idata2 = from_dict(prior={"C": [1, 2, 3, 4]}, observed_data={"D": [2, 3, 4, 5]})
 
     idata_c1 = concat(idata1, idata2)
     idata_c2 = concat(idata2, idata1)
