@@ -95,6 +95,7 @@ def plot_violin(
 
     if backend == "bokeh":
         from .backends.bokeh.bokeh_violinplot import _plot_violin
+
         violinplot_kwargs.pop("ax_labelsize")
         violinplot_kwargs.pop("xt_labelsize")
         violinplot_kwargs["show"] = show
