@@ -32,6 +32,7 @@ from ..plots import (
     plot_pair,
     plot_trace,
     plot_parallel,
+    plot_violin,
 )
 from ..stats import compare, loo, waic
 
@@ -749,3 +750,27 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
+
+
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+def test_plot_violin(models, var_names):
+    axes = plot_violin(models.model_1, var_names=var_names, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def test_plot_violin_ax(models):
+    _, ax = plt.subplots(1)
+    axes = plot_violin(models.model_1, var_names="mu", ax=ax, backend="bokeh", show=False)
+    assert axes.shape
+
+
+def test_plot_violin_layout(models):
+    axes = plot_violin(
+        models.model_1, var_names=["mu", "tau"], sharey=False, backend="bokeh", show=False
+    )
+    assert axes.shape
+
+
+def test_plot_violin_discrete(discrete_model):
+    axes = plot_violin(discrete_model, backend="bokeh", show=False)
+    assert axes.shape
