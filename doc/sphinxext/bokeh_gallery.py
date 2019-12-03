@@ -29,11 +29,18 @@ from os.path import abspath, dirname, exists, getmtime, isdir, isfile, join
 from sphinx.errors import SphinxError
 from sphinx.util import ensuredir, status_iterator
 from jinja2 import Environment, BaseLoader
+from numpy import ndarray
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib import image
 
 # Bokeh imports
 from bokeh.sphinxext.bokeh_directive import BokehDirective
 from bokeh.sphinxext.templates import GALLERY_DETAIL
 from bokeh.io import export_png
+from bokeh.layouts import gridplot
 
 #-----------------------------------------------------------------------------
 # Globals and constants
@@ -46,7 +53,10 @@ __all__ = (
 )
 
 EXPORT_CODE = """\n
-export_png(ax, "{filename}")
+if isinstance(ax, ndarray):
+    export_png(gridplot([list(item) for item in ax]), "{filename}")
+else:
+    export_png(ax, "{filename}")
 """
 
 GALLERY_PAGE_RST = """{% for name in names %}
@@ -140,10 +150,13 @@ def config_inited_handler(app, config):
             source_path = abspath(join(app.srcdir, "..", detail['path']))
             f.write(GALLERY_DETAIL.render(filename=detail['name']+'.py', source_path=source_path))
 
+        pngfile = join(images_dir, detail["name"]+".png")
         with open(source_path, "r") as fp:
             code_text = fp.read().replace("show=True", "show=False")
-            code_text += EXPORT_CODE.format(filename=join(images_dir, detail["name"]+".png"))
-            exec(code_text, {"export_png": export_png})
+            code_text += EXPORT_CODE.format(filename=pngfile)
+            exec(code_text, {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot})
+
+        _bokeh_thumbnail(pngfile)
 
 
 def setup(app):
@@ -155,6 +168,37 @@ def setup(app):
 #-----------------------------------------------------------------------------
 # Private API
 #-----------------------------------------------------------------------------
+
+def _bokeh_thumbnail(
+    pngfile, width=275, height=275, cx=0.5, cy=0.5, border=4
+):
+    """Create a square thumbnail from png bokeh plot."""
+
+    im = image.imread(pngfile)
+    rows, cols = im.shape[:2]
+    size = min(rows, cols)
+    if size == cols:
+        xslice = slice(0, size)
+        ymin = min(max(0, int(cx * rows - size // 2)), rows - size)
+        yslice = slice(ymin, ymin + size)
+    else:
+        yslice = slice(0, size)
+        xmin = min(max(0, int(cx * cols - size // 2)), cols - size)
+        xslice = slice(xmin, xmin + size)
+    thumb = im[yslice, xslice]
+    thumb[:border, :, :3] = thumb[-border:, :, :3] = 0
+    thumb[:, :border, :3] = thumb[:, -border:, :3] = 0
+
+    dpi = 100
+    fig = plt.figure(figsize=(width / dpi, height / dpi), dpi=dpi)
+
+    ax = fig.add_axes([0, 0, 1, 1], aspect='auto',
+                      frameon=False, xticks=[], yticks=[])
+    ax.imshow(thumb, aspect='auto', resample=True,
+              interpolation='bilinear')
+    fig.savefig(pngfile, dpi=dpi)
+    return fig
+
 
 #-----------------------------------------------------------------------------
 # Code
