@@ -15,6 +15,7 @@ if [[ $* == *--build* ]]; then
         --build-arg EMCEE_VERSION=${EMCEE_VERSION} \
         --build-arg TF_VERSION=${TF_VERSION} \
         --build-arg PYMC3_VERSION=${PYMC3_VERSION} \
+        --build-arg NAME=${NAME}
         --rm
 fi
 
