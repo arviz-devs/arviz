@@ -1,12 +1,6 @@
 """Plot posterior traces as violin plot."""
-import matplotlib.pyplot as plt
-import numpy as np
-
 from ..data import convert_to_dataset
-from ..stats import hpd
-from ..stats.stats_utils import histogram
-from .kdeplot import _fast_kde
-from .plot_utils import get_bins, _scale_fig_size, xarray_var_iter, make_label, filter_plotters_list
+from .plot_utils import _scale_fig_size, xarray_var_iter, filter_plotters_list, default_grid
 from ..utils import _var_names
 
 
@@ -22,6 +16,8 @@ def plot_violin(
     textsize=None,
     ax=None,
     kwargs_shade=None,
+    backend=None,
+    show=True,
 ):
     """Plot posterior of traces as violin plot.
 
@@ -73,68 +69,40 @@ def plot_violin(
     if kwargs_shade is None:
         kwargs_shade = {}
 
+    rows, cols = default_grid(len(plotters))
+
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
-        figsize, textsize, 1, len(plotters)
+        figsize, textsize, rows, cols
     )
     ax_labelsize *= 2
 
-    if ax is None:
-        fig, ax = plt.subplots(
-            1, len(plotters), figsize=figsize, sharey=sharey, constrained_layout=True
-        )
+    violinplot_kwargs = dict(
+        ax=ax,
+        plotters=plotters,
+        figsize=figsize,
+        rows=rows,
+        cols=cols,
+        sharey=sharey,
+        kwargs_shade=kwargs_shade,
+        shade=shade,
+        bw=bw,
+        credible_interval=credible_interval,
+        linewidth=linewidth,
+        ax_labelsize=ax_labelsize,
+        xt_labelsize=xt_labelsize,
+        quartiles=quartiles,
+    )
 
+    if backend == "bokeh":
+        from .backends.bokeh.bokeh_violinplot import _plot_violin
+
+        violinplot_kwargs.pop("ax_labelsize")
+        violinplot_kwargs.pop("xt_labelsize")
+        violinplot_kwargs["show"] = show
+        ax = _plot_violin(**violinplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
     else:
-        fig = ax.figure
+        from .backends.matplotlib.mpl_violinplot import _plot_violin
 
-    ax = np.atleast_1d(ax)
-
-    for axind, (var_name, selection, x) in enumerate(plotters):
-        val = x.flatten()
-        if val[0].dtype.kind == "i":
-            cat_hist(val, shade, ax[axind], **kwargs_shade)
-        else:
-            _violinplot(val, shade, bw, ax[axind], **kwargs_shade)
-
-        per = np.percentile(val, [25, 75, 50])
-        hpd_intervals = hpd(val, credible_interval, multimodal=False)
-
-        if quartiles:
-            ax[axind].plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")
-        ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color="k", solid_capstyle="round")
-        ax[axind].plot(0, per[-1], "wo", ms=linewidth * 1.5)
-
-        ax[axind].set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
-        ax[axind].set_xticks([])
-        ax[axind].tick_params(labelsize=xt_labelsize)
-        ax[axind].grid(None, axis="x")
-
-    if sharey:
-        fig.subplots_adjust(wspace=0)
-    else:
-        fig.tight_layout()
+        ax = _plot_violin(**violinplot_kwargs)
 
     return ax
-
-
-def _violinplot(val, shade, bw, ax, **kwargs_shade):
-    """Auxiliary function to plot violinplots."""
-    density, low_b, up_b = _fast_kde(val, bw=bw)
-    x = np.linspace(low_b, up_b, len(density))
-
-    x = np.concatenate([x, x[::-1]])
-    density = np.concatenate([-density, density[::-1]])
-
-    ax.fill_betweenx(x, density, alpha=shade, lw=0, **kwargs_shade)
-
-
-def cat_hist(val, shade, ax, **kwargs_shade):
-    """Auxiliary function to plot discrete-violinplots."""
-    bins = get_bins(val)
-    _, binned_d, _ = histogram(val, bins=bins)
-
-    bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
-    centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
-    heights = np.diff(bin_edges)
-
-    lefts = -0.5 * binned_d
-    ax.barh(centers, binned_d, height=heights, left=lefts, alpha=shade, **kwargs_shade)
