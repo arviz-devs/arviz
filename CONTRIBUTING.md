@@ -203,8 +203,8 @@ To start a bash shell inside Docker, run:
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
-    $ docker exec -it jupyter-dock pip install jupyter
-    $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+    $ docker exec jupyter-dock bash -c "pip install jupyter"
+    $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
 
