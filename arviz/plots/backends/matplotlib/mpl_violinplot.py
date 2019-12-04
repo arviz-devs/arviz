@@ -28,27 +28,27 @@ def _plot_violin(
             len(plotters), rows, cols, sharey=sharey, figsize=figsize, squeeze=False
         )
 
-    ax = np.atleast_1d(ax.flatten())
+    ax = np.atleast_1d(ax)
 
-    for axind, (var_name, selection, x) in enumerate(plotters):
+    for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):
         val = x.flatten()
         if val[0].dtype.kind == "i":
-            cat_hist(val, shade, ax[axind], **kwargs_shade)
+            cat_hist(val, shade, ax_, **kwargs_shade)
         else:
-            _violinplot(val, shade, bw, ax[axind], **kwargs_shade)
+            _violinplot(val, shade, bw, ax_, **kwargs_shade)
 
         per = np.percentile(val, [25, 75, 50])
         hpd_intervals = hpd(val, credible_interval, multimodal=False)
 
         if quartiles:
-            ax[axind].plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")
-        ax[axind].plot([0, 0], hpd_intervals, lw=linewidth, color="k", solid_capstyle="round")
-        ax[axind].plot(0, per[-1], "wo", ms=linewidth * 1.5)
+            ax_.plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")
+        ax_.plot([0, 0], hpd_intervals, lw=linewidth, color="k", solid_capstyle="round")
+        ax_.plot(0, per[-1], "wo", ms=linewidth * 1.5)
 
-        ax[axind].set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
-        ax[axind].set_xticks([])
-        ax[axind].tick_params(labelsize=xt_labelsize)
-        ax[axind].grid(None, axis="x")
+        ax_.set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
+        ax_.set_xticks([])
+        ax_.tick_params(labelsize=xt_labelsize)
+        ax_.grid(None, axis="x")
 
     return ax
 
