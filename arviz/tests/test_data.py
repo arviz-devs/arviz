@@ -303,6 +303,22 @@ def test_concat_bad():
         concat(idata3, idata, dim="chain")
 
 
+def test_inference_concat_keeps_all_fields():
+    """From failures observed in issue #907"""
+    idata1 = from_dict(posterior={"A": [1, 2, 3, 4]}, sample_stats={"B": [2, 3, 4, 5]})
+    idata2 = from_dict(prior={"C": [1, 2, 3, 4]}, observed_data={"D": [2, 3, 4, 5]})
+
+    idata_c1 = concat(idata1, idata2)
+    idata_c2 = concat(idata2, idata1)
+
+    test_dict = {"posterior": ["A"], "sample_stats": ["B"], "prior": ["C"], "observed_data": ["D"]}
+
+    fails_c1 = check_multiple_attrs(test_dict, idata_c1)
+    assert not fails_c1
+    fails_c2 = check_multiple_attrs(test_dict, idata_c2)
+    assert not fails_c2
+
+
 @pytest.mark.parametrize("inplace", [True, False])
 def test_sel_method(inplace):
     data = np.random.normal(size=(4, 500, 8))
@@ -546,24 +562,6 @@ def test_convert_to_dataset_bad(tmpdir):
 def test_bad_inference_data():
     with pytest.raises(ValueError):
         InferenceData(posterior=[1, 2, 3])
-
-
-def test_inference_concat_keeps_all_fields():
-    """From failures observed in issue #907"""
-    idata1 = from_dict(posterior={"A": [1, 2, 3, 4]}, sample_stats={"B": [2, 3, 4, 5]})
-    idata2 = from_dict(prior={"C": [1, 2, 3, 4]}, observed_data={"D": [2, 3, 4, 5]})
-
-    idata_c1 = concat(idata1, idata2)
-    idata_c2 = concat(idata2, idata1)
-
-    assert hasattr(idata_c1, "prior")
-    assert hasattr(idata_c2, "prior")
-    assert hasattr(idata_c1, "observed_data")
-    assert hasattr(idata_c2, "observed_data")
-    assert hasattr(idata_c1, "posterior")
-    assert hasattr(idata_c2, "posterior")
-    assert hasattr(idata_c1, "sample_stats")
-    assert hasattr(idata_c2, "sample_stats")
 
 
 class TestDataConvert:
