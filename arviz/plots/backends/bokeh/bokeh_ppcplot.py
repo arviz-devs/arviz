@@ -188,7 +188,7 @@ def _plot_ppc(
                         color="blue",
                         line_width=linewidth,
                         line_dash="dashed",
-                        mode="cented",
+                        mode="center",
                     )
 
             jitter_scale = 0.1
