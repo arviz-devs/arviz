@@ -148,7 +148,13 @@ def _plot_ppc(
                 pp_densities[2 * idx] = pp_x
                 pp_densities[2 * idx + 1] = pp_density
 
-            ax_i.multi_line([np.arange(pp_densities.shape[1]) for _ in range(pp_densities.shape[0])], list(pp_densities.T), line_alpha=alpha, line_color="pink", line_width=linewidth)
+            ax_i.multi_line(
+                [np.arange(pp_densities.shape[1]) for _ in range(pp_densities.shape[0])],
+                list(pp_densities.T),
+                line_alpha=alpha,
+                line_color="pink",
+                line_width=linewidth,
+            )
             if mean:
                 ax_i.line(
                     *_empirical_cdf(pp_vals.flatten()),
@@ -168,7 +174,8 @@ def _plot_ppc(
                             "line_width": linewidth,
                         },
                         ax=ax_i,
-                        backend="bokeh", show=False
+                        backend="bokeh",
+                        show=False,
                     )
                 else:
                     vals = pp_vals.flatten()
