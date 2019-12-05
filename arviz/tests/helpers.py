@@ -504,6 +504,7 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
             _log.info("Generating and loading stan model")
             models["pystan"] = func(eight_schools_data, draws, chains)
             continue
+
         py_version = sys.version_info
         fname = "{0.major}.{0.minor}_{1.__name__}_{1.__version__}_{2}_{3}_{4}.pkl.gzip".format(
             py_version, library, sys.platform, draws, chains
