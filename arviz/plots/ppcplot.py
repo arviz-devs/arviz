@@ -3,7 +3,6 @@ from numbers import Integral
 import platform
 import logging
 import numpy as np
-from matplotlib import animation
 from .kdeplot import plot_kde, _fast_kde
 from .plot_utils import (
     xarray_var_iter,
@@ -511,6 +510,7 @@ def plot_ppc(
                 ax_i.legend([])
 
     if animated:
+        from matplotlib import animation
         ani = animation.FuncAnimation(
             fig, animate, np.arange(0, num_pp_samples), init_func=init, **animation_kwargs
         )
