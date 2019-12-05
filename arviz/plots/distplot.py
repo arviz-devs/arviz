@@ -90,6 +90,47 @@ def plot_dist(
     Returns
     -------
     ax : matplotlib axes
+
+    Examples
+    --------
+    Plot an integer distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> a = np.random.poisson(4, 1000)
+        >>> az.plot_dist(a)
+
+    Plot a continuous distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> b = np.random.normal(0, 1, 1000)
+        >>> az.plot_dist(b)
+
+    Add a rug under the Gaussian distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True)
+
+    Segment into quantiles
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75])
+
+    Plot as the cumulative distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
     if kind not in ["auto", "kde", "hist"]:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
