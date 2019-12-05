@@ -1,13 +1,14 @@
 """
-ESS Quantile Plot
+Pareto Shape Plot
 =================
 
-_thumb: .4, .5
+_thumb: .7, .5
 """
 import arviz as az
 
 az.style.use("arviz-darkgrid")
 
 idata = az.load_arviz_data("radon")
+loo = az.loo(idata, pointwise=True)
 
-az.plot_ess(idata, var_names=["sigma_y"], kind="quantile", color="C4")
+az.plot_khat(loo, show_bins=True)

@@ -98,6 +98,7 @@ def plot_dist(
     .. plot::
         :context: close-figs
 
+        >>> import matplotlib.pyplot as plt
         >>> import numpy as np
         >>> import arviz as az
         >>> a = np.random.poisson(4, 1000)

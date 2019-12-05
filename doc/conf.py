@@ -42,8 +42,6 @@ thumb_directory = "example_thumbs"
 if not os.path.isdir(thumb_directory):
     os.mkdir(thumb_directory)
 
-tls_verify = False
-
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
