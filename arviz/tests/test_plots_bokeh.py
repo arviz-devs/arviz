@@ -33,6 +33,7 @@ from ..plots import (
     plot_pair,
     plot_trace,
     plot_parallel,
+    plot_ppc,
     plot_violin,
 )
 from ..stats import compare, loo, waic
@@ -775,3 +776,87 @@ def test_plot_violin_layout(models):
 def test_plot_violin_discrete(discrete_model):
     axes = plot_violin(discrete_model, backend="bokeh", show=False)
     assert axes.shape
+
+
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
+@pytest.mark.parametrize("alpha", [None, 0.2, 1])
+def test_plot_ppc(models, kind, alpha):
+    axes = plot_ppc(
+        models.model_1, kind=kind, alpha=alpha, random_seed=3, backend="bokeh", show=False,
+    )
+    assert axes
+
+
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
+@pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
+def test_plot_ppc_multichain(kind, jitter):
+    data = from_dict(
+        posterior_predictive={
+            "x": np.random.randn(4, 100, 30),
+            "y_hat": np.random.randn(4, 100, 3, 10),
+        },
+        observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
+    )
+    axes = plot_ppc(
+        data,
+        kind=kind,
+        data_pairs={"y": "y_hat"},
+        jitter=jitter,
+        random_seed=3,
+        backend="bokeh",
+        show=False,
+    )
+    assert np.all(axes)
+
+
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
+def test_plot_ppc_discrete(kind):
+    data = from_dict(
+        observed_data={"obs": np.random.randint(1, 100, 15)},
+        posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
+    )
+
+    axes = plot_ppc(data, backend="bokeh", show=False)
+    assert axes
+
+
+def test_plot_ppc_grid(models):
+    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], backend="bokeh", show=False)
+    assert len(axes) == 8
+    axes = plot_ppc(
+        models.model_1,
+        kind="scatter",
+        flatten=[],
+        coords={"obs_dim": [1, 2, 3]},
+        backend="bokeh",
+        show=False,
+    )
+    assert len(axes) == 3
+    axes = plot_ppc(
+        models.model_1,
+        kind="scatter",
+        flatten=["obs_dim"],
+        coords={"obs_dim": [1, 2, 3]},
+        backend="bokeh",
+        show=False,
+    )
+    assert len(axes) == 1
+
+
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
+def test_plot_ppc_bad(models, kind):
+    data = from_dict(posterior={"mu": np.random.randn()})
+    with pytest.raises(TypeError):
+        plot_ppc(data, kind=kind, backend="bokeh", show=False)
+    with pytest.raises(TypeError):
+        plot_ppc(models.model_1, kind="bad_val", backend="bokeh", show=False)
+    with pytest.raises(TypeError):
+        plot_ppc(models.model_1, num_pp_samples="bad_val", backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
+def test_plot_ppc_ax(models, kind, get_ax):
+    """Test ax argument of plot_ppc."""
+    ax = get_ax
+    axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh", show=False)
+    assert axes[0] is ax
