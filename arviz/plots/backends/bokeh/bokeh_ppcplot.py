@@ -1,4 +1,4 @@
-"""Matplotib Posterior predictive plot."""
+"""Bokeh Posterior predictive plot."""
 import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
 import numpy as np
@@ -147,10 +147,10 @@ def _plot_ppc(
                 pp_x, pp_density = _empirical_cdf(vals)
                 pp_densities[2 * idx] = pp_x
                 pp_densities[2 * idx + 1] = pp_density
-
+            print(pp_densities.shape)
             ax_i.multi_line(
-                [np.arange(pp_densities.shape[1]) for _ in range(pp_densities.shape[0])],
-                list(pp_densities.T),
+                list(pp_densities[::2]),
+                list(pp_densities[1::2]),
                 line_alpha=alpha,
                 line_color="pink",
                 line_width=linewidth,
