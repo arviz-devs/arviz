@@ -6,7 +6,7 @@ from pandas import DataFrame
 import numpy as np
 import pytest
 
-from ..data import load_arviz_data
+from ..data import from_dict, load_arviz_data
 from .helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -822,7 +822,7 @@ def test_plot_ppc_discrete(kind):
 
 def test_plot_ppc_grid(models):
     axes = plot_ppc(models.model_1, kind="scatter", flatten=[], backend="bokeh", show=False)
-    assert len(axes) == 8
+    assert len(axes.ravel()) == 8
     axes = plot_ppc(
         models.model_1,
         kind="scatter",
@@ -831,7 +831,7 @@ def test_plot_ppc_grid(models):
         backend="bokeh",
         show=False,
     )
-    assert len(axes) == 3
+    assert len(axes.ravel()) == 3
     axes = plot_ppc(
         models.model_1,
         kind="scatter",
@@ -840,7 +840,7 @@ def test_plot_ppc_grid(models):
         backend="bokeh",
         show=False,
     )
-    assert len(axes) == 1
+    assert len(axes.ravel()) == 1
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
