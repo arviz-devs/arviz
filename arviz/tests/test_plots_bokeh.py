@@ -816,7 +816,7 @@ def test_plot_ppc_discrete(kind):
         posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
     )
 
-    axes = plot_ppc(data, backend="bokeh", show=False)
+    axes = plot_ppc(data, kind=kind, backend="bokeh", show=False)
     assert axes
 
 
