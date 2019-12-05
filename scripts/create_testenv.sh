@@ -14,6 +14,7 @@ PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
 EMCEE_VERSION=${EMCEE_VERSION:-latest}
 TF_VERSION=${TF_VERSION:-latest}
+PYMC3_VERSION=${PYMC3_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
@@ -82,6 +83,13 @@ if [ "$TF_VERSION" = "latest" ]; then
 else
   pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
 fi
+
+if [ "$PYMC3_VERSION" = "latest" ]; then
+  pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
+else
+  pip --no-cache-dir install pymc3==${PYMC3_VERSION}
+fi
+
 
 #  Install editable using the setup.py
 pip install  --no-cache-dir -r requirements.txt

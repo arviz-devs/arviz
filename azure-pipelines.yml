@@ -27,6 +27,7 @@ jobs:
         PYSTAN_VERSION: "latest"
         PYRO_VERSION: "latest"
         EMCEE_VERSION: "latest"
+        PYMC3_VERSION: "3.8"
         NAME: "UNIT"
       Python_37_Unit_Test:
         PYTHON_VERSION: 3.7
