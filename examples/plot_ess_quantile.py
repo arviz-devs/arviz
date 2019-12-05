@@ -8,6 +8,6 @@ import arviz as az
 
 az.style.use("arviz-darkgrid")
 
-idata = az.load_arviz_data("radon")
+idata = az.load_arviz_data("centered_eight")
 
-az.plot_ess(idata, var_names=["sigma_y"], kind="quantile", color="C4")
+az.plot_ess(idata, kind="quantile", color="C4")
