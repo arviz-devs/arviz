@@ -138,13 +138,12 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        vline = Span(location=val, line_color="blue", line_alpha=0.65)
-        ax.add_layout(vline)
-
-        cds = ColumnDataSource({"x": values.mean(), "y": h * 0.6, "text": ref_in_posterior,})
+        ax.line([val,val], [0, 0.8*h], line_color="blue", line_alpha=0.65)
+        
+        cds = ColumnDataSource({"x": [values.mean()], "y": [h * 0.6], "text": [ref_in_posterior]})
 
         ax.text(
-            x="x", y="y", text="10", text_font_size=ax_labelsize, text_color="black",
+            x="x", y="y", text="text", source=cds, text_align="center"
         )
 
     def display_rope(h):
@@ -172,13 +171,9 @@ def _plot_posterior_op(
             vals, (h * 0.02, h * 0.02), line_width=linewidth * 5, line_color="red", line_alpha=0.7,
         )
 
-        text_props = dict(text_font_size=ax_labelsize, text_color="black",)
+        text_props = dict(text_font_size=ax_labelsize, text_color="black", text_align="center")
 
-        cds = ColumnDataSource({"x": vals[0], "y": h * 0.2, "text": str(vals[0]),})
-
-        ax.text(x="x", y="y", text="text", source=cds, **text_props)
-
-        cds = ColumnDataSource({"x": vals[1], "y": h * 0.2, "text": vals[1],})
+        cds = ColumnDataSource({"x": vals, "y": [h * 0.2, h * 0.2], "text": list(map(str, vals))})
 
         ax.text(x="x", y="y", text="text", source=cds, **text_props)
 
@@ -203,10 +198,10 @@ def _plot_posterior_op(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
         )
 
-        cds = ColumnDataSource({"x": point_value, "y": h * 0.8, "text": point_text,})
+        cds = ColumnDataSource({"x": [point_value], "y": [h * 0.8], "text": [point_text]})
 
         ax.text(
-            x="x", y="y", text="text", source=cds,
+            x="x", y="y", text="text", source=cds, text_align="center"
         )
 
     def display_hpd(h):
@@ -222,39 +217,18 @@ def _plot_posterior_op(
             )
 
             cds = ColumnDataSource(
-                {"x": hpdi[0], "y": h * 0.07, "text": round_num(hpdi[0], round_to),}
+                {"x": list(hpdi) + [(hpdi[0] + hpdi[1]) / 2], "y": [h * 0.07, h * 0.07, h * 0.3], "text": list(map(str, map(lambda x: round_num(x, round_to), hpdi))) + [format_as_percent(credible_interval) + " HPD"],}
             )
 
-            ax.text(x="x", y="y", text="text", source=cds)
-
-            cds = ColumnDataSource(
-                {"x": hpdi[1], "y": h * 0.07, "text": round_num(hpdi[1], round_to),}
-            )
-
-            ax.text(x="x", y="y", text="text", source=cds)
-
-            cds = ColumnDataSource(
-                {
-                    "x": (hpdi[0] + hpdi[1]) / 2,
-                    "y": h * 0.3,
-                    "text": format_as_percent(credible_interval) + " HPD",
-                }
-            )
-
-            ax.text(x="x", y="y", text="text", source=cds)
+            ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
     def format_axes():
-        return
-        ax.yaxis.set_ticks([])
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_visible(False)
-        ax.spines["bottom"].set_visible(True)
-        ax.xaxis.set_ticks_position("bottom")
-        ax.tick_params(
-            axis="x", direction="out", width=1, length=3, color="0.5", labelsize=xt_labelsize
-        )
-        ax.spines["bottom"].set_color("0.5")
+        ax.yaxis.visible = False
+        ax.yaxis.major_tick_line_color = None
+        ax.yaxis.minor_tick_line_color = None
+        ax.yaxis.major_label_text_font_size = '0pt'
+        ax.xgrid.grid_line_color = None
+        ax.ygrid.grid_line_color = None
 
     if kind == "kde" and values.dtype.kind == "f":
         kwargs.setdefault("line_width", linewidth)
@@ -285,6 +259,7 @@ def _plot_posterior_op(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )
 
+    format_axes()
     h = hist.max()
     if credible_interval is not None:
         display_hpd(h)
