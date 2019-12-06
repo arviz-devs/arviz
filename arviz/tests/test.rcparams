@@ -1,3 +1,4 @@
+data.http_protocol : http
 data.load : eager
 plot.max_subplots : 30
 plot.point_estimate : median

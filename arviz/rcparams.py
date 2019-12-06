@@ -75,6 +75,15 @@ def _validate_float(value):
     return value
 
 
+def _validate_float(value):
+    """Validate value is a float."""
+    try:
+        value = float(value)
+    except ValueError:
+        raise ValueError("Could not convert to float")
+    return value
+
+
 def _validate_probability(value):
     """Validate a probability: a float between 0 and 1."""
     value = _validate_float(value)
@@ -84,6 +93,7 @@ def _validate_probability(value):
 
 
 defaultParams = {  # pylint: disable=invalid-name
+    "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),

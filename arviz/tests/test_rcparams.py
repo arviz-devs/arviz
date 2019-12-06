@@ -5,7 +5,7 @@ import pytest
 from xarray.core.indexing import MemoryCachedArray
 
 
-from ..data import load_arviz_data
+from ..data import load_arviz_data, datasets
 from ..stats import compare
 from ..rcparams import (
     rcParams,
@@ -195,3 +195,22 @@ def test_stats_information_criterion(models):
     rcParams["stats.information_criterion"] = "loo"
     df_comp = compare({"model1": models.model_1, "model2": models.model_2})
     assert "loo" in df_comp.columns
+
+
+def test_http_type_request(models, monkeypatch):
+    def _urlretrive(url, _):
+        raise Exception("URL Retrieved: {}".format(url))
+
+    # Hijack url retrieve to inspect url passed
+    monkeypatch.setattr(datasets, "urlretrieve", _urlretrive)
+
+    # Test HTTPS default
+    with pytest.raises(Exception) as e:
+        datasets.load_arviz_data("radon")
+        assert "https://" in str(e)
+
+    # Test HTTP setting
+    with pytest.raises(Exception) as e:
+        rcParams["data.http_protocol"] = "http"
+        datasets.load_arviz_data("radon")
+        assert "http://" in str(e)
