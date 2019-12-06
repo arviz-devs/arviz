@@ -693,7 +693,7 @@ def test_plot_posterior_bad(models):
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
-def test_point_estimates(models, point_estimate):
+def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate)
     assert axes.shape == (2,)
 

@@ -2,28 +2,21 @@
 from typing import Optional
 from numbers import Number
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Span
+from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
 
 import numpy as np
 from scipy.stats import mode
 
-from ....data import convert_to_dataset
 from ....stats import hpd
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
-    xarray_var_iter,
-    _scale_fig_size,
     make_label,
-    default_grid,
     _create_axes_grid,
-    get_coords,
-    filter_plotters_list,
     format_sig_figs,
     round_num,
 )
-from ....utils import _var_names
 
 
 def _plot_posterior(
@@ -43,7 +36,6 @@ def _plot_posterior(
     ref_val,
     rope,
     ax_labelsize,
-    xt_labelsize,
     kwargs,
     show,
 ):
@@ -69,7 +61,6 @@ def _plot_posterior(
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
-            xt_labelsize=xt_labelsize,
             **kwargs
         )
         idx += 1
@@ -100,7 +91,6 @@ def _plot_posterior_op(
     ref_val,
     rope,
     ax_labelsize,
-    xt_labelsize,
     round_to: Optional[int] = None,
     **kwargs
 ):  # noqa: D202
@@ -109,7 +99,7 @@ def _plot_posterior_op(
     def format_as_percent(x, round_to=0):
         return "{0:.{1:d}f}%".format(100 * x, round_to)
 
-    def display_ref_val(h):
+    def display_ref_val(max_data):
         if ref_val is None:
             return
         elif isinstance(ref_val, dict):
@@ -138,13 +128,15 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.line([val, val], [0, 0.8 * h], line_color="blue", line_alpha=0.65)
+        ax.line([val, val], [0, 0.8 * max_data], line_color="blue", line_alpha=0.65)
 
-        cds = ColumnDataSource({"x": [values.mean()], "y": [h * 0.6], "text": [ref_in_posterior]})
+        cds = ColumnDataSource(
+            {"x": [values.mean()], "y": [max_data * 0.6], "text": [ref_in_posterior]}
+        )
 
         ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
-    def display_rope(h):
+    def display_rope(max_data):
         if rope is None:
             return
         elif isinstance(rope, dict):
@@ -166,16 +158,24 @@ def _plot_posterior_op(
             )
 
         ax.line(
-            vals, (h * 0.02, h * 0.02), line_width=linewidth * 5, line_color="red", line_alpha=0.7,
+            vals,
+            (max_data * 0.02, max_data * 0.02),
+            line_width=linewidth * 5,
+            line_color="red",
+            line_alpha=0.7,
         )
 
-        text_props = dict(text_font_size=ax_labelsize, text_color="black", text_align="center")
+        text_props = dict(
+            text_font_size="{}pt".format(ax_labelsize), text_color="black", text_align="center"
+        )
 
-        cds = ColumnDataSource({"x": vals, "y": [h * 0.2, h * 0.2], "text": list(map(str, vals))})
+        cds = ColumnDataSource(
+            {"x": vals, "y": [max_data * 0.2, max_data * 0.2], "text": list(map(str, vals))}
+        )
 
         ax.text(x="x", y="y", text="text", source=cds, **text_props)
 
-    def display_point_estimate(h):
+    def display_point_estimate(max_data):
         if not point_estimate:
             return
         if point_estimate not in ("mode", "mean", "median"):
@@ -196,11 +196,11 @@ def _plot_posterior_op(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
         )
 
-        cds = ColumnDataSource({"x": [point_value], "y": [h * 0.8], "text": [point_text]})
+        cds = ColumnDataSource({"x": [point_value], "y": [max_data * 0.8], "text": [point_text]})
 
         ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
-    def display_hpd(h):
+    def display_hpd(max_data):
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
         hpd_intervals = hpd(
@@ -209,13 +209,16 @@ def _plot_posterior_op(
 
         for hpdi in np.atleast_2d(hpd_intervals):
             ax.line(
-                hpdi, (h * 0.02, h * 0.02), line_width=linewidth * 2, line_color="black",
+                hpdi,
+                (max_data * 0.02, max_data * 0.02),
+                line_width=linewidth * 2,
+                line_color="black",
             )
 
             cds = ColumnDataSource(
                 {
                     "x": list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
-                    "y": [h * 0.07, h * 0.07, h * 0.3],
+                    "y": [max_data * 0.07, max_data * 0.07, max_data * 0.3],
                     "text": list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
                     + [format_as_percent(credible_interval) + " HPD"],
                 }
@@ -250,20 +253,19 @@ def _plot_posterior_op(
                 xmin = values.min()
                 xmax = values.max()
                 bins = range(xmin, xmax + 2)
-                ax.set_xlim(xmin - 0.5, xmax + 0.5)
             else:
                 bins = "auto"
         kwargs.setdefault("align", "left")
-        kwargs.setdefault("color", "C0")
+        kwargs.setdefault("color", "blue")
         hist, edges = np.histogram(values, density=True, bins=bins)
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )
 
     format_axes()
-    h = hist.max()
+    max_data = hist.max()
     if credible_interval is not None:
-        display_hpd(h)
-    display_point_estimate(h)
-    display_ref_val(h)
-    display_rope(h)
+        display_hpd(max_data)
+    display_point_estimate(max_data)
+    display_ref_val(max_data)
+    display_rope(max_data)

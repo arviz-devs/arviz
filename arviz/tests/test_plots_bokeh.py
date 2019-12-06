@@ -33,6 +33,7 @@ from ..plots import (
     plot_pair,
     plot_trace,
     plot_parallel,
+    plot_posterior,
     plot_ppc,
     plot_violin,
 )
@@ -908,7 +909,7 @@ def test_plot_posterior_bad(models):
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
-def test_point_estimates(models, point_estimate):
+def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(
         models.model_1,
         var_names=("mu", "tau"),
@@ -916,4 +917,4 @@ def test_point_estimates(models, point_estimate):
         backend="bokeh",
         show=False,
     )
-    assert axes.shape == (2,)
+    assert axes.shape == (1,2)
