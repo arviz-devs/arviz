@@ -138,13 +138,11 @@ def _plot_posterior_op(
             val,
             format_as_percent(greater_than_ref_probability, 1),
         )
-        ax.line([val,val], [0, 0.8*h], line_color="blue", line_alpha=0.65)
-        
+        ax.line([val, val], [0, 0.8 * h], line_color="blue", line_alpha=0.65)
+
         cds = ColumnDataSource({"x": [values.mean()], "y": [h * 0.6], "text": [ref_in_posterior]})
 
-        ax.text(
-            x="x", y="y", text="text", source=cds, text_align="center"
-        )
+        ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
     def display_rope(h):
         if rope is None:
@@ -200,9 +198,7 @@ def _plot_posterior_op(
 
         cds = ColumnDataSource({"x": [point_value], "y": [h * 0.8], "text": [point_text]})
 
-        ax.text(
-            x="x", y="y", text="text", source=cds, text_align="center"
-        )
+        ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
     def display_hpd(h):
         # np.ndarray with 2 entries, min and max
@@ -217,7 +213,12 @@ def _plot_posterior_op(
             )
 
             cds = ColumnDataSource(
-                {"x": list(hpdi) + [(hpdi[0] + hpdi[1]) / 2], "y": [h * 0.07, h * 0.07, h * 0.3], "text": list(map(str, map(lambda x: round_num(x, round_to), hpdi))) + [format_as_percent(credible_interval) + " HPD"],}
+                {
+                    "x": list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
+                    "y": [h * 0.07, h * 0.07, h * 0.3],
+                    "text": list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
+                    + [format_as_percent(credible_interval) + " HPD"],
+                }
             )
 
             ax.text(x="x", y="y", text="text", source=cds, text_align="center")
@@ -226,7 +227,7 @@ def _plot_posterior_op(
         ax.yaxis.visible = False
         ax.yaxis.major_tick_line_color = None
         ax.yaxis.minor_tick_line_color = None
-        ax.yaxis.major_label_text_font_size = '0pt'
+        ax.yaxis.major_label_text_font_size = "0pt"
         ax.xgrid.grid_line_color = None
         ax.ygrid.grid_line_color = None
 

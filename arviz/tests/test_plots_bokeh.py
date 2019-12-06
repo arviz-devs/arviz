@@ -860,3 +860,60 @@ def test_plot_ppc_ax(models, kind, get_ax):
     ax = get_ax
     axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh", show=False)
     assert axes[0] is ax
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": "mu"},
+        {"var_names": ("mu", "tau")},
+        {"rope": (-2, 2)},
+        {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
+        {"point_estimate": "mode"},
+        {"point_estimate": "median"},
+        {"point_estimate": False},
+        {"ref_val": 0},
+        {"ref_val": None},
+        {"ref_val": {"mu": [{"ref_val": 1}]}},
+        {"bins": None, "kind": "hist"},
+        {
+            "ref_val": {
+                "theta": [
+                    # {"school": ["Choate", "Deerfield"], "ref_val": -1}, this is not working
+                    {"school": "Lawrenceville", "ref_val": 3}
+                ]
+            }
+        },
+    ],
+)
+def test_plot_posterior(models, kwargs):
+    axes = plot_posterior(models.model_1, backend="bokeh", show=False, **kwargs)
+    assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
+def test_plot_posterior_discrete(discrete_model, kwargs):
+    axes = plot_posterior(discrete_model, backend="bokeh", show=False, **kwargs)
+    assert axes.shape
+
+
+def test_plot_posterior_bad(models):
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, backend="bokeh", show=False, rope="bad_value")
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, ref_val="bad_value", backend="bokeh", show=False)
+    with pytest.raises(ValueError):
+        plot_posterior(models.model_1, point_estimate="bad_value", backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
+def test_point_estimates(models, point_estimate):
+    axes = plot_posterior(
+        models.model_1,
+        var_names=("mu", "tau"),
+        point_estimate=point_estimate,
+        backend="bokeh",
+        show=False,
+    )
+    assert axes.shape == (2,)
