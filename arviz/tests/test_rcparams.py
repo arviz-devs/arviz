@@ -205,12 +205,12 @@ def test_http_type_request(models, monkeypatch):
     monkeypatch.setattr(datasets, "urlretrieve", _urlretrive)
 
     # Test HTTPS default
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as error:
         datasets.load_arviz_data("radon")
-        assert "https://" in str(e)
+        assert "https://" in str(error)
 
     # Test HTTP setting
-    with pytest.raises(Exception) as e:
+    with pytest.raises(Exception) as error:
         rcParams["data.http_protocol"] = "http"
         datasets.load_arviz_data("radon")
-        assert "http://" in str(e)
+        assert "http://" in str(error)
