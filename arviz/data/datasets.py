@@ -7,7 +7,7 @@ import shutil
 from urllib.request import urlretrieve
 
 from .io_netcdf import from_netcdf
-from ..rcparams import RcParams
+from ..rcparams import rcParams
 
 
 LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
@@ -217,7 +217,7 @@ def load_arviz_data(dataset=None, data_home=None):
         file_path = os.path.join(home_dir, remote.filename)
 
         if not os.path.exists(file_path):
-            http_type = RcParams["data.http_protocol"]
+            http_type = rcParams["data.http_protocol"]
 
             # Replaces http type. Redundant if http_type is http, useful if http_type is https
             url = remote.url.replace("http", http_type)
