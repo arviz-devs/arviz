@@ -917,4 +917,4 @@ def test_plot_posterior_point_estimates(models, point_estimate):
         backend="bokeh",
         show=False,
     )
-    assert axes.shape == (1,2)
+    assert axes.shape == (1, 2)
