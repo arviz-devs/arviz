@@ -4,21 +4,14 @@ from numbers import Number
 import numpy as np
 from scipy.stats import mode
 
-from ....data import convert_to_dataset
 from ....stats import hpd
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
-    xarray_var_iter,
-    _scale_fig_size,
     make_label,
-    default_grid,
     _create_axes_grid,
-    get_coords,
-    filter_plotters_list,
     format_sig_figs,
     round_num,
 )
-from ....utils import _var_names
 
 
 def _plot_posterior(
