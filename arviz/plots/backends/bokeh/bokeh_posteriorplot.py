@@ -1,0 +1,293 @@
+"""Matplotlib Plot posterior densities."""
+from typing import Optional
+from numbers import Number
+import bokeh.plotting as bkp
+from bokeh.models import ColumnDataSource, Span
+from bokeh.models.annotations import Title
+from bokeh.layouts import gridplot
+
+import numpy as np
+from scipy.stats import mode
+
+from ....data import convert_to_dataset
+from ....stats import hpd
+from ...kdeplot import plot_kde, _fast_kde
+from ...plot_utils import (
+    xarray_var_iter,
+    _scale_fig_size,
+    make_label,
+    default_grid,
+    _create_axes_grid,
+    get_coords,
+    filter_plotters_list,
+    format_sig_figs,
+    round_num,
+)
+from ....utils import _var_names
+
+
+def _plot_posterior(
+    ax,
+    length_plotters,
+    rows,
+    cols,
+    figsize,
+    plotters,
+    bw,
+    bins,
+    kind,
+    point_estimate,
+    round_to,
+    credible_interval,
+    multimodal,
+    ref_val,
+    rope,
+    ax_labelsize,
+    xt_labelsize,
+    kwargs,
+    show,
+):
+    if ax is None:
+        _, ax = _create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, squeeze=False, backend="bokeh"
+        )
+    idx = 0
+    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+        _plot_posterior_op(
+            idx,
+            x.flatten(),
+            var_name,
+            selection,
+            ax=ax_,
+            bw=bw,
+            bins=bins,
+            kind=kind,
+            point_estimate=point_estimate,
+            round_to=round_to,
+            credible_interval=credible_interval,
+            multimodal=multimodal,
+            ref_val=ref_val,
+            rope=rope,
+            ax_labelsize=ax_labelsize,
+            xt_labelsize=xt_labelsize,
+            **kwargs
+        )
+        idx += 1
+        _title = Title()
+        _title.text = make_label(var_name, selection)
+        ax_.title = _title
+
+    if show:
+        grid = gridplot([list(item) for item in ax], toolbar_location="above")
+        bkp.show(grid)
+
+    return ax
+
+
+def _plot_posterior_op(
+    idx,
+    values,
+    var_name,
+    selection,
+    ax,
+    bw,
+    linewidth,
+    bins,
+    kind,
+    point_estimate,
+    credible_interval,
+    multimodal,
+    ref_val,
+    rope,
+    ax_labelsize,
+    xt_labelsize,
+    round_to: Optional[int] = None,
+    **kwargs
+):  # noqa: D202
+    """Artist to draw posterior."""
+
+    def format_as_percent(x, round_to=0):
+        return "{0:.{1:d}f}%".format(100 * x, round_to)
+
+    def display_ref_val(h):
+        if ref_val is None:
+            return
+        elif isinstance(ref_val, dict):
+            val = None
+            for sel in ref_val.get(var_name, []):
+                if all(
+                    k in selection and selection[k] == v for k, v in sel.items() if k != "ref_val"
+                ):
+                    val = sel["ref_val"]
+                    break
+            if val is None:
+                return
+        elif isinstance(ref_val, list):
+            val = ref_val[idx]
+        elif isinstance(ref_val, Number):
+            val = ref_val
+        else:
+            raise ValueError(
+                "Argument `ref_val` must be None, a constant, a list or a "
+                'dictionary like {"var_name": [{"ref_val": ref_val}]}'
+            )
+        less_than_ref_probability = (values < val).mean()
+        greater_than_ref_probability = (values >= val).mean()
+        ref_in_posterior = "{} <{:g}< {}".format(
+            format_as_percent(less_than_ref_probability, 1),
+            val,
+            format_as_percent(greater_than_ref_probability, 1),
+        )
+        vline = Span(location=val, line_color="blue", line_alpha=0.65)
+        ax.add_layout(vline)
+
+        cds = ColumnDataSource({"x": values.mean(), "y": h * 0.6, "text": ref_in_posterior,})
+
+        ax.text(
+            x="x", y="y", text="10", text_font_size=ax_labelsize, text_color="black",
+        )
+
+    def display_rope(h):
+        if rope is None:
+            return
+        elif isinstance(rope, dict):
+            vals = None
+            for sel in rope.get(var_name, []):
+                # pylint: disable=line-too-long
+                if all(k in selection and selection[k] == v for k, v in sel.items() if k != "rope"):
+                    vals = sel["rope"]
+                    break
+            if vals is None:
+                return
+        elif len(rope) == 2:
+            vals = rope
+        else:
+            raise ValueError(
+                "Argument `rope` must be None, a dictionary like"
+                '{"var_name": {"rope": (lo, hi)}}, or an'
+                "iterable of length 2"
+            )
+
+        ax.line(
+            vals, (h * 0.02, h * 0.02), line_width=linewidth * 5, line_color="red", line_alpha=0.7,
+        )
+
+        text_props = dict(text_font_size=ax_labelsize, text_color="black",)
+
+        cds = ColumnDataSource({"x": vals[0], "y": h * 0.2, "text": str(vals[0]),})
+
+        ax.text(x="x", y="y", text="text", source=cds, **text_props)
+
+        cds = ColumnDataSource({"x": vals[1], "y": h * 0.2, "text": vals[1],})
+
+        ax.text(x="x", y="y", text="text", source=cds, **text_props)
+
+    def display_point_estimate(h):
+        if not point_estimate:
+            return
+        if point_estimate not in ("mode", "mean", "median"):
+            raise ValueError("Point Estimate should be in ('mode','mean','median')")
+        if point_estimate == "mean":
+            point_value = values.mean()
+        elif point_estimate == "mode":
+            if isinstance(values[0], float):
+                density, lower, upper = _fast_kde(values, bw=bw)
+                x = np.linspace(lower, upper, len(density))
+                point_value = x[np.argmax(density)]
+            else:
+                point_value = mode(values)[0][0]
+        elif point_estimate == "median":
+            point_value = np.median(values)
+        sig_figs = format_sig_figs(point_value, round_to)
+        point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
+            point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
+        )
+
+        cds = ColumnDataSource({"x": point_value, "y": h * 0.8, "text": point_text,})
+
+        ax.text(
+            x="x", y="y", text="text", source=cds,
+        )
+
+    def display_hpd(h):
+        # np.ndarray with 2 entries, min and max
+        # pylint: disable=line-too-long
+        hpd_intervals = hpd(
+            values, credible_interval=credible_interval, multimodal=multimodal
+        )  # type: np.ndarray
+
+        for hpdi in np.atleast_2d(hpd_intervals):
+            ax.line(
+                hpdi, (h * 0.02, h * 0.02), line_width=linewidth * 2, line_color="black",
+            )
+
+            cds = ColumnDataSource(
+                {"x": hpdi[0], "y": h * 0.07, "text": round_num(hpdi[0], round_to),}
+            )
+
+            ax.text(x="x", y="y", text="text", source=cds)
+
+            cds = ColumnDataSource(
+                {"x": hpdi[1], "y": h * 0.07, "text": round_num(hpdi[1], round_to),}
+            )
+
+            ax.text(x="x", y="y", text="text", source=cds)
+
+            cds = ColumnDataSource(
+                {
+                    "x": (hpdi[0] + hpdi[1]) / 2,
+                    "y": h * 0.3,
+                    "text": format_as_percent(credible_interval) + " HPD",
+                }
+            )
+
+            ax.text(x="x", y="y", text="text", source=cds)
+
+    def format_axes():
+        return
+        ax.yaxis.set_ticks([])
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.spines["bottom"].set_visible(True)
+        ax.xaxis.set_ticks_position("bottom")
+        ax.tick_params(
+            axis="x", direction="out", width=1, length=3, color="0.5", labelsize=xt_labelsize
+        )
+        ax.spines["bottom"].set_color("0.5")
+
+    if kind == "kde" and values.dtype.kind == "f":
+        kwargs.setdefault("line_width", linewidth)
+        plot_kde(
+            values,
+            bw=bw,
+            fill_kwargs={"fill_alpha": kwargs.pop("fill_alpha", 0)},
+            plot_kwargs=kwargs,
+            ax=ax,
+            rug=False,
+            backend="bokeh",
+            show=False,
+        )
+        hist, edges = np.histogram(values, density=True)
+    else:
+        if bins is None:
+            if values.dtype.kind == "i":
+                xmin = values.min()
+                xmax = values.max()
+                bins = range(xmin, xmax + 2)
+                ax.set_xlim(xmin - 0.5, xmax + 0.5)
+            else:
+                bins = "auto"
+        kwargs.setdefault("align", "left")
+        kwargs.setdefault("color", "C0")
+        hist, edges = np.histogram(values, density=True, bins=bins)
+        ax.quad(
+            top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
+        )
+
+    h = hist.max()
+    if credible_interval is not None:
+        display_hpd(h)
+    display_point_estimate(h)
+    display_ref_val(h)
+    display_rope(h)
