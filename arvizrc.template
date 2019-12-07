@@ -1,6 +1,8 @@
 #### ArviZ rcParams template ####
 ### DATA  ###
 # rcParams related with data loading related functions
+data.http_protocol           : https # protocol for remote dataset load,
+                                     # must be either http or https
 data.index_origin            : 0     # index origin, must be either 0 or 1
 data.load                    : lazy  # Sets the default data loading mode.
                                      # "lazy" stands for xarray lazy loading,
