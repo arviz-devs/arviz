@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 """Bokeh Plotting Backend."""
+import packaging
 
 
 def output_notebook(*args, **kwargs):
@@ -34,7 +35,7 @@ def check_bokeh_version():
     try:
         import bokeh
 
-        assert bokeh.__version__ >= "1.4.0"
+        assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
     except (ImportError, AssertionError):
         raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
 
