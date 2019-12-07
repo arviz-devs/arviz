@@ -16,7 +16,6 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
 )
-from ....rcparams import rcParams
 from ....stats import hpd
 
 

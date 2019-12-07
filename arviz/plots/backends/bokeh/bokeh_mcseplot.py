@@ -11,7 +11,6 @@ from ...plot_utils import (
     make_label,
     _create_axes_grid,
 )
-from ....rcparams import rcParams
 from ....stats.stats_utils import quantile as _quantile
 
 

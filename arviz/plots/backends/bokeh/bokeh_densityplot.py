@@ -7,7 +7,6 @@ import numpy as np
 from ....stats import hpd
 from ...kdeplot import _fast_kde
 from ...plot_utils import make_label
-from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 

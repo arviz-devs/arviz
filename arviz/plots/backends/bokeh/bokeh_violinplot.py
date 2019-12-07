@@ -6,7 +6,6 @@ import numpy as np
 
 from ...kdeplot import _fast_kde
 from ...plot_utils import get_bins, make_label, _create_axes_grid
-from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.stats_utils import histogram
 

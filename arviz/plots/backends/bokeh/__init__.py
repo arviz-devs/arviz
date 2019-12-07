@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member,invalid-name,redefined-outer-name
 """Bokeh Plotting Backend."""
 import packaging
 
