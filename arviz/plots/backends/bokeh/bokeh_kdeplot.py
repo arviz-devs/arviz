@@ -7,7 +7,7 @@ import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Range1d
 import matplotlib._contour as _contour
 from matplotlib.colors import rgb2hex
-from matplotlib.pyplot import rcParams
+from matplotlib.pyplot import rcParams as mpl_rcParams
 from matplotlib.cm import get_cmap
 import numpy as np
 
@@ -58,12 +58,12 @@ def _plot_kde_bokeh(
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}
-        plot_kwargs.setdefault("line_color", rcParams["axes.prop_cycle"].by_key()["color"][0])
+        plot_kwargs.setdefault("line_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if fill_kwargs is None:
             fill_kwargs = {}
 
-        fill_kwargs.setdefault("fill_color", rcParams["axes.prop_cycle"].by_key()["color"][0])
+        fill_kwargs.setdefault("fill_color", mpl_rcParams["axes.prop_cycle"].by_key()["color"][0])
 
         if rug:
             if rug_kwargs is None:

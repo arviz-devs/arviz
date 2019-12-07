@@ -195,6 +195,7 @@ def plot_dist(
         from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
         dist_plot_args.pop("textsize")
+        dist_plot_args["show"] = show
         ax = _plot_dist_bokeh(**dist_plot_args)
     else:
         raise NotImplementedError(

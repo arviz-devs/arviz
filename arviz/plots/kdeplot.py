@@ -214,6 +214,7 @@ def plot_kde(
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
         from .backends.matplotlib.mpl_kdeplot import _plot_kde_mpl
 
+        kde_plot_args["show"] = show
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
         check_bokeh_version()
