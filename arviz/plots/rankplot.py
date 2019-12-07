@@ -68,12 +68,16 @@ def plot_rank(
         wheter to plot or not the x and y labels, defaults to True
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    ax : axes
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

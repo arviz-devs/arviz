@@ -47,14 +47,16 @@ def plot_autocorr(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    ax: axes
-        Matplotlib axes
-    backend: str
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh.figure
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

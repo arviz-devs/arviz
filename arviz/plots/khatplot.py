@@ -73,16 +73,19 @@ def plot_khat(
         markersize for scatter plot. Defaults to `None` in which case it will
         be chosen based on autoscaling for figsize.
     ax: axes, optional
-      Matplotlib axes
+        Matplotlib axes or bokeh figures.
     hlines_kwargs: dictionary, optional
-      Additional keywords passed to ax.hlines
+        Additional keywords passed to ax.hlines.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     kwargs :
-      Additional keywords passed to ax.scatter
+        Additional keywords passed to ax.scatter.
 
     Returns
     -------
-    ax : axes
-      Matplotlib axes.
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

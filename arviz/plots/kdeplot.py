@@ -33,6 +33,7 @@ def plot_kde(
     ax=None,
     legend=True,
     backend=None,
+    show=True,
     **kwargs
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -81,15 +82,18 @@ def plot_kde(
         Keywords passed to ax.contourf. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
-    ax : matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     legend : bool
         Add legend to the figure. By default True.
-    backend : str {"matplotlib", "bokeh"}
-        Select backend engine.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : {matplotlib axes, bokeh figures}
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

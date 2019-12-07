@@ -200,6 +200,8 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
         Number of rows
     cols : int
         Number of columns
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
 
     Returns
     -------

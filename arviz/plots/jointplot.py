@@ -52,14 +52,19 @@ def plot_joint(
     marginal_kwargs : dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
     ax : tuple of axes, optional
-        Tuple containing (axjoin, ax_hist_x, ax_hist_y). If None, a new figure and axes
-        will be created.
+        Tuple containing (ax_joint, ax_hist_x, ax_hist_y). If None, a new figure and axes
+        will be created. Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axjoin : matplotlib axes, join (central) distribution
-    ax_hist_x : matplotlib axes, x (top) distribution
-    ax_hist_y : matplotlib axes, y (right) distribution
+    axes : matplotlib axes or bokeh figures
+        ax_joint : joint (central) distribution
+        ax_hist_x : x (top) distribution
+        ax_hist_y : y (right) distribution
 
     Examples
     --------

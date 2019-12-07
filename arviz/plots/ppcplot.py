@@ -100,12 +100,16 @@ def plot_ppc(
         Keywords passed to `animation.FuncAnimation`.
     legend : bool
         Add legend to figure. By default True.
-    ax : axes
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axes : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

@@ -59,15 +59,19 @@ def plot_pair(
     colorbar : bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
-    ax: axes
-        Matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     divergences_kwargs : dicts, optional
         Additional keywords passed to ax.scatter for divergences
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot, az.plot_kde or ax.hexbin
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

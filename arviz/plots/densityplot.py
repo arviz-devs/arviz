@@ -84,10 +84,14 @@ def plot_density(
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : Matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples

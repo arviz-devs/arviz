@@ -79,14 +79,18 @@ def plot_posterior(
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
-    ax : axes
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

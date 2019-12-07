@@ -87,12 +87,16 @@ def plot_forest(
         histograms. To override this use "hist" to plot histograms and "density" for KDEs
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    gridspec : matplotlib GridSpec
+    gridspec : matplotlib GridSpec or bokeh figures
 
     Examples
     --------

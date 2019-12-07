@@ -53,15 +53,19 @@ def plot_parallel(
     shadend : float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
-    ax : axes
-        Matplotlib axes.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     norm_method : str
         Method for normalizing the data. Methods include normal, minmax and rank.
         Defaults to none.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------

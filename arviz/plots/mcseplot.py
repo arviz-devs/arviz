@@ -62,8 +62,8 @@ def plot_mcse(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     rug_kwargs : dict
         kwargs passed to rug plot.
     extra_kwargs : dict, optional
@@ -71,12 +71,16 @@ def plot_mcse(
     text_kwargs : dict, optional
         kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     References
     ----------
