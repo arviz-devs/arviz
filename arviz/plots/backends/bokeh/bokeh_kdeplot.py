@@ -11,6 +11,8 @@ from matplotlib.pyplot import rcParams
 from matplotlib.cm import get_cmap
 import numpy as np
 
+from ....rcparams import rcParams
+
 
 def _plot_kde_bokeh(
     density,
@@ -41,20 +43,14 @@ def _plot_kde_bokeh(
     show=True,
 ):
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        ax = bkp.figure(
+            width=rcParams["plot.bokeh.figure.width"],
+            height=rcParams["plot.bokeh.figure.height"],
+            output_backend=output_backend,
+            tools=tools,
         )
-        ax = bkp.figure(width=500, height=500, output_backend="webgl", tools=tools)
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label

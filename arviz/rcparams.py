@@ -88,6 +88,14 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.bokeh.tools": (
+        "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
+        lambda x: x,
+    ),
+    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
+    "plot.bokeh.figure.dpi": (60, _validate_positive_int),
+    "plot.bokeh.figure.width": (500, _validate_positive_int),
+    "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",

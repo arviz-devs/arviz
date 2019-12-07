@@ -8,6 +8,7 @@ from ...plot_utils import (
     _create_axes_grid,
     get_bins,
 )
+from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 

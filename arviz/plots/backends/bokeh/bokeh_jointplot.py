@@ -6,6 +6,7 @@ import numpy as np
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
+from ....rcparams import rcParams
 
 
 def _plot_joint(
@@ -22,37 +23,26 @@ def _plot_joint(
     show,
 ):
     if ax is None:
-
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
-        )
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        dpi = rcParams["plot.bokeh.figure.dpi"]
         axjoin = bkp.figure(
-            width=int(figsize[0] * 90 * 0.8),
-            height=int(figsize[1] * 90 * 0.8),
-            output_backend="webgl",
+            width=int(figsize[0] * dpi * 0.8),
+            height=int(figsize[1] * dpi * 0.8),
+            output_backend=output_backend,
             tools=tools,
         )
         ax_hist_x = bkp.figure(
-            width=int(figsize[0] * 90 * 0.8),
-            height=int(figsize[1] * 90 * 0.2),
-            output_backend="webgl",
+            width=int(figsize[0] * dpi * 0.8),
+            height=int(figsize[1] * dpi * 0.2),
+            output_backend=output_backend,
             tools=tools,
             x_range=axjoin.x_range,
         )
         ax_hist_y = bkp.figure(
-            width=int(figsize[0] * 90 * 0.2),
-            height=int(figsize[1] * 90 * 0.8),
-            output_backend="webgl",
+            width=int(figsize[0] * dpi * 0.2),
+            height=int(figsize[1] * dpi * 0.8),
+            output_backend=output_backend,
             tools=tools,
             y_range=axjoin.y_range,
         )

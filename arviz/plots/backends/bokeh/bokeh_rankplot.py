@@ -11,6 +11,7 @@ from ...plot_utils import (
     _create_axes_grid,
     make_label,
 )
+from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 

@@ -6,6 +6,7 @@ from bokeh.layouts import gridplot
 
 from ....stats import autocorr
 from ...plot_utils import make_label
+from ....rcparams import rcParams
 
 
 def _plot_autocorr(

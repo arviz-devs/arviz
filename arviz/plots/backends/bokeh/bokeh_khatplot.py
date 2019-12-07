@@ -6,6 +6,7 @@ from bokeh.models import ColumnDataSource, Span
 
 import numpy as np
 
+from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 
@@ -24,23 +25,13 @@ def _plot_khat(
     show,
 ):
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
-        )
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        dpi = rcParams["plot.bokeh.figure.dpi"]
         ax = bkp.figure(
-            width=int(figsize[0] * 90),
-            height=int(figsize[1] * 90),
-            output_backend="webgl",
+            width=int(figsize[0] * dpi),
+            height=int(figsize[1] * dpi),
+            output_backend=output_backend,
             tools=tools,
         )
 

@@ -4,6 +4,7 @@ import numpy as np
 
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
+from ....rcparams import rcParams
 
 
 def _plot_dist_bokeh(
@@ -31,20 +32,14 @@ def _plot_dist_bokeh(
 ):
 
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        ax = bkp.figure(
+            width=rcParams["plot.bokeh.figure.width"],
+            height=rcParams["plot.bokeh.figure.height"],
+            output_backend=output_backend,
+            tools=tools,
         )
-        ax = bkp.figure(width=500, height=500, output_backend="webgl", tools=tools)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"

@@ -2,6 +2,8 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
+from ....rcparams import rcParams
+
 
 def _compareplot(
     ax,
@@ -20,21 +22,14 @@ def _compareplot(
 ):
 
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
-        )
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        dpi = rcParams["plot.bokeh.figure.dpi"]
         ax = bkp.figure(
-            width=figsize[0] * 90, height=figsize[1] * 90, output_backend="webgl", tools=tools
+            width=figsize[0] * dpi,
+            height=figsize[1] * dpi,
+            output_backend=output_backend,
+            tools=tools,
         )
 
     yticks_pos = list(yticks_pos)
