@@ -1,4 +1,5 @@
 """Joint scatter plot of two variables."""
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords
 from ..utils import _var_names
@@ -160,6 +161,7 @@ def plot_joint(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_jointplot import _plot_joint
 
         plot_joint_kwargs.pop("ax_labelsize")

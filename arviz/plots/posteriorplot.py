@@ -1,6 +1,7 @@
 """Plot posterior densities."""
 from typing import Optional
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     xarray_var_iter,
@@ -206,6 +207,7 @@ def plot_posterior(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_posteriorplot import _plot_posterior
 
         posteriorplot_kwargs.pop("xt_labelsize")

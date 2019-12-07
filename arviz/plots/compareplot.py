@@ -1,5 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
+
+from .backends import check_bokeh_version
 from .plot_utils import _scale_fig_size
 
 
@@ -124,6 +126,7 @@ def plot_compare(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_compareplot import _compareplot
 
         compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")

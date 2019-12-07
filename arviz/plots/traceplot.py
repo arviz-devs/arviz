@@ -1,4 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
+from .backends import check_bokeh_version
 
 
 def plot_trace(
@@ -131,12 +132,7 @@ def plot_trace(
             trace_kwargs=trace_kwargs,
         )
     elif backend.lower() == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        check_bokeh_version()
         from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
 
         axes = _plot_trace_bokeh(

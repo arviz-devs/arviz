@@ -1,4 +1,5 @@
 """Forest plot."""
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import get_coords
 from ..utils import _var_names
@@ -171,6 +172,7 @@ def plot_forest(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_forestplot import _plot_forest
 
         plot_forest_kwargs["show"] = show

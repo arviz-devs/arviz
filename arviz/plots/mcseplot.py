@@ -2,6 +2,7 @@
 import numpy as np
 import xarray as xr
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from ..stats import mcse
 from .plot_utils import (
@@ -177,6 +178,7 @@ def plot_mcse(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_mcseplot import _plot_mcse
 
         mcse_kwargs.pop("kwargs")

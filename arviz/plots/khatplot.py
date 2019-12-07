@@ -5,6 +5,7 @@ import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
 
+from .backends import check_bokeh_version
 from .plot_utils import (
     _scale_fig_size,
     get_coords,
@@ -216,6 +217,7 @@ def plot_khat(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_khatplot import _plot_khat
 
         plot_khat_kwargs.pop("hover_label")

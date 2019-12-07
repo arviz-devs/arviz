@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
+from .backends import check_bokeh_version
 from ..data import convert_to_inference_data
 from .plot_utils import (
     get_coords,
@@ -188,6 +189,7 @@ def plot_elpd(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_elpdplot import _plot_elpd
 
         elpd_plot_kwargs.pop("legend")

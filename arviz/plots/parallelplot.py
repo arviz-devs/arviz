@@ -1,8 +1,8 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import numpy as np
-
-
 from scipy.stats.mstats import rankdata
+
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names, _numba_var
@@ -135,6 +135,7 @@ def plot_parallel(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_parallelplot import _plot_parallel
 
         parallel_kwargs["show"] = show

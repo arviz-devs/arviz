@@ -4,6 +4,7 @@ import platform
 import logging
 import numpy as np
 
+from .backends import check_bokeh_version
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
@@ -286,6 +287,7 @@ def plot_ppc(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_ppcplot import _plot_ppc
 
         ppcplot_kwargs.pop("animated")

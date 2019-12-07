@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
 
+from .backends import check_bokeh_version
 from ..utils import conditional_jit
 from ..rcparams import rcParams
 
@@ -208,6 +209,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
+        check_bokeh_version()
         from bokeh.plotting import figure
 
         figsize = kwargs.get("figsize", (int(rows * 0.5 * 12 / cols), 12))

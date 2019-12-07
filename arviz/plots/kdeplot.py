@@ -5,6 +5,8 @@ import numpy as np
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
+
+from .backends import check_bokeh_version
 from ..data import InferenceData
 from ..utils import conditional_jit, _stack
 from ..stats.stats_utils import histogram
@@ -210,6 +212,7 @@ def plot_kde(
 
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
+        check_bokeh_version()
         try:
             import bokeh
 

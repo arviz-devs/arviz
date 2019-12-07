@@ -3,6 +3,7 @@ import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
+from .backends import check_bokeh_version
 from ..stats import hpd
 
 
@@ -98,6 +99,7 @@ def plot_hpd(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_hpdplot import _plot_hpdplot
 
         hpdplot_kwargs["show"] = show

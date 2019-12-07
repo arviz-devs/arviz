@@ -1,5 +1,6 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
+from .backends import check_bokeh_version
 from .plot_utils import get_bins
 
 
@@ -186,12 +187,7 @@ def plot_dist(
 
         ax = _plot_dist_mpl(**dist_plot_args)
     elif backend == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        check_bokeh_version()
         from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
         dist_plot_args.pop("textsize")

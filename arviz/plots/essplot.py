@@ -2,7 +2,7 @@
 import numpy as np
 import xarray as xr
 
-
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from ..stats import ess
 from .plot_utils import (
@@ -316,6 +316,7 @@ def plot_ess(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_essplot import _plot_ess
 
         essplot_kwargs["show"] = show

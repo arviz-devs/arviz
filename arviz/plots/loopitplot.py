@@ -4,6 +4,7 @@ import scipy.stats as stats
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
+from .backends import check_bokeh_version
 from ..stats import loo_pit as _loo_pit
 from .plot_utils import _scale_fig_size
 from .kdeplot import _fast_kde
@@ -231,6 +232,7 @@ def plot_loo_pit(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_loopitplot import _plot_loo_pit
 
         if (

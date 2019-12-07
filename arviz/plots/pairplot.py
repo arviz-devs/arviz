@@ -2,6 +2,7 @@
 import warnings
 import numpy as np
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset, convert_to_inference_data
 from .plot_utils import xarray_to_ndarray, get_coords
 from ..utils import _var_names
@@ -186,6 +187,7 @@ def plot_pair(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_pairplot import _plot_pair
 
         pairplot_kwargs.pop("gridsize", None)

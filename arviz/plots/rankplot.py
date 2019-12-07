@@ -2,6 +2,7 @@
 from itertools import cycle
 import matplotlib.pyplot as plt
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -156,6 +157,7 @@ def plot_rank(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_rankplot import _plot_rank
 
         rankplot_kwargs.pop("ax_labelsize")

@@ -3,6 +3,7 @@ from itertools import cycle
 from matplotlib.pyplot import rcParams
 import numpy as np
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size
 
@@ -127,6 +128,7 @@ def plot_energy(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_energyplot import _plot_energy
 
         plot_energy_kwargs.pop("xt_labelsize")

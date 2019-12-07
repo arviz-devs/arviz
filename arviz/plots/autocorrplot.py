@@ -1,6 +1,7 @@
 """Autocorrelation plot of data."""
 import numpy as np
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -133,6 +134,7 @@ def plot_autocorr(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_autocorrplot import _plot_autocorr
 
         autocorr_plot_args.pop("xt_labelsize")
