@@ -214,18 +214,12 @@ def plot_kde(
     if backend is None or backend.lower() in ("mpl", "matplotlib"):
         from .backends.matplotlib.mpl_kdeplot import _plot_kde_mpl
 
-        kde_plot_args["show"] = show
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
         check_bokeh_version()
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
         from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
 
+        kde_plot_args["show"] = show
         kde_plot_args.pop("textsize")
         ax = _plot_kde_bokeh(**kde_plot_args)
     else:
