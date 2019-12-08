@@ -635,7 +635,9 @@ def get_plotting_method(plot_name, plot_module, backend):
         backend = _backend[backend]
     except KeyError:
         raise KeyError(
-            "Backend {} is not implemented. Try backend in {}".format(backend, set(_backend.values))
+            "Backend {} is not implemented. Try backend in {}".format(
+                backend, set(_backend.values())
+            )
         )
 
     if backend == "bokeh":
