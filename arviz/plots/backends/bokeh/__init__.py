@@ -32,6 +32,7 @@ def copy_docstring(lib, function):
 
 
 def check_bokeh_version():
+    """Check minimum bokeh version."""
     try:
         import bokeh
 
