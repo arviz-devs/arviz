@@ -69,6 +69,7 @@ def plot_pair(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     show: bool, optional
         If True, call bokeh.plotting.show.
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
