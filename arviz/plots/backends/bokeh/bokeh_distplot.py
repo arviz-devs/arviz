@@ -29,6 +29,7 @@ def _plot_dist_bokeh(
     hist_kwargs=None,
     ax=None,
     show=True,
+    **kwargs
 ):
 
     if ax is None:

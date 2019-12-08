@@ -190,6 +190,6 @@ def plot_dist(
         **kwargs,
     )
 
-    method = get_plotting_method("plot_dist", "distplot", "bokeh")
-    ax = method(dist_plot_args)
+    method = get_plotting_method("plot_dist", "distplot", backend)
+    ax = method(**dist_plot_args)
     return ax
