@@ -643,10 +643,7 @@ def get_plotting_method(plot_name, plot_module, backend):
         except (ImportError, AssertionError):
             raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
 
-    # module = importlib.import_module("arviz.plots.backends.bokeh.bokeh_distplot")
     module = importlib.import_module("arviz.plots.backends.{backend}.{backend}_{plot_module}".format(backend=backend, plot_module=plot_module))
-    # module = importlib.import_module("arviz.plots.backends.{backend}.{backend}_distplot".format(backend=backend))
     plotting_method = getattr(module, "_{plot_name}_{backend}".format(plot_name=plot_name, backend=backend))
-    # plotting_method = getattr(module, "_{plot_name}_{backend")
 
     return plotting_method
