@@ -12,7 +12,7 @@ from ..plots.plot_utils import (
     get_coords,
     filter_plotters_list,
     format_sig_figs,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..rcparams import rc_context
 
@@ -198,4 +198,5 @@ def test_bokeh_import():
     method = get_plotting_method("plot_dist", "distplot", "bokeh")
 
     from arviz.plots.backends.bokeh.bokeh_distplot import _plot_dist_bokeh
+
     assert method is _plot_dist_bokeh
