@@ -59,14 +59,10 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
-    "bokeh_gallery",
 ]
 
 # ipython directive configuration
 ipython_warning_is_error = False
-
-# bokeh extensions configuration
-bokeh_gallery_dir = os.path.join("..", "examples", "bokeh")
 
 # Copy plot options from Seaborn
 # Include the example source for plots in API docs

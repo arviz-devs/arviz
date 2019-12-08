@@ -1,6 +1,0 @@
-{
-  "details": [
-    { "path": "examples/bokeh/plot_elpd_bokeh.py",    "name": "plot_elpd_bokeh"  },
-    { "path": "examples/bokeh/plot_autocorr_bokeh.py",    "name": "plot_autocorr_bokeh"  }
-  ]
-}

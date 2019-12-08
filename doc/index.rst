@@ -102,64 +102,64 @@ Here is the citation in BibTeX format
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/plot_pair.html">
+            <a href="examples/matplotlib/mpl_plot_pair.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_pair_thumb.png">
+                <img src="_static/mpl_plot_pair_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_forest.html">
+            <a href="examples/matplotlib/mpl_plot_forest.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_forest_thumb.png">
+                <img src="_static/mpl_plot_forest_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_density.html">
+            <a href="examples/matplotlib/mpl_plot_density.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_density_thumb.png">
+                <img src="_static/mpl_plot_density_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_energy.html">
+            <a href="examples/matplotlib/mpl_plot_energy.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_energy_thumb.png">
+                <img src="_static/mpl_plot_energy_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_posterior.html">
+            <a href="examples/matplotlib/mpl_plot_posterior.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_posterior_thumb.png">
+                <img src="_static/mpl_plot_posterior_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_kde_2d.html">
+            <a href="examples/matplotlib/mpl_plot_kde_2d.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_kde_2d_thumb.png">
+                <img src="_static/mpl_plot_kde_2d_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_forest_ridge.html">
+            <a href="examples/matplotlib/mpl_plot_forest_ridge.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_forest_ridge_thumb.png">
+                <img src="_static/mpl_plot_forest_ridge_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_parallel.html">
+            <a href="examples/matplotlib/mpl_plot_parallel.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_parallel_thumb.png">
+                <img src="_static/mpl_plot_parallel_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_trace.html">
+            <a href="examples/matplotlib/mpl_plot_trace.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_trace_thumb.png">
+                <img src="_static/mpl_plot_trace_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_joint.html">
+            <a href="examples/matplotlib/mpl_plot_joint.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_joint_thumb.png">
+                <img src="_static/mpl_plot_joint_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_ppc.html">
+            <a href="examples/matplotlib/mpl_plot_ppc.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_ppc_thumb.png">
+                <img src="_static/mpl_plot_ppc_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_autocorr.html">
+            <a href="examples/matplotlib/mpl_plot_autocorr.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_autocorr_thumb.png">
+                <img src="_static/mpl_plot_autocorr_thumb.png">
             </div>
             </a>
         </div>
