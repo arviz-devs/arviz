@@ -1,3 +1,9 @@
+"""
+ELPD Plot
+=========
+
+_thumb: .8, .8
+"""
 import arviz as az
 
 d1 = az.load_arviz_data("centered_eight")

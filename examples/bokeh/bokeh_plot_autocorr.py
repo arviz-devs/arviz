@@ -1,6 +1,6 @@
 """
-ELPD Plot
-=========
+Autocorrelation Plot
+====================
 
 _thumb: .8, .8
 """
