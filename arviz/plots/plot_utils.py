@@ -1,6 +1,7 @@
 """Utilities for plotting."""
 import warnings
 from itertools import product, tee
+import importlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +11,8 @@ import xarray as xr
 from .backends import check_bokeh_version
 from ..utils import conditional_jit
 from ..rcparams import rcParams
+
+from . import backends
 
 
 def make_2d(ary):
@@ -622,3 +625,28 @@ def filter_plotters_list(plotters, plot_kind):
         )
         return plotters[:max_plots]
     return plotters
+
+
+def get_plotting_method(plot_name, plot_module, backend):
+    """Returns plotting function for correct backend"""
+    _backend = {"mpl":"matplotlib", "bokeh":"bokeh", "matplotlib":"matplotlib"}
+
+    try:
+        backend = _backend[backend]
+    except KeyError:
+        raise KeyError("Backend {} is not implemented. Try backend in {}".format(backend, set(_backend.values)))
+
+    if backend == "bokeh":
+        try:
+            import bokeh
+            assert bokeh.__version__ >= "1.4.0"
+        except (ImportError, AssertionError):
+            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+
+    # module = importlib.import_module("arviz.plots.backends.bokeh.bokeh_distplot")
+    module = importlib.import_module("arviz.plots.backends.{backend}.{backend}_{plot_module}".format(backend=backend, plot_module=plot_module))
+    # module = importlib.import_module("arviz.plots.backends.{backend}.{backend}_distplot".format(backend=backend))
+    plotting_method = getattr(module, "_{plot_name}_{backend}".format(plot_name=plot_name, backend=backend))
+    # plotting_method = getattr(module, "_{plot_name}_{backend")
+
+    return plotting_method

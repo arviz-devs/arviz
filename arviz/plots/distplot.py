@@ -1,7 +1,11 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
+<<<<<<< HEAD
 from .backends import check_bokeh_version
 from .plot_utils import get_bins
+=======
+from .plot_utils import get_bins, get_plotting_method
+>>>>>>> Add find plotting method
 
 
 def plot_dist(
@@ -186,19 +190,6 @@ def plot_dist(
         **kwargs,
     )
 
-    if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.mpl_distplot import _plot_dist_mpl
-
-        ax = _plot_dist_mpl(**dist_plot_args)
-    elif backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
-
-        dist_plot_args.pop("textsize")
-        dist_plot_args["show"] = show
-        ax = _plot_dist_bokeh(**dist_plot_args)
-    else:
-        raise NotImplementedError(
-            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
-        )
+    method = get_plotting_method("plot_dist", "distplot", "bokeh")
+    ax = method(dist_plot_args)
     return ax
