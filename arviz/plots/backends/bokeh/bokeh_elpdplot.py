@@ -26,21 +26,6 @@ def _plot_elpd(
     threshold,
     show,
 ):
-    tools = ",".join(
-        [
-            "pan",
-            "wheel_zoom",
-            "box_zoom",
-            "lasso_select",
-            "poly_select",
-            "undo",
-            "redo",
-            "reset",
-            "save",
-            "hover",
-        ]
-    )
-
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
@@ -48,10 +33,12 @@ def _plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
+            tools = rcParams["plot.bokeh.tools"]
+            output_backend = rcParams["plot.bokeh.output_backend"]
             ax = bkp.figure(
                 width=int(figsize[0] * 60),
                 height=int(figsize[1] * 60),
-                output_backend="webgl",
+                output_backend=output_backend,
                 tools=tools,
             )
 
@@ -83,15 +70,18 @@ def _plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
+            tools = rcParams["plot.bokeh.tools"]
+            output_backend = rcParams["plot.bokeh.output_backend"]
+            dpi = rcParams["plot.bokeh.figure.dpi"]
             ax = []
             for row in range(numvars - 1):
                 ax_row = []
                 for col in range(numvars - 1):
                     if row == 0 and col == 0:
                         ax_first = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * 60),
-                            height=int(figsize[1] / (numvars - 1) * 60),
-                            output_backend="webgl",
+                            width=int(figsize[0] / (numvars - 1) * dpi),
+                            height=int(figsize[1] / (numvars - 1) * dpi),
+                            output_backend=output_backend,
                             tools=tools,
                         )
                         ax_row.append(ax_first)
@@ -100,11 +90,11 @@ def _plot_elpd(
                     else:
                         ax_row.append(
                             bkp.figure(
-                                width=int(figsize[0] / (numvars - 1) * 60),
-                                height=int(figsize[1] / (numvars - 1) * 60),
+                                width=int(figsize[0] / (numvars - 1) * dpi),
+                                height=int(figsize[1] / (numvars - 1) * dpi),
                                 x_range=ax_first.x_range,
                                 y_range=ax_first.y_range,
-                                output_backend="webgl",
+                                output_backend=output_backend,
                                 tools=tools,
                             )
                         )

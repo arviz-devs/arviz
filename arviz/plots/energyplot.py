@@ -3,6 +3,7 @@ from itertools import cycle
 from matplotlib.pyplot import rcParams
 import numpy as np
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size
 
@@ -56,12 +57,16 @@ def plot_energy(
         Additional keywords passed to `arviz.plot_kde` (to control the shade)
     plot_kwargs : dicts, optional
         Additional keywords passed to `arviz.plot_kde` or `plt.hist` (if type='hist')
-    ax : axes
-        Matplotlib axes.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -127,6 +132,7 @@ def plot_energy(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_energyplot import _plot_energy
 
         plot_energy_kwargs.pop("xt_labelsize")

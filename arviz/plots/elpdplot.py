@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
+from .backends import check_bokeh_version
 from ..data import convert_to_inference_data
 from .plot_utils import (
     get_coords,
@@ -58,7 +59,7 @@ def plot_elpd(
         If some elpd difference is larger than `threshold * elpd.std()`, show its label. If
         `None`, no observations will be highlighted.
     ax: axes, optional
-        Matplotlib axes
+        Matplotlib axes or bokeh figures.
     ic : str, optional
         Information Criterion (WAIC or LOO) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``. Only taken
@@ -68,10 +69,16 @@ def plot_elpd(
         into account when input is InferenceData.
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -188,6 +195,7 @@ def plot_elpd(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_elpdplot import _plot_elpd
 
         elpd_plot_kwargs.pop("legend")

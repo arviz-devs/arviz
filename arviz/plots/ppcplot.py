@@ -4,6 +4,7 @@ import platform
 import logging
 import numpy as np
 
+from .backends import check_bokeh_version
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
@@ -99,12 +100,16 @@ def plot_ppc(
         Keywords passed to `animation.FuncAnimation`.
     legend : bool
         Add legend to figure. By default True.
-    ax : axes
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axes : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -286,6 +291,7 @@ def plot_ppc(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_ppcplot import _plot_ppc
 
         ppcplot_kwargs.pop("animated")

@@ -14,6 +14,7 @@ from ...plot_utils import (
     get_coords,
     filter_plotters_list,
 )
+from ....rcparams import rcParams
 
 
 def _plot_ess(

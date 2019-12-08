@@ -2,33 +2,29 @@
 from itertools import cycle
 
 import bokeh.plotting as bkp
-from matplotlib.pyplot import rcParams
+from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
+
+from ....rcparams import rcParams
 
 
 def _plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        ax = bkp.figure(
+            width=rcParams["plot.bokeh.figure.width"],
+            height=rcParams["plot.bokeh.figure.height"],
+            output_backend=output_backend,
+            tools=tools,
         )
-        ax = bkp.figure(width=500, height=300, output_backend="webgl", tools=tools)
 
     color = plot_kwargs.pop("color")
     if len(color) == 2 and color[0] == "C":
         color = [
             prop
             for _, prop in zip(
-                range(int(color[1:])), cycle(rcParams["axes.prop_cycle"].by_key()["color"])
+                range(int(color[1:])), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"])
             )
         ][-1]
     plot_kwargs.setdefault("line_color", color)
@@ -39,7 +35,7 @@ def _plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
         color = [
             prop
             for _, prop in zip(
-                range(int(color[1:])), cycle(rcParams["axes.prop_cycle"].by_key()["color"])
+                range(int(color[1:])), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"])
             )
         ][-1]
     fill_kwargs.setdefault("fill_color", color)

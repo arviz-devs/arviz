@@ -1,8 +1,8 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import numpy as np
-
-
 from scipy.stats.mstats import rankdata
+
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
 from ..utils import _var_names, _numba_var
@@ -53,15 +53,19 @@ def plot_parallel(
     shadend : float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
-    ax : axes
-        Matplotlib axes.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     norm_method : str
         Method for normalizing the data. Methods include normal, minmax and rank.
         Defaults to none.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -135,6 +139,7 @@ def plot_parallel(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_parallelplot import _plot_parallel
 
         parallel_kwargs["show"] = show

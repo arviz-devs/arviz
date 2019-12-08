@@ -4,6 +4,7 @@ import scipy.stats as stats
 from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
+from .backends import check_bokeh_version
 from ..stats import loo_pit as _loo_pit
 from .plot_utils import _scale_fig_size
 from .kdeplot import _fast_kde
@@ -72,8 +73,8 @@ def plot_loo_pit(
         This will ensure that LOO-PIT kde and uniform kde have different default colors.
     legend : bool, optional
         Show the legend of the figure.
-    ax : axes, optional
-        Matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
         Additional keywords passed to ax.plot for LOO-PIT line (kde or ECDF)
     plot_unif_kwargs : dict, optional
@@ -83,11 +84,14 @@ def plot_loo_pit(
         Additional keywords passed to az.plot_hpd
     fill_kwargs : dict, optional
         Additional kwargs passed to ax.fill_between
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axes : axes
-        Matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     References
     ----------
@@ -231,6 +235,7 @@ def plot_loo_pit(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_loopitplot import _plot_loo_pit
 
         if (

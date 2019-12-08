@@ -2,7 +2,7 @@
 import numpy as np
 import xarray as xr
 
-
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from ..stats import ess
 from .plot_utils import (
@@ -16,8 +16,6 @@ from ..utils import _var_names
 
 
 def plot_ess(
-    # disable black until #763 is released
-    # fmt: off
     idata,
     var_names=None,
     kind="local",
@@ -38,7 +36,6 @@ def plot_ess(
     backend=None,
     show=True,
     **kwargs
-    # fmt: on
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
@@ -71,8 +68,8 @@ def plot_ess(
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess : int
         Minimum number of ESS desired.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     extra_kwargs : dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
@@ -84,12 +81,16 @@ def plot_ess(
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
     rug_kwargs : dict
         kwargs passed to rug plot.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     References
     ----------
@@ -316,6 +317,7 @@ def plot_ess(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_essplot import _plot_ess
 
         essplot_kwargs["show"] = show

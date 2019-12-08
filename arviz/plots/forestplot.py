@@ -1,4 +1,5 @@
 """Forest plot."""
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import get_coords
 from ..utils import _var_names
@@ -86,12 +87,16 @@ def plot_forest(
         histograms. To override this use "hist" to plot histograms and "density" for KDEs
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    gridspec : matplotlib GridSpec
+    gridspec : matplotlib GridSpec or bokeh figures
 
     Examples
     --------
@@ -171,6 +176,7 @@ def plot_forest(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_forestplot import _plot_forest
 
         plot_forest_kwargs["show"] = show

@@ -1,4 +1,5 @@
 """Plot posterior traces as violin plot."""
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, xarray_var_iter, filter_plotters_list, default_grid
 from ..utils import _var_names
@@ -51,13 +52,18 @@ def plot_violin(
         based on figsize.
     sharey : bool
         Defaults to True, violinplots share a common y-axis scale.
-    ax : matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     kwargs_shade : dicts, optional
-        Additional keywords passed to `fill_between`, or `barh` to control the shade
+        Additional keywords passed to `fill_between`, or `barh` to control the shade.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
     """
     data = convert_to_dataset(data, group="posterior")
     var_names = _var_names(var_names, data)
@@ -94,6 +100,7 @@ def plot_violin(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_violinplot import _plot_violin
 
         violinplot_kwargs.pop("ax_labelsize")

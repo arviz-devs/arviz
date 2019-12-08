@@ -15,8 +15,8 @@ import numpy as np
 from ....data import convert_to_dataset
 from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
-from ....utils import _var_names
 from ....rcparams import rcParams
+from ....utils import _var_names
 
 
 def _plot_trace_bokeh(
@@ -38,91 +38,6 @@ def _plot_trace_bokeh(
     backend_kwargs=None,
     show=True,
 ):
-    """Plot distribution (histogram or kernel density estimates) and sampled values.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_dataset for details
-    var_names : string, or list of strings
-        One or more variables to be plotted.
-    coords : mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    divergences : {"bottom", "top", None, False}
-        NOT IMPLEMENTED
-        Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
-    figsize : figure size tuple
-        If None, size is (12, variables * 2)
-    rug : bool
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
-        variables.
-    lines : tuple
-        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
-        vertical lines on the density and horizontal lines on the trace.
-    compact : bool
-        Plot multidimensional variables in a single plot.
-    combined : bool
-        Flag for combining multiple chains into a single line. If False (default), chains will be
-        plotted separately.
-    legend : bool
-        Add a legend to the figure with the chain color code.
-    plot_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    fill_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    rug_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    hist_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
-    trace_kwargs : dict
-        Extra keyword arguments passed to `bokeh.plotting.lines`
-    backend_kwargs : dict
-        Extra keyword arguments passed to `bokeh.plotting.figure`
-    show : bool
-        Call `bokeh.plotting.show` for gridded plots `bokeh.layouts.gridplot(axes.tolist())`
-    Returns
-    -------
-    ndarray
-        axes (bokeh figures)
-
-
-    Examples
-    --------
-    Plot a subset variables
-
-    .. plot::
-        :context: close-figs
-
-        >>> import arviz as az
-        >>> data = az.load_arviz_data('non_centered_eight')
-        >>> coords = {'school': ['Choate', 'Lawrenceville']}
-        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
-
-    Show all dimensions of multidimensional variables in the same plot
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_trace(data, compact=True)
-
-    Combine all chains into one distribution
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
-
-
-    Plot reference lines against distribution and trace
-
-    .. plot::
-        :context: close-figs
-
-        >>> lines = (('theta_t',{'school': "Choate"}, [-1]),)
-        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
-
-    """
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
@@ -188,7 +103,6 @@ def _plot_trace_bokeh(
     hist_kwargs.setdefault("alpha", 0.35)
 
     figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
-    figsize = int(figsize[0] * 90 // 2), int(figsize[1] * 90 // len(plotters))
 
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)
@@ -196,25 +110,12 @@ def _plot_trace_bokeh(
     if backend_kwargs is None:
         backend_kwargs = dict()
 
+    backend_kwargs.setdefault("tools", rcParams["plot.bokeh.tools"])
+    backend_kwargs.setdefault("output_backend", rcParams["plot.bokeh.output_backend"])
     backend_kwargs.setdefault(
-        "tools",
-        ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
-        ),
+        "height", int(figsize[1] * rcParams["plot.bokeh.figure.dpi"] // len(plotters))
     )
-    backend_kwargs.setdefault("output_backend", "webgl")
-    backend_kwargs.setdefault("height", figsize[1])
-    backend_kwargs.setdefault("width", figsize[0])
+    backend_kwargs.setdefault("width", int(figsize[0] * rcParams["plot.bokeh.figure.dpi"] // 2))
 
     axes = []
     for i in range(len(plotters)):

@@ -1,4 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
+from .backends import check_bokeh_version
 
 
 def plot_trace(
@@ -19,6 +20,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
+    show=True,
     **kwargs
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
@@ -65,12 +67,14 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
-    backend : str {"matplotlib", "bokeh"}
-        Select backend engine.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    axes : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples
@@ -131,12 +135,7 @@ def plot_trace(
             trace_kwargs=trace_kwargs,
         )
     elif backend.lower() == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        check_bokeh_version()
         from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
 
         axes = _plot_trace_bokeh(
@@ -155,6 +154,7 @@ def plot_trace(
             rug_kwargs=rug_kwargs,
             hist_kwargs=hist_kwargs,
             trace_kwargs=trace_kwargs,
+            show=show,
             **kwargs,
         )
     else:

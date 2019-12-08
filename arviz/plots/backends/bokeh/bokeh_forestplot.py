@@ -11,11 +11,12 @@ from bokeh.models.tickers import FixedTicker
 from bokeh.layouts import gridplot
 import matplotlib.pyplot as plt
 
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
+from ...kdeplot import _fast_kde
+from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
 from ....stats.stats_utils import histogram
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
-from ...kdeplot import _fast_kde
 from ....utils import conditional_jit
 
 
@@ -66,35 +67,26 @@ def _plot_forest(
         markersize = auto_markersize
 
     if ax is None:
-        tools = ",".join(
-            [
-                "pan",
-                "wheel_zoom",
-                "box_zoom",
-                "lasso_select",
-                "poly_select",
-                "undo",
-                "redo",
-                "reset",
-                "save,hover",
-            ]
-        )
-
+        tools = rcParams["plot.bokeh.tools"]
+        output_backend = rcParams["plot.bokeh.output_backend"]
+        dpi = rcParams["plot.bokeh.figure.dpi"]
         axes = []
         for i, width_r in zip(range(ncols), width_ratios):
             if i == 0:
                 ax = bkp.figure(
-                    height=int(figsize[0]) * 80,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * 100),
-                    output_backend="webgl",
+                    height=int(figsize[0]) * dpi,
+                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
+                    output_backend=output_backend,
                     tools=tools,
                 )
                 _y_range = ax.y_range
             else:
                 ax = bkp.figure(
-                    height=figsize[0] * 80,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * 100),
+                    height=figsize[0] * dpi,
+                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
                     y_range=_y_range,
+                    output_backend=output_backend,
+                    tools=tools,
                 )
             axes.append(ax)
     else:

@@ -3,6 +3,7 @@ import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
+from .backends import check_bokeh_version
 from ..stats import hpd
 
 
@@ -47,11 +48,16 @@ def plot_hpd(
         Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
     plot_kwargs : dict
         Keywords passed to HPD limits
-    ax : matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
     """
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -98,6 +104,7 @@ def plot_hpd(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_hpdplot import _plot_hpdplot
 
         hpdplot_kwargs["show"] = show

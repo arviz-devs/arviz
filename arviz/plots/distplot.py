@@ -1,5 +1,6 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
+from .backends import check_bokeh_version
 from .plot_utils import get_bins
 
 
@@ -26,6 +27,7 @@ def plot_dist(
     hist_kwargs=None,
     ax=None,
     backend=None,
+    show=True,
     **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
@@ -83,13 +85,16 @@ def plot_dist(
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
-    ax : matplotlib axes
-    backend : str {"matplotlib", "bokeh"}
-        Select backend engine.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -186,15 +191,11 @@ def plot_dist(
 
         ax = _plot_dist_mpl(**dist_plot_args)
     elif backend == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        check_bokeh_version()
         from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
 
         dist_plot_args.pop("textsize")
+        dist_plot_args["show"] = show
         ax = _plot_dist_bokeh(**dist_plot_args)
     else:
         raise NotImplementedError(

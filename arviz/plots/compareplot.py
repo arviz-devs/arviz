@@ -1,5 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
+
+from .backends import check_bokeh_version
 from .plot_utils import _scale_fig_size
 
 
@@ -51,12 +53,16 @@ def plot_compare(
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
-    ax : axes, optional
-        Matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples
@@ -124,6 +130,7 @@ def plot_compare(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_compareplot import _compareplot
 
         compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")

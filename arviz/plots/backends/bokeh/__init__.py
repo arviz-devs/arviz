@@ -1,5 +1,6 @@
-# pylint: disable=no-member
+# pylint: disable=no-member,invalid-name,redefined-outer-name
 """Bokeh Plotting Backend."""
+import packaging
 
 
 def output_notebook(*args, **kwargs):
@@ -30,5 +31,23 @@ def copy_docstring(lib, function):
     return doc
 
 
+def check_bokeh_version():
+    """Check minimum bokeh version."""
+    try:
+        import bokeh
+
+        assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
+    except (ImportError, AssertionError):
+        raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+
+
+def ColumnDataSource(*args, **kwargs):
+    """Wrap bokeh.models.ColumnDataSource."""
+    from bokeh.models import ColumnDataSource
+
+    return ColumnDataSource(*args, **kwargs)
+
+
 output_notebook.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_notebook")
 output_file.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_file")
+ColumnDataSource.__doc__ += "\n\n" + copy_docstring("bokeh.models", "ColumnDataSource")

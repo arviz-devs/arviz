@@ -7,11 +7,11 @@ from bokeh.layouts import gridplot
 import numpy as np
 from scipy.stats import rankdata
 
-from ....stats.stats_utils import quantile as _quantile
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
 )
+from ....stats.stats_utils import quantile as _quantile
 
 
 def _plot_mcse(

@@ -5,6 +5,8 @@ import numpy as np
 from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
+
+from .backends import check_bokeh_version
 from ..data import InferenceData
 from ..utils import conditional_jit, _stack
 from ..stats.stats_utils import histogram
@@ -31,6 +33,7 @@ def plot_kde(
     ax=None,
     legend=True,
     backend=None,
+    show=True,
     **kwargs
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -79,15 +82,18 @@ def plot_kde(
         Keywords passed to ax.contourf. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
-    ax : matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     legend : bool
         Add legend to the figure. By default True.
-    backend : str {"matplotlib", "bokeh"}
-        Select backend engine.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : {matplotlib axes, bokeh figures}
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -210,14 +216,10 @@ def plot_kde(
 
         ax = _plot_kde_mpl(**kde_plot_args)
     elif backend == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+        check_bokeh_version()
         from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
 
+        kde_plot_args["show"] = show
         kde_plot_args.pop("textsize")
         ax = _plot_kde_bokeh(**kde_plot_args)
     else:

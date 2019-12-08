@@ -4,6 +4,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -83,10 +84,14 @@ def plot_density(
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
 
     Returns
     -------
-    ax : Matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples
@@ -233,6 +238,7 @@ def plot_density(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_densityplot import _plot_density
 
         plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")

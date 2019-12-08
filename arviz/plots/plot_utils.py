@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
 
+from .backends import check_bokeh_version
 from ..utils import conditional_jit
 from ..rcparams import rcParams
 
@@ -199,6 +200,8 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
         Number of rows
     cols : int
         Number of columns
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
 
     Returns
     -------
@@ -208,32 +211,24 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
+        check_bokeh_version()
         from bokeh.plotting import figure
 
-        figsize = kwargs.get("figsize", (int(rows * 0.5 * 12 / cols), 12))
-        figsize = int(figsize[0] * 60 // cols), int(figsize[1] * 60 // rows)
+        bokeh_dpi = rcParams["plot.bokeh.figure.dpi"]
+        bokeh_figsize = (
+            rcParams["plot.bokeh.figure.width"] / bokeh_dpi,
+            rcParams["plot.bokeh.figure.height"] / bokeh_dpi,
+        )
+        figsize = kwargs.get("figsize", bokeh_figsize)
+        figsize = int(figsize[0] * bokeh_dpi // cols), int(figsize[1] * bokeh_dpi // rows)
         bokeh_kwargs = {}
-        bokeh_kwargs["height"] = figsize[1]
         bokeh_kwargs["width"] = figsize[0]
+        bokeh_kwargs["height"] = figsize[1]
 
         bokeh_kwargs.setdefault(
-            "tools",
-            ",".join(
-                (
-                    "pan",
-                    "wheel_zoom",
-                    "box_zoom",
-                    "lasso_select",
-                    "poly_select",
-                    "undo",
-                    "redo",
-                    "reset",
-                    "save",
-                    "hover",
-                )
-            ),
+            "tools", rcParams["plot.bokeh.tools"],
         )
-        bokeh_kwargs.setdefault("output_backend", "webgl")
+        bokeh_kwargs.setdefault("output_backend", rcParams["plot.bokeh.output_backend"])
 
         sharex = kwargs.get("sharex", False)
         sharey = kwargs.get("sharey", False)

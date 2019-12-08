@@ -1,6 +1,7 @@
 """Plot posterior densities."""
 from typing import Optional
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     xarray_var_iter,
@@ -78,14 +79,18 @@ def plot_posterior(
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
-    ax : axes
-        Matplotlib axes. Defaults to None.
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -206,6 +211,7 @@ def plot_posterior(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_posteriorplot import _plot_posterior
 
         posteriorplot_kwargs.pop("xt_labelsize")

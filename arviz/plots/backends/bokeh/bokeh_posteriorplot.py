@@ -9,7 +9,6 @@ from bokeh.layouts import gridplot
 import numpy as np
 from scipy.stats import mode
 
-from ....stats import hpd
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     make_label,
@@ -17,6 +16,7 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
 )
+from ....stats import hpd
 
 
 def _plot_posterior(

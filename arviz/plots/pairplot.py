@@ -2,6 +2,7 @@
 import warnings
 import numpy as np
 
+from .backends import check_bokeh_version
 from ..data import convert_to_dataset, convert_to_inference_data
 from .plot_utils import xarray_to_ndarray, get_coords
 from ..utils import _var_names
@@ -58,15 +59,20 @@ def plot_pair(
     colorbar : bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
-    ax: axes
-        Matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
     divergences_kwargs : dicts, optional
         Additional keywords passed to ax.scatter for divergences
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot, az.plot_kde or ax.hexbin
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    show: bool, optional
+        If True, call bokeh.plotting.show.
+
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -186,6 +192,7 @@ def plot_pair(
     )
 
     if backend == "bokeh":
+        check_bokeh_version()
         from .backends.bokeh.bokeh_pairplot import _plot_pair
 
         pairplot_kwargs.pop("gridsize", None)
