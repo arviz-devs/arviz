@@ -124,9 +124,8 @@ def plot_rank(
     if bins is None:
         bins = _sturges_formula(posterior_data, mult=2)
 
+    rows, cols = default_grid(length_plotters)
     if axes is None:
-        rows, cols = default_grid(length_plotters)
-
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
             figsize, None, rows=rows, cols=cols
         )
