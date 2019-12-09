@@ -3,16 +3,15 @@ import warnings
 from itertools import product, tee
 import importlib
 
+import packaging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
 
-from .backends import check_bokeh_version
+
 from ..utils import conditional_jit
 from ..rcparams import rcParams
-
-from . import backends
 
 
 def make_2d(ary):
@@ -214,7 +213,6 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
-        check_bokeh_version()
         from bokeh.plotting import figure
 
         bokeh_dpi = rcParams["plot.bokeh.figure.dpi"]
@@ -648,8 +646,8 @@ def get_plotting_method(plot_name, plot_module, backend):
     if backend == "bokeh":
         try:
             import bokeh
+            assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
 
-            assert bokeh.__version__ >= "1.4.0"
         except (ImportError, AssertionError):
             raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
 
