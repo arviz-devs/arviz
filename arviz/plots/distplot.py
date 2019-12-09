@@ -184,6 +184,9 @@ def plot_dist(
         pcolormesh_kwargs=pcolormesh_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
+
+        # TODO: Change this to be a backend kwarg
+        show=show,
         **kwargs,
     )
 
