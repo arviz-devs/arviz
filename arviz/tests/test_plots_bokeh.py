@@ -74,6 +74,11 @@ def get_ax():
     return ax
 
 
+@pytest.fixture(scope="session")
+def backend_kwargs():
+    return {"show":False}
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -88,7 +93,7 @@ def get_ax():
 )
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
-    axes = plot_density(obj, backend="bokeh", **kwargs)
+    axes = plot_density(obj, backend="bokeh", show=False, **kwargs)
     assert axes.shape[0] >= 6
     assert axes.shape[0] >= 3
 

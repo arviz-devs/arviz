@@ -668,7 +668,7 @@ def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
         "arviz.plots.backends.{}".format(backend),
     )
 
-    default_backend_kwargs = getattr(default_backend_temp_module, "KWARG_DEFAULTS")
+    default_backend_kwargs = getattr(default_backend_temp_module, "BACKEND_KWARG_DEFAULTS")
 
     if user_backend_kwargs is None:
         user_backend_kwargs = {}

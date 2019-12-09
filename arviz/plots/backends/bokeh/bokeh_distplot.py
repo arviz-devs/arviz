@@ -84,6 +84,7 @@ def _plot_dist_bokeh(
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
+    # TODO: Temporary setting just to make sure tests work. This needs to be removed
     if show:
         bkp.show(ax, toolbar_location="above")
     return ax
