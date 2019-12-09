@@ -28,6 +28,8 @@ def _plot_dist_bokeh(
     pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
+
+    # Backend Kwargs
     show=True,
     **kwargs
 ):
@@ -76,6 +78,7 @@ def _plot_dist_bokeh(
             pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="bokeh",
+            # TODO: Revisit this when I refactor backend args for kde
             show=False,
         )
     else:

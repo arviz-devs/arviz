@@ -88,7 +88,7 @@ def get_ax():
 )
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
-    axes = plot_density(obj, backend="bokeh", show=False, **kwargs)
+    axes = plot_density(obj, backend="bokeh", **kwargs)
     assert axes.shape[0] >= 6
     assert axes.shape[0] >= 3
 
@@ -184,7 +184,7 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 
 @pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
 def test_plot_dist(continuous_model, kwargs):
-    axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
+    axes = plot_dist(continuous_model["x"], backend="bokeh", backend_kwargs={"show": False}, **kwargs)
     assert axes
 
 

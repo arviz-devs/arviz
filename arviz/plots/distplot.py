@@ -28,7 +28,7 @@ def plot_dist(
     hist_kwargs=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
@@ -90,8 +90,9 @@ def plot_dist(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend
 
     Returns
     -------
@@ -184,12 +185,9 @@ def plot_dist(
         pcolormesh_kwargs=pcolormesh_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
-
-        # TODO: Change this to be a backend kwarg
-        show=show,
         **kwargs,
     )
 
-    method = get_plotting_method("plot_dist", "distplot", backend)
-    ax = method(**dist_plot_args)
+    method, backend_kwargs = get_plotting_method("plot_dist", "distplot", backend, backend_kwargs)
+    ax = method(**dist_plot_args, **backend_kwargs)
     return ax

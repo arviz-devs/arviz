@@ -2,6 +2,8 @@
 """Bokeh Plotting Backend."""
 import packaging
 
+# Set plot generic bokeh keyword arg defaults if none provided
+KWARG_DEFAULTS = {"show": True}
 
 def output_notebook(*args, **kwargs):
     """Wrap bokeh.plotting.output_notebook."""

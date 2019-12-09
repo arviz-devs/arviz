@@ -625,7 +625,7 @@ def filter_plotters_list(plotters, plot_kind):
     return plotters
 
 
-def get_plotting_method(plot_name, plot_module, backend):
+def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
     """Returns plotting function for correct backend"""
     _backend = {
         "mpl": "matplotlib",
@@ -651,13 +651,28 @@ def get_plotting_method(plot_name, plot_module, backend):
         except (ImportError, AssertionError):
             raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
 
+    # Perform import of plotting method
+    # TODO: Convert module import to top level for all plots
     module = importlib.import_module(
         "arviz.plots.backends.{backend}.{backend}_{plot_module}".format(
             backend=backend, plot_module=plot_module
         )
     )
+
     plotting_method = getattr(
         module, "_{plot_name}_{backend}".format(plot_name=plot_name, backend=backend)
     )
 
-    return plotting_method
+    # Get default backend args and combine with user provided values
+    default_backend_temp_module = importlib.import_module(
+        "arviz.plots.backends.{}".format(backend),
+    )
+
+    default_backend_kwargs = getattr(default_backend_temp_module, "KWARG_DEFAULTS")
+
+    if user_backend_kwargs is None:
+        user_backend_kwargs = {}
+
+    combined_backend_kwargs = {**default_backend_kwargs, **user_backend_kwargs}
+
+    return plotting_method, combined_backend_kwargs
