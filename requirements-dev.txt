@@ -6,7 +6,7 @@ cmdstanpy
 ipython
 nbsphinx
 numpydoc
-pydocstyle
+pydocstyle<5.0
 pylint
 pyro-ppl>=0.5.1
 tensorflow
