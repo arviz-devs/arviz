@@ -12,12 +12,12 @@ import arviz as az
 a = np.random.poisson(4, 1000)
 b = np.random.normal(0, 1, 1000)
 
-figure_kwargs = dict(height=1000, width=400, output_backend="webgl")
+figure_kwargs = dict(height=500, width=500, output_backend="webgl")
 ax_poisson = bkp.figure(**figure_kwargs)
 ax_normal = bkp.figure(**figure_kwargs)
 
-az.plot_dist(a, color="black", label="Poisson", ax=ax_poisson, backend="bokeh")
-az.plot_dist(b, color="red", label="Gaussian", ax=ax_normal, backend="bokeh")
+az.plot_dist(a, color="black", label="Poisson", ax=ax_poisson, backend="bokeh", show=False)
+az.plot_dist(b, color="red", label="Gaussian", ax=ax_normal, backend="bokeh", show=False)
 
 axes = row(ax_poisson, ax_normal)
 bkp.show(axes)

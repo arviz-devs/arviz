@@ -13,7 +13,7 @@ data = az.load_arviz_data("centered_eight")
 # Combine posterior draws for from xarray of (4,500) to ndarray (2000,)
 y_hat = np.concatenate(data.posterior_predictive["obs"].values)
 
-figure_kwargs = dict(height=1000, width=400, output_backend="webgl")
+figure_kwargs = dict(height=500, width=500, output_backend="webgl")
 ax = bkp.figure(**figure_kwargs)
 
 az.plot_kde(
