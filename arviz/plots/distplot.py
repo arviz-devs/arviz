@@ -1,11 +1,8 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-<<<<<<< HEAD
 from .backends import check_bokeh_version
 from .plot_utils import get_bins
-=======
 from .plot_utils import get_bins, get_plotting_method
->>>>>>> Add find plotting method
 
 
 def plot_dist(
