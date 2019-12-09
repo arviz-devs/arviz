@@ -135,8 +135,8 @@ def test_plot_density_bad_kwargs(models):
         {"lines": [("mu", {}, 8)]},
     ],
 )
-def test_plot_trace(models, kwargs):
-    axes = plot_trace(models.model_1, backend="bokeh", show=False, **kwargs)
+def test_plot_trace(models, kwargs, backend_kwargs):
+    axes = plot_trace(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs, **kwargs)
     assert axes.shape
 
 

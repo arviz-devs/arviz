@@ -1,5 +1,5 @@
 """Plot kde or histograms and values from MCMC samples."""
-from .backends import check_bokeh_version
+from .plot_utils import get_plotting_method
 
 
 def plot_trace(
@@ -20,7 +20,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
@@ -113,52 +113,29 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
-    if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.mpl_traceplot import _plot_trace_mpl
 
-        axes = _plot_trace_mpl(
-            data,
-            var_names=var_names,
-            coords=coords,
-            divergences=divergences,
-            figsize=figsize,
-            textsize=textsize,
-            rug=rug,
-            lines=lines,
-            compact=compact,
-            combined=combined,
-            legend=legend,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            hist_kwargs=hist_kwargs,
-            trace_kwargs=trace_kwargs,
-        )
-    elif backend.lower() == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
+    # TODO: Check if this can be further simplified
+    trace_plot_args = dict(
+        data=data,
+        var_names = var_names,
+        coords = coords,
+        divergences = divergences,
+        figsize = figsize,
+        # textsize = textsize,
+        rug = rug,
+        lines = lines,
+        compact = compact,
+        combined = combined,
+        legend = legend,
+        plot_kwargs = plot_kwargs,
+        fill_kwargs = fill_kwargs,
+        rug_kwargs = rug_kwargs,
+        hist_kwargs = hist_kwargs,
+        trace_kwargs = trace_kwargs,
+    )
 
-        axes = _plot_trace_bokeh(
-            data,
-            var_names=var_names,
-            coords=coords,
-            divergences=divergences,
-            figsize=figsize,
-            rug=rug,
-            lines=lines,
-            compact=compact,
-            combined=combined,
-            legend=legend,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            hist_kwargs=hist_kwargs,
-            trace_kwargs=trace_kwargs,
-            show=show,
-            **kwargs,
-        )
-    else:
-        raise NotImplementedError(
-            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
-        )
+    method, backend_kwargs = get_plotting_method("plot_trace", "traceplot", backend, backend_kwargs)
+    axes = method(**trace_plot_args, **backend_kwargs)
+
     return axes
+
