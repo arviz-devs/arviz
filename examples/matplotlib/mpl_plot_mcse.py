@@ -1,6 +1,6 @@
 """
 Quantile Monte Carlo Standard Error Plot
-==================
+========================================
 
 _thumb: .5, .8
 """

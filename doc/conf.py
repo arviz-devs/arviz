@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "matplotlib.sphinxext.plot_directive",
+    "bokeh.sphinxext.bokeh_plot",
     "numpydoc",
     "nbsphinx",
     "m2r",

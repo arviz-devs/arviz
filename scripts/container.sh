@@ -1,5 +1,6 @@
 #! /bin/bash
 SRC_DIR=${SRC_DIR:-`pwd`}
+NAME=${NAME:-SPHINX}
 
 # Build container for use of testing or notebook
 if [[ $* == *--build* ]]; then
@@ -15,8 +16,10 @@ if [[ $* == *--build* ]]; then
         --build-arg EMCEE_VERSION=${EMCEE_VERSION} \
         --build-arg TF_VERSION=${TF_VERSION} \
         --build-arg PYMC3_VERSION=${PYMC3_VERSION} \
+        --build-arg NAME=${NAME}
         --rm
 fi
+
 
 if [[ $* == *--clear-cache* ]]; then
     echo "Removing cached files and models"
@@ -24,8 +27,16 @@ if [[ $* == *--clear-cache* ]]; then
     rm -f arviz/tests/saved_models/*.pkl
 fi
 
+
+if [[ $* == *--sphinx-build* ]]; then
+    echo "Build docs with sphinx"
+    docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx --rm arviz:latest bash -c \
+    "if [ -d ./doc/build ]; then python -msphinx -M clean doc doc/build; fi && sphinx-build doc doc/build -b html"
+fi
+
+
 if [[ $* == *--test* ]]; then
     echo "Testing Arviz"
-    docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ arviz:latest bash -c \
+    docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --rm arviz:latest bash -c \
                                       "NUMBA_DISABLE_JIT=1 pytest -v arviz/tests/ --cov=arviz/"
 fi
