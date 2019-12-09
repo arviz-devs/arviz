@@ -117,33 +117,8 @@ def _plot_trace_mpl(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
-    if divergences:
-        try:
-            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
-        except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
-            divergences = False
 
-    if coords is None:
-        coords = {}
 
-    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
-
-    if divergences:
-        divergence_data = get_coords(
-            divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
-        )
-
-    if lines is None:
-        lines = ()
-
-    num_colors = len(data.chain) + 1 if combined else len(data.chain)
-    colors = [
-        prop
-        for _, prop in zip(
-            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        )
-    ]
 
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}

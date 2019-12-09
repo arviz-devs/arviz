@@ -1,122 +1,60 @@
 # pylint: disable=all
 """Bokeh Traceplot."""
+from typing import Dict
 from collections.abc import Iterable
-from itertools import cycle
-import warnings
 
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from bokeh.layouts import gridplot
-import matplotlib.pyplot as plt
 import numpy as np
 
-
-from ....data import convert_to_dataset
+from . import BACKEND_KWARG_DEFAULTS
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
+from ...plot_utils import xarray_var_iter, make_label
 from ....rcparams import rcParams
-from ....utils import _var_names
+
+BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
+BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
+BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
 
 
 def _plot_trace_bokeh(
     data,
-    var_names=None,
-    coords=None,
-    divergences="bottom",
-    figsize=None,
-    rug=False,
-    lines=None,
-    compact=False,
-    combined=False,
-    legend=False,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    hist_kwargs=None,
-    trace_kwargs=None,
-    backend_kwargs=None,
-    show=True,
+    var_names,
+    divergences,
+    figsize,
+    rug,
+    lines,
+    combined,
+    legend,
+    plot_kwargs: [Dict],
+    fill_kwargs: [Dict],
+    rug_kwargs: [Dict],
+    hist_kwargs: [Dict],
+    trace_kwargs: [Dict],
+    plotters,
+    divergence_data,
+    colors,
+    backend_kwargs: [Dict]
 ):
-    if divergences:
-        try:
-            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
-        except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
-            divergences = False
 
-    if coords is None:
-        coords = {}
+    # If divergences are plotted they must be provided
+    assert divergences is not False and divergence_data is not None
 
-    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
-
-    if divergences:
-        divergence_data = get_coords(
-            divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
-        )
-
-    if lines is None:
-        lines = ()
-
-    num_colors = len(data.chain) + 1 if combined else len(data.chain)
-    colors = [
-        prop
-        for _, prop in zip(
-            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        )
-    ]
-
-    if compact:
-        skip_dims = set(data.dims) - {"chain", "draw"}
-    else:
-        skip_dims = set()
-
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
-    max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(plotters) if max_plots is None else max_plots
-    if len(plotters) > max_plots:
-        warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
-        )
-        plotters = plotters[:max_plots]
-
-    if figsize is None:
-        figsize = (12, len(plotters) * 2)
-
-    if trace_kwargs is None:
-        trace_kwargs = {}
-
-    trace_kwargs.setdefault("alpha", 0.35)
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    if fill_kwargs is None:
-        fill_kwargs = {}
-    if rug_kwargs is None:
-        rug_kwargs = {}
-
-    hist_kwargs.setdefault("alpha", 0.35)
-
-    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
-
-    trace_kwargs.setdefault("line_width", linewidth)
-    plot_kwargs.setdefault("line_width", linewidth)
-
+    # Set plot default backend kwargs
     if backend_kwargs is None:
-        backend_kwargs = dict()
+        backend_kwargs = {}
 
-    backend_kwargs.setdefault("tools", rcParams["plot.bokeh.tools"])
-    backend_kwargs.setdefault("output_backend", rcParams["plot.bokeh.output_backend"])
+    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
+
     backend_kwargs.setdefault(
         "height", int(figsize[1] * rcParams["plot.bokeh.figure.dpi"] // len(plotters))
     )
     backend_kwargs.setdefault("width", int(figsize[0] * rcParams["plot.bokeh.figure.dpi"] // 2))
 
+    # Temporary
+    backend_kwargs.pop("show")
     axes = []
     for i in range(len(plotters)):
         if i != 0:
@@ -303,7 +241,8 @@ def _plot_trace_bokeh(
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
                     axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
-    if show:
+    # if backend_kwargs["show"]:
+    if True:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
         bkp.show(grid)
 
