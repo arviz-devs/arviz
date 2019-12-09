@@ -663,16 +663,4 @@ def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
         module, "_{plot_name}_{backend}".format(plot_name=plot_name, backend=backend)
     )
 
-    # Get default backend args and combine with user provided values
-    default_backend_temp_module = importlib.import_module(
-        "arviz.plots.backends.{}".format(backend),
-    )
-
-    default_backend_kwargs = getattr(default_backend_temp_module, "BACKEND_KWARG_DEFAULTS")
-
-    if user_backend_kwargs is None:
-        user_backend_kwargs = {}
-
-    combined_backend_kwargs = {**default_backend_kwargs, **user_backend_kwargs}
-
-    return plotting_method, combined_backend_kwargs
+    return plotting_method

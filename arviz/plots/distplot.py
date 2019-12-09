@@ -185,9 +185,10 @@ def plot_dist(
         pcolormesh_kwargs=pcolormesh_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
+        backend_kwargs=backend_kwargs,
         **kwargs,
     )
 
-    method, backend_kwargs = get_plotting_method("plot_dist", "distplot", backend, backend_kwargs)
-    ax = method(**dist_plot_args, **backend_kwargs)
+    method = get_plotting_method("plot_dist", "distplot", backend, backend_kwargs)
+    ax = method(**dist_plot_args)
     return ax

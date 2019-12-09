@@ -5,6 +5,7 @@ import numpy as np
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
 from ....rcparams import rcParams
+from . import BACKEND_KWARG_DEFAULTS
 
 
 def _plot_dist_bokeh(
@@ -28,11 +29,14 @@ def _plot_dist_bokeh(
     pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
-
-    # Backend Kwargs
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
+
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
 
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
@@ -85,7 +89,7 @@ def _plot_dist_bokeh(
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     # TODO: Temporary setting just to make sure tests work. This needs to be removed
-    if show:
+    if backend_kwargs["show"] is True:
         bkp.show(ax, toolbar_location="above")
     return ax
 
