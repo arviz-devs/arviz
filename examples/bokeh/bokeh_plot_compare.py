@@ -12,4 +12,4 @@ model_compare = az.compare(
         "Non-centered 8 schools": az.load_arviz_data("non_centered_eight"),
     }
 )
-az.plot_compare(model_compare, figsize=(12, 4), backend="bokeh")
+ax = az.plot_compare(model_compare, figsize=(12, 4), backend="bokeh", show=True)

@@ -8,4 +8,4 @@ import arviz as az
 
 idata = az.load_arviz_data("non_centered_eight")
 
-az.plot_ess(idata, var_names=["mu"], kind="local", rug=True, backend="bokeh")
+ax = az.plot_ess(idata, var_names=["mu"], kind="local", rug=True, backend="bokeh", show=True)

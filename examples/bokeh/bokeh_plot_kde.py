@@ -16,7 +16,7 @@ y_hat = np.concatenate(data.posterior_predictive["obs"].values)
 figure_kwargs = dict(height=500, width=500, output_backend="webgl")
 ax = bkp.figure(**figure_kwargs)
 
-az.plot_kde(
+ax = az.plot_kde(
     y_hat,
     label="Estimated Effect\n of SAT Prep",
     rug=True,
@@ -24,4 +24,5 @@ az.plot_kde(
     rug_kwargs={"line_color": "black"},
     backend="bokeh",
     ax=ax,
+    show=True,
 )

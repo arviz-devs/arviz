@@ -7,7 +7,7 @@ _thumb: .8, .5
 import arviz as az
 
 rugby_data = az.load_arviz_data("rugby")
-axes = az.plot_forest(
+ax = az.plot_forest(
     rugby_data,
     kind="ridgeplot",
     var_names=["defs"],
@@ -17,4 +17,5 @@ axes = az.plot_forest(
     colors="blue",
     figsize=(9, 4),
     backend="bokeh",
+    show=True,
 )

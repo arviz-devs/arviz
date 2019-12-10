@@ -301,7 +301,9 @@ class ExampleGenerator:
         elif self.backend == "bokeh":
             pngfile = thumbfile
             with open(self.filename, "r") as fp:
-                code_text = fp.read().replace("show=True", "show=False")
+                code_text = fp.read()
+                code_text = re.sub(r"show\s*=\s*True", "show=False", code_text)
+                code_text = re.sub(r"^\s*bkp.show(\s*\S+\s*)\s*$", "", code_text)
                 code_text += BOKEH_EXPORT_CODE.format(pngfilename=thumbfile)
                 exec(
                     code_text, {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot}

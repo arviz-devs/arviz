@@ -19,5 +19,5 @@ ax_normal = bkp.figure(**figure_kwargs)
 az.plot_dist(a, color="black", label="Poisson", ax=ax_poisson, backend="bokeh", show=False)
 az.plot_dist(b, color="red", label="Gaussian", ax=ax_normal, backend="bokeh", show=False)
 
-axes = row(ax_poisson, ax_normal)
-bkp.show(axes)
+ax = row(ax_poisson, ax_normal)
+bkp.show(ax)
