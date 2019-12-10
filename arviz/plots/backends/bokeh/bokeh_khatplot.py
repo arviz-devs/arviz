@@ -1,4 +1,4 @@
-"""Matplotlib kdeplot."""
+"""Bokeh pareto shape plot."""
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
