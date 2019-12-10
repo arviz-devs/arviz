@@ -63,7 +63,10 @@ RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 BOKEH_EXPORT_CODE = """\n
 if isinstance(ax, ndarray):
-    export_png(gridplot([list(item) for item in ax]), "{pngfilename}")
+    if len(ax.shape) == 1:
+        export_png(gridplot([list(ax)]), "{pngfilename}")
+    else:
+        export_png(gridplot([list(item) for item in ax]), "{pngfilename}")
 else:
     export_png(ax, "{pngfilename}")
 """
