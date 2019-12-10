@@ -1,4 +1,4 @@
-"""Matplotlib kdeplot."""
+"""Bokeh pareto shape plot."""
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
@@ -65,7 +65,7 @@ def _plot_khat(
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
-        _, hist, _ = histogram(khats, bin_edges)
+        hist, _, _ = histogram(khats, bin_edges)
         for idx, count in enumerate(hist):
             cds = ColumnDataSource(
                 {

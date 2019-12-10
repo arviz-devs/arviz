@@ -1,5 +1,5 @@
 # pylint: disable=all
-"""Matplotlib energyplot."""
+"""Bokeh ESS plots."""
 import bokeh.plotting as bkp
 from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title

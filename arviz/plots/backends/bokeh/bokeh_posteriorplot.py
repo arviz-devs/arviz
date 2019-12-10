@@ -1,4 +1,4 @@
-"""Matplotlib Plot posterior densities."""
+"""Bokeh Plot posterior densities."""
 from typing import Optional
 from numbers import Number
 import bokeh.plotting as bkp

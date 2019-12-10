@@ -472,6 +472,26 @@ def stats_variance_2d(data, ddof=0, axis=1):
 
 @conditional_jit(cache=True)
 def histogram(data, bins, range_hist=None):
+    """Conditionally jitted histogram.
+
+    Parameters
+    ----------
+    data : array-like
+        Input data. Passed as first positional argument to ``np.histogram``.
+    bins : int or array-like
+        Passed as keyword argument ``bins`` to ``np.histogram``.
+    range_hist : (float, float), optional
+        Passed as keyword argument ``range`` to ``np.histogram``.
+
+    Returns
+    -------
+    hist : array
+        The number of counts per bin.
+    density : array
+        The density corresponding to each bin.
+    bin_edges : array
+        The edges of the bins used.
+    """
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
     hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
