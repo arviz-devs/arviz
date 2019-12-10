@@ -389,7 +389,6 @@ def main(app):
         toctrees_contents += "\n".join((toctree, contents))
         toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
 
-
     # write index file
     index_file = op.join(target_dir, "..", "index.rst")
 
