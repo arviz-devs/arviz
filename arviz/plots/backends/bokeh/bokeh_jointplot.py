@@ -92,8 +92,9 @@ def _plot_joint(
             rotated=rotate,
             ax=ax_,
             backend="bokeh",
-            show=False,
+            backend_kwargs={"show":False},
             **marginal_kwargs
+
         )
 
     if show:

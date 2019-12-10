@@ -16,7 +16,6 @@ from ....rcparams import rcParams
 
 BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
 BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
-BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
 
 
 def _plot_trace_bokeh(
@@ -40,7 +39,8 @@ def _plot_trace_bokeh(
 ):
 
     # If divergences are plotted they must be provided
-    assert divergences is not False and divergence_data is not None
+    if divergences is not False:
+        assert divergence_data is not None
 
     # Set plot default backend kwargs
     if backend_kwargs is None:
@@ -53,8 +53,9 @@ def _plot_trace_bokeh(
     )
     backend_kwargs.setdefault("width", int(figsize[0] * rcParams["plot.bokeh.figure.dpi"] // 2))
 
-    # Temporary
-    backend_kwargs.pop("show")
+    # Used near end for whether to show plot or not, can't be passed to bkp.figure
+    show = backend_kwargs.pop("show")
+
     axes = []
     for i in range(len(plotters)):
         if i != 0:
@@ -241,8 +242,7 @@ def _plot_trace_bokeh(
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
                     axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
-    # if backend_kwargs["show"]:
-    if True:
+    if show is True:
         grid = gridplot([list(item) for item in axes], toolbar_location="above")
         bkp.show(grid)
 
@@ -297,7 +297,7 @@ def _plot_chains_bokeh(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
-                show=False,
+                backend_kwargs={"show":False}
             )
 
     if combined:
@@ -314,5 +314,5 @@ def _plot_chains_bokeh(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
-            show=False,
+            backend_kwargs={"show":False}
         )
