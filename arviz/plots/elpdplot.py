@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
-from .backends import check_bokeh_version
 from ..data import convert_to_inference_data
 from .plot_utils import (
     get_coords,
     format_coords_as_labels,
     color_from_dim,
+    get_plotting_method
 )
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
@@ -207,17 +207,12 @@ def plot_elpd(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_elpdplot import _plot_elpd
-
         elpd_plot_kwargs.pop("legend")
         elpd_plot_kwargs.pop("handles")
         elpd_plot_kwargs.pop("color")
         elpd_plot_kwargs["show"] = show
-        ax = _plot_elpd(**elpd_plot_kwargs)  # pylint: disable=unexpected-keyword-arg
-    elif backend == "matplotlib":
-        from .backends.matplotlib.mpl_elpdplot import _plot_elpd
 
-        ax = _plot_elpd(**elpd_plot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_elpd", "elpdplot", backend, {})
+    ax = method(**elpd_plot_kwargs)
     return ax

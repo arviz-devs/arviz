@@ -1,7 +1,6 @@
 """Autocorrelation plot of data."""
 import numpy as np
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -9,6 +8,7 @@ from .plot_utils import (
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
+    get_plotting_method
 )
 from ..utils import _var_names
 
@@ -136,17 +136,14 @@ def plot_autocorr(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_autocorrplot import _plot_autocorr
 
         autocorr_plot_args.pop("xt_labelsize")
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
         autocorr_plot_args["show"] = show
-        axes = _plot_autocorr(**autocorr_plot_args)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_autocorrplot import _plot_autocorr
 
-        axes = _plot_autocorr(**autocorr_plot_args)
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_autocorr", "autocorrplot", backend, {})
+    axes = method(**autocorr_plot_args)
 
     return axes

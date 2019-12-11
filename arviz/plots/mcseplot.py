@@ -2,7 +2,6 @@
 import numpy as np
 import xarray as xr
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from ..stats import mcse
 from .plot_utils import (
@@ -11,6 +10,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
+    get_plotting_method
 )
 from ..utils import _var_names
 
@@ -182,9 +182,6 @@ def plot_mcse(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_mcseplot import _plot_mcse
-
         mcse_kwargs.pop("kwargs")
         mcse_kwargs.pop("text_x")
         mcse_kwargs.pop("text_va")
@@ -193,10 +190,8 @@ def plot_mcse(
         mcse_kwargs.pop("ax_labelsize")
         mcse_kwargs.pop("titlesize")
         mcse_kwargs["show"] = show
-        ax = _plot_mcse(**mcse_kwargs)  #  pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_mcseplot import _plot_mcse
 
-        ax = _plot_mcse(**mcse_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_mcse", "mcseplot", backend, {})
+    ax = method(**mcse_kwargs)
     return ax

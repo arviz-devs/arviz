@@ -655,13 +655,13 @@ def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots
     module = importlib.import_module(
-        "arviz.plots.backends.{backend}.{backend}_{plot_module}".format(
+        "arviz.plots.backends.{backend}.{plot_module}".format(
             backend=backend, plot_module=plot_module
         )
     )
 
     plotting_method = getattr(
-        module, "_{plot_name}_{backend}".format(plot_name=plot_name, backend=backend)
+        module, plot_name
     )
 
     return plotting_method

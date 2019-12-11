@@ -4,12 +4,12 @@ import platform
 import logging
 import numpy as np
 
-from .backends import check_bokeh_version
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
     default_grid,
     filter_plotters_list,
+    get_plotting_method
 )
 from ..utils import _var_names
 
@@ -291,8 +291,6 @@ def plot_ppc(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_ppcplot import _plot_ppc
 
         ppcplot_kwargs.pop("animated")
         ppcplot_kwargs.pop("animation_kwargs")
@@ -300,10 +298,8 @@ def plot_ppc(
         ppcplot_kwargs.pop("xt_labelsize")
         ppcplot_kwargs.pop("ax_labelsize")
         ppcplot_kwargs["show"] = show
-        axes = _plot_ppc(**ppcplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_ppcplot import _plot_ppc
 
-        axes = _plot_ppc(**ppcplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_ppc", "ppcplot", backend, {})
+    axes = method(**ppcplot_kwargs)
     return axes

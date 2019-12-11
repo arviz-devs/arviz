@@ -3,8 +3,8 @@ import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
-from .backends import check_bokeh_version
 from ..stats import hpd
+from .plot_utils import get_plotting_method
 
 
 def plot_hpd(
@@ -104,14 +104,9 @@ def plot_hpd(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_hpdplot import _plot_hpdplot
-
         hpdplot_kwargs["show"] = show
-        ax = _plot_hpdplot(**hpdplot_kwargs)
-    else:
-        from .backends.matplotlib.mpl_hpdplot import _plot_hpdplot
 
-        ax = _plot_hpdplot(**hpdplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_hpd", "hpdplot", backend, {})
+    ax = method(**hpdplot_kwargs)
     return ax

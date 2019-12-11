@@ -6,10 +6,10 @@ from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-na
 from scipy.sparse import coo_matrix
 import xarray as xr
 
-from .backends import check_bokeh_version
 from ..data import InferenceData
 from ..utils import conditional_jit, _stack
 from ..stats.stats_utils import histogram
+from .plot_utils import get_plotting_method
 
 
 def plot_kde(
@@ -211,21 +211,16 @@ def plot_kde(
         legend=legend,
         **kwargs,
     )
-    if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.mpl_kdeplot import _plot_kde_mpl
 
-        ax = _plot_kde_mpl(**kde_plot_args)
-    elif backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_kdeplot import _plot_kde_bokeh
+    if backend == "bokeh":
 
         kde_plot_args["show"] = show
         kde_plot_args.pop("textsize")
-        ax = _plot_kde_bokeh(**kde_plot_args)
-    else:
-        raise NotImplementedError(
-            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
-        )
+
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_kde", "kdeplot", backend, {})
+    ax = method(**kde_plot_args)
+
     return ax
 
 

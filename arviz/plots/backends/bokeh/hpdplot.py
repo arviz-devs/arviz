@@ -8,7 +8,7 @@ from matplotlib.pyplot import rcParams as mpl_rcParams
 from ....rcparams import rcParams
 
 
-def plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
+def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

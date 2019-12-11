@@ -2,7 +2,7 @@
 from matplotlib.pyplot import gca
 
 
-def plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs):
+def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs):
     if ax is None:
         ax = gca()
     ax.plot(x_data, y_data, **plot_kwargs)
