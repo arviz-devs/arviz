@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def _plot_parallel(
+def plot_parallel(
     ax,
     colornd,
     colord,

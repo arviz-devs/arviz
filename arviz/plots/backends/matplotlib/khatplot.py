@@ -9,7 +9,7 @@ from ...plot_utils import set_xticklabels
 from ....stats.stats_utils import histogram
 
 
-def _plot_khat(
+def plot_khat(
     hover_label,
     hover_format,
     ax,

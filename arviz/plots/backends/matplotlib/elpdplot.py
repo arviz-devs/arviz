@@ -12,7 +12,7 @@ from ...plot_utils import (
 from ....rcparams import rcParams
 
 
-def _plot_elpd(
+def plot_elpd(
     ax,
     models,
     pointwise_data,

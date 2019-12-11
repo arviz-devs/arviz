@@ -21,7 +21,7 @@ def pairwise(iterable):
     return zip(first, second)
 
 
-def _plot_forest(
+def plot_forest(
     ax,
     datasets,
     var_names,

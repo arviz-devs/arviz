@@ -5,7 +5,7 @@ from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
 
 
-def _plot_energy(
+def plot_energy(
     ax,
     series,
     energy,

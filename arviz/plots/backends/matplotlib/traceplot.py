@@ -14,7 +14,7 @@ from ....utils import _var_names
 from ....rcparams import rcParams
 
 
-def _plot_trace_mpl(
+def plot_trace(
     data,
     var_names=None,
     coords=None,

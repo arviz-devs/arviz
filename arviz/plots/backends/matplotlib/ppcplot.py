@@ -10,7 +10,7 @@ from ...plot_utils import (
 from ....stats.stats_utils import histogram
 
 
-def _plot_ppc(
+def plot_ppc(
     ax,
     length_plotters,
     rows,

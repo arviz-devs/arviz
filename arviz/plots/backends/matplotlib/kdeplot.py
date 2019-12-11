@@ -5,7 +5,7 @@ import numpy as np
 from ...plot_utils import _scale_fig_size
 
 
-def _plot_kde_mpl(
+def plot_kde(
     density,
     lower,
     upper,

@@ -11,7 +11,7 @@ from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
 
-def _plot_pair(
+def plot_pair(
     ax,
     _posterior,
     numvars,

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from ...kdeplot import plot_kde
 
 
-def _plot_dist_mpl(
+def plot_dist(
     values,
     values2=None,
     color="C0",

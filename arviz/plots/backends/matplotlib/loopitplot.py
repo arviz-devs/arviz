@@ -6,7 +6,7 @@ from ...kdeplot import _fast_kde
 from ...hpdplot import plot_hpd
 
 
-def _plot_loo_pit(
+def plot_loo_pit(
     ax,
     figsize,
     ecdf,

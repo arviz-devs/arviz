@@ -5,7 +5,7 @@ from ....stats import autocorr
 from ...plot_utils import make_label
 
 
-def _plot_autocorr(
+def plot_autocorr(
     axes, plotters, max_lag, linewidth, titlesize, combined=False, xt_labelsize=None,
 ):
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):

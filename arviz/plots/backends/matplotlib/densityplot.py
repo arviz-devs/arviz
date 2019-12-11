@@ -6,7 +6,7 @@ from ...kdeplot import _fast_kde
 from ...plot_utils import make_label
 
 
-def _plot_density(
+def plot_density(
     ax,
     all_labels,
     to_plot,

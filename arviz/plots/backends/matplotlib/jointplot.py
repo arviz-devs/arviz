@@ -7,7 +7,7 @@ from ...kdeplot import plot_kde
 from ...plot_utils import make_label
 
 
-def _plot_joint(
+def plot_joint(
     ax,
     figsize,
     plotters,

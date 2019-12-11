@@ -10,7 +10,7 @@ from ...plot_utils import (
 )
 
 
-def _plot_mcse(
+def plot_mcse(
     ax,
     plotters,
     length_plotters,

@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 
 
-def _compareplot(
+def plot_compare(
     ax,
     comp_df,
     figsize,

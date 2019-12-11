@@ -9,7 +9,7 @@ from ...plot_utils import (
 from ....stats.stats_utils import histogram
 
 
-def _plot_rank(
+def plot_rank(
     axes,
     length_plotters,
     rows,

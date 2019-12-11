@@ -9,7 +9,7 @@ from ...plot_utils import (
 )
 
 
-def _plot_ess(
+def plot_ess(
     ax,
     plotters,
     xdata,

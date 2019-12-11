@@ -14,7 +14,7 @@ from ...plot_utils import (
 )
 
 
-def _plot_posterior(
+def plot_posterior(
     ax,
     length_plotters,
     rows,
