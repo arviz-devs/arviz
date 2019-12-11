@@ -63,7 +63,10 @@ RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 
 BOKEH_EXPORT_CODE = """\n
 if isinstance(ax, ndarray):
-    export_png(gridplot([list(item) for item in ax]), "{pngfilename}")
+    if len(ax.shape) == 1:
+        export_png(gridplot([list(ax)]), "{pngfilename}")
+    else:
+        export_png(gridplot([list(item) for item in ax]), "{pngfilename}")
 else:
     export_png(ax, "{pngfilename}")
 """
@@ -301,7 +304,9 @@ class ExampleGenerator:
         elif self.backend == "bokeh":
             pngfile = thumbfile
             with open(self.filename, "r") as fp:
-                code_text = fp.read().replace("show=True", "show=False")
+                code_text = fp.read()
+                code_text = re.sub(r"show\s*=\s*True", "show=False", code_text)
+                code_text = re.sub(r"^\s*bkp.show(\s*\S+\s*)\s*$", "", code_text)
                 code_text += BOKEH_EXPORT_CODE.format(pngfilename=thumbfile)
                 exec(
                     code_text, {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot}
@@ -386,7 +391,6 @@ def main(app):
 
         toctrees_contents += "\n".join((toctree, contents))
         toctrees_contents += """.. raw:: html\n\n    <div style="clear: both"></div>"""
-
 
     # write index file
     index_file = op.join(target_dir, "..", "index.rst")

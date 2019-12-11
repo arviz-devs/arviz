@@ -54,7 +54,7 @@ setup(
     url="http://github.com/arviz-devs/arviz",
     packages=find_packages(),
     install_requires=get_requirements(),
-    extras_require=dict(all=get_requirements_optional()), # test=get_requirements_dev(), 
+    extras_require=dict(all=get_requirements_optional()),  # test=get_requirements_dev(),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     include_package_data=True,
