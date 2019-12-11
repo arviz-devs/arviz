@@ -5,6 +5,7 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
+from . import BACKEND_KWARG_DEFAULTS
 
 
 from ....data import convert_to_dataset
@@ -13,24 +14,28 @@ from ...plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label
 from ....utils import _var_names
 from ....rcparams import rcParams
 
+# TODO: Change this to RcParams
+BACKEND_KWARG_DEFAULTS["textsize"] = 10
 
 def plot_trace(
     data,
-    var_names=None,
-    coords=None,
-    divergences="bottom",
-    figsize=None,
-    textsize=None,
-    rug=False,
-    lines=None,
-    compact=False,
-    combined=False,
-    legend=False,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    hist_kwargs=None,
-    trace_kwargs=None,
+    var_names,
+    divergences,
+    figsize,
+    rug,
+    lines,
+    combined,
+    legend,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    hist_kwargs,
+    trace_kwargs,
+    plotters,
+    divergence_data,
+    colors,
+    backend_kwargs
+
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -44,23 +49,16 @@ def plot_trace(
         Refer to documentation of az.convert_to_dataset for details
     var_names : string, or list of strings
         One or more variables to be plotted.
-    coords : mapping, optional
-        Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
-    textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
         variables.
     lines : tuple
         Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
-    compact : bool
-        Plot multidimensional variables in a single plot.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
@@ -117,50 +115,54 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
+    # Set plot default backend kwargs
+    if backend_kwargs is None:
+        backend_kwargs = {}
 
+    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
+    # if compact:
+    #     skip_dims = set(data.dims) - {"chain", "draw"}
+    # else:
+    #     skip_dims = set()
+    #
+    # plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    # max_plots = rcParams["plot.max_subplots"]
+    # max_plots = len(plotters) if max_plots is None else max_plots
+    # if len(plotters) > max_plots:
+    #     warnings.warn(
+    #         "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+    #         "of variables to plot ({len_plotters}), generating only {max_plots} "
+    #         "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
+    #         SyntaxWarning,
+    #     )
+    #     plotters = plotters[:max_plots]
 
+    # if figsize is None:
+    #     figsize = (12, len(plotters) * 2)
+    #
+    # if trace_kwargs is None:
+    #     trace_kwargs = {}
+    #
+    # trace_kwargs.setdefault("alpha", 0.35)
 
-    if compact:
-        skip_dims = set(data.dims) - {"chain", "draw"}
-    else:
-        skip_dims = set()
-
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
-    max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(plotters) if max_plots is None else max_plots
-    if len(plotters) > max_plots:
-        warnings.warn(
-            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-            "of variables to plot ({len_plotters}), generating only {max_plots} "
-            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
-        )
-        plotters = plotters[:max_plots]
-
-    if figsize is None:
-        figsize = (12, len(plotters) * 2)
-
-    if trace_kwargs is None:
-        trace_kwargs = {}
-
-    trace_kwargs.setdefault("alpha", 0.35)
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    if fill_kwargs is None:
-        fill_kwargs = {}
-    if rug_kwargs is None:
-        rug_kwargs = {}
-
-    hist_kwargs.setdefault("alpha", 0.35)
+    # if hist_kwargs is None:
+    #     hist_kwargs = {}
+    # if plot_kwargs is None:
+    #     plot_kwargs = {}
+    # if fill_kwargs is None:
+    #     fill_kwargs = {}
+    # if rug_kwargs is None:
+    #     rug_kwargs = {}
+    #
+    # hist_kwargs.setdefault("alpha", 0.35)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
-        figsize, textsize, rows=len(plotters), cols=2
+        figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2
     )
-    trace_kwargs.setdefault("linewidth", linewidth)
-    plot_kwargs.setdefault("linewidth", linewidth)
+
+    # TODO: This is breaking plotting for some reason
+    # trace_kwargs.setdefault("linewidth", linewidth)
+    # plot_kwargs.setdefault("linewidth", linewidth)
 
     _, axes = plt.subplots(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True

@@ -189,8 +189,10 @@ def plot_trace(
         rug_kwargs = {}
 
     figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
-    trace_kwargs.setdefault("line_width", linewidth)
-    plot_kwargs.setdefault("line_width", linewidth)
+
+    # This is where the issue is
+    trace_kwargs.setdefault("linewidth", linewidth)
+    plot_kwargs.setdefault("linewidth", linewidth)
 
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
