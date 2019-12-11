@@ -1,5 +1,5 @@
 """Matplotlib Plotting Backend."""
-BACKEND_KWARG_DEFAULTS = {"show": True, "anotherkey":"test"}
+BACKEND_KWARG_DEFAULTS = {}
 
 from .autocorrplot import plot_autocorr
 from .compareplot import plot_compare
