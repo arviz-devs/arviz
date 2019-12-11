@@ -31,6 +31,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
     plot_pair,
+    plot_rank,
     plot_trace,
     plot_parallel,
     plot_posterior,
@@ -745,14 +746,22 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
 def test_plot_parallel(models, norm_method):
-    assert plot_parallel(models.model_1, var_names=["mu", "tau"], norm_method=norm_method)
+    assert plot_parallel(
+        models.model_1,
+        var_names=["mu", "tau"],
+        norm_method=norm_method,
+        backend="bokeh",
+        show=False,
+    )
 
 
 @pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
 def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
-        assert plot_parallel(models.model_1, var_names=var_names, norm_method="foo")
+        assert plot_parallel(
+            models.model_1, var_names=var_names, norm_method="foo", backend="bokeh", show=False
+        )
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
@@ -918,3 +927,19 @@ def test_plot_posterior_point_estimates(models, point_estimate):
         show=False,
     )
     assert axes.shape == (1, 2)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": "mu"},
+        {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": "mu", "ref_line": True},
+        {"var_names": "mu", "ref_line": False},
+        {"var_names": "mu", "kind": "vlines"},
+    ],
+)
+def test_plot_rank(models, kwargs):
+    axes = plot_rank(models.model_1, backend="bokeh", show=False, **kwargs)
+    assert axes.shape
