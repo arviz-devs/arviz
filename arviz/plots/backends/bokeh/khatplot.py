@@ -2,15 +2,14 @@
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Span
-
 import numpy as np
+from bokeh.models import ColumnDataSource, Span
 
 from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 
-def _plot_khat(
+def plot_khat(
     ax,
     figsize,
     xdata,

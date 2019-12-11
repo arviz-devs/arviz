@@ -1,12 +1,12 @@
 """Bokeh Parallel coordinates plot."""
 import bokeh.plotting as bkp
-from bokeh.models.tickers import FixedTicker
 import numpy as np
+from bokeh.models.tickers import FixedTicker
 
 from ....rcparams import rcParams
 
 
-def _plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, show):
+def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, show):
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

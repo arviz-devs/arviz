@@ -2,8 +2,9 @@
 
 import warnings
 from uuid import uuid4
-import numpy as np
+
 import bokeh.plotting as bkp
+import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource
 
@@ -12,7 +13,7 @@ from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
 
-def _plot_pair(
+def plot_pair(
     ax,
     _posterior,
     numvars,

@@ -5,7 +5,7 @@ from bokeh.models import Span
 from ....rcparams import rcParams
 
 
-def _compareplot(
+def plot_compare(
     ax,
     comp_df,
     figsize,

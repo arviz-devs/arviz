@@ -1,10 +1,10 @@
 """Bokeh mcseplot."""
 
 import bokeh.plotting as bkp
+import numpy as np
+from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
-import numpy as np
 from scipy.stats import rankdata
 
 from ...plot_utils import (
@@ -14,7 +14,7 @@ from ...plot_utils import (
 from ....stats.stats_utils import quantile as _quantile
 
 
-def _plot_mcse(
+def plot_mcse(
     ax,
     plotters,
     length_plotters,

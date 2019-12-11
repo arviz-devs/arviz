@@ -2,13 +2,13 @@
 import bokeh.plotting as bkp
 from bokeh.models import Label
 
+from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
-from .bokeh_distplot import _histplot_bokeh_op
 from ....rcparams import rcParams
 from ....stats import bfmi as e_bfmi
 
 
-def _plot_energy(
+def plot_energy(
     ax, series, energy, kind, bfmi, figsize, line_width, fill_kwargs, plot_kwargs, bw, legend, show,
 ):
     if ax is None:

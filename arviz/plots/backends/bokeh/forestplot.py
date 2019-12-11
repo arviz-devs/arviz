@@ -3,16 +3,16 @@
 from collections import defaultdict, OrderedDict
 from itertools import cycle, tee
 
-import numpy as np
 import bokeh.plotting as bkp
+import matplotlib.pyplot as plt
+import numpy as np
+from bokeh.layouts import gridplot
 from bokeh.models import Band, ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
-from bokeh.layouts import gridplot
-import matplotlib.pyplot as plt
 
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from ...kdeplot import _fast_kde
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
@@ -27,7 +27,7 @@ def pairwise(iterable):
     return zip(first, second)
 
 
-def _plot_forest(
+def plot_forest(
     ax,
     datasets,
     var_names,

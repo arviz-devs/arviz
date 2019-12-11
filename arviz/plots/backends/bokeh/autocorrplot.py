@@ -1,14 +1,14 @@
 """Bokeh Autocorrplot."""
-import numpy as np
 import bokeh.plotting as bkp
-from bokeh.models.annotations import Title
+import numpy as np
 from bokeh.layouts import gridplot
+from bokeh.models.annotations import Title
 
-from ....stats import autocorr
 from ...plot_utils import make_label
+from ....stats import autocorr
 
 
-def _plot_autocorr(
+def plot_autocorr(
     axes, plotters, max_lag, line_width, combined=False, show=True,
 ):
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):

@@ -1,13 +1,13 @@
 """Bokeh loopitplot."""
-import numpy as np
 import bokeh.plotting as bkp
+import numpy as np
 
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
 from ....rcparams import rcParams
 
 
-def _plot_loo_pit(
+def plot_loo_pit(
     ax,
     figsize,
     ecdf,

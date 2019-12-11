@@ -1,23 +1,19 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
 import bokeh.plotting as bkp
+import numpy as np
+from bokeh.layouts import gridplot
 from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
-import numpy as np
 from scipy.stats import rankdata
-
 
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
-    get_coords,
-    filter_plotters_list,
 )
-from ....rcparams import rcParams
 
 
-def _plot_ess(
+def plot_ess(
     ax,
     plotters,
     xdata,

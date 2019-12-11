@@ -2,13 +2,13 @@
 import bokeh.plotting as bkp
 import numpy as np
 
+from . import BACKEND_KWARG_DEFAULTS
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
 from ....rcparams import rcParams
-from . import BACKEND_KWARG_DEFAULTS
 
 
-def _plot_dist_bokeh(
+def plot_dist(
     values,
     values2=None,
     color="C0",

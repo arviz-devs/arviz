@@ -2,16 +2,15 @@
 import warnings
 
 import bokeh.plotting as bkp
-from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
 import numpy as np
-
+from bokeh.layouts import gridplot
+from bokeh.models.annotations import Title
 
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
 
-def _plot_elpd(
+def plot_elpd(
     ax,
     models,
     pointwise_data,

@@ -1,13 +1,13 @@
 # pylint: disable=all
 """Bokeh Traceplot."""
-from typing import Dict
 from collections.abc import Iterable
+from typing import Dict
 
 import bokeh.plotting as bkp
+import numpy as np
+from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
-import numpy as np
 
 from . import BACKEND_KWARG_DEFAULTS
 from ...distplot import plot_dist
@@ -18,7 +18,7 @@ BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
 BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
 
 
-def _plot_trace_bokeh(
+def plot_trace(
     data,
     var_names,
     divergences,

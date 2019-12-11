@@ -2,8 +2,31 @@
 """Bokeh Plotting Backend."""
 import packaging
 
+from .autocorrplot import plot_autocorr
+from .compareplot import plot_compare
+from .densityplot import plot_density
+from .distplot import plot_dist
+from .elpdplot import plot_elpd
+from .energyplot import plot_energy
+from .essplot import plot_ess
+from .forestplot import plot_forest
+from .hpdplot import plot_hpdplot
+from .jointplot import plot_joint
+from .kdeplot import plot_kde
+from .khatplot import plot_khat
+from .loopitplot import plot_loo_pit
+from .mcseplot import plot_mcse
+from .pairplot import plot_pair
+from .parallelplot import plot_parallel
+from .posteriorplot import plot_posterior
+from .rankplot import plot_rank
+from .traceplot import plot_trace
+from .violinplot import plot_violin
+
 # Set plot generic bokeh keyword arg defaults if none provided
 BACKEND_KWARG_DEFAULTS = {"show": True}
+
+
 
 def output_notebook(*args, **kwargs):
     """Wrap bokeh.plotting.output_notebook."""

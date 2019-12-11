@@ -4,17 +4,17 @@ from collections.abc import Callable
 from numbers import Integral
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Dash, Range1d
 import matplotlib._contour as _contour
+import numpy as np
+from bokeh.models import ColumnDataSource, Dash, Range1d
+from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
-from matplotlib.cm import get_cmap
-import numpy as np
 
 from ....rcparams import rcParams
 
 
-def _plot_kde_bokeh(
+def plot_kde(
     density,
     lower,
     upper,

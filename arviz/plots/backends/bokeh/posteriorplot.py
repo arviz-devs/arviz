@@ -1,12 +1,13 @@
 """Bokeh Plot posterior densities."""
 from typing import Optional
 from numbers import Number
+from typing import Optional
+
 import bokeh.plotting as bkp
+import numpy as np
+from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
-
-import numpy as np
 from scipy.stats import mode
 
 from ...kdeplot import plot_kde, _fast_kde
@@ -19,7 +20,7 @@ from ...plot_utils import (
 from ....stats import hpd
 
 
-def _plot_posterior(
+def plot_posterior(
     ax,
     length_plotters,
     rows,

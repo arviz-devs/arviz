@@ -1,11 +1,11 @@
 """Bokeh rankplot."""
 import bokeh.plotting as bkp
+import numpy as np
+import scipy.stats
+from bokeh.layouts import gridplot
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
-from bokeh.layouts import gridplot
-import numpy as np
-import scipy.stats
 
 from ...plot_utils import (
     _create_axes_grid,
@@ -14,7 +14,7 @@ from ...plot_utils import (
 from ....stats.stats_utils import histogram
 
 
-def _plot_rank(
+def plot_rank(
     axes,
     length_plotters,
     rows,

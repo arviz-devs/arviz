@@ -2,13 +2,13 @@
 from itertools import cycle
 
 import bokeh.plotting as bkp
-from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
+from matplotlib.pyplot import rcParams as mpl_rcParams
 
 from ....rcparams import rcParams
 
 
-def _plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
+def plot_hpdplot(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

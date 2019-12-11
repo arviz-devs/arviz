@@ -1,7 +1,7 @@
 """Bokeh jointplot."""
 import bokeh.plotting as bkp
-from bokeh.layouts import gridplot
 import numpy as np
+from bokeh.layouts import gridplot
 
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
@@ -9,7 +9,7 @@ from ...plot_utils import make_label
 from ....rcparams import rcParams
 
 
-def _plot_joint(
+def plot_joint(
     ax,
     figsize,
     plotters,

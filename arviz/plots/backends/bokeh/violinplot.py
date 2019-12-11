@@ -1,8 +1,8 @@
 """Bokeh Violinplot."""
 import bokeh.plotting as bkp
+import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
-import numpy as np
 
 from ...kdeplot import _fast_kde
 from ...plot_utils import get_bins, make_label, _create_axes_grid
@@ -10,7 +10,7 @@ from ....stats import hpd
 from ....stats.stats_utils import histogram
 
 
-def _plot_violin(
+def plot_violin(
     ax,
     plotters,
     figsize,

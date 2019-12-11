@@ -1,16 +1,16 @@
 """Bokeh Densityplot."""
 import bokeh.plotting as bkp
-from bokeh.models.annotations import Title
-from bokeh.layouts import gridplot
 import numpy as np
+from bokeh.layouts import gridplot
+from bokeh.models.annotations import Title
 
-from ....stats import hpd
 from ...kdeplot import _fast_kde
 from ...plot_utils import make_label
+from ....stats import hpd
 from ....stats.stats_utils import histogram
 
 
-def _plot_density(
+def plot_density(
     ax,
     all_labels,
     to_plot,
