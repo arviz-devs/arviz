@@ -217,6 +217,6 @@ def plot_posterior(
         posteriorplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_posterior", "posteriorplot", backend, {})
+    method = get_plotting_method("plot_posterior", "posteriorplot", backend)
     ax = method(**posteriorplot_kwargs)
     return ax

@@ -166,6 +166,6 @@ def plot_rank(
         rankplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_rank", "rankplot", backend, {})
+    method = get_plotting_method("plot_rank", "rankplot", backend)
     axes = method(**rankplot_kwargs)
     return axes

@@ -1,6 +1,4 @@
 """Matplotlib Traceplot."""
-from itertools import cycle
-import warnings
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -8,11 +6,8 @@ import numpy as np
 from . import BACKEND_KWARG_DEFAULTS
 
 
-from ....data import convert_to_dataset
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, get_bins, xarray_var_iter, make_label, get_coords
-from ....utils import _var_names
-from ....rcparams import rcParams
+from ...plot_utils import _scale_fig_size, get_bins, make_label
 
 # TODO: Change this to RcParams
 BACKEND_KWARG_DEFAULTS["textsize"] = 10
@@ -20,7 +15,7 @@ BACKEND_KWARG_DEFAULTS["textsize"] = 10
 
 def plot_trace(
     data,
-    var_names,
+    var_names, # pylint: disable=unused-argument
     divergences,
     figsize,
     rug,
@@ -120,41 +115,6 @@ def plot_trace(
         backend_kwargs = {}
 
     backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
-    # if compact:
-    #     skip_dims = set(data.dims) - {"chain", "draw"}
-    # else:
-    #     skip_dims = set()
-    #
-    # plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
-    # max_plots = rcParams["plot.max_subplots"]
-    # max_plots = len(plotters) if max_plots is None else max_plots
-    # if len(plotters) > max_plots:
-    #     warnings.warn(
-    #         "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-    #         "of variables to plot ({len_plotters}), generating only {max_plots} "
-    #         "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-    #         SyntaxWarning,
-    #     )
-    #     plotters = plotters[:max_plots]
-
-    # if figsize is None:
-    #     figsize = (12, len(plotters) * 2)
-    #
-    # if trace_kwargs is None:
-    #     trace_kwargs = {}
-    #
-    # trace_kwargs.setdefault("alpha", 0.35)
-
-    # if hist_kwargs is None:
-    #     hist_kwargs = {}
-    # if plot_kwargs is None:
-    #     plot_kwargs = {}
-    # if fill_kwargs is None:
-    #     fill_kwargs = {}
-    # if rug_kwargs is None:
-    #     rug_kwargs = {}
-    #
-    # hist_kwargs.setdefault("alpha", 0.35)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2

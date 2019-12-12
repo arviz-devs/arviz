@@ -30,7 +30,7 @@ def plot_dist(
     hist_kwargs=None,
     ax=None,
     backend_kwargs=None,
-    **kwargs
+    **kwargs  # pylint: disable=unused-argument
 ):
 
     if backend_kwargs is None:

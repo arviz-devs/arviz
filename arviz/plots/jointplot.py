@@ -173,6 +173,6 @@ def plot_joint(
         plot_joint_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_joint", "jointplot", backend, {})
+    method = get_plotting_method("plot_joint", "jointplot", backend)
     axes = method(**plot_joint_kwargs)
     return axes

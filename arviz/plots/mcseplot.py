@@ -192,6 +192,6 @@ def plot_mcse(
         mcse_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_mcse", "mcseplot", backend, {})
+    method = get_plotting_method("plot_mcse", "mcseplot", backend)
     ax = method(**mcse_kwargs)
     return ax

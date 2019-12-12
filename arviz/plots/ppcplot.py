@@ -300,6 +300,6 @@ def plot_ppc(
         ppcplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_ppc", "ppcplot", backend, {})
+    method = get_plotting_method("plot_ppc", "ppcplot", backend)
     axes = method(**ppcplot_kwargs)
     return axes

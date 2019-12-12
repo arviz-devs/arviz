@@ -141,14 +141,14 @@ def test_plot_trace(models, kwargs, backend_kwargs):
 
 
 def test_plot_trace_discrete(discrete_model):
-    axes = plot_trace(discrete_model, backend="bokeh", show=False)
+    axes = plot_trace(discrete_model, backend="bokeh")
     assert axes.shape
 
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(SyntaxWarning):
         with rc_context(rc={"plot.max_subplots": 1}):
-            axes = plot_trace(models.model_1, backend="bokeh", show=False)
+            axes = plot_trace(models.model_1, backend="bokeh")
     assert axes.shape
 
 

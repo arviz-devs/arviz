@@ -148,7 +148,7 @@ def plot_parallel(
         parallel_kwargs.pop("shadend")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_parallel", "parallelplot", backend, {})
+    method = get_plotting_method("plot_parallel", "parallelplot", backend)
     ax = method(**parallel_kwargs)
 
     return ax

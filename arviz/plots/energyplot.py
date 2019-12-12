@@ -139,6 +139,6 @@ def plot_energy(
             plot_energy_kwargs["legend"] = False
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_energy", "energyplot", backend, {})
+    method = get_plotting_method("plot_energy", "energyplot", backend)
     ax = method(**plot_energy_kwargs)
     return ax

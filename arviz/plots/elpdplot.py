@@ -208,6 +208,6 @@ def plot_elpd(
         elpd_plot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_elpd", "elpdplot", backend, {})
+    method = get_plotting_method("plot_elpd", "elpdplot", backend)
     ax = method(**elpd_plot_kwargs)
     return ax

@@ -320,6 +320,6 @@ def plot_ess(
         essplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_ess", "essplot", backend, {})
+    method = get_plotting_method("plot_ess", "essplot", backend)
     ax = method(**essplot_kwargs)
     return ax

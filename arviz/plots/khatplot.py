@@ -235,6 +235,6 @@ def plot_khat(
         plot_khat_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_khat", "khatplot", backend, {})
+    method = get_plotting_method("plot_khat", "khatplot", backend)
     axes = method(**plot_khat_kwargs)
     return axes

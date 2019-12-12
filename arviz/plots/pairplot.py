@@ -198,6 +198,6 @@ def plot_pair(
         pairplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_pair", "pairplot", backend, {})
+    method = get_plotting_method("plot_pair", "pairplot", backend)
     ax = method(**pairplot_kwargs)
     return ax

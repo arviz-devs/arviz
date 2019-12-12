@@ -248,7 +248,7 @@ def plot_loo_pit(
         loo_pit_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_loo_pit", "loopitplot", backend, {})
+    method = get_plotting_method("plot_loo_pit", "loopitplot", backend)
     axes = method(**loo_pit_kwargs)
 
     return axes

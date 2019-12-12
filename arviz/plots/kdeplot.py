@@ -218,7 +218,7 @@ def plot_kde(
         kde_plot_args.pop("textsize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_kde", "kdeplot", backend, {})
+    method = get_plotting_method("plot_kde", "kdeplot", backend)
     ax = method(**kde_plot_args)
 
     return ax

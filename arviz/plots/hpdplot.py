@@ -107,6 +107,6 @@ def plot_hpd(
         hpdplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_hpd", "hpdplot", backend, {})
+    method = get_plotting_method("plot_hpd", "hpdplot", backend)
     ax = method(**hpdplot_kwargs)
     return ax

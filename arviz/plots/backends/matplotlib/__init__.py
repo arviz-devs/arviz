@@ -1,3 +1,4 @@
+# pylint: disable= wrong-import-position
 """Matplotlib Plotting Backend."""
 BACKEND_KWARG_DEFAULTS = {}
 

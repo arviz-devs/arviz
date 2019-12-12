@@ -1,5 +1,4 @@
 """Bokeh Plot posterior densities."""
-from typing import Optional
 from numbers import Number
 from typing import Optional
 

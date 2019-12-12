@@ -111,6 +111,6 @@ def plot_violin(
         violinplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_violin", "violinplot", backend, {})
+    method = get_plotting_method("plot_violin", "violinplot", backend)
     ax = method(**violinplot_kwargs)
     return ax

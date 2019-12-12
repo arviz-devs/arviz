@@ -16,7 +16,6 @@ def plot_trace(
     coords=None,
     divergences="bottom",
     figsize=None,
-    textsize=None,
     rug=False,
     lines=None,
     compact=False,
@@ -29,7 +28,6 @@ def plot_trace(
     trace_kwargs=None,
     backend=None,
     backend_kwargs=None,
-    **kwargs
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -49,9 +47,6 @@ def plot_trace(
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
-    textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize. Not implemented for bokeh backend.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
@@ -214,7 +209,7 @@ def plot_trace(
         backend_kwargs=backend_kwargs,
     )
 
-    method = get_plotting_method("plot_trace", "traceplot", backend, backend_kwargs)
+    method = get_plotting_method("plot_trace", "traceplot", backend)
     axes = method(**trace_plot_args)
 
     return axes

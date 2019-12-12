@@ -136,7 +136,7 @@ def plot_compare(
         compareplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_compare", "compareplot", backend, {})
+    method = get_plotting_method("plot_compare", "compareplot", backend)
     ax = method(**compareplot_kwargs)
 
     return ax

@@ -246,6 +246,6 @@ def plot_density(
         plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_density", "densityplot", backend, {})
+    method = get_plotting_method("plot_density", "densityplot", backend)
     ax = method(**plot_density_kwargs)
     return ax

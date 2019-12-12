@@ -143,7 +143,7 @@ def plot_autocorr(
         autocorr_plot_args["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_autocorr", "autocorrplot", backend, {})
+    method = get_plotting_method("plot_autocorr", "autocorrplot", backend)
     axes = method(**autocorr_plot_args)
 
     return axes

@@ -178,6 +178,6 @@ def plot_forest(
         plot_forest_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_forest", "forestplot", backend, {})
+    method = get_plotting_method("plot_forest", "forestplot", backend)
     axes = method(**plot_forest_kwargs)
     return axes
