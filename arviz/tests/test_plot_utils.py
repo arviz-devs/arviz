@@ -197,6 +197,6 @@ def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     method = get_plotting_method("plot_dist", "distplot", "bokeh")
 
-    from arviz.plots.backends.bokeh.bokeh_distplot import _plot_dist_bokeh
+    from arviz.plots.backends.bokeh.distplot import plot_dist
 
-    assert method is _plot_dist_bokeh
+    assert method is plot_dist
