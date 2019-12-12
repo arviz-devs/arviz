@@ -5,12 +5,7 @@ import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
-from .plot_utils import (
-    get_coords,
-    format_coords_as_labels,
-    color_from_dim,
-    get_plotting_method
-)
+from .plot_utils import get_coords, format_coords_as_labels, color_from_dim, get_plotting_method
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
 

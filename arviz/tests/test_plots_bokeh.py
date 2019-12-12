@@ -76,7 +76,7 @@ def get_ax():
 
 @pytest.fixture(scope="session")
 def backend_kwargs():
-    return {"show":False}
+    return {"show": False}
 
 
 @pytest.mark.parametrize(
@@ -189,7 +189,9 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 
 @pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
 def test_plot_dist(continuous_model, kwargs, backend_kwargs):
-    axes = plot_dist(continuous_model["x"], backend="bokeh", backend_kwargs=backend_kwargs, **kwargs)
+    axes = plot_dist(
+        continuous_model["x"], backend="bokeh", backend_kwargs=backend_kwargs, **kwargs
+    )
     assert axes
 
 

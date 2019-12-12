@@ -10,7 +10,7 @@ from .plot_utils import (
     get_coords,
     color_from_dim,
     format_coords_as_labels,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..stats import ELPDData
 

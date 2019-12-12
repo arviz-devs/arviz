@@ -11,7 +11,7 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     _create_axes_grid,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams

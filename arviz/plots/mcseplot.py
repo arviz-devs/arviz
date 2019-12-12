@@ -10,7 +10,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..utils import _var_names
 

@@ -125,7 +125,7 @@ def plot_trace(
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
-            divergences=False
+            divergences = False
 
     if coords is None:
         coords = {}
@@ -188,37 +188,33 @@ def plot_trace(
     if rug_kwargs is None:
         rug_kwargs = {}
 
-
-
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
         # User Kwargs
         data=data,
         var_names=var_names,
         # coords = coords,
-        divergences = divergences,
-        figsize = figsize,
+        divergences=divergences,
+        figsize=figsize,
         rug=rug,
-        lines = lines,
-        plot_kwargs = plot_kwargs,
-        fill_kwargs = fill_kwargs,
-        rug_kwargs = rug_kwargs,
-        hist_kwargs = hist_kwargs,
-        trace_kwargs = trace_kwargs,
+        lines=lines,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        rug_kwargs=rug_kwargs,
+        hist_kwargs=hist_kwargs,
+        trace_kwargs=trace_kwargs,
         # compact = compact,
-        combined = combined,
-        legend = legend,
-
+        combined=combined,
+        legend=legend,
         # Generated kwargs
-        divergence_data = divergence_data,
+        divergence_data=divergence_data,
         # skip_dims=skip_dims,
         plotters=plotters,
         colors=colors,
-        backend_kwargs=backend_kwargs
+        backend_kwargs=backend_kwargs,
     )
 
     method = get_plotting_method("plot_trace", "traceplot", backend, backend_kwargs)
     axes = method(**trace_plot_args)
 
     return axes
-

@@ -27,11 +27,15 @@ def plot_dist(
     pcolormesh_kwargs,
     hist_kwargs,
     ax,
-    backend_kwargs
+    backend_kwargs,
 ):
     if backend_kwargs is not None:
-        warnings.warn(("Argument backend_kwargs has not effect in matplotlib.plot_dist"
-                       "Supplied value won't be used"))
+        warnings.warn(
+            (
+                "Argument backend_kwargs has not effect in matplotlib.plot_dist"
+                "Supplied value won't be used"
+            )
+        )
     if ax is None:
         ax = plt.gca()
 

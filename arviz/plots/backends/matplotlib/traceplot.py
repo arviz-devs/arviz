@@ -17,6 +17,7 @@ from ....rcparams import rcParams
 # TODO: Change this to RcParams
 BACKEND_KWARG_DEFAULTS["textsize"] = 10
 
+
 def plot_trace(
     data,
     var_names,
@@ -34,8 +35,7 @@ def plot_trace(
     plotters,
     divergence_data,
     colors,
-    backend_kwargs
-
+    backend_kwargs,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 

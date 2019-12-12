@@ -8,7 +8,7 @@ from .plot_utils import (
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..utils import _var_names
 

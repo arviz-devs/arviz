@@ -9,7 +9,7 @@ from .plot_utils import (
     _scale_fig_size,
     default_grid,
     filter_plotters_list,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..utils import _var_names
 

@@ -17,6 +17,7 @@ from ....rcparams import rcParams
 BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
 BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
 
+
 def plot_trace(
     data,
     var_names,
@@ -34,7 +35,7 @@ def plot_trace(
     plotters,
     divergence_data,
     colors,
-    backend_kwargs: [Dict]
+    backend_kwargs: [Dict],
 ):
 
     # If divergences are plotted they must be provided
@@ -301,7 +302,7 @@ def _plot_chains_bokeh(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
-                backend_kwargs={"show":False}
+                backend_kwargs={"show": False},
             )
 
     if combined:
@@ -318,5 +319,5 @@ def _plot_chains_bokeh(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
-            backend_kwargs={"show":False}
+            backend_kwargs={"show": False},
         )

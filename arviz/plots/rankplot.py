@@ -9,7 +9,7 @@ from .plot_utils import (
     default_grid,
     filter_plotters_list,
     _sturges_formula,
-    get_plotting_method
+    get_plotting_method,
 )
 from ..utils import _var_names
 

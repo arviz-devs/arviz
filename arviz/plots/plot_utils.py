@@ -646,11 +646,13 @@ def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
     if backend == "bokeh":
         try:
             import bokeh
+
             assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
 
         except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed."
-                              " Please upgrade or install")
+            raise ImportError(
+                "'bokeh' backend needs Bokeh (1.4.0+) installed." " Please upgrade or install"
+            )
 
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots
@@ -660,8 +662,6 @@ def get_plotting_method(plot_name, plot_module, backend, user_backend_kwargs):
         )
     )
 
-    plotting_method = getattr(
-        module, plot_name
-    )
+    plotting_method = getattr(module, plot_name)
 
     return plotting_method

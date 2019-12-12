@@ -1,6 +1,12 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_var_iter, filter_plotters_list, default_grid, get_plotting_method
+from .plot_utils import (
+    _scale_fig_size,
+    xarray_var_iter,
+    filter_plotters_list,
+    default_grid,
+    get_plotting_method,
+)
 from ..utils import _var_names
 
 
