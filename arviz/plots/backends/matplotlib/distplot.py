@@ -1,4 +1,5 @@
 """Matplotlib distplot."""
+import warnings
 import matplotlib.pyplot as plt
 
 from ...kdeplot import plot_kde
@@ -6,27 +7,31 @@ from ...kdeplot import plot_kde
 
 def plot_dist(
     values,
-    values2=None,
-    color="C0",
-    kind="auto",
-    cumulative=False,
-    label=None,
-    rotated=False,
-    rug=False,
-    bw=4.5,
-    quantiles=None,
-    contour=True,
-    fill_last=True,
-    textsize=None,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    contourf_kwargs=None,
-    pcolormesh_kwargs=None,
-    hist_kwargs=None,
-    ax=None,
+    values2,
+    color,
+    kind,
+    cumulative,
+    label,
+    rotated,
+    rug,
+    bw,
+    quantiles,
+    contour,
+    fill_last,
+    textsize,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    contour_kwargs,
+    contourf_kwargs,
+    pcolormesh_kwargs,
+    hist_kwargs,
+    ax,
+    backend_kwargs
 ):
+    if backend_kwargs is not None:
+        warnings.warn(("Argument backend_kwargs has not effect in matplotlib.plot_dist"
+                       "Supplied value won't be used"))
     if ax is None:
         ax = plt.gca()
 

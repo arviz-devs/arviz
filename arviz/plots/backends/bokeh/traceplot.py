@@ -11,12 +11,11 @@ from bokeh.models.annotations import Title
 
 from . import BACKEND_KWARG_DEFAULTS
 from ...distplot import plot_dist
-from ...plot_utils import xarray_var_iter, make_label
+from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
 from ....rcparams import rcParams
 
 BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
 BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
-
 
 def plot_trace(
     data,
@@ -55,6 +54,11 @@ def plot_trace(
 
     # Used near end for whether to show plot or not, can't be passed to bkp.figure
     show = backend_kwargs.pop("show")
+
+    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
+
+    trace_kwargs.setdefault("line_width", linewidth)
+    plot_kwargs.setdefault("line_width", linewidth)
 
     axes = []
     for i in range(len(plotters)):

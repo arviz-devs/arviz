@@ -161,8 +161,8 @@ def plot_trace(
     )
 
     # TODO: This is breaking plotting for some reason
-    # trace_kwargs.setdefault("linewidth", linewidth)
-    # plot_kwargs.setdefault("linewidth", linewidth)
+    trace_kwargs.setdefault("linewidth", linewidth)
+    plot_kwargs.setdefault("linewidth", linewidth)
 
     _, axes = plt.subplots(
         len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
