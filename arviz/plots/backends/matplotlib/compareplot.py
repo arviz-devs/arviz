@@ -19,7 +19,6 @@ def plot_compare(
     step,
 ):
     """Matplotlib compare plot."""
-
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 

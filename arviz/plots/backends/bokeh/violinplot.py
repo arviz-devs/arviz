@@ -25,6 +25,7 @@ def plot_violin(
     quartiles,
     show,
 ):
+    """Bokeh violin plot."""
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),
@@ -35,7 +36,6 @@ def plot_violin(
             squeeze=False,
             backend="bokeh",
         )
-    """Bokeh violin plot."""
     ax = np.atleast_1d(ax)
 
     for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):
