@@ -4,7 +4,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_method, get_coords, xarray_var_iter, _scale_fig_size
+from .plot_utils import get_plotting_method, get_coords, xarray_var_iter
 from ..data import convert_to_dataset
 from ..utils import _var_names
 from ..rcparams import rcParams

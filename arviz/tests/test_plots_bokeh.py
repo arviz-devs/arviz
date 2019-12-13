@@ -140,7 +140,7 @@ def test_plot_trace(models, kwargs, backend_kwargs):
     assert axes.shape
 
 
-def test_plot_trace_discrete(discrete_mode, backend_kwargs):
+def test_plot_trace_discrete(discrete_model, backend_kwargs):
     axes = plot_trace(discrete_model, backend="bokeh", backend_kwargs=backend_kwargs)
     assert axes.shape
 
