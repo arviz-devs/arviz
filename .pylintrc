@@ -68,8 +68,9 @@ disable=missing-docstring,
         no-else-continue,
         unnecessary-comprehension,
         unsubscriptable-object,
+        cyclic-import
 
-        #TODO: Remove this
+        #TODO: Remove this once todos are done
         fixme
 
 
