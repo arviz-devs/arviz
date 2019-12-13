@@ -39,6 +39,7 @@ def plot_posterior(
     kwargs,
     show,
 ):
+    """Bokeh posterior plot."""
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, squeeze=False, backend="bokeh"

@@ -25,6 +25,7 @@ def plot_elpd(
     threshold,
     show,
 ):
+    """Bokeh elpd plot."""
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1

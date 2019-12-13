@@ -37,7 +37,7 @@ def plot_trace(
     colors,
     backend_kwargs: [Dict],
 ):
-
+    """Bokeh traceplot."""
     # If divergences are plotted they must be provided
     if divergences is not False:
         assert divergence_data is not None

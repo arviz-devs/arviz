@@ -11,6 +11,7 @@ from ....stats import autocorr
 def plot_autocorr(
     axes, plotters, max_lag, line_width, combined=False, show=True,
 ):
+    """Bokeh autocorrelation plot."""
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:

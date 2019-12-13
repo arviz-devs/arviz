@@ -26,6 +26,7 @@ def plot_density(
     data_labels,
     show,
 ):
+    """Bokeh density plot."""
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
     if data_labels is None:
         data_labels = {}

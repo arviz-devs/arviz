@@ -23,6 +23,7 @@ def plot_violin(
     xt_labelsize,
     quartiles,
 ):
+    """Matplotlib violin plot."""
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters), rows, cols, sharey=sharey, figsize=figsize, squeeze=False

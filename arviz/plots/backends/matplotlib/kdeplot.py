@@ -33,6 +33,7 @@ def plot_kde(
     ax=None,
     legend=True,
 ):
+    """Matplotlib kde plot."""
     if ax is None:
         ax = plt.gca()
 

@@ -35,6 +35,7 @@ def plot_posterior(
     kwargs,
     titlesize,
 ):
+    """Matplotlib posterior plot."""
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True

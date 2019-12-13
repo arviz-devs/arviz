@@ -28,6 +28,7 @@ def plot_pair(
     divergences_kwargs,
     flat_var_names,
 ):
+    """Matplotlib pairplot."""
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1

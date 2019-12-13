@@ -20,7 +20,7 @@ def plot_compare(
     step,
     show,
 ):
-
+    """Bokeh compareplot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

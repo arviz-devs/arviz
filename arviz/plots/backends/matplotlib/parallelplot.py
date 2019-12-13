@@ -16,6 +16,7 @@ def plot_parallel(
     legend,
     figsize,
 ):
+    """Matplotlib parallel plot."""
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 

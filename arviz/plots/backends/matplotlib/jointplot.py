@@ -20,6 +20,7 @@ def plot_joint(
     gridsize,
     marginal_kwargs,
 ):
+    """Matplotlib joint plot."""
     if ax is None:
         # Instantiate figure and grid
         fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)

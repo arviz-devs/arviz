@@ -36,6 +36,7 @@ def plot_mcse(
     _linewidth,
     show,
 ):
+    """Bokeh mcse plot."""
     if ax is None:
         _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
 

@@ -626,7 +626,7 @@ def filter_plotters_list(plotters, plot_kind):
 
 
 def get_plotting_method(plot_name, plot_module, backend):
-    """Returns plotting function for correct backend"""
+    """Return plotting function for correct backend."""
     _backend = {
         "mpl": "matplotlib",
         "bokeh": "bokeh",

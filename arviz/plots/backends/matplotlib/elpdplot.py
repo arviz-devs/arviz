@@ -29,6 +29,7 @@ def plot_elpd(
     handles,
     color,
 ):
+    """Matplotlib elpd plot."""
 
     if numvars == 2:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(

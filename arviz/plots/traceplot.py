@@ -114,8 +114,6 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
-
-    # TODO: This can be simplified somehow I feel like
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging

@@ -47,6 +47,7 @@ def plot_ess(
     hline_kwargs,
     show,
 ):
+    """Bokeh essplot."""
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

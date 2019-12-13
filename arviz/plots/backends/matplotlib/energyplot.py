@@ -19,6 +19,7 @@ def plot_energy(
     bw,
     legend,
 ):
+    """Matplotlib energy plot."""
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
 

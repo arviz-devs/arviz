@@ -29,6 +29,7 @@ def plot_dist(
     ax,
     backend_kwargs,
 ):
+    """Matplotlib distplot."""
     if backend_kwargs is not None:
         warnings.warn(
             (

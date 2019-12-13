@@ -29,7 +29,7 @@ def plot_loo_pit(
     plot_kwargs,
     show,
 ):
-
+    """Bokeh loo pit plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

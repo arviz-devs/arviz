@@ -8,6 +8,7 @@ from ...plot_utils import make_label
 def plot_autocorr(
     axes, plotters, max_lag, linewidth, titlesize, combined=False, xt_labelsize=None,
 ):
+    """Matplotlib autocorrplot."""
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:

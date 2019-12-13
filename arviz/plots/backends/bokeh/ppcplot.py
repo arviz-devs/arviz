@@ -31,6 +31,7 @@ def plot_ppc(
     show,
     num_pp_samples,
 ):
+    """Bokeh ppc plot."""
     if ax is None:
         _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
     else:

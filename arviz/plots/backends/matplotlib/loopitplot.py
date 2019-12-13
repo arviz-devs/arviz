@@ -30,7 +30,7 @@ def plot_loo_pit(
     credible_interval,
     plot_kwargs,
 ):
-
+    """Matplotlib loo pit plot."""
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
 

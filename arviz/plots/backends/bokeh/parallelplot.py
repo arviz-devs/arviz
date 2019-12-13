@@ -7,6 +7,7 @@ from ....rcparams import rcParams
 
 
 def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, show):
+    """Bokeh parallel plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

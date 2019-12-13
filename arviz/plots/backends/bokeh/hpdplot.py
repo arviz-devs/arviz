@@ -9,6 +9,8 @@ from ....rcparams import rcParams
 
 
 def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, show):
+    """Bokeh hpd plot."""
+
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

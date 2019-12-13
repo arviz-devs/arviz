@@ -51,6 +51,7 @@ def plot_forest(
     r_hat,
     show,
 ):
+    """Bokeh forest plot."""
     plot_handler = PlotHandler(
         datasets, var_names=var_names, model_names=model_names, combined=combined, colors=colors
     )

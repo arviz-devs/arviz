@@ -32,6 +32,7 @@ def plot_dist(
     backend_kwargs=None,
     **kwargs  # pylint: disable=unused-argument
 ):
+    """Bokeh distplot."""
 
     if backend_kwargs is None:
         backend_kwargs = {}

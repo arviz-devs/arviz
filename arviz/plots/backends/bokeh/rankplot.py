@@ -28,7 +28,7 @@ def plot_rank(
     labels,
     show,
 ):
-
+    """Bokeh rank plot."""
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,

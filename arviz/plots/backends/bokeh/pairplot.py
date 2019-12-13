@@ -28,6 +28,7 @@ def plot_pair(
     flat_var_names,
     show,
 ):
+    """Bokeh pair plot."""
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 

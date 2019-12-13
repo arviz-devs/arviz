@@ -1,4 +1,4 @@
-"""Matplotlib Traceplot."""
+"""Matplotlib traceplot."""
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -15,7 +15,7 @@ BACKEND_KWARG_DEFAULTS["textsize"] = 10
 
 def plot_trace(
     data,
-    var_names, # pylint: disable=unused-argument
+    var_names,  # pylint: disable=unused-argument
     divergences,
     figsize,
     rug,

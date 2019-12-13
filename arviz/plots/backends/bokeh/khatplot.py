@@ -23,6 +23,7 @@ def plot_khat(
     bin_format,
     show,
 ):
+    """Bokeh khat plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

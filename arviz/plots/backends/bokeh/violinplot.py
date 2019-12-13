@@ -35,7 +35,7 @@ def plot_violin(
             squeeze=False,
             backend="bokeh",
         )
-
+    """Bokeh violin plot."""
     ax = np.atleast_1d(ax)
 
     for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):

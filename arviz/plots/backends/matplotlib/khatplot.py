@@ -33,6 +33,7 @@ def plot_khat(
     n_data_points,
     bin_format,
 ):
+    """Matplotlib khat plot."""
     if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
         hover_label = False
         warnings.warn(

@@ -34,6 +34,7 @@ def plot_ppc(
     animation_kwargs,
     num_pp_samples,
 ):
+    """Matplotlib ppc plot."""
     if ax is None:
         fig, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
     else:

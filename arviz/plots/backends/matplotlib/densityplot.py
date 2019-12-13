@@ -24,6 +24,7 @@ def plot_density(
     n_data,
     data_labels,
 ):
+    """Matplotlib densityplot."""
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
 
     for m_idx, plotters in enumerate(to_plot):

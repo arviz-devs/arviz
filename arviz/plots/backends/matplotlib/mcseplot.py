@@ -38,6 +38,7 @@ def plot_mcse(
     ax_labelsize,
     titlesize,
 ):
+    """Matplotlib mcseplot."""
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True

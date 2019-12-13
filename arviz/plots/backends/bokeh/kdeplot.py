@@ -42,6 +42,7 @@ def plot_kde(
     legend=True,
     show=True,
 ):
+    """Bokeh kde plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

@@ -24,7 +24,7 @@ def plot_rank(
     ax_labelsize,
     titlesize,
 ):
-
+    """Matplotlib rankplot.."""
     if axes is None:
         _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
 

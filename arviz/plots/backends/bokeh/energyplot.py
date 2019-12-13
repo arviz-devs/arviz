@@ -11,6 +11,7 @@ from ....stats import bfmi as e_bfmi
 def plot_energy(
     ax, series, energy, kind, bfmi, figsize, line_width, fill_kwargs, plot_kwargs, bw, legend, show,
 ):
+    """Bokeh energy plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

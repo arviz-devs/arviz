@@ -22,6 +22,7 @@ def plot_joint(
     marginal_kwargs,
     show,
 ):
+    """Bokeh joint plot."""
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]
