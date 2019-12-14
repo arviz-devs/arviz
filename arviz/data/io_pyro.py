@@ -1,4 +1,3 @@
-# pylint: disable=cyclic-import
 """Pyro-specific conversion code."""
 import logging
 import numpy as np
