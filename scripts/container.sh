@@ -28,6 +28,11 @@ if [[ $* == *--clear-cache* ]]; then
 fi
 
 
+if [[ $* == *--shell* ]]; then
+    echo "Starting Arviz Container Shell"
+    docker run  -it --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_shell --rm arviz:latest /bin/bash
+fi
+
 if [[ $* == *--sphinx-build* ]]; then
     echo "Build docs with sphinx"
     docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx --rm arviz:latest bash -c \
