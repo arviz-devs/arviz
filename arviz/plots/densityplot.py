@@ -4,7 +4,6 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -12,6 +11,7 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     _create_axes_grid,
+    get_plotting_method,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -238,18 +238,14 @@ def plot_density(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_densityplot import _plot_density
 
         plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
         plot_density_kwargs.pop("titlesize")
         plot_density_kwargs.pop("xt_labelsize")
         plot_density_kwargs["show"] = show
         plot_density_kwargs.pop("n_data")
-        _plot_density(**plot_density_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_densityplot import _plot_density
 
-        _plot_density(**plot_density_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_density", "densityplot", backend)
+    ax = method(**plot_density_kwargs)
     return ax

@@ -12,6 +12,7 @@ from ..plots.plot_utils import (
     get_coords,
     filter_plotters_list,
     format_sig_figs,
+    get_plotting_method,
 )
 from ..rcparams import rc_context
 
@@ -190,3 +191,12 @@ def test_filter_plotter_list_warning():
         with pytest.warns(SyntaxWarning, match="test warning"):
             plotters_filtered = filter_plotters_list(plotters, "test warning")
     assert len(plotters_filtered) == 5
+
+
+def test_bokeh_import():
+    """Tests that correct method is returned on bokeh import"""
+    method = get_plotting_method("plot_dist", "distplot", "bokeh")
+
+    from arviz.plots.backends.bokeh.distplot import plot_dist
+
+    assert method is plot_dist

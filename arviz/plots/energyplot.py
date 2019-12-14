@@ -3,9 +3,8 @@ from itertools import cycle
 from matplotlib.pyplot import rcParams
 import numpy as np
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size
+from .plot_utils import _scale_fig_size, get_plotting_method
 
 
 def plot_energy(
@@ -132,18 +131,14 @@ def plot_energy(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_energyplot import _plot_energy
 
         plot_energy_kwargs.pop("xt_labelsize")
         plot_energy_kwargs["line_width"] = plot_energy_kwargs.pop("linewidth")
         plot_energy_kwargs["show"] = show
         if kind in {"hist", "histogram"}:
             plot_energy_kwargs["legend"] = False
-        ax = _plot_energy(**plot_energy_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_energyplot import _plot_energy
 
-        ax = _plot_energy(**plot_energy_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_energy", "energyplot", backend)
+    ax = method(**plot_energy_kwargs)
     return ax

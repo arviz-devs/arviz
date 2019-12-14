@@ -1,7 +1,12 @@
 """Plot posterior traces as violin plot."""
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_var_iter, filter_plotters_list, default_grid
+from .plot_utils import (
+    _scale_fig_size,
+    xarray_var_iter,
+    filter_plotters_list,
+    default_grid,
+    get_plotting_method,
+)
 from ..utils import _var_names
 
 
@@ -100,16 +105,12 @@ def plot_violin(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_violinplot import _plot_violin
 
         violinplot_kwargs.pop("ax_labelsize")
         violinplot_kwargs.pop("xt_labelsize")
         violinplot_kwargs["show"] = show
-        ax = _plot_violin(**violinplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_violinplot import _plot_violin
 
-        ax = _plot_violin(**violinplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_violin", "violinplot", backend)
+    ax = method(**violinplot_kwargs)
     return ax

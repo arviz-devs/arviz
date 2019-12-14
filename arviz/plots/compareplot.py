@@ -1,8 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 
-from .backends import check_bokeh_version
-from .plot_utils import _scale_fig_size
+from .plot_utils import _scale_fig_size, get_plotting_method
 
 
 def plot_compare(
@@ -130,17 +129,14 @@ def plot_compare(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_compareplot import _compareplot
 
         compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")
         compareplot_kwargs.pop("ax_labelsize")
         compareplot_kwargs.pop("xt_labelsize")
         compareplot_kwargs["show"] = show
-        ax = _compareplot(**compareplot_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_compareplot import _compareplot
 
-        ax = _compareplot(**compareplot_kwargs)
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_compare", "compareplot", backend)
+    ax = method(**compareplot_kwargs)
 
     return ax

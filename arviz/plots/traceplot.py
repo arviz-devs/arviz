@@ -1,5 +1,13 @@
 """Plot kde or histograms and values from MCMC samples."""
-from .backends import check_bokeh_version
+from itertools import cycle
+import warnings
+
+import matplotlib.pyplot as plt
+
+from .plot_utils import get_plotting_method, get_coords, xarray_var_iter
+from ..data import convert_to_dataset
+from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_trace(
@@ -8,7 +16,6 @@ def plot_trace(
     coords=None,
     divergences="bottom",
     figsize=None,
-    textsize=None,
     rug=False,
     lines=None,
     compact=False,
@@ -20,8 +27,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
-    show=True,
-    **kwargs
+    backend_kwargs=None,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -41,9 +47,6 @@ def plot_trace(
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
-    textsize: float
-        Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize. Not implemented for bokeh backend.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
@@ -69,8 +72,6 @@ def plot_trace(
         Extra keyword arguments passed to `plt.plot`
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
 
     Returns
     -------
@@ -113,52 +114,100 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
-    if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.mpl_traceplot import _plot_trace_mpl
+    if divergences:
+        try:
+            divergence_data = convert_to_dataset(data, group="sample_stats").diverging
+        except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
+            divergences = False
 
-        axes = _plot_trace_mpl(
-            data,
-            var_names=var_names,
-            coords=coords,
-            divergences=divergences,
-            figsize=figsize,
-            textsize=textsize,
-            rug=rug,
-            lines=lines,
-            compact=compact,
-            combined=combined,
-            legend=legend,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            hist_kwargs=hist_kwargs,
-            trace_kwargs=trace_kwargs,
-        )
-    elif backend.lower() == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_traceplot import _plot_trace_bokeh
+    if coords is None:
+        coords = {}
 
-        axes = _plot_trace_bokeh(
-            data,
-            var_names=var_names,
-            coords=coords,
-            divergences=divergences,
-            figsize=figsize,
-            rug=rug,
-            lines=lines,
-            compact=compact,
-            combined=combined,
-            legend=legend,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            hist_kwargs=hist_kwargs,
-            trace_kwargs=trace_kwargs,
-            show=show,
-            **kwargs,
+    if divergences:
+        divergence_data = get_coords(
+            divergence_data, {k: v for k, v in coords.items() if k in ("chain", "draw")}
         )
     else:
-        raise NotImplementedError(
-            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
+        divergence_data = False
+
+    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+    var_names = _var_names(var_names, data)
+
+    if lines is None:
+        lines = ()
+
+    num_colors = len(data.chain) + 1 if combined else len(data.chain)
+
+    # TODO: matplotlib is always required by arviz. Can we get rid of it?
+    colors = [
+        prop
+        for _, prop in zip(
+            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
         )
+    ]
+
+    if compact:
+        skip_dims = set(data.dims) - {"chain", "draw"}
+    else:
+        skip_dims = set()
+
+    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = len(plotters) if max_plots is None else max_plots
+    if len(plotters) > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}), generating only {max_plots} "
+            "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
+            SyntaxWarning,
+        )
+        plotters = plotters[:max_plots]
+
+    if figsize is None:
+        figsize = (12, len(plotters) * 2)
+
+    if trace_kwargs is None:
+        trace_kwargs = {}
+    trace_kwargs.setdefault("alpha", 0.35)
+
+    if hist_kwargs is None:
+        hist_kwargs = {}
+    hist_kwargs.setdefault("alpha", 0.35)
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
+    if rug_kwargs is None:
+        rug_kwargs = {}
+
+    # TODO: Check if this can be further simplified
+    trace_plot_args = dict(
+        # User Kwargs
+        data=data,
+        var_names=var_names,
+        # coords = coords,
+        divergences=divergences,
+        figsize=figsize,
+        rug=rug,
+        lines=lines,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        rug_kwargs=rug_kwargs,
+        hist_kwargs=hist_kwargs,
+        trace_kwargs=trace_kwargs,
+        # compact = compact,
+        combined=combined,
+        legend=legend,
+        # Generated kwargs
+        divergence_data=divergence_data,
+        # skip_dims=skip_dims,
+        plotters=plotters,
+        colors=colors,
+        backend_kwargs=backend_kwargs,
+    )
+
+    method = get_plotting_method("plot_trace", "traceplot", backend)
+    axes = method(**trace_plot_args)
+
     return axes

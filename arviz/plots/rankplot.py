@@ -2,7 +2,6 @@
 from itertools import cycle
 import matplotlib.pyplot as plt
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
@@ -10,6 +9,7 @@ from .plot_utils import (
     default_grid,
     filter_plotters_list,
     _sturges_formula,
+    get_plotting_method,
 )
 from ..utils import _var_names
 
@@ -160,16 +160,12 @@ def plot_rank(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_rankplot import _plot_rank
 
         rankplot_kwargs.pop("ax_labelsize")
         rankplot_kwargs.pop("titlesize")
         rankplot_kwargs["show"] = show
-        axes = _plot_rank(**rankplot_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_rankplot import _plot_rank
 
-        axes = _plot_rank(**rankplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_rank", "rankplot", backend)
+    axes = method(**rankplot_kwargs)
     return axes

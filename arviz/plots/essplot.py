@@ -2,7 +2,6 @@
 import numpy as np
 import xarray as xr
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from ..stats import ess
 from .plot_utils import (
@@ -11,6 +10,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
+    get_plotting_method,
 )
 from ..utils import _var_names
 
@@ -317,14 +317,9 @@ def plot_ess(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_essplot import _plot_ess
-
         essplot_kwargs["show"] = show
-        ax = _plot_ess(**essplot_kwargs)
-    else:
-        from .backends.matplotlib.mpl_essplot import _plot_ess
 
-        ax = _plot_ess(**essplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_ess", "essplot", backend)
+    ax = method(**essplot_kwargs)
     return ax

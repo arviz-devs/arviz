@@ -1,13 +1,15 @@
 """Utilities for plotting."""
 import warnings
 from itertools import product, tee
+import importlib
 
+import packaging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
 
-from .backends import check_bokeh_version
+
 from ..utils import conditional_jit
 from ..rcparams import rcParams
 
@@ -211,7 +213,6 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
-        check_bokeh_version()
         from bokeh.plotting import figure
 
         bokeh_dpi = rcParams["plot.bokeh.figure.dpi"]
@@ -622,3 +623,45 @@ def filter_plotters_list(plotters, plot_kind):
         )
         return plotters[:max_plots]
     return plotters
+
+
+def get_plotting_method(plot_name, plot_module, backend):
+    """Return plotting function for correct backend."""
+    _backend = {
+        "mpl": "matplotlib",
+        "bokeh": "bokeh",
+        "matplotlib": "matplotlib",
+        None: "matplotlib",
+    }
+
+    try:
+        backend = _backend[backend]
+    except KeyError:
+        raise KeyError(
+            "Backend {} is not implemented. Try backend in {}".format(
+                backend, set(_backend.values())
+            )
+        )
+
+    if backend == "bokeh":
+        try:
+            import bokeh
+
+            assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
+
+        except (ImportError, AssertionError):
+            raise ImportError(
+                "'bokeh' backend needs Bokeh (1.4.0+) installed." " Please upgrade or install"
+            )
+
+    # Perform import of plotting method
+    # TODO: Convert module import to top level for all plots
+    module = importlib.import_module(
+        "arviz.plots.backends.{backend}.{plot_module}".format(
+            backend=backend, plot_module=plot_module
+        )
+    )
+
+    plotting_method = getattr(module, plot_name)
+
+    return plotting_method

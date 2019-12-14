@@ -5,12 +5,12 @@ import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
 
-from .backends import check_bokeh_version
 from .plot_utils import (
     _scale_fig_size,
     get_coords,
     color_from_dim,
     format_coords_as_labels,
+    get_plotting_method,
 )
 from ..stats import ELPDData
 
@@ -220,8 +220,6 @@ def plot_khat(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_khatplot import _plot_khat
 
         plot_khat_kwargs.pop("hover_label")
         plot_khat_kwargs.pop("hover_format")
@@ -235,10 +233,8 @@ def plot_khat(
         plot_khat_kwargs.pop("cmap")
         plot_khat_kwargs.pop("color")
         plot_khat_kwargs["show"] = show
-        ax = _plot_khat(**plot_khat_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_khatplot import _plot_khat
 
-        ax = _plot_khat(**plot_khat_kwargs)
-
-    return ax
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_khat", "khatplot", backend)
+    axes = method(**plot_khat_kwargs)
+    return axes

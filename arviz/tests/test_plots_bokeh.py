@@ -74,6 +74,11 @@ def get_ax():
     return ax
 
 
+@pytest.fixture(scope="session")
+def backend_kwargs():
+    return {"show": False}
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -130,20 +135,20 @@ def test_plot_density_bad_kwargs(models):
         {"lines": [("mu", {}, 8)]},
     ],
 )
-def test_plot_trace(models, kwargs):
-    axes = plot_trace(models.model_1, backend="bokeh", show=False, **kwargs)
+def test_plot_trace(models, kwargs, backend_kwargs):
+    axes = plot_trace(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs, **kwargs)
     assert axes.shape
 
 
-def test_plot_trace_discrete(discrete_model):
-    axes = plot_trace(discrete_model, backend="bokeh", show=False)
+def test_plot_trace_discrete(discrete_model, backend_kwargs):
+    axes = plot_trace(discrete_model, backend="bokeh", backend_kwargs=backend_kwargs)
     assert axes.shape
 
 
-def test_plot_trace_max_subplots_warning(models):
+def test_plot_trace_max_subplots_warning(models, backend_kwargs):
     with pytest.warns(SyntaxWarning):
         with rc_context(rc={"plot.max_subplots": 1}):
-            axes = plot_trace(models.model_1, backend="bokeh", show=False)
+            axes = plot_trace(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs)
     assert axes.shape
 
 
@@ -183,8 +188,10 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 
 
 @pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
-def test_plot_dist(continuous_model, kwargs):
-    axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
+def test_plot_dist(continuous_model, kwargs, backend_kwargs):
+    axes = plot_dist(
+        continuous_model["x"], backend="bokeh", backend_kwargs=backend_kwargs, **kwargs
+    )
     assert axes
 
 

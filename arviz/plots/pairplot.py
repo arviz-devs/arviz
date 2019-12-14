@@ -2,9 +2,8 @@
 import warnings
 import numpy as np
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_coords
+from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_method
 from ..utils import _var_names
 
 
@@ -192,18 +191,13 @@ def plot_pair(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_pairplot import _plot_pair
-
         pairplot_kwargs.pop("gridsize", None)
         pairplot_kwargs.pop("colorbar", None)
         pairplot_kwargs.pop("divergences_kwargs", None)
         pairplot_kwargs.pop("hexbin_values", None)
         pairplot_kwargs["show"] = show
-        ax = _plot_pair(**pairplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_pairplot import _plot_pair
 
-        ax = _plot_pair(**pairplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_pair", "pairplot", backend)
+    ax = method(**pairplot_kwargs)
     return ax

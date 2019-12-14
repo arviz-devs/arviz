@@ -2,9 +2,8 @@
 import numpy as np
 from scipy.stats.mstats import rankdata
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
+from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords, get_plotting_method
 from ..utils import _var_names, _numba_var
 from ..stats.stats_utils import stats_variance_2d as svar
 
@@ -139,8 +138,6 @@ def plot_parallel(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_parallelplot import _plot_parallel
 
         parallel_kwargs["show"] = show
         parallel_kwargs.pop("textsize")
@@ -149,10 +146,9 @@ def plot_parallel(
         parallel_kwargs.pop("colord")
         parallel_kwargs.pop("colornd")
         parallel_kwargs.pop("shadend")
-        ax = _plot_parallel(**parallel_kwargs)  # pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_parallelplot import _plot_parallel
 
-        ax = _plot_parallel(**parallel_kwargs)
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_parallel", "parallelplot", backend)
+    ax = method(**parallel_kwargs)
 
     return ax

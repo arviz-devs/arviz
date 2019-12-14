@@ -1,7 +1,6 @@
 """Plot posterior densities."""
 from typing import Optional
 
-from .backends import check_bokeh_version
 from ..data import convert_to_dataset
 from .plot_utils import (
     xarray_var_iter,
@@ -9,6 +8,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
+    get_plotting_method,
 )
 from ..utils import _var_names
 
@@ -211,16 +211,12 @@ def plot_posterior(
     )
 
     if backend == "bokeh":
-        check_bokeh_version()
-        from .backends.bokeh.bokeh_posteriorplot import _plot_posterior
 
         posteriorplot_kwargs.pop("xt_labelsize")
         posteriorplot_kwargs.pop("titlesize")
         posteriorplot_kwargs["show"] = show
-        ax = _plot_posterior(**posteriorplot_kwargs)  #  pylint: disable=unexpected-keyword-arg
-    else:
-        from .backends.matplotlib.mpl_posteriorplot import _plot_posterior
 
-        ax = _plot_posterior(**posteriorplot_kwargs)
-
+    # TODO: Add backend kwargs
+    method = get_plotting_method("plot_posterior", "posteriorplot", backend)
+    ax = method(**posteriorplot_kwargs)
     return ax

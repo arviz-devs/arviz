@@ -1,6 +1,31 @@
-# pylint: disable=no-member,invalid-name,redefined-outer-name
+# pylint: disable=no-member,invalid-name,redefined-outer-name, wrong-import-position
 """Bokeh Plotting Backend."""
 import packaging
+
+# Set plot generic bokeh keyword arg defaults if none provided
+BACKEND_KWARG_DEFAULTS = {"show": True}
+
+from .autocorrplot import plot_autocorr
+from .compareplot import plot_compare
+from .densityplot import plot_density
+from .distplot import plot_dist
+from .elpdplot import plot_elpd
+from .energyplot import plot_energy
+from .essplot import plot_ess
+from .forestplot import plot_forest
+from .hpdplot import plot_hpd
+from .jointplot import plot_joint
+from .kdeplot import plot_kde
+from .khatplot import plot_khat
+from .loopitplot import plot_loo_pit
+from .mcseplot import plot_mcse
+from .pairplot import plot_pair
+from .parallelplot import plot_parallel
+from .ppcplot import plot_ppc
+from .posteriorplot import plot_posterior
+from .rankplot import plot_rank
+from .traceplot import plot_trace
+from .violinplot import plot_violin
 
 
 def output_notebook(*args, **kwargs):
