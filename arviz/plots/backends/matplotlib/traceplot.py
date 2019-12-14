@@ -120,7 +120,6 @@ def plot_trace(
         figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2
     )
 
-    # TODO: This is breaking plotting for some reason
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
