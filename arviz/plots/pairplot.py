@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_method
+from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -199,6 +199,6 @@ def plot_pair(
         pairplot_kwargs.pop("hexbin_values", None)
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_pair", "pairplot", backend)
-    ax = method(**pairplot_kwargs)
+    plot = get_plotting_function("plot_pair", "pairplot", backend)
+    ax = plot(**pairplot_kwargs)
     return ax

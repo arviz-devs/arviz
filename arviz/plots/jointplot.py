@@ -1,6 +1,6 @@
 """Joint scatter plot of two variables."""
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_method
+from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -174,6 +174,6 @@ def plot_joint(
         ]["plot_kwargs"].pop("linewidth")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_joint", "jointplot", backend)
-    axes = method(**plot_joint_kwargs)
+    plot = get_plotting_function("plot_joint", "jointplot", backend)
+    axes = plot(**plot_joint_kwargs)
     return axes

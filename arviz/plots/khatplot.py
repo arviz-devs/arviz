@@ -10,7 +10,7 @@ from .plot_utils import (
     get_coords,
     color_from_dim,
     format_coords_as_labels,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..stats import ELPDData
 
@@ -236,6 +236,6 @@ def plot_khat(
         plot_khat_kwargs.pop("color")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_khat", "khatplot", backend)
-    axes = method(**plot_khat_kwargs)
+    plot = get_plotting_function("plot_khat", "khatplot", backend)
+    axes = plot(**plot_khat_kwargs)
     return axes

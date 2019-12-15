@@ -4,7 +4,7 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
 from ..stats import hpd
-from .plot_utils import get_plotting_method
+from .plot_utils import get_plotting_function
 
 
 def plot_hpd(
@@ -110,6 +110,6 @@ def plot_hpd(
     )
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_hpd", "hpdplot", backend)
-    ax = method(**hpdplot_kwargs)
+    plot = get_plotting_function("plot_hpd", "hpdplot", backend)
+    ax = plot(**hpdplot_kwargs)
     return ax

@@ -1,6 +1,6 @@
 """Forest plot."""
 from ..data import convert_to_dataset
-from .plot_utils import get_coords, get_plotting_method
+from .plot_utils import get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -177,6 +177,6 @@ def plot_forest(
     )
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_forest", "forestplot", backend)
-    axes = method(**plot_forest_kwargs)
+    plot = get_plotting_function("plot_forest", "forestplot", backend)
+    axes = plot(**plot_forest_kwargs)
     return axes

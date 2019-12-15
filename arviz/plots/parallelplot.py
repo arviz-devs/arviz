@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats.mstats import rankdata
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords, get_plotting_method
+from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords, get_plotting_function
 from ..utils import _var_names, _numba_var
 from ..stats.stats_utils import stats_variance_2d as svar
 
@@ -149,7 +149,7 @@ def plot_parallel(
         parallel_kwargs.pop("shadend")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_parallel", "parallelplot", backend)
-    ax = method(**parallel_kwargs)
+    plot = get_plotting_function("plot_parallel", "parallelplot", backend)
+    ax = plot(**parallel_kwargs)
 
     return ax

@@ -9,7 +9,7 @@ from .plot_utils import (
     _scale_fig_size,
     default_grid,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -301,6 +301,6 @@ def plot_ppc(
         ppcplot_kwargs.pop("ax_labelsize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_ppc", "ppcplot", backend)
-    axes = method(**ppcplot_kwargs)
+    plot = get_plotting_function("plot_ppc", "ppcplot", backend)
+    axes = plot(**ppcplot_kwargs)
     return axes

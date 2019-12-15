@@ -625,7 +625,7 @@ def filter_plotters_list(plotters, plot_kind):
     return plotters
 
 
-def get_plotting_method(plot_name, plot_module, backend):
+def get_plotting_function(plot_name, plot_module, backend):
     """Return plotting function for correct backend."""
     _backend = {
         "mpl": "matplotlib",

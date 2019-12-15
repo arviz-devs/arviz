@@ -8,7 +8,7 @@ from .plot_utils import (
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -144,7 +144,7 @@ def plot_autocorr(
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_autocorr", "autocorrplot", backend)
-    axes = method(**autocorr_plot_args)
+    plot = get_plotting_function("plot_autocorr", "autocorrplot", backend)
+    axes = plot(**autocorr_plot_args)
 
     return axes

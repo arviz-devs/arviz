@@ -4,7 +4,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_method, get_coords, xarray_var_iter
+from .plot_utils import get_plotting_function, get_coords, xarray_var_iter
 from ..data import convert_to_dataset
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -210,7 +210,7 @@ def plot_trace(
         backend_kwargs=backend_kwargs,
     )
 
-    method = get_plotting_method("plot_trace", "traceplot", backend)
-    axes = method(**trace_plot_args)
+    plot = get_plotting_function("plot_trace", "traceplot", backend)
+    axes = plot(**trace_plot_args)
 
     return axes

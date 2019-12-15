@@ -5,7 +5,7 @@ from .plot_utils import (
     xarray_var_iter,
     filter_plotters_list,
     default_grid,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -112,6 +112,6 @@ def plot_violin(
         violinplot_kwargs.pop("xt_labelsize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_violin", "violinplot", backend)
-    ax = method(**violinplot_kwargs)
+    plot = get_plotting_function("plot_violin", "violinplot", backend)
+    ax = plot(**violinplot_kwargs)
     return ax

@@ -4,7 +4,7 @@ from matplotlib.pyplot import rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, get_plotting_method
+from .plot_utils import _scale_fig_size, get_plotting_function
 
 
 def plot_energy(
@@ -140,6 +140,6 @@ def plot_energy(
             plot_energy_kwargs["legend"] = False
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_energy", "energyplot", backend)
-    ax = method(**plot_energy_kwargs)
+    plot = get_plotting_function("plot_energy", "energyplot", backend)
+    ax = plot(**plot_energy_kwargs)
     return ax

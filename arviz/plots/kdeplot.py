@@ -9,7 +9,7 @@ import xarray as xr
 from ..data import InferenceData
 from ..utils import conditional_jit, _stack
 from ..stats.stats_utils import histogram
-from .plot_utils import get_plotting_method
+from .plot_utils import get_plotting_function
 
 
 def plot_kde(
@@ -218,8 +218,8 @@ def plot_kde(
         kde_plot_args.pop("textsize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_kde", "kdeplot", backend)
-    ax = method(**kde_plot_args)
+    plot = get_plotting_function("plot_kde", "kdeplot", backend)
+    ax = plot(**kde_plot_args)
 
     return ax
 

@@ -1,7 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 
-from .plot_utils import _scale_fig_size, get_plotting_method
+from .plot_utils import _scale_fig_size, get_plotting_function
 
 
 def plot_compare(
@@ -137,7 +137,7 @@ def plot_compare(
         compareplot_kwargs.pop("xt_labelsize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_compare", "compareplot", backend)
-    ax = method(**compareplot_kwargs)
+    plot = get_plotting_function("plot_compare", "compareplot", backend)
+    ax = plot(**compareplot_kwargs)
 
     return ax

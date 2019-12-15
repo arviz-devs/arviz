@@ -10,7 +10,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -193,6 +193,6 @@ def plot_mcse(
         mcse_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_mcse", "mcseplot", backend)
-    ax = method(**mcse_kwargs)
+    plot = get_plotting_function("plot_mcse", "mcseplot", backend)
+    ax = plot(**mcse_kwargs)
     return ax

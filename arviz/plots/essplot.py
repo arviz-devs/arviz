@@ -10,7 +10,7 @@ from .plot_utils import (
     default_grid,
     get_coords,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -319,6 +319,6 @@ def plot_ess(
     )
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_ess", "essplot", backend)
-    ax = method(**essplot_kwargs)
+    plot = get_plotting_function("plot_ess", "essplot", backend)
+    ax = plot(**essplot_kwargs)
     return ax

@@ -9,7 +9,7 @@ from .plot_utils import (
     default_grid,
     filter_plotters_list,
     _sturges_formula,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -167,6 +167,6 @@ def plot_rank(
         rankplot_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_rank", "rankplot", backend)
-    axes = method(**rankplot_kwargs)
+    plot = get_plotting_function("plot_rank", "rankplot", backend)
+    axes = plot(**rankplot_kwargs)
     return axes

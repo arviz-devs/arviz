@@ -11,7 +11,7 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     _create_axes_grid,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -247,6 +247,6 @@ def plot_density(
         plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_density", "densityplot", backend)
-    ax = method(**plot_density_kwargs)
+    plot = get_plotting_function("plot_density", "densityplot", backend)
+    ax = plot(**plot_density_kwargs)
     return ax
