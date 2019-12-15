@@ -6,6 +6,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
+from . import backend_kwarg_defaults
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
@@ -26,6 +27,15 @@ def plot_elpd(
     backend_kwargs,
 ):
     """Bokeh elpd plot."""
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
+    dpi = backend_kwargs.pop("dpi")
     show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
@@ -34,13 +44,10 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            tools = rcParams["plot.bokeh.tools"]
-            output_backend = rcParams["plot.bokeh.output_backend"]
             ax = bkp.figure(
-                width=int(figsize[0] * 60),
-                height=int(figsize[1] * 60),
-                output_backend=output_backend,
-                tools=tools,
+                width=int(figsize[0] * dpi),
+                height=int(figsize[1] * dpi),
+                **backend_kwargs
             )
 
         ydata = pointwise_data[0] - pointwise_data[1]
@@ -71,9 +78,6 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            tools = rcParams["plot.bokeh.tools"]
-            output_backend = rcParams["plot.bokeh.output_backend"]
-            dpi = rcParams["plot.bokeh.figure.dpi"]
             ax = []
             for row in range(numvars - 1):
                 ax_row = []
@@ -82,8 +86,7 @@ def plot_elpd(
                         ax_first = bkp.figure(
                             width=int(figsize[0] / (numvars - 1) * dpi),
                             height=int(figsize[1] / (numvars - 1) * dpi),
-                            output_backend=output_backend,
-                            tools=tools,
+                            **backend_kwargs
                         )
                         ax_row.append(ax_first)
                     elif row < col:
@@ -95,8 +98,7 @@ def plot_elpd(
                                 height=int(figsize[1] / (numvars - 1) * dpi),
                                 x_range=ax_first.x_range,
                                 y_range=ax_first.y_range,
-                                output_backend=output_backend,
-                                tools=tools,
+                                **backend_kwargs
                             )
                         )
                 ax.append(ax_row)
