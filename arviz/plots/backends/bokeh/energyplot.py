@@ -2,6 +2,7 @@
 import bokeh.plotting as bkp
 from bokeh.models import Label
 
+from . import backend_kwarg_defaults
 from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
 from ....rcparams import rcParams
@@ -23,16 +24,21 @@ def plot_energy(
     backend_kwargs,
 ):
     """Bokeh energy plot."""
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        dpi = rcParams["plot.bokeh.figure.dpi"]
+        dpi = backend_kwargs.pop("dpi")
         ax = bkp.figure(
             width=int(figsize[0] * dpi),
             height=int(figsize[1] * dpi),
-            output_backend=output_backend,
-            tools=tools,
+            **backend_kwargs
         )
 
     if kind == "kde":
