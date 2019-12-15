@@ -2,6 +2,7 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
+from . import backend_kwargs_defaults
 from ....rcparams import rcParams
 
 
@@ -21,16 +22,20 @@ def plot_compare(
     backend_kwargs,
 ):
     """Bokeh compareplot."""
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        dpi = rcParams["plot.bokeh.figure.dpi"]
+        dpi = backens_kwargs.pop("dpi")rcParams["plot.bokeh.figure.dpi"]
         ax = bkp.figure(
             width=figsize[0] * dpi,
             height=figsize[1] * dpi,
-            output_backend=output_backend,
-            tools=tools,
             **backend_kwargs
         )
 
