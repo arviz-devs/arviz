@@ -12,7 +12,7 @@ from ..plots.plot_utils import (
     get_coords,
     filter_plotters_list,
     format_sig_figs,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..rcparams import rc_context
 
