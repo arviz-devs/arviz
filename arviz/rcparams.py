@@ -35,7 +35,10 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
             raise ValueError("Could not convert to {}".format(typeof.__name__))
         if isinstance(value, str):
             value = value.lower()
+
         if value in accepted_values:
+            # Convert value to python boolean if string matches
+            value = {"true":True, "false":False}.get(value, value)
             return value
         raise ValueError(
             "{} is not one of {}{}".format(
@@ -96,7 +99,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
-    "plot.bokeh.show": (True, _make_validate_choice({True, False}, typeof=bool)),
+    "plot.bokeh.show": ("true", _make_validate_choice({"true", "false"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",
