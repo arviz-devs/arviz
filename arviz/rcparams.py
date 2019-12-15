@@ -38,7 +38,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
 
         if value in accepted_values:
             # Convert value to python boolean if string matches
-            value = {"true":True, "false":False}.get(value, value)
+            value = {"true": True, "false": False}.get(value, value)
             return value
         raise ValueError(
             "{} is not one of {}{}".format(
