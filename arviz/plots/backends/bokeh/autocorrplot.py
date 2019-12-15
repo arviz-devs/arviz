@@ -4,6 +4,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
+from . import backend_kwarg_defaults
 from ...plot_utils import make_label
 from ....stats import autocorr
 
@@ -12,6 +13,10 @@ def plot_autocorr(
     axes, plotters, max_lag, line_width, combined, backend_kwargs,
 ):
     """Bokeh autocorrelation plot."""
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:
