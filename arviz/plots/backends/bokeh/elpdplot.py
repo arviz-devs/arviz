@@ -27,6 +27,9 @@ def plot_elpd(
     backend_kwargs,
 ):
     """Bokeh elpd plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
     backend_kwargs = {
         **backend_kwarg_defaults(
             ("tools", "plot.bokeh.tools"),

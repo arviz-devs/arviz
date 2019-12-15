@@ -41,7 +41,7 @@ def plot_dist(
             ("tools", "plot.bokeh.tools"),
             ("output_backend", "plot.bokeh.output_backend"),
             ("width", "plot.bokeh.figure.width"),
-            ("height", "plot.bokeh.output_backend"),
+            ("height", "plot.bokeh.figure.height"),
         ),
         **backend_kwargs,
     }

@@ -204,6 +204,8 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
         Number of columns
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: dict, optional
+        kwargs for backend figure. Implemented for backend="bokeh"
 
     Returns
     -------

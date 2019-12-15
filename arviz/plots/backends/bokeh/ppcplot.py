@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -32,9 +33,16 @@ def plot_ppc(
     num_pp_samples,
 ):
     """Bokeh ppc plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
-        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
+        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh", backend_kwargs=backend_kwargs)
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:

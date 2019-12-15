@@ -45,18 +45,17 @@ def plot_trace(
 
     backend_kwargs = {
         **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"), ("output_backend", "plot.bokeh.output_backend")
+            ("tools", "plot.bokeh.tools"), ("output_backend", "plot.bokeh.output_backend"), ("dpi", "plot.bokeh.figure.dpi")
         ),
         **backend_kwargs,
     }
+    dpi = backend_kwargs.pop("dpi")
+    show = backend_kwargs.pop("show")
 
     backend_kwargs.setdefault(
-        "height", int(figsize[1] * rcParams["plot.bokeh.figure.dpi"] // len(plotters))
+        "height", int(figsize[1] * dpi // len(plotters))
     )
-    backend_kwargs.setdefault("width", int(figsize[0] * rcParams["plot.bokeh.figure.dpi"] // 2))
-
-    # Used near end for whether to show plot or not, can't be passed to bkp.figure
-    show = backend_kwargs.pop("show")
+    backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
 
     figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
 

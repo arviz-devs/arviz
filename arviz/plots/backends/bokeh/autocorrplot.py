@@ -13,6 +13,9 @@ def plot_autocorr(
     axes, plotters, max_lag, line_width, combined, backend_kwargs,
 ):
     """Bokeh autocorrelation plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
     backend_kwargs = {
         **backend_kwarg_defaults(),
         **backend_kwargs,

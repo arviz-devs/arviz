@@ -9,6 +9,7 @@ from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 from scipy.stats import mode
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     make_label,
@@ -40,6 +41,13 @@ def plot_posterior(
     backend_kwargs,
 ):
     """Bokeh posterior plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(

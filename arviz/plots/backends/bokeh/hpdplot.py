@@ -5,20 +5,28 @@ import bokeh.plotting as bkp
 import numpy as np
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
+from . import backend_kwarg_defaults
 from ....rcparams import rcParams
 
 
 def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs):
     """Bokeh hpd plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("width", "plot.bokeh.figure.width"),
+            ("height", "plot.bokeh.figure.height"),
+        ),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
         ax = bkp.figure(
-            width=rcParams["plot.bokeh.figure.width"],
-            height=rcParams["plot.bokeh.figure.height"],
-            output_backend=output_backend,
-            tools=tools,
+            **backend_kwargs
         )
 
     color = plot_kwargs.pop("color")

@@ -7,6 +7,7 @@ from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
+from . import backend_kwarg_defaults
 from ...plot_utils import (
     _create_axes_grid,
     make_label,
@@ -29,6 +30,13 @@ def plot_rank(
     backend_kwargs,
 ):
     """Bokeh rank plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if axes is None:
         _, axes = _create_axes_grid(
@@ -40,6 +48,7 @@ def plot_rank(
             sharex=True,
             sharey=True,
             backend="bokeh",
+            backend_kwargs=backend_kwargs,
         )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):

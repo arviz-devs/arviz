@@ -24,6 +24,9 @@ def plot_energy(
     backend_kwargs,
 ):
     """Bokeh energy plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
     backend_kwargs = {
         **backend_kwarg_defaults(
             ("tools", "plot.bokeh.tools"),
@@ -33,8 +36,8 @@ def plot_energy(
         **backend_kwargs,
     }
     show = backend_kwargs.pop("show")
+    dpi = backend_kwargs.pop("dpi")
     if ax is None:
-        dpi = backend_kwargs.pop("dpi")
         ax = bkp.figure(
             width=int(figsize[0] * dpi),
             height=int(figsize[1] * dpi),
@@ -57,7 +60,7 @@ def plot_energy(
                 ax=ax,
                 legend=legend,
                 backend="bokeh",
-                show=False,
+                backend_kwargs={"show" : False},
             )
     elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()
@@ -78,8 +81,8 @@ def plot_energy(
     if bfmi:
         for idx, val in enumerate(e_bfmi(energy)):
             bfmi_info = Label(
-                x=int(figsize[0] * 90 * 0.58),
-                y=int(figsize[1] * 90 * 0.83) - 20 * idx,
+                x=int(figsize[0] * dpi * 0.58),
+                y=int(figsize[1] * dpi * 0.83) - 20 * idx,
                 x_units="screen",
                 y_units="screen",
                 text="chain {:>2} BFMI = {:.2f}".format(idx, val),

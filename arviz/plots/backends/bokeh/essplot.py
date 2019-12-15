@@ -7,6 +7,7 @@ from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
+from . import backend_kwarg_defaults
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -48,6 +49,13 @@ def plot_ess(
     backend_kwargs,
 ):
     """Bokeh essplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
@@ -58,6 +66,7 @@ def plot_ess(
             squeeze=False,
             constrained_layout=True,
             backend="bokeh",
+            backend_kwargs=backend_kwargs,
         )
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.circle(np.asarray(xdata), np.asarray(x), size=6)

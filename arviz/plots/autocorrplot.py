@@ -120,6 +120,7 @@ def plot_autocorr(
             sharex=True,
             sharey=True,
             backend=backend,
+            backend_kwargs=backend_kwargs,
         )
     else:
         axes = ax
