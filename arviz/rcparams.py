@@ -96,7 +96,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
-    "plot.bokeh.show": (True, _make_validate_choice({True, False})),
+    "plot.bokeh.show": (True, _make_validate_choice({True, False}, typeof=bool)),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",
