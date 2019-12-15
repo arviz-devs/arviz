@@ -18,9 +18,10 @@ def plot_compare(
     plot_kwargs,
     information_criterion,
     step,
-    show,
+    backend_kwargs,
 ):
     """Bokeh compareplot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]
@@ -30,6 +31,7 @@ def plot_compare(
             height=figsize[1] * dpi,
             output_backend=output_backend,
             tools=tools,
+            **backend_kwargs
         )
 
     yticks_pos = list(yticks_pos)

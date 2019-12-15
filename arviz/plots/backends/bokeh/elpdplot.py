@@ -23,9 +23,10 @@ def plot_elpd(
     coord_labels,
     xdata,
     threshold,
-    show,
+    backend_kwargs,
 ):
     """Bokeh elpd plot."""
+    show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1

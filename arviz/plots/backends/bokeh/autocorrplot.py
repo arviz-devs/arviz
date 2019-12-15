@@ -9,7 +9,7 @@ from ....stats import autocorr
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, line_width, combined=False, show=True,
+    axes, plotters, max_lag, line_width, combined, backend_kwargs,
 ):
     """Bokeh autocorrelation plot."""
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
@@ -38,6 +38,6 @@ def plot_autocorr(
         axes[0, 0].y_range._property_values["start"] = -1  # pylint: disable=protected-access
         axes[0, 0].y_range._property_values["end"] = 1  # pylint: disable=protected-access
 
-    if show:
+    if backend_kwargs["show"]:
         bkp.show(gridplot([list(item) for item in axes], toolbar_location="above"))
     return axes

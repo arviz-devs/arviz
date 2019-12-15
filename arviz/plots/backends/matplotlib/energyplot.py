@@ -18,6 +18,7 @@ def plot_energy(
     plot_kwargs,
     bw,
     legend,
+    backend_kwargs,
 ):
     """Matplotlib energy plot."""
     if ax is None:

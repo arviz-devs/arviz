@@ -33,6 +33,7 @@ def plot_ppc(
     markersize,
     animation_kwargs,
     num_pp_samples,
+    backend_kwargs,
 ):
     """Matplotlib ppc plot."""
     if ax is None:

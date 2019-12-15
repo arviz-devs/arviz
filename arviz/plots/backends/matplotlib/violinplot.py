@@ -22,6 +22,7 @@ def plot_violin(
     ax_labelsize,
     xt_labelsize,
     quartiles,
+    backend_kwargs,
 ):
     """Matplotlib violin plot."""
     if ax is None:

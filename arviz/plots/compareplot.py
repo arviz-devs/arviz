@@ -15,7 +15,7 @@ def plot_compare(
     plot_kwargs=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Summary plot for model comparison.
@@ -56,8 +56,9 @@ def plot_compare(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -126,6 +127,7 @@ def plot_compare(
         ax_labelsize=ax_labelsize,
         xt_labelsize=xt_labelsize,
         step=step,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -133,7 +135,6 @@ def plot_compare(
         compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")
         compareplot_kwargs.pop("ax_labelsize")
         compareplot_kwargs.pop("xt_labelsize")
-        compareplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_compare", "compareplot", backend)

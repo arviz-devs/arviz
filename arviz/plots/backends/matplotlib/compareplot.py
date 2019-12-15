@@ -17,6 +17,7 @@ def plot_compare(
     ax_labelsize,
     xt_labelsize,
     step,
+    backend_kwargs,
 ):
     """Matplotlib compare plot."""
     if ax is None:

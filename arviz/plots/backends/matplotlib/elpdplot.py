@@ -28,6 +28,7 @@ def plot_elpd(
     legend,
     handles,
     color,
+    backend_kwargs,
 ):
     """Matplotlib elpd plot."""
     if numvars == 2:

@@ -19,7 +19,7 @@ def plot_hpd(
     plot_kwargs=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     r"""
     Plot hpd intervals for regression data.
@@ -52,8 +52,9 @@ def plot_hpd(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -100,11 +101,13 @@ def plot_hpd(
         y_data = hpd_[idx]
 
     hpdplot_kwargs = dict(
-        ax=ax, x_data=x_data, y_data=y_data, plot_kwargs=plot_kwargs, fill_kwargs=fill_kwargs,
+        ax=ax,
+        x_data=x_data,
+        y_data=y_data,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        backend_kwargs=backend_kwargs,
     )
-
-    if backend == "bokeh":
-        hpdplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_hpd", "hpdplot", backend)

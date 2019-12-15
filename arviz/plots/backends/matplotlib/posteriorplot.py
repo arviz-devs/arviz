@@ -34,6 +34,7 @@ def plot_posterior(
     xt_labelsize,
     kwargs,
     titlesize,
+    backend_kwargs,
 ):
     """Matplotlib posterior plot."""
     if ax is None:

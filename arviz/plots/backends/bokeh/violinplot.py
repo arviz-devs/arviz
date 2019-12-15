@@ -23,9 +23,10 @@ def plot_violin(
     credible_interval,
     linewidth,
     quartiles,
-    show,
+    backend_kwargs,
 ):
     """Bokeh violin plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

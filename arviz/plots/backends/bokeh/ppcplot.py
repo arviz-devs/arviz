@@ -28,10 +28,11 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     markersize,
-    show,
+    backend_kwargs,
     num_pp_samples,
 ):
     """Bokeh ppc plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
     else:

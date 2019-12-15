@@ -33,7 +33,7 @@ def plot_kde(
     ax=None,
     legend=True,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -88,8 +88,9 @@ def plot_kde(
         Add legend to the figure. By default True.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -209,12 +210,11 @@ def plot_kde(
         pcolormesh_kwargs=pcolormesh_kwargs,
         ax=ax,
         legend=legend,
+        backend_kwargs=backend_kwargs,
         **kwargs,
     )
 
     if backend == "bokeh":
-
-        kde_plot_args["show"] = show
         kde_plot_args.pop("textsize")
 
     # TODO: Add backend kwargs

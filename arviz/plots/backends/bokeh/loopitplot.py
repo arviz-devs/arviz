@@ -27,9 +27,10 @@ def plot_loo_pit(
     plot_unif_kwargs,
     loo_pit_kde,
     plot_kwargs,
-    show,
+    backend_kwargs,
 ):
     """Bokeh loo pit plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

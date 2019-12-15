@@ -24,7 +24,7 @@ def plot_density(
     outline,
     shade,
     data_labels,
-    show,
+    backend_kwargs,
 ):
     """Bokeh density plot."""
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
@@ -58,7 +58,7 @@ def plot_density(
                 data_label=data_label,
             )
 
-    if show:
+    if backend_kwargs["show"]:
         grid = gridplot([list(item) for item in ax], toolbar_location="above")
         bkp.show(grid)
 

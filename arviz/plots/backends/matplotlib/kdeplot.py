@@ -32,6 +32,7 @@ def plot_kde(
     pcolormesh_kwargs=None,
     ax=None,
     legend=True,
+    backend_kwargs,
 ):
     """Matplotlib kde plot."""
     if ax is None:

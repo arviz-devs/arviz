@@ -37,12 +37,19 @@ def plot_posterior(
     rope,
     ax_labelsize,
     kwargs,
-    show,
+    backend_kwargs,
 ):
     """Bokeh posterior plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, backend="bokeh"
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
         )
     idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):

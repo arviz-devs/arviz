@@ -26,9 +26,10 @@ def plot_pair(
     divergences,
     diverging_mask,
     flat_var_names,
-    show,
+    backend_kwargs,
 ):
     """Bokeh pair plot."""
+    show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 

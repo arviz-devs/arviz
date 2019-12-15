@@ -20,9 +20,10 @@ def plot_joint(
     joint_kwargs,
     gridsize,
     marginal_kwargs,
-    show,
+    backend_kwargs,
 ):
     """Bokeh joint plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

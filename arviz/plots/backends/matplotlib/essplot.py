@@ -41,6 +41,7 @@ def plot_ess(
     rug_kind,
     rug_kwargs,
     hline_kwargs,
+    backend_kwargs,
 ):
     """Matplotlib ess plot."""
     if ax is None:

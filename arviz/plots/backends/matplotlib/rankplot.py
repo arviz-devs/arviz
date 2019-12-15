@@ -23,6 +23,7 @@ def plot_rank(
     labels,
     ax_labelsize,
     titlesize,
+    backend_kwargs,
 ):
     """Matplotlib rankplot.."""
     if axes is None:

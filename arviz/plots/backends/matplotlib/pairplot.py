@@ -27,6 +27,7 @@ def plot_pair(
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
+    backend_kwargs,
 ):
     """Matplotlib pairplot."""
     if numvars == 2:

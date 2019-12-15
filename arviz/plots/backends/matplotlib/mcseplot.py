@@ -37,6 +37,7 @@ def plot_mcse(
     xt_labelsize,
     ax_labelsize,
     titlesize,
+    backend_kwargs,
 ):
     """Matplotlib mcseplot."""
     if ax is None:

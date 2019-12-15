@@ -21,7 +21,7 @@ def plot_parallel(
     ax=None,
     norm_method=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
@@ -59,8 +59,9 @@ def plot_parallel(
         Defaults to none.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -135,11 +136,11 @@ def plot_parallel(
         xt_labelsize=xt_labelsize,
         legend=legend,
         figsize=figsize,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
 
-        parallel_kwargs["show"] = show
         parallel_kwargs.pop("textsize")
         parallel_kwargs.pop("xt_labelsize")
         parallel_kwargs.pop("legend")

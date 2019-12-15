@@ -40,9 +40,10 @@ def plot_kde(
     pcolormesh_kwargs=None,
     ax=None,
     legend=True,
-    show=True,
+    backend_kwargs=None,
 ):
     """Bokeh kde plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

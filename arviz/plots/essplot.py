@@ -34,7 +34,7 @@ def plot_ess(
     hline_kwargs=None,
     rug_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
@@ -83,8 +83,9 @@ def plot_ess(
         kwargs passed to rug plot.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -314,10 +315,8 @@ def plot_ess(
         rug_kind=rug_kind,
         rug_kwargs=rug_kwargs,
         hline_kwargs=hline_kwargs,
+        backend_kwargs=backend_kwargs,
     )
-
-    if backend == "bokeh":
-        essplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_ess", "essplot", backend)

@@ -6,8 +6,9 @@ from bokeh.models.tickers import FixedTicker
 from ....rcparams import rcParams
 
 
-def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, show):
+def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kwargs):
     """Bokeh parallel plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

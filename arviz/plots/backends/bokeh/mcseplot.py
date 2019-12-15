@@ -34,11 +34,19 @@ def plot_mcse(
     rug_kind,
     _markersize,
     _linewidth,
-    show,
+    backend_kwargs,
 ):
     """Bokeh mcse plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
-        _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         if errorbar or rug:

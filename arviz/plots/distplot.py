@@ -90,7 +90,7 @@ def plot_dist(
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend
+        check the plotting method of the backend.
 
     Returns
     -------

@@ -2,9 +2,6 @@
 """Bokeh Plotting Backend."""
 import packaging
 
-# Set plot generic bokeh keyword arg defaults if none provided
-BACKEND_KWARG_DEFAULTS = {"show": True}
-
 from .autocorrplot import plot_autocorr
 from .compareplot import plot_compare
 from .densityplot import plot_density
@@ -26,6 +23,22 @@ from .posteriorplot import plot_posterior
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
+from ....rcparams import rcParams
+
+
+def backend_kwarg_defaults(add_default=True, *args, **kwargs):
+    """Get default kwargs for backend.
+
+    For args add a tuple with key and rcParam key pair.
+    """
+    defaults = {**kwargs}
+    # add needed default args from arviz.rcParams
+    for key, arg in args:
+        defaults.setdefault(key, rcParams[arg])
+    # add default args from rcParams
+    if add_default:
+        defaults.setdefault("show", rcParams["plot.bokeh.show"])
+    return defaults
 
 
 def output_notebook(*args, **kwargs):

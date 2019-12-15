@@ -15,6 +15,7 @@ def plot_parallel(
     xt_labelsize,
     legend,
     figsize,
+    backend_kwargs,
 ):
     """Matplotlib parallel plot."""
     if ax is None:

@@ -33,7 +33,7 @@ def plot_density(
     figsize=None,
     textsize=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -86,8 +86,9 @@ def plot_density(
         on figsize.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -235,6 +236,7 @@ def plot_density(
         shade=shade,
         n_data=n_data,
         data_labels=data_labels,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -242,7 +244,6 @@ def plot_density(
         plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
         plot_density_kwargs.pop("titlesize")
         plot_density_kwargs.pop("xt_labelsize")
-        plot_density_kwargs["show"] = show
         plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs

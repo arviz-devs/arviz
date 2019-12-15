@@ -29,6 +29,7 @@ def plot_loo_pit(
     legend,
     credible_interval,
     plot_kwargs,
+    backend_kwargs,
 ):
     """Matplotlib loo pit plot."""
     if ax is None:

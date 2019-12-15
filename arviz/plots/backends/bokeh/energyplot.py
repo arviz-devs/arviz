@@ -9,9 +9,21 @@ from ....stats import bfmi as e_bfmi
 
 
 def plot_energy(
-    ax, series, energy, kind, bfmi, figsize, line_width, fill_kwargs, plot_kwargs, bw, legend, show,
+    ax,
+    series,
+    energy,
+    kind,
+    bfmi,
+    figsize,
+    line_width,
+    fill_kwargs,
+    plot_kwargs,
+    bw,
+    legend,
+    backend_kwargs,
 ):
     """Bokeh energy plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

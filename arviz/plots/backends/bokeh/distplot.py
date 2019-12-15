@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import BACKEND_KWARG_DEFAULTS
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
 from ....rcparams import rcParams
@@ -36,17 +36,18 @@ def plot_dist(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
-
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("width", "plot.bokeh.figure.width"),
+            ("height", "plot.bokeh.output_backend"),
+        ),
+        **backend_kwargs,
+    }
+    show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        ax = bkp.figure(
-            width=rcParams["plot.bokeh.figure.width"],
-            height=rcParams["plot.bokeh.figure.height"],
-            output_backend=output_backend,
-            tools=tools,
-        )
+        ax = bkp.figure(**backend_kwargs)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
@@ -82,14 +83,12 @@ def plot_dist(
             pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="bokeh",
-            # TODO: Revisit this when I refactor backend args for kde
-            show=False,
+            backend_kwarg={"show": False},
         )
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
-    # TODO: Temporary setting just to make sure tests work. This needs to be removed
-    if backend_kwargs["show"] is True:
+    if show:
         bkp.show(ax, toolbar_location="above")
     return ax
 

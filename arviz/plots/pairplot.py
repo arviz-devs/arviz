@@ -23,7 +23,7 @@ def plot_pair(
     divergences_kwargs=None,
     plot_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -66,8 +66,9 @@ def plot_pair(
         Additional keywords passed to ax.plot, az.plot_kde or ax.hexbin
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -188,6 +189,7 @@ def plot_pair(
         diverging_mask=diverging_mask,
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -195,7 +197,6 @@ def plot_pair(
         pairplot_kwargs.pop("colorbar", None)
         pairplot_kwargs.pop("divergences_kwargs", None)
         pairplot_kwargs.pop("hexbin_values", None)
-        pairplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_pair", "pairplot", backend)

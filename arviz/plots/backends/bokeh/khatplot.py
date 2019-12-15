@@ -21,9 +21,10 @@ def plot_khat(
     linewidth,
     n_data_points,
     bin_format,
-    show,
+    backend_kwargs,
 ):
     """Bokeh khat plot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]

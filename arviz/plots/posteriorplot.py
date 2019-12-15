@@ -31,7 +31,7 @@ def plot_posterior(
     bins=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """Plot Posterior densities in the style of John K. Kruschke's book.
@@ -83,8 +83,9 @@ def plot_posterior(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -208,13 +209,13 @@ def plot_posterior(
         xt_labelsize=xt_labelsize,
         kwargs=kwargs,
         titlesize=titlesize,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
 
         posteriorplot_kwargs.pop("xt_labelsize")
         posteriorplot_kwargs.pop("titlesize")
-        posteriorplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_posterior", "posteriorplot", backend)

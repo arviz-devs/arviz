@@ -49,7 +49,7 @@ def plot_forest(
     textsize,
     ess,
     r_hat,
-    show,
+    backend_kwargs,
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
@@ -66,6 +66,8 @@ def plot_forest(
 
     if markersize is None:
         markersize = auto_markersize
+
+    show = backend_kwargs.pop("show")
 
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]

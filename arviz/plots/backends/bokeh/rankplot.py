@@ -26,9 +26,10 @@ def plot_rank(
     colors,
     ref_line,
     labels,
-    show,
+    backend_kwargs,
 ):
     """Bokeh rank plot."""
+    show = backend_kwargs.pop("show")
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,

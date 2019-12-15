@@ -19,6 +19,7 @@ def plot_joint(
     joint_kwargs,
     gridsize,
     marginal_kwargs,
+    backend_kwargs,
 ):
     """Matplotlib joint plot."""
     if ax is None:

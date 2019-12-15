@@ -9,13 +9,10 @@ from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 
-from . import BACKEND_KWARG_DEFAULTS
+from . import backend_kwarg_defaults
 from ...distplot import plot_dist
 from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
 from ....rcparams import rcParams
-
-BACKEND_KWARG_DEFAULTS["tools"] = rcParams["plot.bokeh.tools"]
-BACKEND_KWARG_DEFAULTS["output_backend"] = rcParams["plot.bokeh.output_backend"]
 
 
 def plot_trace(
@@ -46,7 +43,12 @@ def plot_trace(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"), ("output_backend", "plot.bokeh.output_backend")
+        ),
+        **backend_kwargs,
+    }
 
     backend_kwargs.setdefault(
         "height", int(figsize[1] * rcParams["plot.bokeh.figure.dpi"] // len(plotters))

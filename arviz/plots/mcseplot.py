@@ -31,7 +31,7 @@ def plot_mcse(
     extra_kwargs=None,
     text_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """Plot quantile or local Monte Carlo Standard Error.
@@ -73,8 +73,9 @@ def plot_mcse(
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -179,6 +180,7 @@ def plot_mcse(
         xt_labelsize=xt_labelsize,
         ax_labelsize=ax_labelsize,
         titlesize=titlesize,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -189,7 +191,6 @@ def plot_mcse(
         mcse_kwargs.pop("xt_labelsize")
         mcse_kwargs.pop("ax_labelsize")
         mcse_kwargs.pop("titlesize")
-        mcse_kwargs["show"] = show
 
     # TODO: Add backend kwargs
     method = get_plotting_method("plot_mcse", "mcseplot", backend)

@@ -43,6 +43,7 @@ def plot_forest(
     textsize,
     ess,
     r_hat,
+    backend_kwargs,
 ):
     """Matplotlib forest plot."""
     plot_handler = PlotHandler(

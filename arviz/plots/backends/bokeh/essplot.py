@@ -45,9 +45,10 @@ def plot_ess(
     rug_kind,
     rug_kwargs,
     hline_kwargs,
-    show,
+    backend_kwargs,
 ):
     """Bokeh essplot."""
+    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

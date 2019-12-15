@@ -15,5 +15,4 @@ ax = az.plot_joint(
     kind="hexbin",
     figsize=(10, 10),
     backend="bokeh",
-    show=True,
 )
