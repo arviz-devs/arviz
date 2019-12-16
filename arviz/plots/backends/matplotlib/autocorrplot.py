@@ -1,4 +1,5 @@
 """Matplotlib Autocorrplot."""
+import warnings
 import numpy as np
 
 from ....stats import autocorr
@@ -6,7 +7,14 @@ from ...plot_utils import make_label
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, linewidth, titlesize, combined=False, xt_labelsize=None, backend_kwargs=None,
+    axes,
+    plotters,
+    max_lag,
+    linewidth,
+    titlesize,
+    combined=False,
+    xt_labelsize=None,
+    backend_kwargs=None,
 ):
     """Matplotlib autocorrplot."""
     if backend_kwargs is not None:

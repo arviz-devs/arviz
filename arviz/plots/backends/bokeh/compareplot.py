@@ -3,7 +3,6 @@ import bokeh.plotting as bkp
 from bokeh.models import Span
 
 from . import backend_kwarg_defaults
-from ....rcparams import rcParams
 
 
 def plot_compare(

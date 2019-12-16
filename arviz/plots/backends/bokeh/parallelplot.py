@@ -4,7 +4,6 @@ import numpy as np
 from bokeh.models.tickers import FixedTicker
 
 from . import backend_kwarg_defaults
-from ....rcparams import rcParams
 
 
 def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kwargs):

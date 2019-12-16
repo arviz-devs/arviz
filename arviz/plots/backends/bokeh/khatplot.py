@@ -6,7 +6,6 @@ import numpy as np
 from bokeh.models import ColumnDataSource, Span
 
 from . import backend_kwarg_defaults
-from ....rcparams import rcParams
 from ....stats.stats_utils import histogram
 
 

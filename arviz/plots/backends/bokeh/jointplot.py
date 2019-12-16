@@ -7,7 +7,6 @@ from . import backend_kwarg_defaults
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
-from ....rcparams import rcParams
 
 
 def plot_joint(
@@ -81,7 +80,7 @@ def plot_joint(
             fill_last=fill_last,
             ax=axjoin,
             backend="bokeh",
-            backend_kwargs={"show":False},
+            backend_kwargs={"show": False},
             **joint_kwargs
         )
     else:

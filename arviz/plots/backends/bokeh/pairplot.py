@@ -61,7 +61,7 @@ def plot_pair(
                 fill_last=fill_last,
                 ax=ax,
                 backend="bokeh",
-                backend_kwargs={"show":False},
+                backend_kwargs={"show": False},
             )
         else:
             ax.hexbin(_posterior[0], _posterior[1], size=0.5)
@@ -167,7 +167,7 @@ def plot_pair(
                         fill_last=fill_last,
                         ax=ax[j, i],
                         backend="bokeh",
-                        backend_kwargs={"show":False},
+                        backend_kwargs={"show": False},
                         **plot_kwargs
                     )
 

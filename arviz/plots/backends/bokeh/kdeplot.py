@@ -12,7 +12,6 @@ from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
 from . import backend_kwarg_defaults
-from ....rcparams import rcParams
 
 
 def plot_kde(
@@ -58,8 +57,6 @@ def plot_kde(
     }
     show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
         ax = bkp.figure(**backend_kwargs)
 
     if legend and label is not None:

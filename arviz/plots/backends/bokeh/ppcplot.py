@@ -104,7 +104,7 @@ def plot_ppc(
                     fill_kwargs={"alpha": 0},
                     ax=ax_i,
                     backend="bokeh",
-                    backend_kwargs={"show":False},
+                    backend_kwargs={"show": False},
                 )
             else:
                 bins = get_bins(obs_vals)
@@ -194,7 +194,7 @@ def plot_ppc(
                         },
                         ax=ax_i,
                         backend="bokeh",
-                        backend_kwargs={"show":False},
+                        backend_kwargs={"show": False},
                     )
                 else:
                     vals = pp_vals.flatten()

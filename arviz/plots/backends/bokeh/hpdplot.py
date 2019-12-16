@@ -6,7 +6,6 @@ import numpy as np
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
 from . import backend_kwarg_defaults
-from ....rcparams import rcParams
 
 
 def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs):

@@ -5,7 +5,6 @@ import numpy as np
 from . import backend_kwarg_defaults
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
-from ....rcparams import rcParams
 
 
 def plot_loo_pit(
@@ -117,7 +116,14 @@ def plot_loo_pit(
                 )
     else:
         if use_hpd:
-            plot_hpd(x_vals, unif_densities, backend="bokeh", ax=ax, backend_kwargs={"show":False}, **hpd_kwargs)
+            plot_hpd(
+                x_vals,
+                unif_densities,
+                backend="bokeh",
+                ax=ax,
+                backend_kwargs={"show": False},
+                **hpd_kwargs
+            )
         else:
             for idx in range(n_unif):
                 unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)

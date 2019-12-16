@@ -99,7 +99,9 @@ def test_plot_density_float(models, kwargs, backend_kwargs):
 
 
 def test_plot_density_discrete(discrete_model, backend_kwargs):
-    axes = plot_density(discrete_model, shade=0.9, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+    axes = plot_density(
+        discrete_model, shade=0.9, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+    )
     assert axes.shape[0] == 1
 
 
@@ -119,7 +121,9 @@ def test_plot_density_bad_kwargs(models, backend_kwargs):
         )
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_density(
+            obj, credible_interval=2, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 @pytest.mark.parametrize(
@@ -138,7 +142,9 @@ def test_plot_density_bad_kwargs(models, backend_kwargs):
     ],
 )
 def test_plot_trace(models, kwargs, backend_kwargs):
-    axes = plot_trace(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_trace(
+        models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes.shape
 
 
@@ -189,7 +195,9 @@ def test_plot_kde(continuous_model, kwargs, backend_kwargs):
     ],
 )
 def test_plot_kde_cumulative(continuous_model, kwargs, backend_kwargs):
-    axes = plot_kde(continuous_model["x"], backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_kde(
+        continuous_model["x"], backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes
 
 
@@ -285,7 +293,9 @@ def test_plot_compare(models, kwargs, backend_kwargs):
 
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
-    axes = plot_compare(model_compare, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_compare(
+        model_compare, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes
 
 
@@ -364,12 +374,16 @@ def test_plot_elpd_multidim(multidim_models, add_model, use_elpddata, kwargs, ba
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
 def test_plot_energy(models, kind, backend_kwargs):
-    assert plot_energy(models.model_1, kind=kind, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+    assert plot_energy(
+        models.model_1, kind=kind, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+    )
 
 
 def test_plot_energy_bad(models, backend_kwargs):
     with pytest.raises(ValueError):
-        plot_energy(models.model_1, kind="bad_kind", backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_energy(
+            models.model_1, kind="bad_kind", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 @pytest.mark.parametrize(
@@ -433,7 +447,9 @@ def test_plot_ess_bad_coords(models, dim, backend_kwargs):
     """Test error when chain or dim are used as coords to select a data subset."""
     idata = models.model_1
     with pytest.raises(ValueError, match="invalid coordinates"):
-        plot_ess(idata, coords={dim: slice(3)}, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_ess(
+            idata, coords={dim: slice(3)}, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 def test_plot_ess_no_sample_stats(models, backend_kwargs):
@@ -481,7 +497,10 @@ def test_plot_forest(models, model_fits, args_expected, backend_kwargs):
 def test_plot_forest_rope_exception(backend_kwargs):
     with pytest.raises(ValueError) as err:
         plot_forest(
-            {"x": [1]}, rope="not_correct_format", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+            {"x": [1]},
+            rope="not_correct_format",
+            backend="bokeh",
+            backend_kwargs=backend_kwargs.copy(),
         )
     assert "Argument `rope` must be None, a dictionary like" in str(err.value)
 
@@ -541,7 +560,10 @@ def test_plot_joint(models, kind, backend_kwargs):
 
 def test_plot_joint_ax_tuple(models, backend_kwargs):
     ax = plot_joint(
-        models.model_1, var_names=("mu", "tau"), backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        models.model_1,
+        var_names=("mu", "tau"),
+        backend="bokeh",
+        backend_kwargs=backend_kwargs.copy(),
     )
     axes = plot_joint(
         models.model_2,
@@ -653,7 +675,9 @@ def test_plot_khat_annotate(backend_kwargs):
 
 def test_plot_khat_bad_input(models, backend_kwargs):
     with pytest.raises(ValueError):
-        plot_khat(models.model_1.sample_stats, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_khat(
+            models.model_1.sample_stats, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 @pytest.mark.parametrize(
@@ -717,7 +741,11 @@ def test_plot_loo_pit_label(models, args, backend_kwargs):
         y_hat = None
 
     ax = plot_loo_pit(
-        idata=models.model_1, y=y, y_hat=y_hat, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        idata=models.model_1,
+        y=y,
+        y_hat=y_hat,
+        backend="bokeh",
+        backend_kwargs=backend_kwargs.copy(),
     )
     assert ax
 
@@ -745,7 +773,9 @@ def test_plot_mcse_bad_coords(models, dim, backend_kwargs):
     """Test error when chain or dim are used as coords to select a data subset."""
     idata = models.model_1
     with pytest.raises(ValueError, match="invalid coordinates"):
-        plot_mcse(idata, coords={dim: slice(3)}, backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_mcse(
+            idata, coords={dim: slice(3)}, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 def test_plot_mcse_no_sample_stats(models, backend_kwargs):
@@ -795,9 +825,13 @@ def test_plot_pair_2var(discrete_model, get_ax, kwargs, backend_kwargs):
 
 def test_plot_pair_bad(models, backend_kwargs):
     with pytest.raises(ValueError):
-        plot_pair(models.model_1, kind="bad_kind", backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_pair(
+            models.model_1, kind="bad_kind", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
     with pytest.raises(Exception):
-        plot_pair(models.model_1, var_names=["mu"], backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_pair(
+            models.model_1, var_names=["mu"], backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
 
 
 @pytest.mark.parametrize("has_sample_stats", [True, False])
@@ -810,13 +844,13 @@ def test_plot_pair_divergences_warning(has_sample_stats, backend_kwargs):
         # sample_stats missing
         data = data.posterior  # pylint: disable=no-member
     with pytest.warns(SyntaxWarning):
-        ax = plot_pair(data, divergences=True)
+        ax = plot_pair(data, divergences=True, backend_kwargs=backend_kwargs.copy())
     assert np.any(ax)
 
 
 def test_plot_parallel_raises_valueerror(df_trace, backend_kwargs):  # pylint: disable=invalid-name
     with pytest.raises(ValueError):
-        plot_parallel(df_trace)
+        plot_parallel(df_trace, backend_kwargs=backend_kwargs.copy())
 
 
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
@@ -924,7 +958,11 @@ def test_plot_ppc_discrete(kind, backend_kwargs):
 
 def test_plot_ppc_grid(models, backend_kwargs):
     axes = plot_ppc(
-        models.model_1, kind="scatter", flatten=[], backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        models.model_1,
+        kind="scatter",
+        flatten=[],
+        backend="bokeh",
+        backend_kwargs=backend_kwargs.copy(),
     )
     assert len(axes.ravel()) == 8
     axes = plot_ppc(
@@ -953,10 +991,15 @@ def test_plot_ppc_bad(models, kind, backend_kwargs):
     with pytest.raises(TypeError):
         plot_ppc(data, kind=kind, backend="bokeh", backend_kwargs=backend_kwargs.copy())
     with pytest.raises(TypeError):
-        plot_ppc(models.model_1, kind="bad_val", backend="bokeh", backend_kwargs=backend_kwargs.copy())
+        plot_ppc(
+            models.model_1, kind="bad_val", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
     with pytest.raises(TypeError):
         plot_ppc(
-            models.model_1, num_pp_samples="bad_val", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+            models.model_1,
+            num_pp_samples="bad_val",
+            backend="bokeh",
+            backend_kwargs=backend_kwargs.copy(),
         )
 
 
@@ -996,13 +1039,17 @@ def test_plot_ppc_ax(models, kind, get_ax, backend_kwargs):
     ],
 )
 def test_plot_posterior(models, kwargs, backend_kwargs):
-    axes = plot_posterior(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_posterior(
+        models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes.shape
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs, backend_kwargs):
-    axes = plot_posterior(discrete_model, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_posterior(
+        discrete_model, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes.shape
 
 
@@ -1013,7 +1060,10 @@ def test_plot_posterior_bad(models, backend_kwargs):
         )
     with pytest.raises(ValueError):
         plot_posterior(
-            models.model_1, ref_val="bad_value", backend="bokeh", backend_kwargs=backend_kwargs.copy()
+            models.model_1,
+            ref_val="bad_value",
+            backend="bokeh",
+            backend_kwargs=backend_kwargs.copy(),
         )
     with pytest.raises(ValueError):
         plot_posterior(
@@ -1048,5 +1098,7 @@ def test_plot_posterior_point_estimates(models, point_estimate, backend_kwargs):
     ],
 )
 def test_plot_rank(models, kwargs, backend_kwargs):
-    axes = plot_rank(models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs)
+    axes = plot_rank(
+        models.model_1, backend="bokeh", backend_kwargs=backend_kwargs.copy(), **kwargs
+    )
     assert axes.shape

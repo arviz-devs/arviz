@@ -254,7 +254,6 @@ def plot_density(
         plot_density_kwargs.pop("xt_labelsize")
         plot_density_kwargs.pop("n_data")
 
-
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_density", "densityplot", backend)
     ax = plot(**plot_density_kwargs)

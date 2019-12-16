@@ -1,4 +1,5 @@
 """Matplotlib hpdplot."""
+import warnings
 from matplotlib.pyplot import gca
 
 

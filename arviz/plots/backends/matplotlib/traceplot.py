@@ -122,9 +122,7 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     backend_kwargs.pop("textsize")
-    _, axes = plt.subplots(
-        len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs
-    )
+    _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
 
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)

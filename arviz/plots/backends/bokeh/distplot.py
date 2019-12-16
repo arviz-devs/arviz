@@ -5,7 +5,6 @@ import numpy as np
 from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
-from ....rcparams import rcParams
 
 
 def plot_dist(
