@@ -111,6 +111,7 @@ def plot_autocorr(
     )
 
     if ax is None:
+        show = backend_kwargs.pop("show", None) if backend_kwargs is not None else None
         _, axes = _create_axes_grid(
             length_plotters,
             rows,
@@ -122,6 +123,8 @@ def plot_autocorr(
             backend=backend,
             backend_kwargs=backend_kwargs,
         )
+        if show is not None:
+            backend_kwargs["show"] = show
     else:
         axes = ax
 
@@ -143,10 +146,6 @@ def plot_autocorr(
         autocorr_plot_args.pop("xt_labelsize")
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
-
-    else:
-
-        autocorr_plot_args.pop("backend_kwargs")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_autocorr", "autocorrplot", backend)

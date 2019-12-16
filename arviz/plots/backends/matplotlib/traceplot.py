@@ -112,7 +112,7 @@ def plot_trace(
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
-    backend_kwargs["textsize"] = 10
+    backend_kwargs.setdefault("textsize", 10)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2
@@ -121,8 +121,9 @@ def plot_trace(
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
+    backend_kwargs.pop("textsize")
     _, axes = plt.subplots(
-        len(plotters), 2, squeeze=False, figsize=figsize, constrained_layout=True
+        len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs
     )
 
     for idx, (var_name, selection, value) in enumerate(plotters):

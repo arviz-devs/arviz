@@ -20,6 +20,7 @@ def plot_autocorr(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+    show = backend_kwargs.pop("show")
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:
@@ -46,6 +47,6 @@ def plot_autocorr(
         axes[0, 0].y_range._property_values["start"] = -1  # pylint: disable=protected-access
         axes[0, 0].y_range._property_values["end"] = 1  # pylint: disable=protected-access
 
-    if backend_kwargs["show"]:
+    if show:
         bkp.show(gridplot([list(item) for item in axes], toolbar_location="above"))
     return axes

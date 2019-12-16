@@ -108,8 +108,6 @@ def plot_hpd(
         fill_kwargs=fill_kwargs,
         backend_kwargs=backend_kwargs,
     )
-    if backend in (None, "matplolib", "mpl"):
-        hpdplot_kwargs.pop("backend_kwargs")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_hpd", "hpdplot", backend)

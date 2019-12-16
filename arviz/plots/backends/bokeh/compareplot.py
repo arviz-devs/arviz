@@ -33,6 +33,7 @@ def plot_compare(
         ),
         **backend_kwargs,
     }
+    dpi = backend_kwargs.pop("dpi")
     show = backend_kwargs.pop("show")
 
     if ax is None:

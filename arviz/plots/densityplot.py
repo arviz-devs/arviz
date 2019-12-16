@@ -214,7 +214,7 @@ def plot_density(
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-
+    show = backend_kwargs.pop("show", None) if backend_kwargs is not None else None
     _, ax = _create_axes_grid(
         length_plotters,
         rows,
@@ -224,6 +224,8 @@ def plot_density(
         backend=backend,
         backend_kwargs=backend_kwargs,
     )
+    if show is not None:
+        backend_kwargs["show"] = show
 
     plot_density_kwargs = dict(
         ax=ax,
@@ -252,8 +254,6 @@ def plot_density(
         plot_density_kwargs.pop("xt_labelsize")
         plot_density_kwargs.pop("n_data")
 
-    else:
-        plot_density_kwargs.pop("backend_kwargs")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_density", "densityplot", backend)

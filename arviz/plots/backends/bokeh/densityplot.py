@@ -59,6 +59,9 @@ def plot_density(
                 data_label=data_label,
             )
 
+    if backend_kwargs is None:
+        backend_kwargs = {}
+    
     backend_kwargs = {
         **backend_kwarg_defaults(),
         **backend_kwargs,

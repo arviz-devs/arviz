@@ -39,7 +39,7 @@ def plot_joint(
     show = backend_kwargs.pop("show")
     if ax is None:
         axjoin = bkp.figure(
-            width=int(figsize[0] * dpi * 0.8), height=int(figsize[1] * dpi * 0.8), **kwargs
+            width=int(figsize[0] * dpi * 0.8), height=int(figsize[1] * dpi * 0.8), **backend_kwargs
         )
         ax_hist_x = bkp.figure(
             width=int(figsize[0] * dpi * 0.8),
@@ -81,7 +81,7 @@ def plot_joint(
             fill_last=fill_last,
             ax=axjoin,
             backend="bokeh",
-            show=False,
+            backend_kwargs={"show":False},
             **joint_kwargs
         )
     else:

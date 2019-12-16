@@ -260,7 +260,7 @@ def _plot_posterior_op(
             ax=ax,
             rug=False,
             backend="bokeh",
-            show=False,
+            backend_kwargs={"show":False},
         )
         hist, edges = np.histogram(values, density=True)
     else:

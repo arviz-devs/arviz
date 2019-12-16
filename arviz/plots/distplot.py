@@ -187,9 +187,6 @@ def plot_dist(
         **kwargs,
     )
 
-    if backend in (None, "matplotlib", "mpl"):
-        dist_plot_args.pop(backend_kwargs)
-
     plot = get_plotting_function("plot_dist", "distplot", backend)
     ax = plot(**dist_plot_args)
     return ax

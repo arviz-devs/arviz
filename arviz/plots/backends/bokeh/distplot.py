@@ -83,7 +83,7 @@ def plot_dist(
             pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="bokeh",
-            backend_kwarg={"show": False},
+            backend_kwargs={"show": False},
         )
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))

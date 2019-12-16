@@ -51,8 +51,11 @@ def plot_ppc(
             backend_kwargs=backend_kwargs,
         )
     else:
-        axes = np.ravel(ax)
-        if len(axes) != length_plotters:
+        axes = ax
+        if isinstance(axes, bkp.Figure):
+            axes = np.array([axes])
+
+        if len([item for item in axes.ravel() if not None]) != length_plotters:
             raise ValueError(
                 "Found {} variables to plot but {} axes instances. They must be equal.".format(
                     length_plotters, len(axes)
@@ -101,7 +104,7 @@ def plot_ppc(
                     fill_kwargs={"alpha": 0},
                     ax=ax_i,
                     backend="bokeh",
-                    show=False,
+                    backend_kwargs={"show":False},
                 )
             else:
                 bins = get_bins(obs_vals)
@@ -191,7 +194,7 @@ def plot_ppc(
                         },
                         ax=ax_i,
                         backend="bokeh",
-                        show=False,
+                        backend_kwargs={"show":False},
                     )
                 else:
                     vals = pp_vals.flatten()

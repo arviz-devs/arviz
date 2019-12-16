@@ -1,6 +1,22 @@
 # pylint: disable= wrong-import-position
 """Matplotlib Plotting Backend."""
 
+
+def backend_kwarg_defaults(*args, add_default=True, **kwargs):
+    """Get default kwargs for backend.
+
+    For args add a tuple with key and rcParam key pair.
+    """
+    defaults = {**kwargs}
+    # add needed default args from arviz.rcParams
+    for key, arg in args:
+        defaults.setdefault(key, rcParams[arg])
+    # add default args from rcParams
+    if add_default:
+        defaults.setdefault("constrained_layout", rcParams["plot.matplotlib.constrained_layout"])
+    return defaults
+
+
 from .autocorrplot import plot_autocorr
 from .compareplot import plot_compare
 from .densityplot import plot_density
@@ -22,18 +38,4 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-
-
-def backend_kwarg_defaults(add_default=True, *args, **kwargs):
-    """Get default kwargs for backend.
-
-    For args add a tuple with key and rcParam key pair.
-    """
-    defaults = {**kwargs}
-    # add needed default args from arviz.rcParams
-    for key, arg in args:
-        defaults.setdefault(key, rcParams[arg])
-    # add default args from rcParams
-    if add_default:
-        defaults.setdefault("constrained_layout", rcParams["plot.matplotlib.constrained_layout"])
-    return defaults
+from ....rcparams import rcParams

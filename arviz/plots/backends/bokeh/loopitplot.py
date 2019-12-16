@@ -117,7 +117,7 @@ def plot_loo_pit(
                 )
     else:
         if use_hpd:
-            plot_hpd(x_vals, unif_densities, backend="bokeh", ax=ax, show=False, **hpd_kwargs)
+            plot_hpd(x_vals, unif_densities, backend="bokeh", ax=ax, backend_kwargs={"show":False}, **hpd_kwargs)
         else:
             for idx in range(n_unif):
                 unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)

@@ -28,7 +28,7 @@ def plot_parallel(
         **backend_kwargs,
     }
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, backend_kwargs=backend_kwargs)
+        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
     ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
 
