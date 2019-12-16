@@ -42,7 +42,14 @@ def plot_ppc(
     }
     show = backend_kwargs.pop("show")
     if ax is None:
-        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh", backend_kwargs=backend_kwargs)
+        _, axes = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:

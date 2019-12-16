@@ -216,6 +216,8 @@ def plot_kde(
 
     if backend == "bokeh":
         kde_plot_args.pop("textsize")
+    else:
+        kde_plot_args.pop("backend_kwargs")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_kde", "kdeplot", backend)

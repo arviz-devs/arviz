@@ -216,7 +216,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
 
     if backend == "bokeh":
         from bokeh.plotting import figure
-        from backends.bokeh import backend_kwarg_defaults
+        from .backends.bokeh import backend_kwarg_defaults
 
         backend_kwargs = {
             **backend_kwarg_defaults(
@@ -259,7 +259,10 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
             ax.append(row_ax)
         ax = np.array(ax)
     else:
-        fig, ax = plt.subplots(rows, cols, **kwargs)
+        from .backends.matplotlib import backend_kwarg_defaults
+
+        backend_kwargs = {**backend_kwarg_defaults(), **kwargs}
+        fig, ax = plt.subplots(rows, cols, **backend_kwargs)
         ax = np.ravel(ax)
         extra = (rows * cols) - length_plotters
         if extra:

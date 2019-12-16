@@ -36,11 +36,7 @@ def plot_compare(
     show = backend_kwargs.pop("show")
 
     if ax is None:
-        ax = bkp.figure(
-            width=figsize[0] * dpi,
-            height=figsize[1] * dpi,
-            **backend_kwargs
-        )
+        ax = bkp.figure(width=figsize[0] * dpi, height=figsize[1] * dpi, **backend_kwargs)
 
     yticks_pos = list(yticks_pos)
 

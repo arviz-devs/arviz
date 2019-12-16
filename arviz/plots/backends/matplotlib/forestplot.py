@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 
+from . import backend_kwarg_defaults
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
 from ....stats.stats_utils import histogram
@@ -63,6 +64,14 @@ def plot_forest(
     if markersize is None:
         markersize = auto_markersize
 
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     if ax is None:
         _, axes = plt.subplots(
             nrows=1,
@@ -70,7 +79,7 @@ def plot_forest(
             figsize=figsize,
             gridspec_kw={"width_ratios": width_ratios},
             sharey=True,
-            constrained_layout=True,
+            **backend_kwargs,
         )
     else:
         axes = ax

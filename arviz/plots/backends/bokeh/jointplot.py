@@ -39,9 +39,7 @@ def plot_joint(
     show = backend_kwargs.pop("show")
     if ax is None:
         axjoin = bkp.figure(
-            width=int(figsize[0] * dpi * 0.8),
-            height=int(figsize[1] * dpi * 0.8),
-            **kwargs
+            width=int(figsize[0] * dpi * 0.8), height=int(figsize[1] * dpi * 0.8), **kwargs
         )
         ax_hist_x = bkp.figure(
             width=int(figsize[0] * dpi * 0.8),

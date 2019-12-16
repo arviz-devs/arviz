@@ -5,6 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_kwarg_defaults
 from ...plot_utils import set_xticklabels
 from ....stats.stats_utils import histogram
 
@@ -45,8 +46,17 @@ def plot_khat(
             UserWarning,
         )
 
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+    backend_kwargs["constrained_layout"] = not xlabels
+
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
+        fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
     else:
         fig = ax.get_figure()
 

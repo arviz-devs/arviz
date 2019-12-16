@@ -42,7 +42,13 @@ def plot_mcse(
     """Matplotlib mcseplot."""
     if ax is None:
         _, ax = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            constrained_layout=True,
+            backend_kwargs=backend_kwargs,
         )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):

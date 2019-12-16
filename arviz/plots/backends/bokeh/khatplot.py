@@ -39,11 +39,7 @@ def plot_khat(
     dpi = backend_kwargs.pop("dpi")
     show = backend_kwargs.pop("show")
     if ax is None:
-        ax = bkp.figure(
-            width=int(figsize[0] * dpi),
-            height=int(figsize[1] * dpi),
-            **backend_kwargs
-        )
+        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
         for idx, rgba_c_ in enumerate(rgba_c):

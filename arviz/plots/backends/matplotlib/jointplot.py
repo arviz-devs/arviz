@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_kwarg_defaults
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
@@ -22,9 +23,16 @@ def plot_joint(
     backend_kwargs,
 ):
     """Matplotlib joint plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if ax is None:
         # Instantiate figure and grid
-        fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
+        fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
         grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
         # Set up main plot

@@ -27,7 +27,14 @@ def plot_rank(
 ):
     """Matplotlib rankplot.."""
     if axes is None:
-        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+        _, axes = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend_kwargs=backend_kwargs,
+        )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)

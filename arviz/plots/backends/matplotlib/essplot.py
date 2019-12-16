@@ -46,7 +46,13 @@ def plot_ess(
     """Matplotlib ess plot."""
     if ax is None:
         _, ax = _create_axes_grid(
-            len(plotters), rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
+            len(plotters),
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            constrained_layout=True,
+            backend_kwargs=backend_kwargs,
         )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):

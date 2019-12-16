@@ -60,9 +60,7 @@ def plot_kde(
     if ax is None:
         tools = rcParams["plot.bokeh.tools"]
         output_backend = rcParams["plot.bokeh.output_backend"]
-        ax = bkp.figure(
-            **backend_kwargs
-        )
+        ax = bkp.figure(**backend_kwargs)
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label

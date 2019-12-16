@@ -1,6 +1,7 @@
 """Matplotlib energyplot."""
 import matplotlib.pyplot as plt
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
 
@@ -21,8 +22,15 @@ def plot_energy(
     backend_kwargs,
 ):
     """Matplotlib energy plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
     if kind == "kde":
         for alpha, color, label, value in series:

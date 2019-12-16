@@ -48,9 +48,7 @@ def plot_elpd(
 
         if ax is None:
             ax = bkp.figure(
-                width=int(figsize[0] * dpi),
-                height=int(figsize[1] * dpi),
-                **backend_kwargs
+                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
 
         ydata = pointwise_data[0] - pointwise_data[1]

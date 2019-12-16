@@ -3,14 +3,10 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-from . import BACKEND_KWARG_DEFAULTS
 
-
+from . import backend_kwarg_defaults
 from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size, get_bins, make_label
-
-# TODO: Change this to RcParams
-BACKEND_KWARG_DEFAULTS["textsize"] = 10
 
 
 def plot_trace(
@@ -114,7 +110,9 @@ def plot_trace(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**BACKEND_KWARG_DEFAULTS, **backend_kwargs}
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
+
+    backend_kwargs["textsize"] = 10
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2

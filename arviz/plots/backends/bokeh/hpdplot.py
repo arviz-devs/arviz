@@ -25,9 +25,7 @@ def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs):
     }
     show = backend_kwargs.pop("show")
     if ax is None:
-        ax = bkp.figure(
-            **backend_kwargs
-        )
+        ax = bkp.figure(**backend_kwargs)
 
     color = plot_kwargs.pop("color")
     if len(color) == 2 and color[0] == "C":

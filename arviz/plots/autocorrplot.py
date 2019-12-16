@@ -144,6 +144,10 @@ def plot_autocorr(
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
 
+    else:
+
+        autocorr_plot_args.pop("backend_kwargs")
+
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_autocorr", "autocorrplot", backend)
     axes = plot(**autocorr_plot_args)

@@ -38,11 +38,7 @@ def plot_energy(
     show = backend_kwargs.pop("show")
     dpi = backend_kwargs.pop("dpi")
     if ax is None:
-        ax = bkp.figure(
-            width=int(figsize[0] * dpi),
-            height=int(figsize[1] * dpi),
-            **backend_kwargs
-        )
+        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
     if kind == "kde":
         for alpha, color, label, value in series:
@@ -60,7 +56,7 @@ def plot_energy(
                 ax=ax,
                 legend=legend,
                 backend="bokeh",
-                backend_kwargs={"show" : False},
+                backend_kwargs={"show": False},
             )
     elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()

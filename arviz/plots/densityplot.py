@@ -216,7 +216,13 @@ def plot_density(
     )
 
     _, ax = _create_axes_grid(
-        length_plotters, rows, cols, figsize=figsize, squeeze=False, backend=backend
+        length_plotters,
+        rows,
+        cols,
+        figsize=figsize,
+        squeeze=False,
+        backend=backend,
+        backend_kwargs=backend_kwargs,
     )
 
     plot_density_kwargs = dict(
@@ -245,6 +251,9 @@ def plot_density(
         plot_density_kwargs.pop("titlesize")
         plot_density_kwargs.pop("xt_labelsize")
         plot_density_kwargs.pop("n_data")
+
+    else:
+        plot_density_kwargs.pop("backend_kwargs")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_density", "densityplot", backend)

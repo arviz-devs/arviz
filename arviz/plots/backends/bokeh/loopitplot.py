@@ -45,11 +45,7 @@ def plot_loo_pit(
     dpi = backend_kwargs.pop("dpi")
     show = backend_kwargs.pop("show")
     if ax is None:
-        ax = bkp.figure(
-            width=int(figsize[0] * dpi),
-            height=int(figsize[1] * dpi),
-            **backend_kwargs
-        )
+        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
     if ecdf:
         if plot_kwargs.get("drawstyle") == "steps-mid":
