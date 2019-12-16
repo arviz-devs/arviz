@@ -844,13 +844,15 @@ def test_plot_pair_divergences_warning(has_sample_stats, backend_kwargs):
         # sample_stats missing
         data = data.posterior  # pylint: disable=no-member
     with pytest.warns(SyntaxWarning):
-        ax = plot_pair(data, divergences=True, backend_kwargs=backend_kwargs.copy())
+        ax = plot_pair(
+            data, divergences=True, backend="bokeh", backend_kwargs=backend_kwargs.copy()
+        )
     assert np.any(ax)
 
 
 def test_plot_parallel_raises_valueerror(df_trace, backend_kwargs):  # pylint: disable=invalid-name
     with pytest.raises(ValueError):
-        plot_parallel(df_trace, backend_kwargs=backend_kwargs.copy())
+        plot_parallel(df_trace, backend="bokeh", backend_kwargs=backend_kwargs.copy())
 
 
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])

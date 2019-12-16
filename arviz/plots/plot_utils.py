@@ -205,13 +205,17 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: dict, optional
-        kwargs for backend figure. Implemented for backend="bokeh"
+        kwargs for backend figure.
 
     Returns
     -------
     fig : matplotlib figure
     ax : matplotlib axes
     """
+    if kwargs is None:
+        kwargs = {}
+    if backend_kwargs is None:
+        backend_kwargs = {}
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
@@ -261,7 +265,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
     else:
         from .backends.matplotlib import backend_kwarg_defaults
 
-        backend_kwargs = {**backend_kwarg_defaults(), **kwargs}
+        backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs, **kwargs}
         fig, ax = plt.subplots(rows, cols, **backend_kwargs)
         ax = np.ravel(ax)
         extra = (rows * cols) - length_plotters
