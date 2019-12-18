@@ -804,6 +804,7 @@ def summary(
     data,
     var_names: Optional[List[str]] = None,
     fmt: str = "wide",
+    kind: str = "all",
     round_to=None,
     include_circ=None,
     stat_funcs=None,
@@ -823,12 +824,16 @@ def summary(
         Refer to documentation of az.convert_to_dataset for details
     var_names : list
         Names of variables to include in summary
-    include_circ : bool
-        Whether to include circular statistics
     fmt : {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
+    kind : {'all', 'stats', 'diagnostics'}
+        Whether to include the `stats` `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the diagnostics
+        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
+        them.
     round_to : int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
+    include_circ : bool
+        Whether to include circular statistics
     stat_funcs : dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -937,7 +942,7 @@ def summary(
                 )
                 extra_metric_names.append(stat_func.__name__)
 
-    if extend:
+    if extend and kind in ["all", "stats"]:
         mean = posterior.mean(dim=("chain", "draw"))
 
         sd = posterior.std(dim=("chain", "draw"), ddof=1)
@@ -985,19 +990,33 @@ def summary(
             output_core_dims=tuple([] for _ in range(2)),
         )
 
-    mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-        _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-        posterior,
-        input_core_dims=(("chain", "draw"),),
-        output_core_dims=tuple([] for _ in range(7)),
-    )
+    if kind in ["all", "diagnostics"]:
+        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(7)),
+        )
 
     # Combine metrics
     metrics = []
     metric_names = []
     if extend:
-        metrics.extend(
-            (
+        metrics_names_ = (
+            "mean",
+            "sd",
+            "hpd_{:g}%".format(100 * alpha / 2),
+            "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+            "mcse_mean",
+            "mcse_sd",
+            "ess_mean",
+            "ess_sd",
+            "ess_bulk",
+            "ess_tail",
+            "r_hat",
+        )
+        if kind == "all":
+            metrics_ = (
                 mean,
                 sd,
                 hpd_lower,
@@ -1010,22 +1029,14 @@ def summary(
                 ess_tail,
                 r_hat,
             )
-        )
-        metric_names.extend(
-            (
-                "mean",
-                "sd",
-                "hpd_{:g}%".format(100 * alpha / 2),
-                "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                "mcse_mean",
-                "mcse_sd",
-                "ess_mean",
-                "ess_sd",
-                "ess_bulk",
-                "ess_tail",
-                "r_hat",
-            )
-        )
+        elif kind == "stats":
+            metrics_ = (mean, sd, hpd_lower, hpd_higher)
+            metrics_names_ = metrics_names_[:4]
+        elif kind == "diagnostics":
+            metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
+            metrics_names_ = metrics_names_[4:]
+        metrics.extend(metrics_)
+        metric_names.extend(metrics_names_)
     if include_circ:
         metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
         metric_names.extend(
