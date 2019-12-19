@@ -171,7 +171,7 @@ def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, b
     ax = fig.add_axes([0, 0, 1, 1], aspect="auto", frameon=False, xticks=[], yticks=[])
     ax.imshow(thumb, aspect="auto", resample=True, interpolation="bilinear")
     fig.savefig(thumbfile, dpi=dpi)
-    return fig
+    plt.close(fig)
 
 
 def indent(s, N=4):
@@ -292,8 +292,8 @@ class ExampleGenerator:
         thumbfile = op.join("example_thumbs", self.thumbfilename)
         cx, cy = self.thumbloc
         pngfile = op.join(self.target_dir, self.pngfilename)
+        plt.close("all")
         if self.backend == "matplotlib":
-            plt.close("all")
             my_globals = {"pl": plt, "plt": plt}
             execfile(self.filename, my_globals)
 
