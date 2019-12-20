@@ -827,7 +827,7 @@ def summary(
     fmt : {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind : {'all', 'stats', 'diagnostics'}
-        Whether to include the `stats` `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the diagnostics
+        Whether to include the `stats`: `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the `diagnostics`:
         `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
         them.
     round_to : int
