@@ -13,6 +13,10 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    figsize,
+    length_plotters,
+    rows,
+    cols,
     titlesize,
     xt_labelsize,
     linewidth,
@@ -27,13 +31,15 @@ def plot_density(
     backend_kwargs,
 ):
     """Matplotlib densityplot."""
-    if backend_kwargs is not None:
-        warnings.warn(
-            (
-                "Argument backend_kwargs has not effect in matplotlib.plot_density"
-                "Supplied value won't be used"
-            )
-        )
+    _, ax = _create_axes_grid(
+        length_plotters,
+        rows,
+        cols,
+        figsize=figsize,
+        squeeze=False,
+        backend="matplotlib",
+        backend_kwargs=backend_kwargs,
+    )
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
 
     for m_idx, plotters in enumerate(to_plot):
