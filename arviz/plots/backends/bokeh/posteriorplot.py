@@ -146,11 +146,7 @@ def _plot_posterior_op(
         )
         ax.line([val, val], [0, 0.8 * max_data], line_color="blue", line_alpha=0.65)
 
-        cds = ColumnDataSource(
-            {"x": [values.mean()], "y": [max_data * 0.6], "text": [ref_in_posterior]}
-        )
-
-        ax.text(x="x", y="y", text="text", source=cds, text_align="center")
+        ax.text(x=[values.mean()], y=[max_data * 0.6], text=[ref_in_posterior], text_align="center")
 
     def display_rope(max_data):
         if rope is None:
@@ -185,11 +181,13 @@ def _plot_posterior_op(
             text_font_size="{}pt".format(ax_labelsize), text_color="black", text_align="center"
         )
 
-        cds = ColumnDataSource(
-            {"x": vals, "y": [max_data * 0.2, max_data * 0.2], "text": list(map(str, vals))}
+        ax.text(
+            x=vals,
+            y=[max_data * 0.2, max_data * 0.2],
+            text=list(map(str, vals)),
+            source=cds,
+            **text_props
         )
-
-        ax.text(x="x", y="y", text="text", source=cds, **text_props)
 
     def display_point_estimate(max_data):
         if not point_estimate:
@@ -212,9 +210,7 @@ def _plot_posterior_op(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
         )
 
-        cds = ColumnDataSource({"x": [point_value], "y": [max_data * 0.8], "text": [point_text]})
-
-        ax.text(x="x", y="y", text="text", source=cds, text_align="center")
+        ax.text(x=[point_value], y=[max_data * 0.8], text=[point_text], text_align="center")
 
     def display_hpd(max_data):
         # np.ndarray with 2 entries, min and max
@@ -231,16 +227,13 @@ def _plot_posterior_op(
                 line_color="black",
             )
 
-            cds = ColumnDataSource(
-                {
-                    "x": list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
-                    "y": [max_data * 0.07, max_data * 0.07, max_data * 0.3],
-                    "text": list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
-                    + [format_as_percent(credible_interval) + " HPD"],
-                }
+            ax.text(
+                x=list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
+                y=[max_data * 0.07, max_data * 0.07, max_data * 0.3],
+                text=list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
+                + [format_as_percent(credible_interval) + " HPD"],
+                text_align="center",
             )
-
-            ax.text(x="x", y="y", text="text", source=cds, text_align="center")
 
     def format_axes():
         ax.yaxis.visible = False

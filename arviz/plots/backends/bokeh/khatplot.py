@@ -49,8 +49,7 @@ def plot_khat(
     if annotate:
         idxs = xdata[khats > 1]
         for idx in idxs:
-            cds = ColumnDataSource({"x": [idx], "y": [khats[idx]], "text": [coord_labels[idx]],})
-            ax.text(x="x", y="y", text="text", source=cds)
+            ax.text(x=[idx], y=[khats[idx]], text=[coord_labels[idx]])
 
     for hline in [0, 0.5, 0.7, 1]:
         _hline = Span(
@@ -72,14 +71,11 @@ def plot_khat(
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
         hist, _, _ = histogram(khats, bin_edges)
         for idx, count in enumerate(hist):
-            cds = ColumnDataSource(
-                {
-                    "x": [(n_data_points - 1 + xmax) / 2],
-                    "y": [np.mean(bin_edges[idx : idx + 2])],
-                    "text": [bin_format.format(count, count / n_data_points * 100)],
-                }
+            ax.text(
+                x=[(n_data_points - 1 + xmax) / 2],
+                y=[np.mean(bin_edges[idx : idx + 2])],
+                text=[bin_format.format(count, count / n_data_points * 100)],
             )
-            ax.text(x="x", y="y", text="text", source=cds)
         ax.x_range._property_values["end"] = xmax + 1  # pylint: disable=protected-access
     ax.xaxis.axis_label = "Data Point"
     ax.yaxis.axis_label = "Shape parameter k"
