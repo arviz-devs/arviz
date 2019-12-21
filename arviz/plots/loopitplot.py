@@ -5,7 +5,7 @@ from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
-from .plot_utils import _scale_fig_size, get_plotting_method
+from .plot_utils import _scale_fig_size, get_plotting_function
 from .kdeplot import _fast_kde
 
 
@@ -29,7 +29,7 @@ def plot_loo_pit(
     hpd_kwargs=None,
     fill_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.
 
@@ -85,8 +85,9 @@ def plot_loo_pit(
         Additional kwargs passed to ax.fill_between
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -231,6 +232,7 @@ def plot_loo_pit(
         legend=legend,
         credible_interval=credible_interval,
         plot_kwargs=plot_kwargs,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -245,10 +247,9 @@ def plot_loo_pit(
         loo_pit_kwargs.pop("legend")
         loo_pit_kwargs.pop("xt_labelsize")
         loo_pit_kwargs.pop("credible_interval")
-        loo_pit_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_loo_pit", "loopitplot", backend)
-    axes = method(**loo_pit_kwargs)
+    plot = get_plotting_function("plot_loo_pit", "loopitplot", backend)
+    axes = plot(**loo_pit_kwargs)
 
     return axes

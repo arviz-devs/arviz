@@ -9,7 +9,7 @@ from .plot_utils import (
     default_grid,
     filter_plotters_list,
     _sturges_formula,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -26,7 +26,7 @@ def plot_rank(
     figsize=None,
     axes=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Plot rank order statistics of chains.
 
@@ -72,8 +72,9 @@ def plot_rank(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -157,15 +158,15 @@ def plot_rank(
         labels=labels,
         ax_labelsize=ax_labelsize,
         titlesize=titlesize,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
 
         rankplot_kwargs.pop("ax_labelsize")
         rankplot_kwargs.pop("titlesize")
-        rankplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_rank", "rankplot", backend)
-    axes = method(**rankplot_kwargs)
+    plot = get_plotting_function("plot_rank", "rankplot", backend)
+    axes = plot(**rankplot_kwargs)
     return axes

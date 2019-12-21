@@ -11,6 +11,7 @@ from bokeh.models import Band, ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
+from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from ....rcparams import rcParams
@@ -49,7 +50,7 @@ def plot_forest(
     textsize,
     ess,
     r_hat,
-    show,
+    backend_kwargs,
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
@@ -67,18 +68,28 @@ def plot_forest(
     if markersize is None:
         markersize = auto_markersize
 
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
+    dpi = backend_kwargs.pop("dpi")
+    show = backend_kwargs.pop("show")
+
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        dpi = rcParams["plot.bokeh.figure.dpi"]
         axes = []
         for i, width_r in zip(range(ncols), width_ratios):
             if i == 0:
                 ax = bkp.figure(
                     height=int(figsize[0]) * dpi,
                     width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
-                    output_backend=output_backend,
-                    tools=tools,
+                    **backend_kwargs,
                 )
                 _y_range = ax.y_range
             else:
@@ -86,8 +97,7 @@ def plot_forest(
                     height=figsize[0] * dpi,
                     width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
                     y_range=_y_range,
-                    output_backend=output_backend,
-                    tools=tools,
+                    **backend_kwargs,
                 )
             axes.append(ax)
     else:

@@ -9,7 +9,7 @@ from .plot_utils import (
     _scale_fig_size,
     default_grid,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -36,7 +36,7 @@ def plot_ppc(
     legend=True,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Plot for posterior predictive checks.
@@ -104,8 +104,9 @@ def plot_ppc(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -288,6 +289,7 @@ def plot_ppc(
         markersize=markersize,
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -297,9 +299,8 @@ def plot_ppc(
         ppcplot_kwargs.pop("legend")
         ppcplot_kwargs.pop("xt_labelsize")
         ppcplot_kwargs.pop("ax_labelsize")
-        ppcplot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_ppc", "ppcplot", backend)
-    axes = method(**ppcplot_kwargs)
+    plot = get_plotting_function("plot_ppc", "ppcplot", backend)
+    axes = plot(**ppcplot_kwargs)
     return axes

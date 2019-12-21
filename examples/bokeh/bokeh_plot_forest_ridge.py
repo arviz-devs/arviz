@@ -17,5 +17,4 @@ ax = az.plot_forest(
     colors="blue",
     figsize=(9, 4),
     backend="bokeh",
-    show=True,
 )

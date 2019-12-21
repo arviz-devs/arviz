@@ -29,4 +29,6 @@ az.plot_dist(
 )
 
 ax = row(ax_poisson, ax_normal)
-bkp.show(ax)
+
+if az.rcParams["plot.bokeh.show"]:
+    bkp.show(ax)

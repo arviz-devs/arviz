@@ -8,6 +8,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -26,21 +27,28 @@ def plot_pair(
     divergences,
     diverging_mask,
     flat_var_names,
-    show,
+    backend_kwargs,
 ):
     """Bokeh pair plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
+    dpi = backend_kwargs.pop("dpi")
+    show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
         if ax is None:
-            tools = rcParams["plot.bokeh.tools"]
-            output_backend = rcParams["plot.bokeh.output_backend"]
-            dpi = rcParams["plot.bokeh.figure.dpi"]
             ax = bkp.figure(
-                width=int(figsize[0] * dpi),
-                height=int(figsize[1] * dpi),
-                output_backend=output_backend,
-                tools=tools,
+                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
 
         if kind == "scatter":
@@ -53,7 +61,7 @@ def plot_pair(
                 fill_last=fill_last,
                 ax=ax,
                 backend="bokeh",
-                show=False,
+                backend_kwargs={"show": False},
             )
         else:
             ax.hexbin(_posterior[0], _posterior[1], size=0.5)
@@ -159,7 +167,7 @@ def plot_pair(
                         fill_last=fill_last,
                         ax=ax[j, i],
                         backend="bokeh",
-                        show=False,
+                        backend_kwargs={"show": False},
                         **plot_kwargs
                     )
 

@@ -33,10 +33,13 @@ def plot_ppc(
     markersize,
     animation_kwargs,
     num_pp_samples,
+    backend_kwargs,
 ):
     """Matplotlib ppc plot."""
     if ax is None:
-        fig, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize)
+        fig, axes = _create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
+        )
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:

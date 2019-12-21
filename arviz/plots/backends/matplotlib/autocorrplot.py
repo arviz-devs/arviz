@@ -1,4 +1,5 @@
 """Matplotlib Autocorrplot."""
+import warnings
 import numpy as np
 
 from ....stats import autocorr
@@ -6,9 +7,23 @@ from ...plot_utils import make_label
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, linewidth, titlesize, combined=False, xt_labelsize=None,
+    axes,
+    plotters,
+    max_lag,
+    linewidth,
+    titlesize,
+    combined=False,
+    xt_labelsize=None,
+    backend_kwargs=None,
 ):
     """Matplotlib autocorrplot."""
+    if backend_kwargs is not None:
+        warnings.warn(
+            (
+                "Argument backend_kwargs has not effect in matplotlib.plot_autocorr"
+                "Supplied value won't be used"
+            )
+        )
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:

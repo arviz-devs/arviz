@@ -10,7 +10,7 @@ from .plot_utils import (
     get_coords,
     color_from_dim,
     format_coords_as_labels,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..stats import ELPDData
 
@@ -32,7 +32,7 @@ def plot_khat(
     ax=None,
     hlines_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
     **kwargs
 ):
     """
@@ -78,8 +78,9 @@ def plot_khat(
         Additional keywords passed to ax.hlines.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
     kwargs :
         Additional keywords passed to ax.scatter.
 
@@ -217,6 +218,7 @@ def plot_khat(
         color=color,
         n_data_points=n_data_points,
         bin_format=bin_format,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -232,9 +234,8 @@ def plot_khat(
         plot_khat_kwargs.pop("color_mapping")
         plot_khat_kwargs.pop("cmap")
         plot_khat_kwargs.pop("color")
-        plot_khat_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_khat", "khatplot", backend)
-    axes = method(**plot_khat_kwargs)
+    plot = get_plotting_function("plot_khat", "khatplot", backend)
+    axes = plot(**plot_khat_kwargs)
     return axes

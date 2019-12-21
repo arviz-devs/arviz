@@ -24,5 +24,4 @@ ax = az.plot_kde(
     rug_kwargs={"line_color": "black"},
     backend="bokeh",
     ax=ax,
-    show=True,
 )

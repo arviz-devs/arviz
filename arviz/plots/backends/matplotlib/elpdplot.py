@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+from . import backend_kwarg_defaults
 from ...plot_utils import (
     _scale_fig_size,
     set_xticklabels,
@@ -28,8 +29,18 @@ def plot_elpd(
     legend,
     handles,
     color,
+    backend_kwargs,
 ):
     """Matplotlib elpd plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+    backend_kwargs["constrained_layout"] = not xlabels
+
     if numvars == 2:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
@@ -37,7 +48,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
+            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)

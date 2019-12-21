@@ -2,9 +2,9 @@
 import bokeh.plotting as bkp
 import numpy as np
 
+from . import backend_kwarg_defaults
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
-from ....rcparams import rcParams
 
 
 def plot_loo_pit(
@@ -27,19 +27,24 @@ def plot_loo_pit(
     plot_unif_kwargs,
     loo_pit_kde,
     plot_kwargs,
-    show,
+    backend_kwargs,
 ):
     """Bokeh loo pit plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
+    dpi = backend_kwargs.pop("dpi")
+    show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        dpi = rcParams["plot.bokeh.figure.dpi"]
-        ax = bkp.figure(
-            width=int(figsize[0] * dpi),
-            height=int(figsize[1] * dpi),
-            output_backend=output_backend,
-            tools=tools,
-        )
+        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
     if ecdf:
         if plot_kwargs.get("drawstyle") == "steps-mid":
@@ -111,7 +116,14 @@ def plot_loo_pit(
                 )
     else:
         if use_hpd:
-            plot_hpd(x_vals, unif_densities, backend="bokeh", ax=ax, show=False, **hpd_kwargs)
+            plot_hpd(
+                x_vals,
+                unif_densities,
+                backend="bokeh",
+                ax=ax,
+                backend_kwargs={"show": False},
+                **hpd_kwargs
+            )
         else:
             for idx in range(n_unif):
                 unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)

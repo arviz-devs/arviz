@@ -4,7 +4,7 @@ from matplotlib.pyplot import rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, get_plotting_method
+from .plot_utils import _scale_fig_size, get_plotting_function
 
 
 def plot_energy(
@@ -21,7 +21,7 @@ def plot_energy(
     plot_kwargs=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
@@ -60,8 +60,9 @@ def plot_energy(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -128,17 +129,17 @@ def plot_energy(
         plot_kwargs=plot_kwargs,
         bw=bw,
         legend=legend,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
 
         plot_energy_kwargs.pop("xt_labelsize")
         plot_energy_kwargs["line_width"] = plot_energy_kwargs.pop("linewidth")
-        plot_energy_kwargs["show"] = show
         if kind in {"hist", "histogram"}:
             plot_energy_kwargs["legend"] = False
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_energy", "energyplot", backend)
-    ax = method(**plot_energy_kwargs)
+    plot = get_plotting_function("plot_energy", "energyplot", backend)
+    ax = plot(**plot_energy_kwargs)
     return ax

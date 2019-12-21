@@ -1,6 +1,6 @@
 """Forest plot."""
 from ..data import convert_to_dataset
-from .plot_utils import get_coords, get_plotting_method
+from .plot_utils import get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -26,7 +26,7 @@ def plot_forest(
     figsize=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
 
@@ -90,8 +90,9 @@ def plot_forest(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -172,12 +173,10 @@ def plot_forest(
         textsize=textsize,
         ess=ess,
         r_hat=r_hat,
+        backend_kwargs=backend_kwargs,
     )
 
-    if backend == "bokeh":
-        plot_forest_kwargs["show"] = show
-
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_forest", "forestplot", backend)
-    axes = method(**plot_forest_kwargs)
+    plot = get_plotting_function("plot_forest", "forestplot", backend)
+    axes = plot(**plot_forest_kwargs)
     return axes

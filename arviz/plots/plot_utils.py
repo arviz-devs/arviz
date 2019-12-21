@@ -191,7 +191,7 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     return n_items // ideal + 1, ideal
 
 
-def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
+def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=None, **kwargs):
     """Create figure and axes for grids with multiple plots.
 
     Parameters
@@ -204,32 +204,41 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
         Number of columns
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: dict, optional
+        kwargs for backend figure.
 
     Returns
     -------
     fig : matplotlib figure
     ax : matplotlib axes
     """
+    if kwargs is None:
+        kwargs = {}
+    if backend_kwargs is None:
+        backend_kwargs = {}
     kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
         from bokeh.plotting import figure
+        from .backends.bokeh import backend_kwarg_defaults
 
-        bokeh_dpi = rcParams["plot.bokeh.figure.dpi"]
-        bokeh_figsize = (
-            rcParams["plot.bokeh.figure.width"] / bokeh_dpi,
-            rcParams["plot.bokeh.figure.height"] / bokeh_dpi,
-        )
-        figsize = kwargs.get("figsize", bokeh_figsize)
-        figsize = int(figsize[0] * bokeh_dpi // cols), int(figsize[1] * bokeh_dpi // rows)
-        bokeh_kwargs = {}
-        bokeh_kwargs["width"] = figsize[0]
-        bokeh_kwargs["height"] = figsize[1]
-
-        bokeh_kwargs.setdefault(
-            "tools", rcParams["plot.bokeh.tools"],
-        )
-        bokeh_kwargs.setdefault("output_backend", rcParams["plot.bokeh.output_backend"])
+        backend_kwargs = {
+            **backend_kwarg_defaults(
+                ("tools", "plot.bokeh.tools"),
+                ("output_backend", "plot.bokeh.output_backend"),
+                ("width", "plot.bokeh.figure.width"),
+                ("height", "plot.bokeh.figure.height"),
+                ("dpi", "plot.bokeh.figure.dpi"),
+                add_default=False,
+            ),
+            **backend_kwargs,
+        }
+        dpi = backend_kwargs.pop("dpi")
+        if "figsize" in kwargs:
+            figsize = kwargs["figsize"]
+            figsize = int(figsize[0] * dpi / cols), int(figsize[1] * dpi / rows)
+            backend_kwargs["width"] = figsize[0]
+            backend_kwargs["height"] = figsize[1]
 
         sharex = kwargs.get("sharex", False)
         sharey = kwargs.get("sharey", False)
@@ -240,21 +249,24 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, **kwargs):
             row_ax = []
             for col in range(cols):
                 if (row == 0) and (col == 0) and (sharex or sharey):
-                    bokeh_ax = figure(**bokeh_kwargs)
+                    bokeh_ax = figure(**backend_kwargs)
                     row_ax.append(bokeh_ax)
                     if sharex:
-                        bokeh_kwargs["x_range"] = bokeh_ax.x_range
+                        backend_kwargs["x_range"] = bokeh_ax.x_range
                     if sharey:
-                        bokeh_kwargs["y_range"] = bokeh_ax.y_range
+                        backend_kwargs["y_range"] = bokeh_ax.y_range
                 else:
                     if row * cols + (col + 1) > length_plotters:
                         row_ax.append(None)
                     else:
-                        row_ax.append(figure(**bokeh_kwargs))
+                        row_ax.append(figure(**backend_kwargs))
             ax.append(row_ax)
         ax = np.array(ax)
     else:
-        fig, ax = plt.subplots(rows, cols, **kwargs)
+        from .backends.matplotlib import backend_kwarg_defaults
+
+        backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs, **kwargs}
+        fig, ax = plt.subplots(rows, cols, **backend_kwargs)
         ax = np.ravel(ax)
         extra = (rows * cols) - length_plotters
         if extra:
@@ -625,7 +637,7 @@ def filter_plotters_list(plotters, plot_kind):
     return plotters
 
 
-def get_plotting_method(plot_name, plot_module, backend):
+def get_plotting_function(plot_name, plot_module, backend):
     """Return plotting function for correct backend."""
     _backend = {
         "mpl": "matplotlib",

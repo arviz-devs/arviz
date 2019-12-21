@@ -4,6 +4,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
+from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
 from ...plot_utils import get_bins, make_label, _create_axes_grid
 from ....stats import hpd
@@ -23,9 +24,17 @@ def plot_violin(
     credible_interval,
     linewidth,
     quartiles,
-    show,
+    backend_kwargs,
 ):
     """Bokeh violin plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),
@@ -35,6 +44,7 @@ def plot_violin(
             figsize=figsize,
             squeeze=False,
             backend="bokeh",
+            backend_kwargs=backend_kwargs,
         )
     ax = np.atleast_1d(ax)
 

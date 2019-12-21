@@ -13,5 +13,4 @@ ax = az.plot_forest(
     model_names=["Centered", "Non Centered"],
     var_names=["mu"],
     backend="bokeh",
-    show=True,
 )

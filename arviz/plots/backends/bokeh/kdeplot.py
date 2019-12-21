@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from ....rcparams import rcParams
+from . import backend_kwarg_defaults
 
 
 def plot_kde(
@@ -40,18 +40,24 @@ def plot_kde(
     pcolormesh_kwargs=None,
     ax=None,
     legend=True,
-    show=True,
+    backend_kwargs=None,
 ):
     """Bokeh kde plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("width", "plot.bokeh.figure.width"),
+            ("height", "plot.bokeh.figure.height"),
+        ),
+        **backend_kwargs,
+    }
+    show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        ax = bkp.figure(
-            width=rcParams["plot.bokeh.figure.width"],
-            height=rcParams["plot.bokeh.figure.height"],
-            output_backend=output_backend,
-            tools=tools,
-        )
+        ax = bkp.figure(**backend_kwargs)
 
     if legend and label is not None:
         plot_kwargs["legend_label"] = label

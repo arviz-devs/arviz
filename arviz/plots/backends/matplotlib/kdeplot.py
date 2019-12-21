@@ -1,4 +1,5 @@
 """Matplotlib kdeplot."""
+import warnings
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -32,8 +33,16 @@ def plot_kde(
     pcolormesh_kwargs=None,
     ax=None,
     legend=True,
+    backend_kwargs=None,
 ):
     """Matplotlib kde plot."""
+    if backend_kwargs is not None:
+        warnings.warn(
+            (
+                "Argument backend_kwargs has not effect in matplotlib.plot_kde"
+                "Supplied value won't be used"
+            )
+        )
     if ax is None:
         ax = plt.gca()
 

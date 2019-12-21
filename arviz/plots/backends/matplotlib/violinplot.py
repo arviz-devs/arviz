@@ -22,11 +22,18 @@ def plot_violin(
     ax_labelsize,
     xt_labelsize,
     quartiles,
+    backend_kwargs,
 ):
     """Matplotlib violin plot."""
     if ax is None:
         _, ax = _create_axes_grid(
-            len(plotters), rows, cols, sharey=sharey, figsize=figsize, squeeze=False
+            len(plotters),
+            rows,
+            cols,
+            sharey=sharey,
+            figsize=figsize,
+            squeeze=False,
+            backend_kwargs=backend_kwargs,
         )
 
     ax = np.atleast_1d(ax)

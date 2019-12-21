@@ -6,7 +6,7 @@ import re
 import pprint
 import logging
 import locale
-from collections import MutableMapping
+from collections.abc import MutableMapping
 
 _log = logging.getLogger(__name__)
 
@@ -35,7 +35,10 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
             raise ValueError("Could not convert to {}".format(typeof.__name__))
         if isinstance(value, str):
             value = value.lower()
+
         if value in accepted_values:
+            # Convert value to python boolean if string matches
+            value = {"true": True, "false": False}.get(value, value)
             return value
         raise ValueError(
             "{} is not one of {}{}".format(
@@ -83,6 +86,13 @@ def _validate_probability(value):
     return value
 
 
+def _validate_boolean(value):
+    """Validate value is a float."""
+    if value not in {True, "true", False, "false"}:
+        raise ValueError("Only boolean values are valid.")
+    return value is True or value == "true"
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
@@ -96,6 +106,8 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
+    "plot.bokeh.show": (True, _validate_boolean),
+    "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",

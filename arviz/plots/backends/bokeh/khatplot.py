@@ -5,7 +5,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models import ColumnDataSource, Span
 
-from ....rcparams import rcParams
+from . import backend_kwarg_defaults
 from ....stats.stats_utils import histogram
 
 
@@ -21,19 +21,24 @@ def plot_khat(
     linewidth,
     n_data_points,
     bin_format,
-    show,
+    backend_kwargs,
 ):
     """Bokeh khat plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(
+            ("tools", "plot.bokeh.tools"),
+            ("output_backend", "plot.bokeh.output_backend"),
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
+        **backend_kwargs,
+    }
+    dpi = backend_kwargs.pop("dpi")
+    show = backend_kwargs.pop("show")
     if ax is None:
-        tools = rcParams["plot.bokeh.tools"]
-        output_backend = rcParams["plot.bokeh.output_backend"]
-        dpi = rcParams["plot.bokeh.figure.dpi"]
-        ax = bkp.figure(
-            width=int(figsize[0] * dpi),
-            height=int(figsize[1] * dpi),
-            output_backend=output_backend,
-            tools=tools,
-        )
+        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
         for idx, rgba_c_ in enumerate(rgba_c):

@@ -1,6 +1,6 @@
 """Joint scatter plot of two variables."""
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_method
+from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -18,7 +18,7 @@ def plot_joint(
     marginal_kwargs=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
@@ -55,8 +55,9 @@ def plot_joint(
         will be created. Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -162,6 +163,7 @@ def plot_joint(
         joint_kwargs=joint_kwargs,
         gridsize=gridsize,
         marginal_kwargs=marginal_kwargs,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -170,9 +172,8 @@ def plot_joint(
         plot_joint_kwargs["marginal_kwargs"]["plot_kwargs"]["line_width"] = plot_joint_kwargs[
             "marginal_kwargs"
         ]["plot_kwargs"].pop("linewidth")
-        plot_joint_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_joint", "jointplot", backend)
-    axes = method(**plot_joint_kwargs)
+    plot = get_plotting_function("plot_joint", "jointplot", backend)
+    axes = plot(**plot_joint_kwargs)
     return axes

@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_kwarg_defaults
+
 
 def plot_parallel(
     ax,
@@ -15,10 +17,18 @@ def plot_parallel(
     xt_labelsize,
     legend,
     figsize,
+    backend_kwargs,
 ):
     """Matplotlib parallel plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
     ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
 

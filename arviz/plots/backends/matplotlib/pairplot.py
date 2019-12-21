@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -27,15 +28,23 @@ def plot_pair(
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
+    backend_kwargs,
 ):
     """Matplotlib pairplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
         if kind == "scatter":
             ax.plot(_posterior[0], _posterior[1], **plot_kwargs)
@@ -86,9 +95,7 @@ def plot_pair(
         )
 
         if ax is None:
-            fig, ax = plt.subplots(
-                numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True
-            )
+            fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
         hexbin_values = []
         for i in range(0, numvars - 1):
             var1 = _posterior[i]

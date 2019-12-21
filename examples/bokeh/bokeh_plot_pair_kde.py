@@ -16,5 +16,4 @@ ax = az.plot_pair(
     coords=coords,
     divergences=True,
     backend="bokeh",
-    show=True,
 )

@@ -1,4 +1,5 @@
 """Matplotlib Densityplot."""
+import warnings
 import numpy as np
 
 from ....stats import hpd
@@ -23,8 +24,16 @@ def plot_density(
     shade,
     n_data,
     data_labels,
+    backend_kwargs,
 ):
     """Matplotlib densityplot."""
+    if backend_kwargs is not None:
+        warnings.warn(
+            (
+                "Argument backend_kwargs has not effect in matplotlib.plot_density"
+                "Supplied value won't be used"
+            )
+        )
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
 
     for m_idx, plotters in enumerate(to_plot):

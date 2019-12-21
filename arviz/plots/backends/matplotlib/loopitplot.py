@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
 from ...hpdplot import plot_hpd
 
@@ -29,10 +30,18 @@ def plot_loo_pit(
     legend,
     credible_interval,
     plot_kwargs,
+    backend_kwargs,
 ):
     """Matplotlib loo pit plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, constrained_layout=True)
+        _, ax = plt.subplots(1, 1, figsize=figsize, **backend_kwargs)
 
     if ecdf:
         ax.plot(

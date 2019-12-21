@@ -11,7 +11,7 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     _create_axes_grid,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -33,7 +33,7 @@ def plot_density(
     figsize=None,
     textsize=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -86,8 +86,9 @@ def plot_density(
         on figsize.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -213,10 +214,18 @@ def plot_density(
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-
+    show = backend_kwargs.pop("show", None) if backend_kwargs is not None else None
     _, ax = _create_axes_grid(
-        length_plotters, rows, cols, figsize=figsize, squeeze=False, backend=backend
+        length_plotters,
+        rows,
+        cols,
+        figsize=figsize,
+        squeeze=False,
+        backend=backend,
+        backend_kwargs=backend_kwargs,
     )
+    if show is not None:
+        backend_kwargs["show"] = show
 
     plot_density_kwargs = dict(
         ax=ax,
@@ -235,6 +244,7 @@ def plot_density(
         shade=shade,
         n_data=n_data,
         data_labels=data_labels,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -242,10 +252,9 @@ def plot_density(
         plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
         plot_density_kwargs.pop("titlesize")
         plot_density_kwargs.pop("xt_labelsize")
-        plot_density_kwargs["show"] = show
         plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_density", "densityplot", backend)
-    ax = method(**plot_density_kwargs)
+    plot = get_plotting_function("plot_density", "densityplot", backend)
+    ax = plot(**plot_density_kwargs)
     return ax

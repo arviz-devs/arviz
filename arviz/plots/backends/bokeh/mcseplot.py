@@ -7,6 +7,7 @@ from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
+from . import backend_kwarg_defaults
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -34,11 +35,26 @@ def plot_mcse(
     rug_kind,
     _markersize,
     _linewidth,
-    show,
+    backend_kwargs,
 ):
     """Bokeh mcse plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+    show = backend_kwargs.pop("show")
     if ax is None:
-        _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         if errorbar or rug:

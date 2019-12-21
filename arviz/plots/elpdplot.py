@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
-from .plot_utils import get_coords, format_coords_as_labels, color_from_dim, get_plotting_method
+from .plot_utils import get_coords, format_coords_as_labels, color_from_dim, get_plotting_function
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
 
@@ -24,7 +24,7 @@ def plot_elpd(
     scale="deviance",
     plot_kwargs=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -68,8 +68,9 @@ def plot_elpd(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -199,15 +200,15 @@ def plot_elpd(
         legend=legend,
         handles=handles,
         color=color,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
         elpd_plot_kwargs.pop("legend")
         elpd_plot_kwargs.pop("handles")
         elpd_plot_kwargs.pop("color")
-        elpd_plot_kwargs["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_elpd", "elpdplot", backend)
-    ax = method(**elpd_plot_kwargs)
+    plot = get_plotting_function("plot_elpd", "elpdplot", backend)
+    ax = plot(**elpd_plot_kwargs)
     return ax

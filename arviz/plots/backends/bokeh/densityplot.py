@@ -4,6 +4,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
+from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
 from ...plot_utils import make_label
 from ....stats import hpd
@@ -24,7 +25,7 @@ def plot_density(
     outline,
     shade,
     data_labels,
-    show,
+    backend_kwargs,
 ):
     """Bokeh density plot."""
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
@@ -58,7 +59,15 @@ def plot_density(
                 data_label=data_label,
             )
 
-    if show:
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    if backend_kwargs["show"]:
         grid = gridplot([list(item) for item in ax], toolbar_location="above")
         bkp.show(grid)
 

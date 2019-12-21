@@ -8,7 +8,7 @@ from .plot_utils import (
     xarray_var_iter,
     _create_axes_grid,
     filter_plotters_list,
-    get_plotting_method,
+    get_plotting_function,
 )
 from ..utils import _var_names
 
@@ -22,7 +22,7 @@ def plot_autocorr(
     textsize=None,
     ax=None,
     backend=None,
-    show=True,
+    backend_kwargs=None,
 ):
     """Bar plot of the autocorrelation function for a sequence of data.
 
@@ -51,8 +51,9 @@ def plot_autocorr(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    show: bool, optional
-        If True, call bokeh.plotting.show.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
 
     Returns
     -------
@@ -110,6 +111,7 @@ def plot_autocorr(
     )
 
     if ax is None:
+        show = backend_kwargs.pop("show", None) if backend_kwargs is not None else None
         _, axes = _create_axes_grid(
             length_plotters,
             rows,
@@ -119,7 +121,10 @@ def plot_autocorr(
             sharex=True,
             sharey=True,
             backend=backend,
+            backend_kwargs=backend_kwargs,
         )
+        if show is not None:
+            backend_kwargs["show"] = show
     else:
         axes = ax
 
@@ -133,6 +138,7 @@ def plot_autocorr(
         linewidth=linewidth,
         xt_labelsize=xt_labelsize,
         titlesize=titlesize,
+        backend_kwargs=backend_kwargs,
     )
 
     if backend == "bokeh":
@@ -140,10 +146,9 @@ def plot_autocorr(
         autocorr_plot_args.pop("xt_labelsize")
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
-        autocorr_plot_args["show"] = show
 
     # TODO: Add backend kwargs
-    method = get_plotting_method("plot_autocorr", "autocorrplot", backend)
-    axes = method(**autocorr_plot_args)
+    plot = get_plotting_function("plot_autocorr", "autocorrplot", backend)
+    axes = plot(**autocorr_plot_args)
 
     return axes

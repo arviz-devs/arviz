@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
+from . import backend_kwarg_defaults
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -28,15 +29,33 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     markersize,
-    show,
+    backend_kwargs,
     num_pp_samples,
 ):
     """Bokeh ppc plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+    show = backend_kwargs.pop("show")
     if ax is None:
-        _, axes = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, backend="bokeh")
+        _, axes = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
     else:
-        axes = np.ravel(ax)
-        if len(axes) != length_plotters:
+        axes = ax
+        if isinstance(axes, bkp.Figure):
+            axes = np.array([axes])
+
+        if len([item for item in axes.ravel() if not None]) != length_plotters:
             raise ValueError(
                 "Found {} variables to plot but {} axes instances. They must be equal.".format(
                     length_plotters, len(axes)
@@ -85,7 +104,7 @@ def plot_ppc(
                     fill_kwargs={"alpha": 0},
                     ax=ax_i,
                     backend="bokeh",
-                    show=False,
+                    backend_kwargs={"show": False},
                 )
             else:
                 bins = get_bins(obs_vals)
@@ -175,7 +194,7 @@ def plot_ppc(
                         },
                         ax=ax_i,
                         backend="bokeh",
-                        show=False,
+                        backend_kwargs={"show": False},
                     )
                 else:
                     vals = pp_vals.flatten()
