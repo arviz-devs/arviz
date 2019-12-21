@@ -10,7 +10,6 @@ from .plot_utils import (
     make_label,
     xarray_var_iter,
     default_grid,
-    _create_axes_grid,
     get_plotting_function,
 )
 from ..utils import _var_names

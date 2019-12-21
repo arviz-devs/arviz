@@ -4,7 +4,7 @@ import numpy as np
 
 from ....stats import hpd
 from ...kdeplot import _fast_kde
-from ...plot_utils import make_label
+from ...plot_utils import _create_axes_grid, make_label
 
 
 def plot_density(

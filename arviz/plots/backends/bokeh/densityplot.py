@@ -6,7 +6,7 @@ from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
-from ...plot_utils import make_label
+from ...plot_utils import _create_axes_grid, make_label
 from ....stats import hpd
 from ....stats.stats_utils import histogram
 
@@ -17,6 +17,10 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    figsize,
+    length_plotters,
+    rows,
+    cols,
     line_width,
     markersize,
     credible_interval,
@@ -47,7 +51,7 @@ def plot_density(
         backend="bokeh",
         backend_kwargs=backend_kwargs,
     )
-    
+
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
     if data_labels is None:
         data_labels = {}
