@@ -10,7 +10,7 @@ from ....stats import autocorr
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, line_width, combined, backend_kwargs,
+    axes, plotters, max_lag, figsize, rows, cols, line_width, combined, backend_kwargs,
 ):
     """Bokeh autocorrelation plot."""
     if backend_kwargs is None:
@@ -21,6 +21,20 @@ def plot_autocorr(
         **backend_kwargs,
     }
     show = backend_kwargs.pop("show")
+
+    if axes is None:
+        _, axes = _create_axes_grid(
+            len(plotters),
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            sharex=True,
+            sharey=True,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
+
     for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
         x_prime = x
         if combined:
