@@ -5,7 +5,6 @@ from typing import Optional
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 from scipy.stats import mode
 
