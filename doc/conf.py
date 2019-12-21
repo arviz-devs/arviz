@@ -25,8 +25,6 @@ import sphinx_bootstrap_theme
 import arviz
 
 arviz.rcParams["data.load"] = "eager"
-#arviz.rcParams["plot.bokeh.show"] = False
-
 
 # -- General configuration ------------------------------------------------
 
