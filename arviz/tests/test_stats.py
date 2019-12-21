@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name, no-member
 from copy import deepcopy
 import numpy as np
-from numpy.testing import assert_allclose, assert_array_almost_equal
+from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 import pytest
 from scipy.stats import linregress
 from xarray import Dataset, DataArray
@@ -154,6 +154,31 @@ def test_summary_include_circ(centered_eight, include_circ):
     assert summary(centered_eight, include_circ=include_circ) is not NotImplementedError
     Numba.enable_numba()
     assert state == Numba.numba_flag
+
+
+METRICS_NAMES = [
+    "mean",
+    "sd",
+    "hpd_3%",
+    "hpd_97%",
+    "mcse_mean",
+    "mcse_sd",
+    "ess_mean",
+    "ess_sd",
+    "ess_bulk",
+    "ess_tail",
+    "r_hat",
+]
+
+
+@pytest.mark.parametrize(
+    "params",
+    (("all", METRICS_NAMES), ("stats", METRICS_NAMES[:4]), ("diagnostics", METRICS_NAMES[4:])),
+)
+def test_summary_kind(centered_eight, params):
+    kind, metrics_names_ = params
+    summary_df = summary(centered_eight, kind=kind)
+    assert_array_equal(summary_df.columns, metrics_names_)
 
 
 @pytest.mark.parametrize("fmt", ["wide", "long", "xarray"])
