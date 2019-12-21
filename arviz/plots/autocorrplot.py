@@ -1,6 +1,4 @@
 """Autocorrelation plot of data."""
-import numpy as np
-
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,

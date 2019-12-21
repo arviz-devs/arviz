@@ -1,5 +1,4 @@
 """Matplotlib Densityplot."""
-import warnings
 import numpy as np
 
 from ....stats import hpd

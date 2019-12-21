@@ -31,6 +31,7 @@ def plot_density(
     bw=4.5,
     figsize=None,
     textsize=None,
+    ax=None,
     backend=None,
     backend_kwargs=None,
 ):
@@ -83,6 +84,8 @@ def plot_density(
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
+    ax: axes, optional
+        Matplotlib axes or Bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
