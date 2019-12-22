@@ -2,6 +2,7 @@
 import numpy as np
 import pytest
 import torch
+import pyro
 from pyro.infer import Predictive
 
 from ..data.io_pyro import from_pyro
@@ -43,12 +44,14 @@ class TestDataPyro:
         inference_data = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta"],
             "prior_predictive": ["obs"],
-            "observed_data": ["obs"],
         }
+        if pyro.__version__.startswith("1"):
+            test_dict["sample_stats"].append("log_likelihood")
+            test_dict["observed_data"] = ["obs"]
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -75,7 +78,9 @@ class TestDataPyro:
         idata = from_pyro(data.obj)
         test_dict = {
             "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging"],
         }
+        if pyro.__version__.startswith("1"):
+            test_dict["sample_stats"].append("log_likelihood")
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
