@@ -49,12 +49,13 @@ class PyroConverter:
         import pyro
 
         self.pyro = pyro
-        if posterior is not None and pyro.__version__.startswith("1"):
+        if posterior is not None:
             self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
-            self.model = self.posterior.kernel.model
-            # model arguments and keyword arguments
-            self._args = self.posterior._args  # pylint: disable=protected-access
-            self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
+            if pyro.__version__.startswith("1"):
+                self.model = self.posterior.kernel.model
+                # model arguments and keyword arguments
+                self._args = self.posterior._args  # pylint: disable=protected-access
+                self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
         else:
             self.nchains = self.ndraws = 0
 
