@@ -43,10 +43,11 @@ class TestDataPyro:
         inference_data = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging"],
+            "sample_stats": ["diverging", "log_likelihood"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta"],
             "prior_predictive": ["obs"],
+            "observed_data": ["obs"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -72,9 +73,6 @@ class TestDataPyro:
 
     def test_inference_data_only_posterior(self, data):
         idata = from_pyro(data.obj)
-        test_dict = {
-            "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging"],
-        }
+        test_dict = {"posterior": ["mu", "tau", "eta"], "sample_stats": ["diverging"]}
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
