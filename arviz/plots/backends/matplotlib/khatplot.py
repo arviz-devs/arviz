@@ -51,7 +51,7 @@ def plot_khat(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("constrained_layout", not xlabels)),
+        **backend_kwarg_defaults(constrained_layout=(not xlabels))),
         **backend_kwargs,
     }
 
