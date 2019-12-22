@@ -6,7 +6,7 @@ from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults
 from ...kdeplot import _fast_kde
-from ...plot_utils import make_label
+from ...plot_utils import _create_axes_grid, make_label
 from ....stats import hpd
 from ....stats.stats_utils import histogram
 
@@ -17,6 +17,10 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    figsize,
+    length_plotters,
+    rows,
+    cols,
     line_width,
     markersize,
     credible_interval,
@@ -28,6 +32,26 @@ def plot_density(
     backend_kwargs,
 ):
     """Bokeh density plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    show = backend_kwargs.pop("show")
+
+    _, ax = _create_axes_grid(
+        length_plotters,
+        rows,
+        cols,
+        figsize=figsize,
+        squeeze=False,
+        backend="bokeh",
+        backend_kwargs=backend_kwargs,
+    )
+
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
     if data_labels is None:
         data_labels = {}
@@ -59,15 +83,7 @@ def plot_density(
                 data_label=data_label,
             )
 
-    if backend_kwargs is None:
-        backend_kwargs = {}
-
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
-
-    if backend_kwargs["show"]:
+    if show:
         grid = gridplot([list(item) for item in ax], toolbar_location="above")
         bkp.show(grid)
 

@@ -1,12 +1,9 @@
 """Autocorrelation plot of data."""
-import numpy as np
-
 from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
     default_grid,
     xarray_var_iter,
-    _create_axes_grid,
     filter_plotters_list,
     get_plotting_function,
 )
@@ -103,37 +100,19 @@ def plot_autocorr(
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
     )
-    length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(len(plotters))
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, textsize, rows, cols
     )
 
-    if ax is None:
-        show = backend_kwargs.pop("show", None) if backend_kwargs is not None else None
-        _, axes = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            sharex=True,
-            sharey=True,
-            backend=backend,
-            backend_kwargs=backend_kwargs,
-        )
-        if show is not None:
-            backend_kwargs["show"] = show
-    else:
-        axes = ax
-
-    axes = np.atleast_2d(axes)  # in case of only 1 plot
-
     autocorr_plot_args = dict(
-        axes=axes,
+        axes=ax,
         plotters=plotters,
         max_lag=max_lag,
+        figsize=figsize,
+        rows=rows,
+        cols=cols,
         combined=combined,
         linewidth=linewidth,
         xt_labelsize=xt_labelsize,
