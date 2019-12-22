@@ -2,11 +2,11 @@
 from collections import defaultdict, OrderedDict
 from itertools import tee
 
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
+import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
 from ....stats.stats_utils import histogram
@@ -45,6 +45,7 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
+    show,
 ):
     """Matplotlib forest plot."""
     plot_handler = PlotHandler(
@@ -138,6 +139,9 @@ def plot_forest(
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
     axes[0].set_ylim(-all_plotters[0].group_offset, y_max)
+
+    if backend_show(show):
+        plt.show()
 
     return axes
 

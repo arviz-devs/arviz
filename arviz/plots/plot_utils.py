@@ -212,11 +212,8 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
     fig : matplotlib figure
     ax : matplotlib axes
     """
-    if kwargs is None:
-        kwargs = {}
     if backend_kwargs is None:
         backend_kwargs = {}
-    kwargs.setdefault("constrained_layout", True)
 
     if backend == "bokeh":
         from bokeh.plotting import figure
@@ -229,7 +226,6 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
                 ("width", "plot.bokeh.figure.width"),
                 ("height", "plot.bokeh.figure.height"),
                 ("dpi", "plot.bokeh.figure.dpi"),
-                add_default=False,
             ),
             **backend_kwargs,
         }

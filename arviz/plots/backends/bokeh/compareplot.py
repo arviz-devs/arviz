@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_compare(
@@ -19,6 +19,7 @@ def plot_compare(
     information_criterion,
     step,
     backend_kwargs,
+    show,
 ):
     """Bokeh compareplot."""
     if backend_kwargs is None:
@@ -33,7 +34,6 @@ def plot_compare(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
 
     if ax is None:
         ax = bkp.figure(width=figsize[0] * dpi, height=figsize[1] * dpi, **backend_kwargs)
@@ -130,7 +130,7 @@ def plot_compare(
     ax.y_range._property_values["start"] = -1 + step  # pylint: disable=protected-access
     ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
     return ax

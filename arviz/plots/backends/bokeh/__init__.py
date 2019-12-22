@@ -3,7 +3,7 @@
 import packaging
 
 
-def backend_kwarg_defaults(*args, add_default=True, **kwargs):
+def backend_kwarg_defaults(*args, **kwargs):
     """Get default kwargs for backend.
 
     For args add a tuple with key and rcParam key pair.
@@ -12,10 +12,14 @@ def backend_kwarg_defaults(*args, add_default=True, **kwargs):
     # add needed default args from arviz.rcParams
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
-    # add default args from rcParams
-    if add_default:
-        defaults.setdefault("show", rcParams["plot.bokeh.show"])
     return defaults
+
+
+def backend_show(show):
+    """Set default behaviour for show if not explicitly defined."""
+    if show is None:
+        show = rcParams["plot.bokeh.show"]
+    return show
 
 
 from .autocorrplot import plot_autocorr

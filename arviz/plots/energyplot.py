@@ -22,6 +22,7 @@ def plot_energy(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """Plot energy transition distribution and marginal energy distribution in HMC algorithms.
 
@@ -63,6 +64,8 @@ def plot_energy(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -130,6 +133,7 @@ def plot_energy(
         bw=bw,
         legend=legend,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

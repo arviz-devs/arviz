@@ -20,6 +20,7 @@ def plot_hpd(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     r"""
     Plot hpd intervals for regression data.
@@ -55,6 +56,8 @@ def plot_hpd(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -107,6 +110,7 @@ def plot_hpd(
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     # TODO: Add backend kwargs

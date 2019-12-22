@@ -7,7 +7,7 @@ from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -47,6 +47,7 @@ def plot_ess(
     rug_kwargs,
     hline_kwargs,
     backend_kwargs,
+    show,
 ):
     """Bokeh essplot."""
     if backend_kwargs is None:
@@ -56,7 +57,6 @@ def plot_ess(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),
@@ -155,8 +155,8 @@ def plot_ess(
         ax_.xaxis.axis_label = "Total number of draws" if kind == "evolution" else "Quantile"
         ax_.yaxis.axis_label = ylabel.format("Relative ESS" if relative else "ESS")
 
-    if show:
-        grid = gridplot([list(item) for item in ax], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(ax.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return ax

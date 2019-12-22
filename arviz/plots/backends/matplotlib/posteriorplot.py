@@ -1,9 +1,11 @@
 """Matplotlib Plot posterior densities."""
 from typing import Optional
 from numbers import Number
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import mode
 
+from . import backend_show
 from ....stats import hpd
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
@@ -35,6 +37,7 @@ def plot_posterior(
     kwargs,
     titlesize,
     backend_kwargs,
+    show,
 ):
     """Matplotlib posterior plot."""
     if ax is None:
@@ -69,6 +72,9 @@ def plot_posterior(
         )
         idx += 1
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
+
+    if backend_show(show):
+        plt.show()
 
     return ax
 

@@ -3,7 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -31,6 +31,7 @@ def plot_ppc(
     markersize,
     backend_kwargs,
     num_pp_samples,
+    show,
 ):
     """Bokeh ppc plot."""
     if backend_kwargs is None:
@@ -40,7 +41,6 @@ def plot_ppc(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         _, axes = _create_axes_grid(
             length_plotters,
@@ -104,7 +104,8 @@ def plot_ppc(
                     fill_kwargs={"alpha": 0},
                     ax=ax_i,
                     backend="bokeh",
-                    backend_kwargs={"show": False},
+                    backend_kwargs={},
+                    show=False,
                 )
             else:
                 bins = get_bins(obs_vals)
@@ -194,7 +195,8 @@ def plot_ppc(
                         },
                         ax=ax_i,
                         backend="bokeh",
-                        backend_kwargs={"show": False},
+                        backend_kwargs={},
+                        show=False,
                     )
                 else:
                     vals = pp_vals.flatten()
@@ -239,8 +241,8 @@ def plot_ppc(
             xlabel = var_name
         ax_i.xaxis.axis_label = xlabel
 
-    if show:
-        grid = gridplot([list(item) for item in axes], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(axes.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return axes

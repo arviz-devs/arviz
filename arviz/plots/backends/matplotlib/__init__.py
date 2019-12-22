@@ -2,7 +2,7 @@
 """Matplotlib Plotting Backend."""
 
 
-def backend_kwarg_defaults(*args, add_default=True, **kwargs):
+def backend_kwarg_defaults(*args, **kwargs):
     """Get default kwargs for backend.
 
     For args add a tuple with key and rcParam key pair.
@@ -12,9 +12,15 @@ def backend_kwarg_defaults(*args, add_default=True, **kwargs):
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
     # add default args from rcParams
-    if add_default:
-        defaults.setdefault("constrained_layout", rcParams["plot.matplotlib.constrained_layout"])
+    defaults.setdefault("constrained_layout", rcParams["plot.matplotlib.constrained_layout"])
     return defaults
+
+
+def backend_show(show):
+    """Set default behaviour for show if not explicitly defined."""
+    if show is None:
+        show = rcParams["plot.matplotlib.show"]
+    return show
 
 
 from .autocorrplot import plot_autocorr

@@ -19,6 +19,7 @@ def plot_joint(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
@@ -58,6 +59,8 @@ def plot_joint(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -164,6 +167,7 @@ def plot_joint(
         gridsize=gridsize,
         marginal_kwargs=marginal_kwargs,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

@@ -11,7 +11,7 @@ from bokeh.models import Band, ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import _fast_kde
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from ....rcparams import rcParams
@@ -51,6 +51,7 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
+    show,
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
@@ -80,7 +81,6 @@ def plot_forest(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
 
     if ax is None:
         axes = []
@@ -153,7 +153,7 @@ def plot_forest(
     ].group_offset
     axes[0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
-    if show:
+    if backend_show(show):
         grid = gridplot([list(axes)], toolbar_location="above")
         bkp.show(grid)
 

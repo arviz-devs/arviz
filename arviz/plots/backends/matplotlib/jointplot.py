@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
@@ -21,6 +21,7 @@ def plot_joint(
     gridsize,
     marginal_kwargs,
     backend_kwargs,
+    show,
 ):
     """Matplotlib joint plot."""
     if backend_kwargs is None:
@@ -77,5 +78,8 @@ def plot_joint(
 
     ax_hist_x.set_xlim(axjoin.get_xlim())
     ax_hist_y.set_ylim(axjoin.get_ylim())
+
+    if backend_show(show):
+        plt.show()
 
     return np.array([axjoin, ax_hist_x, ax_hist_y])

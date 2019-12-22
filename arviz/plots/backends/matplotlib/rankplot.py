@@ -1,7 +1,9 @@
 """Matplotlib rankplot."""
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy.stats
 
+from . import backend_show
 from ...plot_utils import (
     _create_axes_grid,
     make_label,
@@ -24,6 +26,7 @@ def plot_rank(
     ax_labelsize,
     titlesize,
     backend_kwargs,
+    show,
 ):
     """Matplotlib rankplot.."""
     if axes is None:
@@ -81,4 +84,8 @@ def plot_rank(
             ax.set_title(make_label(var_name, selection), fontsize=titlesize)
         else:
             ax.set_yticks([])
+
+    if backend_show(show):
+        plt.show()
+
     return axes

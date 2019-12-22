@@ -1,8 +1,8 @@
 """Matplotlib loopitplot."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import _fast_kde
 from ...hpdplot import plot_hpd
 
@@ -31,6 +31,7 @@ def plot_loo_pit(
     credible_interval,
     plot_kwargs,
     backend_kwargs,
+    show,
 ):
     """Matplotlib loo pit plot."""
     if backend_kwargs is None:
@@ -67,5 +68,8 @@ def plot_loo_pit(
             label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
             ax.plot([], label=label, **plot_unif_kwargs)
         ax.legend()
+
+    if backend_show(show):
+        plt.show()
 
     return ax

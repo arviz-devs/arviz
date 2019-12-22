@@ -3,7 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
@@ -21,6 +21,7 @@ def plot_joint(
     gridsize,
     marginal_kwargs,
     backend_kwargs,
+    show,
 ):
     """Bokeh joint plot."""
     if backend_kwargs is None:
@@ -35,7 +36,6 @@ def plot_joint(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if ax is None:
         axjoin = bkp.figure(
             width=int(figsize[0] * dpi * 0.8), height=int(figsize[1] * dpi * 0.8), **backend_kwargs
@@ -80,7 +80,8 @@ def plot_joint(
             fill_last=fill_last,
             ax=axjoin,
             backend="bokeh",
-            backend_kwargs={"show": False},
+            backend_kwargs={},
+            show=False,
             **joint_kwargs
         )
     else:
@@ -98,11 +99,12 @@ def plot_joint(
             rotated=rotate,
             ax=ax_,
             backend="bokeh",
-            backend_kwargs={"show": False},
+            backend_kwargs={},
+            show=False,
             **marginal_kwargs
         )
 
-    if show:
+    if backend_show(show):
         grid = gridplot([[ax_hist_x, None], [axjoin, ax_hist_y]], toolbar_location="above")
         bkp.show(grid)
 

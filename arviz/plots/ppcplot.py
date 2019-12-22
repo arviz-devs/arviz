@@ -37,6 +37,7 @@ def plot_ppc(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """
     Plot for posterior predictive checks.
@@ -107,6 +108,8 @@ def plot_ppc(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -290,6 +293,7 @@ def plot_ppc(
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

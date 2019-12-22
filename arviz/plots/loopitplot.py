@@ -30,6 +30,7 @@ def plot_loo_pit(
     fill_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """Plot Leave-One-Out (LOO) probability integral transformation (PIT) predictive checks.
 
@@ -88,6 +89,8 @@ def plot_loo_pit(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -233,6 +236,7 @@ def plot_loo_pit(
         credible_interval=credible_interval,
         plot_kwargs=plot_kwargs,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

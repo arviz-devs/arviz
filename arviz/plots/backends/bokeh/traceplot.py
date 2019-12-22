@@ -9,7 +9,7 @@ from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
 from ....rcparams import rcParams
@@ -33,6 +33,7 @@ def plot_trace(
     divergence_data,
     colors,
     backend_kwargs: [Dict],
+    show,
 ):
     """Bokeh traceplot."""
     # If divergences are plotted they must be provided
@@ -52,7 +53,6 @@ def plot_trace(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
 
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
     backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
@@ -248,8 +248,8 @@ def plot_trace(
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
                     axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
-    if show is True:
-        grid = gridplot([list(item) for item in axes], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(axes.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return axes
@@ -303,7 +303,8 @@ def _plot_chains_bokeh(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
-                backend_kwargs={"show": False},
+                backend_kwargs={},
+                show=False,
             )
 
     if combined:
@@ -320,5 +321,6 @@ def _plot_chains_bokeh(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
-            backend_kwargs={"show": False},
+            backend_kwargs={},
+            show=False,
         )

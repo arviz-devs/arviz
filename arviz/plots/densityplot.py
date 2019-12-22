@@ -34,6 +34,7 @@ def plot_density(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -64,7 +65,7 @@ def plot_density(
         Defaults to 'mean'.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
-        If the string is `cycle`, it will automatically choose a color per model from matplolib's
+        If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
         models. Defaults to `cycle`.
     outline : bool
@@ -91,6 +92,8 @@ def plot_density(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -239,6 +242,7 @@ def plot_density(
         n_data=n_data,
         data_labels=data_labels,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

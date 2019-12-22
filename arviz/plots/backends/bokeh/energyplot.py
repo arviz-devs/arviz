@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 from bokeh.models import Label
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
@@ -21,6 +21,7 @@ def plot_energy(
     bw,
     legend,
     backend_kwargs,
+    show,
 ):
     """Bokeh energy plot."""
     if backend_kwargs is None:
@@ -34,7 +35,6 @@ def plot_energy(
         ),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     dpi = backend_kwargs.pop("dpi")
     if ax is None:
         ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
@@ -55,7 +55,8 @@ def plot_energy(
                 ax=ax,
                 legend=legend,
                 backend="bokeh",
-                backend_kwargs={"show": False},
+                backend_kwargs={},
+                show=False,
             )
     elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()
@@ -94,7 +95,7 @@ def plot_energy(
         ax.legend.location = "top_left"
         ax.legend.click_policy = "hide"
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
     return ax

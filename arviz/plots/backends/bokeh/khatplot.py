@@ -5,7 +5,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models import Span
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ....stats.stats_utils import histogram
 
 
@@ -22,6 +22,7 @@ def plot_khat(
     n_data_points,
     bin_format,
     backend_kwargs,
+    show,
 ):
     """Bokeh khat plot."""
     if backend_kwargs is None:
@@ -36,7 +37,6 @@ def plot_khat(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if ax is None:
         ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
@@ -87,7 +87,7 @@ def plot_khat(
     elif ymax > 1 & annotate:
         ax.y_range._property_values["end"] = 1.1 * ymax  # pylint: disable=protected-access
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
     return ax

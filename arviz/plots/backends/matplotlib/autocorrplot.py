@@ -1,6 +1,8 @@
 """Matplotlib Autocorrplot."""
+import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_show
 from ....stats import autocorr
 from ...plot_utils import _create_axes_grid, make_label
 
@@ -14,9 +16,10 @@ def plot_autocorr(
     cols,
     linewidth,
     titlesize,
-    combined=False,
-    xt_labelsize=None,
-    backend_kwargs=None,
+    combined,
+    xt_labelsize,
+    backend_kwargs,
+    show,
 ):
     """Matplotlib autocorrplot."""
     if axes is None:
@@ -47,5 +50,8 @@ def plot_autocorr(
     if axes.size > 0:
         axes[0, 0].set_xlim(0, max_lag)
         axes[0, 0].set_ylim(-1, 1)
+
+    if backend_show(show):
+        plt.show()
 
     return axes

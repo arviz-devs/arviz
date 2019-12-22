@@ -8,7 +8,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -28,6 +28,7 @@ def plot_pair(
     diverging_mask,
     flat_var_names,
     backend_kwargs,
+    show,
 ):
     """Bokeh pair plot."""
     if backend_kwargs is None:
@@ -42,7 +43,6 @@ def plot_pair(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
@@ -61,7 +61,8 @@ def plot_pair(
                 fill_last=fill_last,
                 ax=ax,
                 backend="bokeh",
-                backend_kwargs={"show": False},
+                backend_kwargs={},
+                show=False,
             )
         else:
             ax.hexbin(_posterior[0], _posterior[1], size=0.5)
@@ -80,7 +81,7 @@ def plot_pair(
         ax.xaxis.axis_label = flat_var_names[0]
         ax.yaxis.axis_label = flat_var_names[1]
 
-        if show:
+        if backend_show(show):
             bkp.show(ax)
 
     else:
@@ -167,7 +168,8 @@ def plot_pair(
                         fill_last=fill_last,
                         ax=ax[j, i],
                         backend="bokeh",
-                        backend_kwargs={"show": False},
+                        backend_kwargs={},
+                        show=False,
                         **plot_kwargs
                     )
 
@@ -192,8 +194,8 @@ def plot_pair(
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + 1]
 
-        if show:
-            grid = gridplot([list(item) for item in ax], toolbar_location="above")
+        if backend_show(show):
+            grid = gridplot(ax.tolist(), toolbar_location="above")
             bkp.show(grid)
 
     return ax

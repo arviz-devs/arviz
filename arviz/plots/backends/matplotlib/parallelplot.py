@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_parallel(
@@ -18,6 +18,7 @@ def plot_parallel(
     legend,
     figsize,
     backend_kwargs,
+    show,
 ):
     """Matplotlib parallel plot."""
     if backend_kwargs is None:
@@ -44,5 +45,8 @@ def plot_parallel(
         if np.any(diverging_mask):
             ax.plot([], color=colord, label="divergent")
         ax.legend(fontsize=xt_labelsize)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

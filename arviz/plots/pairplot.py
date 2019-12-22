@@ -24,6 +24,7 @@ def plot_pair(
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -69,6 +70,8 @@ def plot_pair(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -190,6 +193,7 @@ def plot_pair(
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

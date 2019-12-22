@@ -25,6 +25,7 @@ def plot_elpd(
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -71,6 +72,8 @@ def plot_elpd(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -201,6 +204,7 @@ def plot_elpd(
         handles=handles,
         color=color,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":
