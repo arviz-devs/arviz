@@ -43,6 +43,7 @@ from ..stats import compare, loo, waic
 rcParams["data.load"] = "eager"
 rcParams["plot.bokeh.show"] = False
 
+
 @pytest.fixture(scope="module")
 def data(eight_schools_params):
     data = eight_schools_params
@@ -94,31 +95,24 @@ def test_plot_density_float(models, kwargs):
 
 
 def test_plot_density_discrete(discrete_model):
-    axes = plot_density(
-        discrete_model, shade=0.9, backend="bokeh"
-    )
+    axes = plot_density(discrete_model, shade=0.9, backend="bokeh")
     assert axes.shape[0] == 1
 
 
 def test_plot_density_bad_kwargs(models):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     with pytest.raises(ValueError):
-        plot_density(
-            obj, point_estimate="bad_value", backend="bokeh"
-        )
+        plot_density(obj, point_estimate="bad_value", backend="bokeh")
 
     with pytest.raises(ValueError):
         plot_density(
             obj,
             data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)],
             backend="bokeh",
-
         )
 
     with pytest.raises(ValueError):
-        plot_density(
-            obj, credible_interval=2, backend="bokeh"
-        )
+        plot_density(obj, credible_interval=2, backend="bokeh")
 
 
 @pytest.mark.parametrize(
@@ -137,9 +131,7 @@ def test_plot_density_bad_kwargs(models):
     ],
 )
 def test_plot_trace(models, kwargs):
-    axes = plot_trace(
-        models.model_1, backend="bokeh", **kwargs
-    )
+    axes = plot_trace(models.model_1, backend="bokeh", **kwargs)
     assert axes.shape
 
 
@@ -170,13 +162,7 @@ def test_plot_trace_max_subplots_warning(models):
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
-    axes = plot_kde(
-        continuous_model["x"],
-        continuous_model["y"],
-        backend="bokeh",
-
-        **kwargs
-    )
+    axes = plot_kde(continuous_model["x"], continuous_model["y"], backend="bokeh", **kwargs)
     assert axes
 
 
@@ -190,17 +176,13 @@ def test_plot_kde(continuous_model, kwargs):
     ],
 )
 def test_plot_kde_cumulative(continuous_model, kwargs):
-    axes = plot_kde(
-        continuous_model["x"], backend="bokeh", **kwargs
-    )
+    axes = plot_kde(continuous_model["x"], backend="bokeh", **kwargs)
     assert axes
 
 
 @pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
 def test_plot_dist(continuous_model, kwargs):
-    axes = plot_dist(
-        continuous_model["x"], backend="bokeh", **kwargs
-    )
+    axes = plot_dist(continuous_model["x"], backend="bokeh", **kwargs)
     assert axes
 
 
@@ -219,13 +201,7 @@ def test_plot_kde_1d(continuous_model):
     ],
 )
 def test_plot_kde_2d(continuous_model, kwargs):
-    axes = plot_kde(
-        continuous_model["x"],
-        continuous_model["y"],
-
-        backend="bokeh",
-        **kwargs
-    )
+    axes = plot_kde(continuous_model["x"], continuous_model["y"], backend="bokeh", **kwargs)
     assert axes
 
 
@@ -233,13 +209,7 @@ def test_plot_kde_2d(continuous_model, kwargs):
     "kwargs", [{"plot_kwargs": {"line_dash": "solid"}}, {"cumulative": True}, {"rug": True}]
 )
 def test_plot_kde_quantiles(continuous_model, kwargs):
-    axes = plot_kde(
-        continuous_model["x"],
-        quantiles=[0.05, 0.5, 0.95],
-
-        backend="bokeh",
-        **kwargs
-    )
+    axes = plot_kde(continuous_model["x"], quantiles=[0.05, 0.5, 0.95], backend="bokeh", **kwargs)
     assert axes
 
 
@@ -251,9 +221,7 @@ def test_plot_autocorr_short_chain():
 
 
 def test_plot_autocorr_uncombined(models):
-    axes = plot_autocorr(
-        models.model_1, combined=False, backend="bokeh"
-    )
+    axes = plot_autocorr(models.model_1, combined=False, backend="bokeh")
     assert axes.shape[0] == 10
     max_subplots = (
         np.inf if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
@@ -262,22 +230,14 @@ def test_plot_autocorr_uncombined(models):
 
 
 def test_plot_autocorr_combined(models):
-    axes = plot_autocorr(
-        models.model_1, combined=True, backend="bokeh"
-    )
+    axes = plot_autocorr(models.model_1, combined=True, backend="bokeh")
     assert axes.shape[0] == 6
     assert axes.shape[1] == 3
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_autocorr_var_names(models, var_names):
-    axes = plot_autocorr(
-        models.model_1,
-        var_names=var_names,
-        combined=True,
-        backend="bokeh",
-
-    )
+    axes = plot_autocorr(models.model_1, var_names=var_names, combined=True, backend="bokeh",)
     assert axes.shape
 
 
@@ -288,9 +248,7 @@ def test_plot_compare(models, kwargs):
 
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
-    axes = plot_compare(
-        model_compare, backend="bokeh", **kwargs
-    )
+    axes = plot_compare(model_compare, backend="bokeh", **kwargs)
     assert axes
 
 
@@ -369,16 +327,12 @@ def test_plot_elpd_multidim(multidim_models, add_model, use_elpddata, kwargs):
 
 @pytest.mark.parametrize("kind", ["kde", "hist"])
 def test_plot_energy(models, kind):
-    assert plot_energy(
-        models.model_1, kind=kind, backend="bokeh"
-    )
+    assert plot_energy(models.model_1, kind=kind, backend="bokeh")
 
 
 def test_plot_energy_bad(models):
     with pytest.raises(ValueError):
-        plot_energy(
-            models.model_1, kind="bad_kind", backend="bokeh"
-        )
+        plot_energy(models.model_1, kind="bad_kind", backend="bokeh")
 
 
 @pytest.mark.parametrize(
@@ -420,12 +374,7 @@ def test_plot_ess_evolution(models):
     """Test specific arguments in evolution kind of plot_ess."""
     idata = models.model_1
     ax = plot_ess(
-        idata,
-        kind="evolution",
-        extra_kwargs={"linestyle": "--"},
-        color="b",
-        backend="bokeh",
-
+        idata, kind="evolution", extra_kwargs={"linestyle": "--"}, color="b", backend="bokeh",
     )
     assert np.all(ax)
 
@@ -442,9 +391,7 @@ def test_plot_ess_bad_coords(models, dim):
     """Test error when chain or dim are used as coords to select a data subset."""
     idata = models.model_1
     with pytest.raises(ValueError, match="invalid coordinates"):
-        plot_ess(
-            idata, coords={dim: slice(3)}, backend="bokeh"
-        )
+        plot_ess(idata, coords={dim: slice(3)}, backend="bokeh")
 
 
 def test_plot_ess_no_sample_stats(models):
@@ -492,10 +439,7 @@ def test_plot_forest(models, model_fits, args_expected):
 def test_plot_forest_rope_exception():
     with pytest.raises(ValueError) as err:
         plot_forest(
-            {"x": [1]},
-            rope="not_correct_format",
-            backend="bokeh",
-
+            {"x": [1]}, rope="not_correct_format", backend="bokeh",
         )
     assert "Argument `rope` must be None, a dictionary like" in str(err.value)
 
@@ -516,7 +460,6 @@ def test_plot_forest_bad(models, model_fits):
             obj,
             model_names=["model_name_{}".format(i) for i in range(len(obj) + 10)],
             backend="bokeh",
-
         )
 
 
@@ -531,42 +474,19 @@ def test_plot_forest_bad(models, model_fits):
     ],
 )
 def test_plot_hpd(models, data, kwargs):
-    axis = plot_hpd(
-        data["y"],
-        models.model_1.posterior["theta"],
-        backend="bokeh",
-
-        **kwargs
-    )
+    axis = plot_hpd(data["y"], models.model_1.posterior["theta"], backend="bokeh", **kwargs)
     assert axis
 
 
 @pytest.mark.parametrize("kind", ["scatter", "hexbin", "kde"])
 def test_plot_joint(models, kind):
-    axes = plot_joint(
-        models.model_1,
-        var_names=("mu", "tau"),
-        kind=kind,
-        backend="bokeh",
-
-    )
+    axes = plot_joint(models.model_1, var_names=("mu", "tau"), kind=kind, backend="bokeh",)
     assert axes[1, 0]
 
 
 def test_plot_joint_ax_tuple(models):
-    ax = plot_joint(
-        models.model_1,
-        var_names=("mu", "tau"),
-        backend="bokeh",
-
-    )
-    axes = plot_joint(
-        models.model_2,
-        var_names=("mu", "tau"),
-        ax=ax,
-        backend="bokeh",
-
-    )
+    ax = plot_joint(models.model_1, var_names=("mu", "tau"), backend="bokeh",)
+    axes = plot_joint(models.model_2, var_names=("mu", "tau"), ax=ax, backend="bokeh",)
     assert axes[1, 0]
 
 
@@ -578,29 +498,18 @@ def test_plot_joint_discrete(discrete_model):
 def test_plot_joint_bad(models):
     with pytest.raises(ValueError):
         plot_joint(
-            models.model_1,
-            var_names=("mu", "tau"),
-            kind="bad_kind",
-            backend="bokeh",
-
+            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh",
         )
 
     with pytest.raises(Exception):
         plot_joint(
-            models.model_1,
-            var_names=("mu", "tau", "eta"),
-            backend="bokeh",
-
+            models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh",
         )
 
     with pytest.raises(ValueError):
         _, axes = list(range(5))
         plot_joint(
-            models.model_1,
-            var_names=("mu", "tau"),
-            ax=axes,
-            backend="bokeh",
-
+            models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh",
         )
 
 
@@ -670,9 +579,7 @@ def test_plot_khat_annotate():
 
 def test_plot_khat_bad_input(models):
     with pytest.raises(ValueError):
-        plot_khat(
-            models.model_1.sample_stats, backend="bokeh"
-        )
+        plot_khat(models.model_1.sample_stats, backend="bokeh")
 
 
 @pytest.mark.parametrize(
@@ -689,9 +596,7 @@ def test_plot_khat_bad_input(models):
     ],
 )
 def test_plot_loo_pit(models, kwargs):
-    axes = plot_loo_pit(
-        idata=models.model_1, y="y", backend="bokeh", **kwargs
-    )
+    axes = plot_loo_pit(idata=models.model_1, y="y", backend="bokeh", **kwargs)
     assert axes
 
 
@@ -699,12 +604,7 @@ def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(
-            idata=models.model_1,
-            y="y",
-            ecdf=True,
-            use_hpd=True,
-            backend="bokeh",
-
+            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh",
         )
 
 
@@ -735,13 +635,7 @@ def test_plot_loo_pit_label(models, args):
     else:
         y_hat = None
 
-    ax = plot_loo_pit(
-        idata=models.model_1,
-        y=y,
-        y_hat=y_hat,
-        backend="bokeh",
-
-    )
+    ax = plot_loo_pit(idata=models.model_1, y=y, y_hat=y_hat, backend="bokeh",)
     assert ax
 
 
@@ -768,9 +662,7 @@ def test_plot_mcse_bad_coords(models, dim):
     """Test error when chain or dim are used as coords to select a data subset."""
     idata = models.model_1
     with pytest.raises(ValueError, match="invalid coordinates"):
-        plot_mcse(
-            idata, coords={dim: slice(3)}, backend="bokeh"
-        )
+        plot_mcse(idata, coords={dim: slice(3)}, backend="bokeh")
 
 
 def test_plot_mcse_no_sample_stats(models):
@@ -812,21 +704,15 @@ def test_plot_pair(models, kwargs):
 
 @pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}])
 def test_plot_pair_2var(discrete_model, get_ax, kwargs):
-    ax = plot_pair(
-        discrete_model, ax=get_ax, backend="bokeh", **kwargs
-    )
+    ax = plot_pair(discrete_model, ax=get_ax, backend="bokeh", **kwargs)
     assert ax
 
 
 def test_plot_pair_bad(models):
     with pytest.raises(ValueError):
-        plot_pair(
-            models.model_1, kind="bad_kind", backend="bokeh"
-        )
+        plot_pair(models.model_1, kind="bad_kind", backend="bokeh")
     with pytest.raises(Exception):
-        plot_pair(
-            models.model_1, var_names=["mu"], backend="bokeh"
-        )
+        plot_pair(models.model_1, var_names=["mu"], backend="bokeh")
 
 
 @pytest.mark.parametrize("has_sample_stats", [True, False])
@@ -839,9 +725,7 @@ def test_plot_pair_divergences_warning(has_sample_stats):
         # sample_stats missing
         data = data.posterior  # pylint: disable=no-member
     with pytest.warns(SyntaxWarning):
-        ax = plot_pair(
-            data, divergences=True, backend="bokeh"
-        )
+        ax = plot_pair(data, divergences=True, backend="bokeh")
     assert np.any(ax)
 
 
@@ -853,11 +737,7 @@ def test_plot_parallel_raises_valueerror(df_trace):  # pylint: disable=invalid-n
 @pytest.mark.parametrize("norm_method", [None, "normal", "minmax", "rank"])
 def test_plot_parallel(models, norm_method):
     assert plot_parallel(
-        models.model_1,
-        var_names=["mu", "tau"],
-        norm_method=norm_method,
-        backend="bokeh",
-
+        models.model_1, var_names=["mu", "tau"], norm_method=norm_method, backend="bokeh",
     )
 
 
@@ -866,38 +746,24 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(
-            models.model_1,
-            var_names=var_names,
-            norm_method="foo",
-            backend="bokeh",
-
+            models.model_1, var_names=var_names, norm_method="foo", backend="bokeh",
         )
 
 
 @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
 def test_plot_violin(models, var_names):
-    axes = plot_violin(
-        models.model_1, var_names=var_names, backend="bokeh"
-    )
+    axes = plot_violin(models.model_1, var_names=var_names, backend="bokeh")
     assert axes.shape
 
 
 def test_plot_violin_ax(models):
     ax = bkp.figure()
-    axes = plot_violin(
-        models.model_1, var_names="mu", ax=ax, backend="bokeh"
-    )
+    axes = plot_violin(models.model_1, var_names="mu", ax=ax, backend="bokeh")
     assert axes.shape
 
 
 def test_plot_violin_layout(models):
-    axes = plot_violin(
-        models.model_1,
-        var_names=["mu", "tau"],
-        sharey=False,
-        backend="bokeh",
-
-    )
+    axes = plot_violin(models.model_1, var_names=["mu", "tau"], sharey=False, backend="bokeh",)
     assert axes.shape
 
 
@@ -909,14 +775,7 @@ def test_plot_violin_discrete(discrete_model):
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 def test_plot_ppc(models, kind, alpha):
-    axes = plot_ppc(
-        models.model_1,
-        kind=kind,
-        alpha=alpha,
-        random_seed=3,
-        backend="bokeh",
-
-    )
+    axes = plot_ppc(models.model_1, kind=kind, alpha=alpha, random_seed=3, backend="bokeh",)
     assert axes
 
 
@@ -931,13 +790,7 @@ def test_plot_ppc_multichain(kind, jitter):
         observed_data={"x": np.random.randn(30), "y": np.random.randn(3, 10)},
     )
     axes = plot_ppc(
-        data,
-        kind=kind,
-        data_pairs={"y": "y_hat"},
-        jitter=jitter,
-        random_seed=3,
-        backend="bokeh",
-
+        data, kind=kind, data_pairs={"y": "y_hat"}, jitter=jitter, random_seed=3, backend="bokeh",
     )
     assert np.all(axes)
 
@@ -954,21 +807,10 @@ def test_plot_ppc_discrete(kind):
 
 
 def test_plot_ppc_grid(models):
-    axes = plot_ppc(
-        models.model_1,
-        kind="scatter",
-        flatten=[],
-        backend="bokeh",
-
-    )
+    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], backend="bokeh",)
     assert len(axes.ravel()) == 8
     axes = plot_ppc(
-        models.model_1,
-        kind="scatter",
-        flatten=[],
-        coords={"obs_dim": [1, 2, 3]},
-        backend="bokeh",
-
+        models.model_1, kind="scatter", flatten=[], coords={"obs_dim": [1, 2, 3]}, backend="bokeh",
     )
     assert len(axes.ravel()) == 3
     axes = plot_ppc(
@@ -977,7 +819,6 @@ def test_plot_ppc_grid(models):
         flatten=["obs_dim"],
         coords={"obs_dim": [1, 2, 3]},
         backend="bokeh",
-
     )
     assert len(axes.ravel()) == 1
 
@@ -988,15 +829,10 @@ def test_plot_ppc_bad(models, kind):
     with pytest.raises(TypeError):
         plot_ppc(data, kind=kind, backend="bokeh")
     with pytest.raises(TypeError):
-        plot_ppc(
-            models.model_1, kind="bad_val", backend="bokeh"
-        )
+        plot_ppc(models.model_1, kind="bad_val", backend="bokeh")
     with pytest.raises(TypeError):
         plot_ppc(
-            models.model_1,
-            num_pp_samples="bad_val",
-            backend="bokeh",
-
+            models.model_1, num_pp_samples="bad_val", backend="bokeh",
         )
 
 
@@ -1004,9 +840,7 @@ def test_plot_ppc_bad(models, kind):
 def test_plot_ppc_ax(models, kind, get_ax):
     """Test ax argument of plot_ppc."""
     ax = get_ax
-    axes = plot_ppc(
-        models.model_1, kind=kind, ax=ax, backend="bokeh"
-    )
+    axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh")
     assert axes[0] is ax
 
 
@@ -1036,49 +870,33 @@ def test_plot_ppc_ax(models, kind, get_ax):
     ],
 )
 def test_plot_posterior(models, kwargs):
-    axes = plot_posterior(
-        models.model_1, backend="bokeh", **kwargs
-    )
+    axes = plot_posterior(models.model_1, backend="bokeh", **kwargs)
     assert axes.shape
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
 def test_plot_posterior_discrete(discrete_model, kwargs):
-    axes = plot_posterior(
-        discrete_model, backend="bokeh", **kwargs
-    )
+    axes = plot_posterior(discrete_model, backend="bokeh", **kwargs)
     assert axes.shape
 
 
 def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
+        plot_posterior(models.model_1, backend="bokeh", rope="bad_value")
+    with pytest.raises(ValueError):
         plot_posterior(
-            models.model_1, backend="bokeh", rope="bad_value"
+            models.model_1, ref_val="bad_value", backend="bokeh",
         )
     with pytest.raises(ValueError):
         plot_posterior(
-            models.model_1,
-            ref_val="bad_value",
-            backend="bokeh",
-
-        )
-    with pytest.raises(ValueError):
-        plot_posterior(
-            models.model_1,
-            point_estimate="bad_value",
-            backend="bokeh",
-
+            models.model_1, point_estimate="bad_value", backend="bokeh",
         )
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(
-        models.model_1,
-        var_names=("mu", "tau"),
-        point_estimate=point_estimate,
-        backend="bokeh",
-
+        models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate, backend="bokeh",
     )
     assert axes.shape == (1, 2)
 
@@ -1095,7 +913,5 @@ def test_plot_posterior_point_estimates(models, point_estimate):
     ],
 )
 def test_plot_rank(models, kwargs):
-    axes = plot_rank(
-        models.model_1, backend="bokeh", **kwargs
-    )
+    axes = plot_rank(models.model_1, backend="bokeh", **kwargs)
     assert axes.shape
