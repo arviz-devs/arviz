@@ -438,7 +438,7 @@ def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     axes = plot_forest(obj, backend="bokeh", show=False, **args)
-    assert axes.shape == (expected,)
+    assert axes.shape == (1, expected)
 
 
 def test_plot_forest_rope_exception():
@@ -870,7 +870,7 @@ def test_plot_ppc_ax(models, kind):
     """Test ax argument of plot_ppc."""
     ax = bkp.figure()
     axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh", show=False)
-    assert axes[0,0] is ax
+    assert axes[0, 0] is ax
 
 
 @pytest.mark.parametrize(
