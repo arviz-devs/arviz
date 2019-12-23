@@ -7,7 +7,7 @@ from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -36,6 +36,7 @@ def plot_mcse(
     _markersize,
     _linewidth,
     backend_kwargs,
+    show,
 ):
     """Bokeh mcse plot."""
     if backend_kwargs is None:
@@ -45,7 +46,6 @@ def plot_mcse(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
@@ -55,8 +55,12 @@ def plot_mcse(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         if errorbar or rug:
             values = data[var_name].sel(**selection).values.flatten()
         if errorbar:
@@ -166,8 +170,8 @@ def plot_mcse(
             ax_.y_range._property_values["start"] = -0.05  # pylint: disable=protected-access
             ax_.y_range._property_values["end"] = 1  # pylint: disable=protected-access
 
-    if show:
-        grid = gridplot([list(item) for item in ax], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(ax.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return ax

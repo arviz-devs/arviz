@@ -5,7 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import set_xticklabels
 from ....stats.stats_utils import histogram
 
@@ -34,6 +34,7 @@ def plot_khat(
     n_data_points,
     bin_format,
     backend_kwargs,
+    show,
 ):
     """Matplotlib khat plot."""
     if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
@@ -50,10 +51,9 @@ def plot_khat(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(constrained_layout=(not xlabels)),
         **backend_kwargs,
     }
-    backend_kwargs["constrained_layout"] = not xlabels
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
@@ -112,6 +112,9 @@ def plot_khat(
 
     if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
         _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format)
+
+    if backend_show(show):
+        plt.show()
 
     return ax
 

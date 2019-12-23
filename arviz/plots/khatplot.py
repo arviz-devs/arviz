@@ -33,6 +33,7 @@ def plot_khat(
     hlines_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
     **kwargs
 ):
     """
@@ -81,6 +82,8 @@ def plot_khat(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
     kwargs :
         Additional keywords passed to ax.scatter.
 
@@ -219,6 +222,7 @@ def plot_khat(
         n_data_points=n_data_points,
         bin_format=bin_format,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

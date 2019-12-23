@@ -8,7 +8,7 @@ from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 from scipy.stats import mode
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     make_label,
@@ -38,6 +38,7 @@ def plot_posterior(
     ax_labelsize,
     kwargs,
     backend_kwargs,
+    show,
 ):
     """Bokeh posterior plot."""
     if backend_kwargs is None:
@@ -47,7 +48,6 @@ def plot_posterior(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
@@ -58,8 +58,12 @@ def plot_posterior(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        ax = np.atleast_2d(ax)
     idx = 0
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         _plot_posterior_op(
             idx,
             x.flatten(),
@@ -83,8 +87,8 @@ def plot_posterior(
         _title.text = make_label(var_name, selection)
         ax_.title = _title
 
-    if show:
-        grid = gridplot([list(item) for item in ax], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(ax.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return ax
@@ -246,7 +250,8 @@ def _plot_posterior_op(
             ax=ax,
             rug=False,
             backend="bokeh",
-            backend_kwargs={"show": False},
+            backend_kwargs={},
+            show=False,
         )
         hist, edges = np.histogram(values, density=True)
     else:

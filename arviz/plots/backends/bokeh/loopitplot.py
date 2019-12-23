@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
 
@@ -28,6 +28,7 @@ def plot_loo_pit(
     loo_pit_kde,
     plot_kwargs,
     backend_kwargs,
+    show,
 ):
     """Bokeh loo pit plot."""
     if backend_kwargs is None:
@@ -42,7 +43,6 @@ def plot_loo_pit(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if ax is None:
         ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
@@ -121,7 +121,8 @@ def plot_loo_pit(
                 unif_densities,
                 backend="bokeh",
                 ax=ax,
-                backend_kwargs={"show": False},
+                backend_kwargs={},
+                show=False,
                 **hpd_kwargs
             )
         else:
@@ -142,7 +143,7 @@ def plot_loo_pit(
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
     return ax

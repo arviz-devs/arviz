@@ -34,6 +34,7 @@ def plot_kde(
     legend=True,
     backend=None,
     backend_kwargs=None,
+    show=None,
     **kwargs
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -91,6 +92,8 @@ def plot_kde(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -211,6 +214,7 @@ def plot_kde(
         ax=ax,
         legend=legend,
         backend_kwargs=backend_kwargs,
+        show=show,
         **kwargs,
     )
 

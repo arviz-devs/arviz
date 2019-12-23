@@ -1,6 +1,9 @@
 """Matplotib Posterior predictive plot."""
-import numpy as np
 from matplotlib import animation
+import matplotlib.pyplot as plt
+import numpy as np
+
+from . import backend_show
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     make_label,
@@ -34,6 +37,7 @@ def plot_ppc(
     animation_kwargs,
     num_pp_samples,
     backend_kwargs,
+    show,
 ):
     """Matplotlib ppc plot."""
     if ax is None:
@@ -287,6 +291,9 @@ def plot_ppc(
                 ax_i.legend(fontsize=xt_labelsize * 0.75)
             else:
                 ax_i.legend([])
+
+    if backend_show(show):
+        plt.show()
 
     if animated:
         ani = animation.FuncAnimation(

@@ -1,12 +1,12 @@
 """Matplotlib pairplot."""
 
 import warnings
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -29,6 +29,7 @@ def plot_pair(
     divergences_kwargs,
     flat_var_names,
     backend_kwargs,
+    show,
 ):
     """Matplotlib pairplot."""
     if backend_kwargs is None:
@@ -146,5 +147,8 @@ def plot_pair(
                     )
 
                 ax[j, i].tick_params(labelsize=xt_labelsize)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

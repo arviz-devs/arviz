@@ -2,6 +2,7 @@
 import warnings
 import matplotlib.pyplot as plt
 
+from . import backend_show
 from ...kdeplot import plot_kde
 
 
@@ -28,6 +29,7 @@ def plot_dist(
     hist_kwargs,
     ax,
     backend_kwargs,
+    show,
 ):
     """Matplotlib distplot."""
     if backend_kwargs is not None:
@@ -37,6 +39,7 @@ def plot_dist(
                 "Supplied value won't be used"
             )
         )
+        backend_kwargs = None
     if ax is None:
         ax = plt.gca()
 
@@ -73,7 +76,12 @@ def plot_dist(
             pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="matplotlib",
+            backend_kwargs=backend_kwargs,
+            show=show,
         )
+
+    if backend_show(show):
+        plt.show()
 
     return ax
 

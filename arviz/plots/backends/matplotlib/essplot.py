@@ -1,8 +1,9 @@
 """Matplotlib energyplot."""
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-
+from . import backend_show
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -42,6 +43,7 @@ def plot_ess(
     rug_kwargs,
     hline_kwargs,
     backend_kwargs,
+    show,
 ):
     """Matplotlib ess plot."""
     if ax is None:
@@ -125,5 +127,8 @@ def plot_ess(
             ax_.set_yticklabels(yticks)
         else:
             ax_.set_ylim(bottom=0)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

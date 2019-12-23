@@ -1,7 +1,7 @@
 """Matplotlib Compareplot."""
 import matplotlib.pyplot as plt
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_compare(
@@ -20,6 +20,7 @@ def plot_compare(
     xt_labelsize,
     step,
     backend_kwargs,
+    show,
 ):
     """Matplotlib compare plot."""
     if backend_kwargs is None:
@@ -98,5 +99,8 @@ def plot_compare(
     ax.set_yticklabels(yticks_labels)
     ax.set_ylim(-1 + step, 0 - step)
     ax.tick_params(labelsize=xt_labelsize)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

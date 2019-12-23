@@ -20,6 +20,7 @@ def plot_autocorr(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """Bar plot of the autocorrelation function for a sequence of data.
 
@@ -51,6 +52,8 @@ def plot_autocorr(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -118,6 +121,7 @@ def plot_autocorr(
         xt_labelsize=xt_labelsize,
         titlesize=titlesize,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     if backend == "bokeh":

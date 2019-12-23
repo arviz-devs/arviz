@@ -1,11 +1,11 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import (
     _scale_fig_size,
     set_xticklabels,
@@ -30,6 +30,7 @@ def plot_elpd(
     handles,
     color,
     backend_kwargs,
+    show,
 ):
     """Matplotlib elpd plot."""
     if backend_kwargs is None:
@@ -153,5 +154,8 @@ def plot_elpd(
             ax[0, 1].legend(
                 handles=handles, ncol=ncols, title=color, bbox_to_anchor=(0, 1), loc="upper left"
             )
+
+    if backend_show(show):
+        plt.show()
 
     return ax

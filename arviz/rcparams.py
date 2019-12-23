@@ -108,6 +108,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
+    "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",

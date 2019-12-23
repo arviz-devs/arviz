@@ -3,6 +3,7 @@ import warnings
 from matplotlib import pyplot as plt
 import numpy as np
 
+from . import backend_show
 from ...plot_utils import _scale_fig_size
 
 
@@ -17,23 +18,24 @@ def plot_kde(
     ymax,
     gridsize,
     values,
-    values2=None,
-    rug=False,
-    label=None,
-    quantiles=None,
-    rotated=False,
-    contour=True,
-    fill_last=True,
-    textsize=None,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    contourf_kwargs=None,
-    pcolormesh_kwargs=None,
-    ax=None,
-    legend=True,
-    backend_kwargs=None,
+    values2,
+    rug,
+    label,
+    quantiles,
+    rotated,
+    contour,
+    fill_last,
+    textsize,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    contour_kwargs,
+    contourf_kwargs,
+    pcolormesh_kwargs,
+    ax,
+    legend,
+    backend_kwargs,
+    show,
 ):
     """Matplotlib kde plot."""
     if backend_kwargs is not None:
@@ -145,5 +147,8 @@ def plot_kde(
                 qcs.collections[0].set_alpha(0)
         else:
             ax.pcolormesh(x_x, y_y, density, **pcolormesh_kwargs)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

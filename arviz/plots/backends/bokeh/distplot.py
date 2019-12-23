@@ -2,33 +2,34 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
 
 
 def plot_dist(
     values,
-    values2=None,
-    color="C0",
-    kind="auto",
-    cumulative=False,
-    label=None,
-    rotated=False,
-    rug=False,
-    bw=4.5,
-    quantiles=None,
-    contour=True,
-    fill_last=True,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    contourf_kwargs=None,
-    pcolormesh_kwargs=None,
-    hist_kwargs=None,
-    ax=None,
-    backend_kwargs=None,
+    values2,
+    color,
+    kind,
+    cumulative,
+    label,
+    rotated,
+    rug,
+    bw,
+    quantiles,
+    contour,
+    fill_last,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    contour_kwargs,
+    contourf_kwargs,
+    pcolormesh_kwargs,
+    hist_kwargs,
+    ax,
+    backend_kwargs,
+    show,
     **kwargs  # pylint: disable=unused-argument
 ):
     """Bokeh distplot."""
@@ -44,7 +45,6 @@ def plot_dist(
         ),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         ax = bkp.figure(**backend_kwargs)
 
@@ -82,12 +82,13 @@ def plot_dist(
             pcolormesh_kwargs=pcolormesh_kwargs,
             ax=ax,
             backend="bokeh",
-            backend_kwargs={"show": False},
+            backend_kwargs={},
+            show=False,
         )
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
     return ax
 

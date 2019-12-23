@@ -1,6 +1,8 @@
 """Matplotlib Densityplot."""
+import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_show
 from ....stats import hpd
 from ...kdeplot import _fast_kde
 from ...plot_utils import _create_axes_grid, make_label
@@ -28,6 +30,7 @@ def plot_density(
     n_data,
     data_labels,
     backend_kwargs,
+    show,
 ):
     """Matplotlib densityplot."""
     _, ax = _create_axes_grid(
@@ -65,6 +68,9 @@ def plot_density(
         for m_idx, label in enumerate(data_labels):
             ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
         ax[0].legend(fontsize=xt_labelsize)
+
+    if backend_show(show):
+        plt.show()
 
     return ax
 

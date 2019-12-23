@@ -1,6 +1,8 @@
 """Matplotlib Violinplot."""
+import matplotlib.pyplot as plt
 import numpy as np
 
+from . import backend_show
 from ....stats import hpd
 from ....stats.stats_utils import histogram
 from ...kdeplot import _fast_kde
@@ -23,6 +25,7 @@ def plot_violin(
     xt_labelsize,
     quartiles,
     backend_kwargs,
+    show,
 ):
     """Matplotlib violin plot."""
     if ax is None:
@@ -57,6 +60,9 @@ def plot_violin(
         ax_.set_xticks([])
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.grid(None, axis="x")
+
+    if backend_show(show):
+        plt.show()
 
     return ax
 

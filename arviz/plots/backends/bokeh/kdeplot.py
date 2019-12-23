@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_kde(
@@ -25,22 +25,23 @@ def plot_kde(
     ymax,
     gridsize,
     values,
-    values2=None,
-    rug=False,
-    label=None,
-    quantiles=None,
-    rotated=False,
-    contour=True,
-    fill_last=True,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    contour_kwargs=None,
-    contourf_kwargs=None,
-    pcolormesh_kwargs=None,
-    ax=None,
-    legend=True,
-    backend_kwargs=None,
+    values2,
+    rug,
+    label,
+    quantiles,
+    rotated,
+    contour,
+    fill_last,
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    contour_kwargs,
+    contourf_kwargs,
+    pcolormesh_kwargs,
+    ax,
+    legend,
+    backend_kwargs,
+    show,
 ):
     """Bokeh kde plot."""
     if backend_kwargs is None:
@@ -55,7 +56,6 @@ def plot_kde(
         ),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if ax is None:
         ax = bkp.figure(**backend_kwargs)
 
@@ -228,7 +228,7 @@ def plot_kde(
             )
             ax.x_range.range_padding = ax.y_range.range_padding = 0
 
-    if show:
+    if backend_show(show):
         bkp.show(ax, toolbar_location="above")
     return ax
 

@@ -11,7 +11,7 @@ from bokeh.models import Band, ColumnDataSource
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import _fast_kde
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
 from ....rcparams import rcParams
@@ -51,6 +51,7 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
+    show,
 ):
     """Bokeh forest plot."""
     plot_handler = PlotHandler(
@@ -80,7 +81,6 @@ def plot_forest(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
 
     if ax is None:
         axes = []
@@ -102,14 +102,16 @@ def plot_forest(
             axes.append(ax)
     else:
         axes = ax
-    axes = np.atleast_1d(axes)
+
+    axes = np.atleast_2d(axes)
+
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, linewidth, markersize, axes[0], rope,
+            credible_interval, quartiles, linewidth, markersize, axes[0, 0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
-            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0]
+            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0, 0]
         )
     else:
         raise TypeError(
@@ -119,14 +121,14 @@ def plot_forest(
 
     idx = 1
     if ess:
-        plot_handler.plot_neff(axes[idx], markersize)
+        plot_handler.plot_neff(axes[0, idx], markersize)
         idx += 1
 
     if r_hat:
-        plot_handler.plot_rhat(axes[idx], markersize)
+        plot_handler.plot_rhat(axes[0, idx], markersize)
         idx += 1
 
-    for i, ax_ in enumerate(axes):
+    for i, ax_ in enumerate(axes.ravel()):
         if kind == "ridgeplot":
             ax_.xgrid.grid_line_color = None
             ax_.ygrid.grid_line_color = None
@@ -140,21 +142,23 @@ def plot_forest(
 
     labels, ticks = plot_handler.labels_and_ticks()
 
-    axes[0].yaxis.ticker = FixedTicker(ticks=ticks)
-    axes[0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
+    axes[0, 0].yaxis.ticker = FixedTicker(ticks=ticks)
+    axes[0, 0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
 
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
 
-    axes[0].y_range._property_values["start"] = -all_plotters[  # pylint: disable=protected-access
+    axes[0, 0].y_range._property_values[
+        "start"
+    ] = -all_plotters[  # pylint: disable=protected-access
         0
     ].group_offset
-    axes[0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
+    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
-    if show:
-        grid = gridplot([list(axes)], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(axes.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return axes

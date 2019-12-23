@@ -27,6 +27,7 @@ def plot_forest(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
 ):
     """Forest plot to compare credible intervals from a number of distributions.
 
@@ -93,6 +94,8 @@ def plot_forest(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -174,6 +177,7 @@ def plot_forest(
         ess=ess,
         r_hat=r_hat,
         backend_kwargs=backend_kwargs,
+        show=show,
     )
 
     # TODO: Add backend kwargs

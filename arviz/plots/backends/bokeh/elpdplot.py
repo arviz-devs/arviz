@@ -6,7 +6,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
@@ -25,6 +25,7 @@ def plot_elpd(
     xdata,
     threshold,
     backend_kwargs,
+    show,
 ):
     """Bokeh elpd plot."""
     if backend_kwargs is None:
@@ -39,7 +40,6 @@ def plot_elpd(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
@@ -56,7 +56,7 @@ def plot_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
 
-        if show:
+        if backend_show(show):
             bkp.show(ax, toolbar_location="above")
 
     else:
@@ -128,8 +128,8 @@ def plot_elpd(
                     plot_kwargs,
                 )
 
-        if show:
-            bkp.show(gridplot([list(item) for item in ax], toolbar_location="above"))
+        if backend_show(show):
+            bkp.show(gridplot(ax.tolist(), toolbar_location="above"))
     return ax
 
 

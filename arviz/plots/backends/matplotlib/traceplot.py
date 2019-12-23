@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size, get_bins, make_label
 
@@ -27,6 +27,7 @@ def plot_trace(
     divergence_data,
     colors,
     backend_kwargs,
+    show,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -112,16 +113,15 @@ def plot_trace(
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
-    backend_kwargs.setdefault("textsize", 10)
+    textsize = plot_kwargs.pop("textsize", 10)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
-        figsize, backend_kwargs["textsize"], rows=len(plotters), cols=2
+        figsize, textsize, rows=len(plotters), cols=2
     )
 
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
-    backend_kwargs.pop("textsize")
     _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
 
     for idx, (var_name, selection, value) in enumerate(plotters):
@@ -234,6 +234,10 @@ def plot_trace(
         if combined:
             handles.insert(0, Line2D([], [], color=colors[-1], label="combined"))
         axes[0, 1].legend(handles=handles, title="chain")
+
+    if backend_show(show):
+        plt.show()
+
     return axes
 
 
@@ -258,7 +262,7 @@ def _plot_chains_mpl(
         if not combined:
             plot_kwargs["color"] = colors[chain_idx]
             plot_dist(
-                row,
+                values=row,
                 textsize=xt_labelsize,
                 rug=rug,
                 ax=axes[idx, 0],
@@ -266,12 +270,15 @@ def _plot_chains_mpl(
                 plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
+                backend="matplotlib",
+                backend_kwargs={},
+                show=False,
             )
 
     if combined:
         plot_kwargs["color"] = colors[-1]
         plot_dist(
-            value.flatten(),
+            values=value.flatten(),
             textsize=xt_labelsize,
             rug=rug,
             ax=axes[idx, 0],
@@ -279,4 +286,7 @@ def _plot_chains_mpl(
             plot_kwargs=plot_kwargs,
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
+            backend="matplotlib",
+            backend_kwargs={},
+            show=False,
         )

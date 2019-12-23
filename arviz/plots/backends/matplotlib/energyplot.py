@@ -1,7 +1,7 @@
 """Matplotlib energyplot."""
 import matplotlib.pyplot as plt
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
 
@@ -20,6 +20,7 @@ def plot_energy(
     bw,
     legend,
     backend_kwargs,
+    show,
 ):
     """Matplotlib energy plot."""
     if backend_kwargs is None:
@@ -72,5 +73,8 @@ def plot_energy(
 
     ax.set_xticks([])
     ax.set_yticks([])
+
+    if backend_show(show):
+        plt.show()
 
     return ax

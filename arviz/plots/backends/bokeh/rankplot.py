@@ -7,7 +7,7 @@ from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import (
     _create_axes_grid,
     make_label,
@@ -28,6 +28,7 @@ def plot_rank(
     ref_line,
     labels,
     backend_kwargs,
+    show,
 ):
     """Bokeh rank plot."""
     if backend_kwargs is None:
@@ -37,7 +38,6 @@ def plot_rank(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    show = backend_kwargs.pop("show")
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,
@@ -50,8 +50,12 @@ def plot_rank(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        axes = np.atleast_2d(axes)
 
-    for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
+    for ax, (var_name, selection, var_data) in zip(
+        (item for item in axes.flatten() if item is not None), plotters
+    ):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
@@ -122,8 +126,8 @@ def plot_rank(
         _title.text = make_label(var_name, selection)
         ax.title = _title
 
-    if show:
-        grid = gridplot([list(item) for item in axes], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(axes.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return axes

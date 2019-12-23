@@ -3,10 +3,10 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
-def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kwargs):
+def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kwargs, show):
     """Bokeh parallel plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
@@ -20,7 +20,6 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    show = backend_kwargs.pop("show")
     if ax is None:
         ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
@@ -40,7 +39,7 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     ax.xaxis.major_label_overrides = dict(zip(map(str, range(len(var_names))), map(str, var_names)))
     ax.xaxis.major_label_orientation = np.pi / 2
 
-    if show:
+    if backend_show(show):
         bkp.show(ax)
 
     return ax

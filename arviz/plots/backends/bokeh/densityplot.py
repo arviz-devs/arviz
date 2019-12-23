@@ -4,7 +4,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import _fast_kde
 from ...plot_utils import _create_axes_grid, make_label
 from ....stats import hpd
@@ -30,6 +30,7 @@ def plot_density(
     shade,
     data_labels,
     backend_kwargs,
+    show,
 ):
     """Bokeh density plot."""
     if backend_kwargs is None:
@@ -40,19 +41,23 @@ def plot_density(
         **backend_kwargs,
     }
 
-    show = backend_kwargs.pop("show")
+    if ax is None:
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
+    else:
+        ax = np.atleast_2d(ax)
 
-    _, ax = _create_axes_grid(
-        length_plotters,
-        rows,
-        cols,
-        figsize=figsize,
-        squeeze=False,
-        backend="bokeh",
-        backend_kwargs=backend_kwargs,
-    )
-
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
+    axis_map = {
+        label: ax_
+        for label, ax_ in zip(all_labels, (item for item in ax.flatten() if item is not None))
+    }
     if data_labels is None:
         data_labels = {}
 
@@ -83,8 +88,8 @@ def plot_density(
                 data_label=data_label,
             )
 
-    if show:
-        grid = gridplot([list(item) for item in ax], toolbar_location="above")
+    if backend_show(show):
+        grid = gridplot(ax.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return ax

@@ -1,8 +1,9 @@
 """Matplotlib mcseplot."""
-
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
+from . import backend_show
 from ....stats.stats_utils import quantile as _quantile
 from ...plot_utils import (
     make_label,
@@ -38,6 +39,7 @@ def plot_mcse(
     ax_labelsize,
     titlesize,
     backend_kwargs,
+    show,
 ):
     """Matplotlib mcseplot."""
     if ax is None:
@@ -124,5 +126,8 @@ def plot_mcse(
             ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
         elif not errorbar:
             ax_.set_ylim(bottom=0)
+
+    if backend_show(show):
+        plt.show()
 
     return ax

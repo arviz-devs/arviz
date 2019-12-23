@@ -27,6 +27,7 @@ def plot_dist(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    show=None,
     **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
@@ -91,6 +92,8 @@ def plot_dist(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
@@ -184,6 +187,7 @@ def plot_dist(
         hist_kwargs=hist_kwargs,
         ax=ax,
         backend_kwargs=backend_kwargs,
+        show=show,
         **kwargs,
     )
 
