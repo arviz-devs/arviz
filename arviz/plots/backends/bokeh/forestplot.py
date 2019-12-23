@@ -121,14 +121,14 @@ def plot_forest(
 
     idx = 1
     if ess:
-        plot_handler.plot_neff(axes[idx], markersize)
+        plot_handler.plot_neff(axes[0, idx], markersize)
         idx += 1
 
     if r_hat:
-        plot_handler.plot_rhat(axes[idx], markersize)
+        plot_handler.plot_rhat(axes[0, idx], markersize)
         idx += 1
 
-    for i, ax_ in enumerate(axes):
+    for i, ax_ in enumerate(axes.ravel()):
         if kind == "ridgeplot":
             ax_.xgrid.grid_line_color = None
             ax_.ygrid.grid_line_color = None
