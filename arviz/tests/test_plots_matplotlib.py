@@ -45,7 +45,6 @@ from ..plots import (
 from ..plots.kdeplot import _cov
 
 rcParams["data.load"] = "eager"
-rcParams["plot.matplotlib.show"] = False
 
 
 @pytest.fixture(scope="function", autouse=True)

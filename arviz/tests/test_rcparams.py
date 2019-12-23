@@ -18,9 +18,6 @@ from ..rcparams import (
 
 from .helpers import models  # pylint: disable=unused-import
 
-# reset rcParam manually
-rcParams["plot.bokeh.show"] = True
-
 ### Test rcparams classes ###
 def test_rc_context_dict():
     rcParams["data.load"] = "lazy"
