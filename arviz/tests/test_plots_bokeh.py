@@ -868,8 +868,9 @@ def test_plot_ppc_bad(models, kind):
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_ax(models, kind):
     """Test ax argument of plot_ppc."""
-    axes = plot_ppc(models.model_1, kind=kind, ax=bkp.figure(), backend="bokeh", show=False)
-    assert axes[0] is ax
+    ax = bkp.figure()
+    axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh", show=False)
+    assert axes[0,0] is ax
 
 
 @pytest.mark.parametrize(
