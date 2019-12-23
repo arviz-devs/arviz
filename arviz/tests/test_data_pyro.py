@@ -53,7 +53,7 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
-    @pytest.skipif(
+    @pytest.mark.skipif(
         packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
         reason="requires pyro 1.0.0 or higher",
     )
@@ -88,9 +88,9 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
 
-    @pytest.skipif(
+    @pytest.mark.skipif(
         packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
-        reason="requires pyro 2.0.0 or higher",
+        reason="requires pyro 1.0.0 or higher",
     )
     def test_inference_data_only_posterior_has_log_likelihood(self, data):
         idata = from_pyro(data.obj)
