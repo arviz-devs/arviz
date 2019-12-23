@@ -46,9 +46,12 @@ def plot_violin(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
-    ax = np.atleast_1d(ax)
+    else:
+        ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         val = x.flatten()
         if val[0].dtype.kind == "i":
             cat_hist(val, shade, ax_, **kwargs_shade)

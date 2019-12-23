@@ -102,14 +102,16 @@ def plot_forest(
             axes.append(ax)
     else:
         axes = ax
-    axes = np.atleast_1d(axes)
+
+    axes = np.atleast_2d(axes)
+
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, linewidth, markersize, axes[0], rope,
+            credible_interval, quartiles, linewidth, markersize, axes[0, 0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
-            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0]
+            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0, 0]
         )
     else:
         raise TypeError(
@@ -140,21 +142,23 @@ def plot_forest(
 
     labels, ticks = plot_handler.labels_and_ticks()
 
-    axes[0].yaxis.ticker = FixedTicker(ticks=ticks)
-    axes[0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
+    axes[0, 0].yaxis.ticker = FixedTicker(ticks=ticks)
+    axes[0, 0].yaxis.major_label_overrides = dict(zip(map(str, ticks), map(str, labels)))
 
     all_plotters = list(plot_handler.plotters.values())
     y_max = plot_handler.y_max() - all_plotters[-1].group_offset
     if kind == "ridgeplot":  # space at the top
         y_max += ridgeplot_overlap
 
-    axes[0].y_range._property_values["start"] = -all_plotters[  # pylint: disable=protected-access
+    axes[0, 0].y_range._property_values[
+        "start"
+    ] = -all_plotters[  # pylint: disable=protected-access
         0
     ].group_offset
-    axes[0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
+    axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
     if backend_show(show):
-        grid = gridplot([list(axes)], toolbar_location="above")
+        grid = gridplot(axes.tolist(), toolbar_location="above")
         bkp.show(grid)
 
     return axes

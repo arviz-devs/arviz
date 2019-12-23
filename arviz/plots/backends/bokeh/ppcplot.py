@@ -51,9 +51,7 @@ def plot_ppc(
             backend_kwargs=backend_kwargs,
         )
     else:
-        axes = ax
-        if isinstance(axes, bkp.Figure):
-            axes = np.array([axes])
+        axes = np.atleast_2d(ax)
 
         if len([item for item in axes.ravel() if not None]) != length_plotters:
             raise ValueError(
@@ -62,7 +60,7 @@ def plot_ppc(
                 )
             )
 
-    for i, ax_i in enumerate(axes.ravel()):
+    for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
         var_name, _, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
         dtype = posterior_predictive[pp_var_name].dtype.kind

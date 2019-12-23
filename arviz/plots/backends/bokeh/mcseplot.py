@@ -55,8 +55,12 @@ def plot_mcse(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        ax = np.atleast_2d(ax)
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         if errorbar or rug:
             values = data[var_name].sel(**selection).values.flatten()
         if errorbar:

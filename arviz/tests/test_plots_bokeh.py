@@ -66,12 +66,6 @@ def continuous_model():
     return {"x": np.random.beta(2, 5, size=100), "y": np.random.beta(2, 5, size=100)}
 
 
-@pytest.fixture(scope="function")
-def get_ax():
-    ax = bkp.figure()
-    return np.atleast_2d(ax)
-
-
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -719,8 +713,8 @@ def test_plot_pair(models, kwargs):
 
 
 @pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}])
-def test_plot_pair_2var(discrete_model, get_ax, kwargs):
-    ax = plot_pair(discrete_model, ax=get_ax, backend="bokeh", show=False, **kwargs)
+def test_plot_pair_2var(discrete_model, kwargs):
+    ax = plot_pair(discrete_model, ax=bkp.figure(), backend="bokeh", show=False, **kwargs)
     assert ax
 
 
@@ -777,7 +771,7 @@ def test_plot_violin(models, var_names):
 
 
 def test_plot_violin_ax(models):
-    ax = np.atleast_2d(bkp.figure())
+    ax = bkp.figure()
     axes = plot_violin(models.model_1, var_names="mu", ax=ax, backend="bokeh", show=False)
     assert axes.shape
 
@@ -872,10 +866,9 @@ def test_plot_ppc_bad(models, kind):
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
-def test_plot_ppc_ax(models, kind, get_ax):
+def test_plot_ppc_ax(models, kind):
     """Test ax argument of plot_ppc."""
-    ax = get_ax
-    axes = plot_ppc(models.model_1, kind=kind, ax=ax, backend="bokeh", show=False)
+    axes = plot_ppc(models.model_1, kind=kind, ax=bkp.figure(), backend="bokeh", show=False)
     assert axes[0] is ax
 
 

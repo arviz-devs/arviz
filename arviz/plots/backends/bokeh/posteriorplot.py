@@ -58,8 +58,12 @@ def plot_posterior(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        ax = np.atleast_2d(ax)
     idx = 0
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         _plot_posterior_op(
             idx,
             x.flatten(),

@@ -33,14 +33,18 @@ def plot_autocorr(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        axes = np.atleast_2d(axes)
 
-    for (var_name, selection, x), ax_ in zip(plotters, axes.flatten()):
+    for (var_name, selection, x), ax in zip(
+        plotters, (item for item in axes.flatten() if item is not None)
+    ):
         x_prime = x
         if combined:
             x_prime = x.flatten()
         y = autocorr(x_prime)
 
-        ax_.segment(
+        ax.segment(
             x0=np.arange(len(y)),
             y0=0,
             x1=np.arange(len(y)),
@@ -48,11 +52,11 @@ def plot_autocorr(
             line_width=line_width,
             line_color="black",
         )
-        ax_.line([0, 0], [0, max_lag], line_color="steelblue")
+        ax.line([0, 0], [0, max_lag], line_color="steelblue")
 
         title = Title()
         title.text = make_label(var_name, selection)
-        ax_.title = title
+        ax.title = title
 
     if axes.size > 0:
         axes[0, 0].x_range._property_values["start"] = 0  # pylint: disable=protected-access

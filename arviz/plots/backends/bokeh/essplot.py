@@ -68,7 +68,12 @@ def plot_ess(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
+    else:
+        ax = np.atleast_2d(ax)
+
+    for (var_name, selection, x), ax_ in zip(
+        plotters, (item for item in ax.flatten() if item is not None)
+    ):
         ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
         if kind == "evolution":
             ax_.line(np.asarray(xdata), np.asarray(x), legend_label="bulk")

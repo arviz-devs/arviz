@@ -50,8 +50,12 @@ def plot_rank(
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
+    else:
+        axes = np.atleast_2d(axes)
 
-    for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
+    for ax, (var_name, selection, var_data) in zip(
+        (item for item in axes.flatten() if item is not None), plotters
+    ):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))

@@ -41,17 +41,23 @@ def plot_density(
         **backend_kwargs,
     }
 
-    _, ax = _create_axes_grid(
-        length_plotters,
-        rows,
-        cols,
-        figsize=figsize,
-        squeeze=False,
-        backend="bokeh",
-        backend_kwargs=backend_kwargs,
-    )
+    if ax is None:
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend="bokeh",
+            backend_kwargs=backend_kwargs,
+        )
+    else:
+        ax = np.atleast_2d(ax)
 
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
+    axis_map = {
+        label: ax_
+        for label, ax_ in zip(all_labels, (item for item in ax.flatten() if item is not None))
+    }
     if data_labels is None:
         data_labels = {}
 
