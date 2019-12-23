@@ -1,7 +1,9 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import numpy as np
+import packaging
 import pytest
 import torch
+import pyro
 from pyro.infer import Predictive
 
 from ..data.io_pyro import from_pyro
@@ -51,6 +53,16 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+    @pytest.mark.skipif(
+        packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
+        reason="requires pyro 1.0.0 or higher",
+    )
+    def test_inference_data_has_log_likelihood_and_observed_data(self, data):
+        idata = from_pyro(data.obj)
+        test_dict = {"sample_stats": ["log_likelihood"], "observed_data": ["obs"]}
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+
     def test_inference_data_no_posterior(self, data, eight_schools_params):
         posterior_samples = data.obj.get_samples()
         model = data.obj.kernel.model
@@ -72,9 +84,16 @@ class TestDataPyro:
 
     def test_inference_data_only_posterior(self, data):
         idata = from_pyro(data.obj)
-        test_dict = {
-            "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging"],
-        }
+        test_dict = {"posterior": ["mu", "tau", "eta"], "sample_stats": ["diverging"]}
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+
+    @pytest.mark.skipif(
+        packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
+        reason="requires pyro 1.0.0 or higher",
+    )
+    def test_inference_data_only_posterior_has_log_likelihood(self, data):
+        idata = from_pyro(data.obj)
+        test_dict = {"sample_stats": ["log_likelihood"]}
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
