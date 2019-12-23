@@ -1,5 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import numpy as np
+import packaging
 import pytest
 import torch
 import pyro
@@ -49,7 +50,7 @@ class TestDataPyro:
             "prior": ["mu", "tau", "eta"],
             "prior_predictive": ["obs"],
         }
-        if pyro.__version__.startswith("1"):
+        if packaging.version.parse(pyro.__version__) >= packaging.version.parse("1.0.0"):
             test_dict["sample_stats"].append("log_likelihood")
             test_dict["observed_data"] = ["obs"]
         fails = check_multiple_attrs(test_dict, inference_data)
@@ -80,7 +81,7 @@ class TestDataPyro:
             "posterior": ["mu", "tau", "eta"],
             "sample_stats": ["diverging"],
         }
-        if pyro.__version__.startswith("1"):
+        if packaging.version.parse(pyro.__version__) >= packaging.version.parse("1.0.0"):
             test_dict["sample_stats"].append("log_likelihood")
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
