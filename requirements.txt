@@ -1,5 +1,5 @@
 matplotlib>=3.0
-numpy>=1.12,<1.18
+numpy>=1.12
 scipy>=0.19
 packaging
 pandas>=0.23
