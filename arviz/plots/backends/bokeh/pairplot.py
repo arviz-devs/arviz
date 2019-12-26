@@ -71,7 +71,13 @@ def plot_pair(
 
         if kind == "scatter":
             if divergences:
-                ax.circle(flat_var_names[0], flat_var_names[1], source=source, view=source_nondiv)
+                ax.circle(
+                    flat_var_names[0],
+                    flat_var_names[1],
+                    source=source,
+                    view=source_nondiv,
+                    legend_label="non-divergent",
+                )
             else:
                 ax.circle(flat_var_names[0], flat_var_names[1], source=source)
         elif kind == "kde":
@@ -99,7 +105,9 @@ def plot_pair(
                 size=6,
                 source=source,
                 view=source_div,
+                legend_label="divergent",
             )
+            ax.legend.click_policy = "hide"
 
         ax.xaxis.axis_label = flat_var_names[0]
         ax.yaxis.axis_label = flat_var_names[1]
@@ -131,24 +139,10 @@ def plot_pair(
                     if row < col:
                         row_ax.append(None)
                     else:
-                        tools = ",".join(
-                            [
-                                "pan",
-                                "wheel_zoom",
-                                "box_zoom",
-                                "lasso_select",
-                                "poly_select",
-                                "undo",
-                                "redo",
-                                "reset",
-                                "save,hover",
-                            ]
-                        )
                         ax_ = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * 60),
-                            height=int(figsize[1] / (numvars - 1) * 60),
-                            output_backend="webgl",
-                            tools=tools,
+                            width=int(figsize[0] / (numvars - 1) * dpi),
+                            height=int(figsize[1] / (numvars - 1) * dpi),
+                            **backend_kwargs
                         )
                         row_ax.append(ax_)
                 ax.append(row_ax)
