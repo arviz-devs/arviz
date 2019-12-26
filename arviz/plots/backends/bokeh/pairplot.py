@@ -6,7 +6,7 @@ from uuid import uuid4
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, CDSView, GroupFilter
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
@@ -46,13 +46,34 @@ def plot_pair(
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
+        source_dict = dict(zip(flat_var_names, [list(post) for post in _posterior]))
+
+        if divergences:
+            divergenve_name = "divergences_{}".format(str(uuid4()))
+            source_dict[divergenve_name] = (
+                np.array(diverging_mask).astype(bool).astype(int).astype(str)
+            )
+
+        source = ColumnDataSource(data=source_dict)
+
+        if divergences:
+            source_nondiv = CDSView(
+                source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+            )
+            source_div = CDSView(
+                source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
+            )
+
         if ax is None:
             ax = bkp.figure(
                 width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
 
         if kind == "scatter":
-            ax.circle(_posterior[0], _posterior[1])
+            if divergences:
+                ax.circle(flat_var_names[0], flat_var_names[1], source=source, view=source_nondiv)
+            else:
+                ax.circle(flat_var_names[0], flat_var_names[1], source=source)
         elif kind == "kde":
             plot_kde(
                 _posterior[0],
@@ -70,12 +91,14 @@ def plot_pair(
 
         if divergences:
             ax.circle(
-                _posterior[0][diverging_mask],
-                _posterior[1][diverging_mask],
+                flat_var_names[0],
+                flat_var_names[1],
                 line_color="black",
                 fill_color="orange",
                 line_width=1,
                 size=6,
+                source=source,
+                view=source_div,
             )
 
         ax.xaxis.axis_label = flat_var_names[0]
@@ -133,13 +156,24 @@ def plot_pair(
 
         tmp_flat_var_names = None
         if len(flat_var_names) == len(list(set(flat_var_names))):
-            source = ColumnDataSource(
-                data=dict(zip(flat_var_names, [list(post) for post in _posterior]))
-            )
+            source_dict = dict(zip(flat_var_names, [list(post) for post in _posterior]))
         else:
             tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
-            source = ColumnDataSource(
-                data=dict(zip(tmp_flat_var_names, [list(post) for post in _posterior]))
+            source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in _posterior]))
+        if divergences:
+            divergenve_name = "divergences_{}".format(str(uuid4()))
+            source_dict[divergenve_name] = (
+                np.array(diverging_mask).astype(bool).astype(int).astype(str)
+            )
+
+        source = ColumnDataSource(data=source_dict)
+
+        if divergences:
+            source_nondiv = CDSView(
+                source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+            )
+            source_div = CDSView(
+                source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
             )
 
         for i in range(0, numvars - 1):
@@ -156,14 +190,17 @@ def plot_pair(
                 )
 
                 if kind == "scatter":
-                    ax[j, i].circle(var1, var2, source=source)
+                    if divergences:
+                        ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
+                    else:
+                        ax[j, i].circle(var1, var2, source=source)
 
                 elif kind == "kde":
-                    var1 = _posterior[i]
-                    var2 = _posterior[j + 1]
+                    var1_kde = _posterior[i]
+                    var2_kde = _posterior[j + 1]
                     plot_kde(
-                        var1,
-                        var2,
+                        var1_kde,
+                        var2_kde,
                         contour=contour,
                         fill_last=fill_last,
                         ax=ax[j, i],
@@ -174,21 +211,21 @@ def plot_pair(
                     )
 
                 else:
-                    var1_ = _posterior[i]
-                    var2_ = _posterior[j + 1]
+                    var1_hexbin = _posterior[i]
+                    var2_hexbin = _posterior[j + 1]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1_, var2_, size=0.5)
+                    ax[j, i].hexbin(var1_hexbin, var2_hexbin, size=0.5)
 
                 if divergences:
-                    var1_ = _posterior[i]
-                    var2_ = _posterior[j + 1]
                     ax[j, i].circle(
-                        var1_[diverging_mask],
-                        var2_[diverging_mask],
+                        var1,
+                        var2,
                         line_color="black",
                         fill_color="orange",
                         line_width=1,
                         size=10,
+                        source=source,
+                        view=source_div,
                     )
 
                 ax[j, i].xaxis.axis_label = flat_var_names[i]

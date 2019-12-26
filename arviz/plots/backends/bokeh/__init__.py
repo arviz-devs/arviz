@@ -1,6 +1,6 @@
 # pylint: disable=no-member,invalid-name,redefined-outer-name, wrong-import-position
 """Bokeh Plotting Backend."""
-import packaging
+from packaging import version
 
 
 def backend_kwarg_defaults(*args, **kwargs):
@@ -79,7 +79,7 @@ def check_bokeh_version():
     try:
         import bokeh
 
-        assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
+        assert version.parse(bokeh.__version__) >= version.parse("1.4.0")
     except (ImportError, AssertionError):
         raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
 

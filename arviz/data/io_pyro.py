@@ -1,7 +1,7 @@
 """Pyro-specific conversion code."""
 import logging
 import numpy as np
-import packaging
+from packaging import version
 import xarray as xr
 
 from .inference_data import InferenceData
@@ -52,7 +52,7 @@ class PyroConverter:
         self.pyro = pyro
         if posterior is not None:
             self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
-            if packaging.version.parse(pyro.__version__) >= packaging.version.parse("1.0.0"):
+            if version.parse(pyro.__version__) >= version.parse("1.0.0"):
                 self.model = self.posterior.kernel.model
                 # model arguments and keyword arguments
                 self._args = self.posterior._args  # pylint: disable=protected-access
