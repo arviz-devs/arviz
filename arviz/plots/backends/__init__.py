@@ -1,3 +1,4 @@
+# pylint: disable=no-member,invalid-name,redefined-outer-name
 """ArviZ plotting backends."""
 
 

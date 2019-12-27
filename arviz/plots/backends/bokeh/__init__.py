@@ -1,4 +1,4 @@
-# pylint: disable=no-member,invalid-name,redefined-outer-name, wrong-import-position
+# pylint: disable=wrong-import-position
 """Bokeh Plotting Backend."""
 from packaging import version
 
