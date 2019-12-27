@@ -15,7 +15,7 @@ def output_file(*args, **kwargs):
     return bkp.output_file(*args, **kwargs)
 
 
-def copy_docstring(lib, function):
+def _copy_docstring(lib, function):
     """Extract docstring from function."""
     import importlib
 
@@ -36,6 +36,6 @@ def ColumnDataSource(*args, **kwargs):
     return ColumnDataSource(*args, **kwargs)
 
 
-output_notebook.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_notebook")
-output_file.__doc__ += "\n\n" + copy_docstring("bokeh.plotting", "output_file")
-ColumnDataSource.__doc__ += "\n\n" + copy_docstring("bokeh.models", "ColumnDataSource")
+output_notebook.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_notebook")
+output_file.__doc__ += "\n\n" + _copy_docstring("bokeh.plotting", "output_file")
+ColumnDataSource.__doc__ += "\n\n" + _copy_docstring("bokeh.models", "ColumnDataSource")
