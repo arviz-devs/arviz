@@ -24,6 +24,7 @@ class PyMC3Converter:
     nchains = None  # type: int
     ndraws = None  # type: int
     posterior_predictive = None  # Type: Optional[Dict[str, np.ndarray]]
+    predictions = None  # Type: Optional[Dict[str, np.ndarray]]
     prior = None  # Type: Optional[Dict[str, np.ndarray]]
 
     def __init__(
@@ -32,6 +33,7 @@ class PyMC3Converter:
         trace=None,
         prior=None,
         posterior_predictive=None,
+        predictions=None,
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
         model=None
@@ -60,6 +62,7 @@ class PyMC3Converter:
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
 
         def arbitrary_element(dct: Dict[Any, np.ndarray]) -> np.ndarray:
             return next(iter(dct.values()))
@@ -155,9 +158,11 @@ class PyMC3Converter:
 
         return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
 
-    @requires("posterior_predictive")
-    def posterior_predictive_to_xarray(self):
+    @requires(["posterior_predictive", "predictions"])
+    def posterior_predictive_to_xarray(self, raw=None):
         """Convert posterior_predictive samples to xarray."""
+        if raw is None:
+            raw = self.posterior_predictive
         data = {}
         for k, ary in self.posterior_predictive.items():
             shape = ary.shape
@@ -168,10 +173,29 @@ class PyMC3Converter:
             else:
                 data[k] = utils.expand_dims(ary)
                 _log.warning(
-                    "posterior predictive shape not compatible with number of chains and draws. "
-                    "This can mean that some draws or even whole chains are not represented."
+                    "posterior predictive variable %s's shape not compatible with number of chains and draws. "
+                    "This can mean that some draws or even whole chains are not represented.", k
                 )
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
+
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert out of sample predictive samples to xarray."""
+        data = {}
+        for k, ary in self.predictions.items():
+            shape = ary.shape
+            if shape[0] == self.nchains and shape[1] == self.ndraws:
+                data[k] = ary
+            elif shape[0] == self.nchains * self.ndraws:
+                data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
+            else:
+                data[k] = utils.expand_dims(ary)
+                _log.warning(
+                    "predictive variable %s's shape not compatible with number of chains and draws. "
+                    "This can mean that some draws or even whole chains are not represented.", k
+                )
+        return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
+
 
     def priors_to_xarray(self):
         """Convert prior samples (and if possible prior predictive too) to xarray."""
@@ -224,13 +248,22 @@ class PyMC3Converter:
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pymc3))
 
-    @requires("trace")
+    @requires(["trace", "predictions"])
     @requires("model")
     def constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-            self.trace.varnames, include_transformed=True
-        )
+        # if both predictions AND trace are supplied, then the trace should be the
+        # *thinned* trace used in prediction and NOT the full posterior trace. Hence we
+        # give precedence here to checking the predictions.
+        if self.predictions is not None:
+            model_vars = self.pymc3.util.get_default_varnames(
+                self.predictions.keys(),
+                include_transformed=True
+            )
+        elif self.trace is not None:
+            model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+                self.trace.varnames, include_transformed=True
+            )
         if self.observations is not None:
             model_vars.extend(
                 [obs.name for obs in self.observations.values() if hasattr(obs, "name")]
@@ -271,6 +304,7 @@ class PyMC3Converter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.posterior_predictive_to_xarray(self.predictions),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
                 "constant_data": self.constant_data_to_xarray(),
@@ -279,13 +313,14 @@ class PyMC3Converter:
 
 
 def from_pymc3(
-    trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None, model=None
+    trace=None, *, prior=None, posterior_predictive=None, predictions=None, coords=None, dims=None, model=None
 ):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
         trace=trace,
         prior=prior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
         coords=coords,
         dims=dims,
         model=model,
