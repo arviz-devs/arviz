@@ -156,7 +156,7 @@ class CmdStanPyConverter:
             ]
 
         valid_cols = [col for col in columns if col not in set(prior_predictive)]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        data = _unpack_frame(self.prior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("prior")
