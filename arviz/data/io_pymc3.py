@@ -253,7 +253,7 @@ class PyMC3Converter:
         # if both predictions AND trace are supplied, then the trace should be the
         # *thinned* trace used in prediction and NOT the full posterior trace. Hence we
         # give precedence here to checking the predictions.
-        model_vars: Set[str]
+        model_vars = None             # type: Set[str]
         if self.predictions is not None:
             model_vars = set(self.pymc3.util.get_default_varnames(
                 self.predictions.keys(),
