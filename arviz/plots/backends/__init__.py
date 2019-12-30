@@ -67,11 +67,11 @@ def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=N
                 if "draw" not in cds_dict:
                     cds_dict["draw"] = var.coords.get("draw").values
                 if len(var.shape) == 1:
-                    cds_dict[var_name] = var.values
+                    cds_dict["{}_ARVIZ_GROUP_{}".format(var_name, group)] = var.values
                 else:
                     for loc in np.ndindex(var.shape[:-1]):
-                        var_name_dim = "{}_ARVIZ_CDS_SELECTION_{}".format(
-                            var_name, "_".join((str(item + index_origin) for item in loc))
+                        var_name_dim = "{}_ARVIZ_GROUP_{}_ARVIZ_CDS_SELECTION_{}".format(
+                            var_name, group, "_".join((str(item + index_origin) for item in loc))
                         )
                         cds_dict[var_name_dim] = var[loc].values
     cds_data = ColumnDataSource(cds_dict)
