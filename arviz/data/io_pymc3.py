@@ -17,7 +17,7 @@ Coords = Dict[str, List[Any]]
 Dims = Dict[str, List[str]]
 
 
-class PyMC3Converter:
+class PyMC3Converter: # pylint: disable=too-many-instance-attributes
     """Encapsulate PyMC3 specific logic."""
 
     model = None  # type: Optional[pm.Model]
@@ -168,7 +168,8 @@ class PyMC3Converter:
 
         return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
 
-    def translate_posterior_predictive_dict_to_xarray(self, dct):
+    def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
+        """Take Dict of variables to numpy ndarrays (samples) and translate into dataset."""
         data = {}
         for k, ary in dct.items():
             shape = ary.shape
@@ -178,6 +179,7 @@ class PyMC3Converter:
                 data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
             else:
                 data[k] = utils.expand_dims(ary)
+                # pylint: disable=line-too-long
                 _log.warning(
                     "posterior predictive variable %s's shape not compatible with number of chains and draws. "
                     "This can mean that some draws or even whole chains are not represented.", k
@@ -267,6 +269,7 @@ class PyMC3Converter:
                              self.trace.varnames, include_transformed=True
                          ))
         if self.observations is not None:
+            # pylint: disable=line-too-long
             model_vars = model_vars | \
                          {obs.name for obs in self.observations.values() if hasattr(obs, "name")} | \
                          set(self.observations.keys())
@@ -280,7 +283,8 @@ class PyMC3Converter:
             return name
 
         constant_data_vars = {
-            name: var for name, var in self.model.named_vars.items() if untransformed_name(name) not in model_vars
+            name: var for name, var in self.model.named_vars.items() \
+            if untransformed_name(name) not in model_vars
         }
         if not constant_data_vars:
             return None
@@ -301,7 +305,7 @@ class PyMC3Converter:
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             try:
                 constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-            except ValueError as e:
+            except ValueError as e: # pylint: disable=invalid-name
                 raise ValueError("Error translating constant_data variable %s: %s"%(name, e))
         return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
@@ -326,7 +330,8 @@ class PyMC3Converter:
 
 
 def from_pymc3(
-    trace=None, *, prior=None, posterior_predictive=None, predictions=None, coords=None, dims=None, model=None
+    trace=None, *, prior=None, posterior_predictive=None, predictions=None,
+    coords=None, dims=None, model=None
 ):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
@@ -339,23 +344,32 @@ def from_pymc3(
         model=model,
     ).to_inference_data()
 
-def predictions_from_pymc3(predictions, posterior_trace, model, coords=None, dims=None) -> InferenceData:
-    """Specially tailored version of ``from_pymc3`` for handling out-of-sample predictions.
+def predictions_from_pymc3(predictions, posterior_trace, model,
+                           coords=None, dims=None) -> InferenceData:
+    """Special version of ``from_pymc3`` forout-of-sample predictions.
+
     Parameters
     ~~~~~~~~~~
     predictions: Dict[str, np.ndarray]
-        The predictions are the return value of ``pymc3.sample_posterior_predictive``, a dictionary of 
-        strings (variable names) to numpy ndarrays (draws).
+        The predictions are the return value of ``pymc3.sample_posterior_predictive``,
+        a dictionary of strings (variable names) to numpy ndarrays (draws).
     posterior_trace: pm.MultiTrace
-        This should be a trace that has been thinned appropriately for ``pymc3.sample_posterior_predictive``.
-        Specifically, any variable whose shape is a deterministic function of the shape of any predictor
-        (explanatory, independent, etc.) variables must be *removed* from this trace.
+        This should be a trace that has been thinned appropriately for
+        ``pymc3.sample_posterior_predictive``. Specifically, any variable whose shape is
+        a deterministic function of the shape of any predictor (explanatory, independent, etc.)
+        variables must be *removed* from this trace.
     model: pymc3.Model
-        This argument is *not* optional, unlike in conventional uses of ``from_pymc3``.  The reason is
-        that the posterior_trace argument is likely to supply and incorrect value of model.
+        This argument is *not* optional, unlike in conventional uses of ``from_pymc3``.
+        The reason is that the posterior_trace argument is likely to supply an incorrect
+        value of model.
     coords: Dict[str, array-like[Any]]
         Coordinates for the variables.  Map from coordinate names to coordinate values.
     dims: Dict[str, array-like[str]]
         Map from variable name to ordered set of coordinate names.
+
+    Returns
+    ~~~~~~~
+    InferenceData
     """
-    return_from_pymc3(trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims)
+    return from_pymc3(trace=posterior_trace, predictions=predictions, model=model,
+                      coords=coords, dims=dims)
