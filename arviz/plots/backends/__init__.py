@@ -6,8 +6,8 @@ from ...data import convert_to_inference_data
 from ...rcparams import rcParams
 
 
-def to_cds(data, var_names=None, groups=None, index_origin=None):
-    """Transform data to ColumnDataSource compatible with Bokeh.
+def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=None):
+    """Transform data to ColumnDataSource (CDS) compatible with Bokeh.
 
     Uses `_ARVIZ_CDS_SELECTION_` to separate var_name from dimensions.
 
@@ -22,6 +22,8 @@ def to_cds(data, var_names=None, groups=None, index_origin=None):
         Select groups for CDS. Default groups are {"posterior_groups", "prior_groups"}
             posterior_groups: posterior, posterior_predictive, sample_stats
             prior_groups: prior, posterior_predictive, sample_stats_prior
+    ignore_groups : str or list of str, optional
+        Ignore specific groups from CDS.
     index_origin : int, optional
         Start parameter indeces from `index_origin`. Either 0 or 1.
 
@@ -43,11 +45,18 @@ def to_cds(data, var_names=None, groups=None, index_origin=None):
         else:
             raise TypeError("Valid predefined groups are {posterior_groups, prior_groups}")
 
+    if ignore_groups is None:
+        ignore_groups = []
+    elif isinstance(ignore_groups, str):
+        ignore_groups = [ignore_groups]
+
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
 
     cds_dict = {}
     for group in groups:
+        if group in ignore_groups:
+            continue
         if hasattr(data, group):
             group_data = getattr(data, group).stack(samples=("chain", "draw"))
             for var_name, var in group_data.data_vars.items():
