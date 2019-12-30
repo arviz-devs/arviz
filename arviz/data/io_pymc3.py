@@ -312,21 +312,23 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
-        Note that if groups can not be created (i.e., there is no `trace`, so
+        Note that if groups can not be created (e.g., there is no `trace`, so
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        return InferenceData(
-            **{
+        id_dict = {
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "predictions": self.predictions_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
-                "constant_data": self.constant_data_to_xarray(),
             }
-        )
+        if self.predictions:
+            id_dict["predictions_constant_data"] = self.constant_data_to_xarray()
+        else:
+            id_dict["constant_data"] = self.constant_data_to_xarray()
+        return InferenceData(**id_dict)
 
 
 def from_pymc3(
