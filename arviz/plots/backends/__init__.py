@@ -6,10 +6,11 @@ from ...data import convert_to_inference_data
 from ...rcparams import rcParams
 
 
-def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=None):
+def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=None, return_dict):
     """Transform data to ColumnDataSource (CDS) compatible with Bokeh.
 
-    Uses `_ARVIZ_CDS_SELECTION_` to separate var_name from dimensions.
+    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_`to separate var_name 
+    from group and dimensions in CDS columns.
 
     Parameters
     ----------
@@ -31,8 +32,6 @@ def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=N
     -------
     bokeh.models.ColumnDataSource object
     """
-    from bokeh.models import ColumnDataSource
-
     data = convert_to_inference_data(data)
 
     if groups is None:
@@ -74,6 +73,10 @@ def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=N
                             var_name, group, "_".join((str(item + index_origin) for item in loc))
                         )
                         cds_dict[var_name_dim] = var[loc].values
+
+    if return_dict:
+        return cds_dict
+    
     cds_data = ColumnDataSource(cds_dict)
     return cds_data
 
