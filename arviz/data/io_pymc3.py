@@ -1,6 +1,6 @@
 """PyMC3-specific conversion code."""
 import logging
-from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from typing import Dict, List, Any, Optional, TYPE_CHECKING, Set
 
 import numpy as np
 import xarray as xr
@@ -71,11 +71,19 @@ class PyMC3Converter:
             # if you have a posterior_predictive built with keep_dims,
             # you'll lose here, but there's nothing I can do about that.
             self.nchains = 1
-            aelem = (
-                arbitrary_element(prior)
-                if posterior_predictive is None
-                else arbitrary_element(posterior_predictive)
-            )
+            get_from = None
+            if predictions is not None:
+                get_from = predictions
+            elif prior is not None:
+                get_from = prior
+            elif posterior_predictive is not None:
+                get_from = posterior_predictive
+            if get_from is None:
+                # pylint: disable=line-too-long
+                raise ValueError("""When constructing InferenceData must have at least
+                                    one of trace, prior, posterior_predictive or predictions.""")
+
+            aelem = arbitrary_element(get_from)
             self.ndraws = aelem.shape[0]
 
         self.coords = coords
@@ -102,7 +110,9 @@ class PyMC3Converter:
 
         Return None if there is not exactly 1 observed random variable.
         """
-        if len(self.model.observed_RVs) != 1:
+        # If we have predictions, then we have a thinned trace which does not
+        # support extracting a log likelihood.
+        if len(self.model.observed_RVs) != 1 or self.predictions:
             return None, None
         else:
             if self.dims is not None:
@@ -158,13 +168,9 @@ class PyMC3Converter:
 
         return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
 
-    @requires(["posterior_predictive", "predictions"])
-    def posterior_predictive_to_xarray(self, raw=None):
-        """Convert posterior_predictive samples to xarray."""
-        if raw is None:
-            raw = self.posterior_predictive
+    def translate_posterior_predictive_dict_to_xarray(self, dct):
         data = {}
-        for k, ary in self.posterior_predictive.items():
+        for k, ary in dct.items():
             shape = ary.shape
             if shape[0] == self.nchains and shape[1] == self.ndraws:
                 data[k] = ary
@@ -178,24 +184,16 @@ class PyMC3Converter:
                 )
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
-    @requires("predictions")
-    def predictions_to_xarray(self):
-        """Convert out of sample predictive samples to xarray."""
-        data = {}
-        for k, ary in self.predictions.items():
-            shape = ary.shape
-            if shape[0] == self.nchains and shape[1] == self.ndraws:
-                data[k] = ary
-            elif shape[0] == self.nchains * self.ndraws:
-                data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
-            else:
-                data[k] = utils.expand_dims(ary)
-                _log.warning(
-                    "predictive variable %s's shape not compatible with number of chains and draws. "
-                    "This can mean that some draws or even whole chains are not represented.", k
-                )
-        return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
 
+    @requires(["posterior_predictive"])
+    def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(self.posterior_predictive)
+
+    @requires(["predictions"])
+    def predictions_to_xarray(self):
+        """Convert predictions (out of sample predictions) to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(self.predictions)
 
     def priors_to_xarray(self):
         """Convert prior samples (and if possible prior predictive too) to xarray."""
@@ -255,22 +253,34 @@ class PyMC3Converter:
         # if both predictions AND trace are supplied, then the trace should be the
         # *thinned* trace used in prediction and NOT the full posterior trace. Hence we
         # give precedence here to checking the predictions.
+        model_vars: Set[str]
         if self.predictions is not None:
-            model_vars = self.pymc3.util.get_default_varnames(
+            model_vars = set(self.pymc3.util.get_default_varnames(
                 self.predictions.keys(),
                 include_transformed=True
-            )
-        elif self.trace is not None:
-            model_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-                self.trace.varnames, include_transformed=True
-            )
+            ))
+        else:
+            model_vars = set()
+        if self.trace is not None:
+            model_vars = model_vars | \
+                         set(self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+                             self.trace.varnames, include_transformed=True
+                         ))
         if self.observations is not None:
-            model_vars.extend(
-                [obs.name for obs in self.observations.values() if hasattr(obs, "name")]
-            )
-            model_vars.extend(self.observations.keys())
+            model_vars = model_vars | \
+                         {obs.name for obs in self.observations.values() if hasattr(obs, "name")} | \
+                         set(self.observations.keys())
+
+        # this check is necessary in filtering constant variables because I found that some still
+        # slipped through, notably the bounding transformed variables introduced by bounded and
+        # truncated RVs in PyMC3.
+        def untransformed_name(name: str) -> str:
+            if self.pymc3.util.is_transformed_name(name):
+                return self.pymc3.util.get_untransformed_name(name)
+            return name
+
         constant_data_vars = {
-            name: var for name, var in self.model.named_vars.items() if name not in model_vars
+            name: var for name, var in self.model.named_vars.items() if untransformed_name(name) not in model_vars
         }
         if not constant_data_vars:
             return None
@@ -289,7 +299,10 @@ class PyMC3Converter:
             )
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
-            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+            try:
+                constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+            except ValueError as e:
+                raise ValueError("Error translating constant_data variable %s: %s"%(name, e))
         return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):
@@ -304,7 +317,7 @@ class PyMC3Converter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
-                "predictions": self.posterior_predictive_to_xarray(self.predictions),
+                "predictions": self.predictions_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
                 "constant_data": self.constant_data_to_xarray(),
@@ -325,3 +338,24 @@ def from_pymc3(
         dims=dims,
         model=model,
     ).to_inference_data()
+
+def predictions_from_pymc3(predictions, posterior_trace, model, coords=None, dims=None) -> InferenceData:
+    """Specially tailored version of ``from_pymc3`` for handling out-of-sample predictions.
+    Parameters
+    ~~~~~~~~~~
+    predictions: Dict[str, np.ndarray]
+        The predictions are the return value of ``pymc3.sample_posterior_predictive``, a dictionary of 
+        strings (variable names) to numpy ndarrays (draws).
+    posterior_trace: pm.MultiTrace
+        This should be a trace that has been thinned appropriately for ``pymc3.sample_posterior_predictive``.
+        Specifically, any variable whose shape is a deterministic function of the shape of any predictor
+        (explanatory, independent, etc.) variables must be *removed* from this trace.
+    model: pymc3.Model
+        This argument is *not* optional, unlike in conventional uses of ``from_pymc3``.  The reason is
+        that the posterior_trace argument is likely to supply and incorrect value of model.
+    coords: Dict[str, array-like[Any]]
+        Coordinates for the variables.  Map from coordinate names to coordinate values.
+    dims: Dict[str, array-like[str]]
+        Map from variable name to ordered set of coordinate names.
+    """
+    return_from_pymc3(trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims)
