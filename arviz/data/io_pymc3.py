@@ -348,10 +348,10 @@ def from_pymc3(
 
 def predictions_from_pymc3(predictions, posterior_trace, model,
                            coords=None, dims=None) -> InferenceData:
-    """Special version of ``from_pymc3`` forout-of-sample predictions.
+    """Translate out-of-sample predictions into ``InferenceData`` using ``from_pymc3``.
 
     Parameters
-    ~~~~~~~~~~
+    ----------
     predictions: Dict[str, np.ndarray]
         The predictions are the return value of ``pymc3.sample_posterior_predictive``,
         a dictionary of strings (variable names) to numpy ndarrays (draws).
@@ -370,7 +370,7 @@ def predictions_from_pymc3(predictions, posterior_trace, model,
         Map from variable name to ordered set of coordinate names.
 
     Returns
-    ~~~~~~~
+    -------
     InferenceData
     """
     return from_pymc3(trace=posterior_trace, predictions=predictions, model=model,
