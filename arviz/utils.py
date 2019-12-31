@@ -324,12 +324,12 @@ def full(shape, x, dtype=None):
     return np.full(shape, x, dtype=dtype)
 
 
-def inference_data_to_dict(
+def flat_inference_data_to_dict(
     data,
     var_names=None,
     groups=None,
     dimensions=None,
-    add_group_info=False,
+    group_info=False,
     var_name_format=None,
     index_origin=None,
 ):
@@ -350,7 +350,7 @@ def inference_data_to_dict(
         Ignore specific groups from CDS.
     dimension : list, optional
         Select dimensions along to slice the data. By default uses ("chain", "draw").
-    add_group_info : bool
+    group_info : bool
         Add group info for `var_name_format`
     var_name_format : str or tuple of tuple of string, optional
         Select column name format for non-scalar input. Predefined {"brackets", "underscore", "cds"}
@@ -413,7 +413,8 @@ def inference_data_to_dict(
         )
         group_separator_start, group_separator_end = "_ARVIZ_GROUP_", ""
     elif isinstance(str, var_name_format):
-        raise TypeError('Invalid predefined format. Select one {"brackets", "underscore", "cds"}')
+        msg = 'Invalid predefined format. Select one {"brackets", "underscore", "cds"}'
+        raise TypeError(msg)
     else:
         (
             (dim_join_separator, dim_separator_start, dim_separator_end),
@@ -426,7 +427,7 @@ def inference_data_to_dict(
     data_dict = {}
     for group in groups:
         if hasattr(data, group):
-            group_data = getattr(data, group).stack(samples=dimensions)
+            group_data = getattr(data, group).stack(stack_dimension=dimensions)
             for var_name, var in group_data.data_vars.items():
                 if var_names is not None and var_name not in var_names:
                     continue
@@ -434,8 +435,10 @@ def inference_data_to_dict(
                     if dim_name not in data_dict:
                         data_dict[dim_name] = var.coords.get(dim_name).values
                 if len(var.shape) == 1:
-                    if add_group_info:
-                        var_name_dim = "{var_name}{group_separator_start}{group}{group_separator_end}".format(
+                    if group_info:
+                        var_name_dim = (
+                            "{var_name}" "{group_separator_start}{group}{group_separator_end}"
+                        ).format(
                             var_name=var_name,
                             group_separator_start=group_separator_start,
                             group=group,
@@ -446,8 +449,12 @@ def inference_data_to_dict(
                     data_dict[var_name_dim] = var.values
                 else:
                     for loc in np.ndindex(var.shape[:-1]):
-                        if add_group_info:
-                            var_name_dim = "{var_name}{group_separator_start}{group}{group_separator_end}{dim_separator_start}{dim_join}{dim_separator_end}".format(
+                        if group_info:
+                            var_name_dim = (
+                                "{var_name}"
+                                "{group_separator_start}{group}{group_separator_end}"
+                                "{dim_separator_start}{dim_join}{dim_separator_end}"
+                            ).format(
                                 var_name=var_name,
                                 group_separator_start=group_separator_start,
                                 group=group,
@@ -459,7 +466,9 @@ def inference_data_to_dict(
                                 dim_separator_end=dim_separator_end,
                             )
                         else:
-                            var_name_dim = "{var_name}{dim_separator_start}{dim_join}{dim_separator_end}".format(
+                            var_name_dim = (
+                                "{var_name}" "{dim_separator_start}{dim_join}{dim_separator_end}"
+                            ).format(
                                 var_name=var_name,
                                 dim_separator_start=dim_separator_start,
                                 dim_join=dim_join_separator.join(

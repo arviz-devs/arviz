@@ -1,5 +1,6 @@
 # pylint: disable=no-member,invalid-name,redefined-outer-name
 """ArviZ plotting backends."""
+from pandas import DataFrame
 
 
 def to_cds(
@@ -7,7 +8,7 @@ def to_cds(
     var_names=None,
     groups=None,
     dimensions=None,
-    add_group_info=True,
+    group_info=True,
     var_name_format=None,
     index_origin=None,
 ):
@@ -31,7 +32,7 @@ def to_cds(
         Ignore specific groups from CDS.
     dimension : list, optional
         Select dimensions along to slice the data. By default uses ("chain", "draw").
-    add_group_info : bool
+    group_info : bool
         Add group info for `var_name_format`
     var_name_format : str or tuple of tuple of string, optional
         Select column name format for non-scalar input. Predefined {"brackets", "underscore", "cds"}
@@ -59,21 +60,21 @@ def to_cds(
     -------
     bokeh.models.ColumnDataSource object
     """
-    from ...utils import inference_data_to_dict
+    from ...utils import flat_inference_data_to_dict
 
     if var_name_format is None:
         var_name_format = "cds"
 
-    cds_dict = inference_data_to_dict(
+    cds_dict = flat_inference_data_to_dict(
         data=data,
         var_names=var_names,
         groups=groups,
         dimensions=dimensions,
-        add_group_info=add_group_info,
+        group_info=group_info,
         index_origin=index_origin,
         var_name_format=var_name_format,
     )
-    cds_data = ColumnDataSource(cds_dict)
+    cds_data = ColumnDataSource(DataFrame.from_dict(cds_dict, orient="columns"))
     return cds_data
 
 
