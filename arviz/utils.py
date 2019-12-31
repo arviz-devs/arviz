@@ -372,7 +372,7 @@ def flat_inference_data_to_dict(
                                    str: dim_separator_start,
                                    str: dim_separator_end)
                         group_info: (str: group separator start, str: group separator end)
-                Example: ((",", "[", "]"), "_", "")
+                Example: ((",", "[", "]"), ("_", ""))
                     - add_group_info == False: theta[0,0]
                     - add_group_info == True: theta_posterior[0,0]
     index_origin : int, optional
@@ -398,11 +398,15 @@ def flat_inference_data_to_dict(
 
     if dimensions is None:
         dimensions = "chain", "draw"
+    elif isinstance(dimensions, str):
+        dimensions = (dimensions,)
 
     if var_name_format is None:
         var_name_format = "brackets"
 
-    var_name_format = var_name_format.lower()
+    if isinstance(var_name_format, str):
+        var_name_format = var_name_format.lower()
+
     if var_name_format == "brackets":
         dim_join_separator, dim_separator_start, dim_separator_end = ",", "[", "]"
         group_separator_start, group_separator_end = "_", ""
@@ -416,7 +420,7 @@ def flat_inference_data_to_dict(
             "",
         )
         group_separator_start, group_separator_end = "_ARVIZ_GROUP_", ""
-    elif isinstance(str, var_name_format):
+    elif isinstance(var_name_format, str):
         msg = 'Invalid predefined format. Select one {"brackets", "underscore", "cds"}'
         raise TypeError(msg)
     else:
