@@ -341,7 +341,7 @@ def flat_inference_data_to_dict(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_inference_data for details
-    var_names : list of variable names, optional
+    var_names : str or list of str, optional
         Variables to be processed, if None all variables are processed.
     groups : str or list of str, optional
         Select groups for CDS. Default groups are {"posterior_groups", "prior_groups"}
@@ -349,7 +349,7 @@ def flat_inference_data_to_dict(
             - prior_groups: prior, posterior_predictive, sample_stats_prior
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
-    dimension : list, optional
+    dimension : str, or list of str, optional
         Select dimensions along to slice the data. By default uses ("chain", "draw").
     group_info : bool
         Add group info for `var_name_format`

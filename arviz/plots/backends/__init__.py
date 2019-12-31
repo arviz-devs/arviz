@@ -22,15 +22,15 @@ def to_cds(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_inference_data for details
-    var_names : list of variable names, optional
+    var_names : str or list of str, optional
         Variables to be processed, if None all variables are processed.
     groups : str or list of str, optional
         Select groups for CDS. Default groups are {"posterior_groups", "prior_groups"}
-            posterior_groups: posterior, posterior_predictive, sample_stats
-            prior_groups: prior, posterior_predictive, sample_stats_prior
+            - posterior_groups: posterior, posterior_predictive, sample_stats
+            - prior_groups: prior, posterior_predictive, sample_stats_prior
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
-    dimension : list, optional
+    dimension : str, or list of str, optional
         Select dimensions along to slice the data. By default uses ("chain", "draw").
     group_info : bool
         Add group info for `var_name_format`
@@ -53,7 +53,7 @@ def to_cds(
                                    str: dim_separator_start,
                                    str: dim_separator_end)
                         group_info: (str: group separator start, str: group separator end)
-                Example: ((",", "[", "]"), "_", "")
+                Example: ((",", "[", "]"), ("_", ""))
                     - add_group_info == False: theta[0,0]
                     - add_group_info == True: theta_posterior[0,0]
     index_origin : int, optional
