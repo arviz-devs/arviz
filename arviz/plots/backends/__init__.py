@@ -1,15 +1,19 @@
 # pylint: disable=no-member,invalid-name,redefined-outer-name
 """ArviZ plotting backends."""
-import numpy as np
-
-from ...data import convert_to_inference_data
-from ...rcparams import rcParams
 
 
-def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=None, return_dict):
+def to_cds(
+    data,
+    var_names=None,
+    groups=None,
+    dimensions=None,
+    add_group_info=True,
+    var_name_format=None,
+    index_origin=None,
+):
     """Transform data to ColumnDataSource (CDS) compatible with Bokeh.
 
-    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_`to separate var_name 
+    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_`to separate var_name
     from group and dimensions in CDS columns.
 
     Parameters
@@ -25,6 +29,29 @@ def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=N
             prior_groups: prior, posterior_predictive, sample_stats_prior
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
+    dimension : list, optional
+        Select dimensions along to slice the data. By default uses ("chain", "draw").
+    add_group_info : bool
+        Add group info for `var_name_format`
+    var_name_format : str or tuple of tuple of string, optional
+        Select column name format for non-scalar input. Predefined {"brackets", "underscore", "cds"}
+            "brackets":
+                - add_group_info == False: theta[0,0]
+                - add_group_info == True: theta_posterior[0,0]
+            "underscore":
+                - add_group_info == False: theta_0_0
+                - add_group_info == True: theta_posterior_0_0_
+            "cds":
+                - add_group_info == False: theta_ARVIZ_CDS_SELECTION_0_0
+                - add_group_info == True: theta_ARVIZ_GROUP_posterior__ARVIZ_CDS_SELECTION_0_0
+            tuple:
+                Structure:
+                    tuple: (dim_info, group_info)
+                        dim_info: (str: `.join` separator, str: dim_separator_start, str: dim_separator_end)
+                        group_info: (str: group separator start, str: group separator end)
+                Example: ((",", "[", "]"), "_", "")
+                    - add_group_info == False: theta[0,0]
+                    - add_group_info == True: theta_posterior[0,0]
     index_origin : int, optional
         Start parameter indeces from `index_origin`. Either 0 or 1.
 
@@ -32,51 +59,20 @@ def to_cds(data, var_names=None, groups=None, ignore_groups=None, index_origin=N
     -------
     bokeh.models.ColumnDataSource object
     """
-    data = convert_to_inference_data(data)
+    from ...utils import inference_data_to_dict
 
-    if groups is None:
-        groups = ["posterior", "posterior_predictive", "sample_stats"]
-    elif isinstance(groups, str):
-        if groups.lower() == "posterior_groups":
-            groups = ["posterior", "posterior_predictive", "sample_stats"]
-        elif groups.lower() == "prior_groups":
-            groups = ["prior", "prior_predictive", "sample_stats_prior"]
-        else:
-            raise TypeError("Valid predefined groups are {posterior_groups, prior_groups}")
+    if var_name_format is None:
+        var_name_format = "cds"
 
-    if ignore_groups is None:
-        ignore_groups = []
-    elif isinstance(ignore_groups, str):
-        ignore_groups = [ignore_groups]
-
-    if index_origin is None:
-        index_origin = rcParams["data.index_origin"]
-
-    cds_dict = {}
-    for group in groups:
-        if group in ignore_groups:
-            continue
-        if hasattr(data, group):
-            group_data = getattr(data, group).stack(samples=("chain", "draw"))
-            for var_name, var in group_data.data_vars.items():
-                if var_names is not None and var_name not in var_names:
-                    continue
-                if "chain" not in cds_dict:
-                    cds_dict["chain"] = var.coords.get("chain").values
-                if "draw" not in cds_dict:
-                    cds_dict["draw"] = var.coords.get("draw").values
-                if len(var.shape) == 1:
-                    cds_dict["{}_ARVIZ_GROUP_{}".format(var_name, group)] = var.values
-                else:
-                    for loc in np.ndindex(var.shape[:-1]):
-                        var_name_dim = "{}_ARVIZ_GROUP_{}_ARVIZ_CDS_SELECTION_{}".format(
-                            var_name, group, "_".join((str(item + index_origin) for item in loc))
-                        )
-                        cds_dict[var_name_dim] = var[loc].values
-
-    if return_dict:
-        return cds_dict
-    
+    cds_dict = inference_data_to_dict(
+        data=data,
+        var_names=var_names,
+        groups=groups,
+        dimensions=dimensions,
+        add_group_info=add_group_info,
+        index_origin=index_origin,
+        var_name_format=var_name_format,
+    )
     cds_data = ColumnDataSource(cds_dict)
     return cds_data
 
