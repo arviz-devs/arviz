@@ -35,7 +35,8 @@ def to_cds(
     group_info : bool
         Add group info for `var_name_format`
     var_name_format : str or tuple of tuple of string, optional
-        Select column name format for non-scalar input. Predefined {"brackets", "underscore", "cds"}
+        Select column name format for non-scalar input.
+        Predefined options are {"brackets", "underscore", "cds"}
             "brackets":
                 - add_group_info == False: theta[0,0]
                 - add_group_info == True: theta_posterior[0,0]
@@ -48,7 +49,9 @@ def to_cds(
             tuple:
                 Structure:
                     tuple: (dim_info, group_info)
-                        dim_info: (str: `.join` separator, str: dim_separator_start, str: dim_separator_end)
+                        dim_info: (str: `.join` separator,
+                                   str: dim_separator_start,
+                                   str: dim_separator_end)
                         group_info: (str: group separator start, str: group separator end)
                 Example: ((",", "[", "]"), "_", "")
                     - add_group_info == False: theta[0,0]
