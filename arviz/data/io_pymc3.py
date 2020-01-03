@@ -17,7 +17,7 @@ Coords = Dict[str, List[Any]]
 Dims = Dict[str, List[str]]
 
 
-class PyMC3Converter: # pylint: disable=too-many-instance-attributes
+class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     """Encapsulate PyMC3 specific logic."""
 
     model = None  # type: Optional[pm.Model]
@@ -80,8 +80,10 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
                 get_from = posterior_predictive
             if get_from is None:
                 # pylint: disable=line-too-long
-                raise ValueError("""When constructing InferenceData must have at least
-                                    one of trace, prior, posterior_predictive or predictions.""")
+                raise ValueError(
+                    """When constructing InferenceData must have at least
+                                    one of trace, prior, posterior_predictive or predictions."""
+                )
 
             aelem = arbitrary_element(get_from)
             self.ndraws = aelem.shape[0]
@@ -182,10 +184,10 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
                 # pylint: disable=line-too-long
                 _log.warning(
                     "posterior predictive variable %s's shape not compatible with number of chains and draws. "
-                    "This can mean that some draws or even whole chains are not represented.", k
+                    "This can mean that some draws or even whole chains are not represented.",
+                    k,
                 )
         return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
-
 
     @requires(["posterior_predictive"])
     def posterior_predictive_to_xarray(self):
@@ -255,24 +257,28 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
         # if both predictions AND trace are supplied, then the trace should be the
         # *thinned* trace used in prediction and NOT the full posterior trace. Hence we
         # give precedence here to checking the predictions.
-        model_vars = None             # type: Set[str]
+        model_vars = None  # type: Set[str]
         if self.predictions is not None:
-            model_vars = set(self.pymc3.util.get_default_varnames(
-                self.predictions.keys(),
-                include_transformed=True
-            ))
+            model_vars = set(
+                self.pymc3.util.get_default_varnames(
+                    self.predictions.keys(), include_transformed=True
+                )
+            )
         else:
             model_vars = set()
         if self.trace is not None:
-            model_vars = model_vars | \
-                         set(self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-                             self.trace.varnames, include_transformed=True
-                         ))
+            model_vars = model_vars | set(
+                self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+                    self.trace.varnames, include_transformed=True
+                )
+            )
         if self.observations is not None:
             # pylint: disable=line-too-long
-            model_vars = model_vars | \
-                         {obs.name for obs in self.observations.values() if hasattr(obs, "name")} | \
-                         set(self.observations.keys())
+            model_vars = (
+                model_vars
+                | {obs.name for obs in self.observations.values() if hasattr(obs, "name")}
+                | set(self.observations.keys())
+            )
 
         # this check is necessary in filtering constant variables because I found that some still
         # slipped through, notably the bounding transformed variables introduced by bounded and
@@ -283,7 +289,8 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
             return name
 
         constant_data_vars = {
-            name: var for name, var in self.model.named_vars.items() \
+            name: var
+            for name, var in self.model.named_vars.items()
             if untransformed_name(name) not in model_vars
         }
         if not constant_data_vars:
@@ -305,8 +312,8 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             try:
                 constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-            except ValueError as e: # pylint: disable=invalid-name
-                raise ValueError("Error translating constant_data variable %s: %s"%(name, e))
+            except ValueError as e:  # pylint: disable=invalid-name
+                raise ValueError("Error translating constant_data variable %s: %s" % (name, e))
         return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):
@@ -317,13 +324,13 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
         will not have those groups.
         """
         id_dict = {
-                "posterior": self.posterior_to_xarray(),
-                "sample_stats": self.sample_stats_to_xarray(),
-                "posterior_predictive": self.posterior_predictive_to_xarray(),
-                "predictions": self.predictions_to_xarray(),
-                **self.priors_to_xarray(),
-                "observed_data": self.observed_data_to_xarray(),
-            }
+            "posterior": self.posterior_to_xarray(),
+            "sample_stats": self.sample_stats_to_xarray(),
+            "posterior_predictive": self.posterior_predictive_to_xarray(),
+            "predictions": self.predictions_to_xarray(),
+            **self.priors_to_xarray(),
+            "observed_data": self.observed_data_to_xarray(),
+        }
         if self.predictions:
             id_dict["predictions_constant_data"] = self.constant_data_to_xarray()
         else:
@@ -332,8 +339,14 @@ class PyMC3Converter: # pylint: disable=too-many-instance-attributes
 
 
 def from_pymc3(
-    trace=None, *, prior=None, posterior_predictive=None, predictions=None,
-    coords=None, dims=None, model=None
+    trace=None,
+    *,
+    prior=None,
+    posterior_predictive=None,
+    predictions=None,
+    coords=None,
+    dims=None,
+    model=None
 ):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
@@ -346,8 +359,10 @@ def from_pymc3(
         model=model,
     ).to_inference_data()
 
-def predictions_from_pymc3(predictions, posterior_trace, model,
-                           coords=None, dims=None) -> InferenceData:
+
+def predictions_from_pymc3(
+    predictions, posterior_trace, model, coords=None, dims=None
+) -> InferenceData:
     """Translate out-of-sample predictions into ``InferenceData`` using ``from_pymc3``.
 
     Parameters
@@ -373,5 +388,6 @@ def predictions_from_pymc3(predictions, posterior_trace, model,
     -------
     InferenceData
     """
-    return from_pymc3(trace=posterior_trace, predictions=predictions, model=model,
-                      coords=coords, dims=dims)
+    return from_pymc3(
+        trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims
+    )
