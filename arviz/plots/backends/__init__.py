@@ -27,7 +27,7 @@ def to_cds(
     groups : str or list of str, optional
         Select groups for CDS. Default groups are {"posterior_groups", "prior_groups"}
             - posterior_groups: posterior, posterior_predictive, sample_stats
-            - prior_groups: prior, posterior_predictive, sample_stats_prior
+            - prior_groups: prior, prior_predictive, sample_stats_prior
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
     dimension : str, or list of str, optional
