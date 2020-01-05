@@ -376,7 +376,7 @@ def flat_inference_data_to_dict(
                     - add_group_info == False: theta[0,0]
                     - add_group_info == True: theta_posterior[0,0]
     index_origin : int, optional
-        Start parameter indeces from `index_origin`. Either 0 or 1.
+        Start parameter indices from `index_origin`. Either 0 or 1.
 
     Returns
     -------
