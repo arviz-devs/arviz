@@ -437,6 +437,7 @@ def flat_inference_data_to_dict(
         if hasattr(data, group):
             group_data = getattr(data, group).stack(stack_dimension=dimensions)
             for var_name, var in group_data.data_vars.items():
+                var_values = var.values
                 if var_names is not None and var_name not in var_names:
                     continue
                 for dim_name in dimensions:
@@ -485,5 +486,5 @@ def flat_inference_data_to_dict(
                                 dim_separator_end=dim_separator_end,
                             )
 
-                        data_dict[var_name_dim] = var[loc].values
+                        data_dict[var_name_dim] = var_values[loc]
     return data_dict
