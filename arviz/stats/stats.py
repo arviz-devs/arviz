@@ -811,7 +811,7 @@ def summary(
     extend=True,
     credible_interval=0.94,
     order="C",
-    index_origin=0,
+    index_origin=None,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
@@ -851,7 +851,8 @@ def summary(
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
     index_origin : int
-        If fmt is "wide, select n-based indexing for multivariate parameters. Defaults to 0.
+        If fmt is "wide, select n-based indexing for multivariate parameters.
+        Defaults to rcParam data.index.origin, which is 0.
     coords: Dict[str, List[Any]], optional
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
@@ -905,6 +906,8 @@ def summary(
         extra_args["coords"] = coords
     if dims is not None:
         extra_args["dims"] = dims
+    if index_origin is None:
+        index_origin = rcParams["data.index_origin"]
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]

@@ -287,7 +287,7 @@ def selection_to_string(selection):
     return ", ".join(["{}".format(v) for _, v in selection.items()])
 
 
-def make_label(var_name, selection, position="below"):
+def make_label(var_name, selection, position="below", index_origin=None):
     """Consistent labelling for plots.
 
     Parameters
@@ -297,8 +297,9 @@ def make_label(var_name, selection, position="below"):
 
     selection : dict[Any] -> Any
         Coordinates of the variable
-    position : whether to position the coordinates' label "below" (default) or "beside" the name
-               of the variable
+    position : str
+        Whether to position the coordinates' label "below" (default) or "beside"
+        the name of the variable
 
     Returns
     -------
