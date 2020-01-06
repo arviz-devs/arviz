@@ -287,7 +287,7 @@ def selection_to_string(selection):
     return ", ".join(["{}".format(v) for _, v in selection.items()])
 
 
-def make_label(var_name, selection, position="below", index_origin=None):
+def make_label(var_name, selection, position="below"):
     """Consistent labelling for plots.
 
     Parameters
