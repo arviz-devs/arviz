@@ -7,9 +7,25 @@ import importlib
 import numpy as np
 import pytest
 
-from ..utils import _var_names, numba_check, Numba, _numba_var, _stack, one_de, two_de, expand_dims
+from ..utils import (
+    _var_names,
+    numba_check,
+    Numba,
+    _numba_var,
+    _stack,
+    one_de,
+    two_de,
+    expand_dims,
+    flat_inference_data_to_dict,
+)
 from ..data import load_arviz_data, from_dict
 from ..stats.stats_utils import stats_variance_2d as svar
+
+
+@pytest.fixture(scope="session")
+def inference_data():
+    centered_eight = load_arviz_data("centered_eight")
+    return centered_eight
 
 
 @pytest.fixture(scope="session")
@@ -247,3 +263,45 @@ def test_one_de(data):
 def test_expand_dims(data):
     """Test to check for custom expand_dims. List added to test for a non ndarray case."""
     assert np.allclose(expand_dims(data), np.expand_dims(data, 0))
+
+
+@pytest.mark.parametrize("var_names", [None, "mu", ["mu", "tau"]])
+@pytest.mark.parametrize(
+    "groups", [None, "posterior_groups", "prior_groups", ["posterior", "sample_stats"]]
+)
+@pytest.mark.parametrize("dimensions", [None, "draw", ["chain", "draw"]])
+@pytest.mark.parametrize("group_info", [True, False])
+@pytest.mark.parametrize(
+    "var_name_format", [None, "brackets", "underscore", "cds", ((",", "[", "]"), ("_", ""))]
+)
+@pytest.mark.parametrize("index_origin", [None, 0, 1])
+def test_flat_inference_data_to_dict(
+    inference_data, var_names, groups, dimensions, group_info, var_name_format, index_origin
+):
+    """Test flattening (stacking) inference data (subgroups) for dictionary."""
+    res_dict = flat_inference_data_to_dict(
+        data=inference_data,
+        var_names=var_names,
+        groups=groups,
+        dimensions=dimensions,
+        group_info=group_info,
+        var_name_format=var_name_format,
+        index_origin=index_origin,
+    )
+    assert res_dict
+    assert "draw" in res_dict
+    assert any("mu" in item for item in res_dict)
+    if group_info:
+        if groups != "prior_groups":
+            assert any("posterior" in item for item in res_dict)
+            if var_names is None:
+                assert any("sample_stats" in item for item in res_dict)
+        else:
+            assert any("prior" in item for item in res_dict)
+    else:
+        if groups != "prior_groups":
+            assert not any("posterior" in item for item in res_dict)
+            if var_names is None:
+                assert not any("sample_stats" in item for item in res_dict)
+        else:
+            assert not any("prior" in item for item in res_dict)

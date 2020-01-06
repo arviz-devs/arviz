@@ -297,8 +297,9 @@ def make_label(var_name, selection, position="below"):
 
     selection : dict[Any] -> Any
         Coordinates of the variable
-    position : whether to position the coordinates' label "below" (default) or "beside" the name
-               of the variable
+    position : str
+        Whether to position the coordinates' label "below" (default) or "beside"
+        the name of the variable
 
     Returns
     -------
