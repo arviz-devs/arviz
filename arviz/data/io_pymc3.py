@@ -1,6 +1,6 @@
 """PyMC3-specific conversion code."""
 import logging
-from typing import Dict, List, Any, Optional, TYPE_CHECKING, Set
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
 
 import numpy as np
 import xarray as xr
@@ -10,12 +10,16 @@ from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 if TYPE_CHECKING:
     import pymc3 as pm
+    import theano
+    from typing import Set
 
 _log = logging.getLogger(__name__)
 
 Coords = Dict[str, List[Any]]
 Dims = Dict[str, List[str]]
+Var = Any # random variable object ...
 
+# pylint: disable=line-too-long
 
 class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     """Encapsulate PyMC3 specific logic."""
@@ -39,8 +43,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         model=None
     ):
         import pymc3
+        import theano
 
         self.pymc3 = pymc3
+        self.theano = theano
 
         self.trace = trace
 
@@ -90,20 +96,17 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.coords = coords
         self.dims = dims
-        self.observations = (
-            None
-            if self.trace is None
-            else True
-            if any(
-                hasattr(obs, "observations")
-                for obs in self.trace._straces[  # pylint: disable=protected-access
-                    0
-                ].model.observed_RVs
-            )
-            else None
-        )
-        if self.observations is not None:
-            self.observations = {obs.name: obs.observations for obs in self.model.observed_RVs}
+        self.observations = self.find_observations()
+
+    def find_observations(self) -> Optional[Dict[str, Var]]:
+        has_observations = False
+        if self.trace is not None:
+            assert self.model is not None, "Cannot identify observations without PymC3 model"
+            if any((hasattr(obs, "observations") for obs in self.model.observed_RVs)):
+                has_observations = True
+        if has_observations:
+            return {obs.name: obs.observations for obs in self.model.observed_RVs}
+        return None
 
     @requires("trace")
     @requires("model")
@@ -254,45 +257,26 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("model")
     def constant_data_to_xarray(self):
         """Convert constant data to xarray."""
-        # if both predictions AND trace are supplied, then the trace should be the
-        # *thinned* trace used in prediction and NOT the full posterior trace. Hence we
-        # give precedence here to checking the predictions.
-        model_vars = None  # type: Set[str]
-        if self.predictions is not None:
-            model_vars = set(
-                self.pymc3.util.get_default_varnames(
-                    self.predictions.keys(), include_transformed=True
-                )
-            )
-        else:
-            model_vars = set()
-        if self.trace is not None:
-            model_vars = model_vars | set(
-                self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-                    self.trace.varnames, include_transformed=True
-                )
-            )
-        if self.observations is not None:
-            # pylint: disable=line-too-long
-            model_vars = (
-                model_vars
-                | {obs.name for obs in self.observations.values() if hasattr(obs, "name")}
-                | set(self.observations.keys())
-            )
+        # For constant data, we are concerned only with deterministics and data.
+        # The constant data vars must be either pm.Data (TensorSharedVariable) or pm.Deterministic
+        constant_data_vars = {} # type: Dict[str, Var]
+        for var in self.model.deterministics:
+            ancestors = self.theano.tensor.gof.graph.ancestors(var.owner.inputs)
+            # no dependency on a random variable
+            if not any((isinstance(a, self.pymc3.model.PyMC3Variable) for a in ancestors)):
+                constant_data_vars[var.name] = var
 
-        # this check is necessary in filtering constant variables because I found that some still
-        # slipped through, notably the bounding transformed variables introduced by bounded and
-        # truncated RVs in PyMC3.
-        def untransformed_name(name: str) -> str:
-            if self.pymc3.util.is_transformed_name(name):
-                return self.pymc3.util.get_untransformed_name(name)
-            return name
+        def is_data(name, var) -> bool:
+            return var not in self.model.deterministics and var not in self.model.observed_RVs \
+               and var not in self.model.free_RVs and \
+               (self.observations is None or name not in self.observations)
 
-        constant_data_vars = {
-            name: var
-            for name, var in self.model.named_vars.items()
-            if untransformed_name(name) not in model_vars
-        }
+        # I don't know how to find pm.Data, except that they are named variables that aren't
+        # observed or free RVs, nor are they deterministics, and then we eliminate observations.
+        for name, var in self.model.named_vars.items():
+            if is_data(name, var):
+                constant_data_vars[name] = var
+
         if not constant_data_vars:
             return None
         if self.dims is None:
