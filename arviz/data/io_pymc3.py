@@ -287,6 +287,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         for name, vals in constant_data_vars.items():
             if hasattr(vals, "get_value"):
                 vals = vals.get_value()
+            # this might be a Deterministic, and must be evaluated
+            elif hasattr(self.model[name], 'eval'):
+                    vals = self.model[name].eval()
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
             val_dims, coords = generate_dims_coords(
