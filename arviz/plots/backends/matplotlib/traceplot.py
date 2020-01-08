@@ -271,7 +271,6 @@ def _plot_chains_mpl(
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="matplotlib",
-                backend_kwargs={},
                 show=False,
             )
 
@@ -287,6 +286,5 @@ def _plot_chains_mpl(
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="matplotlib",
-            backend_kwargs={},
             show=False,
         )
