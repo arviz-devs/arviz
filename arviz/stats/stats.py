@@ -49,7 +49,7 @@ def compare(
     b_samples=1000,
     alpha=1,
     seed=None,
-    scale="deviance",
+    scale=None,
 ):
     r"""Compare models based on WAIC or LOO cross-validation.
 
@@ -137,7 +137,7 @@ def compare(
 
     """
     names = list(dataset_dict.keys())
-    scale = scale.lower()
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if scale == "log":
         scale_value = 1
         ascending = False
