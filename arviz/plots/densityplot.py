@@ -157,7 +157,9 @@ def plot_density(
         point_estimate = rcParams["plot.point_estimate"]
     elif point_estimate not in ("mean", "median", "mode", None):
         raise ValueError(
-            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(point_estimate)
+            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(
+                point_estimate
+            )
         )
 
     n_data = len(datasets)
