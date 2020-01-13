@@ -23,7 +23,7 @@ def plot_density(
     data_labels=None,
     var_names=None,
     credible_interval=0.94,
-    point_estimate="mean",
+    point_estimate="auto",
     colors="cycle",
     outline=True,
     hpd_markers="",
@@ -61,8 +61,8 @@ def plot_density(
     credible_interval : float
         Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
-        Plot point estimate per variable. Values should be 'mean', 'median' or None.
-        Defaults to 'mean'.
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto'.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -153,10 +153,11 @@ def plot_density(
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
 
     var_names = _var_names(var_names, datasets)
-
-    if point_estimate not in ("mean", "median", None):
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in ("mean", "median", "mode", None):
         raise ValueError(
-            "Point estimate should be 'mean'," "median' or None, not {}".format(point_estimate)
+            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(point_estimate)
         )
 
     n_data = len(datasets)
