@@ -31,10 +31,7 @@ def plot_violin(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

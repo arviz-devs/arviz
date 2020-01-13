@@ -10,12 +10,7 @@ from scipy.stats import mode
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    format_sig_figs,
-    round_num,
-)
+from ...plot_utils import make_label, _create_axes_grid, format_sig_figs, round_num
 from ....stats import hpd
 
 
@@ -44,10 +39,7 @@ def plot_posterior(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,

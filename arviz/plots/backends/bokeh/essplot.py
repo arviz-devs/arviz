@@ -8,10 +8,7 @@ from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
 from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-)
+from ...plot_utils import make_label, _create_axes_grid
 
 
 def plot_ess(
@@ -53,10 +50,7 @@ def plot_ess(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

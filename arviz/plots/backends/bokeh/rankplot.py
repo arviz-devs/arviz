@@ -8,10 +8,7 @@ from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
 from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _create_axes_grid,
-    make_label,
-)
+from ...plot_utils import _create_axes_grid, make_label
 from ....stats.stats_utils import histogram
 
 
@@ -34,10 +31,7 @@ def plot_rank(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,

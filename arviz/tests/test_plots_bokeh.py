@@ -189,7 +189,7 @@ def test_plot_kde_1d(continuous_model):
     "kwargs",
     [
         {"contour": True, "fill_last": False},
-        {"contour": True, "contourf_kwargs": {"cmap": "plasma"},},
+        {"contour": True, "contourf_kwargs": {"cmap": "plasma"}},
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
     ],
@@ -275,9 +275,7 @@ def test_plot_compare_no_ic(models):
     assert "['waic', 'loo']" in str(err.value)
 
 
-@pytest.mark.parametrize(
-    "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"},],
-)
+@pytest.mark.parametrize("kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}])
 @pytest.mark.parametrize("add_model", [False, True])
 @pytest.mark.parametrize("use_elpddata", [False, True])
 def test_plot_elpd(models, add_model, use_elpddata, kwargs):
@@ -300,9 +298,7 @@ def test_plot_elpd(models, add_model, use_elpddata, kwargs):
         assert axes.shape[0] == len(model_dict) - 1
 
 
-@pytest.mark.parametrize(
-    "kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"},],
-)
+@pytest.mark.parametrize("kwargs", [{}, {"ic": "loo"}, {"xlabels": True, "scale": "log"}])
 @pytest.mark.parametrize("add_model", [False, True])
 @pytest.mark.parametrize("use_elpddata", [False, True])
 def test_plot_elpd_multidim(multidim_models, add_model, use_elpddata, kwargs):
@@ -443,9 +439,7 @@ def test_plot_forest(models, model_fits, args_expected):
 
 def test_plot_forest_rope_exception():
     with pytest.raises(ValueError) as err:
-        plot_forest(
-            {"x": [1]}, rope="not_correct_format", backend="bokeh", show=False,
-        )
+        plot_forest({"x": [1]}, rope="not_correct_format", backend="bokeh", show=False)
     assert "Argument `rope` must be None, a dictionary like" in str(err.value)
 
 
@@ -508,19 +502,15 @@ def test_plot_joint_discrete(discrete_model):
 def test_plot_joint_bad(models):
     with pytest.raises(ValueError):
         plot_joint(
-            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False,
+            models.model_1, var_names=("mu", "tau"), kind="bad_kind", backend="bokeh", show=False
         )
 
     with pytest.raises(Exception):
-        plot_joint(
-            models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False,
-        )
+        plot_joint(models.model_1, var_names=("mu", "tau", "eta"), backend="bokeh", show=False)
 
     with pytest.raises(ValueError):
         _, axes = list(range(5))
-        plot_joint(
-            models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False,
-        )
+        plot_joint(models.model_1, var_names=("mu", "tau"), ax=axes, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -614,7 +604,7 @@ def test_plot_loo_pit_incompatible_args(models):
     """Test error when both ecdf and use_hpd are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(
-            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False,
+            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False
         )
 
 
@@ -694,8 +684,8 @@ def test_plot_mcse_no_divergences(models):
 @pytest.mark.parametrize(
     "kwargs",
     [
-        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]},},
-        {"divergences": True, "var_names": ["theta", "mu"],},
+        {"var_names": "theta", "divergences": True, "coords": {"theta_dim_0": [0, 1]}},
+        {"divergences": True, "var_names": ["theta", "mu"]},
         {"kind": "kde", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
         {"kind": "hexbin", "var_names": ["theta"]},
@@ -760,7 +750,7 @@ def test_plot_parallel_exception(models, var_names):
     """Ensure that correct exception is raised when one variable is passed."""
     with pytest.raises(ValueError):
         assert plot_parallel(
-            models.model_1, var_names=var_names, norm_method="foo", backend="bokeh", show=False,
+            models.model_1, var_names=var_names, norm_method="foo", backend="bokeh", show=False
         )
 
 
@@ -860,9 +850,7 @@ def test_plot_ppc_bad(models, kind):
     with pytest.raises(TypeError):
         plot_ppc(models.model_1, kind="bad_val", backend="bokeh", show=False)
     with pytest.raises(TypeError):
-        plot_ppc(
-            models.model_1, num_pp_samples="bad_val", backend="bokeh", show=False,
-        )
+        plot_ppc(models.model_1, num_pp_samples="bad_val", backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
@@ -913,13 +901,9 @@ def test_plot_posterior_bad(models):
     with pytest.raises(ValueError):
         plot_posterior(models.model_1, backend="bokeh", show=False, rope="bad_value")
     with pytest.raises(ValueError):
-        plot_posterior(
-            models.model_1, ref_val="bad_value", backend="bokeh", show=False,
-        )
+        plot_posterior(models.model_1, ref_val="bad_value", backend="bokeh", show=False)
     with pytest.raises(ValueError):
-        plot_posterior(
-            models.model_1, point_estimate="bad_value", backend="bokeh", show=False,
-        )
+        plot_posterior(models.model_1, point_estimate="bad_value", backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))

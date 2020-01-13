@@ -35,10 +35,7 @@ def plot_pair(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1

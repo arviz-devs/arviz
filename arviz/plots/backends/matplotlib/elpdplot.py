@@ -6,10 +6,7 @@ import numpy as np
 
 
 from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _scale_fig_size,
-    set_xticklabels,
-)
+from ...plot_utils import _scale_fig_size, set_xticklabels
 from ....rcparams import rcParams
 
 
@@ -36,10 +33,7 @@ def plot_elpd(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     backend_kwargs["constrained_layout"] = not xlabels
 
     if numvars == 2:

@@ -5,10 +5,7 @@ from bokeh.layouts import gridplot
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import (
-    _create_axes_grid,
-    get_bins,
-)
+from ...plot_utils import _create_axes_grid, get_bins
 from ....stats.stats_utils import histogram
 
 
@@ -37,10 +34,7 @@ def plot_ppc(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         _, axes = _create_axes_grid(
             length_plotters,
@@ -109,9 +103,7 @@ def plot_ppc(
                 bins = get_bins(obs_vals)
                 _, hist, bin_edges = histogram(obs_vals, bins=bins)
                 hist = np.concatenate((hist[:1], hist))
-                ax_i.step(
-                    bin_edges, hist, line_color="black", line_width=linewidth, mode="center",
-                )
+                ax_i.step(bin_edges, hist, line_color="black", line_width=linewidth, mode="center")
 
             if mean:
                 if dtype == "f":
@@ -125,11 +117,7 @@ def plot_ppc(
                     for irep in range(rep):
                         new_d[irep][bins[irep]] = pp_densities[irep]
                     ax_i.line(
-                        new_x,
-                        new_d.mean(0),
-                        color="blue",
-                        line_dash="dashed",
-                        line_width=linewidth,
+                        new_x, new_d.mean(0), color="blue", line_dash="dashed", line_width=linewidth
                     )
                 else:
                     vals = pp_vals.flatten()
@@ -150,9 +138,7 @@ def plot_ppc(
 
         elif kind == "cumulative":
             if dtype == "f":
-                ax_i.line(
-                    *_empirical_cdf(obs_vals), line_color="black", line_width=linewidth,
-                )
+                ax_i.line(*_empirical_cdf(obs_vals), line_color="black", line_width=linewidth)
             else:
                 ax_i.step(
                     *_empirical_cdf(obs_vals),
@@ -218,9 +204,7 @@ def plot_ppc(
             obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
             if jitter:
                 obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
-            ax_i.circle(
-                obs_vals, obs_yvals, fill_color="black", size=markersize, line_alpha=alpha,
-            )
+            ax_i.circle(obs_vals, obs_yvals, fill_color="black", size=markersize, line_alpha=alpha)
 
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):
                 vals = np.ravel(vals)

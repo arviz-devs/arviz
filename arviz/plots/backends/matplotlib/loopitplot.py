@@ -37,10 +37,7 @@ def plot_loo_pit(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {
-        **backend_kwarg_defaults(),
-        **backend_kwargs,
-    }
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=figsize, **backend_kwargs)
 

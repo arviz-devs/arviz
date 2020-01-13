@@ -35,7 +35,7 @@ def plot_kde(
     backend=None,
     backend_kwargs=None,
     show=None,
-    **kwargs
+    **kwargs,
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
 

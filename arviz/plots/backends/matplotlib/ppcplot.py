@@ -5,11 +5,7 @@ import numpy as np
 
 from . import backend_show
 from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    get_bins,
-)
+from ...plot_utils import make_label, _create_axes_grid, get_bins
 from ....stats.stats_utils import histogram
 
 

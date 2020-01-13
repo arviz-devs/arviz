@@ -5,10 +5,7 @@ from scipy.stats import rankdata
 
 from . import backend_show
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-)
+from ...plot_utils import make_label, _create_axes_grid
 
 
 def plot_mcse(

@@ -43,13 +43,7 @@ __all__ = [
 
 
 def compare(
-    dataset_dict,
-    ic=None,
-    method="BB-pseudo-BMA",
-    b_samples=1000,
-    alpha=1,
-    seed=None,
-    scale=None,
+    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
     r"""Compare models based on WAIC or LOO cross-validation.
 

@@ -26,9 +26,7 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     non_div = list(_posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]
 
-    ax.multi_line(
-        x_non_div, non_div, line_color="black", line_alpha=0.05,
-    )
+    ax.multi_line(x_non_div, non_div, line_color="black", line_alpha=0.05)
 
     if np.any(diverging_mask):
         div = list(_posterior[:, diverging_mask].T)

@@ -8,12 +8,7 @@ from scipy.stats import mode
 from . import backend_show
 from ....stats import hpd
 from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    format_sig_figs,
-    round_num,
-)
+from ...plot_utils import make_label, _create_axes_grid, format_sig_figs, round_num
 
 
 def plot_posterior(
