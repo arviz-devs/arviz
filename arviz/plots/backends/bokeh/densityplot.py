@@ -5,11 +5,11 @@ from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import _fast_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
     calculate_point_estimate,
+    _fast_kde,
 )
 from ....stats import hpd
 from ....stats.stats_utils import histogram

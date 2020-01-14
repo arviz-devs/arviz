@@ -4,11 +4,11 @@ import numpy as np
 
 from . import backend_show
 from ....stats import hpd
-from ...kdeplot import _fast_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
     calculate_point_estimate,
+    _fast_kde,
 )
 
 

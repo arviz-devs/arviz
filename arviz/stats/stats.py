@@ -12,9 +12,8 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
+from ..plots.plot_utils import *
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from ..plots.kdeplot import _fast_kde
-from ..plots.plot_utils import get_bins
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
     make_ufunc as _make_ufunc,
