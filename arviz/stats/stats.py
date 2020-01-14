@@ -482,7 +482,6 @@ def loo(data, pointwise=False, reff=None, scale=None):
 
     """
     inference_data = convert_to_inference_data(data)
-    posterior = inference_data.posterior
     log_likelihood = _get_log_likelihood(inference_data)
 
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
