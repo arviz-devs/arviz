@@ -9,9 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
-from ..stats.stats_utils import histogram
 from scipy.stats import mode
-
 
 from ..utils import conditional_jit
 from ..rcparams import rcParams
@@ -771,7 +769,11 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
 
-    _, grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax))
+
+    hist, bin_edges = np.histogram(x, bins=n_bins, range=(xmin, xmax))
+    grid = hist / (hist.sum() * np.diff(bin_edges))
+
+    # _, grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax))
 
     scotts_factor = len_x ** (-0.2)
     kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
