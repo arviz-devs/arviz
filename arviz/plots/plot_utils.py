@@ -1,15 +1,16 @@
 """Utilities for plotting."""
 import warnings
 from itertools import product, tee
-from scipy.signal import gaussian, convolve
 import importlib
+from scipy.signal import gaussian, convolve
+from scipy.stats import mode
 
 import packaging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
-from scipy.stats import mode
+
 
 from ..utils import conditional_jit
 from ..rcparams import rcParams

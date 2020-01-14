@@ -3,7 +3,6 @@ from typing import Optional
 from numbers import Number
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import mode
 
 from . import backend_show
 from ....stats import hpd

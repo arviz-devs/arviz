@@ -11,7 +11,6 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..utils import _var_names
-from ..rcparams import rcParams
 
 
 def plot_posterior(

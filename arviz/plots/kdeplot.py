@@ -2,7 +2,7 @@
 """One-dimensional kernel density estimate plots."""
 import warnings
 import numpy as np
-from scipy.signal import gaussian, convolve, convolve2d  # pylint: disable=no-name-in-module
+from scipy.signal import convolve2d  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 import xarray as xr
 

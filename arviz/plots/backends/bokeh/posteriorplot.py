@@ -6,7 +6,6 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
-from scipy.stats import mode
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
