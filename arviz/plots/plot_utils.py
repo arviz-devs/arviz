@@ -678,7 +678,7 @@ def get_plotting_function(plot_name, plot_module, backend):
 
 
 def calculate_point_estimate(point_estimate, values, bw):
-    """Validate and calculate the point estimate
+    """Validate and calculate the point estimate.
 
     Parameters
     ----------
@@ -696,7 +696,7 @@ def calculate_point_estimate(point_estimate, values, bw):
     point_value : float
         best estimate of data distribution
     """
-    point_value = None;
+    point_value = None
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]
     elif point_estimate not in ("mean", "median", "mode", None):
@@ -768,7 +768,6 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     if n_bins < 2:
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
-
 
     hist, bin_edges = np.histogram(x, bins=n_bins, range=(xmin, xmax))
     grid = hist / (hist.sum() * np.diff(bin_edges))
