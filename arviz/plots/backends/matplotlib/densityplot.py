@@ -5,7 +5,11 @@ import numpy as np
 from . import backend_show
 from ....stats import hpd
 from ...kdeplot import _fast_kde
-from ...plot_utils import _create_axes_grid, make_label
+from ...plot_utils import (
+    make_label,
+    _create_axes_grid,
+    calculate_point_estimate,
+)
 
 
 def plot_density(
@@ -115,8 +119,9 @@ def _d_helper(
         Size of markers
     credible_interval : float
         Credible intervals. Defaults to 0.94
-    point_estimate : str or None
-        'mean' or 'median'
+    point_estimate : Optional[str]
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
     shade : float
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
@@ -155,11 +160,8 @@ def _d_helper(
         ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
         ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
 
+    est = calculate_point_estimate(point_estimate, vec, bw)
     if point_estimate is not None:
-        if point_estimate == "mean":
-            est = np.mean(vec)
-        elif point_estimate == "median":
-            est = np.median(vec)
         ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])

@@ -7,12 +7,13 @@ from scipy.stats import mode
 
 from . import backend_show
 from ....stats import hpd
-from ...kdeplot import plot_kde, _fast_kde
+from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
     format_sig_figs,
     round_num,
+    calculate_point_estimate,
 )
 
 
@@ -179,21 +180,9 @@ def _plot_posterior_op(
         ax.text(vals[1], plot_height * 0.2, vals[1], weight="semibold", **text_props)
 
     def display_point_estimate():
+        point_value = calculate_point_estimate(point_estimate, values, bw)
         if not point_estimate:
             return
-        if point_estimate not in ("mode", "mean", "median"):
-            raise ValueError("Point Estimate should be in ('mode','mean','median')")
-        if point_estimate == "mean":
-            point_value = values.mean()
-        elif point_estimate == "mode":
-            if isinstance(values[0], float):
-                density, lower, upper = _fast_kde(values, bw=bw)
-                x = np.linspace(lower, upper, len(density))
-                point_value = x[np.argmax(density)]
-            else:
-                point_value = mode(values)[0][0]
-        elif point_estimate == "median":
-            point_value = np.median(values)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs

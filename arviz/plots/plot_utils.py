@@ -8,9 +8,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import xarray as xr
+from scipy.stats import mode
 
 
 from ..utils import conditional_jit
+from .kdeplot import _fast_kde
 from ..rcparams import rcParams
 
 
@@ -674,3 +676,45 @@ def get_plotting_function(plot_name, plot_module, backend):
     plotting_method = getattr(module, plot_name)
 
     return plotting_method
+
+
+def calculate_point_estimate(point_estimate, values, bw):
+    """Validate and calculate the point estimate
+
+    Parameters
+    ----------
+    point_estimate : Optional[str]
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
+    values : 1-d array
+    bw : float
+        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
+        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
+        (the default used rule by SciPy).
+
+    Returns
+    -------
+    point_value : float
+        best estimate of data distribution
+    """
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in ("mean", "median", "mode", None):
+        raise ValueError(
+            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(
+                point_estimate
+            )
+        )
+    if point_estimate == "mean":
+        point_value = values.mean()
+    elif point_estimate == "mode":
+        if isinstance(values[0], float):
+            density, lower, upper = _fast_kde(values, bw=bw)
+            x = np.linspace(lower, upper, len(density))
+            point_value = x[np.argmax(density)]
+        else:
+            point_value = mode(values)[0][0]
+    elif point_estimate == "median":
+        point_value = np.median(values)
+
+    return point_value
