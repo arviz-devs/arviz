@@ -12,7 +12,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..plots.plot_utils import *
+from ..plots.plot_utils import _fast_kde, get_bins
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
 from .stats_utils import (
