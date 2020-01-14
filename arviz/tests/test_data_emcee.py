@@ -41,7 +41,7 @@ class TestDataEmcee:
                 "posterior": ["var_0", "var_1", "var_7"],
                 "observed_data": ["arg_0"],
                 "constant_data": ["arg_1"],
-                "log_likelihoods": ["y", "lp"],
+                "log_likelihoods": ["y"],
                 "posterior_predictive": ["y"],
             },
         ),
@@ -59,7 +59,7 @@ class TestDataEmcee:
                 "posterior": ["mu", "tau", "eta"],
                 "observed_data": ["y"],
                 "constant_data": ["sigma"],
-                "log_likelihoods": ["log_likelihood", "y", "lp"],
+                "sampler_stats": ["log_likelihood", "y"],
             },
         ),
     ]
@@ -126,10 +126,10 @@ class TestDataEmcee:
         sampler = emcee.EnsembleSampler(6, 1, lambda x: (-(x ** 2), (np.random.normal(x), 3)))
         sampler.run_mcmc(np.random.normal(size=(6, 1)), 20)
         inference_data = from_emcee(sampler, blob_names=["normal", "threes"])
-        fails = check_multiple_attrs({"log_likelihoods": ["normal", "threes"]}, inference_data)
+        fails = check_multiple_attrs({"sampler_stats": ["normal", "threes"]}, inference_data)
         assert not fails
         inference_data = from_emcee(data.obj, blob_names=["mix"])
-        fails = check_multiple_attrs({"log_likelihoods": ["mix"]}, inference_data)
+        fails = check_multiple_attrs({"sampler_stats": ["mix"]}, inference_data)
         assert not fails
 
     def test_single_blob(self):

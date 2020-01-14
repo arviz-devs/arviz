@@ -174,7 +174,7 @@ class EmceeConverter:
         store_blobs = not self.blob_names is None
         self.blob_names = [] if self.blob_names is None else self.blob_names
         if self.blob_groups is None:
-            self.blob_groups = ["log_likelihoods" for _ in self.blob_names]
+            self.blob_groups = ["sampler_stats" for _ in self.blob_names]
         if len(self.blob_names) != len(self.blob_groups):
             raise ValueError(
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
