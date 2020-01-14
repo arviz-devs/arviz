@@ -14,14 +14,17 @@ def plot_violin(
     data,
     var_names=None,
     quartiles=True,
+    rug=False,
     credible_interval=0.94,
     shade=0.35,
     bw=4.5,
+    sharex=True,
     sharey=True,
     figsize=None,
     textsize=None,
     ax=None,
-    kwargs_shade=None,
+    shade_kwargs=None,
+    rug_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
@@ -42,6 +45,8 @@ def plot_violin(
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval*100%
         intervals. Defaults to True
+    rug : bool
+        If True adds a jittered rugplot. Defaults to False.
     credible_interval : float, optional
         Credible intervals. Defaults to 0.94.
     shade : float
@@ -56,12 +61,17 @@ def plot_violin(
     textsize: int
         Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
         based on figsize.
+    sharex : bool
+        Defaults to True, violinplots share a common x-axis scale.
     sharey : bool
         Defaults to True, violinplots share a common y-axis scale.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
-    kwargs_shade : dicts, optional
+    shade_kwargs : dicts, optional
         Additional keywords passed to `fill_between`, or `barh` to control the shade.
+    rug_kwargs : dict
+        Keywords passed to the rug plot. If true only the righ half side of the violin will be
+        plotted.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -81,15 +91,21 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    if kwargs_shade is None:
-        kwargs_shade = {}
+    if shade_kwargs is None:
+        shade_kwargs = {}
 
     rows, cols = default_grid(len(plotters))
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    ax_labelsize *= 2
+
+    if rug_kwargs is None:
+        rug_kwargs = {}
+        rug_kwargs = {}
+    rug_kwargs.setdefault("alpha", 0.1)
+    rug_kwargs.setdefault("marker", ".")
+    rug_kwargs.setdefault("linestyle", "")
 
     violinplot_kwargs = dict(
         ax=ax,
@@ -97,9 +113,12 @@ def plot_violin(
         figsize=figsize,
         rows=rows,
         cols=cols,
+        sharex=sharex,
         sharey=sharey,
-        kwargs_shade=kwargs_shade,
+        shade_kwargs=shade_kwargs,
         shade=shade,
+        rug=rug,
+        rug_kwargs=rug_kwargs,
         bw=bw,
         credible_interval=credible_interval,
         linewidth=linewidth,

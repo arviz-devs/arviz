@@ -17,9 +17,12 @@ def plot_violin(
     figsize,
     rows,
     cols,
+    sharex,
     sharey,
-    kwargs_shade,
+    shade_kwargs,
     shade,
+    rug,
+    rug_kwargs,
     bw,
     credible_interval,
     linewidth,
@@ -40,6 +43,7 @@ def plot_violin(
             len(plotters),
             rows,
             cols,
+            sharex=sharex,
             sharey=sharey,
             figsize=figsize,
             squeeze=False,
@@ -54,9 +58,13 @@ def plot_violin(
     ):
         val = x.flatten()
         if val[0].dtype.kind == "i":
-            cat_hist(val, shade, ax_, **kwargs_shade)
+            dens = cat_hist(val, rug, shade, ax_, **shade_kwargs)
         else:
-            _violinplot(val, shade, bw, ax_, **kwargs_shade)
+            dens = _violinplot(val, rug, shade, bw, ax_, **shade_kwargs)
+
+        if rug:
+            rug_x = -np.abs(np.random.normal(scale=np.std(dens), size=len(val)))
+            ax_.scatter(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
         hpd_intervals = hpd(val, credible_interval, multimodal=False)
@@ -80,18 +88,20 @@ def plot_violin(
     return ax
 
 
-def _violinplot(val, shade, bw, ax, **kwargs_shade):
+def _violinplot(val, rug, shade, bw, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
     density, low_b, up_b = _fast_kde(val, bw=bw)
     x = np.linspace(low_b, up_b, len(density))
 
-    x = np.concatenate([x, x[::-1]])
-    density = np.concatenate([-density, density[::-1]])
+    if not rug:
+        x = np.concatenate([x, x[::-1]])
+        density = np.concatenate([-density, density[::-1]])
 
-    ax.patch(density, x, fill_alpha=shade, line_width=0, **kwargs_shade)
+    ax.patch(density, x, fill_alpha=shade, line_width=0, **shade_kwargs)
+    return density
 
 
-def cat_hist(val, shade, ax, **kwargs_shade):
+def cat_hist(val, rug, shade, ax, **shade_kwargs):
     """Auxiliary function to plot discrete-violinplots."""
     bins = get_bins(val)
     _, binned_d, _ = histogram(val, bins=bins)
@@ -99,8 +109,12 @@ def cat_hist(val, shade, ax, **kwargs_shade):
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
     centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
     heights = np.diff(bin_edges)
+    centers = bin_edges[:-1] + heights.mean() / 2
 
     lefts = -0.5 * binned_d
+
+    if rug:
+        pass
 
     ax.hbar(
         y=centers,
@@ -110,5 +124,6 @@ def cat_hist(val, shade, ax, **kwargs_shade):
         fill_alpha=shade,
         line_alpha=shade,
         line_color=None,
-        **kwargs_shade
+        **shade_kwargs
     )
+    return binned_d
