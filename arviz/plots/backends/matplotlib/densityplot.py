@@ -160,8 +160,8 @@ def _d_helper(
         ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
         ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
 
-    est = calculate_point_estimate(point_estimate, vec, bw)
     if point_estimate is not None:
+        est = calculate_point_estimate(point_estimate, vec, bw)
         ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])

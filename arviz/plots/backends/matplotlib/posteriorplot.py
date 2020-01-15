@@ -179,9 +179,9 @@ def _plot_posterior_op(
         ax.text(vals[1], plot_height * 0.2, vals[1], weight="semibold", **text_props)
 
     def display_point_estimate():
-        point_value = calculate_point_estimate(point_estimate, values, bw)
         if not point_estimate:
             return
+        point_value = calculate_point_estimate(point_estimate, values, bw)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs

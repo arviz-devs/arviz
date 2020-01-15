@@ -189,8 +189,8 @@ def _d_helper(
         ax.diamond(xmin, 0, line_color="black", fill_color=color, size=markersize)
         ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize)
 
-    est = calculate_point_estimate(point_estimate, vec, bw)
     if point_estimate is not None:
+        est = calculate_point_estimate(point_estimate, vec, bw)
         ax.circle(est, 0, fill_color=color, line_color="black", size=markersize)
 
     _title = Title()

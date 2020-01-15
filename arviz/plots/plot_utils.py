@@ -745,6 +745,8 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     density: A gridded 1D KDE of the input points (x)
     xmin: minimum value of x
     xmax: maximum value of x
+
+    .. warning:: scipy.signal.gaussian is deprecated, use scipy.signal.windows.gaussian instead.
     """
     x = np.asarray(x, dtype=float)
     x = x[np.isfinite(x)]
