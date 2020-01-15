@@ -32,13 +32,12 @@ class TestDataPyStan:
             prior_predictive="y_hat",
             observed_data="y",
             constant_data="sigma",
-            log_likelihood={"log_likelihood": "log_lik"},
+            log_likelihood={"y": "log_lik"},
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
                 "y": ["school"],
                 "sigma": ["school"],
-                "log_lik": ["school"],
                 "y_hat": ["school"],
                 "eta": ["school"],
             },
@@ -119,8 +118,8 @@ class TestDataPyStan:
             "posterior": ["theta"],
             "observed_data": ["y"],
             "constant_data": ["sigma"],
-            "sample_stats": ["diverging"],
-            "log_likelihoods": ["log_likelihood", "lp"],
+            "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["y"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -130,8 +129,8 @@ class TestDataPyStan:
             "posterior_predictive": ["y_hat"],
             "observed_data": ["y"],
             "sample_stats_prior": ["diverging"],
-            "sample_stats": ["diverging"],
-            "log_likelihoods": ["log_lik", "lp"],
+            "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["log_lik"],
             "prior_predictive": ["y_hat"],
         }
         fails = check_multiple_attrs(test_dict, inference_data2)
@@ -141,8 +140,7 @@ class TestDataPyStan:
             "posterior_predictive": ["y_hat", "log_lik"],
             "constant_data": ["sigma"],
             "sample_stats_prior": ["diverging"],
-            "sample_stats": ["diverging"],
-            "log_likelihoods": ["lp"],
+            "sample_stats": ["diverging", "lp"],
             "prior_predictive": ["y_hat", "log_lik"],
         }
         fails = check_multiple_attrs(test_dict, inference_data3)
@@ -151,8 +149,7 @@ class TestDataPyStan:
         test_dict = {
             "posterior": ["theta"],
             "prior": ["theta"],
-            "sample_stats": ["diverging"],
-            "log_likelihoods": ["lp"],
+            "sample_stats": ["diverging", "lp"],
         }
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails

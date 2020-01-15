@@ -71,36 +71,29 @@ class PyStanConverter:
 
         data = get_sample_stats(posterior)
 
+        # lp__
+        stat_lp = get_draws(posterior, variables="lp__")
+        data["lp"] = stat_lp["lp__"]
+
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
-    def log_likelihoods_to_xarray(self):
-        """Store log_likelihoods and lp in log_likelihoods group."""
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Store log_likelihood data in log_likelihood group."""
         fit = self.posterior
 
         # log_likelihood values
         log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-            if isinstance(log_likelihood, (list, tuple)):
-                log_likelihood = {name: name for name in log_likelihood}
-            data = {
-                obs_var_name: get_draws(fit, variables=log_like_name)[log_like_name]
-                for obs_var_name, log_like_name in log_likelihood.items()
-            }
-        else:
-            data = {}
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        if isinstance(log_likelihood, (list, tuple)):
+            log_likelihood = {name: name for name in log_likelihood}
+        data = {
+            obs_var_name: get_draws(fit, variables=log_like_name)[log_like_name]
+            for obs_var_name, log_like_name in log_likelihood.items()
+        }
 
-        # lp__
-        if "lp" in data:
-            warnings.warn(
-                "Found log_likelihood named 'lp'. It will be overwritten by the "
-                "model's log probablility.",
-                SyntaxWarning,
-            )
-        stat_lp = get_draws(fit, variables="lp__")
-        data["lp"] = stat_lp["lp__"]
 
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
@@ -185,7 +178,7 @@ class PyStanConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
-                "log_likelihoods": self.log_likelihoods_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
@@ -260,37 +253,27 @@ class PyStan3Converter:
         """Extract sample_stats from posterior."""
         posterior = self.posterior
         data = get_sample_stats_stan3(posterior, ignore="lp__")
+        data["lp"] = get_sample_stats_stan3(posterior, variables="lp__")["lp"]
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
-    def log_likelihoods_to_xarray(self):
-        """Store log_likelihoods and lp in log_likelihoods group."""
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Store log_likelihood data in log_likelihood group."""
         fit = self.posterior
 
-        # log_likelihood values
         log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            model = self.posterior_model
-            if isinstance(log_likelihood, str):
-                log_likelihood = [log_likelihood]
-            if isinstance(log_likelihood, (list, tuple)):
-                log_likelihood = {name: name for name in log_likelihood}
-            data = {
-                obs_var_name: get_draws_stan3(fit, model=model, variables=log_like_name)[
-                    log_like_name
-                ]
-                for obs_var_name, log_like_name in log_likelihood.items()
-            }
-        else:
-            data = {}
-
-        if "lp" in data:
-            warnings.warn(
-                "Found log_likelihood named 'lp'. It will be overwritten by the "
-                "model's log probablility.",
-                SyntaxWarning,
-            )
-        data["lp"] = get_sample_stats_stan3(fit, variables="lp__")["lp"]
+        model = self.posterior_model
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        if isinstance(log_likelihood, (list, tuple)):
+            log_likelihood = {name: name for name in log_likelihood}
+        data = {
+            obs_var_name: get_draws_stan3(fit, model=model, variables=log_like_name)[
+                log_like_name
+            ]
+            for obs_var_name, log_like_name in log_likelihood.items()
+        }
 
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
@@ -378,7 +361,7 @@ class PyStan3Converter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
-                "log_likelihoods": self.log_likelihoods_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
