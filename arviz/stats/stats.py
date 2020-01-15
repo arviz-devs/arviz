@@ -21,7 +21,7 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
-    histogram
+    histogram,
 )
 from ..utils import _var_names, Numba, _numba_var
 from ..rcparams import rcParams
