@@ -63,12 +63,12 @@ def to_cds(
     -------
     bokeh.models.ColumnDataSource object
     """
-    from ...utils import flat_inference_data_to_dict
+    from ...utils import flatten_inference_data_to_dict
 
     if var_name_format is None:
         var_name_format = "cds"
 
-    cds_dict = flat_inference_data_to_dict(
+    cds_dict = flatten_inference_data_to_dict(
         data=data,
         var_names=var_names,
         groups=groups,
