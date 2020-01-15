@@ -9,6 +9,7 @@ from ..utils import _var_names
 
 def plot_pair(
     data,
+    group="posterior",
     var_names=None,
     coords=None,
     figsize=None,
@@ -34,6 +35,10 @@ def plot_pair(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
+    group: Optional[str]
+        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+        Alternative values include 'prior' and any other strings used as dataset keys in the
+        InferenceData.
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted
     coords : mapping, optional
@@ -142,10 +147,10 @@ def plot_pair(
 
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
-    posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data)
+    grouped_data = convert_to_dataset(data, group=group)
+    var_names = _var_names(var_names, grouped_data)
     flat_var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+        get_coords(grouped_data, coords), var_names=var_names, combined=True
     )
 
     divergent_data = None
@@ -158,13 +163,19 @@ def plot_pair(
                 divergent_data, var_names=("diverging",), combined=True
             )
             diverging_mask = np.squeeze(diverging_mask)
+        elif hasattr(data, "sample_stats_prior") and hasattr(data.sample_stats_prior, "diverging"):
+            divergent_data = convert_to_dataset(data, group="sample_stats_prior")
+            _, diverging_mask = xarray_to_ndarray(
+                divergent_data, var_names=("diverging",), combined=True
+            )
+            diverging_mask = np.squeeze(diverging_mask)
         else:
             divergences = False
             warnings.warn(
                 "Divergences data not found, plotting without divergences. "
                 "Make sure the sample method provides divergences data and "
                 "that it is present in the `diverging` field of `sample_stats` "
-                "or set divergences=False",
+                "or `sample_stats_prior` or set divergences=False",
                 SyntaxWarning,
             )
 
