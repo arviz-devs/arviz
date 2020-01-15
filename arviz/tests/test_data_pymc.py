@@ -3,6 +3,7 @@ import numpy as np
 from numpy import ma
 import pymc3 as pm
 import pytest
+from sys import version_info
 
 from arviz import from_pymc3
 from .helpers import (  # pylint: disable=unused-import
@@ -119,6 +120,7 @@ class TestDataPyMC3:
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
+    @pytest.mark.skipif(version_info < (3,6), reason="Requires updated PyMC3, which needs Python 3.6")
     def test_multiple_observed_rv_without_observations(self):
         with pm.Model():
             mu = pm.Normal("mu")
