@@ -17,7 +17,7 @@ class DictConverter:
         posterior=None,
         posterior_predictive=None,
         sample_stats=None,
-        log_likelihoods=None,
+        log_likelihood=None,
         prior=None,
         prior_predictive=None,
         sample_stats_prior=None,
@@ -29,7 +29,7 @@ class DictConverter:
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
         self.sample_stats = sample_stats
-        self.log_likelihoods = log_likelihoods
+        self.log_likelihood = log_likelihood
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.sample_stats_prior = sample_stats_prior
@@ -47,8 +47,8 @@ class DictConverter:
 
         if "log_likelihood" in data:
             warnings.warn(
-                "log_likelihood found in posterior."
-                " For stats functions log_likelihood needs to be in sample_stats.",
+                "log_likelihood variable found in posterior group."
+                " For stats functions log likelihood data needs to be in log_likelihood group.",
                 SyntaxWarning,
             )
 
@@ -63,20 +63,20 @@ class DictConverter:
 
         if "log_likelihood" in data:
             warnings.warn(
-                "log_likelihood found in sample_stats."
-                " Storing log_likelihood data in sample_stats will be deprecated in favour "
-                "of storing them in log_likelihoods group.",
+                "log_likelihood variable found in sample_stats."
+                " Storing log_likelihood data in sample_stats group will be deprecated in "
+                "favour of storing them in the log_likelihood group.",
                 PendingDeprecationWarning,
             )
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
-    @requires("log_likelihoods")
-    def log_likelihoods_to_xarray(self):
-        """Convert log_likelihoods samples to xarray."""
-        data = self.log_likelihoods
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert log_likelihood samples to xarray."""
+        data = self.log_likelihood
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.log_likelihoods is not a dictionary")
+            raise TypeError("DictConverter.log_likelihood is not a dictionary")
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
@@ -166,7 +166,7 @@ class DictConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
-                "log_likelihoods": self.log_likelihoods_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
@@ -183,7 +183,7 @@ def from_dict(
     *,
     posterior_predictive=None,
     sample_stats=None,
-    log_likelihoods=None,
+    log_likelihood=None,
     prior=None,
     prior_predictive=None,
     sample_stats_prior=None,
@@ -199,8 +199,8 @@ def from_dict(
     posterior : dict
     posterior_predictive : dict
     sample_stats : dict
-    log_likelihoods : dict
-        For stats functions, it is recommended to store "log_likelihood" data here.
+    log_likelihood : dict
+        For stats functions, log likelihood data should be stored here.
     prior : dict
     prior_predictive : dict
     observed_data : dict
@@ -219,7 +219,7 @@ def from_dict(
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
-        log_likelihoods=log_likelihoods,
+        log_likelihood=log_likelihood,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
