@@ -22,7 +22,7 @@ def plot_ppc(
     animated,
     obs_plotters,
     pp_plotters,
-    posterior_predictive,
+    predictive_dataset,
     pp_sample_ix,
     kind,
     alpha,
@@ -60,7 +60,7 @@ def plot_ppc(
     for i, ax_i in enumerate(axes):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
-        dtype = posterior_predictive[pp_var_name].dtype.kind
+        dtype = predictive_dataset[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()
