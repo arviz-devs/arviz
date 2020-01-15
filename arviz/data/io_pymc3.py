@@ -393,6 +393,7 @@ def predictions_from_pymc3(
     inplace: boolean, optional
         If idata_orig is supplied and inplace is True, merge the predictions into idata_orig,
         rather than returning a fresh InferenceData object.
+
     Returns
     -------
     InferenceData:
