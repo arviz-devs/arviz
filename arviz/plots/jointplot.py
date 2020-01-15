@@ -29,9 +29,9 @@ def plot_joint(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : tuple
-        Variables to be plotted.
-        Two variables(or one variable with multiple dimensions) are required.
+    var_names : str or iterable of str
+        Variables to be plotted. iter of two variables or one variable (with subset having
+        exactly 2 dimensions) are required.
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
