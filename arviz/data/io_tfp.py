@@ -51,12 +51,6 @@ class TfpConverter:
         self.tf = tf  # pylint: disable=invalid-name
         self.ed = ed  # pylint: disable=invalid-name
 
-        if int(self.tf.__version__[0]) > 1:
-            import tensorflow.compat.v1 as tf  # pylint: disable=import-error
-
-            tf.disable_v2_behavior()
-            self.tf = tf  # pylint: disable=invalid-name
-
     def handle_chain_location(self, ary):
         """Move the axis corresponding to the chain to first position.
 
@@ -79,8 +73,8 @@ class TfpConverter:
             return None
 
         observed_data = {}
-        if isinstance(self.observed, self.tf.Tensor):
-            with self.tf.Session() as sess:
+        if isinstance(self.observed, self.tf.compat.v1.Tensor):
+            with self.tf.compat.v1.Session() as sess:
                 vals = sess.run(self.observed, feed_dict=self.feed_dict)
         else:
             vals = self.observed
@@ -131,7 +125,7 @@ class TfpConverter:
                     posterior_preds.append(self.model_fn())
 
         data = {}
-        with self.tf.Session() as sess:
+        with self.tf.compat.v1.Session() as sess:
             data["obs"] = self.handle_chain_location(
                 sess.run(posterior_preds, feed_dict=self.feed_dict)
             )
@@ -160,7 +154,7 @@ class TfpConverter:
             coord_name = None
         dims = {"log_likelihood": coord_name}
 
-        with self.tf.Session() as sess:
+        with self.tf.compat.v1.Session() as sess:
             data["log_likelihood"] = self.handle_chain_location(
                 sess.run(log_likelihood, feed_dict=self.feed_dict)
             )
