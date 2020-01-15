@@ -1,5 +1,4 @@
 """PyStan-specific conversion code."""
-import warnings
 from collections import OrderedDict
 import re
 
@@ -93,7 +92,6 @@ class PyStanConverter:
             obs_var_name: get_draws(fit, variables=log_like_name)[log_like_name]
             for obs_var_name, log_like_name in log_likelihood.items()
         }
-
 
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
@@ -269,9 +267,7 @@ class PyStan3Converter:
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
         data = {
-            obs_var_name: get_draws_stan3(fit, model=model, variables=log_like_name)[
-                log_like_name
-            ]
+            obs_var_name: get_draws_stan3(fit, model=model, variables=log_like_name)[log_like_name]
             for obs_var_name, log_like_name in log_likelihood.items()
         }
 

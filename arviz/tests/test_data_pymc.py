@@ -218,7 +218,7 @@ class TestDataPyMC3:
             "posterior": ["x"],
             "observed_data": ["y1", "y2"],
             "log_likelihood": ["y1", "y2"],
-            "sample_stats": ["diverging", "lp"]
+            "sample_stats": ["diverging", "lp"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
