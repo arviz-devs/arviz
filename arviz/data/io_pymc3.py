@@ -17,7 +17,8 @@ _log = logging.getLogger(__name__)
 
 Coords = Dict[str, List[Any]]
 Dims = Dict[str, List[str]]
-Var = Any # random variable object ...
+# random variable object ...
+Var = Any # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long
 
@@ -99,12 +100,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         self.observations = self.find_observations()
 
     def find_observations(self) -> Optional[Dict[str, Var]]:
+        """If there are observations available, return them as a dictionary."""
         has_observations = False
         if self.trace is not None:
             assert self.model is not None, "Cannot identify observations without PymC3 model"
             if any((hasattr(obs, "observations") for obs in self.model.observed_RVs)):
                 has_observations = True
         if has_observations:
+            assert self.model is not None
             return {obs.name: obs.observations for obs in self.model.observed_RVs}
         return None
 
@@ -289,7 +292,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 vals = vals.get_value()
             # this might be a Deterministic, and must be evaluated
             elif hasattr(self.model[name], 'eval'):
-                    vals = self.model[name].eval()
+                vals = self.model[name].eval()
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
             val_dims, coords = generate_dims_coords(
