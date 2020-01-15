@@ -1,11 +1,11 @@
 """PyMC3-specific conversion code."""
 import logging
-from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from typing import Dict, List, Any, Optional, TYPE_CHECKING, cast
 
 import numpy as np
 import xarray as xr
 from .. import utils
-from .inference_data import InferenceData
+from .inference_data import InferenceData, concat
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 if TYPE_CHECKING:
@@ -363,7 +363,8 @@ def predictions_from_pymc3(
         model: Optional[Model]=None,
         coords=None,
         dims=None,
-        idata_orig: Optional[InferenceData]=None
+        idata_orig: Optional[InferenceData]=None,
+        inplace: bool=False
 ) -> InferenceData:
     """Translate out-of-sample predictions into ``InferenceData``.
 
@@ -389,16 +390,24 @@ def predictions_from_pymc3(
         If supplied, then modify this inference data in place, adding ``predictions`` and
         (if available) ``predictions_constant_data`` groups. If this is not supplied, make a
         fresh InferenceData
+    inplace: boolean, optional
+        If idata_orig is supplied and inplace is True, merge the predictions into idata_orig,
+        rather than returning a fresh InferenceData object.
     Returns
     -------
     InferenceData:
         May be modified ``idata_orig``.
     """
+    if inplace and not idata_orig:
+        raise ValueError(("Do not pass True for inplace unless passing"
+                          "an existing InferenceData as idata_orig"))
     new_idata = PyMC3Converter(
         trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims
     ).to_inference_data()
     if idata_orig is None:
         return new_idata
-    idata_orig.predictions = new_idata.predictions
-    idata_orig.predictions_constant_data = new_idata.predictions_constant_data
-    return idata_orig
+    if inplace:
+        return cast(InferenceData, concat([idata_orig, new_idata], dim=None, inplace=True))
+    # if we are not returning in place, then merge the old groups into the new inference
+    # data and return that.
+    return cast(InferenceData, concat([new_idata, idata_orig], dim=None, copy=True, inplace=True))
