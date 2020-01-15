@@ -325,7 +325,7 @@ def full(shape, x, dtype=None):
     return np.full(shape, x, dtype=dtype)
 
 
-def flat_inference_data_to_dict(
+def flatten_inference_data_to_dict(
     data,
     var_names=None,
     groups=None,
