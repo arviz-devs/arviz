@@ -21,9 +21,9 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
+    histogram
 )
 from ..utils import _var_names, Numba, _numba_var
-from ..stats.stats_utils import histogram
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
