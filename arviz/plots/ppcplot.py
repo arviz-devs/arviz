@@ -127,7 +127,7 @@ def plot_ppc(
 
         >>> import arviz as az
         >>> data = az.load_arviz_data('radon')
-        >>> az.plot_ppc(data)
+        >>> az.plot_ppc(data,data_pairs={"obs":"obs"})
 
     Plot the overlay with empirical CDFs.
 
