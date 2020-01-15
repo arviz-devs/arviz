@@ -63,16 +63,25 @@ def plot_violin(
             dens = _violinplot(val, rug, shade, bw, ax_, **shade_kwargs)
 
         if rug:
-            rug_x = -np.abs(np.random.normal(scale=np.std(dens), size=len(val)))
+            rug_x = -np.abs(np.random.normal(scale=max(dens) / 3.5, size=len(val)))
             ax_.scatter(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
         hpd_intervals = hpd(val, credible_interval, multimodal=False)
 
         if quartiles:
-            ax_.line([0, 0], per[:2], line_width=linewidth * 3, line_color="black")
-        ax_.line([0, 0], hpd_intervals, line_width=linewidth, line_color="black")
-        ax_.circle(0, per[-1])
+            ax_.line(
+                [0, 0], per[:2], line_width=linewidth * 3, line_color="black", line_cap="round"
+            )
+        ax_.line([0, 0], hpd_intervals, line_width=linewidth, line_color="black", line_cap="round")
+        ax_.circle(
+            0,
+            per[-1],
+            line_color="white",
+            fill_color="white",
+            size=linewidth * 1.5,
+            line_width=linewidth,
+        )
 
         _title = Title()
         _title.text = make_label(var_name, selection)
@@ -108,7 +117,6 @@ def cat_hist(val, rug, shade, ax, **shade_kwargs):
     _, binned_d, _ = histogram(val, bins=bins)
 
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
-    centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
     heights = np.diff(bin_edges)
     centers = bin_edges[:-1] + heights.mean() / 2
     right = 0.5 * binned_d
