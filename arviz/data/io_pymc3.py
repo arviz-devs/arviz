@@ -148,7 +148,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         if self.predictions:
             return None, None
         cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
-        log_likelihoods_dict = {}
+        log_likelihood_dict = {}
         for var, log_like_fun in cached:
             chain_likelihoods = []
             for chain in self.trace.chains:
@@ -163,8 +163,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                     "model's log probablility.",
                     SyntaxWarning,
                 )
-            log_likelihoods_dict[var.name] = np.stack(chain_likelihoods)
-        return log_likelihoods_dict
+            log_likelihood_dict[var.name] = np.stack(chain_likelihoods)
+        return log_likelihood_dict
 
     @requires("trace")
     def posterior_to_xarray(self):
@@ -181,19 +181,19 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     def sample_stats_to_xarray(self):
         """Extract sample_stats from PyMC3 trace."""
         data = {}
-        sample_stats_names = self.trace.stat_names
-        sample_stats_names.remove("model_logp")
-        for stat in sample_stats_names:
-            data[stat] = np.array(self.trace.get_sampler_stats(stat, combine=False))
+        rename_key = {"model_logp": "lp"}
+        data = {}
+        for stat in self.trace.stat_names:
+            name = rename_key.get(stat, stat)
+            data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
 
         return dict_to_dataset(data, library=self.pymc3, dims=None, coords=self.coords)
 
     @requires("trace")
     @requires("model")
-    def log_likelihoods_to_xarray(self):
+    def log_likelihood_to_xarray(self):
         """Extract log likelihood and log_p data from PyMC3 trace."""
         data = self._extract_log_likelihood()
-        data["lp"] = np.array(self.trace.get_sampler_stats("model_logp", combine=False))
         return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
@@ -340,7 +340,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         id_dict = {
             "posterior": self.posterior_to_xarray(),
             "sample_stats": self.sample_stats_to_xarray(),
-            "log_likelihoods": self.log_likelihoods_to_xarray(),
+            "log_likelihood": self.log_likelihood_to_xarray(),
             "posterior_predictive": self.posterior_predictive_to_xarray(),
             "predictions": self.predictions_to_xarray(),
             **self.priors_to_xarray(),
