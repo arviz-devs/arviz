@@ -169,12 +169,12 @@ class EmceeConverter:
     def blobs_to_dict(self):
         """Convert blobs to dictionary {groupname: xr.Dataset}.
 
-        It also stores lp values in log likelihoods group.
+        It also stores lp values in sample_stats group.
         """
         store_blobs = not self.blob_names is None
         self.blob_names = [] if self.blob_names is None else self.blob_names
         if self.blob_groups is None:
-            self.blob_groups = ["sampler_stats" for _ in self.blob_names]
+            self.blob_groups = ["log_likelihood" for _ in self.blob_names]
         if len(self.blob_names) != len(self.blob_groups):
             raise ValueError(
                 "blob_names and blob_groups must have the same length, or blob_groups be None"
@@ -197,7 +197,7 @@ class EmceeConverter:
                     )
                 )
         blob_groups_set = set(self.blob_groups)
-        blob_groups_set.add("log_likelihoods")
+        blob_groups_set.add("sample_stats")
         idata_groups = ("posterior", "observed_data", "constant_data")
         if np.any(np.isin(list(blob_groups_set), idata_groups)):
             raise SyntaxError(
@@ -205,15 +205,6 @@ class EmceeConverter:
                 "overwrite their actual values".format(idata_groups)
             )
         blob_dict = {group: OrderedDict() for group in blob_groups_set}
-        if any(
-            group == "log_likelihoods" and name == "lp"
-            for group, name in zip(self.blob_groups, self.blob_names)
-        ):
-            warnings.warn(
-                "Found variable to be stored in log_likelihoods named 'lp'. It will be "
-                "overwritten by the model's log probablility.",
-                SyntaxWarning,
-            )
         if len(self.blob_names) == 1:
             blob_dict[self.blob_groups[0]][self.blob_names[0]] = blobs.swapaxes(0, 2).swapaxes(0, 1)
         else:
@@ -228,8 +219,8 @@ class EmceeConverter:
                     blob = blob.reshape((nwalkers, ndraws, -1))
                 blob_dict[group][name] = np.squeeze(blob)
 
-        # store lp in log_likelihoods group
-        blob_dict["log_likelihoods"]["lp"] = (
+        # store lp in sample_stats group
+        blob_dict["sample_stats"]["lp"] = (
             self.sampler.get_log_prob().swapaxes(0, 1)
             if hasattr(self.sampler, "get_log_prob")
             else self.sampler.lnprobability
@@ -285,7 +276,7 @@ def from_emcee(
         A list of the groups where blob_names variables
         should be assigned respectively. If blob_names!=None
         and blob_groups is None, all variables are assigned
-        to log_likelihoods group
+        to log_likelihood group
     coords : dict[str] -> list[str] (Optional)
         Map of dimensions to coordinates
     dims : dict[str] -> list[str] (Optional)
@@ -444,7 +435,7 @@ def from_emcee(
         >>>     arg_names=["y","sigma"],
         >>>     arg_groups=["observed_data", "constant_data"]
         >>>     blob_names=["log_likelihood", "y"],
-        >>>     blob_groups=["log_likelihoods", "posterior_predictive"],
+        >>>     blob_groups=["log_likelihood", "posterior_predictive"],
         >>>     dims=dims,
         >>>     coords={"school": range(8)}
         >>> )
