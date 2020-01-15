@@ -97,7 +97,8 @@ def _violinplot(val, rug, shade, bw, ax, **shade_kwargs):
         x = np.concatenate([x, x[::-1]])
         density = np.concatenate([-density, density[::-1]])
 
-    ax.patch(density, x, fill_alpha=shade, line_width=0, **shade_kwargs)
+    ax.harea(y=x, x1=density, x2=np.zeros_like(density), fill_alpha=shade, **shade_kwargs)
+
     return density
 
 
@@ -110,20 +111,22 @@ def cat_hist(val, rug, shade, ax, **shade_kwargs):
     centers = 0.5 * (bin_edges + np.roll(bin_edges, 1))[:-1]
     heights = np.diff(bin_edges)
     centers = bin_edges[:-1] + heights.mean() / 2
-
-    lefts = -0.5 * binned_d
+    right = 0.5 * binned_d
 
     if rug:
-        pass
+        left = 0
+    else:
+        left = -right
 
     ax.hbar(
         y=centers,
-        left=lefts,
-        right=-lefts,
+        left=left,
+        right=right,
         height=heights,
         fill_alpha=shade,
         line_alpha=shade,
         line_color=None,
         **shade_kwargs
     )
+
     return binned_d

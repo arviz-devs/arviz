@@ -97,12 +97,11 @@ def cat_hist(val, rug, shade, ax, **shade_kwargs):
 
     bin_edges = np.linspace(np.min(val), np.max(val), len(bins))
     heights = np.diff(bin_edges)
+    centers = bin_edges[:-1] + heights.mean() / 2
 
     if rug:
-        centers = bin_edges[:-1] + heights.mean() / 2
         left = None
     else:
-        centers = bin_edges[:-1] + heights.mean() / 2
         left = -0.5 * binned_d
 
     ax.barh(centers, binned_d, height=heights, left=left, alpha=shade, **shade_kwargs)

@@ -102,10 +102,6 @@ def plot_violin(
 
     if rug_kwargs is None:
         rug_kwargs = {}
-        rug_kwargs = {}
-    rug_kwargs.setdefault("alpha", 0.1)
-    rug_kwargs.setdefault("marker", ".")
-    rug_kwargs.setdefault("linestyle", "")
 
     violinplot_kwargs = dict(
         ax=ax,
@@ -133,6 +129,14 @@ def plot_violin(
 
         violinplot_kwargs.pop("ax_labelsize")
         violinplot_kwargs.pop("xt_labelsize")
+
+        rug_kwargs.setdefault("fill_alpha", 0.1)
+        rug_kwargs.setdefault("line_alpha", 0.1)
+
+    else:
+        rug_kwargs.setdefault("alpha", 0.1)
+        rug_kwargs.setdefault("marker", ".")
+        rug_kwargs.setdefault("linestyle", "")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_violin", "violinplot", backend)
