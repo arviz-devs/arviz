@@ -16,7 +16,7 @@ from ..utils import (
     one_de,
     two_de,
     expand_dims,
-    flat_inference_data_to_dict,
+    flatten_inference_data_to_dict,
 )
 from ..data import load_arviz_data, from_dict
 from ..stats.stats_utils import stats_variance_2d as svar
@@ -275,11 +275,11 @@ def test_expand_dims(data):
     "var_name_format", [None, "brackets", "underscore", "cds", ((",", "[", "]"), ("_", ""))]
 )
 @pytest.mark.parametrize("index_origin", [None, 0, 1])
-def test_flat_inference_data_to_dict(
+def test_flatten_inference_data_to_dict(
     inference_data, var_names, groups, dimensions, group_info, var_name_format, index_origin
 ):
     """Test flattening (stacking) inference data (subgroups) for dictionary."""
-    res_dict = flat_inference_data_to_dict(
+    res_dict = flatten_inference_data_to_dict(
         data=inference_data,
         var_names=var_names,
         groups=groups,
