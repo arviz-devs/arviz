@@ -17,16 +17,17 @@ else:
     MultiTrace = Any
     Model = Any
 
-___all__ = ['']
+___all__ = [""]
 
 _log = logging.getLogger(__name__)
 
 Coords = Dict[str, List[Any]]
 Dims = Dict[str, List[str]]
 # random variable object ...
-Var = Any # pylint: disable=invalid-name
+Var = Any  # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long
+
 
 class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     """Encapsulate PyMC3 specific logic."""
@@ -268,7 +269,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Convert constant data to xarray."""
         # For constant data, we are concerned only with deterministics and data.
         # The constant data vars must be either pm.Data (TensorSharedVariable) or pm.Deterministic
-        constant_data_vars = {} # type: Dict[str, Var]
+        constant_data_vars = {}  # type: Dict[str, Var]
         for var in self.model.deterministics:
             ancestors = self.theano.tensor.gof.graph.ancestors(var.owner.inputs)
             # no dependency on a random variable
@@ -277,9 +278,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         def is_data(name, var) -> bool:
             assert self.model is not None
-            return var not in self.model.deterministics and var not in self.model.observed_RVs \
-               and var not in self.model.free_RVs and \
-               (self.observations is None or name not in self.observations)
+            return (
+                var not in self.model.deterministics
+                and var not in self.model.observed_RVs
+                and var not in self.model.free_RVs
+                and (self.observations is None or name not in self.observations)
+            )
 
         # I don't know how to find pm.Data, except that they are named variables that aren't
         # observed or free RVs, nor are they deterministics, and then we eliminate observations.
@@ -298,7 +302,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             if hasattr(vals, "get_value"):
                 vals = vals.get_value()
             # this might be a Deterministic, and must be evaluated
-            elif hasattr(self.model[name], 'eval'):
+            elif hasattr(self.model[name], "eval"):
                 vals = self.model[name].eval()
             vals = np.atleast_1d(vals)
             val_dims = dims.get(name)
@@ -336,13 +340,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
 
 def from_pymc3(
-    trace=None,
-    *,
-    prior=None,
-    posterior_predictive=None,
-    coords=None,
-    dims=None,
-    model=None
+    trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None, model=None
 ):
     """Convert pymc3 data into an InferenceData object."""
     return PyMC3Converter(
@@ -358,13 +356,13 @@ def from_pymc3(
 ### Later I could have this return ``None`` if the ``idata_orig`` argument is supplied.  But
 ### perhaps we should have an inplace argument?
 def predictions_from_pymc3(
-        predictions,
-        posterior_trace: Optional[MultiTrace]=None,
-        model: Optional[Model]=None,
-        coords=None,
-        dims=None,
-        idata_orig: Optional[InferenceData]=None,
-        inplace: bool=False
+    predictions,
+    posterior_trace: Optional[MultiTrace] = None,
+    model: Optional[Model] = None,
+    coords=None,
+    dims=None,
+    idata_orig: Optional[InferenceData] = None,
+    inplace: bool = False,
 ) -> InferenceData:
     """Translate out-of-sample predictions into ``InferenceData``.
 
@@ -400,8 +398,12 @@ def predictions_from_pymc3(
         May be modified ``idata_orig``.
     """
     if inplace and not idata_orig:
-        raise ValueError(("Do not pass True for inplace unless passing"
-                          "an existing InferenceData as idata_orig"))
+        raise ValueError(
+            (
+                "Do not pass True for inplace unless passing"
+                "an existing InferenceData as idata_orig"
+            )
+        )
     new_idata = PyMC3Converter(
         trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims
     ).to_inference_data()

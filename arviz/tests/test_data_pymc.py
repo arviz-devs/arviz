@@ -120,7 +120,9 @@ class TestDataPyMC3:
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
-    @pytest.mark.skipif(version_info < (3,6), reason="Requires updated PyMC3, which needs Python 3.6")
+    @pytest.mark.skipif(
+        version_info < (3, 6), reason="Requires updated PyMC3, which needs Python 3.6"
+    )
     def test_multiple_observed_rv_without_observations(self):
         with pm.Model():
             mu = pm.Normal("mu")
