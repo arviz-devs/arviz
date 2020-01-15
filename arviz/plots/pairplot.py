@@ -35,9 +35,8 @@ def plot_pair(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    group: Optional[str]
+    group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
-        Alternative values is 'prior'.
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted
     coords : mapping, optional
