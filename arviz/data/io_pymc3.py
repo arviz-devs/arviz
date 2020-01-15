@@ -17,6 +17,8 @@ else:
     MultiTrace = Any
     Model = Any
 
+___all__ = ['']
+
 _log = logging.getLogger(__name__)
 
 Coords = Dict[str, List[Any]]
@@ -338,7 +340,6 @@ def from_pymc3(
     *,
     prior=None,
     posterior_predictive=None,
-    predictions=None,
     coords=None,
     dims=None,
     model=None
@@ -348,17 +349,23 @@ def from_pymc3(
         trace=trace,
         prior=prior,
         posterior_predictive=posterior_predictive,
-        predictions=predictions,
         coords=coords,
         dims=dims,
         model=model,
     ).to_inference_data()
 
 
+### Later I could have this return ``None`` if the ``idata_orig`` argument is supplied.  But
+### perhaps we should have an inplace argument?
 def predictions_from_pymc3(
-    predictions, posterior_trace, model, coords=None, dims=None
+        predictions,
+        posterior_trace: Optional[MultiTrace]=None,
+        model: Optional[Model]=None,
+        coords=None,
+        dims=None,
+        idata_orig: Optional[InferenceData]=None
 ) -> InferenceData:
-    """Translate out-of-sample predictions into ``InferenceData`` using ``from_pymc3``.
+    """Translate out-of-sample predictions into ``InferenceData``.
 
     Parameters
     ----------
@@ -378,11 +385,20 @@ def predictions_from_pymc3(
         Coordinates for the variables.  Map from coordinate names to coordinate values.
     dims: Dict[str, array-like[str]]
         Map from variable name to ordered set of coordinate names.
-
+    idata_orig: InferenceData, optional
+        If supplied, then modify this inference data in place, adding ``predictions`` and
+        (if available) ``predictions_constant_data`` groups. If this is not supplied, make a
+        fresh InferenceData
     Returns
     -------
-    InferenceData
+    InferenceData:
+        May be modified ``idata_orig``.
     """
-    return from_pymc3(
+    new_idata = PyMC3Converter(
         trace=posterior_trace, predictions=predictions, model=model, coords=coords, dims=dims
-    )
+    ).to_inference_data()
+    if idata_orig is None:
+        return new_idata
+    idata_orig.predictions = new_idata.predictions
+    idata_orig.predictions_constant_data = new_idata.predictions_constant_data
+    return idata_orig

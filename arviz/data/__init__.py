@@ -25,6 +25,7 @@ __all__ = [
     "convert_to_dataset",
     "convert_to_inference_data",
     "from_pymc3",
+    "predictions_from_pymc3",
     "from_pystan",
     "from_emcee",
     "from_cmdstan",
