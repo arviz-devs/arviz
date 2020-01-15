@@ -10,8 +10,12 @@ from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 if TYPE_CHECKING:
     import pymc3 as pm
+    from pymc3 import MultiTrace, Model
     import theano
     from typing import Set
+else:
+    MultiTrace = Any
+    Model = Any
 
 _log = logging.getLogger(__name__)
 
@@ -270,6 +274,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 constant_data_vars[var.name] = var
 
         def is_data(name, var) -> bool:
+            assert self.model is not None
             return var not in self.model.deterministics and var not in self.model.observed_RVs \
                and var not in self.model.free_RVs and \
                (self.observations is None or name not in self.observations)
