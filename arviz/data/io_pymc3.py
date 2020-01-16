@@ -10,12 +10,12 @@ from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 if TYPE_CHECKING:
     import pymc3 as pm
-    from pymc3 import MultiTrace, Model # pylint: disable=invalid-name
+    from pymc3 import MultiTrace, Model  # pylint: disable=invalid-name
     import theano
     from typing import Set
 else:
-    MultiTrace = Any # pylint: disable=invalid-name
-    Model = Any # pylint: disable=invalid-name
+    MultiTrace = Any  # pylint: disable=invalid-name
+    Model = Any  # pylint: disable=invalid-name
 
 ___all__ = [""]
 
