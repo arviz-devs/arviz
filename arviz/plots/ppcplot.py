@@ -1,4 +1,4 @@
-"""Posterior predictive plot."""
+"""Posterior/Prior predictive plot."""
 from numbers import Integral
 import platform
 import logging
@@ -37,8 +37,8 @@ def plot_ppc(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    group="posterior",
     show=None,
-    group="posterior_predictive",
 ):
     """
     Plot for posterior/prior predictive checks.
@@ -108,11 +108,11 @@ def plot_ppc(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    group : {"prior", "posterior"}, optional
+        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
+        Other value can be 'prior'.
     show : bool, optional
         Call backend show function.
-    group : str, optional
-        Specifies which InferenceData group should be plotted. Defaults to 'posterior_predictive'.
-        Alternative values include 'prior_predictive'.
 
     Returns
     -------
@@ -160,9 +160,21 @@ def plot_ppc(
 
         >>> az.plot_ppc(data, num_pp_samples=30, random_seed=7)
     """
-    if group not in ("posterior_predictive", "prior_predictive", "observed_data"):
+    if group == "posterior":
+        for groups in ("posterior_predictive", "observed_data"):
+            if not hasattr(data, groups):
+                raise TypeError(
+                    '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
+                )
+    elif group == "prior":
+        for groups in ("prior_predictive", "observed_data"):
+            if not hasattr(data, groups):
+                raise TypeError(
+                    '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
+                )
+    else:
         raise TypeError(
-            '`group` argument must be `posterior_predictive`, `prior_predictive` or `observed_data`'
+            '`group` argument must be either `posterior` or `prior`'
         )
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
@@ -202,9 +214,9 @@ def plot_ppc(
 
     observed = data.observed_data
 
-    if group == "posterior_predictive":
+    if group == "posterior":
         predictive_dataset = data.posterior_predictive
-    elif group == "prior_predictive":
+    elif group == "prior":
         predictive_dataset = data.prior_predictive
 
     if var_names is None:
