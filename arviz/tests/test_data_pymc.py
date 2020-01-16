@@ -1,9 +1,10 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
+from sys import version_info
+import pytest
+
 import numpy as np
 from numpy import ma
 import pymc3 as pm
-import pytest
-from sys import version_info
 
 from arviz import from_pymc3
 from .helpers import (  # pylint: disable=unused-import
