@@ -410,7 +410,9 @@ def predictions_from_pymc3(
     if idata_orig is None:
         return new_idata
     if inplace:
-        return cast(InferenceData, concat([idata_orig, new_idata], dim=None, inplace=True))
+        cast(InferenceData, concat([idata_orig, new_idata], dim=None, inplace=True))
+        return idata_orig
     # if we are not returning in place, then merge the old groups into the new inference
     # data and return that.
-    return cast(InferenceData, concat([new_idata, idata_orig], dim=None, copy=True, inplace=True))
+    concat([new_idata, idata_orig], dim=None, copy=True, inplace=True)
+    return new_idata
