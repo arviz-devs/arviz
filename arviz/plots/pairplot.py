@@ -8,24 +8,24 @@ from ..utils import _var_names
 
 
 def plot_pair(
-    data,
-    group="posterior",
-    var_names=None,
-    coords=None,
-    figsize=None,
-    textsize=None,
-    kind="scatter",
-    gridsize="auto",
-    contour=True,
-    fill_last=True,
-    divergences=False,
-    colorbar=False,
-    ax=None,
-    divergences_kwargs=None,
-    plot_kwargs=None,
-    backend=None,
-    backend_kwargs=None,
-    show=None,
+        data,
+        group="posterior",
+        var_names=None,
+        coords=None,
+        figsize=None,
+        textsize=None,
+        kind="scatter",
+        gridsize="auto",
+        contour=True,
+        fill_last=True,
+        divergences=False,
+        colorbar=False,
+        ax=None,
+        divergences_kwargs=None,
+        plot_kwargs=None,
+        backend=None,
+        backend_kwargs=None,
+        show=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -35,7 +35,7 @@ def plot_pair(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    group : {"prior", "posterior"}, optional
+    group : str, optional
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted
@@ -147,51 +147,41 @@ def plot_pair(
     data = convert_to_inference_data(data)
     grouped_data = convert_to_dataset(data, group=group)
     var_names = _var_names(var_names, grouped_data)
-    flat_var_names, _posterior = xarray_to_ndarray(
+    flat_var_names, infdata_group = xarray_to_ndarray(
         get_coords(grouped_data, coords), var_names=var_names, combined=True
     )
 
     divergent_data = None
     diverging_mask = None
+
+    # Assigning divergence group based on group param
+    if group == "posterior":
+        divergent_group = "sample_stats"
+    elif group == "prior":
+        divergent_group = "sample_stats_prior"
+    else:
+        divergences = False
+
     # Get diverging draws and combine chains
     if divergences:
-        if group == "posterior":
-            if hasattr(data, "sample_stats") and hasattr(data.sample_stats, "diverging"):
-                divergent_data = convert_to_dataset(data, group="sample_stats")
-                _, diverging_mask = xarray_to_ndarray(
-                    divergent_data, var_names=("diverging",), combined=True
-                )
-                diverging_mask = np.squeeze(diverging_mask)
-            else:
-                divergences = False
-                warnings.warn(
-                    "Divergences data not found, plotting without divergences. "
-                    "Make sure the sample method provides divergences data and "
-                    "that it is present in the `diverging` field of `sample_stats` "
-                    "or `sample_stats_prior` or set divergences=False",
-                    SyntaxWarning,
-                )
+        if hasattr(data, divergent_group) and hasattr(getattr(data, divergent_group), "diverging"):
+            divergent_data = convert_to_dataset(data, group=divergent_group)
+            _, diverging_mask = xarray_to_ndarray(
+                divergent_data, var_names=("diverging",), combined=True
+            )
+            diverging_mask = np.squeeze(diverging_mask)
         else:
-            if hasattr(data, "sample_stats_prior") and hasattr(
-                data.sample_stats_prior, "diverging"
-            ):
-                divergent_data = convert_to_dataset(data, group="sample_stats_prior")
-                _, diverging_mask = xarray_to_ndarray(
-                    divergent_data, var_names=("diverging",), combined=True
-                )
-                diverging_mask = np.squeeze(diverging_mask)
-            else:
-                divergences = False
-                warnings.warn(
-                    "Divergences data not found, plotting without divergences. "
-                    "Make sure the sample method provides divergences data and "
-                    "that it is present in the `diverging` field of `sample_stats` "
-                    "or `sample_stats_prior` or set divergences=False",
-                    SyntaxWarning,
-                )
+            divergences = False
+            warnings.warn(
+                "Divergences data not found, plotting without divergences. "
+                "Make sure the sample method provides divergences data and "
+                "that it is present in the `diverging` field of `sample_stats` "
+                "or `sample_stats_prior` or set divergences=False",
+                SyntaxWarning,
+            )
 
     if gridsize == "auto":
-        gridsize = int(len(_posterior[0]) ** 0.35)
+        gridsize = int(len(infdata_group[0]) ** 0.35)
 
     numvars = len(flat_var_names)
 
@@ -200,7 +190,7 @@ def plot_pair(
 
     pairplot_kwargs = dict(
         ax=ax,
-        _posterior=_posterior,
+        infdata_group=infdata_group,
         numvars=numvars,
         figsize=figsize,
         textsize=textsize,
