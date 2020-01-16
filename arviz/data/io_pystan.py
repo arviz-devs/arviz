@@ -88,8 +88,9 @@ class PyStanConverter:
             log_likelihood = [log_likelihood]
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
+        log_likelihood_draws = get_draws(fit, variables=list(log_likelihood.values()))
         data = {
-            obs_var_name: get_draws(fit, variables=log_like_name)[log_like_name]
+            obs_var_name: log_likelihood_draws[log_like_name]
             for obs_var_name, log_like_name in log_likelihood.items()
         }
 
@@ -266,8 +267,11 @@ class PyStan3Converter:
             log_likelihood = [log_likelihood]
         if isinstance(log_likelihood, (list, tuple)):
             log_likelihood = {name: name for name in log_likelihood}
+        log_likelihood_draws = get_draws_stan3(
+            fit, model=model, variables=list(log_likelihood.values())
+        )
         data = {
-            obs_var_name: get_draws_stan3(fit, model=model, variables=log_like_name)[log_like_name]
+            obs_var_name: log_likelihood_draws[log_like_name]
             for obs_var_name, log_like_name in log_likelihood.items()
         }
 
@@ -604,9 +608,12 @@ def from_pystan(
     constant_data : str or list of str
         Constants relevant to the model (i.e. x values in a linear
         regression).
-    log_likelihood : str
-        Pointwise log_likelihood for the data.
-        log_likelihood is extracted from the posterior.
+    log_likelihood : dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        equal to its values is used.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.

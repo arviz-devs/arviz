@@ -157,12 +157,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                     for point in self.trace.points([chain])
                 ]
                 chain_likelihoods.append(np.stack(log_like_chain))
-            if var.name == "lp":
-                warnings.warn(
-                    "Found variable named 'lp'. Its likelihood will be overwritten by the "
-                    "model's log probablility.",
-                    SyntaxWarning,
-                )
             log_likelihood_dict[var.name] = np.stack(chain_likelihoods)
         return log_likelihood_dict
 

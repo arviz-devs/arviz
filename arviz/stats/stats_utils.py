@@ -394,20 +394,20 @@ def get_log_likelihood(idata, var_name=None):
             PendingDeprecationWarning,
         )
         return idata.sample_stats.log_likelihood
-    if not hasattr(idata, "log_likelihoods"):
+    if not hasattr(idata, "log_likelihood"):
         raise TypeError("log likelihood not found in inference data object")
     if var_name is None:
-        var_names = list(idata.log_likelihoods.data_vars)
+        var_names = list(idata.log_likelihood.data_vars)
         if "lp" in var_names:
             var_names.remove("lp")
         if len(var_names) > 1:
             raise TypeError(
                 "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
             )
-        return idata.log_likelihoods[var_names[0]]
+        return idata.log_likelihood[var_names[0]]
     else:
         try:
-            log_likelihood = idata.log_likelihoods[var_name]
+            log_likelihood = idata.log_likelihood[var_name]
         except KeyError:
             raise TypeError("No log likelihood data named {} found".format(var_name))
         return log_likelihood
