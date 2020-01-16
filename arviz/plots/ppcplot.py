@@ -173,9 +173,7 @@ def plot_ppc(
                     '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
                 )
     else:
-        raise TypeError(
-            '`group` argument must be either `posterior` or `prior`'
-        )
+        raise TypeError("`group` argument must be either `posterior` or `prior`")
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
         raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
