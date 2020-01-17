@@ -62,8 +62,6 @@ class TestDataPyMC3:
     def make_predictions_inference_data(self, data, eight_schools_params) -> Tuple[InferenceData, Dict[str, np.ndarray]]:
         with data.model:
             posterior_predictive = pm.sample_posterior_predictive(data.obj)
-
-            __import__("pdb").set_trace()
             idata = predictions_from_pymc3(posterior_predictive,
                                            posterior_trace=data.obj,
                                            coords={"school": np.arange(eight_schools_params["J"])},
@@ -119,19 +117,28 @@ class TestDataPyMC3:
             assert ivalues.shape[0] == 1 # one chain in predictions
             assert np.all(np.isclose(ivalues[0], values))
 
-
     def test_from_pymc_predictions_new(self, data, eight_schools_params):
         # check creating new
         inference_data, posterior_predictive = self.make_predictions_inference_data(data, eight_schools_params)
-        del(test_dict['prior'])
+        test_dict = {
+            "posterior": ["mu", "tau", "eta", "theta"],
+            "predictions": ["obs"],
+            "observed_data": ["obs"],
+            }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         for key, values in posterior_predictive.items():
             ivalues = inference_data.predictions[key]
-            assert ivalues.shape[0] == 1 # one chain in predictions
-            assert np.all(np.isclose(ivalues[0], values))
-
-
+            # could the following better be done by simply flattening both the ivalues and the values?
+            if len(ivalues.shape) == 3:
+                ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1], ivalues.shape[2]))
+            elif len(ivalues.shape) == 2:
+                ivalues_arr = np.reshape(ivalues.values, (ivalues.shape[0] * ivalues.shape[1]))
+            else:
+                raise ValueError("Unexpected values shape for variable %s"%key)
+            assert (ivalues.shape[0] == 2) and (ivalues.shape[1] == 500)
+            assert (values.shape[0] == 1000)
+            assert np.all(np.isclose(ivalues_arr, values))
 
     def test_posterior_predictive_keep_size(self, data, chains, draws, eight_schools_params):
         with data.model:
