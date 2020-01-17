@@ -256,6 +256,52 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+    def test_constant_data_with_model_context(self):
+        with pm.Model():
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            trace = pm.sample(100, tune=100)
+
+            inference_data = from_pymc3(trace=trace)
+        test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+    def test_predictions_constant_data(self):
+        with pm.Model():
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            trace = pm.sample(100, tune=100)
+
+            inference_data = from_pymc3(trace=trace)
+        test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+        with pm.Model():
+            x = pm.Data("x", [1.0, 2.0])
+            y = pm.Data("y", [1.0, 2.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            predictive_trace = pm.sample_posterior_predictive(trace)
+            assert set(predictive_trace.keys()) == {"obs"}
+            # four chains of 100 samples
+            assert predictive_trace["obs"].shape == (400, 2)
+            inference_data = predictions_from_pymc3(predictive_trace, posterior_trace=trace)
+        test_dict = {"posterior": ["beta"], "observed_data": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails, "Posterior data not copied over as expected."
+        test_dict = {"predictions": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails, "Predictions not instantiated as expected."
+        test_dict = {"predictions_constant_data": ["x"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails, "Predictions constant data not instantiated as expected."
+
     def test_no_trace(self):
         with pm.Model():
             x = pm.Data("x", [1.0, 2.0, 3.0])
