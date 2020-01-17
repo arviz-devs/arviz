@@ -1,4 +1,5 @@
 from typing import Optional, List, overload, Iterable, TYPE_CHECKING
+
 if TYPE_CHECKING:
     from typing_extensions import Literal
 import xarray as xr
@@ -22,7 +23,10 @@ class InferenceData:
     @staticmethod
     def from_netcdf(filename: str) -> "InferenceData": ...
     def to_netcdf(
-        self, filename: str, compress: bool = True, groups: Optional[List[str]] = None # pylint: disable=line-too-long
+        self,
+        filename: str,
+        compress: bool = True,
+        groups: Optional[List[str]] = None,  # pylint: disable=line-too-long
     ) -> str: ...
     def sel(
         self, inplace: bool = False, chain_prior: bool = False, **kwargs

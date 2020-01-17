@@ -1,6 +1,6 @@
 """PyMC3-specific conversion code."""
 import logging
-from typing import Dict, List, Any, Optional, TYPE_CHECKING, cast
+from typing import Dict, List, Any, Optional, TYPE_CHECKING
 
 import numpy as np
 import xarray as xr
