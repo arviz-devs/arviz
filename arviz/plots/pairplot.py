@@ -58,7 +58,8 @@ def plot_pair(
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     divergences : Boolean
-        If True divergences will be plotted in a different color
+        If True divergences will be plotted in a different color, only if group is either 'prior'
+        or 'posterior'.
     colorbar : bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
