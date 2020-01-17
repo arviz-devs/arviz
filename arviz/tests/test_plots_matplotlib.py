@@ -33,7 +33,6 @@ from ..plots import (
     plot_violin,
     plot_compare,
     plot_kde,
-    _fast_kde,
     plot_khat,
     plot_hpd,
     plot_dist,
@@ -42,7 +41,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.kdeplot import _cov
+from ..plots.plot_utils import _fast_kde, _cov
 
 rcParams["data.load"] = "eager"
 
