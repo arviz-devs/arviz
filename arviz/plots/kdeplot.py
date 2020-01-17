@@ -1,13 +1,8 @@
 # pylint: disable=unexpected-keyword-arg
 """One-dimensional kernel density estimate plots."""
-import warnings
-import numpy as np
-from scipy.signal import convolve2d  # pylint: disable=no-name-in-module
-from scipy.sparse import coo_matrix
 import xarray as xr
 
 from ..data import InferenceData
-from ..utils import conditional_jit, _stack
 from .plot_utils import get_plotting_function, _fast_kde, _fast_kde_2d
 
 
