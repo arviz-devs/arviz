@@ -58,21 +58,21 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.trace = trace
 
-        # This next line is brittle and may not work forever, but is a secret
-        # way to access the model from the trace.
-        if trace is not None:
-            self.model = self.trace._straces[0].model  # pylint: disable=protected-access
-            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-            self.ndraws = len(trace)
-        else:
-            self.model = None
-            self.nchains = self.ndraws = 0
-
         # this permits us to get the model from command-line argument or from with model:
         try:
             self.model = self.pymc3.modelcontext(model or self.model)
         except TypeError:
             self.model = None
+
+        # This next line is brittle and may not work forever, but is a secret
+        # way to access the model from the trace.
+        if trace is not None:
+            if self.model is None:
+                self.model = self.trace._straces[0].model  # pylint: disable=protected-access
+            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+            self.ndraws = len(trace)
+        else:
+            self.nchains = self.ndraws = 0
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
@@ -171,6 +171,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Extract sample_stats from PyMC3 trace."""
         rename_key = {"model_logp": "lp"}
         data = {}
+        __import__("pdb").set_trace()
         for stat in self.trace.stat_names:
             name = rename_key.get(stat, stat)
             data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
@@ -409,10 +410,11 @@ def predictions_from_pymc3(
     ).to_inference_data()
     if idata_orig is None:
         return new_idata
-    if inplace:
-        cast(InferenceData, concat([idata_orig, new_idata], dim=None, inplace=True))
+    elif inplace:
+        concat([idata_orig, new_idata], dim=None, inplace=True)
         return idata_orig
-    # if we are not returning in place, then merge the old groups into the new inference
-    # data and return that.
-    concat([new_idata, idata_orig], dim=None, copy=True, inplace=True)
-    return new_idata
+    else:
+        # if we are not returning in place, then merge the old groups into the new inference
+        # data and return that.
+        concat([new_idata, idata_orig], dim=None, copy=True, inplace=True)
+        return new_idata
