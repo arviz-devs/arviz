@@ -70,7 +70,9 @@ def plot_pair(
 
         if divergences:
             ax.plot(
-                infdata_group[0][diverging_mask], infdata_group[1][diverging_mask], **divergences_kwargs
+                infdata_group[0][diverging_mask],
+                infdata_group[1][diverging_mask],
+                **divergences_kwargs
             )
 
         ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
