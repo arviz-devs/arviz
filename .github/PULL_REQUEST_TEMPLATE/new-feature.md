@@ -22,18 +22,18 @@ consider the following points:
 ## Checklist
 <!-- Feel free to remove check-list items aren't relevant to your change -->
 
-- [ ] Does this PR follow the [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
+- [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
       PR format?
-- [ ] Included a sample plot to visually illustrate your changes?
-- [ ] Do all the added functions and methods have docstrings?
-- [ ] Has added/updated unit tests where appropriate( using [pytest fixture pattern](
-      (https://docs.pytest.org/en/latest/fixture.html#fixture))?
-- [ ] Is code style correct (follows pylint, black guidelines)?
-- [ ] Has added documentation for new feature/functionality?
+- [ ] Included a sample plot to visually illustrate your changes? (only for plot-related functions)
+- [ ] Is the new feature properly documented with an example?
+- [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
+      https://docs.pytest.org/en/latest/fixture.html#fixture))?
+- [ ] Is code style correct (follows pylint and black guidelines)?
 
 <!--
-Also, please consider reading the contributing guidelines and code of conduct  carefully before submitting the PR. It is available at 
-https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md and https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md.
+Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at 
+- https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md and 
+- https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md
   
 - If you are contributing fixes to docstrings, please pay attention to
   https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#docstring-formatting.
