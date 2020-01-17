@@ -1,30 +1,7 @@
 ## Description
-<!-- Briefly describe the bug you are trying to fix -->
-
-<!-- Describe your changes in detail -->
-<!-- If it fixes an open issue, please link to the issue here. -->
-
-## Checklist
-<!-- Feel free to remove check-list items aren't relevant to your change -->
-
-- [ ] Is this PR following the [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
-      PR format (described below)?
-- [ ] Have you added the unit tests to prevent issue reoccurance( using [pytest fixture pattern](
-      (https://docs.pytest.org/en/latest/fixture.html#fixture))?
-- [ ] Have you run the unit tests using pytest?
-- [ ] Is your code style correct (are you using PEP8, pylint)?
-
 <!--
 Thank you so much for your PR!  To help us review your contribution, please
 consider the following points:
-
-- Read contributing guidelines carefully before submitting the PR. It is available
-  at https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md.
-
-- Read and abide by the Code of Conduct. It is available at  
-  https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md
-
-- Do not create the PR out of master, but out of a separate branch.
 
 - The PR title should summarize the changes, for example "Add new group argument for the
   pair plot".  Avoid non-descriptive titles such as "Addresses issue #348". If your pull 
@@ -39,11 +16,24 @@ consider the following points:
 - Please prefix the title of incomplete contributions with [WIP] (to indicate a work in 
   progress). WIPs may be useful to (1) indicate you are working on something to avoid 
   duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
-  
-- If you are contributing fixes to docstrings, please pay attention to
-  https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#docstring-formatting.
-  In particular, note the difference between using single backquotes, double backquotes, and
-  asterisks in the markup.
+-->
+<!-- Briefly describe the bug you are trying to fix -->
+
+<!-- Describe your changes in detail -->
+<!-- If it fixes an open issue, please link to the issue here. -->
+
+## Checklist
+<!-- Feel free to remove check-list items aren't relevant to your change -->
+
+- [ ] Is this PR following the [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
+      PR format (described below)?
+- [ ] Has added unit tests to prevent issue recurrence( using [pytest fixture pattern](
+      (https://docs.pytest.org/en/latest/fixture.html#fixture))?
+- [ ] Is code style correct (are you using pylint, black)?
+
+<!--
+Also, read the contributing guidelines carefully before submitting the PR. It is available 
+at https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md.
 
 We understand that PRs can sometimes be overwhelming, especially as the
 reviews start coming in.  Please let us know if the reviews are unclear or
