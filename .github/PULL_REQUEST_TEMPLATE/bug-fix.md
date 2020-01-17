@@ -26,11 +26,12 @@ consider the following points:
       PR format?
 - [ ] Does the PR include new or updated tests to prevent issue recurrence (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
-- [ ] Is code style correct (follows pylint and black guidelines)?
+- [ ] Is your code style correct (follows pylint and black guidelines)?
+- [ ] Added the change in [change log](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md) in correct format.
 
 <!--
 Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at 
-- https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md and 
+- https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md
 - https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md
 
 We understand that PRs can sometimes be overwhelming, especially as the

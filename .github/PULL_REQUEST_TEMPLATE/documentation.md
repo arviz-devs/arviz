@@ -24,10 +24,11 @@ consider the following points:
 - [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
       PR format?
 - [ ] Is the documentation [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) compliant?
+- [ ] Added the change in [change log](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md) in correct format.
 
 <!--
 Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at 
-- https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md and 
+- https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md
 - https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md
 
 - If you are contributing fixes to docstrings, please pay attention to
