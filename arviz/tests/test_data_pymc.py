@@ -8,7 +8,7 @@ import numpy as np
 from numpy import ma
 import pymc3 as pm
 
-from arviz import from_pymc3, predictions_from_pymc3, InferenceData
+from arviz import from_pymc3, from_pymc3_predictions, InferenceData
 from .helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
@@ -56,7 +56,7 @@ class TestDataPyMC3:
                 dims={"theta": ["school"], "eta": ["school"]},
             )
             assert isinstance(idata, InferenceData)
-            extended = predictions_from_pymc3(
+            extended = from_pymc3_predictions(
                 posterior_predictive, idata_orig=idata, inplace=inplace
             )
             assert isinstance(extended, InferenceData)
@@ -68,7 +68,7 @@ class TestDataPyMC3:
     ) -> Tuple[InferenceData, Dict[str, np.ndarray]]:
         with data.model:
             posterior_predictive = pm.sample_posterior_predictive(data.obj)
-            idata = predictions_from_pymc3(
+            idata = from_pymc3_predictions(
                 posterior_predictive,
                 posterior_trace=data.obj,
                 coords={"school": np.arange(eight_schools_params["J"])},
@@ -291,7 +291,7 @@ class TestDataPyMC3:
             assert set(predictive_trace.keys()) == {"obs"}
             # four chains of 100 samples
             assert predictive_trace["obs"].shape == (400, 2)
-            inference_data = predictions_from_pymc3(predictive_trace, posterior_trace=trace)
+            inference_data = from_pymc3_predictions(predictive_trace, posterior_trace=trace)
         test_dict = {"posterior": ["beta"], "observed_data": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails, "Posterior data not copied over as expected."

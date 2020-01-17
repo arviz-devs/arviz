@@ -355,7 +355,7 @@ def from_pymc3(
 
 ### Later I could have this return ``None`` if the ``idata_orig`` argument is supplied.  But
 ### perhaps we should have an inplace argument?
-def predictions_from_pymc3(
+def from_pymc3_predictions(
     predictions,
     posterior_trace: Optional[MultiTrace] = None,
     model: Optional[Model] = None,
