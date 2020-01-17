@@ -18,21 +18,17 @@ consider the following points:
   duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
 -->
 
-<!-- Describe your changes in detail -->
-<!-- If it fixes an open issue, please link to the issue here. -->
-
 ## Checklist
 <!-- Feel free to remove check-list items aren't relevant to your change -->
 
-- [ ] This PR is following the [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
+- [ ] Does this PR follow the [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
       PR format (described below).
 - [ ] Documentation is [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) compliant.
 
 <!--
-Keep in mind the following points:
-
-- Read contributing guidelines carefully before submitting the PR. It is available
-  at https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md.
+Also, please consider reading the contributing guidelines and code of conduct  carefully before submitting the PR. 
+It is available at https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md and 
+https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md.
 
 - If you are contributing fixes to docstrings, please pay attention to
   https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#docstring-formatting.
