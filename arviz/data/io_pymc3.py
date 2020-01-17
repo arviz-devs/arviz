@@ -1,6 +1,7 @@
 """PyMC3-specific conversion code."""
 import logging
 from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from types import ModuleType
 
 import numpy as np
 import xarray as xr
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     import pymc3 as pm
     from pymc3 import MultiTrace, Model  # pylint: disable=invalid-name
     import theano
-    from typing import Set
+    from typing import Set  # pylint: disable=ungrouped-imports
 else:
     MultiTrace = Any  # pylint: disable=invalid-name
     Model = Any  # pylint: disable=invalid-name
@@ -27,6 +28,17 @@ Dims = Dict[str, List[str]]
 Var = Any  # pylint: disable=invalid-name
 
 # pylint: disable=line-too-long
+
+
+def _monkey_patch_pymc3(pm: ModuleType) -> None:  # pylint: disable=invalid-name
+    assert pm.__name__ == "pymc3"
+
+    def fixed_eq(self, other):
+        """Use object identity for MultiObservedRV equality."""
+        return self is other
+
+    if tuple([int(x) for x in pm.__version__.split(".")]) < (3, 9):
+        pm.model.MultiObservedRV.__eq__ = fixed_eq
 
 
 class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
@@ -52,6 +64,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     ):
         import pymc3
         import theano
+
+        _monkey_patch_pymc3(pymc3)
 
         self.pymc3 = pymc3
         self.theano = theano
