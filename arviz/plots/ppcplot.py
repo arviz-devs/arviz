@@ -160,20 +160,14 @@ def plot_ppc(
 
         >>> az.plot_ppc(data, num_pp_samples=30, random_seed=7)
     """
-    if group == "posterior":
-        for groups in ("posterior_predictive", "observed_data"):
-            if not hasattr(data, groups):
-                raise TypeError(
-                    '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
-                )
-    elif group == "prior":
-        for groups in ("prior_predictive", "observed_data"):
-            if not hasattr(data, groups):
-                raise TypeError(
-                    '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
-                )
-    else:
+    if group not in ("posterior", "prior"):
         raise TypeError("`group` argument must be either `posterior` or `prior`")
+
+    for groups in ("{}_predictive".format(group), "observed_data"):
+        if not hasattr(data, groups):
+            raise TypeError(
+                '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
+            )
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
         raise TypeError("`kind` argument must be either `kde`, `cumulative`, or `scatter`")
