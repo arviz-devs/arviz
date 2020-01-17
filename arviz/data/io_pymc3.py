@@ -171,7 +171,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Extract sample_stats from PyMC3 trace."""
         rename_key = {"model_logp": "lp"}
         data = {}
-        __import__("pdb").set_trace()
         for stat in self.trace.stat_names:
             name = rename_key.get(stat, stat)
             data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))

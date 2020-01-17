@@ -1,12 +1,14 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from sys import version_info
+from typing import Tuple, Dict
 import pytest
+
 
 import numpy as np
 from numpy import ma
 import pymc3 as pm
 
-from arviz import from_pymc3
+from arviz import from_pymc3, predictions_from_pymc3, InferenceData
 from .helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
@@ -40,6 +42,36 @@ class TestDataPyMC3:
             posterior_predictive,
         )
 
+    def get_predictions_inference_data(self, data, eight_schools_params, inplace) -> Tuple[InferenceData, Dict[str, np.ndarray]]:
+        with data.model:
+            prior = pm.sample_prior_predictive()
+            posterior_predictive = pm.sample_posterior_predictive(data.obj)
+
+            idata = from_pymc3(
+                    trace=data.obj,
+                    prior=prior,
+                    coords={"school": np.arange(eight_schools_params["J"])},
+                    dims={"theta": ["school"], "eta": ["school"]},
+                )
+            assert isinstance(idata, InferenceData)
+            extended = predictions_from_pymc3(posterior_predictive, idata_orig=idata, inplace=inplace)
+            assert isinstance(extended, InferenceData)
+            assert (id(idata) == id(extended)) == inplace
+        return (extended, posterior_predictive)
+
+    def make_predictions_inference_data(self, data, eight_schools_params) -> Tuple[InferenceData, Dict[str, np.ndarray]]:
+        with data.model:
+            posterior_predictive = pm.sample_posterior_predictive(data.obj)
+
+            __import__("pdb").set_trace()
+            idata = predictions_from_pymc3(posterior_predictive,
+                                           posterior_trace=data.obj,
+                                           coords={"school": np.arange(eight_schools_params["J"])},
+                                           dims={"theta": ["school"], "eta": ["school"]},
+            )
+            assert isinstance(idata, InferenceData)
+        return idata, posterior_predictive
+
     def test_from_pymc(self, data, eight_schools_params, chains, draws):
         inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
         test_dict = {
@@ -58,6 +90,48 @@ class TestDataPyMC3:
                 assert np.all(
                     np.isclose(ivalues[chain], values[chain * draws : (chain + 1) * draws])
                 )
+
+    def test_from_pymc_predictions(self, data, eight_schools_params):
+        "Test that we can add predictions to a previously-existing InferenceData."
+        test_dict = {
+            "posterior": ["mu", "tau", "eta", "theta"],
+            "sample_stats": ["diverging", "log_likelihood"],
+            "predictions": ["obs"],
+            "prior": ["mu", "tau", "eta", "theta"],
+            "observed_data": ["obs"],
+        }
+
+        # check adding non-destructively
+        inference_data, posterior_predictive = self.get_predictions_inference_data(data, eight_schools_params, False)
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        for key, values in posterior_predictive.items():
+            ivalues = inference_data.predictions[key]
+            assert ivalues.shape[0] == 1 # one chain in predictions
+            assert np.all(np.isclose(ivalues[0], values))
+
+        # check adding in place
+        inference_data, posterior_predictive = self.get_predictions_inference_data(data, eight_schools_params, True)
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        for key, values in posterior_predictive.items():
+            ivalues = inference_data.predictions[key]
+            assert ivalues.shape[0] == 1 # one chain in predictions
+            assert np.all(np.isclose(ivalues[0], values))
+
+
+    def test_from_pymc_predictions_new(self, data, eight_schools_params):
+        # check creating new
+        inference_data, posterior_predictive = self.make_predictions_inference_data(data, eight_schools_params)
+        del(test_dict['prior'])
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        for key, values in posterior_predictive.items():
+            ivalues = inference_data.predictions[key]
+            assert ivalues.shape[0] == 1 # one chain in predictions
+            assert np.all(np.isclose(ivalues[0], values))
+
+
 
     def test_posterior_predictive_keep_size(self, data, chains, draws, eight_schools_params):
         with data.model:
