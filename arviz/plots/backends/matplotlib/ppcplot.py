@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ...kdeplot import plot_kde, _fast_kde
+from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
     get_bins,
+    _fast_kde,
 )
 from ....stats.stats_utils import histogram
 

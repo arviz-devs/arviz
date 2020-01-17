@@ -33,7 +33,6 @@ from ..plots import (
     plot_violin,
     plot_compare,
     plot_kde,
-    _fast_kde,
     plot_khat,
     plot_hpd,
     plot_dist,
@@ -42,7 +41,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.kdeplot import _cov
+from ..plots.plot_utils import _fast_kde, _cov
 
 rcParams["data.load"] = "eager"
 
@@ -657,7 +656,7 @@ def test_plot_rank(models, kwargs):
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
-        {"point_estimate": False},
+        {"point_estimate": None},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},

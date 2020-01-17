@@ -22,7 +22,7 @@ def plot_posterior(
     credible_interval=0.94,
     multimodal=False,
     round_to: Optional[int] = None,
-    point_estimate="mean",
+    point_estimate="auto",
     group="posterior",
     rope=None,
     ref_val=None,
@@ -58,8 +58,9 @@ def plot_posterior(
         multimodal and the modes are well separated.
     round_to : int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
-    point_estimate: str
-        Must be in ('mode', 'mean', 'median', None)
+    point_estimate : Optional[str]
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
     group : str, optional
         Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     rope: tuple or dictionary of tuples

@@ -10,8 +10,7 @@ from . import backend_kwarg_defaults, backend_show
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
 from ....stats.stats_utils import histogram
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
-from ...kdeplot import _fast_kde
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
 from ....utils import conditional_jit
 
 
