@@ -415,7 +415,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
     return hpd_intervals
 
 
-def loo(data, pointwise=False, reff=None, scale="deviance"):
+def loo(data, pointwise=False, reff=None, scale=None):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
@@ -487,12 +487,13 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
@@ -1095,7 +1096,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=False, scale="deviance"):
+def waic(data, pointwise=False, scale=None):
     """Calculate the widely available information criterion.
 
     Also calculates the WAIC's standard error and the effective number of
@@ -1159,12 +1160,13 @@ def waic(data, pointwise=False, scale="deviance"):
     if "log_likelihood" not in inference_data.sample_stats:
         raise TypeError("Data must include log_likelihood in sample_stats")
     log_likelihood = inference_data.sample_stats.log_likelihood
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
