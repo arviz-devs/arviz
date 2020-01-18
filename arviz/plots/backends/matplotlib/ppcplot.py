@@ -4,8 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import make_label, _create_axes_grid, get_bins
+from ...kdeplot import plot_kde
+from ...plot_utils import (
+    make_label,
+    _create_axes_grid,
+    get_bins,
+    _fast_kde,
+)
 from ....stats.stats_utils import histogram
 
 
@@ -18,7 +23,7 @@ def plot_ppc(
     animated,
     obs_plotters,
     pp_plotters,
-    posterior_predictive,
+    predictive_dataset,
     pp_sample_ix,
     kind,
     alpha,
@@ -56,7 +61,7 @@ def plot_ppc(
     for i, ax_i in enumerate(axes):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
-        dtype = posterior_predictive[pp_var_name].dtype.kind
+        dtype = predictive_dataset[pp_var_name].dtype.kind
 
         # flatten non-specified dimensions
         obs_vals = obs_vals.flatten()

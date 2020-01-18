@@ -1,4 +1,4 @@
-"""Posterior predictive plot."""
+"""Posterior/Prior predictive plot."""
 from numbers import Integral
 import platform
 import logging
@@ -37,35 +37,35 @@ def plot_ppc(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    group="posterior",
     show=None,
 ):
     """
-    Plot for posterior predictive checks.
+    Plot for posterior/prior predictive checks.
 
     Parameters
     ----------
     data : az.InferenceData object
-        InferenceData object containing the observed and posterior
-        predictive data.
+        InferenceData object containing the observed and posterior/prior predictive data.
     kind : str
         Type of plot to display (kde, cumulative, or scatter). Defaults to kde.
     alpha : float
-        Opacity of posterior predictive density curves. Defaults to 0.2 for kind = kde
-        and cumulative, for scatter defaults to 0.7
+        Opacity of posterior/prior predictive density curves.
+        Defaults to 0.2 for kind = kde and cumulative, for scatter defaults to 0.7
     mean : bool
-        Whether or not to plot the mean posterior predictive distribution. Defaults to True
+        Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
     data_pairs : dict
-        Dictionary containing relations between observed data and posterior predictive data.
+        Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
         Key = data var_name
-        Value = posterior predictive var_name
+        Value = posterior/prior predictive var_name
         For example, `data_pairs = {'y' : 'y_hat'}`
-        If None, it will assume that the observed data and the posterior
+        If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
     var_names : list
         List of variables to be plotted. Defaults to all observed variables in the
@@ -79,12 +79,12 @@ def plot_ppc(
         List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
     flatten_pp : list
-        List of dimensions to flatten in posterior_predictive. Only flattens across the coordinates
-        specified in the coords argument. Defaults to flattening all of the dimensions.
-        Dimensions should match flatten excluding dimensions for data_pairs parameters.
-        If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
+        List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
+        across the coordinates specified in the coords argument. Defaults to flattening all
+        of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
+        parameters. If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
     num_pp_samples : int
-        The number of posterior predictive samples to plot. For `kind` = 'scatter' and
+        The number of posterior/prior predictive samples to plot. For `kind` = 'scatter' and
         `animation = False` if defaults to a maximum of 5 samples and will set jitter to 0.7
         unless defined otherwise. Otherwise it defaults to all provided samples.
     random_seed : int
@@ -96,7 +96,7 @@ def plot_ppc(
         If kind is "scatter", jitter will add random uniform noise to the height
         of the ppc samples and observed data. By default 0.
     animated : bool
-        Create an animation of one posterior predictive sample per frame. Defaults to False.
+        Create an animation of one posterior/prior predictive sample per frame. Defaults to False.
     animation_kwargs : dict
         Keywords passed to `animation.FuncAnimation`.
     legend : bool
@@ -108,6 +108,9 @@ def plot_ppc(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    group : {"prior", "posterior"}, optional
+        Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
+        Other value can be 'prior'.
     show : bool, optional
         Call backend show function.
 
@@ -157,10 +160,13 @@ def plot_ppc(
 
         >>> az.plot_ppc(data, num_pp_samples=30, random_seed=7)
     """
-    for group in ("posterior_predictive", "observed_data"):
-        if not hasattr(data, group):
+    if group not in ("posterior", "prior"):
+        raise TypeError("`group` argument must be either `posterior` or `prior`")
+
+    for groups in ("{}_predictive".format(group), "observed_data"):
+        if not hasattr(data, groups):
             raise TypeError(
-                '`data` argument must have the group "{group}" for ppcplot'.format(group=group)
+                '`data` argument must have the group "{group}" for ppcplot'.format(group=groups)
             )
 
     if kind.lower() not in ("kde", "cumulative", "scatter"):
@@ -199,16 +205,20 @@ def plot_ppc(
     assert jitter >= 0.0
 
     observed = data.observed_data
-    posterior_predictive = data.posterior_predictive
+
+    if group == "posterior":
+        predictive_dataset = data.posterior_predictive
+    elif group == "prior":
+        predictive_dataset = data.prior_predictive
 
     if var_names is None:
         var_names = list(observed.data_vars)
     var_names = _var_names(var_names, observed)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
-    pp_var_names = _var_names(pp_var_names, posterior_predictive)
+    pp_var_names = _var_names(pp_var_names, predictive_dataset)
 
     if flatten_pp is None and flatten is None:
-        flatten_pp = list(posterior_predictive.dims.keys())
+        flatten_pp = list(predictive_dataset.dims.keys())
     elif flatten_pp is None:
         flatten_pp = flatten
     if flatten is None:
@@ -220,7 +230,7 @@ def plot_ppc(
     if random_seed is not None:
         np.random.seed(random_seed)
 
-    total_pp_samples = posterior_predictive.sizes["chain"] * posterior_predictive.sizes["draw"]
+    total_pp_samples = predictive_dataset.sizes["chain"] * predictive_dataset.sizes["draw"]
     if num_pp_samples is None:
         if kind == "scatter" and not animated:
             num_pp_samples = min(5, total_pp_samples)
@@ -256,7 +266,7 @@ def plot_ppc(
         for _, tup in zip(
             range(length_plotters),
             xarray_var_iter(
-                posterior_predictive.isel(coords),
+                predictive_dataset.isel(coords),
                 var_names=pp_var_names,
                 skip_dims=set(flatten_pp),
                 combined=True,
@@ -278,7 +288,7 @@ def plot_ppc(
         animated=animated,
         obs_plotters=obs_plotters,
         pp_plotters=pp_plotters,
-        posterior_predictive=posterior_predictive,
+        predictive_dataset=predictive_dataset,
         pp_sample_ix=pp_sample_ix,
         kind=kind,
         alpha=alpha,

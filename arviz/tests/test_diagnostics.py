@@ -45,7 +45,7 @@ def data():
 class TestDiagnostics:
     def test_bfmi(self):
         energy = np.array([1, 2, 3, 4])
-        assert_almost_equal(bfmi(energy), 0.8)
+        assert_almost_equal(bfmi(energy), 0.6)
 
     def test_bfmi_dataset(self):
         data = load_arviz_data("centered_eight")
