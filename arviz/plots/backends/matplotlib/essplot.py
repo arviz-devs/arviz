@@ -4,7 +4,10 @@ import numpy as np
 from scipy.stats import rankdata
 
 from . import backend_show
-from ...plot_utils import make_label, _create_axes_grid
+from ...plot_utils import (
+    make_label,
+    _create_axes_grid,
+)
 
 
 def plot_ess(

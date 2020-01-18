@@ -50,7 +50,10 @@ def plot_khat(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**backend_kwarg_defaults(constrained_layout=(not xlabels)), **backend_kwargs}
+    backend_kwargs = {
+        **backend_kwarg_defaults(constrained_layout=(not xlabels)),
+        **backend_kwargs,
+    }
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)

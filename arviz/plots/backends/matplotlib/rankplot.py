@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import scipy.stats
 
 from . import backend_show
-from ...plot_utils import _create_axes_grid, make_label
+from ...plot_utils import (
+    _create_axes_grid,
+    make_label,
+)
 from ....stats.stats_utils import histogram
 
 

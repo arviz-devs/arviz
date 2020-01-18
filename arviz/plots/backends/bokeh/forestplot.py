@@ -106,7 +106,7 @@ def plot_forest(
 
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, linewidth, markersize, axes[0, 0], rope
+            credible_interval, quartiles, linewidth, markersize, axes[0, 0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -285,7 +285,11 @@ class PlotHandler:
                     facecolor = color
                 if x.dtype.kind == "i":
                     ax.vbar(
-                        x=x, top=y_max - y_min, bottom=y_min, fill_alpha=alpha, fill_color=facecolor
+                        x=x,
+                        top=y_max - y_min,
+                        bottom=y_min,
+                        fill_alpha=alpha,
+                        fill_color=facecolor,
                     )
                 else:
                     patch = ax.patch(
@@ -368,7 +372,9 @@ class PlotHandler:
                     ax.line(
                         [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
                     )
-                ax.circle(x=values[mid], y=y, size=markersize * 0.75, fill_color=color)
+                ax.circle(
+                    x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
+                )
         _title = Title()
         _title.text = "{:.1%} Credible Interval".format(credible_interval)
         ax.title = _title
@@ -381,7 +387,9 @@ class PlotHandler:
         for plotter in self.plotters.values():
             for y, ess, color in plotter.ess():
                 if ess is not None:
-                    ax.circle(x=ess, y=y, fill_color=color, size=markersize, line_color="black")
+                    ax.circle(
+                        x=ess, y=y, fill_color=color, size=markersize, line_color="black",
+                    )
                 if ess > max_ess:
                     max_ess = ess
         ax.x_range._property_values["start"] = 0  # pylint: disable=protected-access

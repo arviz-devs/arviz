@@ -8,7 +8,10 @@ from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
 from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import make_label, _create_axes_grid
+from ...plot_utils import (
+    make_label,
+    _create_axes_grid,
+)
 from ....stats.stats_utils import quantile as _quantile
 
 
@@ -39,7 +42,10 @@ def plot_mcse(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
@@ -132,7 +138,10 @@ def plot_mcse(
                 )
 
             else:
-                rug_x, rug_y = (values / (len(mask) - 1), np.full_like(values, 0))
+                rug_x, rug_y = (
+                    values / (len(mask) - 1),
+                    np.full_like(values, 0,),
+                )
 
                 hline = Span(
                     location=0,

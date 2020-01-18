@@ -10,13 +10,16 @@ from ....stats import autocorr
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, figsize, rows, cols, line_width, combined, backend_kwargs, show
+    axes, plotters, max_lag, figsize, rows, cols, line_width, combined, backend_kwargs, show,
 ):
     """Bokeh autocorrelation plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
 
     if axes is None:
         _, axes = _create_axes_grid(

@@ -161,7 +161,7 @@ def _plot_atomic_elpd(
         for outlier in outliers:
             label = coord_labels[outlier]
             ax_.text(
-                x=np.asarray(outlier), y=np.asarray(ydata[outlier]), text=label, text_color="black"
+                x=np.asarray(outlier), y=np.asarray(ydata[outlier]), text=label, text_color="black",
             )
     if ylabels_shown:
         ax_.yaxis.axis_label = "ELPD difference"

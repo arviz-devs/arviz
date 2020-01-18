@@ -275,7 +275,9 @@ def _plot_chains_bokeh(
     for chain_idx, cds in data.items():
         if legend:
             trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
-        ax_trace.line(x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs)
+        ax_trace.line(
+            x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs,
+        )
         if marker:
             ax_trace.circle(
                 x=x_name,
