@@ -40,6 +40,7 @@ MPL_RST_TEMPLATE = """
 .. image:: {img_file}
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+**API documentation:** `{api_name} <../../generated/arviz.{api_name}>`_ 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -54,6 +55,7 @@ BOKEH_RST_TEMPLATE = """
     :source-position: none
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+**API documentation:** `{api_name} <../../generated/arviz.{api_name}>`_ 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -237,6 +239,12 @@ class ExampleGenerator:
         return pngfile
 
     @property
+    def apiname(self):
+        name = self.modulename.split("_")
+        name = name[1::]
+        return "_".join(name)
+
+    @property
     def sphinxtag(self):
         return self.modulename
 
@@ -320,6 +328,7 @@ class ExampleGenerator:
             ".. raw:: html\n\n"
             "    <div class='figure align-center'>\n"
             "    <a href=./{0}/{1}>\n"
+            
             "    <img src=../_static/{2}>\n"
             "    <span class='figure-label'>\n"
             "    <p>{3}</p>\n"
@@ -380,6 +389,7 @@ def main(app):
                 fname=ex.pyfilename,
                 absfname=op.join(target_dir, ex.pyfilename),
                 img_file=ex.pngfilename,
+                api_name=ex.apiname,
             )
             with open(op.join(target_dir, ex.rstfilename), "w") as f:
                 f.write(output)
