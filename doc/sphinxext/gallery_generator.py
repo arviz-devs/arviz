@@ -328,7 +328,6 @@ class ExampleGenerator:
             ".. raw:: html\n\n"
             "    <div class='figure align-center'>\n"
             "    <a href=./{0}/{1}>\n"
-            
             "    <img src=../_static/{2}>\n"
             "    <span class='figure-label'>\n"
             "    <p>{3}</p>\n"
