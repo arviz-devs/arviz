@@ -18,7 +18,7 @@ class requires:  # pylint: disable=invalid-name
     If the decorator is called various times on the same function with different
     attributes, it will return None if one of them is missing. If instead a list
     of attributes is passed, it will return None if all attributes in the list are
-    missing. Both functionalities can be combines as desired.
+    missing. Both functionalities can be combined as desired.
     """
 
     def __init__(self, *props):

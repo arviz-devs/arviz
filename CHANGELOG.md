@@ -3,7 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
-
+* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 translations. (#983)
 
 ### Maintenance and fixes
 * Fixed bug in extracting prior samples for cmdstanpy. (#979) 
