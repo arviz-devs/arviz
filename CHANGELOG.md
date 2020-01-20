@@ -4,13 +4,15 @@
 
 ### New features
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 translations. (#983)
+* Violinplot: rug-plot option (#997)
 
 ### Maintenance and fixes
 * Fixed bug in extracting prior samples for cmdstanpy. (#979) 
 * Fix erroneous warning in traceplot (#989)
 * Correct bfmi denominator (#991)
 * Removed parallel from jit full (#996)
-* Rename flat_inference_data_to_dict (#1003) 
+* Rename flat_inference_data_to_dict (#1003)
+* Violinplot: fix histogram (#997)
 
 ### Deprecation
 
