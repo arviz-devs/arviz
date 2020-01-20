@@ -145,8 +145,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Compute log likelihood of each observation."""
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
-        if self.predictions:
-            return None, None
         cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
         log_likelihood_dict = {}
         for var, log_like_fun in cached:
@@ -187,6 +185,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("model")
     def log_likelihood_to_xarray(self):
         """Extract log likelihood and log_p data from PyMC3 trace."""
+        if self.predictions:
+            return None
         data = self._extract_log_likelihood()
         return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
 

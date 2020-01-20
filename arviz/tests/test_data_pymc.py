@@ -101,7 +101,8 @@ class TestDataPyMC3:
         "Test that we can add predictions to a previously-existing InferenceData."
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["obs"],
             "predictions": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
             "observed_data": ["obs"],
