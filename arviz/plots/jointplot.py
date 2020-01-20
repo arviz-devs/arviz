@@ -6,6 +6,7 @@ from ..utils import _var_names
 
 def plot_joint(
     data,
+    group="posterior",
     var_names=None,
     coords=None,
     figsize=None,
@@ -29,6 +30,8 @@ def plot_joint(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
+    group : str, optional
+        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     var_names : str or iterable of str
         Variables to be plotted. iter of two variables or one variable (with subset having
         exactly 2 dimensions) are required.
@@ -131,7 +134,7 @@ def plot_joint(
             ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
         )
 
-    data = convert_to_dataset(data, group="posterior")
+    data = convert_to_dataset(data, group=group)
 
     if coords is None:
         coords = {}
