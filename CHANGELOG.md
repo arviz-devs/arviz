@@ -20,7 +20,7 @@
 
 ### Documentation
 *  Clarify the usage of "plot_joint" (#1001)
-*  Show API link of the function in examples (#1013)
+*  Added the API link of function to examples (#1013)
 
 
 ## v0.6.1 (2019 Dec 28)
