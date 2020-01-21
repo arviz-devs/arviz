@@ -62,8 +62,8 @@ def plot_ppc(
     data_pairs : dict
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
-        Key = data var_name
-        Value = posterior/prior predictive var_name
+            key = data var_name
+            value = posterior/prior predictive var_name
         For example, `data_pairs = {'y' : 'y_hat'}`
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
@@ -128,6 +128,7 @@ def plot_ppc(
         >>> import arviz as az
         >>> data = az.load_arviz_data('radon')
         >>> az.plot_ppc(data,data_pairs={"obs":"obs"})
+        >>> #az.plot_ppc(data,data_pairs={"obs":"obs_hat"})
 
     Plot the overlay with empirical CDFs.
 
