@@ -240,13 +240,10 @@ class ExampleGenerator:
 
     @property
     def apiname(self):
-        name=""
         with open(op.join(self.target_dir, self.pyfilename), "r") as file:
             regex = r"az\.(plot\_[a-z_]+)\("
-            matches = re.finditer(regex, file.read(), re.MULTILINE)
-            for matchNum, match in enumerate(matches, start=1):
-                name = match.group(1)
-        return name
+            name = re.findall(regex, file.read())
+        return name[0] if len(name) > 0 else None
 
     @property
     def sphinxtag(self):
