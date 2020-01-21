@@ -109,7 +109,7 @@ class TestDataEmcee:
 
     @pytest.mark.parametrize("slices", [[0, 0, slice(2, None)], [0, 1, slice(1, None)]])
     def test_slices_warning(self, data, slices):
-        with pytest.warns(SyntaxWarning):
+        with pytest.warns(UserWarning):
             from_emcee(data.obj, slices=slices)
 
     def test_no_blobs_error(self):

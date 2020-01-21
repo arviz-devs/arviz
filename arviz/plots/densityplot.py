@@ -196,7 +196,7 @@ def plot_density(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
             "of variables to plot ({len_plotters}) in plot_density, generating only "
             "{max_plots} plots".format(max_plots=max_plots, len_plotters=length_plotters),
-            SyntaxWarning,
+            UserWarning,
         )
         all_labels = all_labels[:max_plots]
         to_plot = [

@@ -150,7 +150,7 @@ def test_plot_trace_discrete(discrete_model):
 
 
 def test_plot_trace_max_subplots_warning(models):
-    with pytest.warns(SyntaxWarning):
+    with pytest.warns(UserWarning):
         with rc_context(rc={"plot.max_subplots": 1}):
             axes = plot_trace(models.model_1)
     assert axes.shape
@@ -400,7 +400,7 @@ def test_plot_pair_divergences_warning(has_sample_stats):
     else:
         # sample_stats missing
         data = data.posterior  # pylint: disable=no-member
-    with pytest.warns(SyntaxWarning):
+    with pytest.warns(UserWarning):
         ax = plot_pair(data, divergences=True)
     assert np.all(ax)
 
