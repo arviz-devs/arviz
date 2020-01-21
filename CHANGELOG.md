@@ -5,9 +5,11 @@
 ### New features
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 translations. (#983)
 * Violinplot: rug-plot option (#997)
+* Integrated rcParams `plot.point_estimate` (#994) and `stats.ic_scale` (#993)
+* Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
 
 ### Maintenance and fixes
-* Fixed bug in extracting prior samples for cmdstanpy. (#979) 
+* Fixed bug in extracting prior samples for cmdstanpy. (#979)
 * Fix erroneous warning in traceplot (#989)
 * Correct bfmi denominator (#991)
 * Removed parallel from jit full (#996)
@@ -17,7 +19,7 @@
 ### Deprecation
 
 ### Documentation
-*  Clarify the usage of "plot_joint" (#1001) 
+*  Clarify the usage of "plot_joint" (#1001)
 
 
 ## v0.6.1 (2019 Dec 28)
@@ -134,7 +136,7 @@
 * And exception to plot compare ([#461](https://github.com/arviz-devs/arviz/pull/461))
 * Add Docker Testing to travisCI ([#473](https://github.com/arviz-devs/arviz/pull/473))
 * fix jointplot warning ([#478](https://github.com/arviz-devs/arviz/pull/478))
-* Fix tensorflow import bug ([#489](https://github.com/arviz-devs/arviz/pull/489)) 
+* Fix tensorflow import bug ([#489](https://github.com/arviz-devs/arviz/pull/489))
 * Rename N_effective to S_effective ([#505](https://github.com/arviz-devs/arviz/pull/505))
 
 

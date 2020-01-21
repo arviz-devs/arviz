@@ -130,7 +130,7 @@ def plot_ppc(
         >>> az.plot_ppc(data,data_pairs={"obs":"obs"})
         >>> #az.plot_ppc(data,data_pairs={"obs":"obs_hat"})
 
-     Plot the overlay with empirical CDFs.
+    Plot the overlay with empirical CDFs.
 
     .. plot::
         :context: close-figs
