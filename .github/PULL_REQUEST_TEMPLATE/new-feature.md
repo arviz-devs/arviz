@@ -29,7 +29,7 @@ consider the following points:
 - [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
 - [ ] Is your code style correct (follows pylint and black guidelines)?
-- [ ] Is fix listed in the [New features](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#new-features) 
+- [ ] Is the fix listed in the [New features](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#new-features) 
       section of the changelog?
 
 <!--
