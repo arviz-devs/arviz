@@ -632,7 +632,7 @@ def filter_plotters_list(plotters, plot_kind):
             "{max_plots} plots".format(
                 max_plots=max_plots, len_plotters=len(plotters), plot_kind=plot_kind
             ),
-            SyntaxWarning,
+            UserWarning,
         )
         return plotters[:max_plots]
     return plotters

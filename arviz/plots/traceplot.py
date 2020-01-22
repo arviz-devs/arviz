@@ -165,7 +165,7 @@ def plot_trace(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
             "of variables to plot ({len_plotters}), generating only {max_plots} "
             "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
+            UserWarning,
         )
         plotters = plotters[:max_plots]
 

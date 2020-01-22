@@ -125,7 +125,7 @@ def plot_pair(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
                 "of resulting pair plots with these variables, generating only a "
                 "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
-                SyntaxWarning,
+                UserWarning,
             )
             numvars = vars_to_plot
 
