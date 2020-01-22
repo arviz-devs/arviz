@@ -24,7 +24,7 @@ consider the following points:
 - [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
       PR format?
 - [ ] Is the documentation [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) compliant?
-- [ ] Is fix listed in the [Documentation](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#documentation) 
+- [ ] Is the fix listed in the [Documentation](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#documentation) 
       section of the changelog?
 
 <!--
