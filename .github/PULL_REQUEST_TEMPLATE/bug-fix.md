@@ -27,7 +27,7 @@ consider the following points:
 - [ ] Does the PR include new or updated tests to prevent issue recurrence (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
 - [ ] Is your code style correct (follows pylint and black guidelines)?
-- [ ] Is fix listed in the [Maintenance and fixes](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#maintenance-and-fixes) 
+- [ ] Is the fix listed in the [Maintenance and fixes](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#maintenance-and-fixes) 
       section of the changelog?
 
 <!--
