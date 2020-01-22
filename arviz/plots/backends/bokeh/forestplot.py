@@ -7,7 +7,7 @@ import bokeh.plotting as bkp
 import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import Band, ColumnDataSource
+from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
@@ -138,6 +138,8 @@ def plot_forest(
             ax_.yaxis.visible = False
 
         ax_.outline_line_color = None
+        ax_.x_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
+        ax_.y_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
 
     labels, ticks = plot_handler.labels_and_ticks()
 

@@ -2,6 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
+from bokeh.models import DataRange1d
 from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults, backend_show
@@ -59,10 +60,8 @@ def plot_autocorr(
         ax.title = title
 
     if axes.size > 0:
-        axes[0, 0].x_range._property_values["start"] = 0  # pylint: disable=protected-access
-        axes[0, 0].x_range._property_values["end"] = max_lag  # pylint: disable=protected-access
-        axes[0, 0].y_range._property_values["start"] = -1  # pylint: disable=protected-access
-        axes[0, 0].y_range._property_values["end"] = 1  # pylint: disable=protected-access
+        axes[0, 0].x_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
+        axes[0, 0].y_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
 
     if backend_show(show):
         bkp.show(gridplot(axes.tolist(), toolbar_location="above"))

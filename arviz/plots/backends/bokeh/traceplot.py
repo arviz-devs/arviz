@@ -6,7 +6,7 @@ from typing import Dict
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
 from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults, backend_show
@@ -179,6 +179,7 @@ def plot_trace(
             _title = Title()
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
+            axes[idx, col].y_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):
