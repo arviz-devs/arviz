@@ -247,7 +247,7 @@ class ExampleGenerator:
 
     @property
     def apilink(self):
-        return " ../../generated/arviz."+self.apitext if self.apitext else None
+        return " ../../generated/arviz." + self.apitext if self.apitext else None
 
     @property
     def sphinxtag(self):
