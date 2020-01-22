@@ -302,7 +302,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
+def hpd(ary, credible_interval=None, circular=False, multimodal=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -338,6 +338,12 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
            ...: data = np.random.normal(size=2000)
            ...: az.hpd(data, credible_interval=.68)
     """
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
     if ary.ndim > 1:
         hpd_array = np.array(
             [
@@ -395,10 +401,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
         interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
         if len(interval_width) == 0:
-            raise ValueError(
-                "Too few elements for interval calculation. "
-                "Check that credible_interval meets condition 0 =< credible_interval < 1"
-            )
+            raise ValueError("Too few elements for interval calculation. ")
 
         min_idx = np.argmin(interval_width)
         hdi_min = ary[min_idx]
@@ -803,7 +806,7 @@ def summary(
     include_circ=None,
     stat_funcs=None,
     extend=True,
-    credible_interval=0.94,
+    credible_interval=None,
     order="C",
     index_origin=None,
     coords: Optional[CoordSpec] = None,
@@ -902,6 +905,11 @@ def summary(
         extra_args["dims"] = dims
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]

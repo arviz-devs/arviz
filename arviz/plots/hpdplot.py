@@ -5,12 +5,13 @@ from scipy.signal import savgol_filter
 
 from ..stats import hpd
 from .plot_utils import get_plotting_function
+from ..rcparams import rcParams
 
 
 def plot_hpd(
     x,
     y,
-    credible_interval=0.94,
+    credible_interval=None,
     color="C1",
     circular=False,
     smooth=True,
@@ -87,6 +88,12 @@ def plot_hpd(
     if len(y_shape[: -len(x_shape)]) > 1:
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
+
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     hpd_ = hpd(y, credible_interval=credible_interval, circular=circular, multimodal=False)
 
