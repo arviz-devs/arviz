@@ -71,8 +71,6 @@ def plot_density(
 
             if data_labels:
                 data_label = data_labels[m_idx]
-                if ax_idx != 0 or data_label == "":
-                    data_label = None
             else:
                 data_label = None
 
@@ -196,3 +194,4 @@ def _d_helper(
     _title = Title()
     _title.text = vname
     ax.title = _title
+    ax.legend.click_policy = "hide"
