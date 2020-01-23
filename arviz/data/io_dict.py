@@ -49,7 +49,7 @@ class DictConverter:
             warnings.warn(
                 "log_likelihood variable found in posterior group."
                 " For stats functions log likelihood data needs to be in log_likelihood group.",
-                SyntaxWarning,
+                UserWarning,
             )
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
