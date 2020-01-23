@@ -1,6 +1,5 @@
 """PyMC3-specific conversion code."""
 import logging
-import warnings
 from typing import Dict, List, Any, Optional, TYPE_CHECKING
 from types import ModuleType
 
@@ -130,7 +129,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             assert self.model is not None
             return {obs.name: obs.observations for obs in self.model.observed_RVs}
         return None
-
 
     def log_likelihood_vals_point(self, point, var, log_like_fun):
         """Compute log likelihood for each observed point."""
