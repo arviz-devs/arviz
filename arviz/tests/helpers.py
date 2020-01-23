@@ -325,6 +325,7 @@ def numpyro_schools_model(data, draws, chains):
     mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
     mcmc.sampler._init_fn = None  # pylint: disable=protected-access
     mcmc.sampler._constrain_fn = None  # pylint: disable=protected-access
+    mcmc.sampler.get_potential_fn = None
     mcmc._cache = {}  # pylint: disable=protected-access
     return mcmc
 
