@@ -355,7 +355,6 @@ def round_num(n, round_to):
     return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
 
 
-@conditional_jit(forceobj=True)
 def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.
 
