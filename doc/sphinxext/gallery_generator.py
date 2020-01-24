@@ -245,7 +245,7 @@ class ExampleGenerator:
             name = re.findall(regex, file.read())
         apitext = name[0] if len(name) > 0 else ""
         return (
-            "`" + apitext + " <../../generated/arviz." + apitext + ">`_"
+            "`{apitext} <../../generated/arviz.{apitext}>`_".format(apitext=apitext)
             if apitext
             else "No API Documentation available"
         )
