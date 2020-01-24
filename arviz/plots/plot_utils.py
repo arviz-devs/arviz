@@ -377,7 +377,7 @@ def purge_duplicates(list_in):
 
     seen = set()
     seen_add = seen.add
-    return [x for x in seq if not (x in seen or seen_add(x))]
+    return [x for x in list_in if not (x in seen or seen_add(x))]
 
 
 def _dims(data, var_name, skip_dims):
