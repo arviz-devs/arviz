@@ -243,7 +243,7 @@ class ExampleGenerator:
         with open(op.join(self.target_dir, self.pyfilename), "r") as file:
             regex = r"az\.(plot\_[a-z_]+)\("
             name = re.findall(regex, file.read())
-        apitext = name[0] if len(name) > 0 else ""
+        apitext = name[0] if name else ""
         return (
             "`{apitext} <../../generated/arviz.{apitext}>`_".format(apitext=apitext)
             if apitext
