@@ -22,8 +22,8 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
-    credible_interval=0.94,
-    point_estimate="mean",
+    credible_interval=None,
+    point_estimate="auto",
     colors="cycle",
     outline=True,
     hpd_markers="",
@@ -61,8 +61,8 @@ def plot_density(
     credible_interval : float
         Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
-        Plot point estimate per variable. Values should be 'mean', 'median' or None.
-        Defaults to 'mean'.
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
@@ -153,12 +153,6 @@ def plot_density(
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
 
     var_names = _var_names(var_names, datasets)
-
-    if point_estimate not in ("mean", "median", None):
-        raise ValueError(
-            "Point estimate should be 'mean'," "median' or None, not {}".format(point_estimate)
-        )
-
     n_data = len(datasets)
 
     if data_labels is None:
@@ -182,8 +176,11 @@ def plot_density(
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if not 1 >= credible_interval > 0:
-        raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -202,7 +199,7 @@ def plot_density(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
             "of variables to plot ({len_plotters}) in plot_density, generating only "
             "{max_plots} plots".format(max_plots=max_plots, len_plotters=length_plotters),
-            SyntaxWarning,
+            UserWarning,
         )
         all_labels = all_labels[:max_plots]
         to_plot = [

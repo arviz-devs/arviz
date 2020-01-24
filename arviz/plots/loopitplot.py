@@ -5,8 +5,12 @@ from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
-from .plot_utils import _scale_fig_size, get_plotting_function
-from .kdeplot import _fast_kde
+from .plot_utils import (
+    _scale_fig_size,
+    get_plotting_function,
+    _fast_kde,
+)
+from ..rcparams import rcParams
 
 
 def plot_loo_pit(
@@ -18,7 +22,7 @@ def plot_loo_pit(
     ecdf_fill=True,
     n_unif=100,
     use_hpd=False,
-    credible_interval=0.94,
+    credible_interval=None,
     figsize=None,
     textsize=None,
     color="C0",
@@ -168,6 +172,12 @@ def plot_loo_pit(
     unif = None
     unif_densities = None
     x_vals = None
+
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     if ecdf:
         loo_pit.sort()

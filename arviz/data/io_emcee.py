@@ -55,11 +55,11 @@ def _verify_names(sampler, var_names, arg_names, slices):
         warnings.warn(
             "Check slices: Not all parameters in chain captured. "
             "{} are present, and {} have been captured.".format(ndim, len(slicing_try)),
-            SyntaxWarning,
+            UserWarning,
         )
     if len(slicing_try) != len(set(slicing_try)):
         warnings.warn(
-            "Overlapping slices. Check the index present: {}".format(slicing_try), SyntaxWarning
+            "Overlapping slices. Check the index present: {}".format(slicing_try), UserWarning
         )
 
     if var_names is None:

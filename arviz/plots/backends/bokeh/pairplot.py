@@ -16,7 +16,7 @@ from ....rcparams import rcParams
 
 def plot_pair(
     ax,
-    _posterior,
+    infdata_group,
     numvars,
     figsize,
     textsize,
@@ -46,7 +46,7 @@ def plot_pair(
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
-        source_dict = dict(zip(flat_var_names, [list(post) for post in _posterior]))
+        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
 
         if divergences:
             divergenve_name = "divergences_{}".format(str(uuid4()))
@@ -82,8 +82,8 @@ def plot_pair(
                 ax.circle(flat_var_names[0], flat_var_names[1], source=source)
         elif kind == "kde":
             plot_kde(
-                _posterior[0],
-                _posterior[1],
+                infdata_group[0],
+                infdata_group[1],
                 contour=contour,
                 fill_last=fill_last,
                 ax=ax,
@@ -92,7 +92,7 @@ def plot_pair(
                 show=False,
             )
         else:
-            ax.hexbin(_posterior[0], _posterior[1], size=0.5)
+            ax.hexbin(infdata_group[0], infdata_group[1], size=0.5)
             ax.grid.visible = False
 
         if divergences:
@@ -125,7 +125,7 @@ def plot_pair(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
                 "of resulting pair plots with these variables, generating only a "
                 "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
-                SyntaxWarning,
+                UserWarning,
             )
             numvars = vars_to_plot
 
@@ -150,10 +150,10 @@ def plot_pair(
 
         tmp_flat_var_names = None
         if len(flat_var_names) == len(list(set(flat_var_names))):
-            source_dict = dict(zip(flat_var_names, [list(post) for post in _posterior]))
+            source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
         else:
             tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
-            source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in _posterior]))
+            source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
         if divergences:
             divergenve_name = "divergences_{}".format(str(uuid4()))
             source_dict[divergenve_name] = (
@@ -190,8 +190,8 @@ def plot_pair(
                         ax[j, i].circle(var1, var2, source=source)
 
                 elif kind == "kde":
-                    var1_kde = _posterior[i]
-                    var2_kde = _posterior[j + 1]
+                    var1_kde = infdata_group[i]
+                    var2_kde = infdata_group[j + 1]
                     plot_kde(
                         var1_kde,
                         var2_kde,
@@ -205,8 +205,8 @@ def plot_pair(
                     )
 
                 else:
-                    var1_hexbin = _posterior[i]
-                    var2_hexbin = _posterior[j + 1]
+                    var1_hexbin = infdata_group[i]
+                    var2_hexbin = infdata_group[j + 1]
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(var1_hexbin, var2_hexbin, size=0.5)
 

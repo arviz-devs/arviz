@@ -142,7 +142,7 @@ def test_dims_coords():
 def test_dims_coords_extra_dims():
     shape = 4, 20
     var_name = "x"
-    with pytest.warns(SyntaxWarning):
+    with pytest.warns(UserWarning):
         dims, coords = generate_dims_coords(shape, var_name, dims=["xx", "xy", "xz"])
     assert "xx" in dims
     assert "xy" in dims
@@ -419,7 +419,7 @@ class TestNumpyToDataArray:
 
     def test_warns_bad_shape(self):
         # Shape should be (chain, draw, *shape)
-        with pytest.warns(SyntaxWarning):
+        with pytest.warns(UserWarning):
             convert_to_dataset(np.random.randn(100, 4))
 
     def test_nd_to_dataset(self):
@@ -448,7 +448,7 @@ class TestNumpyToDataArray:
 
     def test_more_chains_than_draws(self):
         shape = (10, 4)
-        with pytest.warns(SyntaxWarning):
+        with pytest.warns(UserWarning):
             inference_data = convert_to_inference_data(np.random.randn(*shape), group="foo")
         assert hasattr(inference_data, "foo")
         assert len(inference_data.foo.data_vars) == 1
@@ -688,7 +688,7 @@ class TestDataDict:
 
     def test_from_dict_warning(self):
         bad_posterior_dict = {"log_likelihood": np.ones((5, 1000, 2))}
-        with pytest.warns(SyntaxWarning):
+        with pytest.warns(UserWarning):
             from_dict(posterior=bad_posterior_dict)
 
 

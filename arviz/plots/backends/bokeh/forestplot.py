@@ -12,8 +12,7 @@ from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
 from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import _fast_kde
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
 from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat

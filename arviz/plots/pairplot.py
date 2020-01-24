@@ -9,6 +9,7 @@ from ..utils import _var_names
 
 def plot_pair(
     data,
+    group="posterior",
     var_names=None,
     coords=None,
     figsize=None,
@@ -34,6 +35,8 @@ def plot_pair(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
+    group : str, optional
+        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
     var_names : list of variable names
         Variables to be plotted, if None all variable are plotted
     coords : mapping, optional
@@ -55,7 +58,8 @@ def plot_pair(
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     divergences : Boolean
-        If True divergences will be plotted in a different color
+        If True divergences will be plotted in a different color, only if group is either 'prior'
+        or 'posterior'.
     colorbar : bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
@@ -142,18 +146,27 @@ def plot_pair(
 
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
-    posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data)
-    flat_var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+    grouped_data = convert_to_dataset(data, group=group)
+    var_names = _var_names(var_names, grouped_data)
+    flat_var_names, infdata_group = xarray_to_ndarray(
+        get_coords(grouped_data, coords), var_names=var_names, combined=True
     )
 
     divergent_data = None
     diverging_mask = None
+
+    # Assigning divergence group based on group param
+    if group == "posterior":
+        divergent_group = "sample_stats"
+    elif group == "prior":
+        divergent_group = "sample_stats_prior"
+    else:
+        divergences = False
+
     # Get diverging draws and combine chains
     if divergences:
-        if hasattr(data, "sample_stats") and hasattr(data.sample_stats, "diverging"):
-            divergent_data = convert_to_dataset(data, group="sample_stats")
+        if hasattr(data, divergent_group) and hasattr(getattr(data, divergent_group), "diverging"):
+            divergent_data = convert_to_dataset(data, group=divergent_group)
             _, diverging_mask = xarray_to_ndarray(
                 divergent_data, var_names=("diverging",), combined=True
             )
@@ -164,12 +177,12 @@ def plot_pair(
                 "Divergences data not found, plotting without divergences. "
                 "Make sure the sample method provides divergences data and "
                 "that it is present in the `diverging` field of `sample_stats` "
-                "or set divergences=False",
-                SyntaxWarning,
+                "or `sample_stats_prior` or set divergences=False",
+                UserWarning,
             )
 
     if gridsize == "auto":
-        gridsize = int(len(_posterior[0]) ** 0.35)
+        gridsize = int(len(infdata_group[0]) ** 0.35)
 
     numvars = len(flat_var_names)
 
@@ -178,7 +191,7 @@ def plot_pair(
 
     pairplot_kwargs = dict(
         ax=ax,
-        _posterior=_posterior,
+        infdata_group=infdata_group,
         numvars=numvars,
         figsize=figsize,
         textsize=textsize,

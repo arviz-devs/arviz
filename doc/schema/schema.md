@@ -15,6 +15,7 @@ Currently there are 2 beta implementations of this design:
 ## Contents
 
 <ol class="simple">
+  <li><a class="reference internal" href="#terminology">Terminology</a></li>
  <li><a class="reference internal" href="#current-design">Current Design</a>
   <ol>
     <li><a class="reference internal" href="#posterior">posterior</a></li>
@@ -40,10 +41,21 @@ Currently there are 2 beta implementations of this design:
  <li><a class="reference internal" href="#examples">Examples</a></li>
 </ol>
 
-## Current design
-`InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Each group, described below, stores a conceptually different quantity. In general, each quantity will be represented by several multidimensional labeled variables.
+## Terminology
+The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the InferenceData case.
 
-Each group should have one entry per variable and each variable should be named. When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). For groups like `observed_data` or `constant_data` these two initial dimensions are omitted. Dimensions must be named and specify their index values, called coordinates. Coordinates can have repeated identifiers and may not be numerical. Variables must not share names with dimensions.
+* **Variable**: NetCDF-like variables are multidimensional labeled arrays representing a single quantity. Variables and their dimensions must be named. They can also have attributes describing it. Relevant terms related to InferenceData variables are: *variable_name*, *values* (its data), *dimensions*, *coordinates*, and *attributes*.
+* **Dimension**: The dimensions of an object are its named axes. A variable containing 3D data can have dimensions `[chain, draw, dim0]`, thus, its `0th`-dimension is `chain`, its `1st`-dimension is `draw` and so on. Every dimension present in an InferenceData variable must share names with a *coordinate*. Given that dimensions must be named, dimension and dimension name are used equivalents.
+* **Coordinate**: A named array that labels a dimension. A coordinate named `chain` with values `[0, 1, 2, 3]` would label the `chain` dimension. Coordinate names and values can be loosely though of as labels and tick labels along a dimension.
+* **Attributes**: An ordered dictionary that can store arbitrary metadata.
+* **Group**: Dataset containing one or several variables with a conceptual link between them. Variables inside a group will generally share some dimensions too. For example, the `posterior` group contains a representation of the posterior distribution conditioned on the observations in the `observed_data` group.
+* **Matching samples**: Two variables (or groups) whose samples match are those that have been generated with the same set of samples. Therefore, they will share dimensions and coordinates corresponding to sampling process. Sample dimensions (generally `(chain, draw)`) are the ones introduced by the sampling process.
+* **Matching variables**: Two groups with matching variables are groups that conceptually share variables, variable dimensions and coordinates of the variable dimensions but do not necessarily share variable names nor sample dimensions. Variable dimensions are the ones intrinsic to the data and model as opposed to sample dimensions which are the ones relative to the sampling process. When talking about specific variables, this same idea is expressed as one variable being the counterpart of the other.
+
+## Current design
+`InferenceData` stores all quantities relevant to fulfilling its goals in different groups. Different groups generally distinguish conceptually different quantities in Bayesian inference, however, convenience in creation and usage of InferenceData objects also plays a role. In general, each quantity (such as posterior distribution or observed data) will be represented by several multidimensional labeled variables.
+
+Each group should have one entry per variable and each variable should be named. When relevant, the first two dimensions of each variable should be the sample identifier (`chain`, `draw`). For groups like `observed_data` or `constant_data` these two initial dimensions are omitted. Dimensions must be named and share name with a coordinate specifying the index values, called coordinate values. Coordinate values can be repeated and should not necessarily be numerical values. Variables must not share names with dimensions.
 
 Moreover, each group contains the following attributes:
 * `created_at`: the date of creation of the group.
@@ -70,19 +82,19 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 * `max_energy_error`
 
 ### `posterior_predictive`
-Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and each variable should have a counterpart in `observed_data`. The `observed_data` counterpart variable may have a different name.
+Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and its variables should match `observed_data` variables. The `observed_data` counterpart variable may have a different name.
 
 ### `observed_data`
 Observed data on which the `posterior` is conditional. It should only contain data which is modeled as a random variable. Each variable should have a counterpart in `posterior_predictive`, however, the `posterior_predictive` counterpart variable may have a different name.
 
 ### `constant_data`
-Model constants, data included in the model which is not modeled as a random variable. It should be the data used to generate the `posterior` and `posterior_predictive` samples.
+Model constants, data included in the model which is not modeled as a random variable. It should be the data used to generate samples in all the groups except the `predictions` groups.
 
 ### `prior`
-Samples from the prior distribution p(theta). Samples need not match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. Each variable should have a counterpart in `posterior`.
+Samples from the prior distribution p(theta). Samples need not match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
 ### `sample_stats_prior`
-Information and diagnostics for each `prior` sample, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in [`sample_stats`](#sample_stats).
+Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in [`sample_stats`](#sample_stats).
 
 ### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
@@ -95,10 +107,10 @@ Parameters of the sampling algorithm and sampling backend to be used for analysi
 
 ### Out of sample `posterior_predictive` samples
 #### `predictions`
-Out of sample posterior predictive samples p(y'|y). Sample should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` may not share coordinates.
+Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
 
 #### `predictions_constant_data`
-Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` may not share coordinates.
+Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
 
 ## Examples
 In order to clarify the definitions above, an example of `InferenceData` generation for a 1D linear regression is available in several programming languages and probabilistic programming frameworks. This particular inference task has been chosen because it is widely well known while still being useful and it also allows to populate all the fields in the `InferenceData` object.
