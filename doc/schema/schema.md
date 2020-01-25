@@ -20,6 +20,7 @@ Currently there are 2 beta implementations of this design:
   <ol>
     <li><a class="reference internal" href="#posterior">posterior</a></li>
     <li><a class="reference internal" href="#sample-stats">sample_stats</a></li>
+    <li><a class="reference internal" href="#log-likelihood">log_likelihood</a></li>
     <li><a class="reference internal" href="#posterior-predictive">posterior_predictive</a></li>
     <li><a class="reference internal" href="#observed-data">observed_data</a></li>
     <li><a class="reference internal" href="#constant-data">constant_data</a></li>
@@ -80,6 +81,14 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 * `energy`: HMC-NUTS only
 * `energy_error`
 * `max_energy_error`
+
+### `log_likelihood`
+Pointwise log likelihood data. The log likelihood of the model log(p(y|theta))
+should be proportional to the sum of the exponentials of all the terms stored
+in this group. Samples should match with `posterior` ones and its variables
+should match `observed_data` variables. The `observed_data` counterpart variable
+may have a different name. Moreover, some cases such as a multivariate normal
+may require some dimensions or coordinates to be different.
 
 ### `posterior_predictive`
 Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and its variables should match `observed_data` variables. The `observed_data` counterpart variable may have a different name.
