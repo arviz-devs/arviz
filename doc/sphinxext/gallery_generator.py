@@ -40,6 +40,7 @@ MPL_RST_TEMPLATE = """
 .. image:: {img_file}
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -54,6 +55,7 @@ BOKEH_RST_TEMPLATE = """
     :source-position: none
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -237,6 +239,18 @@ class ExampleGenerator:
         return pngfile
 
     @property
+    def apiname(self):
+        with open(op.join(self.target_dir, self.pyfilename), "r") as file:
+            regex = r"az\.(plot\_[a-z_]+)\("
+            name = re.findall(regex, file.read())
+        apitext = name[0] if name else ""
+        return (
+            "`{apitext} <../../generated/arviz.{apitext}>`_".format(apitext=apitext)
+            if apitext
+            else "No API Documentation available"
+        )
+
+    @property
     def sphinxtag(self):
         return self.modulename
 
@@ -380,6 +394,7 @@ def main(app):
                 fname=ex.pyfilename,
                 absfname=op.join(target_dir, ex.pyfilename),
                 img_file=ex.pngfilename,
+                api_name=ex.apiname,
             )
             with open(op.join(target_dir, ex.rstfilename), "w") as f:
                 f.write(output)
