@@ -26,11 +26,10 @@ consider the following points:
       PR format?
 - [ ] Has included a sample plot to visually illustrate the changes? (only for plot-related functions)
 - [ ] Is the new feature properly documented with an example?
-- [ ] Does the change introduced by this pull request are covered by existing or newly introduced tests.(using [pytest fixture pattern](
+- [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
-- [ ] Is your code style correct (follows pylint and black guidelines)?
-- [ ] Is the change listed in the [Maintenance and fixes](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#maintenance-and-fixes) 
-      section of the changelog?
+- [ ] Is the code style correct (follows pylint and black guidelines)?
+- [ ] Is the change listed in [changelog](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#v0xx-unreleased )?
 
 <!--
 Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at 

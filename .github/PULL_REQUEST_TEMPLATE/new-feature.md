@@ -28,7 +28,7 @@ consider the following points:
 - [ ] Is the new feature properly documented with an example?
 - [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
-- [ ] Is your code style correct (follows pylint and black guidelines)?
+- [ ] Is the code style correct (follows pylint and black guidelines)?
 - [ ] Is the new feature listed in the [New features](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#new-features) 
       section of the changelog?
 
