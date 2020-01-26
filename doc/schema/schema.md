@@ -27,16 +27,13 @@ Currently there are 2 beta implementations of this design:
     <li><a class="reference internal" href="#prior">prior</a></li>
     <li><a class="reference internal" href="#sample-stats-prior">sample_stats_prior</a></li>
     <li><a class="reference internal" href="#prior-predictive">prior_predictive</a></li>
+    <li><a class="reference internal" href="#predictions">predictions</a>
+    <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
   </ol>
  </li>
  <li><a class="reference internal" href="#planned-features">Planned Features</a>
   <ol>
     <li><a class="reference internal" href="#sampler-parameters">Sampler parameters</a>
-    <li><a class="reference internal" href="#out-of-sample-posterior-predictive-samples">Out of sample posterior_predictive samples</a>
-    <ol>
-      <li><a class="reference internal" href="#predictions">predictions</a>
-      <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
-    </ol>
   </ol>
  </li>
  <li><a class="reference internal" href="#examples">Examples</a></li>
