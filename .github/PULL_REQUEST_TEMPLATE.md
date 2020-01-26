@@ -18,17 +18,14 @@ consider the following points:
   duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
 -->
 
-## Types of Changes
-<!-- Please select all items that apply either now or after creating the pull request: -->
-- [ ] Documentation update
-- [ ] Bug fix
-- [ ] New feature
 
 ## Checklist
 <!-- Feel free to remove check-list items aren't relevant to your change -->
 
 - [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) 
       PR format?
+- [ ] Has included a sample plot to visually illustrate the changes? (only for plot-related functions)
+- [ ] Is the new feature properly documented with an example?
 - [ ] Does the change introduced by this pull request are covered by existing or newly introduced tests.(using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
 - [ ] Is your code style correct (follows pylint and black guidelines)?
