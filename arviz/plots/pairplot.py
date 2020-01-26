@@ -178,7 +178,7 @@ def plot_pair(
                 "Make sure the sample method provides divergences data and "
                 "that it is present in the `diverging` field of `sample_stats` "
                 "or `sample_stats_prior` or set divergences=False",
-                SyntaxWarning,
+                UserWarning,
             )
 
     if gridsize == "auto":

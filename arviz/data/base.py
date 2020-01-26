@@ -82,7 +82,7 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 shape_len=len(shape),
                 defaults=",".join(default_dims) + ", " if default_dims is not None else "",
             ),
-            SyntaxWarning,
+            UserWarning,
         )
     if coords is None:
         coords = {}
@@ -142,7 +142,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
             "Passed array should have shape (chains, draws, *shape)".format(
                 n_chains=n_chains, n_samples=n_samples
             ),
-            SyntaxWarning,
+            UserWarning,
         )
 
     dims, coords = generate_dims_coords(

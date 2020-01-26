@@ -2,6 +2,7 @@
 from ..data import convert_to_dataset
 from .plot_utils import get_coords, get_plotting_function
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_forest(
@@ -11,7 +12,7 @@ def plot_forest(
     var_names=None,
     coords=None,
     combined=False,
-    credible_interval=0.94,
+    credible_interval=None,
     rope=None,
     quartiles=True,
     ess=False,
@@ -153,6 +154,12 @@ def plot_forest(
     if r_hat:
         ncols += 1
         width_ratios.append(1)
+
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     plot_forest_kwargs = dict(
         ax=ax,
