@@ -179,7 +179,7 @@ def plot_trace(
             _title = Title()
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
-            axes[idx, col].y_range = DataRange1d(bounds="auto")  # pylint: disable=protected-access
+            axes[idx, col].y_range = DataRange1d(bounds=rcParams["bokeh.bounds"])
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):

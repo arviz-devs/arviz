@@ -93,6 +93,18 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
+def _validate_tuple(value):
+    """Validate value is a tuple of size 2."""
+    if value is None:
+        return value
+    elif value == "auto":
+        return value
+    elif isinstance(value, tuple) and len(value) == 2:
+        return value
+    else:
+        raise ValueError("Only tuple of size 2 is valid.")
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
@@ -107,6 +119,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
+    "bokeh.bounds": ("auto", _validate_tuple),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
