@@ -21,6 +21,8 @@
 ### Deprecation
 
 ### Documentation
+* Updated `InferenceData` schema specification (`log_likelihood`,
+  `predictions` and `predictions_constant_data` groups)
 *  Clarify the usage of "plot_joint" (#1001)
 *  Added the API link of function to examples (#1013)
 

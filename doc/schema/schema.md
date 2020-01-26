@@ -108,18 +108,17 @@ Information and diagnostics for the samples in the `prior` group, provided by th
 ### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
 
+### `predictions`
+Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
+
+### `predictions_constant_data`
+Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
+
 ## Planned features
 The `InferenceData` structure is still evolving, with some feature being currently developed. This section aims to describe the roadmap of the specification.
 
 ### Sampler parameters
 Parameters of the sampling algorithm and sampling backend to be used for analysis reproducibility.
-
-### Out of sample `posterior_predictive` samples
-#### `predictions`
-Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
-
-#### `predictions_constant_data`
-Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
 
 ## Examples
 In order to clarify the definitions above, an example of `InferenceData` generation for a 1D linear regression is available in several programming languages and probabilistic programming frameworks. This particular inference task has been chosen because it is widely well known while still being useful and it also allows to populate all the fields in the `InferenceData` object.
