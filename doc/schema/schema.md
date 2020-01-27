@@ -80,9 +80,7 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 * `max_energy_error`
 
 ### `log_likelihood`
-Pointwise log likelihood data. The log likelihood of the model log(p(y|theta))
-should be proportional to the sum of the exponentials of all the terms stored
-in this group. Samples should match with `posterior` ones and its variables
+Pointwise log likelihood data. Samples should match with `posterior` ones and its variables
 should match `observed_data` variables. The `observed_data` counterpart variable
 may have a different name. Moreover, some cases such as a multivariate normal
 may require some dimensions or coordinates to be different.
