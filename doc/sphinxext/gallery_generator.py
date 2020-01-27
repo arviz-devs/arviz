@@ -40,6 +40,7 @@ MPL_RST_TEMPLATE = """
 .. image:: {img_file}
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+
 **API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
@@ -55,6 +56,7 @@ BOKEH_RST_TEMPLATE = """
     :source-position: none
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+
 **API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
