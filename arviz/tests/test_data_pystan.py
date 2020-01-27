@@ -28,10 +28,12 @@ class TestDataPyStan:
         return from_pystan(
             posterior=data.obj,
             posterior_predictive="y_hat",
+            predictions="y_hat",  # wrong, but fine for testing
             prior=data.obj,
             prior_predictive="y_hat",
             observed_data="y",
             constant_data="sigma",
+            predictions_constant_data="sigma",  # wrong, but fine for testing
             log_likelihood={"y": "log_lik"},
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
@@ -50,6 +52,7 @@ class TestDataPyStan:
         return from_pystan(
             posterior=data.obj,
             posterior_predictive=["y_hat"],
+            predictions=["y_hat"],  # wrong, but fine for testing
             prior=data.obj,
             prior_predictive=["y_hat"],
             observed_data=["y"],
@@ -73,10 +76,12 @@ class TestDataPyStan:
         """multiple vars as lists."""
         return from_pystan(
             posterior=data.obj,
-            posterior_predictive=["y_hat", "log_lik"],
+            posterior_predictive=["y_hat", "log_lik"],  # wrong, but fine for testing
+            predictions=["y_hat", "log_lik"],  # wrong, but fine for testing
             prior=data.obj,
-            prior_predictive=["y_hat", "log_lik"],
-            constant_data=["sigma"],
+            prior_predictive=["y_hat", "log_lik"],  # wrong, but fine for testing
+            constant_data=["sigma", "y"],  # wrong, but fine for testing
+            predictions_constant_data=["sigma", "y"],  # wrong, but fine for testing
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
                 "theta": ["school"],
@@ -90,7 +95,7 @@ class TestDataPyStan:
         )
 
     def get_inference_data4(self, data):
-        """multiple vars as lists."""
+        """minimal input."""
         return from_pystan(
             posterior=data.obj,
             posterior_predictive=None,
@@ -116,8 +121,11 @@ class TestDataPyStan:
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
+            "posterior_predictive": ["y_hat"],
+            "predictions": ["y_hat"],
             "observed_data": ["y"],
             "constant_data": ["sigma"],
+            "predictions_constant_data": ["sigma"],
             "sample_stats": ["diverging", "lp"],
             "log_likelihood": ["y"],
             "prior": ["theta"],
@@ -127,6 +135,7 @@ class TestDataPyStan:
         # inference_data 2
         test_dict = {
             "posterior_predictive": ["y_hat"],
+            "predictions": ["y_hat"],
             "observed_data": ["y"],
             "sample_stats_prior": ["diverging"],
             "sample_stats": ["diverging", "lp"],
@@ -138,7 +147,9 @@ class TestDataPyStan:
         # inference_data 3
         test_dict = {
             "posterior_predictive": ["y_hat", "log_lik"],
-            "constant_data": ["sigma"],
+            "predictions": ["y_hat", "log_lik"],
+            "constant_data": ["sigma", "y"],
+            "predictions_constant_data": ["sigma", "y"],
             "sample_stats_prior": ["diverging"],
             "sample_stats": ["diverging", "lp"],
             "prior_predictive": ["y_hat", "log_lik"],
