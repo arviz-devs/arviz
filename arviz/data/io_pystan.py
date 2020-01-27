@@ -1,3 +1,4 @@
+#  pylint: disable=too-many-instance-attributes
 """PyStan-specific conversion code."""
 from collections import OrderedDict
 import re
@@ -17,20 +18,24 @@ class PyStanConverter:
         *,
         posterior=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_predictive=None,
         observed_data=None,
         constant_data=None,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -49,6 +54,11 @@ class PyStanConverter:
             posterior_predictive = []
         elif isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
+        predictions = self.predictions
+        if predictions is None:
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [predictions]
         log_likelihood = self.log_likelihood
         if log_likelihood is None:
             log_likelihood = []
@@ -57,7 +67,7 @@ class PyStanConverter:
         elif isinstance(log_likelihood, dict):
             log_likelihood = list(log_likelihood.values())
 
-        ignore = posterior_predictive + log_likelihood + ["lp__"]
+        ignore = posterior_predictive + predictions + log_likelihood + ["lp__"]
 
         data = get_draws(posterior, ignore=ignore)
 
@@ -105,6 +115,15 @@ class PyStanConverter:
         data = get_draws(posterior, variables=posterior_predictive)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions samples to xarray."""
+        posterior = self.posterior
+        predictions = self.predictions
+        data = get_draws(posterior, variables=predictions)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
@@ -140,7 +159,7 @@ class PyStanConverter:
     @requires("posterior")
     @requires(["observed_data", "constant_data"])
     def observed_and_constant_data_to_xarray(self):
-        """Convert observed data to xarray."""
+        """Convert observed and constant data to xarray."""
         posterior = self.posterior
         if self.dims is None:
             dims = {}
@@ -165,6 +184,27 @@ class PyStanConverter:
             )
         return obs_const_dict
 
+    @requires("posterior")
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions constant data to xarray."""
+        posterior = self.posterior
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        names = self.predictions_constant_data
+        names = [names] if isinstance(names, str) else names
+        data = OrderedDict()
+        for key in names:
+            vals = np.atleast_1d(posterior.data[key])
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=data, attrs=make_attrs(library=self.pystan))
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -173,16 +213,23 @@ class PyStanConverter:
         will not have those groups.
         """
         obs_const_dict = self.observed_and_constant_data_to_xarray()
+        predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 **({} if obs_const_dict is None else obs_const_dict),
+                **(
+                    {}
+                    if predictions_const_data is None
+                    else {"predictions_constant_data": predictions_const_data}
+                ),
             }
         )
 
@@ -197,11 +244,13 @@ class PyStan3Converter:
         posterior=None,
         posterior_model=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_model=None,
         prior_predictive=None,
         observed_data=None,
         constant_data=None,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
@@ -209,11 +258,13 @@ class PyStan3Converter:
         self.posterior = posterior
         self.posterior_model = posterior_model
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior = prior
         self.prior_model = prior_model
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -233,6 +284,11 @@ class PyStan3Converter:
             posterior_predictive = []
         elif isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
+        predictions = self.predictions
+        if predictions is None:
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [predictions]
         log_likelihood = self.log_likelihood
         if log_likelihood is None:
             log_likelihood = []
@@ -241,7 +297,7 @@ class PyStan3Converter:
         elif isinstance(log_likelihood, dict):
             log_likelihood = list(log_likelihood.values())
 
-        ignore = posterior_predictive + log_likelihood
+        ignore = posterior_predictive + predictions + log_likelihood
 
         data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore)
 
@@ -285,6 +341,16 @@ class PyStan3Converter:
         posterior_model = self.posterior_model
         posterior_predictive = self.posterior_predictive
         data = get_draws_stan3(posterior, model=posterior_model, variables=posterior_predictive)
+        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions samples to xarray."""
+        posterior = self.posterior
+        posterior_model = self.posterior_model
+        predictions = self.predictions
+        data = get_draws_stan3(posterior, model=posterior_model, variables=predictions)
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -349,6 +415,27 @@ class PyStan3Converter:
             )
         return obs_const_dict
 
+    @requires("posterior_model")
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert observed data to xarray."""
+        posterior_model = self.posterior_model
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        names = self.predictions_constant_data
+        names = [names] if isinstance(names, str) else names
+        data = OrderedDict()
+        for key in names:
+            vals = np.atleast_1d(posterior_model.data[key])
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=data, attrs=make_attrs(library=self.stan))
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -357,16 +444,23 @@ class PyStan3Converter:
         will not have those groups.
         """
         obs_const_dict = self.observed_and_constant_data_to_xarray()
+        predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 **({} if obs_const_dict is None else obs_const_dict),
+                **(
+                    {}
+                    if predictions_const_data is None
+                    else {"predictions_constant_data": predictions_const_data}
+                ),
             }
         )
 
@@ -578,10 +672,12 @@ def from_pystan(
     posterior=None,
     *,
     posterior_predictive=None,
+    predictions=None,
     prior=None,
     prior_predictive=None,
     observed_data=None,
     constant_data=None,
+    predictions_constant_data=None,
     log_likelihood=None,
     coords=None,
     dims=None,
@@ -596,6 +692,8 @@ def from_pystan(
         PyStan fit object for posterior.
     posterior_predictive : str, a list of str
         Posterior predictive samples for the posterior.
+    predictions : str, a list of str
+        Out-of-sample predictions for the posterior.
     prior : StanFit4Model or stan.fit.Fit
         PyStan fit object for prior.
     prior_predictive : str, a list of str
@@ -607,6 +705,9 @@ def from_pystan(
         See `posterior_model`.
     constant_data : str or list of str
         Constants relevant to the model (i.e. x values in a linear
+        regression).
+    predictions_constant_data : str or list of str
+        Constants relevant to the model predictions (i.e. new x values in a linear
         regression).
     log_likelihood : dict of {str: str}, list of str or str, optional
         Pointwise log_likelihood for the data. log_likelihood is extracted from the
@@ -636,11 +737,13 @@ def from_pystan(
             posterior=posterior,
             posterior_model=posterior_model,
             posterior_predictive=posterior_predictive,
+            predictions=predictions,
             prior=prior,
             prior_model=prior_model,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
             constant_data=constant_data,
+            predictions_constant_data=predictions_constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,
@@ -649,10 +752,12 @@ def from_pystan(
         return PyStanConverter(
             posterior=posterior,
             posterior_predictive=posterior_predictive,
+            predictions=predictions,
             prior=prior,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
             constant_data=constant_data,
+            predictions_constant_data=predictions_constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,
