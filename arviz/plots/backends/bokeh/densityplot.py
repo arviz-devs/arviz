@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models.annotations import Title
+from bokeh.models.annotations import Title, Legend
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import (
@@ -65,6 +65,7 @@ def plot_density(
     if data_labels is None:
         data_labels = {}
 
+    legend_items = {}
     for m_idx, plotters in enumerate(to_plot):
         for ax_idx, (var_name, selection, values) in enumerate(plotters):
             label = make_label(var_name, selection)
@@ -74,7 +75,7 @@ def plot_density(
             else:
                 data_label = None
 
-            _d_helper(
+            plotted = _d_helper(
                 values.flatten(),
                 label,
                 colors[m_idx],
@@ -89,6 +90,17 @@ def plot_density(
                 axis_map[label],
                 data_label=data_label,
             )
+            if data_label is not None:
+                if axis_map[label] in legend_items.keys():
+                    legend_items[axis_map[label]].append((data_label, plotted))
+                else:
+                    legend_items[axis_map[label]] = []
+                    legend_items[axis_map[label]].append((data_label, plotted))
+
+    for ax1, lg in legend_items.items():
+        legend = Legend(items=lg, location="center_right", orientation="horizontal",)
+        ax1.add_layout(legend, "above")
+        ax1.legend.click_policy = "hide"
 
     if backend_show(show):
         grid = gridplot(ax.tolist(), toolbar_location="above")
@@ -112,9 +124,9 @@ def _d_helper(
     ax,
     data_label,
 ):
+
     extra = dict()
-    if data_label is not None:
-        extra["legend_label"] = data_label
+    plotted = []
 
     if vec.dtype.kind == "f":
         if credible_interval != 1:
@@ -130,29 +142,41 @@ def _d_helper(
         ymax = density[-1]
 
         if outline:
-            ax.line(x, density, line_color=color, line_width=line_width, **extra)
-            ax.line(
-                [xmin, xmin],
-                [-ymin / 100, ymin],
-                line_color=color,
-                line_dash="solid",
-                line_width=line_width,
+            plotted.append(ax.line(x, density, line_color=color, line_width=line_width, **extra))
+            plotted.append(
+                ax.line(
+                    [xmin, xmin],
+                    [-ymin / 100, ymin],
+                    line_color=color,
+                    line_dash="solid",
+                    line_width=line_width,
+                    muted_color=color,
+                    muted_alpha=0.2,
+                )
             )
-            ax.line(
-                [xmax, xmax],
-                [-ymax / 100, ymax],
-                line_color=color,
-                line_dash="solid",
-                line_width=line_width,
+            plotted.append(
+                ax.line(
+                    [xmax, xmax],
+                    [-ymax / 100, ymax],
+                    line_color=color,
+                    line_dash="solid",
+                    line_width=line_width,
+                    muted_color=color,
+                    muted_alpha=0.2,
+                )
             )
 
         if shade:
-            ax.patch(
-                np.r_[x[::-1], x, x[-1:]],
-                np.r_[np.zeros_like(x), density, [0]],
-                fill_color=color,
-                fill_alpha=shade,
-                **extra
+            plotted.append(
+                ax.patch(
+                    np.r_[x[::-1], x, x[-1:]],
+                    np.r_[np.zeros_like(x), density, [0]],
+                    fill_color=color,
+                    fill_alpha=shade,
+                    muted_color=color,
+                    muted_alpha=0.2,
+                    **extra
+                )
             )
 
     else:
@@ -162,36 +186,45 @@ def _d_helper(
         _, hist, edges = histogram(vec, bins=bins)
 
         if outline:
-            ax.quad(
-                top=hist,
-                bottom=0,
-                left=edges[:-1],
-                right=edges[1:],
-                line_color=color,
-                fill_color=None,
-                **extra
+            plotted.append(
+                ax.quad(
+                    top=hist,
+                    bottom=0,
+                    left=edges[:-1],
+                    right=edges[1:],
+                    line_color=color,
+                    fill_color=None,
+                    muted_color=color,
+                    muted_alpha=0.2,
+                    **extra
+                )
             )
         else:
-            ax.quad(
-                top=hist,
-                bottom=0,
-                left=edges[:-1],
-                right=edges[1:],
-                line_color=color,
-                fill_color=color,
-                fill_alpha=shade,
-                **extra
+            plotted.append(
+                x.quad(
+                    top=hist,
+                    bottom=0,
+                    left=edges[:-1],
+                    right=edges[1:],
+                    line_color=color,
+                    fill_color=color,
+                    fill_alpha=shade,
+                    muted_color=color,
+                    muted_alpha=0.2,
+                    **extra
+                )
             )
 
     if hpd_markers:
-        ax.diamond(xmin, 0, line_color="black", fill_color=color, size=markersize)
-        ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize)
+        plotted.append(ax.diamond(xmin, 0, line_color="black", fill_color=color, size=markersize))
+        plotted.append(ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize))
 
     if point_estimate is not None:
         est = calculate_point_estimate(point_estimate, vec, bw)
-        ax.circle(est, 0, fill_color=color, line_color="black", size=markersize)
+        plotted.append(ax.circle(est, 0, fill_color=color, line_color="black", size=markersize))
 
     _title = Title()
     _title.text = vname
     ax.title = _title
-    ax.legend.click_policy = "hide"
+
+    return plotted
