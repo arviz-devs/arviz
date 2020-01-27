@@ -39,8 +39,9 @@ MPL_RST_TEMPLATE = """
 
 .. image:: {img_file}
 
-|   **Python source code:** :download:`[download source: {fname}]<{fname}>`
-|   **API documentation:** {api_name} 
+**Python source code:** :download:`[download source: {fname}]<{fname}>`
+
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -54,8 +55,9 @@ BOKEH_RST_TEMPLATE = """
 .. bokeh-plot:: {absfname}
     :source-position: none
 
-|   **Python source code:** :download:`[download source: {fname}]<{fname}>`
-|   **API documentation:** {api_name} 
+**Python source code:** :download:`[download source: {fname}]<{fname}>`
+
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
