@@ -4,7 +4,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models import Dash, Span, ColumnDataSource
-from bokeh.models.annotations import Title
+from bokeh.models.annotations import Title, Legend
 from scipy.stats import rankdata
 
 from . import backend_kwarg_defaults, backend_show
@@ -74,12 +74,12 @@ def plot_ess(
     for (var_name, selection, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
-        ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
+        bulk_points = ax_.circle(np.asarray(xdata), np.asarray(x), size=6)
         if kind == "evolution":
-            ax_.line(np.asarray(xdata), np.asarray(x), legend_label="bulk")
+            bulk_line = ax_.line(np.asarray(xdata), np.asarray(x))
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
-            ax_.line(np.asarray(xdata), np.asarray(ess_tail), color="orange", legend_label="tail")
-            ax_.circle(np.asarray(xdata), np.asarray(ess_tail), size=6, color="orange")
+            tail_points = ax_.line(np.asarray(xdata), np.asarray(ess_tail), color="orange")
+            tail_line = ax_.circle(np.asarray(xdata), np.asarray(ess_tail), size=6, color="orange")
         elif rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
@@ -152,6 +152,14 @@ def plot_ess(
         )
 
         ax_.renderers.append(hline)
+
+        if kind == "evolution":
+            legend = Legend(
+                items=[("bulk", [bulk_points, bulk_line]), ("tail", [tail_line, tail_points])],
+                location="center_right", orientation="horizontal",
+            )
+            ax_.add_layout(legend, "above")
+            ax_.legend.click_policy = "hide"
 
         title = Title()
         title.text = make_label(var_name, selection)

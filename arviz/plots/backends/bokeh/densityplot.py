@@ -67,7 +67,7 @@ def plot_density(
 
     legend_items = {}
     for m_idx, plotters in enumerate(to_plot):
-        for ax_idx, (var_name, selection, values) in enumerate(plotters):
+        for _, (var_name, selection, values) in enumerate(plotters):
             label = make_label(var_name, selection)
 
             if data_labels:
@@ -88,7 +88,6 @@ def plot_density(
                 outline,
                 shade,
                 axis_map[label],
-                data_label=data_label,
             )
             if data_label is not None:
                 if axis_map[label] in legend_items.keys():
@@ -97,8 +96,8 @@ def plot_density(
                     legend_items[axis_map[label]] = []
                     legend_items[axis_map[label]].append((data_label, plotted))
 
-    for ax1, lg in legend_items.items():
-        legend = Legend(items=lg, location="center_right", orientation="horizontal",)
+    for ax1, legend in legend_items.items():
+        legend = Legend(items=legend, location="center_right", orientation="horizontal",)
         ax1.add_layout(legend, "above")
         ax1.legend.click_policy = "hide"
 
@@ -122,7 +121,6 @@ def _d_helper(
     outline,
     shade,
     ax,
-    data_label,
 ):
 
     extra = dict()
@@ -226,5 +224,6 @@ def _d_helper(
     _title = Title()
     _title.text = vname
     ax.title = _title
+    ax.title.text_font_size = "15pt"
 
     return plotted
