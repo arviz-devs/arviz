@@ -156,7 +156,8 @@ def plot_ess(
         if kind == "evolution":
             legend = Legend(
                 items=[("bulk", [bulk_points, bulk_line]), ("tail", [tail_line, tail_points])],
-                location="center_right", orientation="horizontal",
+                location="center_right",
+                orientation="horizontal",
             )
             ax_.add_layout(legend, "above")
             ax_.legend.click_policy = "hide"

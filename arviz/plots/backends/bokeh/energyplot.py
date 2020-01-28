@@ -96,11 +96,7 @@ def plot_energy(
             ax.add_layout(bfmi_info)
 
     if legend and label is not None:
-        legend = Legend(
-            items=labels,
-            location="center_right",
-            orientation="horizontal",
-        )
+        legend = Legend(items=labels, location="center_right", orientation="horizontal",)
         ax.add_layout(legend, "above")
         ax.legend.click_policy = "hide"
 
