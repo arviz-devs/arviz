@@ -12,13 +12,13 @@ data.load                    : lazy  # Sets the default data loading mode.
 # rcParams related with plotting functions
 plot.backend                 : matplotlib  # One of bokeh, matplotlib
 
+plot.bokeh.bounds            : auto        # either auto, None or tuple of size 2
 plot.bokeh.tools             : pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover
 plot.bokeh.output_backend    : webgl       # one of canvas, svg, webgl
 plot.bokeh.figure.dpi        : 60          # dots (pixels) per inch
 plot.bokeh.figure.height     : 500         # num of pixels
 plot.bokeh.figure.width      : 500         # num of pixels
 plot.bokeh.show              : true        # call bokeh.plotting.show for figure or grid of figures. One of "true", "false"
-bokeh.bounds                 : auto        # either auto, none or tuple of size 2
 
 plot.matplotlib.constrained_layout : true  # One of "true" or "false"
 plot.matplotlib.show         : false       # call plt.show. One of "true", "false"

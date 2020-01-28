@@ -41,8 +41,8 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     ax.xaxis.major_label_overrides = dict(zip(map(str, range(len(var_names))), map(str, var_names)))
     ax.xaxis.major_label_orientation = np.pi / 2
 
-    ax.x_range = DataRange1d(bounds=rcParams["bokeh.bounds"])
-    ax.y_range = DataRange1d(bounds=rcParams["bokeh.bounds"])
+    ax.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
+    ax.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
 
     if backend_show(show):
         bkp.show(ax)

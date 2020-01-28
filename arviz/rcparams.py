@@ -7,6 +7,7 @@ import pprint
 import logging
 import locale
 from collections.abc import MutableMapping
+import numpy as np
 
 _log = logging.getLogger(__name__)
 
@@ -78,6 +79,14 @@ def _validate_float(value):
     return value
 
 
+def _validate_float_or_none(value):
+    """Validate value is a float or None."""
+    if value is None or isinstance(value, str) and value.lower() == "none":
+        return None
+    else:
+        return _validate_float(value)
+
+
 def _validate_probability(value):
     """Validate a probability: a float between 0 and 1."""
     value = _validate_float(value)
@@ -93,16 +102,29 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
-def _validate_tuple(value):
-    """Validate value is a tuple of size 2."""
-    if value is None:
-        return value
+def _validate_float_iterable(value, length):
+    """Validate value is a float iterable of given length."""
+    if value is None or isinstance(value, str) and value.lower() == "none":
+        return None
     elif value == "auto":
         return value
-    elif isinstance(value, tuple) and len(value) == 2:
-        return value
+    elif isinstance(value, str):
+        try:
+            val = [_validate_float_or_none(v.strip("( )")) for v in value.split(',') if v.strip()]
+            if len(val) == length:
+                return tuple(val)
+            else:
+                raise ValueError("Iterable must be of length: {}".format(length))
+        except Exception:
+            raise
+    elif np.iterable(value) and not isinstance(value, (set, frozenset)):
+        val = [_validate_float_or_none(v) for v in value]
+        if len(val) == length:
+            return tuple(val)
+        else:
+            raise ValueError("Iterable must be of length: {}".format(length))
     else:
-        raise ValueError("Only tuple of size 2 is valid.")
+        raise ValueError("Only float iterable values are valid")
 
 
 defaultParams = {  # pylint: disable=invalid-name
@@ -110,6 +132,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.bokeh.bounds": ("auto", _validate_float_iterable(length=2)),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
         lambda x: x,
@@ -119,7 +142,6 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
-    "bokeh.bounds": ("auto", _validate_tuple),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),

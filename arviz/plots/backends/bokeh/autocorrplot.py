@@ -61,8 +61,8 @@ def plot_autocorr(
         ax.title = title
 
     if axes.size > 0:
-        axes[0, 0].x_range = DataRange1d(bounds=rcParams["bokeh.bounds"], start=0, end=max_lag)
-        axes[0, 0].y_range = DataRange1d(bounds=rcParams["bokeh.bounds"], start=-1, end=1)
+        axes[0, 0].x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"], start=0, end=max_lag)
+        axes[0, 0].y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"], start=-1, end=1)
 
     if backend_show(show):
         bkp.show(gridplot(axes.tolist(), toolbar_location="above"))
