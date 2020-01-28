@@ -103,7 +103,7 @@ class PyroConverter:
                 shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
                 data["log_likelihood"] = np.reshape(log_likelihood, shape)
                 dims = {"log_likelihood": coord_name}
-            except:
+            except:  # pylint: disable=bare-except
                 # cannot get vectorized trace
                 pass
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
