@@ -234,7 +234,11 @@ def plot_kde(
 
     if backend_show(show):
         bkp.show(ax, toolbar_location="above")
-    return glyphs
+
+    if legend and label is not None:
+        return glyphs
+
+    return ax
 
 
 def _scale_axis(arr, args=None):
