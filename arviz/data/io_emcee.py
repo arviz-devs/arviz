@@ -433,7 +433,7 @@ def from_emcee(
         >>>     var_names = ["mu", "tau", "eta"],
         >>>     slices=[0, 1, slice(2,None)],
         >>>     arg_names=["y","sigma"],
-        >>>     arg_groups=["observed_data", "constant_data"]
+        >>>     arg_groups=["observed_data", "constant_data"],
         >>>     blob_names=["log_likelihood", "y"],
         >>>     blob_groups=["log_likelihood", "posterior_predictive"],
         >>>     dims=dims,
