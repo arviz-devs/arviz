@@ -368,12 +368,12 @@ def purge_duplicates(list_in):
         List of first occurrences in order
     """
     # Algorithm taken from Stack Overflow,
-    # https://stackoverflow.com/questions/480214. Content by Georgy 
+    # https://stackoverflow.com/questions/480214. Content by Georgy
     # Skorobogatov (https://stackoverflow.com/users/7851470/georgy) and
-    # Markus Jarderot 
+    # Markus Jarderot
     # (https://stackoverflow.com/users/22364/markus-jarderot), licensed
-    # under CC-BY-SA 4.0. 
-    # https://creativecommons.org/licenses/by-sa/4.0/. 
+    # under CC-BY-SA 4.0.
+    # https://creativecommons.org/licenses/by-sa/4.0/.
 
     seen = set()
     seen_add = seen.add
