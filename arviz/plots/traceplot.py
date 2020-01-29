@@ -15,6 +15,7 @@ def plot_trace(
     var_names=None,
     coords=None,
     divergences="bottom",
+    transform=None,
     figsize=None,
     rug=False,
     lines=None,
@@ -46,6 +47,8 @@ def plot_trace(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
+    transform : callable
+    	Function to transform data (defaults to identity)
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     rug : bool
@@ -137,6 +140,9 @@ def plot_trace(
         divergence_data = False
 
     data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+
+    data = transform(data)
+
     var_names = _var_names(var_names, data)
 
     if lines is None:
