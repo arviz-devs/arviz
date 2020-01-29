@@ -22,7 +22,7 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
-    credible_interval=0.94,
+    credible_interval=None,
     point_estimate="auto",
     colors="cycle",
     outline=True,
@@ -176,8 +176,11 @@ def plot_density(
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if not 1 >= credible_interval > 0:
-        raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -196,7 +199,7 @@ def plot_density(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
             "of variables to plot ({len_plotters}) in plot_density, generating only "
             "{max_plots} plots".format(max_plots=max_plots, len_plotters=length_plotters),
-            SyntaxWarning,
+            UserWarning,
         )
         all_labels = all_labels[:max_plots]
         to_plot = [

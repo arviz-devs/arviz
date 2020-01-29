@@ -1,6 +1,6 @@
+#  pylint: disable=too-many-instance-attributes
 """PyStan-specific conversion code."""
 from collections import OrderedDict
-from copy import deepcopy
 import re
 
 import numpy as np
@@ -18,20 +18,24 @@ class PyStanConverter:
         *,
         posterior=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_predictive=None,
         observed_data=None,
         constant_data=None,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -50,13 +54,20 @@ class PyStanConverter:
             posterior_predictive = []
         elif isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
+        predictions = self.predictions
+        if predictions is None:
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [predictions]
         log_likelihood = self.log_likelihood
-        if not isinstance(log_likelihood, str):
+        if log_likelihood is None:
             log_likelihood = []
-        else:
+        elif isinstance(log_likelihood, str):
             log_likelihood = [log_likelihood]
+        elif isinstance(log_likelihood, dict):
+            log_likelihood = list(log_likelihood.values())
 
-        ignore = posterior_predictive + log_likelihood + ["lp__"]
+        ignore = posterior_predictive + predictions + log_likelihood + ["lp__"]
 
         data = get_draws(posterior, ignore=ignore)
 
@@ -67,19 +78,33 @@ class PyStanConverter:
         """Extract sample_stats from posterior."""
         posterior = self.posterior
 
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
+        data = get_sample_stats(posterior)
 
-        # log_likelihood
+        # lp__
+        stat_lp = get_draws(posterior, variables="lp__")
+        data["lp"] = stat_lp["lp__"]
+
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Store log_likelihood data in log_likelihood group."""
+        fit = self.posterior
+
+        # log_likelihood values
         log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            if isinstance(log_likelihood, str) and log_likelihood in dims:
-                dims["log_likelihood"] = dims.pop(log_likelihood)
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        if isinstance(log_likelihood, (list, tuple)):
+            log_likelihood = {name: name for name in log_likelihood}
+        log_likelihood_draws = get_draws(fit, variables=list(log_likelihood.values()))
+        data = {
+            obs_var_name: log_likelihood_draws[log_like_name]
+            for obs_var_name, log_like_name in log_likelihood.items()
+        }
 
-        data = get_sample_stats(posterior, log_likelihood)
-
-        return dict_to_dataset(data, library=self.pystan, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -88,6 +113,15 @@ class PyStanConverter:
         posterior = self.posterior
         posterior_predictive = self.posterior_predictive
         data = get_draws(posterior, variables=posterior_predictive)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions samples to xarray."""
+        posterior = self.posterior
+        predictions = self.predictions
+        data = get_draws(posterior, variables=predictions)
         return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -125,7 +159,7 @@ class PyStanConverter:
     @requires("posterior")
     @requires(["observed_data", "constant_data"])
     def observed_and_constant_data_to_xarray(self):
-        """Convert observed data to xarray."""
+        """Convert observed and constant data to xarray."""
         posterior = self.posterior
         if self.dims is None:
             dims = {}
@@ -150,6 +184,27 @@ class PyStanConverter:
             )
         return obs_const_dict
 
+    @requires("posterior")
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions constant data to xarray."""
+        posterior = self.posterior
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        names = self.predictions_constant_data
+        names = [names] if isinstance(names, str) else names
+        data = OrderedDict()
+        for key in names:
+            vals = np.atleast_1d(posterior.data[key])
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=data, attrs=make_attrs(library=self.pystan))
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -158,15 +213,23 @@ class PyStanConverter:
         will not have those groups.
         """
         obs_const_dict = self.observed_and_constant_data_to_xarray()
+        predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 **({} if obs_const_dict is None else obs_const_dict),
+                **(
+                    {}
+                    if predictions_const_data is None
+                    else {"predictions_constant_data": predictions_const_data}
+                ),
             }
         )
 
@@ -181,11 +244,13 @@ class PyStan3Converter:
         posterior=None,
         posterior_model=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_model=None,
         prior_predictive=None,
         observed_data=None,
         constant_data=None,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
@@ -193,11 +258,13 @@ class PyStan3Converter:
         self.posterior = posterior
         self.posterior_model = posterior_model
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior = prior
         self.prior_model = prior_model
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -217,13 +284,20 @@ class PyStan3Converter:
             posterior_predictive = []
         elif isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
+        predictions = self.predictions
+        if predictions is None:
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [predictions]
         log_likelihood = self.log_likelihood
-        if not isinstance(log_likelihood, str):
+        if log_likelihood is None:
             log_likelihood = []
-        else:
+        elif isinstance(log_likelihood, str):
             log_likelihood = [log_likelihood]
+        elif isinstance(log_likelihood, dict):
+            log_likelihood = list(log_likelihood.values())
 
-        ignore = posterior_predictive + log_likelihood
+        ignore = posterior_predictive + predictions + log_likelihood
 
         data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore)
 
@@ -233,22 +307,31 @@ class PyStan3Converter:
     def sample_stats_to_xarray(self):
         """Extract sample_stats from posterior."""
         posterior = self.posterior
-        posterior_model = self.posterior_model
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
+        data = get_sample_stats_stan3(posterior, ignore="lp__")
+        data["lp"] = get_sample_stats_stan3(posterior, variables="lp__")["lp"]
+        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
-        # log_likelihood
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Store log_likelihood data in log_likelihood group."""
+        fit = self.posterior
+
         log_likelihood = self.log_likelihood
-        if log_likelihood is not None:
-            if isinstance(log_likelihood, str) and log_likelihood in dims:
-                dims["log_likelihood"] = dims.pop(log_likelihood)
-
-        data = get_sample_stats_stan3(
-            posterior, model=posterior_model, log_likelihood=log_likelihood
+        model = self.posterior_model
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        if isinstance(log_likelihood, (list, tuple)):
+            log_likelihood = {name: name for name in log_likelihood}
+        log_likelihood_draws = get_draws_stan3(
+            fit, model=model, variables=list(log_likelihood.values())
         )
+        data = {
+            obs_var_name: log_likelihood_draws[log_like_name]
+            for obs_var_name, log_like_name in log_likelihood.items()
+        }
 
-        return dict_to_dataset(data, library=self.stan, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -258,6 +341,16 @@ class PyStan3Converter:
         posterior_model = self.posterior_model
         posterior_predictive = self.posterior_predictive
         data = get_draws_stan3(posterior, model=posterior_model, variables=posterior_predictive)
+        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions samples to xarray."""
+        posterior = self.posterior
+        posterior_model = self.posterior_model
+        predictions = self.predictions
+        data = get_draws_stan3(posterior, model=posterior_model, variables=predictions)
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -281,8 +374,7 @@ class PyStan3Converter:
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats_prior from prior."""
         prior = self.prior
-        prior_model = self.prior_model
-        data = get_sample_stats_stan3(prior, model=prior_model)
+        data = get_sample_stats_stan3(prior)
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -323,6 +415,27 @@ class PyStan3Converter:
             )
         return obs_const_dict
 
+    @requires("posterior_model")
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert observed data to xarray."""
+        posterior_model = self.posterior_model
+        if self.dims is None:
+            dims = {}
+        else:
+            dims = self.dims
+        names = self.predictions_constant_data
+        names = [names] if isinstance(names, str) else names
+        data = OrderedDict()
+        for key in names:
+            vals = np.atleast_1d(posterior_model.data[key])
+            val_dims = dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=data, attrs=make_attrs(library=self.stan))
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -331,15 +444,23 @@ class PyStan3Converter:
         will not have those groups.
         """
         obs_const_dict = self.observed_and_constant_data_to_xarray()
+        predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 **({} if obs_const_dict is None else obs_const_dict),
+                **(
+                    {}
+                    if predictions_const_data is None
+                    else {"predictions_constant_data": predictions_const_data}
+                ),
             }
         )
 
@@ -428,7 +549,7 @@ def get_draws(fit, variables=None, ignore=None):
     return data
 
 
-def get_sample_stats(fit, log_likelihood=None):
+def get_sample_stats(fit):
     """Extract sample stats from PyStan fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
@@ -450,15 +571,6 @@ def get_sample_stats(fit, log_likelihood=None):
         name = re.sub("__$", "", key)
         name = "diverging" if name == "divergent" else name
         data[name] = values
-
-    # log_likelihood
-    if log_likelihood is not None:
-        log_likelihood_data = get_draws(fit, variables=log_likelihood)
-        data["log_likelihood"] = log_likelihood_data[log_likelihood]
-
-    # lp__
-    stat_lp = get_draws(fit, variables="lp__")
-    data["lp"] = stat_lp["lp__"]
 
     return data
 
@@ -496,12 +608,19 @@ def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     return data
 
 
-def get_sample_stats_stan3(fit, model=None, log_likelihood=None):
+def get_sample_stats_stan3(fit, variables=None, ignore=None):
     """Extract sample stats from PyStan3 fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
+    if isinstance(variables, str):
+        variables = [variables]
+    if isinstance(ignore, str):
+        ignore = [ignore]
+
     data = OrderedDict()
     for key in fit.sample_and_sampler_param_names:
+        if (variables and key not in variables) or (ignore and key in ignore):
+            continue
         new_shape = -1, fit.num_chains
         values = fit._draws[fit._parameter_indexes(key)]  # pylint: disable=protected-access
         values = values.reshape(new_shape, order="F")
@@ -511,11 +630,6 @@ def get_sample_stats_stan3(fit, model=None, log_likelihood=None):
         name = re.sub("__$", "", key)
         name = "diverging" if name == "divergent" else name
         data[name] = values
-
-    # log_likelihood
-    if log_likelihood is not None:
-        log_likelihood_data = get_draws_stan3(fit, model=model, variables=log_likelihood)
-        data["log_likelihood"] = log_likelihood_data[log_likelihood]
 
     return data
 
@@ -558,10 +672,12 @@ def from_pystan(
     posterior=None,
     *,
     posterior_predictive=None,
+    predictions=None,
     prior=None,
     prior_predictive=None,
     observed_data=None,
     constant_data=None,
+    predictions_constant_data=None,
     log_likelihood=None,
     coords=None,
     dims=None,
@@ -576,6 +692,8 @@ def from_pystan(
         PyStan fit object for posterior.
     posterior_predictive : str, a list of str
         Posterior predictive samples for the posterior.
+    predictions : str, a list of str
+        Out-of-sample predictions for the posterior.
     prior : StanFit4Model or stan.fit.Fit
         PyStan fit object for prior.
     prior_predictive : str, a list of str
@@ -588,9 +706,15 @@ def from_pystan(
     constant_data : str or list of str
         Constants relevant to the model (i.e. x values in a linear
         regression).
-    log_likelihood : str
-        Pointwise log_likelihood for the data.
-        log_likelihood is extracted from the posterior.
+    predictions_constant_data : str or list of str
+        Constants relevant to the model predictions (i.e. new x values in a linear
+        regression).
+    log_likelihood : dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        equal to its values is used.
     coords : dict[str, iterable]
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -613,11 +737,13 @@ def from_pystan(
             posterior=posterior,
             posterior_model=posterior_model,
             posterior_predictive=posterior_predictive,
+            predictions=predictions,
             prior=prior,
             prior_model=prior_model,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
             constant_data=constant_data,
+            predictions_constant_data=predictions_constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,
@@ -626,10 +752,12 @@ def from_pystan(
         return PyStanConverter(
             posterior=posterior,
             posterior_predictive=posterior_predictive,
+            predictions=predictions,
             prior=prior,
             prior_predictive=prior_predictive,
             observed_data=observed_data,
             constant_data=constant_data,
+            predictions_constant_data=predictions_constant_data,
             log_likelihood=log_likelihood,
             coords=coords,
             dims=dims,

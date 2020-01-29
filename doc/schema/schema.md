@@ -20,22 +20,20 @@ Currently there are 2 beta implementations of this design:
   <ol>
     <li><a class="reference internal" href="#posterior">posterior</a></li>
     <li><a class="reference internal" href="#sample-stats">sample_stats</a></li>
+    <li><a class="reference internal" href="#log-likelihood">log_likelihood</a></li>
     <li><a class="reference internal" href="#posterior-predictive">posterior_predictive</a></li>
     <li><a class="reference internal" href="#observed-data">observed_data</a></li>
     <li><a class="reference internal" href="#constant-data">constant_data</a></li>
     <li><a class="reference internal" href="#prior">prior</a></li>
     <li><a class="reference internal" href="#sample-stats-prior">sample_stats_prior</a></li>
     <li><a class="reference internal" href="#prior-predictive">prior_predictive</a></li>
+    <li><a class="reference internal" href="#predictions">predictions</a>
+    <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
   </ol>
  </li>
  <li><a class="reference internal" href="#planned-features">Planned Features</a>
   <ol>
     <li><a class="reference internal" href="#sampler-parameters">Sampler parameters</a>
-    <li><a class="reference internal" href="#out-of-sample-posterior-predictive-samples">Out of sample posterior_predictive samples</a>
-    <ol>
-      <li><a class="reference internal" href="#predictions">predictions</a>
-      <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
-    </ol>
   </ol>
  </li>
  <li><a class="reference internal" href="#examples">Examples</a></li>
@@ -81,6 +79,12 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 * `energy_error`
 * `max_energy_error`
 
+### `log_likelihood`
+Pointwise log likelihood data. Samples should match with `posterior` ones and its variables
+should match `observed_data` variables. The `observed_data` counterpart variable
+may have a different name. Moreover, some cases such as a multivariate normal
+may require some dimensions or coordinates to be different.
+
 ### `posterior_predictive`
 Posterior predictive samples p(y|y) corresponding to the posterior predictive distribution evaluated at the `observed_data`. Samples should match with `posterior` ones and its variables should match `observed_data` variables. The `observed_data` counterpart variable may have a different name.
 
@@ -99,18 +103,17 @@ Information and diagnostics for the samples in the `prior` group, provided by th
 ### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
 
+### `predictions`
+Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
+
+### `predictions_constant_data`
+Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
+
 ## Planned features
 The `InferenceData` structure is still evolving, with some feature being currently developed. This section aims to describe the roadmap of the specification.
 
 ### Sampler parameters
 Parameters of the sampling algorithm and sampling backend to be used for analysis reproducibility.
-
-### Out of sample `posterior_predictive` samples
-#### `predictions`
-Out of sample posterior predictive samples p(y'|y). Samples should match `posterior` samples. Its variables should have a counterpart in `posterior_predictive`. However, variables in `predictions` and their counterpart in `posterior_predictive` can have different coordinate values.
-
-#### `predictions_constant_data`
-Model constants used to get the `predictions` samples. Its variables should have a counterpart in `constant_data`. However, variables in `predictions_constant_data` and their counterpart in `constant_data` can have different coordinate values.
 
 ## Examples
 In order to clarify the definitions above, an example of `InferenceData` generation for a 1D linear regression is available in several programming languages and probabilistic programming frameworks. This particular inference task has been chosen because it is widely well known while still being useful and it also allows to populate all the fields in the `InferenceData` object.

@@ -100,10 +100,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             get_from = None
             if predictions is not None:
                 get_from = predictions
-            elif prior is not None:
-                get_from = prior
             elif posterior_predictive is not None:
                 get_from = posterior_predictive
+            elif prior is not None:
+                get_from = prior
             if get_from is None:
                 # pylint: disable=line-too-long
                 raise ValueError(
@@ -130,42 +130,31 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             return {obs.name: obs.observations for obs in self.model.observed_RVs}
         return None
 
+    def log_likelihood_vals_point(self, point, var, log_like_fun):
+        """Compute log likelihood for each observed point."""
+        log_like_val = utils.one_de(log_like_fun(point))
+        if var.missing_values:
+            log_like_val = np.where(var.observations.mask, np.nan, log_like_val)
+        return log_like_val
+
     @requires("trace")
     @requires("model")
     def _extract_log_likelihood(self):
-        """Compute log likelihood of each observation.
-
-        Return None if there is not exactly 1 observed random variable.
-        """
+        """Compute log likelihood of each observation."""
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
-        if len(self.model.observed_RVs) != 1 or self.predictions:
-            return None, None
-        else:
-            if self.dims is not None:
-                coord_name = self.dims.get(
-                    "log_likelihood", self.dims.get(self.model.observed_RVs[0].name)
-                )
-            else:
-                coord_name = None
-
         cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
-
-        def log_likelihood_vals_point(point):
-            """Compute log likelihood for each observed point."""
-            log_like_vals = []
-            for var, log_like in cached:
-                log_like_val = utils.one_de(log_like(point))
-                if var.missing_values:
-                    log_like_val = log_like_val[~var.observations.mask]
-                log_like_vals.append(log_like_val)
-            return np.concatenate(log_like_vals)
-
-        chain_likelihoods = []
-        for chain in self.trace.chains:
-            log_like = [log_likelihood_vals_point(point) for point in self.trace.points([chain])]
-            chain_likelihoods.append(np.stack(log_like))
-        return np.stack(chain_likelihoods), coord_name
+        log_likelihood_dict = {}
+        for var, log_like_fun in cached:
+            chain_likelihoods = []
+            for chain in self.trace.chains:
+                log_like_chain = [
+                    self.log_likelihood_vals_point(point, var, log_like_fun)
+                    for point in self.trace.points([chain])
+                ]
+                chain_likelihoods.append(np.stack(log_like_chain))
+            log_likelihood_dict[var.name] = np.stack(chain_likelihoods)
+        return log_likelihood_dict
 
     @requires("trace")
     def posterior_to_xarray(self):
@@ -181,19 +170,23 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("trace")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from PyMC3 trace."""
+        data = {}
         rename_key = {"model_logp": "lp"}
         data = {}
         for stat in self.trace.stat_names:
             name = rename_key.get(stat, stat)
             data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
-        log_likelihood, dims = self._extract_log_likelihood()
-        if log_likelihood is not None:
-            data["log_likelihood"] = log_likelihood
-            dims = {"log_likelihood": dims}
-        else:
-            dims = None
 
-        return dict_to_dataset(data, library=self.pymc3, dims=dims, coords=self.coords)
+        return dict_to_dataset(data, library=self.pymc3, dims=None, coords=self.coords)
+
+    @requires("trace")
+    @requires("model")
+    def log_likelihood_to_xarray(self):
+        """Extract log likelihood and log_p data from PyMC3 trace."""
+        if self.predictions:
+            return None
+        data = self._extract_log_likelihood()
+        return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
         """Take Dict of variables to numpy ndarrays (samples) and translate into dataset."""
@@ -339,6 +332,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         id_dict = {
             "posterior": self.posterior_to_xarray(),
             "sample_stats": self.sample_stats_to_xarray(),
+            "log_likelihood": self.log_likelihood_to_xarray(),
             "posterior_predictive": self.posterior_predictive_to_xarray(),
             "predictions": self.predictions_to_xarray(),
             **self.priors_to_xarray(),

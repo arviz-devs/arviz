@@ -359,16 +359,15 @@ def test_loo_warning(centered_eight):
     centered_eight = deepcopy(centered_eight)
     # make one of the khats infinity
     centered_eight.sample_stats["log_likelihood"][:, :, 1] = 10
-    with pytest.warns(UserWarning) as record:
+    with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
-    assert len(record) == 1
-    assert "Estimated shape parameter" in str(record[0].message)
+    assert any("Estimated shape parameter" in str(record.message) for record in records)
+
     # make all of the khats infinity
     centered_eight.sample_stats["log_likelihood"][:, :, :] = 1
-    with pytest.warns(UserWarning) as record:
+    with pytest.warns(UserWarning) as records:
         assert loo(centered_eight, pointwise=True) is not None
-    assert len(record) == 1
-    assert "Estimated shape parameter" in str(record[0].message)
+    assert any("Estimated shape parameter" in str(record.message) for record in records)
 
 
 @pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])

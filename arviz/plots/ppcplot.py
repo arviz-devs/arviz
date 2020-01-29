@@ -62,8 +62,10 @@ def plot_ppc(
     data_pairs : dict
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
-            key = data var_name
-            value = posterior/prior predictive var_name
+
+        - key = data var_name
+        - value = posterior/prior predictive var_name
+
         For example, `data_pairs = {'y' : 'y_hat'}`
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.

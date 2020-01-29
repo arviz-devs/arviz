@@ -22,6 +22,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
     histogram,
+    get_log_likelihood as _get_log_likelihood,
 )
 from ..utils import _var_names, Numba, _numba_var
 from ..rcparams import rcParams
@@ -302,7 +303,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
+def hpd(ary, credible_interval=None, circular=False, multimodal=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -338,6 +339,12 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
            ...: data = np.random.normal(size=2000)
            ...: az.hpd(data, credible_interval=.68)
     """
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
     if ary.ndim > 1:
         hpd_array = np.array(
             [
@@ -395,10 +402,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
         interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
         if len(interval_width) == 0:
-            raise ValueError(
-                "Too few elements for interval calculation. "
-                "Check that credible_interval meets condition 0 =< credible_interval < 1"
-            )
+            raise ValueError("Too few elements for interval calculation. ")
 
         min_idx = np.argmin(interval_width)
         hdi_min = ary[min_idx]
@@ -478,11 +482,8 @@ def loo(data, pointwise=False, reff=None, scale=None):
 
     """
     inference_data = convert_to_inference_data(data)
-    if not hasattr(inference_data, "sample_stats"):
-        raise TypeError("Must be able to extract a sample_stats group from data.")
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data)
+
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
@@ -803,7 +804,7 @@ def summary(
     include_circ=None,
     stat_funcs=None,
     extend=True,
-    credible_interval=0.94,
+    credible_interval=None,
     order="C",
     index_origin=None,
     coords: Optional[CoordSpec] = None,
@@ -902,6 +903,11 @@ def summary(
         extra_args["dims"] = dims
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]
@@ -1152,14 +1158,7 @@ def waic(data, pointwise=False, scale=None):
     `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("sample_stats",):
-        if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data.".format(group=group)
-            )
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data)
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
     if scale == "deviance":
@@ -1292,6 +1291,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
+    y_str = ""
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
 
@@ -1308,6 +1308,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif y_hat is None:
             raise ValueError("y_hat cannot be None if y is not a str")
         if isinstance(y, str):
+            y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
@@ -1318,7 +1319,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
-            log_likelihood = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+            if y_str:
+                try:
+                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                except TypeError:
+                    log_likelihood = _get_log_likelihood(idata)
+            else:
+                log_likelihood = _get_log_likelihood(idata)
+            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)
