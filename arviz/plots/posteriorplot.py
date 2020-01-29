@@ -190,7 +190,7 @@ def plot_posterior(
 
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]
-    elif point_estimate not in {'mean', 'median', 'mode', None}:
+    elif point_estimate not in {"mean", "median", "mode", None}:
         raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
     plotters = filter_plotters_list(

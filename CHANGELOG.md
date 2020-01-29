@@ -17,7 +17,7 @@
 * Rename flat_inference_data_to_dict (#1003)
 * Violinplot: fix histogram (#997)
 * Convert all instances of SyntaxWarning to UserWarning (#1016)
-* Fixed `point_estimate` in `plot_posterior` (#1038)
+* Fix `point_estimate` in `plot_posterior` (#1038)
 
 ### Deprecation
 
