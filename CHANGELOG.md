@@ -23,11 +23,10 @@
 ### Documentation
 * Updated `InferenceData` schema specification (`log_likelihood`,
   `predictions` and `predictions_constant_data` groups)
-*  Clarify the usage of "plot_joint" (#1001)
-*  Added the API link of function to examples (#1013)
-* Clarify the usage of "plot_joint" (#1001)
+* Clarify the usage of `plot_joint` (#1001)
 * Added the API link of function to examples (#1013)
 * Updated PyStan_schema_example to include example of out-of-sample prediction (#1032)
+* Added example for `concat` method (#1037)
 
 
 ## v0.6.1 (2019 Dec 28)
