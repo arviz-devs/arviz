@@ -104,10 +104,11 @@ def _validate_boolean(value):
 
 def iterable_validator(validate_scalar, length=None):
     """Validate value is an iterable datatype."""
+
     def validate_iterable(value):
         if isinstance(value, str):
             try:
-                val = [validate_scalar(v.strip("([ ])")) for v in value.split(',') if v.strip()]
+                val = [validate_scalar(v.strip("([ ])")) for v in value.split(",") if v.strip()]
                 if length is not None:
                     if len(val) == length:
                         return val
@@ -128,11 +129,13 @@ def iterable_validator(validate_scalar, length=None):
                 return val
         else:
             raise ValueError("Only iterable values are valid")
+
     return validate_iterable
 
 
 def _make_validate_float_iterable(length):
     """Validate value is a float iterable of given length."""
+
     def validate_float_iterable(value):
         if value is None or isinstance(value, str) and value.lower() == "none":
             return None
@@ -143,6 +146,7 @@ def _make_validate_float_iterable(length):
             return tuple(validate_floatlist(value))
         except:
             raise ValueError("Only float iterable values are valid.")
+
     return validate_float_iterable
 
 
