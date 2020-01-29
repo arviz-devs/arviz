@@ -18,7 +18,7 @@ from .stats_utils import (
     _sqrt,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var, _stack
+from ..utils import _var_names, conditional_jit, Numba, _numba_var, _stack
 
 __all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 
