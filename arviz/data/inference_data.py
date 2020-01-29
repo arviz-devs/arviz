@@ -252,6 +252,46 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     InferenceData
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
+
+    Examples
+    --------
+    Use ``concat`` method to concatenate InferenceData objects. This will concatenates over
+    unique groups by default. We first create an InferenceData object:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: import numpy as np
+           ...: import xarray as xr
+           ...: dataset = xr.Dataset(
+           ...:     {
+           ...:         "a": (["chain", "draw", "a_dim"], np.random.normal(size=(4, 100, 3))),
+           ...:         "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
+           ...:     },
+           ...:     coords={
+           ...:         "chain": (["chain"], np.arange(4)),
+           ...:         "draw": (["draw"], np.arange(100)),
+           ...:         "a_dim": (["a_dim"], ["x", "y", "z"]),
+           ...:     }
+           ...: )
+           ...: dataA = az.convert_to_inference_data(dataset)
+           ...: dataA
+
+    We have created an ``InferenceData`` object with default group 'posterior'. Now we will
+    create another InferenceData object:
+
+    .. ipython::
+
+        In [1]: dataB = az.convert_to_inference_data(dataset, group = "prior")
+           ...: dataB
+
+    We have created another ``InferenceData`` object with group 'prior'. Now we will concatenate
+    these two ``InferenceData`` objects:
+
+    .. ipython::
+
+        In [1]: az.concat(dataA, dataB)
+
     """
     # pylint: disable=undefined-loop-variable, too-many-nested-blocks
     if len(args) == 0:
