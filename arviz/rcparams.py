@@ -104,6 +104,9 @@ def _validate_boolean(value):
 
 def iterable_validator(validate_scalar, length=None):
     """Validate value is an iterable datatype."""
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
     def validate_iterable(value):
         if isinstance(value, str):
             try:
@@ -134,6 +137,9 @@ def iterable_validator(validate_scalar, length=None):
 
 def _make_validate_float_iterable(length):
     """Validate value is a float iterable of given length."""
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
     def validate_float_iterable(value):
         if value is None or isinstance(value, str) and value.lower() == "none":
             return None
