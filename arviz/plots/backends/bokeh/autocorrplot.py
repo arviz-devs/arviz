@@ -59,10 +59,16 @@ def plot_autocorr(
         title = Title()
         title.text = make_label(var_name, selection)
         ax.title = title
+        ax.x_range = DataRange1d(
+            start=0, end=max_lag, bounds=(0, len(np.arange(len(y)))), min_interval=5
+        )
+        ax.y_range = DataRange1d(start=-1, end=1, bounds=rcParams["plot.bokeh.bounds"])
 
-    if axes.size > 0:
-        axes[0, 0].x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"], start=0, end=max_lag)
-        axes[0, 0].y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"], start=-1, end=1)
+    for _, ax in zip(
+        plotters, (item for item in axes.flatten() if item is not None)
+    ):
+        ax.x_range = axes[0, 0].x_range
+        ax.y_range = axes[0, 0].y_range
 
     if backend_show(show):
         bkp.show(gridplot(axes.tolist(), toolbar_location="above"))
