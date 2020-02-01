@@ -224,6 +224,6 @@ def _d_helper(
     _title = Title()
     _title.text = vname
     ax.title = _title
-    ax.title.text_font_size = "15pt"
+    ax.title.text_font_size = "13pt"
 
     return plotted
