@@ -4,6 +4,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 import pytest
 from scipy.special import logsumexp
+from scipy.stats import circstd
 
 from ..data import load_arviz_data
 from ..stats.stats_utils import (
@@ -14,6 +15,10 @@ from ..stats.stats_utils import (
     ELPDData,
     stats_variance_2d,
     histogram,
+    _sqrt,
+    _angle,
+    _circfunc,
+    _circular_standard_deviation,
 )
 
 
@@ -257,3 +262,34 @@ def test_histogram():
     k_count_np, *_ = np.histogram(school, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf], density=False)
     assert np.allclose(k_count_az, k_count_np)
     assert np.allclose(k_dens_az, k_dens_np)
+
+
+def test_sqrt():
+    x = np.random.rand(100)
+    y = np.random.rand(100)
+    assert np.allclose(_sqrt(x, y), np.sqrt(x + y))
+
+
+def test_angle():
+    x = np.random.randn(100)
+    high = 8
+    low = 4
+    res = (x - low) * 2 * np.pi / (high - low)
+    assert np.allclose(_angle(x, low, high, np.pi), res)
+
+
+def test_circfunc():
+    school = load_arviz_data("centered_eight").posterior["mu"].values
+    a_a = _circfunc(school, 8, 4, skipna=False)
+    assert np.allclose(a_a, _angle(school, 4, 8, np.pi))
+
+
+@pytest.mark.parametrize(
+    "data", (np.random.randn(100), np.random.randn(100, 100), np.random.randn(100, 100, 100))
+)
+def test_circular_standard_deviation_1d(data):
+    high = 8
+    low = 4
+    assert np.allclose(
+        _circular_standard_deviation(data, high=high, low=low), circstd(data, high=high, low=low),
+    )

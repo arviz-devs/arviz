@@ -8,6 +8,7 @@
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
+* Add `skipna` argument to `hpd` and `summary` (#1035)
 
 ### Maintenance and fixes
 * Fixed bug in extracting prior samples for cmdstanpy (#979)
