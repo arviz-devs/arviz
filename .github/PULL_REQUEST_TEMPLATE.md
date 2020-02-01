@@ -29,18 +29,12 @@ consider the following points:
 - [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
       https://docs.pytest.org/en/latest/fixture.html#fixture))?
 - [ ] Is the code style correct (follows pylint and black guidelines)?
-- [ ] Is the new feature listed in the [New features](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#new-features) 
-      section of the changelog?
+- [ ] Is the change listed in [changelog](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#v0xx-unreleased )?
 
 <!--
 Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at 
 - https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md
 - https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md
-  
-- If you are contributing fixes to docstrings, please pay attention to
-  https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#docstring-formatting.
-  In particular, note the difference between using single backquotes, double backquotes, and
-  asterisks in the markup.
 
 We understand that PRs can sometimes be overwhelming, especially as the
 reviews start coming in.  Please let us know if the reviews are unclear or

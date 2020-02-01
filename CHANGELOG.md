@@ -3,7 +3,8 @@
 ## v0.x.x Unreleased
 
 ### New features
-* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 translations (#983)
+* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 and pystan translations (#983 and #1032)
+* Started adding pointwise log likelihood storage support (#794)
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
@@ -20,7 +21,13 @@
 ### Deprecation
 
 ### Documentation
+* Updated `InferenceData` schema specification (`log_likelihood`,
+  `predictions` and `predictions_constant_data` groups)
 *  Clarify the usage of "plot_joint" (#1001)
+*  Added the API link of function to examples (#1013)
+* Clarify the usage of "plot_joint" (#1001)
+* Added the API link of function to examples (#1013)
+* Updated PyStan_schema_example to include example of out-of-sample prediction (#1032)
 
 
 ## v0.6.1 (2019 Dec 28)
