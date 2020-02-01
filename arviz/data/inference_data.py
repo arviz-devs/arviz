@@ -262,19 +262,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
         In [1]: import arviz as az
            ...: import numpy as np
-           ...: import xarray as xr
-           ...: dataset = xr.Dataset(
-           ...:     {
-           ...:         "a": (["chain", "draw", "a_dim"], np.random.normal(size=(4, 100, 3))),
-           ...:         "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
-           ...:     },
-           ...:     coords={
-           ...:         "chain": (["chain"], np.arange(4)),
-           ...:         "draw": (["draw"], np.arange(100)),
-           ...:         "a_dim": (["a_dim"], ["x", "y", "z"]),
-           ...:     }
-           ...: )
-           ...: dataA = az.convert_to_inference_data(dataset)
+           ...: dataA = az.from_dict(posterior={"mu": np.random.randn()})
            ...: dataA
 
     We have created an ``InferenceData`` object with default group 'posterior'. Now we will
@@ -282,7 +270,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     .. ipython::
 
-        In [1]: dataB = az.convert_to_inference_data(dataset, group = "prior")
+        In [1]: dataB = az.from_dict(prior={"mu": np.random.randn()})
            ...: dataB
 
     We have created another ``InferenceData`` object with group 'prior'. Now we will concatenate
