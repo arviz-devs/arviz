@@ -102,26 +102,22 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
-def iterable_validator(validate_scalar, length=None):
+def make_iterable_validator(scalar_validator, length=None):
     """Validate value is an iterable datatype."""
-    # no blank lines allowed after function docstring by pydocstyle,
-    # but black requires white line before function
+    # based on matplotlib's _listify_validator function
 
     def validate_iterable(value):
         if isinstance(value, str):
-            try:
-                val = [validate_scalar(v.strip("([ ])")) for v in value.split(",") if v.strip()]
-                if length is not None:
-                    if len(val) == length:
-                        return val
-                    else:
-                        raise ValueError("Iterable must be of length: {}".format(length))
-                else:
+            val = tuple([scalar_validator(v.strip("([ ])")) for v in value.split(",") if v.strip()])
+            if length is not None:
+                if len(val) == length:
                     return val
-            except Exception:
-                raise
+                else:
+                    raise ValueError("Iterable must be of length: {}".format(length))
+            else:
+                return val
         elif np.iterable(value) and not isinstance(value, (set, frozenset)):
-            val = [validate_scalar(v) for v in value]
+            val = tuple([scalar_validator(v) for v in value])
             if length is not None:
                 if len(val) == length:
                     return val
@@ -137,8 +133,7 @@ def iterable_validator(validate_scalar, length=None):
 
 def _make_validate_float_iterable(length):
     """Validate value is a float iterable of given length."""
-    # no blank lines allowed after function docstring by pydocstyle,
-    # but black requires white line before function
+    # uses make_iterable_validator to validate float iterables
 
     def validate_float_iterable(value):
         if value is None or isinstance(value, str) and value.lower() == "none":
@@ -146,8 +141,8 @@ def _make_validate_float_iterable(length):
         elif value == "auto":
             return value
         try:
-            validate_floatlist = iterable_validator(_validate_float_or_none, length)
-            return tuple(validate_floatlist(value))
+            validate_floatlist = make_iterable_validator(_validate_float_or_none, length)
+            return validate_floatlist(value)
         except:
             raise ValueError("Only float iterable values are valid.")
 
@@ -159,7 +154,8 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
-    "plot.bokeh.bounds": ("auto", _make_validate_float_iterable(length=2)),
+    "plot.bokeh.bounds_x_range": ("auto", _make_validate_float_iterable(length=2)),
+    "plot.bokeh.bounds_y_range": ("auto", _make_validate_float_iterable(length=2)),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
         lambda x: x,

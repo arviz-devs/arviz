@@ -23,7 +23,12 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     }
     dpi = backend_kwargs.pop("dpi")
     if ax is None:
-        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
+        ax = bkp.figure(
+            width=int(figsize[0] * dpi),
+            height=int(figsize[1] * dpi),
+            toolbar_location="above",
+            **backend_kwargs
+        )
 
     non_div = list(_posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]
@@ -41,8 +46,8 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     ax.xaxis.major_label_overrides = dict(zip(map(str, range(len(var_names))), map(str, var_names)))
     ax.xaxis.major_label_orientation = np.pi / 2
 
-    ax.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
-    ax.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
+    ax.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=2)
+    ax.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=5)
 
     if backend_show(show):
         bkp.show(ax)

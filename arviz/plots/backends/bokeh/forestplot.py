@@ -138,8 +138,8 @@ def plot_forest(
             ax_.yaxis.visible = False
 
         ax_.outline_line_color = None
-        ax_.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
-        ax_.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds"])
+        ax_.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=1)
+        ax_.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=2)
 
     labels, ticks = plot_handler.labels_and_ticks()
 
