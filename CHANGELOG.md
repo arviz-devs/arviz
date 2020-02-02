@@ -18,6 +18,7 @@
 * Violinplot: fix histogram (#997)
 * Convert all instances of SyntaxWarning to UserWarning (#1016)
 * Fix `point_estimate` in `plot_posterior` (#1038)
+* Fix interpolation `hpd_plot` (#1039)
 
 ### Deprecation
 
