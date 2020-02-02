@@ -38,7 +38,7 @@ def plot_autocorr(
     else:
         axes = np.atleast_2d(axes)
 
-    len_y = len(plotters[0][2])
+    len_y = plotters[0][2].size
     data_range_x = DataRange1d(start=0, end=max_lag, bounds=(0, len_y), min_interval=5)
     data_range_y = DataRange1d(
         start=-1, end=1, bounds=(rcParams["plot.bokeh.bounds_y_range"]), min_interval=0.1
