@@ -11,7 +11,7 @@ from collections.abc import MutableMapping
 _log = logging.getLogger(__name__)
 
 
-def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
+def _make_validate_choice(accepted_values, allow_none=False, typeof=str, case_sensitive=False):
     """Validate value is in accepted_values.
 
     Parameters
@@ -23,6 +23,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     typeof: type, optional
         Type the values should be converted to.
     """
+
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
@@ -33,8 +34,10 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
             value = typeof(value)
         except (ValueError, TypeError):
             raise ValueError("Could not convert to {}".format(typeof.__name__))
-        if isinstance(value, str):
+        if isinstance(value, str) and not case_sensitive:
             value = value.lower()
+        else:
+            value = value
 
         if value in accepted_values:
             # Convert value to python boolean if string matches
@@ -107,6 +110,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
+    "plot.bokeh.marker": ("Cross", _make_validate_choice({"Asterisk", "Circle", "CircleCross", "CircleX",
+                                                          "Cross", "Dash", "Diamond", "DiamondCross", "Hex",
+                                                          "InvertedTriangle", "Square", "SquareCross", "SquareX",
+                                                          "Triangle", "X"}, case_sensitive=True)),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
@@ -247,6 +254,7 @@ def get_arviz_rcfile():
 
     Otherwise, the default defined in ``rcparams.py`` file will be used.
     """
+
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 

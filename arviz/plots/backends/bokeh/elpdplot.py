@@ -5,6 +5,8 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
+from bokeh.models import ColumnDataSource
+import bokeh.models.markers as mk
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
@@ -24,6 +26,7 @@ def plot_elpd(
     coord_labels,
     xdata,
     threshold,
+    marker,
     backend_kwargs,
     show,
 ):
@@ -50,10 +53,23 @@ def plot_elpd(
             ax = bkp.figure(
                 width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
-
         ydata = pointwise_data[0] - pointwise_data[1]
+
+        markers = ["Circle", "Asterisk", "Dash", "CircleCross", "CircleX", "Cross",
+                  "Diamond", "DiamondCross", "Hex", "InvertedTriangle", "Square",
+                  "SquareCross", "SquareX", "Triangle", "X"]
+
+        if marker == "auto":
+            marker = rcParams["plot.bokeh.marker"]
+        elif marker not in markers:
+            raise ValueError(
+                "Marker can't be {}, it should be one of {}".format(
+                    marker, markers
+                )
+            )
+        marker_func = getattr(mk, marker)
         _plot_atomic_elpd(
-            ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
+            ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, marker_func, plot_kwargs
         )
 
         if backend_show(show):
@@ -125,6 +141,7 @@ def plot_elpd(
                     xlabels,
                     j == numvars - 2,
                     i == 0,
+                    marker_func,
                     plot_kwargs,
                 )
 
@@ -144,14 +161,13 @@ def _plot_atomic_elpd(
     xlabels,
     xlabels_shown,
     ylabels_shown,
+    marker_func,
     plot_kwargs,
 ):
-    ax_.cross(
-        np.asarray(xdata),
-        np.asarray(ydata),
-        line_color=plot_kwargs.get("color", "black"),
-        size=plot_kwargs.get("s"),
-    )
+    sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
+    source = ColumnDataSource(dict(x=xdata, y=ydata, sizes=sizes))
+    glyph = marker_func(x="x", y="y", size="sizes", line_color=plot_kwargs.get("color", "black"))
+    ax_.add_glyph(source, glyph)
     if threshold is not None:
         diff_abs = np.abs(ydata - ydata.mean())
         bool_ary = diff_abs > threshold * ydata.std()

@@ -22,6 +22,7 @@ def plot_elpd(
     ax=None,
     ic=None,
     scale=None,
+    marker="auto",
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
@@ -63,6 +64,10 @@ def plot_elpd(
     scale : str, optional
         scale argument passed to az.waic or az.loo, see their docs for details. Only taken
         into account when input is InferenceData.
+    marker : str, optional
+        Used to change the scatter marker shapes. Default is "Cross". It could be any of
+        {"Asterisk", "Circle", "CircleCross", "CircleX", "Cross", "Dash", "Diamond", "DiamondCross",
+         "Hex", "InvertedTriangle", "Square", "SquareCross", "SquareX", "Triangle", "X"}.
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.plot
     ax: axes, optional
@@ -204,6 +209,7 @@ def plot_elpd(
         legend=legend,
         handles=handles,
         color=color,
+        marker=marker,
         backend_kwargs=backend_kwargs,
         show=show,
     )
