@@ -267,11 +267,9 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
            ...:         "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
            ...:         }
            ...: coords = {
-           ...:         "chain": (["chain"], np.arange(4)),
-           ...:         "draw": (["draw"], np.arange(100)),
-           ...:         "a_dim": (["a_dim"], ["x", "y", "z"]),
+           ...:         "a_dim": ["x", "y", "z"]
            ...:         }
-           ...: dataA = az.from_dict(posterior=data, coords=coords)
+           ...: dataA = az.from_dict(data, coords=coords, dims={"a": ["a_dim"]})
            ...: dataA
 
     We have created an ``InferenceData`` object with default group 'posterior'. Now, we will
@@ -279,7 +277,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     .. ipython::
 
-        In [1]: dataB = az.from_dict(prior=data, coords=coords)
+        In [1]: dataB = az.from_dict(prior=data, coords=coords, dims={"a": ["a_dim"]})
            ...: dataB
 
     We have created another ``InferenceData`` object with group 'prior'. Now, we will concatenate
