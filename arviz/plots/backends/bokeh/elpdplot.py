@@ -55,21 +55,41 @@ def plot_elpd(
             )
         ydata = pointwise_data[0] - pointwise_data[1]
 
-        markers = ["Circle", "Asterisk", "Dash", "CircleCross", "CircleX", "Cross",
-                  "Diamond", "DiamondCross", "Hex", "InvertedTriangle", "Square",
-                  "SquareCross", "SquareX", "Triangle", "X"]
+        markers = [
+            "Circle",
+            "Asterisk",
+            "Dash",
+            "CircleCross",
+            "CircleX",
+            "Cross",
+            "Diamond",
+            "DiamondCross",
+            "Hex",
+            "InvertedTriangle",
+            "Square",
+            "SquareCross",
+            "SquareX",
+            "Triangle",
+            "X",
+        ]
 
         if marker == "auto":
             marker = rcParams["plot.bokeh.marker"]
         elif marker not in markers:
-            raise ValueError(
-                "Marker can't be {}, it should be one of {}".format(
-                    marker, markers
-                )
-            )
+            raise ValueError("Marker can't be {}, it should be one of {}".format(marker, markers))
         marker_func = getattr(mk, marker)
         _plot_atomic_elpd(
-            ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, marker_func, plot_kwargs
+            ax,
+            xdata,
+            ydata,
+            *models,
+            threshold,
+            coord_labels,
+            xlabels,
+            True,
+            True,
+            marker_func,
+            plot_kwargs
         )
 
         if backend_show(show):
