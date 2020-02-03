@@ -262,18 +262,27 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
         In [1]: import arviz as az
            ...: import numpy as np
-           ...: dataA = az.from_dict(posterior={"mu": np.random.randn()})
+           ...: data = {
+           ...:         "a": (["chain", "draw", "a_dim"], np.random.normal(size=(4, 100, 3))),
+           ...:         "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
+           ...:         }
+           ...: coords = {
+           ...:         "chain": (["chain"], np.arange(4)),
+           ...:         "draw": (["draw"], np.arange(100)),
+           ...:         "a_dim": (["a_dim"], ["x", "y", "z"]),
+           ...:         }
+           ...: dataA = az.from_dict(posterior=data, coords=coords)
            ...: dataA
 
-    We have created an ``InferenceData`` object with default group 'posterior'. Now we will
+    We have created an ``InferenceData`` object with default group 'posterior'. Now, we will
     create another InferenceData object:
 
     .. ipython::
 
-        In [1]: dataB = az.from_dict(prior={"mu": np.random.randn()})
+        In [1]: dataB = az.from_dict(prior=data, coords=coords)
            ...: dataB
 
-    We have created another ``InferenceData`` object with group 'prior'. Now we will concatenate
+    We have created another ``InferenceData`` object with group 'prior'. Now, we will concatenate
     these two ``InferenceData`` objects:
 
     .. ipython::
