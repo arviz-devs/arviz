@@ -11,9 +11,8 @@ from collections.abc import MutableMapping
 _log = logging.getLogger(__name__)
 
 
-def _make_validate_choice(accepted_values, allow_none=False, typeof=str, case_sensitive=False):
+def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     """Validate value is in accepted_values.
-
     Parameters
     ----------
     accepted_values : iterable
@@ -23,7 +22,6 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str, case_se
     typeof: type, optional
         Type the values should be converted to.
     """
-
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
@@ -34,7 +32,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str, case_se
             value = typeof(value)
         except (ValueError, TypeError):
             raise ValueError("Could not convert to {}".format(typeof.__name__))
-        if isinstance(value, str) and not case_sensitive:
+        if isinstance(value, str):
             value = value.lower()
 
         if value in accepted_values:
