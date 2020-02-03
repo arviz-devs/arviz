@@ -10,7 +10,7 @@ import bokeh.models.markers as mk
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
-from ....rcparams import rcParams
+from ....rcparams import rcParams, _validate_bokeh_marker
 
 
 def plot_elpd(
@@ -55,28 +55,10 @@ def plot_elpd(
             )
         ydata = pointwise_data[0] - pointwise_data[1]
 
-        markers = [
-            "Circle",
-            "Asterisk",
-            "Dash",
-            "CircleCross",
-            "CircleX",
-            "Cross",
-            "Diamond",
-            "DiamondCross",
-            "Hex",
-            "InvertedTriangle",
-            "Square",
-            "SquareCross",
-            "SquareX",
-            "Triangle",
-            "X",
-        ]
-
         if marker == "auto":
             marker = rcParams["plot.bokeh.marker"]
-        elif marker not in markers:
-            raise ValueError("Marker can't be {}, it should be one of {}".format(marker, markers))
+        else:
+            marker = _validate_bokeh_marker(marker)
         marker_func = getattr(mk, marker)
         _plot_atomic_elpd(
             ax,

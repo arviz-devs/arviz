@@ -94,6 +94,30 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
+def _validate_bokeh_marker(value):
+    """Validate the bokeh marker"""
+    all_markers = [
+        "Asterisk",
+        "Circle",
+        "CircleCross",
+        "CircleX",
+        "Cross",
+        "Dash",
+        "Diamond",
+        "DiamondCross",
+        "Hex",
+        "InvertedTriangle",
+        "Square",
+        "SquareCross",
+        "SquareX",
+        "Triangle",
+        "X",
+    ]
+    if value not in all_markers:
+        raise ValueError("{} is not one of {}".format(value, all_markers))
+    return value
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
@@ -108,29 +132,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
-    "plot.bokeh.marker": (
-        "Cross",
-        _make_validate_choice(
-            {
-                "Asterisk",
-                "Circle",
-                "CircleCross",
-                "CircleX",
-                "Cross",
-                "Dash",
-                "Diamond",
-                "DiamondCross",
-                "Hex",
-                "InvertedTriangle",
-                "Square",
-                "SquareCross",
-                "SquareX",
-                "Triangle",
-                "X",
-            },
-            case_sensitive=True,
-        ),
-    ),
+    "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
