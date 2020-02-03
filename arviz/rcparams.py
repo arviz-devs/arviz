@@ -36,8 +36,6 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str, case_se
             raise ValueError("Could not convert to {}".format(typeof.__name__))
         if isinstance(value, str) and not case_sensitive:
             value = value.lower()
-        else:
-            value = value
 
         if value in accepted_values:
             # Convert value to python boolean if string matches
