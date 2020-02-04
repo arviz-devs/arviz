@@ -22,6 +22,7 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
+    transform=None,
     credible_interval=0.94,
     point_estimate="auto",
     colors="cycle",
@@ -58,6 +59,8 @@ def plot_density(
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
+    transform : callable
+        Function to transform data (defaults to None i.e. the identity function)
     credible_interval : float
         Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
@@ -147,6 +150,8 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
+    if transform is not None:
+        data = transform(data)
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
