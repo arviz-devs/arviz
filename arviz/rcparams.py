@@ -311,7 +311,6 @@ def get_arviz_rcfile():
 
     Otherwise, the default defined in ``rcparams.py`` file will be used.
     """
-
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
