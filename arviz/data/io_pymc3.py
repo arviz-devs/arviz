@@ -287,6 +287,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 var not in self.model.deterministics
                 and var not in self.model.observed_RVs
                 and var not in self.model.free_RVs
+                and var not in self.model.potentials
                 and (self.observations is None or name not in self.observations)
             )
 
