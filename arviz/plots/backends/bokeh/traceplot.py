@@ -180,7 +180,7 @@ def plot_trace(
             _title = Title()
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
-            if "bounds_y_range" in backend_config:
+            if backend_config is not None and "bounds_y_range" in backend_config:
                 axes[idx, col].y_range = DataRange1d(
                     bounds=backend_config["bounds_y_range"], min_interval=0.1
                 )

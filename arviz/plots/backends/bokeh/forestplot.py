@@ -139,12 +139,12 @@ def plot_forest(
             ax_.yaxis.visible = False
 
         ax_.outline_line_color = None
-        if "bounds_x_range" in backend_config:
+        if backend_config is not None and "bounds_x_range" in backend_config:
             ax_.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=1)
         else:
             ax_.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=1)
 
-        if "bounds_y_range" in backend_config:
+        if backend_config is not None and "bounds_y_range" in backend_config:
             ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
         else:
             ax_.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=2)

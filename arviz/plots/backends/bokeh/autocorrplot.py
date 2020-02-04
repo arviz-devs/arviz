@@ -48,7 +48,7 @@ def plot_autocorr(
     else:
         axes = np.atleast_2d(axes)
 
-    if "bounds_x_range" in backend_config:
+    if backend_config is not None and "bounds_x_range" in backend_config:
         data_range_x = DataRange1d(
             start=0, end=max_lag, bounds=backend_config["bounds_x_range"], min_interval=5
         )
@@ -56,7 +56,7 @@ def plot_autocorr(
         len_y = plotters[0][2].size
         data_range_x = DataRange1d(start=0, end=max_lag, bounds=(0, len_y), min_interval=5)
 
-    if "bounds_y_range" in backend_config:
+    if backend_config is not None and "bounds_y_range" in backend_config:
         data_range_y = DataRange1d(
             start=-1, end=1, bounds=backend_config["bounds_y_range"], min_interval=0.1
         )
