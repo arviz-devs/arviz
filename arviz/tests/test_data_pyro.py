@@ -104,7 +104,7 @@ class TestDataPyro:
         from pyro.infer import MCMC, NUTS
         import torch
         y1 = torch.randn(10)
-        y2 = torch.randn(10) #does not work with 100 instead of 10
+        y2 = torch.randn(10)
         def model_example_multiple_obs(y1=None, y2=None):
             x = pyro.sample('x', dist.Normal(1, 3))
             pyro.sample('y1', dist.Normal(x, 1), obs=y1)
