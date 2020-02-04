@@ -27,10 +27,10 @@ class TestDataPyro:
     def get_inference_data(self, data, eight_schools_params):
         posterior_samples = data.obj.get_samples()
         model = data.obj.kernel.model
-        posterior_predictive = Predictive(model, posterior_samples).get_samples(
+        posterior_predictive = Predictive(model, posterior_samples).forward(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
-        prior = Predictive(model, num_samples=500).get_samples(
+        prior = Predictive(model, num_samples=500).forward(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
         return from_pyro(
@@ -66,10 +66,10 @@ class TestDataPyro:
     def test_inference_data_no_posterior(self, data, eight_schools_params):
         posterior_samples = data.obj.get_samples()
         model = data.obj.kernel.model
-        posterior_predictive = Predictive(model, posterior_samples).get_samples(
+        posterior_predictive = Predictive(model, posterior_samples).forward(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
-        prior = Predictive(model, num_samples=500).get_samples(
+        prior = Predictive(model, num_samples=500).forward(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
         idata = from_pyro(
