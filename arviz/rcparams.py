@@ -13,6 +13,7 @@ _log = logging.getLogger(__name__)
 
 def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     """Validate value is in accepted_values.
+
     Parameters
     ----------
     accepted_values : iterable
@@ -22,7 +23,6 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     typeof: type, optional
         Type the values should be converted to.
     """
-
     # no blank lines allowed after function docstring by pydocstyle,
     # but black requires white line before function
 
@@ -94,7 +94,7 @@ def _validate_boolean(value):
 
 
 def _validate_marker(value):
-    """Validate the markers"""
+    """Validate the markers."""
     all_markers = (
         "Asterisk",
         "Circle",
