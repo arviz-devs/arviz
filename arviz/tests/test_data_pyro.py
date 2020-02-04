@@ -38,7 +38,7 @@ class TestDataPyro:
             prior=prior,
             posterior_predictive=posterior_predictive,
             coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "eta": ["school"]},
+            dims={"theta": ["school"], "eta": ["school"]}
         )
 
     def test_inference_data(self, data, eight_schools_params):
@@ -99,16 +99,17 @@ class TestDataPyro:
         assert not fails
 
     def test_multiple_observed_rv(self):
-        import pyro
         import pyro.distributions as dist
         from pyro.infer import MCMC, NUTS
-        import torch
+
         y1 = torch.randn(10)
         y2 = torch.randn(10)
+
         def model_example_multiple_obs(y1=None, y2=None):
-            x = pyro.sample('x', dist.Normal(1, 3))
-            pyro.sample('y1', dist.Normal(x, 1), obs=y1)
-            pyro.sample('y2', dist.Normal(x, 1), obs=y2)
+            x = pyro.sample("x", dist.Normal(1, 3))
+            pyro.sample("y1", dist.Normal(x, 1), obs=y1)
+            pyro.sample("y2", dist.Normal(x, 1), obs=y2)
+
         nuts_kernel = NUTS(model_example_multiple_obs)
         mcmc = MCMC(nuts_kernel, num_samples=10)
         mcmc.run(y1=y1, y2=y2)

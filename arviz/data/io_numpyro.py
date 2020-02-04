@@ -104,7 +104,7 @@ class NumPyroConverter:
             if stat == "num_steps":
                 data["depth"] = np.log2(value).astype(int) + 1
         return dict_to_dataset(data, library=self.numpyro, dims=None, coords=self.coords)
-                
+
     @requires("posterior")
     @requires("model")
     def log_likelihood_to_xarray(self):

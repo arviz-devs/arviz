@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 from jax.random import PRNGKey
 from numpyro.infer import Predictive
-import jax.numpy
 
 from ..data.io_numpyro import from_numpyro
 from .helpers import (  # pylint: disable=unused-import
@@ -26,10 +25,10 @@ class TestDataNumPyro:
     def get_inference_data(self, data, eight_schools_params):
         posterior_samples = data.obj.get_samples()
         model = data.obj.sampler.model
-        posterior_predictive = Predictive(model, posterior_samples).__call__(
+        posterior_predictive = Predictive(model, posterior_samples)(
             PRNGKey(1), eight_schools_params["J"], eight_schools_params["sigma"]
         )
-        prior = Predictive(model, num_samples=500).__call__(
+        prior = Predictive(model, num_samples=500)(
             PRNGKey(2), eight_schools_params["J"], eight_schools_params["sigma"]
         )
         return from_numpyro(
@@ -58,12 +57,15 @@ class TestDataNumPyro:
         import numpyro
         import numpyro.distributions as dist
         from numpyro.infer import MCMC, NUTS
+
         y1 = np.random.randn(10)
         y2 = np.random.randn(100)
+
         def model_example_multiple_obs(y1=None, y2=None):
-            x = numpyro.sample('x', dist.Normal(1, 3))
-            numpyro.sample('y1', dist.Normal(x, 1), obs=y1)
-            numpyro.sample('y2', dist.Normal(x, 1), obs=y2)
+            x = numpyro.sample("x", dist.Normal(1, 3))
+            numpyro.sample("y1", dist.Normal(x, 1), obs=y1)
+            numpyro.sample("y2", dist.Normal(x, 1), obs=y2)
+
         nuts_kernel = NUTS(model_example_multiple_obs)
         mcmc = MCMC(nuts_kernel, num_samples=10, num_warmup=2)
         mcmc.run(PRNGKey(0), y1=y1, y2=y2)
@@ -75,11 +77,10 @@ class TestDataNumPyro:
             "observed_data": ["y1", "y2"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
-#         from ..stats import waic
-#         waic_results = waic(inference_data)
-#         print(waic_results)
-#         print(waic_results.keys())
-#         print(waic_results.waic, waic_results.waic_se)
+        #         from ..stats import waic
+        #         waic_results = waic(inference_data)
+        #         print(waic_results)
+        #         print(waic_results.keys())
+        #         print(waic_results.waic, waic_results.waic_se)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
-        
