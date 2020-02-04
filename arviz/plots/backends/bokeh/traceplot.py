@@ -32,6 +32,7 @@ def plot_trace(
     plotters,
     divergence_data,
     colors,
+    backend_config,
     backend_kwargs: [Dict],
     show,
 ):
@@ -179,9 +180,14 @@ def plot_trace(
             _title = Title()
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
-            axes[idx, col].y_range = DataRange1d(
-                bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=0.1
-            )
+            if "bounds_y_range" in backend_config:
+                axes[idx, col].y_range = DataRange1d(
+                    bounds=backend_config["bounds_y_range"], min_interval=0.1
+                )
+            else:
+                axes[idx, col].y_range = DataRange1d(
+                    bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=0.1
+                )
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):

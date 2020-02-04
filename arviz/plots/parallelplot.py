@@ -21,6 +21,7 @@ def plot_parallel(
     ax=None,
     norm_method=None,
     backend=None,
+    backend_config=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -60,6 +61,8 @@ def plot_parallel(
         Defaults to none.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_config: bool, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -151,6 +154,7 @@ def plot_parallel(
         parallel_kwargs.pop("colord")
         parallel_kwargs.pop("colornd")
         parallel_kwargs.pop("shadend")
+        parallel_kwargs.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_parallel", "parallelplot", backend)

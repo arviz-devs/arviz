@@ -49,6 +49,7 @@ def plot_forest(
     textsize,
     ess,
     r_hat,
+    backend_config,
     backend_kwargs,
     show,
 ):
@@ -138,8 +139,15 @@ def plot_forest(
             ax_.yaxis.visible = False
 
         ax_.outline_line_color = None
-        ax_.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=1)
-        ax_.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=2)
+        if "bounds_x_range" in backend_config:
+            ax_.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=1)
+        else:
+            ax_.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=1)
+
+        if "bounds_y_range" in backend_config:
+            ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
+        else:
+            ax_.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=2)
 
     labels, ticks = plot_handler.labels_and_ticks()
 

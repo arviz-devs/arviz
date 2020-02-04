@@ -8,7 +8,9 @@ from . import backend_kwarg_defaults, backend_show
 from ....rcparams import rcParams
 
 
-def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kwargs, show):
+def plot_parallel(
+    ax, diverging_mask, _posterior, var_names, figsize, backend_config, backend_kwargs, show
+):
     """Bokeh parallel plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
@@ -46,8 +48,15 @@ def plot_parallel(ax, diverging_mask, _posterior, var_names, figsize, backend_kw
     ax.xaxis.major_label_overrides = dict(zip(map(str, range(len(var_names))), map(str, var_names)))
     ax.xaxis.major_label_orientation = np.pi / 2
 
-    ax.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=2)
-    ax.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=5)
+    if "bounds_x_range" in backend_config:
+        ax.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=2)
+    else:
+        ax.x_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_x_range"], min_interval=2)
+
+    if "bounds_y_range" in backend_config:
+        ax.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=5)
+    else:
+        ax.y_range = DataRange1d(bounds=rcParams["plot.bokeh.bounds_y_range"], min_interval=5)
 
     if backend_show(show):
         bkp.show(ax)

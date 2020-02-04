@@ -12,7 +12,17 @@ from ....rcparams import rcParams
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, figsize, rows, cols, line_width, combined, backend_kwargs, show,
+    axes,
+    plotters,
+    max_lag,
+    figsize,
+    rows,
+    cols,
+    line_width,
+    combined,
+    backend_config,
+    backend_kwargs,
+    show,
 ):
     """Bokeh autocorrelation plot."""
     if backend_kwargs is None:
@@ -38,11 +48,22 @@ def plot_autocorr(
     else:
         axes = np.atleast_2d(axes)
 
-    len_y = plotters[0][2].size
-    data_range_x = DataRange1d(start=0, end=max_lag, bounds=(0, len_y), min_interval=5)
-    data_range_y = DataRange1d(
-        start=-1, end=1, bounds=(rcParams["plot.bokeh.bounds_y_range"]), min_interval=0.1
-    )
+    if "bounds_x_range" in backend_config:
+        data_range_x = DataRange1d(
+            start=0, end=max_lag, bounds=backend_config["bounds_x_range"], min_interval=5
+        )
+    else:
+        len_y = plotters[0][2].size
+        data_range_x = DataRange1d(start=0, end=max_lag, bounds=(0, len_y), min_interval=5)
+
+    if "bounds_y_range" in backend_config:
+        data_range_y = DataRange1d(
+            start=-1, end=1, bounds=backend_config["bounds_y_range"], min_interval=0.1
+        )
+    else:
+        data_range_y = DataRange1d(
+            start=-1, end=1, bounds=(rcParams["plot.bokeh.bounds_y_range"]), min_interval=0.1
+        )
 
     for (var_name, selection, x), ax in zip(
         plotters, (item for item in axes.flatten() if item is not None)

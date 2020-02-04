@@ -27,6 +27,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
+    backend_config=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -73,6 +74,8 @@ def plot_trace(
         Extra keyword arguments passed to `plt.plot`
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_config: bool, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -213,6 +216,9 @@ def plot_trace(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend == "bokeh":
+        trace_plot_args.update(backend_config=backend_config)
 
     plot = get_plotting_function("plot_trace", "traceplot", backend)
     axes = plot(**trace_plot_args)
