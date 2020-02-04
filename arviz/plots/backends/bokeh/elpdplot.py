@@ -10,7 +10,7 @@ import bokeh.models.markers as mk
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
-from ....rcparams import rcParams, _validate_marker
+from ....rcparams import rcParams, _validate_bokeh_marker
 
 
 def plot_elpd(
@@ -147,7 +147,7 @@ def _plot_atomic_elpd(
     ylabels_shown,
     plot_kwargs,
 ):
-    marker = _validate_marker(plot_kwargs.get("marker"))
+    marker = _validate_bokeh_marker(plot_kwargs.get("marker"))
     marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
     glyph = marker_func(x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black"))
