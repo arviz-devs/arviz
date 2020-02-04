@@ -10,7 +10,7 @@ import bokeh.models.markers as mk
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
-from ....rcparams import rcParams, _validate_bokeh_marker
+from ....rcparams import rcParams, _validate_marker
 
 
 def plot_elpd(
@@ -26,7 +26,6 @@ def plot_elpd(
     coord_labels,
     xdata,
     threshold,
-    marker,
     backend_kwargs,
     show,
 ):
@@ -54,24 +53,8 @@ def plot_elpd(
                 width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
         ydata = pointwise_data[0] - pointwise_data[1]
-
-        if marker == "auto":
-            marker = rcParams["plot.bokeh.marker"]
-        else:
-            marker = _validate_bokeh_marker(marker)
-        marker_func = getattr(mk, marker)
         _plot_atomic_elpd(
-            ax,
-            xdata,
-            ydata,
-            *models,
-            threshold,
-            coord_labels,
-            xlabels,
-            True,
-            True,
-            marker_func,
-            plot_kwargs
+            ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
 
         if backend_show(show):
@@ -143,7 +126,6 @@ def plot_elpd(
                     xlabels,
                     j == numvars - 2,
                     i == 0,
-                    marker_func,
                     plot_kwargs,
                 )
 
@@ -163,9 +145,10 @@ def _plot_atomic_elpd(
     xlabels,
     xlabels_shown,
     ylabels_shown,
-    marker_func,
     plot_kwargs,
 ):
+    marker = _validate_marker("bokeh")(plot_kwargs.get("marker"))
+    marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
     source = ColumnDataSource(dict(x=xdata, y=ydata, sizes=sizes))
     glyph = marker_func(x="x", y="y", size="sizes", line_color=plot_kwargs.get("color", "black"))

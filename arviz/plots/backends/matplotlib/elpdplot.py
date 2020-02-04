@@ -29,7 +29,6 @@ def plot_elpd(
     legend,
     handles,
     color,
-    marker,
     backend_kwargs,
     show,
 ):
