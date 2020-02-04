@@ -144,10 +144,8 @@ def plot_elpd(
 
     if plot_kwargs is None:
         plot_kwargs = {}
-    if backend == "matplotlib":
-        plot_kwargs.setdefault("marker", "+")
-    else:
-        plot_kwargs.setdefault("marker", "Cross")
+    if backend == "bokeh":
+        plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
 
     pointwise_data = [
         get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models

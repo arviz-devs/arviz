@@ -49,68 +49,6 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     return validate_choice
 
 
-def _validate_marker(backend):
-    """Validate the markers.
-    Parameters
-    ----------
-    backend : str
-        Select plotting backend {"matplotlib","bokeh"}
-    """
-    all_markers = {
-        "bokeh": (
-            "Asterisk",
-            "Circle",
-            "CircleCross",
-            "CircleX",
-            "Cross",
-            "Dash",
-            "Diamond",
-            "DiamondCross",
-            "Hex",
-            "InvertedTriangle",
-            "Square",
-            "SquareCross",
-            "SquareX",
-            "Triangle",
-            "X",
-        ),
-        "matplotlib": (
-            ".",
-            ",",
-            "o",
-            "v",
-            "^",
-            "<",
-            ">",
-            "1",
-            "2",
-            "3",
-            "4",
-            "8",
-            "s",
-            "p",
-            "*",
-            "h",
-            "H",
-            "+",
-            "x",
-            "D",
-            "d",
-            "|",
-            "_",
-            "P",
-            "X",
-        ),
-    }
-
-    def validate_markers(value):
-        if value not in all_markers.get(backend):
-            raise ValueError("{} is not one of {}".format(value, all_markers.get(backend)))
-        return value
-
-    return validate_markers
-
-
 def _validate_positive_int(value):
     """Validate value is a natural number."""
     try:
@@ -155,6 +93,30 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
+def _validate_marker(value):
+    """Validate the markers"""
+    all_markers = (
+        "Asterisk",
+        "Circle",
+        "CircleCross",
+        "CircleX",
+        "Cross",
+        "Dash",
+        "Diamond",
+        "DiamondCross",
+        "Hex",
+        "InvertedTriangle",
+        "Square",
+        "SquareCross",
+        "SquareX",
+        "Triangle",
+        "X",
+    )
+    if value not in all_markers:
+        raise ValueError("{} is not one of {}".format(value, all_markers))
+    return value
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
@@ -169,10 +131,9 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.show": (True, _validate_boolean),
-    "plot.bokeh.marker": ("Cross", _validate_marker("bokeh")),
+    "plot.bokeh.marker": ("Cross", _validate_marker),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
-    "plot.matplotlib.marker": ("+", _validate_marker("matplotlib")),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
         "mean",

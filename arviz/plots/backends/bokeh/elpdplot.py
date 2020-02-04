@@ -147,7 +147,7 @@ def _plot_atomic_elpd(
     ylabels_shown,
     plot_kwargs,
 ):
-    marker = _validate_marker("bokeh")(plot_kwargs.get("marker"))
+    marker = _validate_marker(plot_kwargs.get("marker"))
     marker_func = getattr(mk, marker)
     sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
     source = ColumnDataSource(dict(x=xdata, y=ydata, sizes=sizes))
