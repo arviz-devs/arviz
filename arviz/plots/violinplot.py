@@ -8,6 +8,7 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_violin(
@@ -16,7 +17,7 @@ def plot_violin(
     transform=None,
     quartiles=True,
     rug=False,
-    credible_interval=0.94,
+    credible_interval=None,
     shade=0.35,
     bw=4.5,
     sharex=True,
@@ -107,6 +108,12 @@ def plot_violin(
 
     if rug_kwargs is None:
         rug_kwargs = {}
+
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
         ax=ax,

@@ -103,6 +103,7 @@ Data
     from_dict
     from_emcee
     from_pymc3
+    from_pymc3_predictions
     from_pyro
     from_numpyro
     from_pystan

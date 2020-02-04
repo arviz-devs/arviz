@@ -89,18 +89,23 @@ class PyroConverter:
         # extract log_likelihood
         dims = None
         if self.observations is not None and len(self.observations) == 1:
-            obs_name = list(self.observations.keys())[0]
-            samples = self.posterior.get_samples(group_by_chain=False)
-            predictive = self.pyro.infer.Predictive(self.model, samples)
-            obs_site = predictive.get_vectorized_trace(*self._args, **self._kwargs).nodes[obs_name]
-            log_likelihood = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
-            if self.dims is not None:
-                coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
-            else:
-                coord_name = None
-            shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
-            data["log_likelihood"] = np.reshape(log_likelihood, shape)
-            dims = {"log_likelihood": coord_name}
+            try:
+                obs_name = list(self.observations.keys())[0]
+                samples = self.posterior.get_samples(group_by_chain=False)
+                predictive = self.pyro.infer.Predictive(self.model, samples)
+                vectorized_trace = predictive.get_vectorized_trace(*self._args, **self._kwargs)
+                obs_site = vectorized_trace.nodes[obs_name]
+                log_likelihood = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
+                if self.dims is not None:
+                    coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
+                else:
+                    coord_name = None
+                shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
+                data["log_likelihood"] = np.reshape(log_likelihood, shape)
+                dims = {"log_likelihood": coord_name}
+            except:  # pylint: disable=bare-except
+                # cannot get vectorized trace
+                pass
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
 
     @requires("posterior_predictive")

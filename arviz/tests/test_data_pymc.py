@@ -81,7 +81,8 @@ class TestDataPyMC3:
         inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["obs"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
             "prior_predictive": ["obs"],
@@ -100,7 +101,8 @@ class TestDataPyMC3:
         "Test that we can add predictions to a previously-existing InferenceData."
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
-            "sample_stats": ["diverging", "log_likelihood"],
+            "sample_stats": ["diverging", "lp"],
+            "log_likelihood": ["obs"],
             "predictions": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
             "observed_data": ["obs"],
@@ -200,7 +202,7 @@ class TestDataPyMC3:
         (y_missing,) = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
         inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["x"], "observed_data": ["y"], "sample_stats": ["log_likelihood"]}
+        test_dict = {"posterior": ["x"], "observed_data": ["y"], "log_likelihood": ["y"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -213,7 +215,12 @@ class TestDataPyMC3:
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
         inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["x"], "observed_data": ["y1", "y2"], "sample_stats": ["lp"]}
+        test_dict = {
+            "posterior": ["x"],
+            "observed_data": ["y1", "y2"],
+            "log_likelihood": ["y1", "y2"],
+            "sample_stats": ["diverging", "lp"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
@@ -233,6 +240,7 @@ class TestDataPyMC3:
         assert not hasattr(inference_data, "observed_data")
         assert hasattr(inference_data, "posterior")
         assert hasattr(inference_data, "sample_stats")
+        assert hasattr(inference_data, "log_likelihood")
 
     def test_single_observation(self):
         with pm.Model():
