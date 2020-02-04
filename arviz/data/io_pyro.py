@@ -85,24 +85,25 @@ class PyroConverter:
         for i, k in enumerate(sorted(divergences)):
             diverging[i, divergences[k]] = True
         data = {"diverging": diverging}
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=None)
 
-        # extract log_likelihood
+    @requires("posterior")
+    @requires("model")
+    def log_likelihood_to_xarray(self):
+        """Extract log likelihood from Pyro posterior."""
+        data = {}
         dims = None
-        if self.observations is not None and len(self.observations) == 1:
+        if self.observations is not None:
             try:
-                obs_name = list(self.observations.keys())[0]
                 samples = self.posterior.get_samples(group_by_chain=False)
                 predictive = self.pyro.infer.Predictive(self.model, samples)
                 vectorized_trace = predictive.get_vectorized_trace(*self._args, **self._kwargs)
-                obs_site = vectorized_trace.nodes[obs_name]
-                log_likelihood = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
-                if self.dims is not None:
-                    coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
-                else:
-                    coord_name = None
-                shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
-                data["log_likelihood"] = np.reshape(log_likelihood, shape)
-                dims = {"log_likelihood": coord_name}
+                data = {}
+                for obs_name in self.observations.keys():
+                    obs_site = vectorized_trace.nodes[obs_name]
+                    log_likelihood = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
+                    shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
+                    data[obs_name] = np.reshape(log_likelihood.copy(), shape)
             except:  # pylint: disable=bare-except
                 # cannot get vectorized trace
                 pass
@@ -179,6 +180,7 @@ class PyroConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),

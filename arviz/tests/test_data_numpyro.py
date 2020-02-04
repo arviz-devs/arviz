@@ -58,7 +58,6 @@ class TestDataNumPyro:
         import numpyro
         import numpyro.distributions as dist
         from numpyro.infer import MCMC, NUTS
-        
         y1 = np.random.randn(10)
         y2 = np.random.randn(100)
         def model_example_multiple_obs(y1=None, y2=None):
@@ -66,7 +65,7 @@ class TestDataNumPyro:
             numpyro.sample('y1', dist.Normal(x, 1), obs=y1)
             numpyro.sample('y2', dist.Normal(x, 1), obs=y2)
         nuts_kernel = NUTS(model_example_multiple_obs)
-        mcmc = MCMC(nuts_kernel, num_warmup=20, num_samples=20)
+        mcmc = MCMC(nuts_kernel, num_samples=10, num_warmup=2)
         mcmc.run(PRNGKey(0), y1=y1, y2=y2)
         inference_data = from_numpyro(mcmc)
         test_dict = {
@@ -76,10 +75,11 @@ class TestDataNumPyro:
             "observed_data": ["y1", "y2"],
         }
         fails = check_multiple_attrs(test_dict, inference_data)
-        waic_results = az.stats.waic(inference_data)
-        print(waic_results)
-        print(waic_results.keys())
-        print(waic_results.waic, waic_results.waic_se)
+#         from ..stats import waic
+#         waic_results = waic(inference_data)
+#         print(waic_results)
+#         print(waic_results.keys())
+#         print(waic_results.waic, waic_results.waic_se)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
         
