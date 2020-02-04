@@ -142,7 +142,7 @@ def plot_trace(
     data = get_coords(convert_to_dataset(data, group="posterior"), coords)
 
     if transform is not None:
-    	data = transform(data)
+        data = transform(data)
 
     var_names = _var_names(var_names, data)
 

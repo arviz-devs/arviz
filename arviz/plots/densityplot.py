@@ -22,12 +22,8 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
-<<<<<<< HEAD
     transform=None,
-    credible_interval=0.94,
-=======
     credible_interval=None,
->>>>>>> 382cc3906f60b0b28820664555271fc6942a779d
     point_estimate="auto",
     colors="cycle",
     outline=True,

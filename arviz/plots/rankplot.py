@@ -124,7 +124,6 @@ def plot_rank(
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)
-    if transform is not None:
     var_names = _var_names(var_names, posterior_data)
     plotters = filter_plotters_list(
         list(xarray_var_iter(posterior_data, var_names=var_names, combined=True)), "plot_rank"
