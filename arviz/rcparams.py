@@ -93,7 +93,7 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
-def _validate_marker(value):
+def _validate_bokeh_marker(value):
     """Validate the markers."""
     all_markers = (
         "Asterisk",
@@ -122,16 +122,16 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.bokeh.figure.dpi": (60, _validate_positive_int),
+    "plot.bokeh.figure.width": (500, _validate_positive_int),
+    "plot.bokeh.figure.height": (500, _validate_positive_int),
+    "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
+    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
+    "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
         lambda x: x,
     ),
-    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
-    "plot.bokeh.figure.dpi": (60, _validate_positive_int),
-    "plot.bokeh.figure.width": (500, _validate_positive_int),
-    "plot.bokeh.figure.height": (500, _validate_positive_int),
-    "plot.bokeh.show": (True, _validate_boolean),
-    "plot.bokeh.marker": ("Cross", _validate_marker),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
