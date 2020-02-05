@@ -48,7 +48,7 @@ def plot_trace(
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
     transform : callable
-    	Function to transform data (defaults to None i.e.the identity function)
+        Function to transform data (defaults to None i.e.the identity function)
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     rug : bool
