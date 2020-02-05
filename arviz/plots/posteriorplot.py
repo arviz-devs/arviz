@@ -193,6 +193,11 @@ def plot_posterior(
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in {"mean", "median", "mode", None}:
+        raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
+
     plotters = filter_plotters_list(
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),
         "plot_posterior",

@@ -67,6 +67,14 @@ def test_hpd_bad_ci():
         hpd(normal_sample, credible_interval=2)
 
 
+def test_hpd_skipna():
+    normal_sample = np.random.randn(500)
+    interval = hpd(normal_sample[10:])
+    normal_sample[:10] = np.nan
+    interval_ = hpd(normal_sample, skipna=True)
+    assert_array_almost_equal(interval, interval_)
+
+
 def test_r2_score():
     x = np.linspace(0, 1, 100)
     y = np.random.normal(x, 1)
@@ -241,6 +249,16 @@ def test_summary_nan(centered_eight):
         .all()
         .all()
     )
+
+
+def test_summary_skip_nan(centered_eight):
+    centered_eight = deepcopy(centered_eight)
+    centered_eight.posterior.theta[:, :10, 1] = np.nan
+    summary_xarray = summary(centered_eight)
+    theta_1 = summary_xarray.loc["theta[1]"].isnull()
+    assert summary_xarray is not None
+    assert ~theta_1[:4].all()
+    assert theta_1[4:].all()
 
 
 @pytest.mark.parametrize("fmt", [1, "bad_fmt"])
