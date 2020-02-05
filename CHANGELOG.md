@@ -8,7 +8,7 @@
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
-* Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,`plot_violin`, `plot_density`, `plot_joint` (#1036)
+* Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 
 ### Maintenance and fixes
 * Fixed bug in extracting prior samples for cmdstanpy (#979)
