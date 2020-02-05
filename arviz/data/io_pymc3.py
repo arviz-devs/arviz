@@ -121,8 +121,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     def find_observations(self) -> Optional[Dict[str, Var]]:
         """If there are observations available, return them as a dictionary."""
         has_observations = False
-        if self.trace is not None:
-            assert self.model is not None, "Cannot identify observations without PymC3 model"
+        if self.model is not None:
             if any((hasattr(obs, "observations") for obs in self.model.observed_RVs)):
                 has_observations = True
         if has_observations:
@@ -250,6 +249,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
+        if self.predictions:
+            return None
         if self.dims is None:
             dims = {}
         else:

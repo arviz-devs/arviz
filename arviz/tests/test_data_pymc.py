@@ -81,7 +81,7 @@ class TestDataPyMC3:
         inference_data, posterior_predictive = self.get_inference_data(data, eight_schools_params)
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
-            "sample_stats": ["diverging", "lp"],
+            "sample_stats": ["diverging", "lp", "~log_likelihood"],
             "log_likelihood": ["obs"],
             "posterior_predictive": ["obs"],
             "prior": ["mu", "tau", "eta", "theta"],
@@ -138,7 +138,7 @@ class TestDataPyMC3:
         test_dict = {
             "posterior": ["mu", "tau", "eta", "theta"],
             "predictions": ["obs"],
-            "observed_data": ["obs"],
+            "~observed_data": "",
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -310,7 +310,7 @@ class TestDataPyMC3:
             # assert predictive_trace["obs"].shape == (400, 2)
             # but the shape seems to vary between pymc3 versions
             inference_data = from_pymc3_predictions(predictive_trace, posterior_trace=trace)
-        test_dict = {"posterior": ["beta"], "observed_data": ["obs"]}
+        test_dict = {"posterior": ["beta"], "~observed_data": ""}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails, "Posterior data not copied over as expected."
         test_dict = {"predictions": ["obs"]}
