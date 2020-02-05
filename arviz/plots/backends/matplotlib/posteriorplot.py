@@ -13,6 +13,7 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
     calculate_point_estimate,
+    get_bins
 )
 
 
@@ -258,7 +259,7 @@ def _plot_posterior_op(
             if values.dtype.kind == "i":
                 xmin = values.min()
                 xmax = values.max()
-                bins = range(xmin, xmax + 2)
+                bins = get_bins(values)
                 ax.set_xlim(xmin - 0.5, xmax + 0.5)
             else:
                 bins = "auto"
