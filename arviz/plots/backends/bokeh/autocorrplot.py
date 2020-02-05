@@ -28,8 +28,11 @@ def plot_autocorr(
     if backend_config is None:
         backend_config = {}
 
+    len_y = plotters[0][2].size
+    backend_config.setdefault("bounds_x_range", (0, len_y))
+
     backend_config = {
-        **backend_kwarg_defaults(("bounds_y_range", "plots.bokeh.bounds_y_range"),),
+        **backend_kwarg_defaults(("bounds_y_range", "plot.bokeh.bounds_y_range"),),
         **backend_config,
     }
 
@@ -56,14 +59,9 @@ def plot_autocorr(
     else:
         axes = np.atleast_2d(axes)
 
-    if "bounds_x_range" in backend_config:
-        data_range_x = DataRange1d(
-            start=0, end=max_lag, bounds=backend_config["bounds_x_range"], min_interval=5
-        )
-    else:
-        len_y = plotters[0][2].size
-        data_range_x = DataRange1d(start=0, end=max_lag, bounds=(0, len_y), min_interval=5)
-
+    data_range_x = DataRange1d(
+        start=0, end=max_lag, bounds=backend_config["bounds_x_range"], min_interval=5
+    )
     data_range_y = DataRange1d(
         start=-1, end=1, bounds=backend_config["bounds_y_range"], min_interval=0.1
     )

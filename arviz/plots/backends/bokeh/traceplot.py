@@ -45,7 +45,7 @@ def plot_trace(
         backend_config = {}
 
     backend_config = {
-        **backend_kwarg_defaults(("bounds_y_range", "plots.bokeh.bounds_y_range"),),
+        **backend_kwarg_defaults(("bounds_y_range", "plot.bokeh.bounds_y_range"),),
         **backend_config,
     }
 

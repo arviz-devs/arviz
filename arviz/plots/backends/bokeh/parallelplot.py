@@ -17,8 +17,8 @@ def plot_parallel(
 
     backend_config = {
         **backend_kwarg_defaults(
-            ("bounds_x_range", "plots.bokeh.bounds_x_range"),
-            ("bounds_y_range", "plots.bokeh.bounds_y_range"),
+            ("bounds_x_range", "plot.bokeh.bounds_x_range"),
+            ("bounds_y_range", "plot.bokeh.bounds_y_range"),
         ),
         **backend_config,
     }
