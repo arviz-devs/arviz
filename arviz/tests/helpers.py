@@ -165,8 +165,10 @@ def check_multiple_attrs(test_dict, parent):
 
     Args
     ----
-    test_dict: dict
-        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`
+    test_dict: dict of {str : list of str}
+        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`.
+        A ``~`` at the beggining of a dataset or variable name indicates the name NOT
+        being present must be asserted.
     parent: InferenceData
         InferenceData object on which to check the attributes.
 
@@ -179,10 +181,16 @@ def check_multiple_attrs(test_dict, parent):
     """
     failed_attrs = []
     for dataset_name, attributes in test_dict.items():
-        if hasattr(parent, dataset_name):
+        if dataset_name.startswith("~"):
+            if hasattr(parent, dataset_name[1:]):
+                failed_attrs.append(dataset_name)
+        elif hasattr(parent, dataset_name):
             dataset = getattr(parent, dataset_name)
             for attribute in attributes:
-                if not hasattr(dataset, attribute):
+                if attribute.startswith("~"):
+                    if hasattr(dataset, attribute[1:]):
+                        failed_attrs.append((dataset_name, attribute))
+                elif not hasattr(dataset, attribute):
                     failed_attrs.append((dataset_name, attribute))
         else:
             failed_attrs.append(dataset_name)
