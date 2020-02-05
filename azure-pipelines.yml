@@ -14,10 +14,10 @@ jobs:
         PYRO_VERSION: "latest"
         EMCEE_VERSION: "latest"
         NAME: "UNIT"
-      Python_36_Unit_Test_PyStan_3_Pyro_0.5.1_Emcee_2_tf_1:
+      Python_36_Unit_Test_PyStan_3_Pyro_1.0.0_Emcee_2_tf_1:
         PYTHON_VERSION: 3.6
         PYSTAN_VERSION: "preview"
-        PYRO_VERSION: 0.5.1
+        PYRO_VERSION: 1.0.0
         PYTORCH_VERSION: 1.3.0
         EMCEE_VERSION: 2
         TF_VERSION: 1
