@@ -8,7 +8,6 @@ from bokeh.models.annotations import Title
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _create_axes_grid, make_label
 from ....stats import autocorr
-from ....rcparams import rcParams
 
 
 def plot_autocorr(

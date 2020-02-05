@@ -5,7 +5,6 @@ from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker
 
 from . import backend_kwarg_defaults, backend_show
-from ....rcparams import rcParams
 
 
 def plot_parallel(
