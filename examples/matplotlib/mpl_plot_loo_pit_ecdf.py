@@ -4,6 +4,7 @@ LOO-PIT ECDF Plot
 
 _thumb: .5, .7
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")

@@ -4,6 +4,7 @@ Forest Plot
 
 _thumb: .5, .8
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")

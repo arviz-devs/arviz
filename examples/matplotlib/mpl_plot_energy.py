@@ -4,6 +4,7 @@ Energy Plot
 
 _thumb: .7, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")

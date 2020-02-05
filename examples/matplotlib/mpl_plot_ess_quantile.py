@@ -4,6 +4,7 @@ ESS Quantile Plot
 
 _thumb: .4, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")

@@ -24,7 +24,7 @@ from matplotlib import image
 
 from bokeh.io import export_png
 from bokeh.layouts import gridplot
-
+from arviz.rcparams import rc_context
 
 # Python 3 has no execfile
 def execfile(filename, globals=None, locals=None):
@@ -322,9 +322,11 @@ class ExampleGenerator:
             with open(self.filename, "r") as fp:
                 code_text = fp.read()
                 code_text += BOKEH_EXPORT_CODE.format(pngfilename=thumbfile)
-                exec(
-                    code_text, {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot}
-                )
+                with rc_context(rc={"plot.bokeh.show": False}):
+                    exec(
+                        code_text,
+                        {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot},
+                    )
 
         create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
@@ -398,6 +400,9 @@ def main(app):
                 img_file=ex.pngfilename,
                 api_name=ex.apiname,
             )
+            if backend == "matplotlib":
+                with open(op.join(target_dir, ex.pyfilename), "a") as f:
+                    f.write("plt.show()")
             with open(op.join(target_dir, ex.rstfilename), "w") as f:
                 f.write(output)
 

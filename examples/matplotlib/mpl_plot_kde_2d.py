@@ -4,8 +4,9 @@
 
 _thumb: .1, .8
 """
-import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import arviz as az
 
 az.style.use("arviz-darkgrid")
 

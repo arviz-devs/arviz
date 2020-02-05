@@ -4,6 +4,7 @@ Quantile MCSE Errobar Plot
 
 _thumb: .6, .4
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")

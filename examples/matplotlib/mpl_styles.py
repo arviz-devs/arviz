@@ -4,9 +4,9 @@ Styles
 
 _thumb: .8, .8
 """
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
 import arviz as az
 
 x = np.linspace(0, 1, 100)
