@@ -91,13 +91,13 @@ class PyroConverter:
     @requires("model")
     def log_likelihood_to_xarray(self):
         """Extract log likelihood from Pyro posterior."""
+        data = {}
         dims = None
         if self.observations is not None:
             try:
                 samples = self.posterior.get_samples(group_by_chain=False)
                 predictive = self.pyro.infer.Predictive(self.model, samples)
                 vectorized_trace = predictive.get_vectorized_trace(*self._args, **self._kwargs)
-                data = {}
                 for obs_name in self.observations.keys():
                     obs_site = vectorized_trace.nodes[obs_name]
                     log_like = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
@@ -105,7 +105,7 @@ class PyroConverter:
                     data[obs_name] = np.reshape(log_like, shape)
             except:  # pylint: disable=bare-except
                 # cannot get vectorized trace
-                pass
+                return None
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
 
     @requires("posterior_predictive")
