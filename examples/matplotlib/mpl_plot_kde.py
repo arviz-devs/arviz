@@ -22,3 +22,4 @@ ax = az.plot_kde(
     plot_kwargs={"linewidth": 2, "color": "black"},
     rug_kwargs={"color": "black"},
 )
+plt.show()

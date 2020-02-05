@@ -26,11 +26,6 @@ from bokeh.io import export_png
 from bokeh.layouts import gridplot
 from arviz.rcparams import rc_context
 
-# Python 3 has no execfile
-def execfile(filename, globals=None, locals=None):
-    with open(filename, "rb") as fp:
-        exec(compile(fp.read(), filename, "exec"), globals, locals)
-
 
 MPL_RST_TEMPLATE = """
 .. _{sphinx_tag}:
@@ -311,7 +306,10 @@ class ExampleGenerator:
         plt.close("all")
         if self.backend == "matplotlib":
             my_globals = {"pl": plt, "plt": plt}
-            execfile(self.filename, my_globals)
+            with open(self.filename, "r") as fp:
+                code_text = fp.read()
+                code_text = re.sub(r"(plt\.show\S+)", "", code_text)
+                exec(compile(code_text, self.filename, "exec"), my_globals)
 
             fig = plt.gcf()
             fig.canvas.draw()
@@ -400,9 +398,6 @@ def main(app):
                 img_file=ex.pngfilename,
                 api_name=ex.apiname,
             )
-            if backend == "matplotlib":
-                with open(op.join(target_dir, ex.pyfilename), "a") as f:
-                    f.write("plt.show()")
             with open(op.join(target_dir, ex.rstfilename), "w") as f:
                 f.write(output)
 

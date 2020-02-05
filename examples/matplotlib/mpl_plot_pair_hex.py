@@ -20,3 +20,4 @@ az.plot_pair(
     colorbar=True,
     divergences=True,
 )
+plt.show()

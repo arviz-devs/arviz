@@ -17,3 +17,4 @@ az.plot_density(
     var_names=["theta"],
     shade=0.1,
 )
+plt.show()

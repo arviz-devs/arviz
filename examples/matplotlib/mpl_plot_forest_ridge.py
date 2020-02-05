@@ -21,3 +21,5 @@ axes = az.plot_forest(
     figsize=(9, 4),
 )
 axes[0].set_title("Relative defensive strength\nof Six Nation rugby teams")
+
+plt.show()

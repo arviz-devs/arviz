@@ -19,3 +19,4 @@ az.plot_joint(
     kind="hexbin",
     figsize=(10, 10),
 )
+plt.show()

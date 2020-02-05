@@ -15,3 +15,4 @@ coords = {"school": ["Choate", "Deerfield"]}
 az.plot_pair(
     centered, var_names=["theta", "mu", "tau"], coords=coords, divergences=True, textsize=22
 )
+plt.show()

@@ -17,3 +17,5 @@ model_compare = az.compare(
     }
 )
 az.plot_compare(model_compare, figsize=(12, 4))
+
+plt.show()

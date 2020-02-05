@@ -20,3 +20,4 @@ az.plot_pair(
     divergences=True,
     textsize=22,
 )
+plt.show()
