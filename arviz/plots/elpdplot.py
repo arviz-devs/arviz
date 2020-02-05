@@ -64,7 +64,7 @@ def plot_elpd(
         scale argument passed to az.waic or az.loo, see their docs for details. Only taken
         into account when input is InferenceData.
     plot_kwargs : dicts, optional
-        Additional keywords passed to ax.plot
+        Additional keywords passed to ax.scatter
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional
