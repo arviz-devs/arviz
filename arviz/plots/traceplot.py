@@ -14,7 +14,7 @@ def plot_trace(
     data,
     var_names=None,
     transform=None,
-	coords=None,
+    coords=None,
     divergences="bottom",
     figsize=None,
     rug=False,
