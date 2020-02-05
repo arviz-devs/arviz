@@ -61,7 +61,7 @@ def plot_parallel(
         Defaults to none.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_config: bool, optional
+    backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
