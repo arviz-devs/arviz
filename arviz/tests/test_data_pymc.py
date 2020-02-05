@@ -260,27 +260,19 @@ class TestDataPyMC3:
         inference_data = from_pymc3(trace=trace)
         assert inference_data
 
-    def test_constant_data(self):
+    @pytest.mark.parametrize("use_context", [True, False])
+    def test_constant_data(self, use_context):
+        """Test constant_data group behaviour."""
         with pm.Model():
             x = pm.Data("x", [1.0, 2.0, 3.0])
             y = pm.Data("y", [1.0, 2.0, 3.0])
             beta = pm.Normal("beta", 0, 1)
             obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
             trace = pm.sample(100, tune=100)
+            if use_context:
+                inference_data = from_pymc3(trace=trace)
 
-        inference_data = from_pymc3(trace=trace)
-        test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
-        fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails
-
-    def test_constant_data_with_model_context(self):
-        with pm.Model():
-            x = pm.Data("x", [1.0, 2.0, 3.0])
-            y = pm.Data("y", [1.0, 2.0, 3.0])
-            beta = pm.Normal("beta", 0, 1)
-            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
-            trace = pm.sample(100, tune=100)
-
+        if not use_context:
             inference_data = from_pymc3(trace=trace)
         test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
         fails = check_multiple_attrs(test_dict, inference_data)
@@ -343,5 +335,28 @@ class TestDataPyMC3:
         # Prior and posterior_predictive but no trace
         inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive)
         test_dict = {"prior": ["beta", "obs"], "posterior_predictive": ["obs"]}
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+    @pytest.mark.parametrize("use_context", [True, False])
+    def test_priors_with_model(self, use_context):
+        """Test model is enough to get prior, prior predictive and observed_data."""
+        with pm.Model() as model:
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            prior = pm.sample_prior_predictive()
+
+        test_dict = {
+            "prior": ["beta", "~obs"],
+            "observed_data": ["obs"],
+            "prior_predictive": ["obs"],
+        }
+        if use_context:
+            with model:
+                inference_data = from_pymc3(prior=prior)
+        else:
+            inference_data = from_pymc3(prior=prior, model=model)
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails

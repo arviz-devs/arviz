@@ -220,11 +220,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Convert prior samples (and if possible prior predictive too) to xarray."""
         if self.prior is None:
             return {"prior": None, "prior_predictive": None}
-        if self.trace is not None:
-            prior_vars = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
-                self.trace.varnames, include_transformed=False
-            )
-            prior_predictive_vars = [key for key in self.prior.keys() if key not in prior_vars]
+        if self.observations is not None:
+            prior_predictive_vars = list(self.observations.keys())
+            prior_vars = [key for key in self.prior.keys() if key not in prior_predictive_vars]
         else:
             prior_vars = list(self.prior.keys())
             prior_predictive_vars = None
