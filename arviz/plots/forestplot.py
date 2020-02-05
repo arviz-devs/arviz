@@ -24,6 +24,7 @@ def plot_forest(
     ridgeplot_alpha=None,
     ridgeplot_overlap=2,
     ridgeplot_kind="auto",
+    ridgeplot_quantiles=None,
     figsize=None,
     ax=None,
     backend=None,
@@ -86,6 +87,9 @@ def plot_forest(
     ridgeplot_kind : string
         By default ("auto") continuous variables are plotted using KDEs and discrete ones using
         histograms. To override this use "hist" to plot histograms and "density" for KDEs
+    ridgeplot_quantiles : list
+        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+        Defaults to None.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     ax: axes, optional
@@ -180,6 +184,7 @@ def plot_forest(
         ridgeplot_overlap=ridgeplot_overlap,
         ridgeplot_alpha=ridgeplot_alpha,
         ridgeplot_kind=ridgeplot_kind,
+        ridgeplot_quantiles=ridgeplot_quantiles,
         textsize=textsize,
         ess=ess,
         r_hat=r_hat,
