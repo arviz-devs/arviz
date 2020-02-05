@@ -38,16 +38,21 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
-    _, ax = _create_axes_grid(
-        length_plotters,
-        rows,
-        cols,
-        figsize=figsize,
-        squeeze=False,
-        backend="matplotlib",
-        backend_kwargs=backend_kwargs,
-    )
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
+    if ax is None:
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend="matplotlib",
+            backend_kwargs=backend_kwargs,
+        )
+    else:
+        ax = np.atleast_2d(ax)
+    
+    axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
+
 
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
