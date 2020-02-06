@@ -103,24 +103,22 @@ class NumPyroConverter:
             data[name] = value
             if stat == "num_steps":
                 data["depth"] = np.log2(value).astype(int) + 1
+        return dict_to_dataset(data, library=self.numpyro, dims=None, coords=self.coords)
 
-        # extract log_likelihood
-        dims = None
-        if self.observations is not None and len(self.observations) == 1:
+    @requires("posterior")
+    @requires("model")
+    def log_likelihood_to_xarray(self):
+        """Extract log likelihood from NumPyro posterior."""
+        data = {}
+        if self.observations is not None:
             samples = self.posterior.get_samples(group_by_chain=False)
-            log_likelihood = self.numpyro.infer.log_likelihood(
+            log_likelihood_dict = self.numpyro.infer.log_likelihood(
                 self.model, samples, *self._args, **self._kwargs
             )
-            obs_name, log_likelihood = list(log_likelihood.items())[0]
-            if self.dims is not None:
-                coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
-            else:
-                coord_name = None
-            shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
-            data["log_likelihood"] = np.reshape(log_likelihood.copy(), shape)
-            dims = {"log_likelihood": coord_name}
-
-        return dict_to_dataset(data, library=self.numpyro, dims=dims, coords=self.coords)
+            for obs_name, log_like in log_likelihood_dict.items():
+                shape = (self.nchains, self.ndraws) + log_like.shape[1:]
+                data[obs_name] = np.reshape(log_like.copy(), shape)
+        return dict_to_dataset(data, library=self.numpyro, dims=self.dims, coords=self.coords)
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -197,6 +195,7 @@ class NumPyroConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
