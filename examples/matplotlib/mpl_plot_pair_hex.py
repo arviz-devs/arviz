@@ -4,6 +4,7 @@ Hexbin PairPlot
 
 _thumb: .2, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")
@@ -19,3 +20,4 @@ az.plot_pair(
     colorbar=True,
     divergences=True,
 )
+plt.show()

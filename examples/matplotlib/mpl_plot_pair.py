@@ -4,6 +4,7 @@ Pair Plot
 
 _thumb: .2, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")
@@ -14,3 +15,4 @@ coords = {"school": ["Choate", "Deerfield"]}
 az.plot_pair(
     centered, var_names=["theta", "mu", "tau"], coords=coords, divergences=True, textsize=22
 )
+plt.show()

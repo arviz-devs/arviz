@@ -4,8 +4,9 @@ KDE Plot
 
 _thumb: .2, .8
 """
-import arviz as az
+import matplotlib.pyplot as plt
 import numpy as np
+import arviz as az
 
 az.style.use("arviz-darkgrid")
 
@@ -21,3 +22,4 @@ ax = az.plot_kde(
     plot_kwargs={"linewidth": 2, "color": "black"},
     rug_kwargs={"color": "black"},
 )
+plt.show()
