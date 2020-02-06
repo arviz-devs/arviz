@@ -50,9 +50,8 @@ def plot_density(
         )
     else:
         ax = np.atleast_2d(ax)
-    
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
+    axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:

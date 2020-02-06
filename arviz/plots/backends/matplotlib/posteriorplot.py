@@ -13,7 +13,7 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
     calculate_point_estimate,
-    get_bins
+    get_bins,
 )
 
 
