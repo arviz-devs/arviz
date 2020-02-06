@@ -10,6 +10,7 @@ def plot_forest(
     kind="forestplot",
     model_names=None,
     var_names=None,
+    transform=None,
     coords=None,
     combined=False,
     credible_interval=None,
@@ -48,6 +49,8 @@ def plot_forest(
     var_names: list[str], optional
         List of variables to plot (defaults to None, which results in all
         variables plotted)
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     coords : dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     combined : bool
@@ -135,6 +138,8 @@ def plot_forest(
     """
     if not isinstance(data, (list, tuple)):
         data = [data]
+    if transform is not None:
+        data = transform(data)
 
     if coords is None:
         coords = {}

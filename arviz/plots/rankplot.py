@@ -17,6 +17,7 @@ from ..utils import _var_names
 def plot_rank(
     data,
     var_names=None,
+    transform=None,
     coords=None,
     bins=None,
     kind="bars",
@@ -50,6 +51,8 @@ def plot_rank(
         az.convert_to_dataset for details
     var_names : string or list of variable names
         Variables to be plotted
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     bins : None or passed to np.histogram
@@ -116,6 +119,8 @@ def plot_rank(
         >>> az.plot_rank(noncentered_data, var_names="mu", kind='vlines', axes=ax[1])
 
     """
+    if transform is not None:
+        data = transform(data)
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)

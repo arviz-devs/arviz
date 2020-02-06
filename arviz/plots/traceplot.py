@@ -13,6 +13,7 @@ from ..rcparams import rcParams
 def plot_trace(
     data,
     var_names=None,
+    transform=None,
     coords=None,
     divergences="bottom",
     figsize=None,
@@ -46,6 +47,8 @@ def plot_trace(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     rug : bool
@@ -137,6 +140,10 @@ def plot_trace(
         divergence_data = False
 
     data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+
+    if transform is not None:
+        data = transform(data)
+
     var_names = _var_names(var_names, data)
 
     if lines is None:

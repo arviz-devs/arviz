@@ -8,6 +8,7 @@ def plot_joint(
     data,
     group="posterior",
     var_names=None,
+    transform=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -35,6 +36,8 @@ def plot_joint(
     var_names : str or iterable of str
         Variables to be plotted. iter of two variables or one variable (with subset having
         exactly 2 dimensions) are required.
+    transform : callable
+        Function to transform data (defaults to None i.e. the identity function)
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
@@ -135,6 +138,9 @@ def plot_joint(
         )
 
     data = convert_to_dataset(data, group=group)
+
+    if transform is not None:
+        data = transform(data)
 
     if coords is None:
         coords = {}

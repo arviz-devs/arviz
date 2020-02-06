@@ -14,6 +14,7 @@ from ..rcparams import rcParams
 def plot_violin(
     data,
     var_names=None,
+    transform=None,
     quartiles=True,
     rug=False,
     credible_interval=None,
@@ -43,6 +44,8 @@ def plot_violin(
         Refer to documentation of az.convert_to_dataset for details
     var_names: list, optional
         List of variables to plot (defaults to None, which results in all variables plotted)
+    transform : callable
+        Function to transform data (defaults to None i.e. the identity function)
     quartiles : bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval*100%
         intervals. Defaults to True
@@ -86,6 +89,8 @@ def plot_violin(
     axes : matplotlib axes or bokeh figures
     """
     data = convert_to_dataset(data, group="posterior")
+    if transform is not None:
+        data = transform(data)
     var_names = _var_names(var_names, data)
 
     plotters = filter_plotters_list(
