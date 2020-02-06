@@ -11,6 +11,8 @@ from ..rcparams import (
     rcParams,
     rc_context,
     _make_validate_choice,
+    make_iterable_validator,
+    _validate_float_or_none,
     _validate_positive_int_or_none,
     _validate_probability,
     read_rcfile,
@@ -133,6 +135,42 @@ def test_make_validate_choice(args, allow_none, typeof):
     else:
         value = validate_choice(value)
         assert value in accepted_values or value is None
+
+
+@pytest.mark.parametrize("allow_none", (True, False))
+@pytest.mark.parametrize("allow_auto", (True, False))
+@pytest.mark.parametrize("length", (2, 3))
+@pytest.mark.parametrize(
+    "args",
+    [
+        (False, (1, 2)),
+        ("Only ordered iterable", set(["a", "b", "c"])),
+        (False, None),
+        (False, "auto"),
+    ],
+)
+def test_make_iterable_validator(args, length, allow_auto, allow_none):
+    scalar_validator = _validate_float_or_none
+    validate_iterable = make_iterable_validator(
+        scalar_validator, length=length, allow_none=allow_none, allow_auto=allow_auto
+    )
+    raise_error, value = args
+    if (
+        value not in {None, "auto"}
+        and not isinstance(value, (set, frozenset))
+        and len(value) != length
+    ):
+        raise_error = "Iterable must be of length"
+    if value is None and not allow_none:
+        raise_error = "Only ordered iterable"
+    if value == "auto" and not allow_auto:
+        raise_error = "Could not convert"
+    if raise_error:
+        with pytest.raises(ValueError, match=raise_error):
+            validate_iterable(value)
+    else:
+        value = validate_iterable(value)
+        assert np.iterable(value) or value is None or value == "auto"
 
 
 @pytest.mark.parametrize(
