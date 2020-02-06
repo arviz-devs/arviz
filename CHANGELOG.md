@@ -13,6 +13,8 @@
 
 
 ### Maintenance and fixes
+* Fixed bug in density and posterior plot bin computation (#1049)
+* Fixed bug in density plot ax argument (#1049)
 * Fixed bug in extracting prior samples for cmdstanpy (#979)
 * Fix erroneous warning in traceplot (#989)
 * Correct bfmi denominator (#991)
