@@ -89,7 +89,7 @@ def plot_violin(
     axes : matplotlib axes or bokeh figures
 
     Examples
-    -------
+    --------
     Show a default violin plot
 
     .. plot::
