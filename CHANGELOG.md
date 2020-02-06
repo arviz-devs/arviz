@@ -9,6 +9,7 @@
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
+* Add `skipna` argument to `hpd` and `summary` (#1035)
 
 ### Maintenance and fixes
 * Fixed bug in extracting prior samples for cmdstanpy (#979)
@@ -18,6 +19,9 @@
 * Rename flat_inference_data_to_dict (#1003)
 * Violinplot: fix histogram (#997)
 * Convert all instances of SyntaxWarning to UserWarning (#1016)
+* Fix `point_estimate` in `plot_posterior` (#1038)
+* Fix interpolation `hpd_plot` (#1039)
+* Fix `io_pymc3.py` to handle models with `potentials` (#1043)
 
 ### Deprecation
 
