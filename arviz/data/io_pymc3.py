@@ -7,7 +7,7 @@ import numpy as np
 import xarray as xr
 from .. import utils
 from .inference_data import InferenceData, concat
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs, CoordSpec, DimSpec
 
 if TYPE_CHECKING:
     import pymc3 as pm
@@ -346,9 +346,41 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
 
 def from_pymc3(
-    trace=None, *, prior=None, posterior_predictive=None, coords=None, dims=None, model=None
-):
-    """Convert pymc3 data into an InferenceData object."""
+    trace: Optional[MultiTrace] = None,
+    *,
+    prior: Optional[Dict[str, Any]] = None,
+    posterior_predictive: Optional[Dict[str, Any]] = None,
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None,
+    model: Optional[Model] = None
+) -> InferenceData:
+    """Convert pymc3 data into an InferenceData object.
+
+    All three of them are optional arguments, but at least one of ``trace``,
+    ``prior`` and ``posterior_predictive`` must be present.
+
+    Parameters
+    ----------
+    trace : pymc3.MultiTrace, optional
+        Trace generated from MCMC sampling.
+    prior : dict, optional
+        Dictionary with the variable names as keys, and values numpy arrays
+        containing prior and prior predictive samples.
+    posterior_predictive : dict, optional
+        Dictionary with the variable names as keys, and values numpy arrays
+        containing posterior predictive samples.
+    coords : dict of {str: array-like}, optional
+        Map of coordinate names to coordinate values
+    dims : dict of {str: list of str}, optional
+        Map of variable names to the coordinate names to use to index its dimensions.
+    model : pymc3.Model, optional
+        Model used to generate ``trace``. It is not necessary to pass ``model`` if in
+        ``with`` context.
+
+    Returns
+    -------
+    InferenceData
+    """
     return PyMC3Converter(
         trace=trace,
         prior=prior,
