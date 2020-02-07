@@ -96,7 +96,7 @@ def plot_violin(
         :context: close-figs
 
         >>> import arviz as az
-        >>> data = az.load_arviz_data('centered-eight')
+        >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_violin(data)
 
     Show a default violin plot, but with a transformation applied to the data
@@ -104,9 +104,8 @@ def plot_violin(
     .. plot::
         :context: close-figs
 
-        >>> import arviz as az
-        >>> data = az.load_arviz_data('centered-eight', transform=np.log)
-        >>> az.plot_violin(data) 
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
     data = convert_to_dataset(data, group="posterior")
