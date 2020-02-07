@@ -139,9 +139,7 @@ def test_make_validate_choice(args, allow_none, typeof):
 
 @pytest.mark.parametrize("allow_none", (True, False))
 @pytest.mark.parametrize("allow_auto", (True, False))
-@pytest.mark.parametrize(
-    "value", [(1, 2), "auto", None, "(1, 4)"]
-)
+@pytest.mark.parametrize("value", [(1, 2), "auto", None, "(1, 4)"])
 def test_make_iterable_validator_none_auto(value, allow_auto, allow_none):
     scalar_validator = _validate_float_or_none
     validate_iterable = make_iterable_validator(
