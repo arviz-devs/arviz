@@ -87,6 +87,25 @@ def plot_violin(
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    Examples
+    --------
+    Show a default violin plot
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data('centered_eight')
+        >>> az.plot_violin(data)
+
+    Show a default violin plot, but with a transformation applied to the data
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_violin(data, var_names="tau", transform=np.log)
+
     """
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
