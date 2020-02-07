@@ -140,14 +140,13 @@ def test_make_validate_choice(args, allow_none, typeof):
 @pytest.mark.parametrize("allow_none", (True, False))
 @pytest.mark.parametrize("allow_auto", (True, False))
 @pytest.mark.parametrize(
-    "args", [(1, 2), "auto", None, "(1, 4)"]
+    "value", [(1, 2), "auto", None, "(1, 4)"]
 )
-def test_make_iterable_validator_none_auto(args, allow_auto, allow_none):
+def test_make_iterable_validator_none_auto(value, allow_auto, allow_none):
     scalar_validator = _validate_float_or_none
     validate_iterable = make_iterable_validator(
         scalar_validator, allow_auto=allow_auto, allow_none=allow_none
     )
-    value = args
     raise_error = False
     if value is None and not allow_none:
         raise_error = "Only ordered iterable"
@@ -162,11 +161,10 @@ def test_make_iterable_validator_none_auto(args, allow_auto, allow_none):
 
 
 @pytest.mark.parametrize("length", (2, None))
-@pytest.mark.parametrize("args", [(1, 5), (1, 3, 5), "(3, 4, 5)"])
-def test_make_iterable_validator_length(args, length):
+@pytest.mark.parametrize("value", [(1, 5), (1, 3, 5), "(3, 4, 5)"])
+def test_make_iterable_validator_length(value, length):
     scalar_validator = _validate_float_or_none
     validate_iterable = make_iterable_validator(scalar_validator, length=length)
-    value = args
     raise_error = False
     if length is not None and len(value) != length:
         raise_error = "Iterable must be of length"
