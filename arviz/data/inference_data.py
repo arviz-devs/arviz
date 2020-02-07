@@ -3,11 +3,27 @@ from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 from datetime import datetime
+import warnings
+
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
 from ..rcparams import rcParams
+
+SUPPORTED_GROUPS = [
+    "posterior",
+    "sample_stats",
+    "log_likelihood",
+    "posterior_predictive",
+    "observed_data",
+    "constant_data",
+    "prior",
+    "sample_stats_prior",
+    "prior_predictive",
+    "predictions",
+    "predictions_constant_data",
+]
 
 
 class InferenceData:
@@ -60,13 +76,21 @@ class InferenceData:
 
         """
         self._groups = []
-        for key, dataset in kwargs.items():
+        key_list = [key for key in SUPPORTED_GROUPS if key in kwargs]
+        for key in kwargs:
+            if key not in SUPPORTED_GROUPS:
+                key_list.append(key)
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(key), UserWarning
+                )
+        for key in key_list:
+            dataset = kwargs[key]
             if dataset is None:
                 continue
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
-                    '(argument "{}" was type "{}")'.format(key, type(dataset))
+                    "(argument '{}' was type '{}')".format(key, type(dataset))
                 )
             setattr(self, key, dataset)
             self._groups.append(key)
@@ -312,18 +336,9 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 group_data = getattr(arg0, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
-        basic_order = [
-            "posterior",
-            "posterior_predictive",
-            "sample_stats",
-            "prior",
-            "prior_predictive",
-            "sample_stats_prior",
-            "observed_data",
-        ]
-        other_groups = [group for group in args_groups if group not in basic_order]
+        other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS]
 
-        for group in basic_order + other_groups:
+        for group in SUPPORTED_GROUPS + other_groups:
             if group not in args_groups:
                 continue
             if inplace:
@@ -333,9 +348,11 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 inference_data_dict[group] = args_groups[group]
         if inplace:
             other_groups = [
-                group for group in arg0_groups if group not in basic_order
+                group for group in arg0_groups if group not in SUPPORTED_GROUPS
             ] + other_groups
-            sorted_groups = [group for group in basic_order + other_groups if group in arg0._groups]
+            sorted_groups = [
+                group for group in SUPPORTED_GROUPS + other_groups if group in arg0._groups
+            ]
             setattr(arg0, "_groups", sorted_groups)
     else:
         arg0 = args[0]
