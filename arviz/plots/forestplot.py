@@ -28,6 +28,7 @@ def plot_forest(
     figsize=None,
     ax=None,
     backend=None,
+    backend_config=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -95,6 +96,8 @@ def plot_forest(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_config: dict, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -191,6 +194,9 @@ def plot_forest(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend == "bokeh":
+        plot_forest_kwargs.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_forest", "forestplot", backend)
