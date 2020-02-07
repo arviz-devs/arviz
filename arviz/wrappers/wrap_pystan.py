@@ -5,6 +5,7 @@ from ..data import from_pystan
 
 
 class PyStanSamplingWrapper(SamplingWrapper):
+    """PyStan sampling wrapper base class."""
 
     def sel_observations(self, idx):
         """Select a subset of the observations in idata_orig.
@@ -38,12 +39,9 @@ class PyStanSamplingWrapper(SamplingWrapper):
 
     def get_inference_data(self, fit):
         """Convert the fit object returned by ``self.sample`` to InferenceData."""
-        idata = from_pystan(
-            posterior=fit,
-            **self.idata_kwargs
-        )
+        idata = from_pystan(posterior=fit, **self.idata_kwargs)
         return idata
 
     def log_likelihood__i(self, excluded_obs_log_like, idata__i):
         """Retrieve the log likelihood of the excluded observations from ``idata__i``."""
-        return idata__i.posterior_predictive[excluded_obs_log_like]
+        return idata__i.log_likelihood[excluded_obs_log_like]

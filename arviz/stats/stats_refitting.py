@@ -1,4 +1,5 @@
 """Stats functions that require refitting the model."""
+import logging
 import numpy as np
 
 from .stats import loo
@@ -6,7 +7,10 @@ from .stats_utils import logsumexp as _logsumexp
 
 __all__ = ["reloo"]
 
-def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale="deviance"):
+_log = logging.getLogger(__name__)
+
+
+def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     """Recalculate exact Leave-One-Out cross validation refitting where the approximation fails.
 
     ``az.loo`` estimates the values of Leave-One-Out (LOO) cross validation using Pareto
@@ -86,6 +90,8 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale="deviance"):
 
     if np.any(khats > k_thresh):
         for idx in np.argwhere(khats.values > 0.7):
+            if verbose:
+                _log.info("Refitting model excluding observation %d", idx)
             new_obs, excluded_obs = wrapper.sel_observations(idx)
             fit = wrapper.sample(new_obs)
             idata_idx = wrapper.get_inference_data(fit)
@@ -98,5 +104,5 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale="deviance"):
         loo_refitted.p_loo = lppd_orig - loo_refitted.loo / scale_value
         return loo_refitted
     else:
-        print("No problematic observations")
+        _log.info("No problematic observations")
         return loo_orig
