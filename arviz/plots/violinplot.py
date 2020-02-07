@@ -104,7 +104,6 @@ def plot_violin(
     .. plot::
         :context: close-figs
 
-        >>> data = az.load_arviz_data('centered_eight')
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
