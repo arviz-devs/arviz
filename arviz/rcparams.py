@@ -124,8 +124,8 @@ def _validate_bokeh_marker(value):
     if value not in all_markers:
         raise ValueError("{} is not one of {}".format(value, all_markers))
     return value
-  
-  
+
+
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
     """Validate value is an iterable datatype."""
     # based on matplotlib's _listify_validator function
