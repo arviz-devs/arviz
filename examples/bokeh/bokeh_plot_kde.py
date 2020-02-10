@@ -16,7 +16,7 @@ y_hat = np.concatenate(data.posterior_predictive["obs"].values)
 figure_kwargs = dict(height=500, width=500, output_backend="webgl")
 ax = bkp.figure(**figure_kwargs)
 
-ax = az.plot_kde(
+ax, _ = az.plot_kde(
     y_hat,
     label="Estimated Effect\n of SAT Prep",
     rug=True,

@@ -91,7 +91,7 @@ def plot_kde(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib axes or bokeh figures and glyphs
 
     Examples
     --------
