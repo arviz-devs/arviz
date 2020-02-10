@@ -38,7 +38,7 @@ If an issue exists check the ticket to ensure no one else has started work. If f
 Open an issue ticket for the issue and state that you'll be solving the issue with a pull request. Optionally create a pull request and add `[WIP]` in the title to indicate Work in Progress.
 
 ### In the event of a conflict
-In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though the core contributors will make the best judgement call in each situation.
+In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the the core contributors will make the best judgement call if needed.
 
 ## Making the pull request
 The preferred workflow for contributing to ArviZ is to fork
