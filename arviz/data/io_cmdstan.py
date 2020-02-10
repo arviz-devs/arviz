@@ -28,10 +28,15 @@ class CmdStanConverter:
         *,
         posterior=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_predictive=None,
         observed_data=None,
         observed_data_var=None,
+        constant_data=None,
+        constant_data_var=None,
+        predictions_constant_data=None,
+        predictions_constant_data_var=None,
         log_likelihood=None,
         coords=None,
         dims=None
@@ -57,6 +62,16 @@ class CmdStanConverter:
                 )
                 len_pp = len(posterior_predictive)
                 _log.info("glob found %d files for 'posterior_predictive':\n%s", len_pp, msg)
+        if isinstance(predictions, str):
+            predictions_glob = glob(predictions)
+            if len(predictions_glob) > 1:
+                predictions = sorted(predictions_glob)
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path))
+                    for i, path in enumerate(predictions, 1)
+                )
+                len_p = len(predictions)
+                _log.info("glob found %d files for 'predictions':\n%s", len_p, msg)
         if isinstance(prior, str):
             prior_glob = glob(prior)
             if len(prior_glob) > 1:
@@ -77,10 +92,15 @@ class CmdStanConverter:
                 len_pp = len(prior_predictive)
                 _log.info("glob found %d files for 'prior_predictive':\n%s", len_pp, msg)
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior_ = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
         self.observed_data_var = observed_data_var
+        self.constant_data = constant_data
+        self.constant_data_var = constant_data_var
+        self.predictions_constant_data = predictions_constant_data
+        self.predictions_constant_data_var = predictions_constant_data_var
         if isinstance(log_likelihood, (list, tuple)):
             if len(log_likelihood) == 1:
                 log_likelihood = log_likelihood[0]
@@ -145,7 +165,7 @@ class CmdStanConverter:
         """Extract posterior samples from output csv."""
         columns = self.posterior[0].columns
 
-        # filter posterior_predictive and log_likelihood
+        # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
         if posterior_predictive is None or (
             isinstance(posterior_predictive, str) and posterior_predictive.lower().endswith(".csv")
@@ -162,13 +182,25 @@ class CmdStanConverter:
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
 
+        predictions = self.predictions
+        if predictions is None or (
+            isinstance(predictions, str) and predictions.lower().endswith(".csv")
+        ):
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [col for col in columns if predictions == col.split(".")[0]]
+        else:
+            predictions = [
+                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+            ]
+
         log_likelihood = self.log_likelihood
         if log_likelihood is None:
             log_likelihood = []
         else:
             log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
 
-        invalid_cols = posterior_predictive + log_likelihood
+        invalid_cols = posterior_predictive + predictions + log_likelihood
         valid_cols = [col for col in columns if col not in invalid_cols]
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
@@ -256,6 +288,32 @@ class CmdStanConverter:
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
             data = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior])
+        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions samples to xarray."""
+        predictions = self.predictions
+        columns = self.posterior[0].columns
+        if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
+            isinstance(predictions, str) and predictions.endswith(".csv")
+        ):
+            if isinstance(predictions, str):
+                predictions = [predictions]
+            chain_data = []
+            for path in predictions:
+                parsed_output = _read_output(path)
+                for sample, *_ in parsed_output:
+                    chain_data.append(sample)
+            data = _unpack_dataframes(chain_data)
+        else:
+            if isinstance(predictions, str):
+                predictions = [predictions]
+            predictions_cols = [
+                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+            ]
+            data = _unpack_dataframes([item[predictions_cols] for item in self.posterior])
         return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -351,6 +409,44 @@ class CmdStanConverter:
             )
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
+
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant data to xarray."""
+        constant_data_raw = _read_data(self.constant_data)
+        variables = self.constant_data_var
+        if isinstance(variables, str):
+            variables = [variables]
+        constant_data = {}
+        for key, vals in constant_data_raw.items():
+            if variables is not None and key not in variables:
+                continue
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data)
+
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions constant data to xarray."""
+        predictions_constant_data_raw = _read_data(self.predictions_constant_data)
+        variables = self.predictions_constant_data_var
+        if isinstance(variables, str):
+            variables = [variables]
+        predictions_constant_data = {}
+        for key, vals in predictions_constant_data_raw.items():
+            if variables is not None and key not in variables:
+                continue
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=predictions_constant_data)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -672,10 +768,15 @@ def from_cmdstan(
     posterior=None,
     *,
     posterior_predictive=None,
+    predictions=None,
     prior=None,
     prior_predictive=None,
     observed_data=None,
     observed_data_var=None,
+    constant_data=None,
+    constant_data_var=None,
+    predictions_constant_data=None,
+    predictions_constant_data_var=None,
     log_likelihood=None,
     coords=None,
     dims=None
@@ -690,21 +791,34 @@ def from_cmdstan(
 
             cat output*.csv > combined_output.csv
 
-    posterior_predictive : str, List[Str]
+    posterior_predictive : str, List[str]
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
+    predictions : str, List[str]
+        Out of sample predictions samples for the fit. If endswith ".csv" assumes file.
     prior : List[str]
         List of paths to output.csv files
         CSV file can be stacked csv containing all the chains.
 
             cat output*.csv > combined_output.csv
 
-    prior_predictive : str, List[Str]
+    prior_predictive : str, List[str]
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : str
         Observed data used in the sampling. Path to data file in Rdump format.
     observed_data_var : str, List[str]
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
+    constant_data : str
+        Constant data used in the sampling. Path to data file in Rdump format.
+    constant_data_var : str, List[str]
+        Variable(s) used for slicing constant_data. If not defined, all
+        data variables are imported.
+    predictions_constant_data : str
+        Constant data for predictions used in the sampling.
+        Path to data file in Rdump format.
+    predictions_constant_data_var : str, List[str]
+        Variable(s) used for slicing predictions_constant_data.
+        If not defined, all data variables are imported.
     log_likelihood : str
         Pointwise log_likelihood for the data.
     coords : dict[str, iterable]
@@ -720,10 +834,15 @@ def from_cmdstan(
     return CmdStanConverter(
         posterior=posterior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
         prior=prior,
         prior_predictive=prior_predictive,
         observed_data=observed_data,
         observed_data_var=observed_data_var,
+        constant_data=constant_data,
+        constant_data_var=constant_data_var,
+        predictions_constant_data=predictions_constant_data,
+        predictions_constant_data_var=predictions_constant_data_var,
         log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
