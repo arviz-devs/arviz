@@ -280,7 +280,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     Examples
     --------
     Use ``concat`` method to concatenate InferenceData objects. This will concatenates over
-    unique groups by default. We first create an InferenceData object:
+    unique groups by default. We first create an ``InferenceData`` object:
 
     .. ipython::
 
@@ -295,7 +295,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
            ...: dataA
 
     We have created an ``InferenceData`` object with default group 'posterior'. Now, we will
-    create another InferenceData object:
+    create another ``InferenceData`` object:
 
     .. ipython::
 
