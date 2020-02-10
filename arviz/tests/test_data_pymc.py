@@ -368,7 +368,7 @@ class TestDataPyMC3:
         assert not fails
 
     def test_no_model_deprecation(self):
-        with pm.Model() as model:
+        with pm.Model():
             x = pm.Data("x", [1.0, 2.0, 3.0])
             y = pm.Data("y", [1.0, 2.0, 3.0])
             beta = pm.Normal("beta", 0, 1)
