@@ -159,15 +159,11 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
     "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
-    "plot.bokeh.tools": (
-        "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
-        lambda x: x,
-    ),
-    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
+    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
