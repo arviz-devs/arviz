@@ -1,5 +1,6 @@
 """PyMC3-specific conversion code."""
 import logging
+import warnings
 from typing import Dict, List, Any, Optional, TYPE_CHECKING
 from types import ModuleType
 
@@ -85,6 +86,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             self.ndraws = len(trace)
         else:
             self.nchains = self.ndraws = 0
+
+        if model is None:
+            warnings.warn(
+                "Using `from_pymc3` without the model will be deprecated in a future release. "
+                "Not using the model will return less accurate and less useful results. "
+                "Make sure you use the model argument or call from_pymc3 within a model context.",
+                PendingDeprecationWarning
+            )
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive

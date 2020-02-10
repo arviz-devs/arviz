@@ -161,13 +161,13 @@ class TestDataPyMC3:
     def test_posterior_predictive_keep_size(self, data, chains, draws, eight_schools_params):
         with data.model:
             posterior_predictive = pm.sample_posterior_predictive(data.obj, keep_size=True)
+            inference_data = from_pymc3(
+                trace=data.obj,
+                posterior_predictive=posterior_predictive,
+                coords={"school": np.arange(eight_schools_params["J"])},
+                dims={"theta": ["school"], "eta": ["school"]},
+            )
 
-        inference_data = from_pymc3(
-            trace=data.obj,
-            posterior_predictive=posterior_predictive,
-            coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "eta": ["school"]},
-        )
         shape = inference_data.posterior_predictive.obs.shape
         assert np.all(
             [obs_s == s for obs_s, s in zip(shape, (chains, draws, eight_schools_params["J"]))]
@@ -176,13 +176,13 @@ class TestDataPyMC3:
     def test_posterior_predictive_warning(self, data, eight_schools_params, caplog):
         with data.model:
             posterior_predictive = pm.sample_posterior_predictive(data.obj, 370)
+            inference_data = from_pymc3(
+                trace=data.obj,
+                posterior_predictive=posterior_predictive,
+                coords={"school": np.arange(eight_schools_params["J"])},
+                dims={"theta": ["school"], "eta": ["school"]},
+            )
 
-        inference_data = from_pymc3(
-            trace=data.obj,
-            posterior_predictive=posterior_predictive,
-            coords={"school": np.arange(eight_schools_params["J"])},
-            dims={"theta": ["school"], "eta": ["school"]},
-        )
         records = caplog.records
         shape = inference_data.posterior_predictive.obs.shape
         assert np.all([obs_s == s for obs_s, s in zip(shape, (1, 370, eight_schools_params["J"]))])
@@ -201,7 +201,7 @@ class TestDataPyMC3:
         # make sure that data is really missing
         (y_missing,) = model.missing_values
         assert y_missing.tag.test_value.shape == (2,)
-        inference_data = from_pymc3(trace=trace)
+        inference_data = from_pymc3(trace=trace, model=model)
         test_dict = {"posterior": ["x"], "observed_data": ["y"], "log_likelihood": ["y"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
@@ -214,7 +214,7 @@ class TestDataPyMC3:
             pm.Normal("y1", x, 1, observed=y1_data)
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
-        inference_data = from_pymc3(trace=trace)
+            inference_data = from_pymc3(trace=trace)
         test_dict = {
             "posterior": ["x"],
             "observed_data": ["y1", "y2"],
@@ -235,7 +235,7 @@ class TestDataPyMC3:
                 "x", pm.Normal.dist(mu, 1.0).logp, observed={"value": 0.1}
             )
             trace = pm.sample(100, chains=2)
-        inference_data = from_pymc3(trace=trace)
+            inference_data = from_pymc3(trace=trace)
         assert inference_data
         assert not hasattr(inference_data, "observed_data")
         assert hasattr(inference_data, "posterior")
@@ -247,8 +247,8 @@ class TestDataPyMC3:
             p = pm.Uniform("p", 0, 1)
             pm.Binomial("w", p=p, n=2, observed=1)
             trace = pm.sample(500, chains=2)
+            inference_data = from_pymc3(trace=trace)
 
-        inference_data = from_pymc3(trace=trace)
         assert inference_data
 
     def test_potential(self):
@@ -256,8 +256,8 @@ class TestDataPyMC3:
             x = pm.Normal("x", 0.0, 1.0)
             pm.Potential("z", pm.Normal.dist(x, 1.0).logp(np.random.randn(10)))
             trace = pm.sample(100, chains=2)
+            inference_data = from_pymc3(trace=trace)
 
-        inference_data = from_pymc3(trace=trace)
         assert inference_data
 
     @pytest.mark.parametrize("use_context", [True, False])
@@ -313,7 +313,7 @@ class TestDataPyMC3:
         assert not fails, "Predictions constant data not instantiated as expected."
 
     def test_no_trace(self):
-        with pm.Model():
+        with pm.Model() as model:
             x = pm.Data("x", [1.0, 2.0, 3.0])
             y = pm.Data("y", [1.0, 2.0, 3.0])
             beta = pm.Normal("beta", 0, 1)
@@ -323,18 +323,18 @@ class TestDataPyMC3:
             posterior_predictive = pm.sample_posterior_predictive(trace)
 
         # Only prior
-        inference_data = from_pymc3(prior=prior)
-        test_dict = {"prior": ["beta", "obs"]}
+        inference_data = from_pymc3(prior=prior, model=model)
+        test_dict = {"prior": ["beta"], "prior_predictive": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         # Only posterior_predictive
-        inference_data = from_pymc3(posterior_predictive=posterior_predictive)
+        inference_data = from_pymc3(posterior_predictive=posterior_predictive, model=model)
         test_dict = {"posterior_predictive": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         # Prior and posterior_predictive but no trace
-        inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive)
-        test_dict = {"prior": ["beta", "obs"], "posterior_predictive": ["obs"]}
+        inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive, model=model)
+        test_dict = {"prior": ["beta"], "prior_predictive": ["obs"], "posterior_predictive": ["obs"]}
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -360,3 +360,22 @@ class TestDataPyMC3:
             inference_data = from_pymc3(prior=prior, model=model)
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+    def test_no_model_deprecation(self):
+        with pm.Model() as model:
+            x = pm.Data("x", [1.0, 2.0, 3.0])
+            y = pm.Data("y", [1.0, 2.0, 3.0])
+            beta = pm.Normal("beta", 0, 1)
+            obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
+            prior = pm.sample_prior_predictive()
+
+        with pytest.warns(PendingDeprecationWarning, match="without the model"):
+            inference_data = from_pymc3(prior=prior)
+        test_dict = {
+            "prior": ["beta", "obs"],
+            "~prior_predictive": [],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
+
