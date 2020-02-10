@@ -309,6 +309,16 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
         In [1]: az.concat(dataA, dataB)
 
+    Now, we will concatenate over chain (or draw). It requires identical groups and variables.
+    Here we are concatenating two identical ``InferenceData`` objects over dimension chain:
+
+    .. ipython::
+
+        In [1]: az.concat(dataA, dataA, dim="chain")
+
+    It will create an ``InferenceData`` with the original group 'posterior'. In similar way,
+    we can also concatenate over draws.
+
     """
     # pylint: disable=undefined-loop-variable, too-many-nested-blocks
     if len(args) == 0:
