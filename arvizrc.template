@@ -19,7 +19,6 @@ plot.bokeh.figure.height     : 500         # num of pixels
 plot.bokeh.figure.width      : 500         # num of pixels
 plot.bokeh.marker            : Cross       # specify the marker type used to plot
 plot.bokeh.output_backend    : webgl       # one of canvas, svg, webgl
-plot.bokeh.output_backend    : webgl       # one of canvas, svg, webgl
 plot.bokeh.show              : true        # call bokeh.plotting.show for figure or grid of figures. One of "true", "false"
 plot.bokeh.tools             : pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover
 

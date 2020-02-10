@@ -164,7 +164,6 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
     "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
-    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
