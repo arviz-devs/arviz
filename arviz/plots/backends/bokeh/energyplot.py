@@ -48,7 +48,7 @@ def plot_energy(
             plot_kwargs["line_color"] = color
             plot_kwargs["line_alpha"] = alpha
             plot_kwargs.setdefault("line_width", line_width)
-            glyph = plot_kde(
+            _, glyph = plot_kde(
                 value,
                 bw=bw,
                 label=label,
