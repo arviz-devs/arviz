@@ -21,7 +21,7 @@ def plot_elpd(
     threshold=None,
     ax=None,
     ic=None,
-    scale="deviance",
+    scale=None,
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
@@ -109,6 +109,7 @@ def plot_elpd(
     """
     valid_ics = ["waic", "loo"]
     ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if ic not in valid_ics:
         raise ValueError(
             ("Information Criteria type {} not recognized." "IC must be in {}").format(

@@ -13,6 +13,7 @@ from ..rcparams import rcParams
 def plot_trace(
     data,
     var_names=None,
+    transform=None,
     coords=None,
     divergences="bottom",
     figsize=None,
@@ -27,6 +28,7 @@ def plot_trace(
     hist_kwargs=None,
     trace_kwargs=None,
     backend=None,
+    backend_config=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -46,6 +48,8 @@ def plot_trace(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     rug : bool
@@ -73,6 +77,8 @@ def plot_trace(
         Extra keyword arguments passed to `plt.plot`
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_config: dict, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -137,6 +143,10 @@ def plot_trace(
         divergence_data = False
 
     data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+
+    if transform is not None:
+        data = transform(data)
+
     var_names = _var_names(var_names, data)
 
     if lines is None:
@@ -165,7 +175,7 @@ def plot_trace(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
             "of variables to plot ({len_plotters}), generating only {max_plots} "
             "plots".format(max_plots=max_plots, len_plotters=len(plotters)),
-            SyntaxWarning,
+            UserWarning,
         )
         plotters = plotters[:max_plots]
 
@@ -213,6 +223,9 @@ def plot_trace(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend == "bokeh":
+        trace_plot_args.update(backend_config=backend_config)
 
     plot = get_plotting_function("plot_trace", "traceplot", backend)
     axes = plot(**trace_plot_args)

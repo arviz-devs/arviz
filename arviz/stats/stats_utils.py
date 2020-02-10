@@ -8,7 +8,7 @@ import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
-from ..utils import conditional_jit
+from ..utils import conditional_jit, conditional_vect
 
 _log = logging.getLogger(__name__)
 
@@ -386,6 +386,33 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
     return nan_error | chain_error | draw_error
 
 
+def get_log_likelihood(idata, var_name=None):
+    """Retrieve the log likelihood dataarray of a given variable."""
+    if hasattr(idata, "sample_stats") and hasattr(idata.sample_stats, "log_likelihood"):
+        warnings.warn(
+            "Storing the log_likelihood in sample_stats groups will be deprecated",
+            PendingDeprecationWarning,
+        )
+        return idata.sample_stats.log_likelihood
+    if not hasattr(idata, "log_likelihood"):
+        raise TypeError("log likelihood not found in inference data object")
+    if var_name is None:
+        var_names = list(idata.log_likelihood.data_vars)
+        if "lp" in var_names:
+            var_names.remove("lp")
+        if len(var_names) > 1:
+            raise TypeError(
+                "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
+            )
+        return idata.log_likelihood[var_names[0]]
+    else:
+        try:
+            log_likelihood = idata.log_likelihood[var_name]
+        except KeyError:
+            raise TypeError("No log likelihood data named {} found".format(var_name))
+        return log_likelihood
+
+
 BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
 
 {{0:{0}}} Estimate       SE
@@ -495,3 +522,31 @@ def histogram(data, bins, range_hist=None):
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
     hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
+
+
+@conditional_vect
+def _sqrt(a_a, b_b):
+    return (a_a + b_b) ** 0.5
+
+
+def _circfunc(samples, high, low, skipna):
+    samples = np.asarray(samples)
+    if skipna:
+        samples = samples[~np.isnan(samples)]
+    if samples.size == 0:
+        return np.nan
+    return _angle(samples, low, high, np.pi)
+
+
+@conditional_vect
+def _angle(samples, low, high, p_i=np.pi):
+    ang = (samples - low) * 2.0 * p_i / (high - low)
+    return ang
+
+
+def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, axis=None):
+    ang = _circfunc(samples, high, low, skipna)
+    s_s = np.sin(ang).mean(axis=axis)
+    c_c = np.cos(ang).mean(axis=axis)
+    r_r = np.hypot(s_s, c_c)
+    return ((high - low) / 2.0 / np.pi) * np.sqrt(-2 * np.log(r_r))

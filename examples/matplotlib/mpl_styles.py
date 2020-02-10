@@ -4,9 +4,9 @@ Styles
 
 _thumb: .8, .8
 """
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
 import arviz as az
 
 x = np.linspace(0, 1, 100)
@@ -31,3 +31,5 @@ for idx, style in enumerate(style_list):
         ax.set_ylabel("f(x)", rotation=0, labelpad=15)
         ax.legend(bbox_to_anchor=(1, 1))
 plt.tight_layout()
+
+plt.show()

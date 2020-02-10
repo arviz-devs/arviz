@@ -14,7 +14,7 @@ from ....rcparams import rcParams
 
 def plot_pair(
     ax,
-    _posterior,
+    infdata_group,
     numvars,
     figsize,
     textsize,
@@ -48,11 +48,11 @@ def plot_pair(
             fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
         if kind == "scatter":
-            ax.plot(_posterior[0], _posterior[1], **plot_kwargs)
+            ax.plot(infdata_group[0], infdata_group[1], **plot_kwargs)
         elif kind == "kde":
             plot_kde(
-                _posterior[0],
-                _posterior[1],
+                infdata_group[0],
+                infdata_group[1],
                 contour=contour,
                 fill_last=fill_last,
                 ax=ax,
@@ -60,7 +60,7 @@ def plot_pair(
             )
         else:
             hexbin = ax.hexbin(
-                _posterior[0], _posterior[1], mincnt=1, gridsize=gridsize, **plot_kwargs
+                infdata_group[0], infdata_group[1], mincnt=1, gridsize=gridsize, **plot_kwargs
             )
             ax.grid(False)
 
@@ -70,7 +70,9 @@ def plot_pair(
 
         if divergences:
             ax.plot(
-                _posterior[0][diverging_mask], _posterior[1][diverging_mask], **divergences_kwargs
+                infdata_group[0][diverging_mask],
+                infdata_group[1][diverging_mask],
+                **divergences_kwargs
             )
 
         ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
@@ -87,7 +89,7 @@ def plot_pair(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
                 "of resulting pair plots with these variables, generating only a "
                 "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
-                SyntaxWarning,
+                UserWarning,
             )
             numvars = vars_to_plot
 
@@ -99,14 +101,14 @@ def plot_pair(
             fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
         hexbin_values = []
         for i in range(0, numvars - 1):
-            var1 = _posterior[i]
+            var1 = infdata_group[i]
 
             for j in range(0, numvars - 1):
                 if j < i:
                     ax[j, i].axis("off")
                     continue
 
-                var2 = _posterior[j + 1]
+                var2 = infdata_group[j + 1]
 
                 if kind == "scatter":
                     ax[j, i].plot(var1, var2, **plot_kwargs)

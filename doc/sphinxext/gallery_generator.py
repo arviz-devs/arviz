@@ -24,12 +24,7 @@ from matplotlib import image
 
 from bokeh.io import export_png
 from bokeh.layouts import gridplot
-
-
-# Python 3 has no execfile
-def execfile(filename, globals=None, locals=None):
-    with open(filename, "rb") as fp:
-        exec(compile(fp.read(), filename, "exec"), globals, locals)
+from arviz.rcparams import rc_context
 
 
 MPL_RST_TEMPLATE = """
@@ -40,6 +35,8 @@ MPL_RST_TEMPLATE = """
 .. image:: {img_file}
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -54,6 +51,8 @@ BOKEH_RST_TEMPLATE = """
     :source-position: none
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
+
+**API documentation:** {api_name} 
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -237,6 +236,18 @@ class ExampleGenerator:
         return pngfile
 
     @property
+    def apiname(self):
+        with open(op.join(self.target_dir, self.pyfilename), "r") as file:
+            regex = r"az\.(plot\_[a-z_]+)\("
+            name = re.findall(regex, file.read())
+        apitext = name[0] if name else ""
+        return (
+            "`{apitext} <../../generated/arviz.{apitext}>`_".format(apitext=apitext)
+            if apitext
+            else "No API Documentation available"
+        )
+
+    @property
     def sphinxtag(self):
         return self.modulename
 
@@ -295,7 +306,10 @@ class ExampleGenerator:
         plt.close("all")
         if self.backend == "matplotlib":
             my_globals = {"pl": plt, "plt": plt}
-            execfile(self.filename, my_globals)
+            with open(self.filename, "r") as fp:
+                code_text = fp.read()
+                code_text = re.sub(r"(plt\.show\S+)", "", code_text)
+                exec(compile(code_text, self.filename, "exec"), my_globals)
 
             fig = plt.gcf()
             fig.canvas.draw()
@@ -306,9 +320,11 @@ class ExampleGenerator:
             with open(self.filename, "r") as fp:
                 code_text = fp.read()
                 code_text += BOKEH_EXPORT_CODE.format(pngfilename=thumbfile)
-                exec(
-                    code_text, {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot}
-                )
+                with rc_context(rc={"plot.bokeh.show": False}):
+                    exec(
+                        code_text,
+                        {"export_png": export_png, "ndarray": ndarray, "gridplot": gridplot},
+                    )
 
         create_thumbnail(pngfile, thumbfile, cx=cx, cy=cy)
 
@@ -380,6 +396,7 @@ def main(app):
                 fname=ex.pyfilename,
                 absfname=op.join(target_dir, ex.pyfilename),
                 img_file=ex.pngfilename,
+                api_name=ex.apiname,
             )
             with open(op.join(target_dir, ex.rstfilename), "w") as f:
                 f.write(output)

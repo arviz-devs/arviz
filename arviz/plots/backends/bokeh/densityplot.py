@@ -5,8 +5,13 @@ from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import _fast_kde
-from ...plot_utils import _create_axes_grid, make_label
+from ...plot_utils import (
+    make_label,
+    _create_axes_grid,
+    calculate_point_estimate,
+    _fast_kde,
+    get_bins,
+)
 from ....stats import hpd
 from ....stats.stats_utils import histogram
 
@@ -155,7 +160,7 @@ def _d_helper(
 
     else:
         xmin, xmax = hpd(vec, credible_interval, multimodal=False)
-        bins = range(xmin, xmax + 2)
+        bins = get_bins(vec)
 
         _, hist, edges = histogram(vec, bins=bins)
 
@@ -186,10 +191,7 @@ def _d_helper(
         ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize)
 
     if point_estimate is not None:
-        if point_estimate == "mean":
-            est = np.mean(vec)
-        elif point_estimate == "median":
-            est = np.median(vec)
+        est = calculate_point_estimate(point_estimate, vec, bw)
         ax.circle(est, 0, fill_color=color, line_color="black", size=markersize)
 
     _title = Title()

@@ -4,7 +4,6 @@ import os
 import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pandas as pd
-from scipy.stats import circstd
 import pytest
 
 from ..data import load_arviz_data, from_cmdstan
@@ -21,10 +20,6 @@ from ..stats.diagnostics import (
     _z_scale,
     _conv_quantile,
     _split_chains,
-    _sqrt,
-    _angle,
-    _circfunc,
-    _circular_standard_deviation,
 )
 from ..utils import Numba
 from ..rcparams import rcParams
@@ -209,30 +204,6 @@ class TestDiagnostics:
     def test_rhat_ndarray(self):
         with pytest.raises(TypeError):
             rhat(np.random.randn(2, 300, 10))
-
-    def test_angle(self):
-        x = np.random.randn(100)
-        high = 8
-        low = 4
-        res = (x - low) * 2 * np.pi / (high - low)
-        assert np.allclose(_angle(x, low, high, np.pi), res)
-
-    def test_circfunc(self):
-        school = load_arviz_data("centered_eight").posterior["mu"].values
-        a_a, b_b = _circfunc(school, 8, 4)
-        assert np.allclose(a_a, school)
-        assert np.allclose(b_b, _angle(school, 4, 8, np.pi))
-
-    @pytest.mark.parametrize(
-        "data", (np.random.randn(100), np.random.randn(100, 100), np.random.randn(100, 100, 100))
-    )
-    def test_circular_standard_deviation_1d(self, data):
-        high = 8
-        low = 4
-        assert np.allclose(
-            _circular_standard_deviation(data, high=high, low=low),
-            circstd(data, high=high, low=low),
-        )
 
     @pytest.mark.parametrize(
         "method",
@@ -503,11 +474,6 @@ class TestDiagnostics:
 
         assert gw_stat.shape[0] == intervals
         assert 100000 * last - gw_stat[:, 0].max() == 1
-
-    def test_sqrt(self):
-        x = np.random.rand(100)
-        y = np.random.rand(100)
-        assert np.allclose(_sqrt(x, y), np.sqrt(x + y))
 
     def test_geweke_bad_interval(self):
         # lower bound

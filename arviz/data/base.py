@@ -18,7 +18,7 @@ class requires:  # pylint: disable=invalid-name
     If the decorator is called various times on the same function with different
     attributes, it will return None if one of them is missing. If instead a list
     of attributes is passed, it will return None if all attributes in the list are
-    missing. Both functionalities can be combines as desired.
+    missing. Both functionalities can be combined as desired.
     """
 
     def __init__(self, *props):
@@ -82,7 +82,7 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 shape_len=len(shape),
                 defaults=",".join(default_dims) + ", " if default_dims is not None else "",
             ),
-            SyntaxWarning,
+            UserWarning,
         )
     if coords is None:
         coords = {}
@@ -142,7 +142,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
             "Passed array should have shape (chains, draws, *shape)".format(
                 n_chains=n_chains, n_samples=n_samples
             ),
-            SyntaxWarning,
+            UserWarning,
         )
 
     dims, coords = generate_dims_coords(

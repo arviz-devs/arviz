@@ -11,18 +11,20 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..utils import _var_names
+from ..rcparams import rcParams
 
 
 def plot_posterior(
     data,
     var_names=None,
+    transform=None,
     coords=None,
     figsize=None,
     textsize=None,
-    credible_interval=0.94,
+    credible_interval=None,
     multimodal=False,
     round_to: Optional[int] = None,
-    point_estimate="mean",
+    point_estimate="auto",
     group="posterior",
     rope=None,
     ref_val=None,
@@ -44,6 +46,8 @@ def plot_posterior(
         Refer to documentation of az.convert_to_dataset for details
     var_names : list of variable names
         Variables to be plotted, two variables are required.
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
@@ -58,8 +62,9 @@ def plot_posterior(
         multimodal and the modes are well separated.
     round_to : int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
-    point_estimate: str
-        Must be in ('mode', 'mean', 'median', None)
+    point_estimate : Optional[str]
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
     group : str, optional
         Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     rope: tuple or dictionary of tuples
@@ -175,10 +180,23 @@ def plot_posterior(
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
     data = convert_to_dataset(data, group=group)
+    if transform is not None:
+        data = transform(data)
     var_names = _var_names(var_names, data)
 
     if coords is None:
         coords = {}
+
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in {"mean", "median", "mode", None}:
+        raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
     plotters = filter_plotters_list(
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),

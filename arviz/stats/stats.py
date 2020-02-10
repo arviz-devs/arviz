@@ -12,19 +12,20 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
+from ..plots.plot_utils import _fast_kde, get_bins
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from ..plots.kdeplot import _fast_kde
-from ..plots.plot_utils import get_bins
-from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
+from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
     make_ufunc as _make_ufunc,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
+    histogram,
+    _circular_standard_deviation,
+    get_log_likelihood as _get_log_likelihood,
 )
 from ..utils import _var_names, Numba, _numba_var
-from ..stats.stats_utils import histogram
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
@@ -43,13 +44,7 @@ __all__ = [
 
 
 def compare(
-    dataset_dict,
-    ic=None,
-    method="BB-pseudo-BMA",
-    b_samples=1000,
-    alpha=1,
-    seed=None,
-    scale="deviance",
+    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
     r"""Compare models based on WAIC or LOO cross-validation.
 
@@ -137,7 +132,7 @@ def compare(
 
     """
     names = list(dataset_dict.keys())
-    scale = scale.lower()
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if scale == "log":
         scale_value = 1
         ascending = False
@@ -309,7 +304,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
+def hpd(ary, credible_interval=None, circular=False, multimodal=False, skipna=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -328,6 +323,8 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
     multimodal : bool
         If true it may compute more than one hpd interval if the distribution is multimodal and the
         modes are well separated.
+    skipna : bool
+        If true ignores nan values when computing the hpd interval. Defaults to false.
 
     Returns
     -------
@@ -345,6 +342,12 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
            ...: data = np.random.normal(size=2000)
            ...: az.hpd(data, credible_interval=.68)
     """
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
     if ary.ndim > 1:
         hpd_array = np.array(
             [
@@ -360,6 +363,9 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
         return hpd_array
 
     if multimodal:
+        if skipna:
+            ary = ary[~np.isnan(ary)]
+
         if ary.dtype.kind == "f":
             density, lower, upper = _fast_kde(ary)
             range_x = upper - lower
@@ -389,6 +395,10 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
 
     else:
         ary = ary.copy()
+        if skipna:
+            nans = np.isnan(ary)
+            if not nans.all():
+                ary = ary[~nans]
         n = len(ary)
 
         if circular:
@@ -402,10 +412,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
         interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
         if len(interval_width) == 0:
-            raise ValueError(
-                "Too few elements for interval calculation. "
-                "Check that credible_interval meets condition 0 =< credible_interval < 1"
-            )
+            raise ValueError("Too few elements for interval calculation. ")
 
         min_idx = np.argmin(interval_width)
         hdi_min = ary[min_idx]
@@ -422,7 +429,7 @@ def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
     return hpd_intervals
 
 
-def loo(data, pointwise=False, reff=None, scale="deviance"):
+def loo(data, pointwise=False, reff=None, scale=None):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
 
     Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
@@ -485,21 +492,19 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
 
     """
     inference_data = convert_to_inference_data(data)
-    if not hasattr(inference_data, "sample_stats"):
-        raise TypeError("Must be able to extract a sample_stats group from data.")
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data)
+
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
@@ -809,9 +814,10 @@ def summary(
     include_circ=None,
     stat_funcs=None,
     extend=True,
-    credible_interval=0.94,
+    credible_interval=None,
     order="C",
     index_origin=None,
+    skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
@@ -843,16 +849,19 @@ def summary(
         The functions should be in the style of a ufunc and return a single number. For example,
         `np.mean`, or `scipy.stats.var` would both work.
     extend : boolean
-        If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
-        of, the default statistics. This is only meaningful when `stat_funcs` is not None.
+        If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
+        of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
+        Credible interval to plot. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
     index_origin : int
         If fmt is "wide, select n-based indexing for multivariate parameters.
         Defaults to rcParam data.index.origin, which is 0.
+    skipna : bool
+        If true ignores nan values when computing the summary statistics, it does not affect the
+        behaviour of the functions passed to ``stat_funcs``. Defaults to false.
     coords: Dict[str, List[Any]], optional
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
@@ -908,6 +917,11 @@ def summary(
         extra_args["dims"] = dims
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior)
     posterior = posterior if var_names is None else posterior[var_names]
@@ -946,35 +960,38 @@ def summary(
                 extra_metric_names.append(stat_func.__name__)
 
     if extend and kind in ["all", "stats"]:
-        mean = posterior.mean(dim=("chain", "draw"))
+        mean = posterior.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = posterior.std(dim=("chain", "draw"), ddof=1)
+        sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
         hpd_lower, hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, multimodal=False),
+            kwargs=dict(credible_interval=credible_interval, multimodal=False, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
 
     if include_circ:
+        nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
             input_core_dims=(("chain", "draw"),),
         )
         _numba_flag = Numba.numba_flag
         func = None
         if _numba_flag:
             func = _circular_standard_deviation
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
         else:
             func = st.circstd
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
         circ_sd = xr.apply_ufunc(
             _make_ufunc(func),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=kwargs_circ_std,
             input_core_dims=(("chain", "draw"),),
         )
 
@@ -988,7 +1005,7 @@ def summary(
         circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, circular=True),
+            kwargs=dict(credible_interval=credible_interval, circular=True, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
@@ -1102,7 +1119,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=False, scale="deviance"):
+def waic(data, pointwise=False, scale=None):
     """Calculate the widely available information criterion.
 
     Also calculates the WAIC's standard error and the effective number of
@@ -1158,20 +1175,14 @@ def waic(data, pointwise=False, scale="deviance"):
     `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("sample_stats",):
-        if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data.".format(group=group)
-            )
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data)
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
@@ -1297,6 +1308,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
+    y_str = ""
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
 
@@ -1313,6 +1325,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif y_hat is None:
             raise ValueError("y_hat cannot be None if y is not a str")
         if isinstance(y, str):
+            y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
@@ -1323,7 +1336,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
-            log_likelihood = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+            if y_str:
+                try:
+                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                except TypeError:
+                    log_likelihood = _get_log_likelihood(idata)
+            else:
+                log_likelihood = _get_log_likelihood(idata)
+            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)

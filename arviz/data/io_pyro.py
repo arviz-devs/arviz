@@ -85,22 +85,27 @@ class PyroConverter:
         for i, k in enumerate(sorted(divergences)):
             diverging[i, divergences[k]] = True
         data = {"diverging": diverging}
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=None)
 
-        # extract log_likelihood
+    @requires("posterior")
+    @requires("model")
+    def log_likelihood_to_xarray(self):
+        """Extract log likelihood from Pyro posterior."""
+        data = {}
         dims = None
-        if self.observations is not None and len(self.observations) == 1:
-            obs_name = list(self.observations.keys())[0]
-            samples = self.posterior.get_samples(group_by_chain=False)
-            predictive = self.pyro.infer.Predictive(self.model, samples)
-            obs_site = predictive.get_vectorized_trace(*self._args, **self._kwargs).nodes[obs_name]
-            log_likelihood = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
-            if self.dims is not None:
-                coord_name = self.dims.get("log_likelihood", self.dims.get(obs_name))
-            else:
-                coord_name = None
-            shape = (self.nchains, self.ndraws) + log_likelihood.shape[1:]
-            data["log_likelihood"] = np.reshape(log_likelihood, shape)
-            dims = {"log_likelihood": coord_name}
+        if self.observations is not None:
+            try:
+                samples = self.posterior.get_samples(group_by_chain=False)
+                predictive = self.pyro.infer.Predictive(self.model, samples)
+                vectorized_trace = predictive.get_vectorized_trace(*self._args, **self._kwargs)
+                for obs_name in self.observations.keys():
+                    obs_site = vectorized_trace.nodes[obs_name]
+                    log_like = obs_site["fn"].log_prob(obs_site["value"]).detach().cpu().numpy()
+                    shape = (self.nchains, self.ndraws) + log_like.shape[1:]
+                    data[obs_name] = np.reshape(log_like, shape)
+            except:  # pylint: disable=bare-except
+                # cannot get vectorized trace
+                return None
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
 
     @requires("posterior_predictive")
@@ -117,7 +122,7 @@ class PyroConverter:
             else:
                 data[k] = utils.expand_dims(ary)
                 _log.warning(
-                    "posterior predictive shape not compatible with number of chains and draws. "
+                    "posterior predictive shape not compatible with number of chains and draws."
                     "This can mean that some draws or even whole chains are not represented."
                 )
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
@@ -174,6 +179,7 @@ class PyroConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),

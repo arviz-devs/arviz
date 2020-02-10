@@ -4,6 +4,7 @@ Ridgeplot
 
 _thumb: .8, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")
@@ -20,3 +21,5 @@ axes = az.plot_forest(
     figsize=(9, 4),
 )
 axes[0].set_title("Relative defensive strength\nof Six Nation rugby teams")
+
+plt.show()

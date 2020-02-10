@@ -6,7 +6,7 @@ from typing import Dict
 import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
 from bokeh.models.annotations import Title
 
 from . import backend_kwarg_defaults, backend_show
@@ -32,6 +32,7 @@ def plot_trace(
     plotters,
     divergence_data,
     colors,
+    backend_config,
     backend_kwargs: [Dict],
     show,
 ):
@@ -39,6 +40,14 @@ def plot_trace(
     # If divergences are plotted they must be provided
     if divergences is not False:
         assert divergence_data is not None
+
+    if backend_config is None:
+        backend_config = {}
+
+    backend_config = {
+        **backend_kwarg_defaults(("bounds_y_range", "plot.bokeh.bounds_y_range"),),
+        **backend_config,
+    }
 
     # Set plot default backend kwargs
     if backend_kwargs is None:
@@ -179,6 +188,9 @@ def plot_trace(
             _title = Title()
             _title.text = make_label(var_name, selection)
             axes[idx, col].title = _title
+            axes[idx, col].y_range = DataRange1d(
+                bounds=backend_config["bounds_y_range"], min_interval=0.1
+            )
 
         for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
             if isinstance(vlines, (float, int)):

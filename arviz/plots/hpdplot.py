@@ -5,12 +5,13 @@ from scipy.signal import savgol_filter
 
 from ..stats import hpd
 from .plot_utils import get_plotting_function
+from ..rcparams import rcParams
 
 
 def plot_hpd(
     x,
     y,
-    credible_interval=0.94,
+    credible_interval=None,
     color="C1",
     circular=False,
     smooth=True,
@@ -88,6 +89,12 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
+    if credible_interval is None:
+        credible_interval = rcParams["stats.credible_interval"]
+    else:
+        if not 1 >= credible_interval > 0:
+            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
     hpd_ = hpd(y, credible_interval=credible_interval, circular=circular, multimodal=False)
 
     if smooth:
@@ -95,7 +102,8 @@ def plot_hpd(
             smooth_kwargs = {}
         smooth_kwargs.setdefault("window_length", 55)
         smooth_kwargs.setdefault("polyorder", 2)
-        x_data = np.linspace(x.min(), x.max(), 200)
+        eps = np.finfo(float).eps
+        x_data = np.linspace(x.min() + eps, x.max() - eps, 200)
         hpd_interp = griddata(x, hpd_, x_data)
         y_data = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
     else:

@@ -4,6 +4,7 @@ Density Plot
 
 _thumb: .5, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")
@@ -16,3 +17,4 @@ az.plot_density(
     var_names=["theta"],
     shade=0.1,
 )
+plt.show()

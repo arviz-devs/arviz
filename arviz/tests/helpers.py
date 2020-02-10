@@ -324,7 +324,8 @@ def numpyro_schools_model(data, draws, chains):
     # This block lets the posterior be pickled
     mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
     mcmc.sampler._init_fn = None  # pylint: disable=protected-access
-    mcmc.sampler._constrain_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._postprocess_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._potential_fn = None  # pylint: disable=protected-access
     mcmc._cache = {}  # pylint: disable=protected-access
     return mcmc
 
