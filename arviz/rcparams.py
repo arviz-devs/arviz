@@ -7,6 +7,7 @@ import pprint
 import logging
 import locale
 from collections.abc import MutableMapping
+import numpy as np
 
 _log = logging.getLogger(__name__)
 
@@ -78,6 +79,14 @@ def _validate_float(value):
     return value
 
 
+def _validate_float_or_none(value):
+    """Validate value is a float or None."""
+    if value is None or isinstance(value, str) and value.lower() == "none":
+        return None
+    else:
+        return _validate_float(value)
+
+
 def _validate_probability(value):
     """Validate a probability: a float between 0 and 1."""
     value = _validate_float(value)
@@ -93,11 +102,39 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
+def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
+    """Validate value is an iterable datatype."""
+    # based on matplotlib's _listify_validator function
+
+    def validate_iterable(value):
+        if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
+            return None
+        if isinstance(value, str):
+            if allow_auto and value.lower() == "auto":
+                return "auto"
+            value = tuple(v.strip("([ ])") for v in value.split(",") if v.strip())
+        if np.iterable(value) and not isinstance(value, (set, frozenset)):
+            val = tuple(scalar_validator(v) for v in value)
+            if length is not None and len(val) != length:
+                raise ValueError("Iterable must be of length: {}".format(length))
+            return val
+        raise ValueError("Only ordered iterable values are valid")
+
+    return validate_iterable
+
+
+_validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-name
+    _validate_float_or_none, length=2, allow_none=True, allow_auto=True
+)
+
+
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
+    "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
         lambda x: x,

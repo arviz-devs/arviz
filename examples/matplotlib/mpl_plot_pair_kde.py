@@ -4,6 +4,7 @@ KDE Pair Plot
 
 _thumb: .2, .5
 """
+import matplotlib.pyplot as plt
 import arviz as az
 
 az.style.use("arviz-darkgrid")
@@ -19,3 +20,4 @@ az.plot_pair(
     divergences=True,
     textsize=22,
 )
+plt.show()

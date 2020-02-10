@@ -7,7 +7,7 @@ import bokeh.plotting as bkp
 import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.layouts import gridplot
-from bokeh.models import Band, ColumnDataSource
+from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
@@ -49,6 +49,7 @@ def plot_forest(
     textsize,
     ess,
     r_hat,
+    backend_config,
     backend_kwargs,
     show,
 ):
@@ -67,6 +68,17 @@ def plot_forest(
 
     if markersize is None:
         markersize = auto_markersize
+
+    if backend_config is None:
+        backend_config = {}
+
+    backend_config = {
+        **backend_kwarg_defaults(
+            ("bounds_x_range", "plot.bokeh.bounds_x_range"),
+            ("bounds_y_range", "plot.bokeh.bounds_y_range"),
+        ),
+        **backend_config,
+    }
 
     if backend_kwargs is None:
         backend_kwargs = {}
@@ -138,6 +150,8 @@ def plot_forest(
             ax_.yaxis.visible = False
 
         ax_.outline_line_color = None
+        ax_.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=1)
+        ax_.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=2)
 
     labels, ticks = plot_handler.labels_and_ticks()
 

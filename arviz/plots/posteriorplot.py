@@ -17,6 +17,7 @@ from ..rcparams import rcParams
 def plot_posterior(
     data,
     var_names=None,
+    transform=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -45,6 +46,8 @@ def plot_posterior(
         Refer to documentation of az.convert_to_dataset for details
     var_names : list of variable names
         Variables to be plotted, two variables are required.
+    transform : callable
+        Function to transform data (defaults to None i.e.the identity function)
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : tuple
@@ -177,6 +180,8 @@ def plot_posterior(
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
     data = convert_to_dataset(data, group=group)
+    if transform is not None:
+        data = transform(data)
     var_names = _var_names(var_names, data)
 
     if coords is None:
@@ -187,6 +192,11 @@ def plot_posterior(
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in {"mean", "median", "mode", None}:
+        raise ValueError("The value of point_estimate must be either mean, median, mode or None.")
 
     plotters = filter_plotters_list(
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True)),

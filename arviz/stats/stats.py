@@ -14,7 +14,7 @@ import xarray as xr
 
 from ..plots.plot_utils import _fast_kde, get_bins
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
+from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
     make_ufunc as _make_ufunc,
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
@@ -22,6 +22,7 @@ from .stats_utils import (
     ELPDData,
     stats_variance_2d as svar,
     histogram,
+    _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
 )
 from ..utils import _var_names, Numba, _numba_var
@@ -303,7 +304,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=None, circular=False, multimodal=False):
+def hpd(ary, credible_interval=None, circular=False, multimodal=False, skipna=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -322,6 +323,8 @@ def hpd(ary, credible_interval=None, circular=False, multimodal=False):
     multimodal : bool
         If true it may compute more than one hpd interval if the distribution is multimodal and the
         modes are well separated.
+    skipna : bool
+        If true ignores nan values when computing the hpd interval. Defaults to false.
 
     Returns
     -------
@@ -360,6 +363,9 @@ def hpd(ary, credible_interval=None, circular=False, multimodal=False):
         return hpd_array
 
     if multimodal:
+        if skipna:
+            ary = ary[~np.isnan(ary)]
+
         if ary.dtype.kind == "f":
             density, lower, upper = _fast_kde(ary)
             range_x = upper - lower
@@ -389,6 +395,10 @@ def hpd(ary, credible_interval=None, circular=False, multimodal=False):
 
     else:
         ary = ary.copy()
+        if skipna:
+            nans = np.isnan(ary)
+            if not nans.all():
+                ary = ary[~nans]
         n = len(ary)
 
         if circular:
@@ -807,6 +817,7 @@ def summary(
     credible_interval=None,
     order="C",
     index_origin=None,
+    skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
@@ -838,16 +849,19 @@ def summary(
         The functions should be in the style of a ufunc and return a single number. For example,
         `np.mean`, or `scipy.stats.var` would both work.
     extend : boolean
-        If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
-        of, the default statistics. This is only meaningful when `stat_funcs` is not None.
+        If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
+        of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
+        Credible interval to plot. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order : {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
     index_origin : int
         If fmt is "wide, select n-based indexing for multivariate parameters.
         Defaults to rcParam data.index.origin, which is 0.
+    skipna : bool
+        If true ignores nan values when computing the summary statistics, it does not affect the
+        behaviour of the functions passed to ``stat_funcs``. Defaults to false.
     coords: Dict[str, List[Any]], optional
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
@@ -946,35 +960,38 @@ def summary(
                 extra_metric_names.append(stat_func.__name__)
 
     if extend and kind in ["all", "stats"]:
-        mean = posterior.mean(dim=("chain", "draw"))
+        mean = posterior.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = posterior.std(dim=("chain", "draw"), ddof=1)
+        sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
         hpd_lower, hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, multimodal=False),
+            kwargs=dict(credible_interval=credible_interval, multimodal=False, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
 
     if include_circ:
+        nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
             input_core_dims=(("chain", "draw"),),
         )
         _numba_flag = Numba.numba_flag
         func = None
         if _numba_flag:
             func = _circular_standard_deviation
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
         else:
             func = st.circstd
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
         circ_sd = xr.apply_ufunc(
             _make_ufunc(func),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=kwargs_circ_std,
             input_core_dims=(("chain", "draw"),),
         )
 
@@ -988,7 +1005,7 @@ def summary(
         circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, circular=True),
+            kwargs=dict(credible_interval=credible_interval, circular=True, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )

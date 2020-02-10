@@ -251,6 +251,15 @@ class TestDataPyMC3:
         inference_data = from_pymc3(trace=trace)
         assert inference_data
 
+    def test_potential(self):
+        with pm.Model():
+            x = pm.Normal("x", 0.0, 1.0)
+            pm.Potential("z", pm.Normal.dist(x, 1.0).logp(np.random.randn(10)))
+            trace = pm.sample(100, chains=2)
+
+        inference_data = from_pymc3(trace=trace)
+        assert inference_data
+
     def test_constant_data(self):
         with pm.Model():
             x = pm.Data("x", [1.0, 2.0, 3.0])

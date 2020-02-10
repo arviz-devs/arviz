@@ -10,6 +10,7 @@ from ...plot_utils import (
     _create_axes_grid,
     calculate_point_estimate,
     _fast_kde,
+    get_bins,
 )
 from ....stats import hpd
 from ....stats.stats_utils import histogram
@@ -179,7 +180,7 @@ def _d_helper(
 
     else:
         xmin, xmax = hpd(vec, credible_interval, multimodal=False)
-        bins = range(xmin, xmax + 2)
+        bins = get_bins(vec)
 
         _, hist, edges = histogram(vec, bins=bins)
 

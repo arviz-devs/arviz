@@ -15,6 +15,7 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
     calculate_point_estimate,
+    get_bins,
 )
 from ....stats import hpd
 
@@ -245,9 +246,7 @@ def _plot_posterior_op(
     else:
         if bins is None:
             if values.dtype.kind == "i":
-                xmin = values.min()
-                xmax = values.max()
-                bins = range(xmin, xmax + 2)
+                bins = get_bins(values)
             else:
                 bins = "auto"
         kwargs.setdefault("align", "left")

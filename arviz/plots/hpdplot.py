@@ -102,7 +102,8 @@ def plot_hpd(
             smooth_kwargs = {}
         smooth_kwargs.setdefault("window_length", 55)
         smooth_kwargs.setdefault("polyorder", 2)
-        x_data = np.linspace(x.min(), x.max(), 200)
+        eps = np.finfo(float).eps
+        x_data = np.linspace(x.min() + eps, x.max() - eps, 200)
         hpd_interp = griddata(x, hpd_, x_data)
         y_data = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
     else:

@@ -80,7 +80,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # way to access the model from the trace.
         if trace is not None:
             if self.model is None:
-                self.model = self.trace._straces[0].model  # pylint: disable=protected-access
+                self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
+                    0
+                ].model
             self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
             self.ndraws = len(trace)
         else:
@@ -287,6 +289,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 var not in self.model.deterministics
                 and var not in self.model.observed_RVs
                 and var not in self.model.free_RVs
+                and var not in self.model.potentials
                 and (self.observations is None or name not in self.observations)
             )
 

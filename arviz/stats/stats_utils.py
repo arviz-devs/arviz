@@ -8,7 +8,7 @@ import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
-from ..utils import conditional_jit
+from ..utils import conditional_jit, conditional_vect
 
 _log = logging.getLogger(__name__)
 
@@ -522,3 +522,31 @@ def histogram(data, bins, range_hist=None):
     hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
     hist_dens = hist / (hist.sum() * np.diff(bin_edges))
     return hist, hist_dens, bin_edges
+
+
+@conditional_vect
+def _sqrt(a_a, b_b):
+    return (a_a + b_b) ** 0.5
+
+
+def _circfunc(samples, high, low, skipna):
+    samples = np.asarray(samples)
+    if skipna:
+        samples = samples[~np.isnan(samples)]
+    if samples.size == 0:
+        return np.nan
+    return _angle(samples, low, high, np.pi)
+
+
+@conditional_vect
+def _angle(samples, low, high, p_i=np.pi):
+    ang = (samples - low) * 2.0 * p_i / (high - low)
+    return ang
+
+
+def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, axis=None):
+    ang = _circfunc(samples, high, low, skipna)
+    s_s = np.sin(ang).mean(axis=axis)
+    c_c = np.cos(ang).mean(axis=axis)
+    r_r = np.hypot(s_s, c_c)
+    return ((high - low) / 2.0 / np.pi) * np.sqrt(-2 * np.log(r_r))
