@@ -44,7 +44,6 @@ def plot_kde(
     show,
 ):
     """Bokeh kde plot."""
-    return_glyphs = None
     if backend_kwargs is None:
         backend_kwargs = {}
 
@@ -236,10 +235,10 @@ def plot_kde(
     if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
-    if legend and label is not None:
-        return_glyphs = glyphs
+    if legend and label is None:
+        glyphs = None
 
-    return ax, return_glyphs
+    return ax, glyphs
 
 
 def _scale_axis(arr, args=None):

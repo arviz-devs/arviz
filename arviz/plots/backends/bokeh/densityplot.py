@@ -68,7 +68,7 @@ def plot_density(
 
     legend_items = {}
     for m_idx, plotters in enumerate(to_plot):
-        for _, (var_name, selection, values) in enumerate(plotters):
+        for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
 
             if data_labels:
