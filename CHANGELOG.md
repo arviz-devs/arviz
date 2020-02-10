@@ -4,13 +4,18 @@
 
 ### New features
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 and pystan translations (#983 and #1032)
-* Started adding pointwise log likelihood storage support (#794)
+* Started adding pointwise log likelihood storage support (#794, #1044)
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
+* Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 * Add `skipna` argument to `hpd` and `summary` (#1035)
+* Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
+
 
 ### Maintenance and fixes
+* Fixed bug in density and posterior plot bin computation (#1049)
+* Fixed bug in density plot ax argument (#1049)
 * Fixed bug in extracting prior samples for cmdstanpy (#979)
 * Fix erroneous warning in traceplot (#989)
 * Correct bfmi denominator (#991)
@@ -19,6 +24,8 @@
 * Violinplot: fix histogram (#997)
 * Convert all instances of SyntaxWarning to UserWarning (#1016)
 * Fix `point_estimate` in `plot_posterior` (#1038)
+* Fix interpolation `hpd_plot` (#1039)
+* Fix `io_pymc3.py` to handle models with `potentials` (#1043)
 
 ### Deprecation
 

@@ -8,7 +8,7 @@ nbsphinx
 numpydoc
 pydocstyle<5.0
 pylint
-pyro-ppl>=0.5.1
+pyro-ppl>=1.0.0
 tensorflow
 tensorflow-probability
 pytest
