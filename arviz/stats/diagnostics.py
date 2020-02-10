@@ -14,9 +14,11 @@ from .stats_utils import (
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     stats_variance_2d as svar,
     histogram,
+    _circular_standard_deviation,
+    _sqrt,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var, _stack
+from ..utils import _var_names, conditional_jit, Numba, _numba_var, _stack
 
 __all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 
@@ -382,11 +384,6 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     return _wrap_xarray_ufunc(
         mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
     )
-
-
-@conditional_vect
-def _sqrt(a_a, b_b):
-    return (a_a + b_b) ** 0.5
 
 
 @conditional_jit(forceobj=True)
@@ -872,28 +869,6 @@ def _mcse_quantile(ary, prob):
         return np.nan
     mcse_q, *_ = _conv_quantile(ary, prob)
     return mcse_q
-
-
-def _circfunc(samples, high, low):
-    samples = np.asarray(samples)
-    if samples.size == 0:
-        return np.nan, np.nan
-    return samples, _angle(samples, low, high, np.pi)
-
-
-@conditional_vect
-def _angle(samples, low, high, p_i=np.pi):
-    ang = (samples - low) * 2.0 * p_i / (high - low)
-    return ang
-
-
-def _circular_standard_deviation(samples, high=2 * np.pi, low=0, axis=None):
-    p_i = np.pi
-    samples, ang = _circfunc(samples, high, low)
-    s_s = np.sin(ang).mean(axis=axis)
-    c_c = np.cos(ang).mean(axis=axis)
-    r_r = np.hypot(s_s, c_c)
-    return ((high - low) / 2.0 / p_i) * np.sqrt(-2 * np.log(r_r))
 
 
 def _mc_error(ary, batches=5, circular=False):

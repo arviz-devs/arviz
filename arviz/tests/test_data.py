@@ -435,29 +435,29 @@ class TestNumpyToDataArray:
 
     def test_nd_to_inference_data(self):
         shape = (1, 2, 3, 4, 5)
-        inference_data = convert_to_inference_data(np.random.randn(*shape), group="foo")
-        assert hasattr(inference_data, "foo")
-        assert len(inference_data.foo.data_vars) == 1
-        var_name = list(inference_data.foo.data_vars)[0]
+        inference_data = convert_to_inference_data(np.random.randn(*shape), group="prior")
+        assert hasattr(inference_data, "prior")
+        assert len(inference_data.prior.data_vars) == 1
+        var_name = list(inference_data.prior.data_vars)[0]
 
-        assert len(inference_data.foo.coords) == len(shape)
-        assert inference_data.foo.chain.shape == shape[:1]
-        assert inference_data.foo.draw.shape == shape[1:2]
-        assert inference_data.foo[var_name].shape == shape
+        assert len(inference_data.prior.coords) == len(shape)
+        assert inference_data.prior.chain.shape == shape[:1]
+        assert inference_data.prior.draw.shape == shape[1:2]
+        assert inference_data.prior[var_name].shape == shape
         assert repr(inference_data).startswith("Inference data with groups")
 
     def test_more_chains_than_draws(self):
         shape = (10, 4)
         with pytest.warns(UserWarning):
-            inference_data = convert_to_inference_data(np.random.randn(*shape), group="foo")
-        assert hasattr(inference_data, "foo")
-        assert len(inference_data.foo.data_vars) == 1
-        var_name = list(inference_data.foo.data_vars)[0]
+            inference_data = convert_to_inference_data(np.random.randn(*shape), group="prior")
+        assert hasattr(inference_data, "prior")
+        assert len(inference_data.prior.data_vars) == 1
+        var_name = list(inference_data.prior.data_vars)[0]
 
-        assert len(inference_data.foo.coords) == len(shape)
-        assert inference_data.foo.chain.shape == shape[:1]
-        assert inference_data.foo.draw.shape == shape[1:2]
-        assert inference_data.foo[var_name].shape == shape
+        assert len(inference_data.prior.coords) == len(shape)
+        assert inference_data.prior.chain.shape == shape[:1]
+        assert inference_data.prior.draw.shape == shape[1:2]
+        assert inference_data.prior[var_name].shape == shape
 
 
 class TestConvertToDataset:
@@ -533,17 +533,17 @@ def test_convert_to_dataset_idempotent():
 
 
 def test_convert_to_inference_data_idempotent():
-    first = convert_to_inference_data(np.random.randn(100), group="foo")
+    first = convert_to_inference_data(np.random.randn(100), group="prior")
     second = convert_to_inference_data(first)
-    assert first.foo is second.foo
+    assert first.prior is second.prior
 
 
 def test_convert_to_inference_data_from_file(tmpdir):
-    first = convert_to_inference_data(np.random.randn(100), group="foo")
+    first = convert_to_inference_data(np.random.randn(100), group="prior")
     filename = str(tmpdir.join("test_file.nc"))
     first.to_netcdf(filename)
     second = convert_to_inference_data(filename)
-    assert first.foo.equals(second.foo)
+    assert first.prior.equals(second.prior)
 
 
 def test_convert_to_inference_data_bad():
@@ -552,7 +552,7 @@ def test_convert_to_inference_data_bad():
 
 
 def test_convert_to_dataset_bad(tmpdir):
-    first = convert_to_inference_data(np.random.randn(100), group="foo")
+    first = convert_to_inference_data(np.random.randn(100), group="prior")
     filename = str(tmpdir.join("test_file.nc"))
     first.to_netcdf(filename)
     with pytest.raises(ValueError):
@@ -562,6 +562,15 @@ def test_convert_to_dataset_bad(tmpdir):
 def test_bad_inference_data():
     with pytest.raises(ValueError):
         InferenceData(posterior=[1, 2, 3])
+
+
+def test_inference_data_other_groups():
+    datadict = {"a": np.random.randn(100), "b": np.random.randn(1, 100, 10)}
+    dataset = convert_to_dataset(datadict, coords={"c": np.arange(10)}, dims={"b": ["c"]})
+    with pytest.warns(UserWarning, match="not.+in.+InferenceData scheme"):
+        idata = InferenceData(other_group=dataset)
+    fails = check_multiple_attrs({"other_group": ["a", "b"]}, idata)
+    assert not fails
 
 
 class TestDataConvert:
@@ -661,7 +670,8 @@ class TestDataDict:
         }
 
         # log_likelihood to posterior
-        assert from_dict(posterior=log_likelihood) is not None
+        with pytest.warns(UserWarning, match="log_likelihood.+in posterior"):
+            assert from_dict(posterior=log_likelihood) is not None
 
         # dims == None
         assert from_dict(observed_data=log_likelihood, dims=None) is not None
