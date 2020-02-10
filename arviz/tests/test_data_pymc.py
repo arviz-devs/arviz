@@ -333,8 +333,14 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         # Prior and posterior_predictive but no trace
-        inference_data = from_pymc3(prior=prior, posterior_predictive=posterior_predictive, model=model)
-        test_dict = {"prior": ["beta"], "prior_predictive": ["obs"], "posterior_predictive": ["obs"]}
+        inference_data = from_pymc3(
+            prior=prior, posterior_predictive=posterior_predictive, model=model
+        )
+        test_dict = {
+            "prior": ["beta"],
+            "prior_predictive": ["obs"],
+            "posterior_predictive": ["obs"],
+        }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
@@ -377,5 +383,3 @@ class TestDataPyMC3:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
-
-
