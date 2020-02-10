@@ -200,7 +200,7 @@ def _d_helper(
             )
         else:
             plotted.append(
-                x.quad(
+                ax.quad(
                     top=hist,
                     bottom=0,
                     left=edges[:-1],
