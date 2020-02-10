@@ -67,3 +67,6 @@ saved_animations/
 
 # mypy
 .mypy_cache
+
+# Stan file
+doc/notebooks/*.stan
