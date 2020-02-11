@@ -302,6 +302,7 @@ def plot_ppc(
         jitter=jitter,
         total_pp_samples=total_pp_samples,
         legend=legend,
+        group=group,
         markersize=markersize,
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,
@@ -314,6 +315,7 @@ def plot_ppc(
         ppcplot_kwargs.pop("animated")
         ppcplot_kwargs.pop("animation_kwargs")
         ppcplot_kwargs.pop("legend")
+        ppcplot_kwargs.pop("group")
         ppcplot_kwargs.pop("xt_labelsize")
         ppcplot_kwargs.pop("ax_labelsize")
 
