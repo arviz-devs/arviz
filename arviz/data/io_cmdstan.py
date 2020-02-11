@@ -2,6 +2,7 @@
 from collections import defaultdict
 from copy import deepcopy
 from glob import glob
+from typing import Optional, Union, List
 import linecache
 import os
 import logging
@@ -13,7 +14,7 @@ import xarray as xr
 
 from .. import utils
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords
+from .base import requires, dict_to_dataset, generate_dims_coords, CoordSpec, DimSpec
 
 _log = logging.getLogger(__name__)
 
@@ -462,11 +463,15 @@ class CmdStanConverter:
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
+                "predictions_constant_data": self.predictions_constant_data_to_xarray(),
             }
         )
 
@@ -768,66 +773,66 @@ def _unpack_dataframes(dfs):
 
 
 def from_cmdstan(
-    posterior=None,
+    posterior: Optional[Union[str, List[str]]] = None,
     *,
-    posterior_predictive=None,
-    predictions=None,
-    prior=None,
-    prior_predictive=None,
-    observed_data=None,
-    observed_data_var=None,
-    constant_data=None,
-    constant_data_var=None,
-    predictions_constant_data=None,
-    predictions_constant_data_var=None,
-    log_likelihood=None,
-    coords=None,
-    dims=None
-):
+    posterior_predictive: Optional[Union[str, List[str]]] = None,
+    predictions: Optional[Union[str, List[str]]] = None,
+    prior: Optional[Union[str, List[str]]] = None,
+    prior_predictive: Optional[Union[str, List[str]]] = None,
+    observed_data: Optional[str] = None,
+    observed_data_var: Optional[Union[str, List[str]]] = None,
+    constant_data: Optional[str] = None,
+    constant_data_var: Optional[Union[str, List[str]]] = None,
+    predictions_constant_data: Optional[str] = None,
+    predictions_constant_data_var: Optional[Union[str, List[str]]] = None,
+    log_likelihood: Optional[Union[str, List[str]]] = None,
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None
+) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
 
     Parameters
     ----------
-    posterior : List[str]
+    posterior : str or list of str, optional
         List of paths to output.csv files.
         CSV file can be stacked csv containing all the chains
 
             cat output*.csv > combined_output.csv
 
-    posterior_predictive : str, List[str]
+    posterior_predictive : str or list of str, optional
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
-    predictions : str, List[str]
+    predictions : str or list of str, optional
         Out of sample predictions samples for the fit. If endswith ".csv" assumes file.
-    prior : List[str]
+    prior : str or list of str, optional
         List of paths to output.csv files
         CSV file can be stacked csv containing all the chains.
 
             cat output*.csv > combined_output.csv
 
-    prior_predictive : str, List[str]
+    prior_predictive : str or list of str, optional
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
-    observed_data : str
+    observed_data : str, optional
         Observed data used in the sampling. Path to data file in Rdump format.
-    observed_data_var : str, List[str]
+    observed_data_var : str or list of str, optional
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
-    constant_data : str
+    constant_data : str, optional
         Constant data used in the sampling. Path to data file in Rdump format.
-    constant_data_var : str, List[str]
+    constant_data_var : str or list of str, optional
         Variable(s) used for slicing constant_data. If not defined, all
         data variables are imported.
-    predictions_constant_data : str
+    predictions_constant_data : str, optional
         Constant data for predictions used in the sampling.
         Path to data file in Rdump format.
-    predictions_constant_data_var : str, List[str]
+    predictions_constant_data_var : str or list of str, optional
         Variable(s) used for slicing predictions_constant_data.
         If not defined, all data variables are imported.
-    log_likelihood : str
+    log_likelihood : str or list of str, optional
         Pointwise log_likelihood for the data.
-    coords : dict[str, iterable]
+    coords : dict of {str: array_like}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
-    dims : dict[str, List(str)]
+    dims : dict of {str: list of str, optional
         A mapping from variables to a list of coordinate names for the variable.
 
     Returns

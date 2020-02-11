@@ -191,7 +191,7 @@ class TestDataCmdStan:
                 "predictions": ["y_hat"],
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
                 "prior_predictive": ["y_hat"],
-                "sample_stats": ["divergent"],
+                "sample_stats": ["diverging"],
                 "observed_data": ["y"],
                 "constant_data": ["y"],
                 "predictions_constant_data": ["y"],
@@ -228,7 +228,7 @@ class TestDataCmdStan:
             )
             test_dict = {
                 "posterior": ["mu", "tau", "theta_tilde", "theta"],
-                "sample_stats": ["divergent"],
+                "sample_stats": ["diverging"],
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
                 "prior_predictive": ["y_hat"],
                 "observed_data": ["y"],
