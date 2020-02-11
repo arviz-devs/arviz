@@ -45,10 +45,10 @@ Information and diagnostics for each `posterior` sample, provided by the inferen
 * `step_size`: the step size used for this sample
 * `step_size_bar`: the current best known step-size
 * `tune`: boolean variable indicating if the sampler is tuning or sampling
-* `depth`: the depth of the tree that was used to generate this sample
-* `tree_size`: the number of leafs of the sampling tree, when the sample was accepted
-* `n_leapfrog`: number of steps selected in each iteration to traverse the posterior
-* `mean_tree_accept`: the mean acceptance probability for the tree that generated this sample
+* `depth`: HMC-NUTS only, the depth of the tree that was used to generate this sample
+* `tree_size`: HMC-NUTS only, the number of leafs of the sampling tree, when the sample was accepted
+* `n_leapfrog`: HMC-NUTS only, number of steps selected in each iteration to traverse the posterior
+* `mean_tree_accept`: HMC-NUTS only, the mean acceptance probability for the tree that generated this sample
 * `diverging`: HMC-NUTS only, boolean variable indicating divergent transitions
 * `energy`: HMC-NUTS only, the energy at the point in phase-space where the sample was accepted
 * `energy_error`: HMC-NUTS only, the difference in energy between the start and the end of the trajectory
