@@ -8,6 +8,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
+from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
 
@@ -29,6 +30,7 @@ def plot_pair(
     divergences_kwargs,
     flat_var_names,
     backend_kwargs,
+    marginal_kwargs,
     show,
 ):
     """Matplotlib pairplot."""
@@ -39,45 +41,77 @@ def plot_pair(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    
     if numvars == 2:
-        (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
+        (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
 
+        if marginal_kwargs is None:
+            marginal_kwargs = {}
+
+        marginal_kwargs.setdefault("plot_kwargs", {})
+        marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth    
+
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            #fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            # Instantiate figure and grid
+            fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
+            grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+
+            # Set up main plot
+            axjoin = fig.add_subplot(grid[1:, :-1])
+            # Set up top KDE
+            ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
+            # Set up right KDE
+            ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
 
         if kind == "scatter":
-            ax.plot(infdata_group[0], infdata_group[1], **plot_kwargs)
+            axjoin.plot(infdata_group[0], infdata_group[1], **plot_kwargs)
         elif kind == "kde":
             plot_kde(
                 infdata_group[0],
                 infdata_group[1],
                 contour=contour,
                 fill_last=fill_last,
-                ax=ax,
+                ax=axjoin,
                 **plot_kwargs
             )
         else:
-            hexbin = ax.hexbin(
+            hexbin = axjoin.hexbin(
                 infdata_group[0], infdata_group[1], mincnt=1, gridsize=gridsize, **plot_kwargs
             )
-            ax.grid(False)
+            axjoin.grid(False)
 
         if kind == "hexbin" and colorbar:
-            cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
+            cbar = axjoin.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
             cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
         if divergences:
-            ax.plot(
+            axjoin.plot(
                 infdata_group[0][diverging_mask],
                 infdata_group[1][diverging_mask],
                 **divergences_kwargs
             )
+            
+        # Flatten data
+        x = infdata_group[0].flatten()
+        y = infdata_group[1].flatten()
 
-        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
-        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
-        ax.tick_params(labelsize=xt_labelsize)
+        for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
+            plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
+
+        ax_hist_x.set_xlim(axjoin.get_xlim())
+        ax_hist_y.set_ylim(axjoin.get_ylim())
+
+        # Personalize axes
+        ax_hist_x.tick_params(labelleft=False, labelbottom=False)
+        ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+
+        axjoin.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
+        axjoin.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
+        axjoin.tick_params(labelsize=xt_labelsize)
 
     else:
         max_plots = (

@@ -26,6 +26,7 @@ def plot_pair(
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    marginal_kwargs=None,
     show=None,
 ):
     """
@@ -75,6 +76,8 @@ def plot_pair(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    marginal_kwargs : dicts, optional
+        Additional keywords modifying the marginals distributions (top and right subplot)
     show : bool, optional
         Call backend show function.
 
@@ -207,6 +210,7 @@ def plot_pair(
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
         backend_kwargs=backend_kwargs,
+        marginal_kwargs=marginal_kwargs,
         show=show,
     )
 
