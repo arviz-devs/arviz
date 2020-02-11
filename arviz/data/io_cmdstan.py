@@ -91,6 +91,16 @@ class CmdStanConverter:
                 )
                 len_pp = len(prior_predictive)
                 _log.info("glob found %d files for 'prior_predictive':\n%s", len_pp, msg)
+        if isinstance(log_likelihood, str):
+            log_likelihood_glob = glob(log_likelihood)
+            if len(log_likelihood_glob) > 1:
+                log_likelihood = sorted(log_likelihood_glob)
+                msg = "\n".join(
+                    "{}: {}".format(i, os.path.normpath(path))
+                    for i, path in enumerate(log_likelihood, 1)
+                )
+                len_ll = len(log_likelihood)
+                _log.info("glob found %d files for 'log_likelihood':\n%s", len_ll, msg)
         self.posterior_predictive = posterior_predictive
         self.predictions = predictions
         self.prior_ = prior
@@ -101,9 +111,6 @@ class CmdStanConverter:
         self.constant_data_var = constant_data_var
         self.predictions_constant_data = predictions_constant_data
         self.predictions_constant_data_var = predictions_constant_data_var
-        if isinstance(log_likelihood, (list, tuple)):
-            if len(log_likelihood) == 1:
-                log_likelihood = log_likelihood[0]
         self.log_likelihood = log_likelihood
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
@@ -112,7 +119,7 @@ class CmdStanConverter:
         self.prior = None
         self.sample_stats_prior = None
 
-        # populate posterior and sample_Stats
+        # populate posterior and sample_stats
         self._parse_posterior()
         self._parse_prior()
 
@@ -195,10 +202,16 @@ class CmdStanConverter:
             ]
 
         log_likelihood = self.log_likelihood
-        if log_likelihood is None:
+        if log_likelihood is None or (
+            isinstance(log_likelihood, str) and log_likelihood.lower().endswith(".csv")
+        ):
             log_likelihood = []
-        else:
+        elif isinstance(log_likelihood, str):
             log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+        else:
+            log_likelihood = [
+                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+            ]
 
         invalid_cols = posterior_predictive + predictions + log_likelihood
         valid_cols = [col for col in columns if col not in invalid_cols]
@@ -211,43 +224,7 @@ class CmdStanConverter:
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
-
         sampler_params = self.sample_stats
-        log_likelihood = self.log_likelihood
-        if isinstance(log_likelihood, str):
-            log_likelihood_cols = [
-                col for col in self.posterior[0].columns if log_likelihood == col.split(".")[0]
-            ]
-            log_likelihood_vals = [item[log_likelihood_cols] for item in self.posterior]
-
-            # Add log_likelihood to sampler_params
-            for i, _ in enumerate(sampler_params):
-                # slice log_likelihood to keep dimensions
-                for col in log_likelihood_cols:
-                    col_ll = col.replace(log_likelihood, "log_likelihood")
-                    sampler_params[i][col_ll] = log_likelihood_vals[i][col]
-
-            # change dims and coords for log_likelihood if defined
-            if log_likelihood in dims:
-                dims["log_likelihood"] = dims.pop(log_likelihood)
-
-            log_likelihood_dims = np.array(
-                [list(map(int, col.split(".")[1:])) for col in log_likelihood_cols]
-            )
-            max_dims = log_likelihood_dims.max(0)
-            max_dims = max_dims if hasattr(max_dims, "__iter__") else (max_dims,)
-            default_dim_names, _ = generate_dims_coords(shape=max_dims, var_name=log_likelihood)
-            log_likelihood_dim_names, _ = generate_dims_coords(
-                shape=max_dims, var_name="log_likelihood"
-            )
-            for default_dim_name, log_likelihood_dim_name in zip(
-                default_dim_names, log_likelihood_dim_names
-            ):
-                if default_dim_name in coords:
-                    coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
 
         for j, s_params in enumerate(sampler_params):
             rename_dict = {}
@@ -259,7 +236,7 @@ class CmdStanConverter:
                 sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
-        return dict_to_dataset(data, coords=coords, dims=dims)
+        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -293,7 +270,7 @@ class CmdStanConverter:
     @requires("posterior")
     @requires("predictions")
     def predictions_to_xarray(self):
-        """Convert predictions samples to xarray."""
+        """Convert out of sample predictions samples to xarray."""
         predictions = self.predictions
         columns = self.posterior[0].columns
         if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
@@ -447,6 +424,32 @@ class CmdStanConverter:
             )
             predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=predictions_constant_data)
+
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert elementwise log_likelihood samples to xarray."""
+        log_likelihood = self.log_likelihood
+        columns = self.posterior[0].columns
+        if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
+            isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
+        ):
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            chain_data = []
+            for path in log_likelihood:
+                parsed_output = _read_output(path)
+                for sample, *_ in parsed_output:
+                    chain_data.append(sample)
+            data = _unpack_dataframes(chain_data)
+        else:
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            log_likelihood_cols = [
+                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+            ]
+            data = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior])
+        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
