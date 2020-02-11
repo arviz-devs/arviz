@@ -655,7 +655,6 @@ def get_sample_stats(fit, warmup=False):
         name = re.sub("__$", "", key)
         name = "diverging" if name == "divergent" else name
         data[name] = values
-    data.update({"max_treedepth": False})
 
     data_warmup = OrderedDict()
     if warmup:
@@ -792,7 +791,6 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         name = re.sub("__$", "", key)
         name = "diverging" if name == "divergent" else name
         data[name] = values
-    data.update({"max_treedepth": False})
 
     return data
 
