@@ -11,6 +11,7 @@
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 * Add `skipna` argument to `hpd` and `summary` (#1035)
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
+* Add `marker` functionality to `bokeh_plot_elpd` (#1040)
 
 
 ### Maintenance and fixes

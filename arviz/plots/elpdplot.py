@@ -64,7 +64,7 @@ def plot_elpd(
         scale argument passed to az.waic or az.loo, see their docs for details. Only taken
         into account when input is InferenceData.
     plot_kwargs : dicts, optional
-        Additional keywords passed to ax.plot
+        Additional keywords passed to ax.scatter
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional
@@ -144,7 +144,8 @@ def plot_elpd(
 
     if plot_kwargs is None:
         plot_kwargs = {}
-    plot_kwargs.setdefault("marker", "+")
+    if backend == "bokeh":
+        plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
 
     pointwise_data = [
         get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models
