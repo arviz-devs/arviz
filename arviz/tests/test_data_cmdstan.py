@@ -145,7 +145,7 @@ class TestDataCmdStan:
                 "predictions": ["y_hat"],
                 "prior": ["mu", "tau", "theta_tilde", "theta"],
                 "prior_predictive": ["y_hat"],
-                "sample_stats": ["log_likelihood"],
+                "sample_stats": ["diverging"],
                 "observed_data": ["y"],
                 "constant_data": ["y"],
                 "predictions_constant_data": ["y"],
