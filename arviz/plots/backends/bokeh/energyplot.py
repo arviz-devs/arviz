@@ -59,6 +59,7 @@ def plot_energy(
                 backend="bokeh",
                 backend_kwargs={},
                 show=False,
+                return_glyph=True,
             )
             labels.append((label, glyph,))
 

@@ -8,4 +8,4 @@ import arviz as az
 import numpy as np
 
 dist = np.random.beta(np.random.uniform(0.5, 10), 5, size=1000)
-ax, _ = az.plot_kde(dist, quantiles=[0.25, 0.5, 0.75], backend="bokeh")
+ax = az.plot_kde(dist, quantiles=[0.25, 0.5, 0.75], backend="bokeh")
