@@ -29,7 +29,7 @@ class CmdStanPyConverter:
         prior_predictive=None,
         observed_data=None,
         constant_data=None,
-        predictions_constant_data=predictions_constant_data,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
