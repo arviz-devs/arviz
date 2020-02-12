@@ -37,7 +37,7 @@ For more instructions see the
 
 ### Code Formatting
 For code generally follow the
-[TensorFlow's style guide](https://www.tensorflow.org/versions/master/how_tos/style_guide.html)
+[TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)
 Both more or less follows PEP 8.
 

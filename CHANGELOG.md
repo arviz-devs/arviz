@@ -11,6 +11,7 @@
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 * Add `skipna` argument to `hpd` and `summary` (#1035)
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
+* Add `marker` functionality to `bokeh_plot_elpd` (#1040)
 
 
 ### Maintenance and fixes
@@ -26,17 +27,18 @@
 * Fix `point_estimate` in `plot_posterior` (#1038)
 * Fix interpolation `hpd_plot` (#1039)
 * Fix `io_pymc3.py` to handle models with `potentials` (#1043)
+* Fix several inconsistencies between schema and `from_pymc3` implementation
+  in groups `prior`, `prior_predictive` and `observed_data` (#1045)
 
 ### Deprecation
 
 ### Documentation
 * Updated `InferenceData` schema specification (`log_likelihood`,
   `predictions` and `predictions_constant_data` groups)
-*  Clarify the usage of "plot_joint" (#1001)
-*  Added the API link of function to examples (#1013)
-* Clarify the usage of "plot_joint" (#1001)
+* Clarify the usage of `plot_joint` (#1001)
 * Added the API link of function to examples (#1013)
 * Updated PyStan_schema_example to include example of out-of-sample prediction (#1032)
+* Added example for `concat` method (#1037)
 
 
 ## v0.6.1 (2019 Dec 28)

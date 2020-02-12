@@ -102,6 +102,30 @@ def _validate_boolean(value):
     return value is True or value == "true"
 
 
+def _validate_bokeh_marker(value):
+    """Validate the markers."""
+    all_markers = (
+        "Asterisk",
+        "Circle",
+        "CircleCross",
+        "CircleX",
+        "Cross",
+        "Dash",
+        "Diamond",
+        "DiamondCross",
+        "Hex",
+        "InvertedTriangle",
+        "Square",
+        "SquareCross",
+        "SquareX",
+        "Triangle",
+        "X",
+    )
+    if value not in all_markers:
+        raise ValueError("{} is not one of {}".format(value, all_markers))
+    return value
+
+
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
     """Validate value is an iterable datatype."""
     # based on matplotlib's _listify_validator function
@@ -135,15 +159,16 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
     "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
+    "plot.bokeh.figure.dpi": (60, _validate_positive_int),
+    "plot.bokeh.figure.width": (500, _validate_positive_int),
+    "plot.bokeh.figure.height": (500, _validate_positive_int),
+    "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
+    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
+    "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
         "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
         lambda x: x,
     ),
-    "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
-    "plot.bokeh.figure.dpi": (60, _validate_positive_int),
-    "plot.bokeh.figure.width": (500, _validate_positive_int),
-    "plot.bokeh.figure.height": (500, _validate_positive_int),
-    "plot.bokeh.show": (True, _validate_boolean),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
