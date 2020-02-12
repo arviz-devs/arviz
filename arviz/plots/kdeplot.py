@@ -221,6 +221,8 @@ def plot_kde(
 
     if backend == "bokeh":
         kde_plot_args.pop("textsize")
+        kde_plot_args.pop("label")
+        kde_plot_args.pop("legend")
     else:
         kde_plot_args.pop("return_glyph")
 
