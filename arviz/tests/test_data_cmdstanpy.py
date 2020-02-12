@@ -53,9 +53,12 @@ class TestDataCmdStanPy:
         return from_cmdstanpy(
             posterior=data.obj,
             posterior_predictive="y_hat",
+            predictions="y_hat",
             prior=data.obj,
             prior_predictive="y_hat",
             observed_data={"y": eight_schools_params["y"]},
+            constant_data={"y": eight_schools_params["y"]},
+            predictions_constant_data={"y": eight_schools_params["y"]},
             log_likelihood="log_lik",
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={
@@ -72,20 +75,23 @@ class TestDataCmdStanPy:
         return from_cmdstanpy(
             posterior=data.obj,
             posterior_predictive=["y_hat"],
+            predictions=["y_hat", "log_lik"],
             prior=data.obj,
             prior_predictive=["y_hat"],
             observed_data={"y": eight_schools_params["y"]},
-            log_likelihood="log_lik",
+            constant_data=eight_schools_params,
+            predictions_constant_data=eight_schools_params,
+            log_likelihood=["log_lik", "y_hat"],
             coords={
                 "school": np.arange(eight_schools_params["J"]),
-                "log_likelihood_dim": np.arange(eight_schools_params["J"]),
+                "log_lik_dim": np.arange(eight_schools_params["J"]),
             },
             dims={
                 "theta": ["school"],
                 "y": ["school"],
                 "y_hat": ["school"],
                 "eta": ["school"],
-                "log_lik": ["log_likelihood_dim"],
+                "log_lik": ["log_lik_dim"],
             },
         )
 
@@ -127,8 +133,11 @@ class TestDataCmdStanPy:
         # inference_data 1
         test_dict = {
             "posterior": ["theta"],
+            "predictions": ["y_hat"],
             "observed_data": ["y"],
-            "sample_stats": ["log_likelihood"],
+            "constant_data": ["y"],
+            "predictions_constant_data": ["y"],
+            "log_likelihood": ["log_lik"],
             "prior": ["theta"],
         }
         fails = check_multiple_attrs(test_dict, inference_data1)
@@ -136,10 +145,14 @@ class TestDataCmdStanPy:
         # inference_data 2
         test_dict = {
             "posterior_predictive": ["y_hat"],
+            "predictions": ["y_hat", "log_lik"],
             "observed_data": ["y"],
             "sample_stats_prior": ["lp"],
             "sample_stats": ["lp"],
+            "constant_data": list(eight_schools_params),
+            "predictions_constant_data": list(eight_schools_params),
             "prior_predictive": ["y_hat"],
+            "log_likelihood": ["log_lik", "y_hat"],
         }
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
