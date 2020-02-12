@@ -17,9 +17,8 @@ Thank you so much for your PR! To help us review your contribution, please consi
 
 - [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) PR format?
 - [ ] Has included a sample plot to visually illustrate the changes? (only for plot-related functions)
-- [ ] Is the new feature properly documented with an example?
-- [ ] Does the PR include new or updated tests to cover the new feature (using [pytest fixture pattern](
-      https://docs.pytest.org/en/latest/fixture.html#fixture))?
+- [ ] Is the new feature properly documented (with an example if appropriate)?
+- [ ] Does the PR include new or updated tests to cover the new feature?
 - [ ] Is the code style correct (follows pylint and black guidelines)?
 - [ ] Is the change listed in [changelog](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#v0xx-unreleased )?
 
