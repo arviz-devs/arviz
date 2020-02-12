@@ -20,7 +20,9 @@ def plot_trace(
     rug=False,
     lines=None,
     compact=False,
+    compact_prop="linestyle",
     combined=False,
+    combined_prop="color",
     legend=False,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -155,6 +157,8 @@ def plot_trace(
     num_colors = len(data.chain) + 1 if combined else len(data.chain)
 
     # TODO: matplotlib is always required by arviz. Can we get rid of it?
+    # TODO: kind of related: move mpl specific code to backend and
+    # define prop_cycle instead of only colors
     colors = [
         prop
         for _, prop in zip(
@@ -212,7 +216,7 @@ def plot_trace(
         rug_kwargs=rug_kwargs,
         hist_kwargs=hist_kwargs,
         trace_kwargs=trace_kwargs,
-        # compact = compact,
+        compact = compact,
         combined=combined,
         legend=legend,
         # Generated kwargs
