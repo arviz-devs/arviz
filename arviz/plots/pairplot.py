@@ -28,6 +28,7 @@ def plot_pair(
     backend_kwargs=None,
     marginal_kwargs=None,
     show=None,
+    diagonal=False,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -124,7 +125,7 @@ def plot_pair(
         ...             divergences=True,
         ...             textsize=18)
     """
-    valid_kinds = ["scatter", "kde", "hexbin"]
+    valid_kinds = ["scatter", "kde", "hexbin", "scatter_kde"]
     if kind not in valid_kinds:
         raise ValueError(
             ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
@@ -136,7 +137,7 @@ def plot_pair(
     if plot_kwargs is None:
         plot_kwargs = {}
 
-    if kind == "scatter":
+    if kind == "scatter" or kind == "scatter_kde":
         plot_kwargs.setdefault("marker", ".")
         plot_kwargs.setdefault("lw", 0)
 
@@ -212,6 +213,7 @@ def plot_pair(
         backend_kwargs=backend_kwargs,
         marginal_kwargs=marginal_kwargs,
         show=show,
+        diagonal=diagonal,
     )
 
     if backend is None:
