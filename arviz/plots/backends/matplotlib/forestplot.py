@@ -56,7 +56,7 @@ def plot_forest(
         if ridgeplot_quantiles is None:
             figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
         else:
-            figsize = (min(12, sum(width_ratios) * 3), plot_handler.fig_height() * 1.5)
+            figsize = (min(14, sum(width_ratios) * 4), plot_handler.fig_height() * 1.2)
 
     (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(
         figsize, textsize, 1.1, 1
@@ -102,8 +102,12 @@ def plot_forest(
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
-            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind,
-            ridgeplot_quantiles, axes[0]
+            ridgeplot_overlap,
+            linewidth,
+            ridgeplot_alpha,
+            ridgeplot_kind,
+            ridgeplot_quantiles,
+            axes[0],
         )
     else:
         raise TypeError(
@@ -235,7 +239,7 @@ class PlotHandler:
         )
         return ax
 
-    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ridgeplot_quantiles,  ax):
+    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ridgeplot_quantiles, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
@@ -276,9 +280,15 @@ class PlotHandler:
                 else:
                     if ridgeplot_quantiles is not None:
                         idx = [np.sum(y_q < quant) for quant in ridgeplot_quantiles]
-                        ax.fill_between(x, y_min, y_max,
-                                        where=np.isin(x, x[idx], invert=True, assume_unique=True),
-                                        alpha=alpha, color=color, zorder=zorder)
+                        ax.fill_between(
+                            x,
+                            y_min,
+                            y_max,
+                            where=np.isin(x, x[idx], invert=True, assume_unique=True),
+                            alpha=alpha,
+                            color=color,
+                            zorder=zorder,
+                        )
                     else:
                         ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
                         ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
