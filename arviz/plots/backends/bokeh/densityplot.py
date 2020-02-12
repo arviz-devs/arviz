@@ -1,6 +1,7 @@
 """Bokeh Densityplot."""
 import bokeh.plotting as bkp
 import numpy as np
+from collections import defaultdict
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title, Legend
 
@@ -66,7 +67,7 @@ def plot_density(
     if data_labels is None:
         data_labels = {}
 
-    legend_items = {}
+    legend_items = defaultdict(list)
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
             label = make_label(var_name, selection)
@@ -91,11 +92,7 @@ def plot_density(
                 axis_map[label],
             )
             if data_label is not None:
-                if axis_map[label] in legend_items.keys():
-                    legend_items[axis_map[label]].append((data_label, plotted))
-                else:
-                    legend_items[axis_map[label]] = []
-                    legend_items[axis_map[label]].append((data_label, plotted))
+                legend_items[axis_map[label]].append((data_label, plotted))
 
     for ax1, legend in legend_items.items():
         legend = Legend(items=legend, location="center_right", orientation="horizontal",)
