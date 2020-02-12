@@ -94,7 +94,10 @@ def plot_kde(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures and glyphs
+    axes : matplotlib.Axes or bokeh.plotting.Figure
+        Object containing the kde plot
+    glyphs : list, optional
+        Bokeh glyphs present in plot.  Only provided if ``return_glyph`` is True.
 
     Examples
     --------

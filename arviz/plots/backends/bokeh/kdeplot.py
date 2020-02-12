@@ -236,7 +236,7 @@ def plot_kde(
     if backend_show(show):
         bkp.show(ax, toolbar_location="above")
 
-    if legend and label is not None and return_glyph:
+    if return_glyph:
         return ax, glyphs
 
     return ax
