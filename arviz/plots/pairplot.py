@@ -29,6 +29,8 @@ def plot_pair(
     marginal_kwargs=None,
     show=None,
     diagonal=False,
+    point_estimate=None,
+    point_estimate_kwargs=None
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -149,6 +151,9 @@ def plot_pair(
     divergences_kwargs.setdefault("color", "C1")
     divergences_kwargs.setdefault("lw", 0)
 
+    if point_estimate_kwargs is None:
+        point_estimate_kwargs = {}
+
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
     grouped_data = convert_to_dataset(data, group=group)
@@ -214,6 +219,8 @@ def plot_pair(
         marginal_kwargs=marginal_kwargs,
         show=show,
         diagonal=diagonal,
+        point_estimate=point_estimate,
+        point_estimate_kwargs=point_estimate_kwargs
     )
 
     if backend is None:

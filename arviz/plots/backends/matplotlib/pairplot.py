@@ -9,7 +9,7 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from ....rcparams import rcParams
 
 
@@ -33,6 +33,8 @@ def plot_pair(
     marginal_kwargs,
     show,
     diagonal,
+    point_estimate,
+    point_estimate_kwargs
 ):
     """Matplotlib pairplot."""
     if backend_kwargs is None:
@@ -81,6 +83,7 @@ def plot_pair(
             # Personalize axes
             ax_hist_x.tick_params(labelleft=False, labelbottom=False)
             ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+
         else:
             axjoin = ax
 
@@ -111,6 +114,10 @@ def plot_pair(
                 contour_kwargs={"colors": "k"},
                 fill_last=False,
             )
+
+
+        
+
         if kind == "hexbin" and colorbar:
             cbar = axjoin.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
             cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
@@ -121,6 +128,17 @@ def plot_pair(
                 infdata_group[1][diverging_mask],
                 **divergences_kwargs
             )
+
+        if point_estimate:
+            pe_x = calculate_point_estimate(point_estimate, x, 0.5) 
+            pe_y = calculate_point_estimate(point_estimate, y, 0.5) 
+            ax_hist_x.axvline(pe_x, **point_estimate_kwargs)
+            ax_hist_y.axhline(pe_y, **point_estimate_kwargs)
+            
+            axjoin.axvline(pe_x, **point_estimate_kwargs)
+            axjoin.axhline(pe_y, **point_estimate_kwargs)
+
+            axjoin.scatter(pe_x, pe_y, marker='s', s=figsize[0] + 50, **point_estimate_kwargs, zorder=4)
 
         axjoin.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
         axjoin.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
@@ -152,7 +170,6 @@ def plot_pair(
 
             for j in range(0, numvars):
                 if i > j:
-                    # ax[j, i].axis("off")
                     ax[j, i].remove()
                     continue
 
@@ -164,7 +181,7 @@ def plot_pair(
                         plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
                     else:
                         loc = "left"
-                        ax[j, i].remove()  # .axis("off")
+                        ax[j, i].remove()
                         continue
                 if i < j:
                     if kind == "scatter":
@@ -205,13 +222,25 @@ def plot_pair(
                     if kind == "hexbin" and colorbar:
                         hexbin_values.append(hexbin.norm.vmin)
                         hexbin_values.append(hexbin.norm.vmax)
-                        # if j == i == 0 and colorbar:
                         divider = make_axes_locatable(ax[-1, -1])
-                        cax = divider.append_axes(loc, size="7%")
+                        cax = divider.append_axes(loc, size="7%", pad='5%')
                         cbar = fig.colorbar(
                             hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], cax=cax
                         )
                         cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
+
+                    if point_estimate:
+                        pe_x = calculate_point_estimate(point_estimate, var1, 0.5) 
+                        pe_y = calculate_point_estimate(point_estimate, var2, 0.5) 
+                        ax[j, i].axvline(pe_x, **point_estimate_kwargs)
+                        ax[j, i].axhline(pe_y, **point_estimate_kwargs)
+
+                        if diagonal:
+                            ax[j - 1 , i].axvline(pe_x, **point_estimate_kwargs)
+                            pe = calculate_point_estimate(point_estimate, infdata_group[-1], 0.5)
+                            ax[-1 , -1].axvline(pe, **point_estimate_kwargs)
+
+                        ax[j, i].scatter(pe_x, pe_y, marker='s', s=figsize[0] + 50, **point_estimate_kwargs, zorder=4)
 
                 if j != numvars - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
@@ -225,8 +254,9 @@ def plot_pair(
                     ax[j, i].set_ylabel(
                         "{}".format(flat_var_names[j]), fontsize=ax_labelsize, wrap=True
                     )
+                ax[j, i].tick_params(labelsize=xt_labelsize) 
 
-                ax[j, i].tick_params(labelsize=xt_labelsize)
+
     if backend_show(show):
         plt.show()
 
