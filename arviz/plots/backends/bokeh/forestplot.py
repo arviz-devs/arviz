@@ -59,10 +59,10 @@ def plot_forest(
     )
 
     if figsize is None:
-        if ridgeplot_quantiles is None:
-            figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
-        else:
+        if kind == "ridgeplot":
             figsize = (min(14, sum(width_ratios) * 3), plot_handler.fig_height() * 3)
+        else:
+            figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
     (figsize, _, _, _, auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
 
