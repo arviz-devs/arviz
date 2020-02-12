@@ -9,6 +9,7 @@ from ...plot_utils import (
     _create_axes_grid,
     calculate_point_estimate,
     _fast_kde,
+    get_bins,
 )
 
 
@@ -37,16 +38,20 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
-    _, ax = _create_axes_grid(
-        length_plotters,
-        rows,
-        cols,
-        figsize=figsize,
-        squeeze=False,
-        backend="matplotlib",
-        backend_kwargs=backend_kwargs,
-    )
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
+    if ax is None:
+        _, ax = _create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            squeeze=False,
+            backend="matplotlib",
+            backend_kwargs=backend_kwargs,
+        )
+    else:
+        ax = np.atleast_2d(ax)
+
+    axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
     for m_idx, plotters in enumerate(to_plot):
         for var_name, selection, values in plotters:
@@ -150,7 +155,7 @@ def _d_helper(
 
     else:
         xmin, xmax = hpd(vec, credible_interval, multimodal=False)
-        bins = range(xmin, xmax + 2)
+        bins = get_bins(vec)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype="step", align="left")
         if shade:

@@ -48,6 +48,7 @@ def get_version():
 
 setup(
     name="arviz",
+    license="Apache-2.0",
     version=get_version(),
     description="Exploratory analysis of Bayesian models",
     author="ArviZ Developers",

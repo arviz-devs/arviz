@@ -19,6 +19,7 @@ def plot_autocorr(
     textsize=None,
     ax=None,
     backend=None,
+    backend_config=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -49,7 +50,9 @@ def plot_autocorr(
         Matplotlib axes or bokeh figures.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    backend_config: dict, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
+    backend_kwargs: dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
@@ -129,6 +132,7 @@ def plot_autocorr(
         autocorr_plot_args.pop("xt_labelsize")
         autocorr_plot_args.pop("titlesize")
         autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
+        autocorr_plot_args.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_autocorr", "autocorrplot", backend)

@@ -34,6 +34,7 @@ def plot_ppc(
     jitter,
     total_pp_samples,
     legend,
+    group,
     markersize,
     animation_kwargs,
     num_pp_samples,
@@ -72,7 +73,9 @@ def plot_ppc(
             plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
-            ax_i.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot(
+                [], color="C5", label="{} predictive {}".format(group.capitalize(), pp_var_name)
+            )
 
             if dtype == "f":
                 plot_kde(
@@ -126,6 +129,7 @@ def plot_ppc(
                         ax_i.plot(x_s, y_s, **plot_kwargs)
 
             if mean:
+                label = "{} predictive mean {}".format(group.capitalize(), pp_var_name)
                 if dtype == "f":
                     rep = len(pp_densities)
                     len_density = len(pp_densities[0])
@@ -143,7 +147,7 @@ def plot_ppc(
                         linestyle="--",
                         linewidth=linewidth,
                         zorder=2,
-                        label="Posterior predictive mean {}".format(pp_var_name),
+                        label=label,
                     )
                 else:
                     vals = pp_vals.flatten()
@@ -155,7 +159,7 @@ def plot_ppc(
                         hist,
                         color="C0",
                         linewidth=linewidth,
-                        label="Posterior predictive mean {}".format(pp_var_name),
+                        label=label,
                         zorder=2,
                         linestyle="--",
                         drawstyle=plot_kwargs["drawstyle"],

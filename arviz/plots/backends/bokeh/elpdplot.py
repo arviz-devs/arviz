@@ -5,10 +5,12 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
+from bokeh.models import ColumnDataSource
+import bokeh.models.markers as mk
 
 from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
-from ....rcparams import rcParams
+from ....rcparams import rcParams, _validate_bokeh_marker
 
 
 def plot_elpd(
@@ -50,7 +52,6 @@ def plot_elpd(
             ax = bkp.figure(
                 width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
             )
-
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
@@ -146,12 +147,14 @@ def _plot_atomic_elpd(
     ylabels_shown,
     plot_kwargs,
 ):
-    ax_.cross(
-        np.asarray(xdata),
-        np.asarray(ydata),
-        line_color=plot_kwargs.get("color", "black"),
-        size=plot_kwargs.get("s"),
+    marker = _validate_bokeh_marker(plot_kwargs.get("marker"))
+    marker_func = getattr(mk, marker)
+    sizes = np.ones(len(xdata)) * plot_kwargs.get("s")
+    glyph = marker_func(
+        x="xdata", y="ydata", size="sizes", line_color=plot_kwargs.get("color", "black")
     )
+    source = ColumnDataSource(dict(xdata=xdata, ydata=ydata, sizes=sizes))
+    ax_.add_glyph(source, glyph)
     if threshold is not None:
         diff_abs = np.abs(ydata - ydata.mean())
         bool_ary = diff_abs > threshold * ydata.std()
