@@ -1,7 +1,7 @@
 """Bokeh Densityplot."""
-import bokeh.plotting as bkp
-import numpy as np
 from collections import defaultdict
+import numpy as np
+import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title, Legend
 
