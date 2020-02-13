@@ -713,7 +713,7 @@ def test_plot_compare_manual(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # remove "scale" column
-    del model_compare["waic_scale"]
+    del model_compare["loo_scale"]
     axes = plot_compare(model_compare)
     assert axes
 
@@ -723,12 +723,12 @@ def test_plot_compare_no_ic(models):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     # Drop column needed for plotting
-    model_compare = model_compare.drop("waic", axis=1)
+    model_compare = model_compare.drop("loo", axis=1)
     with pytest.raises(ValueError) as err:
         plot_compare(model_compare)
 
     assert "comp_df must contain one of the following" in str(err.value)
-    assert "['waic', 'loo']" in str(err.value)
+    assert "['loo', 'waic']" in str(err.value)
 
 
 @pytest.mark.parametrize(
