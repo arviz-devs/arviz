@@ -57,7 +57,7 @@ def plot_elpd(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     ic : str, optional
-        Information Criterion (PSIS-LOO, WAIC) used to compare models. Defaults to
+        Information Criterion (PSIS-LOO `loo`, WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``. Only taken
         into account when input is InferenceData.
     scale : str, optional
