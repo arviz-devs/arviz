@@ -853,8 +853,8 @@ def test_plot_elpd_ic_error(models):
 
 def test_plot_elpd_scale_error(models):
     model_dict = {
-        "Model 1": waic(models.model_1, pointwise=True),
-        "Model 2": waic(models.model_2, pointwise=True, scale="log"),
+        "Model 1": waic(models.model_1, pointwise=True, scale="log"),
+        "Model 2": waic(models.model_2, pointwise=True, scale="deviance"),
     }
     with pytest.raises(SyntaxError):
         plot_elpd(model_dict)
