@@ -14,6 +14,7 @@
 * Add `marker` functionality to `bokeh_plot_elpd` (#1040)
 * Added the functionality [interactive legends](https://docs.bokeh.org/en/1.4.0/docs/user_guide/interaction/legends.html) for bokeh plots of `densityplot`, `energyplot` 
   and `essplot` (#1024)
+* New defaults for cross validation: `loo` (old: waic) and `log` -scale (old: `deviance` -scale) (#1067)
 
 
 ### Maintenance and fixes
