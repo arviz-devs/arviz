@@ -40,6 +40,7 @@ def plot_forest(
     ridgeplot_overlap,
     ridgeplot_alpha,
     ridgeplot_kind,
+    ridgeplot_quantiles,
     textsize,
     ess,
     r_hat,
@@ -52,7 +53,10 @@ def plot_forest(
     )
 
     if figsize is None:
-        figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
+        if kind == "ridgeplot":
+            figsize = (min(14, sum(width_ratios) * 4), plot_handler.fig_height() * 1.2)
+        else:
+            figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
     (figsize, _, titlesize, xt_labelsize, auto_linewidth, auto_markersize) = _scale_fig_size(
         figsize, textsize, 1.1, 1
@@ -98,7 +102,12 @@ def plot_forest(
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
-            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0]
+            ridgeplot_overlap,
+            linewidth,
+            ridgeplot_alpha,
+            ridgeplot_kind,
+            ridgeplot_quantiles,
+            axes[0],
         )
     else:
         raise TypeError(
@@ -230,7 +239,7 @@ class PlotHandler:
         )
         return ax
 
-    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ax):
+    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ridgeplot_quantiles, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
@@ -251,7 +260,7 @@ class PlotHandler:
             alpha = 1.0
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, color in plotter.ridgeplot(mult, ridgeplot_kind):
+            for x, y_min, y_max, y_q, color in plotter.ridgeplot(mult, ridgeplot_kind):
                 if alpha == 0:
                     border = color
                     facecolor = "None"
@@ -269,9 +278,21 @@ class PlotHandler:
                         zorder=zorder,
                     )
                 else:
-                    ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
-                    ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
-                    ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
+                    if ridgeplot_quantiles is not None:
+                        idx = [np.sum(y_q < quant) for quant in ridgeplot_quantiles]
+                        ax.fill_between(
+                            x,
+                            y_min,
+                            y_max,
+                            where=np.isin(x, x[idx], invert=True, assume_unique=True),
+                            alpha=alpha,
+                            color=color,
+                            zorder=zorder,
+                        )
+                    else:
+                        ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
+                        ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
+                        ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
                 zorder -= 1
         return ax
 
@@ -484,7 +505,7 @@ class VarHandler:
 
     def ridgeplot(self, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
-        xvals, yvals, pdfs, colors = [], [], [], []
+        xvals, yvals, pdfs, pdfs_q, colors = [], [], [], [], []
         for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
@@ -502,15 +523,17 @@ class VarHandler:
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)
+                density_q = density.cumsum() / density.sum()
                 x = np.linspace(lower, upper, len(density))
 
             xvals.append(x)
             pdfs.append(density)
+            pdfs_q.append((density_q))
 
         scaling = max(np.max(j) for j in pdfs)
-        for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
+        for y, x, pdf, pdf_q, color in zip(yvals, xvals, pdfs, pdfs_q, colors):
             y = y * np.ones_like(x)
-            yield x, y, mult * pdf / scaling + y, color
+            yield x, y, mult * pdf / scaling + y, pdf_q, color
 
     def ess(self):
         """Get effective n data for the variable."""

@@ -46,6 +46,7 @@ def plot_forest(
     ridgeplot_overlap,
     ridgeplot_alpha,
     ridgeplot_kind,
+    ridgeplot_quantiles,
     textsize,
     ess,
     r_hat,
@@ -59,7 +60,10 @@ def plot_forest(
     )
 
     if figsize is None:
-        figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
+        if kind == "ridgeplot":
+            figsize = (min(14, sum(width_ratios) * 3), plot_handler.fig_height() * 3)
+        else:
+            figsize = (min(12, sum(width_ratios) * 2), plot_handler.fig_height())
 
     (figsize, _, _, _, auto_linewidth, auto_markersize) = _scale_fig_size(figsize, textsize, 1.1, 1)
 
@@ -122,7 +126,12 @@ def plot_forest(
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
-            ridgeplot_overlap, linewidth, ridgeplot_alpha, ridgeplot_kind, axes[0, 0]
+            ridgeplot_overlap,
+            linewidth,
+            ridgeplot_alpha,
+            ridgeplot_kind,
+            ridgeplot_quantiles,
+            axes[0, 0],
         )
     else:
         raise TypeError(
@@ -270,7 +279,7 @@ class PlotHandler:
         )
         return ax
 
-    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ax):
+    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ridgeplot_quantiles, ax):
         """Draw ridgeplot for each plotter.
 
         Parameters
@@ -290,7 +299,7 @@ class PlotHandler:
         if alpha is None:
             alpha = 1.0
         for plotter in list(self.plotters.values())[::-1]:
-            for x, y_min, y_max, color in list(plotter.ridgeplot(mult, ridgeplot_kind))[::-1]:
+            for x, y_min, y_max, y_q, color in list(plotter.ridgeplot(mult, ridgeplot_kind))[::-1]:
                 if alpha == 0:
                     border = color
                     facecolor = None
@@ -306,16 +315,43 @@ class PlotHandler:
                         fill_color=facecolor,
                     )
                 else:
-                    patch = ax.patch(
-                        np.concatenate([x, x[::-1]]),
-                        np.concatenate([y_min, y_max[::-1]]),
-                        fill_color=color,
-                        fill_alpha=alpha,
-                        line_dash="solid",
-                        line_width=linewidth,
-                        line_color=border,
-                    )
-                    patch.level = "overlay"
+                    if ridgeplot_quantiles is None:
+                        patch = ax.patch(
+                            np.concatenate([x, x[::-1]]),
+                            np.concatenate([y_min, y_max[::-1]]),
+                            fill_color=color,
+                            fill_alpha=alpha,
+                            line_dash="solid",
+                            line_width=linewidth,
+                            line_color=border,
+                        )
+                        patch.level = "overlay"
+                    else:
+                        quantiles = sorted(np.clip(ridgeplot_quantiles, 0, 1))
+                        if quantiles[0] != 0:
+                            quantiles = [0] + quantiles
+                        if quantiles[-1] != 1:
+                            quantiles = quantiles + [1]
+
+                        for quant_0, quant_1 in zip(quantiles[:-1], quantiles[1:]):
+                            idx = (y_q > quant_0) & (y_q < quant_1)
+                            if idx.sum():
+                                patch_x = np.concatenate(
+                                    (x[idx], [x[idx][-1]], x[idx][::-1], [x[idx][0]])
+                                )
+                                patch_y = np.concatenate(
+                                    (
+                                        y_min[idx],
+                                        [y_min[idx][-1]],
+                                        y_max[idx][::-1],
+                                        [y_max[idx][0]],
+                                    )
+                                )
+                                patch = ax.patch(
+                                    patch_x, patch_y, fill_color=color, fill_alpha=alpha,
+                                )
+                            patch.level = "overlay"
+
         return ax
 
     def forestplot(self, credible_interval, quartiles, linewidth, markersize, ax, rope):
@@ -526,7 +562,7 @@ class VarHandler:
 
     def ridgeplot(self, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
-        xvals, yvals, pdfs, colors = [], [], [], []
+        xvals, yvals, pdfs, pdfs_q, colors = [], [], [], [], []
         for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
@@ -544,15 +580,17 @@ class VarHandler:
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)
+                density_q = density.cumsum() / density.sum()
                 x = np.linspace(lower, upper, len(density))
 
             xvals.append(x)
             pdfs.append(density)
+            pdfs_q.append((density_q))
 
         scaling = max(np.max(j) for j in pdfs)
-        for y, x, pdf, color in zip(yvals, xvals, pdfs, colors):
+        for y, x, pdf, pdf_q, color in zip(yvals, xvals, pdfs, pdfs_q, colors):
             y = y * np.ones_like(x)
-            yield x, y, mult * pdf / scaling + y, color
+            yield x, y, mult * pdf / scaling + y, pdf_q, color
 
     def ess(self):
         """Get effective n data for the variable."""
