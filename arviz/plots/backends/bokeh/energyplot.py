@@ -1,6 +1,7 @@
 """Bokeh energyplot."""
 import bokeh.plotting as bkp
 from bokeh.models import Label
+from bokeh.models.annotations import Legend
 
 from . import backend_kwarg_defaults, backend_show
 from .distplot import _histplot_bokeh_op
@@ -39,6 +40,7 @@ def plot_energy(
     if ax is None:
         ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
 
+    labels = []
     if kind == "kde":
         for alpha, color, label, value in series:
             fill_kwargs["fill_alpha"] = alpha
@@ -46,7 +48,7 @@ def plot_energy(
             plot_kwargs["line_color"] = color
             plot_kwargs["line_alpha"] = alpha
             plot_kwargs.setdefault("line_width", line_width)
-            plot_kde(
+            _, glyph = plot_kde(
                 value,
                 bw=bw,
                 label=label,
@@ -57,7 +59,10 @@ def plot_energy(
                 backend="bokeh",
                 backend_kwargs={},
                 show=False,
+                return_glyph=True,
             )
+            labels.append((label, glyph,))
+
     elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()
         hist_kwargs.update(**fill_kwargs)
@@ -78,7 +83,7 @@ def plot_energy(
         for idx, val in enumerate(e_bfmi(energy)):
             bfmi_info = Label(
                 x=int(figsize[0] * dpi * 0.58),
-                y=int(figsize[1] * dpi * 0.83) - 20 * idx,
+                y=int(figsize[1] * dpi * 0.73) - 20 * idx,
                 x_units="screen",
                 y_units="screen",
                 text="chain {:>2} BFMI = {:.2f}".format(idx, val),
@@ -91,8 +96,9 @@ def plot_energy(
 
             ax.add_layout(bfmi_info)
 
-    if legend:
-        ax.legend.location = "top_left"
+    if legend and label is not None:
+        legend = Legend(items=labels, location="center_right", orientation="horizontal",)
+        ax.add_layout(legend, "above")
         ax.legend.click_policy = "hide"
 
     if backend_show(show):
