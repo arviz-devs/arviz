@@ -46,10 +46,11 @@ __all__ = [
 def compare(
     dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
-    r"""Compare models based on LOO or WAIC cross-validation.
+    r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
-    LOO is leave-one-out (PSIS-LOO) cross-validation and WAIC is the widely applicable information
-    criterion. Read more theory here - in a paper by some of the leading authorities
+    LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
+    WAIC is the widely applicable information criterion.
+    Read more theory here - in a paper by some of the leading authorities
     on model selection dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
@@ -57,7 +58,7 @@ def compare(
     dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
     ic : str
-        Information Criterion (LOO or WAIC) used to compare models. Defaults to
+        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
     method : str
         Method used to estimate the weights for each model. Available options are:
@@ -92,13 +93,14 @@ def compare(
     A DataFrame, ordered from best to worst model (measured by information criteria).
     The index reflects the key with which the models are passed to this function. The columns are:
     rank : The rank-order of the models. 0 is the best.
-    IC : Information Criteria (LOO or WAIC).
+    IC : Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
         Higher IC indicates higher out-of-sample predictive fit ("better" model). Default LOO.
         If `scale` is `deviance` or `negative_log` smaller IC indicates
         higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
-    dIC : Relative difference between each IC (LOO or WAIC) and the lowest IC (LOO or WAIC).
-        It's always 0 for the top-ranked model.
+    dIC : Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
+          and the lowest IC (PSIS-LOO `loo` or WAIC `waic`).
+          The top-ranked model is always 0.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
         given the data. By default the uncertainty in the weights estimation is considered using

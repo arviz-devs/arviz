@@ -27,7 +27,7 @@ def plot_compare(
     Notes
     -----
     Defaults to comparing Leave-one-out (psis-loo) if present in comp_df column,
-    otherwise compares Widely Accepted Information Criterion (WAIC)
+    otherwise compares Widely Applicable Information Criterion (WAIC)
 
 
     Parameters
