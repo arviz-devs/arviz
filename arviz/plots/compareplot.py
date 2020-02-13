@@ -26,8 +26,8 @@ def plot_compare(
 
     Notes
     -----
-    Defaults to comparing Widely Accepted Information Criterion (WAIC) if present in comp_df column,
-    otherwise compares Leave-one-out (loo)
+    Defaults to comparing Leave-one-out (psis-loo) if present in comp_df column,
+    otherwise compares Widely Applicable Information Criterion (WAIC)
 
 
     Parameters
@@ -101,7 +101,7 @@ def plot_compare(
 
     yticks_labels = [""] * len(yticks_pos)
 
-    _information_criterion = ["waic", "loo"]
+    _information_criterion = ["loo", "waic"]
     column_index = [c.lower() for c in comp_df.columns]
     for information_criterion in _information_criterion:
         if information_criterion in column_index:

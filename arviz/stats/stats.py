@@ -46,18 +46,19 @@ __all__ = [
 def compare(
     dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
-    r"""Compare models based on WAIC or LOO cross-validation.
+    r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
-    WAIC is the widely applicable information criterion, and LOO is leave-one-out
-    (LOO) cross-validation. Read more theory here - in a paper by some of the
-    leading authorities on model selection - dx.doi.org/10.1111/1467-9868.00353
+    LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
+    WAIC is the widely applicable information criterion.
+    Read more theory here - in a paper by some of the leading authorities
+    on model selection dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
     dataset_dict : dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
     ic : str
-        Information Criterion (WAIC or LOO) used to compare models. Defaults to
+        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
     method : str
         Method used to estimate the weights for each model. Available options are:
@@ -83,21 +84,23 @@ def compare(
     scale : str
         Output scale for IC. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `log` : (default) log-score (after Vehtari et al. (2017))
         - `negative_log` : -1 * (log-score)
+        - `deviance` : -2 * (log-score)
 
     Returns
     -------
     A DataFrame, ordered from best to worst model (measured by information criteria).
     The index reflects the key with which the models are passed to this function. The columns are:
     rank : The rank-order of the models. 0 is the best.
-    IC : Information Criteria (WAIC or LOO).
-        Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
-        If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
+    IC : Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
+        Higher IC indicates higher out-of-sample predictive fit ("better" model). Default LOO.
+        If `scale` is `deviance` or `negative_log` smaller IC indicates
+        higher out-of-sample predictive fit ("better" model).
     pIC : Estimated effective number of parameters.
-    dIC : Relative difference between each IC (WAIC or LOO) and the lowest IC (WAIC or LOO).
-        It's always 0 for the top-ranked model.
+    dIC : Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
+          and the lowest IC (PSIS-LOO `loo` or WAIC `waic`).
+          The top-ranked model is always 0.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
         given the data. By default the uncertainty in the weights estimation is considered using
@@ -144,25 +147,7 @@ def compare(
         ascending = True
 
     ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
-    if ic == "waic":
-        ic_func = waic
-        df_comp = pd.DataFrame(
-            index=names,
-            columns=[
-                "rank",
-                "waic",
-                "p_waic",
-                "d_waic",
-                "weight",
-                "se",
-                "dse",
-                "warning",
-                "waic_scale",
-            ],
-        )
-        scale_col = "waic_scale"
-
-    elif ic == "loo":
+    if ic == "loo":
         ic_func = loo
         df_comp = pd.DataFrame(
             index=names,
@@ -179,7 +164,23 @@ def compare(
             ],
         )
         scale_col = "loo_scale"
-
+    elif ic == "waic":
+        ic_func = waic
+        df_comp = pd.DataFrame(
+            index=names,
+            columns=[
+                "rank",
+                "waic",
+                "p_waic",
+                "d_waic",
+                "weight",
+                "se",
+                "dse",
+                "warning",
+                "waic_scale",
+            ],
+        )
+        scale_col = "waic_scale"
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
 
@@ -449,9 +450,9 @@ def loo(data, pointwise=False, reff=None, scale=None):
     scale : str
         Output scale for loo. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score (after Vehtari et al. (2017))
-        - `negative_log` : -1 * (log-score)
+        - `log` : (default) log-score (after Vehtari et al. (2017))
+        - `negative_log` : -1 * log-score
+        - `deviance` : -2 * log-score
 
         A higher log-score (or a lower deviance) indicates a model with better predictive
         accuracy.
@@ -483,8 +484,8 @@ def loo(data, pointwise=False, reff=None, scale=None):
            ...: az.loo(data)
 
     The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``IC_loo`` stands for information criteria, which is the
-    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    with a specific organization. ``deviance_loo`` stands for `deviance` scale,
+    the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
 
     .. ipython::
 
@@ -1136,11 +1137,11 @@ def waic(data, pointwise=False, scale=None):
         if True the pointwise predictive accuracy will be returned.
         Default False
     scale : str
-        Output scale for loo. Available options are:
+        Output scale for WAIC. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score
-        - `negative_log` : -1 * (log-score)
+        - `log` : (default) log-score
+        - `negative_log` : -1 * log-score
+        - `deviance` : -2 * log-score
 
         A higher log-score (or a lower deviance) indicates a model with better predictive
         accuracy.
@@ -1171,8 +1172,8 @@ def waic(data, pointwise=False, scale=None):
            ...: az.waic(data, pointwise=True)
 
     The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``IC_loo`` stands for information criteria, which is the
-    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    with a specific organization. ``deviance_loo`` stands for `deviance` scale,
+    the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
     """
     inference_data = convert_to_inference_data(data)
     log_likelihood = _get_log_likelihood(inference_data)
@@ -1264,7 +1265,7 @@ def waic(data, pointwise=False, scale=None):
 
 
 def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
-    """Compute leave one out (LOO) probability integral transform (PIT) values.
+    """Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     Parameters
     ----------

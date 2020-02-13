@@ -177,8 +177,8 @@ defaultParams = {  # pylint: disable=invalid-name
         _make_validate_choice({"mean", "median", "mode"}, allow_none=True),
     ),
     "stats.credible_interval": (0.94, _validate_probability),
-    "stats.information_criterion": ("waic", _make_validate_choice({"waic", "loo"})),
-    "stats.ic_scale": ("deviance", _make_validate_choice({"deviance", "log", "negative_log"})),
+    "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
+    "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
 }
 
 

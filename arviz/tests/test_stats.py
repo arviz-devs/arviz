@@ -112,9 +112,9 @@ def test_compare_unknown_ic_and_method(centered_eight, non_centered_eight):
         compare(model_dict, ic="loo", method="Unknown")
 
 
-@pytest.mark.parametrize("ic", ["waic", "loo"])
+@pytest.mark.parametrize("ic", ["loo", "waic"])
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_compare_different(centered_eight, non_centered_eight, ic, method, scale):
     model_dict = {"centered": centered_eight, "non_centered": non_centered_eight}
     weight = compare(model_dict, ic=ic, method=method, scale=scale)["weight"]
@@ -122,7 +122,7 @@ def test_compare_different(centered_eight, non_centered_eight, ic, method, scale
     assert_allclose(np.sum(weight), 1.0)
 
 
-@pytest.mark.parametrize("ic", ["waic", "loo"])
+@pytest.mark.parametrize("ic", ["loo", "waic"])
 @pytest.mark.parametrize("method", ["stacking", "BB-pseudo-BMA", "pseudo-BMA"])
 def test_compare_different_multidim(multidim_models, ic, method):
     model_dict = {"model_1": multidim_models.model_1, "model_2": multidim_models.model_2}
@@ -273,7 +273,7 @@ def test_summary_bad_unpack_order(centered_eight, order):
         summary(centered_eight, order=order)
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 @pytest.mark.parametrize("multidim", (True, False))
 def test_waic(centered_eight, multidim_models, scale, multidim):
     """Test widely available information criterion calculation"""
@@ -316,7 +316,7 @@ def test_waic_warning(centered_eight):
         assert waic(centered_eight, pointwise=True) is not None
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_waic_print(centered_eight, scale):
     waic_data = waic(centered_eight, scale=scale).__repr__()
     waic_pointwise = waic(centered_eight, scale=scale, pointwise=True).__repr__()
@@ -325,7 +325,7 @@ def test_waic_print(centered_eight, scale):
     assert waic_data == waic_pointwise
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 @pytest.mark.parametrize("multidim", (True, False))
 def test_loo(centered_eight, multidim_models, scale, multidim):
     """Test approximate leave one out criterion calculation"""
@@ -388,7 +388,7 @@ def test_loo_warning(centered_eight):
     assert any("Estimated shape parameter" in str(record.message) for record in records)
 
 
-@pytest.mark.parametrize("scale", ["deviance", "log", "negative_log"])
+@pytest.mark.parametrize("scale", ["log", "negative_log", "deviance"])
 def test_loo_print(centered_eight, scale):
     loo_data = loo(centered_eight, scale=scale).__repr__()
     loo_pointwise = loo(centered_eight, scale=scale, pointwise=True).__repr__()

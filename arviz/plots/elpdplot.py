@@ -34,7 +34,7 @@ def plot_elpd(
     ----------
     compare_dict : mapping, str -> ELPDData or InferenceData
         A dictionary mapping the model name to the object containing its inference data or
-        the result of `waic`/`loo` functions.
+        the result of `loo`/`waic` functions.
         Refer to az.convert_to_inference_data for details on possible dict items
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will have the same color,
@@ -57,11 +57,11 @@ def plot_elpd(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     ic : str, optional
-        Information Criterion (WAIC or LOO) used to compare models. Defaults to
+        Information Criterion (PSIS-LOO `loo`, WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``. Only taken
         into account when input is InferenceData.
     scale : str, optional
-        scale argument passed to az.waic or az.loo, see their docs for details. Only taken
+        scale argument passed to az.loo or az.waic, see their docs for details. Only taken
         into account when input is InferenceData.
     plot_kwargs : dicts, optional
         Additional keywords passed to ax.scatter
@@ -81,7 +81,7 @@ def plot_elpd(
 
     Examples
     --------
-    Compare pointwise WAIC for centered and non centered models of the 8school problem
+    Compare pointwise PSIS-LOO for centered and non centered models of the 8-schools problem
     using matplotlib.
 
     .. plot::
@@ -107,7 +107,7 @@ def plot_elpd(
         )
 
     """
-    valid_ics = ["waic", "loo"]
+    valid_ics = ["loo", "waic"]
     ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if ic not in valid_ics:
@@ -116,7 +116,7 @@ def plot_elpd(
                 ic, valid_ics
             )
         )
-    ic_fun = waic if ic == "waic" else loo
+    ic_fun = loo if ic == "loo" else waic
     handles = None
     # Make sure all object are ELPDData
     for k, item in compare_dict.items():

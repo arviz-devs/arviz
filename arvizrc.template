@@ -31,5 +31,5 @@ plot.point_estimate          : mean        # One of mean, median, mode or None
 ### STATS ###
 # rcParams related with statistical and diagnostic functions
 stats.credible_interval      : 0.94
-stats.information_criterion  : waic       # One of loo, waic
-stats.ic_scale               : deviance   # One of deviance, log, negative_log
+stats.information_criterion  : loo       # One of loo, waic
+stats.ic_scale               : log   # One of deviance, log, negative_log
