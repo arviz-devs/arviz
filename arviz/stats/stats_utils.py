@@ -427,7 +427,7 @@ Pareto k diagnostic values:
    (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
-SCALE_DICT = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
+SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
 
 
 class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
@@ -437,7 +437,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         """Print elpd data in a user friendly way."""
         kind = self.index[0]
 
-        if kind not in ("waic", "loo"):
+        if kind not in ("loo", "waic"):
             raise ValueError("Invalid ELPDData object")
 
         scale_str = SCALE_DICT[self["{}_scale".format(kind)]]
