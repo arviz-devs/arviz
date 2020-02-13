@@ -27,7 +27,6 @@ def plot_kde(
     values,
     values2,
     rug,
-    label,
     quantiles,
     rotated,
     contour,
@@ -39,9 +38,9 @@ def plot_kde(
     contourf_kwargs,
     pcolormesh_kwargs,
     ax,
-    legend,
     backend_kwargs,
     show,
+    return_glyph,
 ):
     """Bokeh kde plot."""
     if backend_kwargs is None:
@@ -59,9 +58,7 @@ def plot_kde(
     if ax is None:
         ax = bkp.figure(**backend_kwargs)
 
-    if legend and label is not None:
-        plot_kwargs["legend_label"] = label
-
+    glyphs = []
     if values2 is None:
         if plot_kwargs is None:
             plot_kwargs = {}
@@ -103,6 +100,7 @@ def plot_kde(
                 else:
                     glyph = Dash(x=0.0, y=rug_varname, **rug_kwargs)
                 ax.add_glyph(cds_rug, glyph)
+            glyphs.append(glyph)
 
         x = np.linspace(lower, upper, len(density))
 
@@ -124,9 +122,10 @@ def plot_kde(
                         (np.zeros_like(density[idx]), [density[idx][-1]], density[idx][::-1], [0])
                     )
                     if not rotated:
-                        ax.patch(patch_x, patch_y, **fill_kwargs)
+                        patch = ax.patch(patch_x, patch_y, **fill_kwargs)
                     else:
-                        ax.patch(patch_y, patch_x, **fill_kwargs)
+                        patch = ax.patch(patch_y, patch_x, **fill_kwargs)
+                    glyphs.append(patch)
         else:
             if fill_kwargs.get("fill_alpha", False):
                 patch_x = np.concatenate((x, [x[-1]], x[::-1], [x[0]]))
@@ -134,14 +133,16 @@ def plot_kde(
                     (np.zeros_like(density), [density[-1]], density[::-1], [0])
                 )
                 if not rotated:
-                    ax.patch(patch_x, patch_y, **fill_kwargs)
+                    patch = ax.patch(patch_x, patch_y, **fill_kwargs)
                 else:
-                    ax.patch(patch_y, patch_x, **fill_kwargs)
+                    patch = ax.patch(patch_y, patch_x, **fill_kwargs)
+                glyphs.append(patch)
 
             if not rotated:
-                ax.line(x, density, **plot_kwargs)
+                line = ax.line(x, density, **plot_kwargs)
             else:
-                ax.line(density, x, **plot_kwargs)
+                line = ax.line(density, x, **plot_kwargs)
+            glyphs.append(line)
 
     else:
         if contour_kwargs is None:
@@ -196,7 +197,8 @@ def plot_kde(
                     continue
                 vertices, _ = contour_generator.create_filled_contour(level, level_upper)
                 for seg in vertices:
-                    ax.patch(*seg.T, fill_color=color, **contour_kwargs)
+                    patch = ax.patch(*seg.T, fill_color=color, **contour_kwargs)
+                    glyphs.append(patch)
 
             if fill_last:
                 ax.background_fill_color = colors[0]
@@ -217,7 +219,7 @@ def plot_kde(
             else:
                 colors = cmap
 
-            ax.image(
+            image = ax.image(
                 image=[density.T],
                 x=xmin,
                 y=ymin,
@@ -226,10 +228,15 @@ def plot_kde(
                 palette=colors,
                 **pcolormesh_kwargs
             )
+            glyphs.append(image)
             ax.x_range.range_padding = ax.y_range.range_padding = 0
 
     if backend_show(show):
         bkp.show(ax, toolbar_location="above")
+
+    if return_glyph:
+        return ax, glyphs
+
     return ax
 
 

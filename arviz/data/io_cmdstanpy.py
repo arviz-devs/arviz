@@ -24,21 +24,24 @@ class CmdStanPyConverter:
         *,
         posterior=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_predictive=None,
         observed_data=None,
+        constant_data=None,
+        predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
         dims=None
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.prior = prior
         self.prior_predictive = prior_predictive
         self.observed_data = observed_data
-        if isinstance(log_likelihood, (list, tuple)):
-            if len(log_likelihood) == 1:
-                log_likelihood = log_likelihood[0]
+        self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
@@ -52,7 +55,7 @@ class CmdStanPyConverter:
         """Extract posterior samples from output csv."""
         columns = self.posterior.column_names
 
-        # filter posterior_predictive and log_likelihood
+        # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
         if posterior_predictive is None:
             posterior_predictive = []
@@ -67,14 +70,31 @@ class CmdStanPyConverter:
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
 
+        predictions = self.predictions
+        if predictions is None:
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [col for col in columns if predictions == col.split(".")[0]]
+        else:
+            predictions = [
+                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+            ]
+
         log_likelihood = self.log_likelihood
         if log_likelihood is None:
             log_likelihood = []
-        else:
+        elif isinstance(log_likelihood, str):
             log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+        else:
+            log_likelihood = [
+                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+            ]
 
         invalid_cols = (
-            posterior_predictive + log_likelihood + [col for col in columns if col.endswith("__")]
+            posterior_predictive
+            + predictions
+            + log_likelihood
+            + [col for col in columns if col.endswith("__")]
         )
         valid_cols = [col for col in columns if col not in invalid_cols]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
@@ -87,43 +107,14 @@ class CmdStanPyConverter:
 
         columns = self.posterior.column_names
         valid_cols = [col for col in columns if col.endswith("__")]
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
-
-        log_likelihood = self.log_likelihood
-        if isinstance(log_likelihood, str):
-            valid_cols.append(log_likelihood)
-
-            log_likelihood_cols = [col for col in columns if log_likelihood == col.split(".")[0]]
-            # change dims and coords for log_likelihood if defined
-            if log_likelihood in dims:
-                dims["log_likelihood"] = dims.pop(log_likelihood)
-
-            log_likelihood_dims = np.array(
-                [list(map(int, col.split(".")[1:])) for col in log_likelihood_cols]
-            )
-            max_dims = log_likelihood_dims.max(0)
-            max_dims = max_dims if hasattr(max_dims, "__iter__") else (max_dims,)
-            default_dim_names, _ = generate_dims_coords(shape=max_dims, var_name=log_likelihood)
-            log_likelihood_dim_names, _ = generate_dims_coords(
-                shape=max_dims, var_name="log_likelihood"
-            )
-            for default_dim_name, log_likelihood_dim_name in zip(
-                default_dim_names, log_likelihood_dim_names
-            ):
-                if default_dim_name in coords:
-                    coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
-
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
-        if log_likelihood in data:
-            data["log_likelihood"] = data.pop(log_likelihood)
+
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
             name = re.sub("__$", "", s_param_)
             name = "diverging" if name == "divergent" else name
             data[name] = data.pop(s_param).astype(dtypes.get(s_param, float))
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims)
+        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -135,6 +126,19 @@ class CmdStanPyConverter:
         if isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
         valid_cols = [col for col in columns if col.split(".")[0] in set(posterior_predictive)]
+        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert out of sample predictions samples to xarray."""
+        predictions = self.predictions
+        columns = self.posterior.column_names
+
+        if isinstance(predictions, str):
+            predictions = [predictions]
+        valid_cols = [col for col in columns if col.split(".")[0] in set(predictions)]
         data = _unpack_frame(self.posterior.sample, columns, valid_cols)
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
@@ -204,6 +208,47 @@ class CmdStanPyConverter:
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.cmdstanpy))
 
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant data to xarray."""
+        constant_data = {}
+        for key, vals in self.constant_data.items():
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key) if self.dims is not None else None
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.cmdstanpy))
+
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert constant data to xarray."""
+        predictions_constant_data = {}
+        for key, vals in self.predictions_constant_data.items():
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key) if self.dims is not None else None
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(
+            data_vars=predictions_constant_data, attrs=make_attrs(library=self.cmdstanpy)
+        )
+
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert elementwise log likelihood samples to xarray."""
+        log_likelihood = self.log_likelihood
+        columns = self.posterior.column_names
+
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        valid_cols = [col for col in columns if col.split(".")[0] in set(log_likelihood)]
+        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -216,10 +261,14 @@ class CmdStanPyConverter:
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
+                "predictions_constant_data": self.predictions_constant_data_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
             }
         )
 
@@ -286,9 +335,12 @@ def from_cmdstanpy(
     posterior=None,
     *,
     posterior_predictive=None,
+    predictions=None,
     prior=None,
     prior_predictive=None,
     observed_data=None,
+    constant_data=None,
+    predictions_constant_data=None,
     log_likelihood=None,
     coords=None,
     dims=None
@@ -301,13 +353,19 @@ def from_cmdstanpy(
         CmdStanPy CmdStanMCMC
     posterior_predictive : str, list of str
         Posterior predictive samples for the fit.
+    predictions : str, list of str
+        Out of sample prediction samples for the fit.
     prior : CmdStanMCMC
         CmdStanPy CmdStanMCMC
     prior_predictive : str, list of str
         Prior predictive samples for the fit.
     observed_data : dict
         Observed data used in the sampling.
-    log_likelihood : str
+    constant_data : dict
+        Constant data used in the sampling.
+    predictions_constant_data : dict
+        Constant data for predictions used in the sampling.
+    log_likelihood : str, list of str
         Pointwise log_likelihood for the data.
     coords : dict of str or dict of iterable
         A dictionary containing the values that are used as index. The key
@@ -322,9 +380,12 @@ def from_cmdstanpy(
     return CmdStanPyConverter(
         posterior=posterior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
         prior=prior,
         prior_predictive=prior_predictive,
         observed_data=observed_data,
+        constant_data=constant_data,
+        predictions_constant_data=predictions_constant_data,
         log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,

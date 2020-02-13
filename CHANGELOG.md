@@ -3,8 +3,8 @@
 ## v0.x.x Unreleased
 
 ### New features
-* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 and pystan translations (#983 and #1032)
-* Started adding pointwise log likelihood storage support (#794, #1044)
+* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3, pystan, cmdstan and cmdstanpy translations (#983, #1032 and #1064)
+* Started adding pointwise log likelihood storage support (#794, #1044 and #1064)
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)
@@ -13,6 +13,8 @@
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 * Add `marker` functionality to `bokeh_plot_elpd` (#1040)
 * Add `ridgeplot_quantiles` argument to `plot_forest` (#1047)
+* Added the functionality [interactive legends](https://docs.bokeh.org/en/1.4.0/docs/user_guide/interaction/legends.html) for bokeh plots of `densityplot`, `energyplot` 
+  and `essplot` (#1024)
 
 
 ### Maintenance and fixes

@@ -29,6 +29,7 @@ def plot_kde(
     backend=None,
     backend_kwargs=None,
     show=None,
+    return_glyph=False,
     **kwargs
 ):
     """1D or 2D KDE plot taking into account boundary conditions.
@@ -88,10 +89,15 @@ def plot_kde(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+    return_glyph : bool, optional
+        Internal argument to return glyphs for bokeh
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : matplotlib.Axes or bokeh.plotting.Figure
+        Object containing the kde plot
+    glyphs : list, optional
+        Bokeh glyphs present in plot.  Only provided if ``return_glyph`` is True.
 
     Examples
     --------
@@ -209,11 +215,16 @@ def plot_kde(
         legend=legend,
         backend_kwargs=backend_kwargs,
         show=show,
+        return_glyph=return_glyph,
         **kwargs,
     )
 
     if backend == "bokeh":
         kde_plot_args.pop("textsize")
+        kde_plot_args.pop("label")
+        kde_plot_args.pop("legend")
+    else:
+        kde_plot_args.pop("return_glyph")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_kde", "kdeplot", backend)
