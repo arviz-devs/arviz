@@ -30,7 +30,7 @@ def plot_pair(
     show=None,
     diagonal=False,
     point_estimate=None,
-    point_estimate_kwargs=None
+    point_estimate_kwargs=None,
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
@@ -220,7 +220,7 @@ def plot_pair(
         show=show,
         diagonal=diagonal,
         point_estimate=point_estimate,
-        point_estimate_kwargs=point_estimate_kwargs
+        point_estimate_kwargs=point_estimate_kwargs,
     )
 
     if backend is None:
