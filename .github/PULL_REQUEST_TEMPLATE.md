@@ -15,12 +15,12 @@ Thank you so much for your PR! To help us review your contribution, please consi
 ## Checklist
 <!-- Feel free to remove check-list items aren't relevant to your change -->
 
-- [ ] Does the PR follow [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) PR format?
-- [ ] Has included a sample plot to visually illustrate the changes? (only for plot-related functions)
-- [ ] Is the new feature properly documented (with an example if appropriate)?
-- [ ] Does the PR include new or updated tests to cover the new feature?
-- [ ] Is the code style correct (follows pylint and black guidelines)?
-- [ ] Is the change listed in [changelog](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#v0xx-unreleased )?
+- [ ] Follows [official](https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md#pull-request-checklist) PR format
+- [ ] Includes a sample plot to visually illustrate the changes (only for plot-related functions)
+- [ ] New features are properly documented (with an example if appropriate)?
+- [ ] Includes new or updated tests to cover the new feature
+- [ ] Code style  correct (follows pylint and black guidelines)
+- [ ] Changes are listed in [changelog](https://github.com/arviz-devs/arviz/blob/master/CHANGELOG.md#v0xx-unreleased)
 
 <!--
 Also, please consider reading the contributing guidelines and code of conduct carefully before submitting the PR. They are available at
