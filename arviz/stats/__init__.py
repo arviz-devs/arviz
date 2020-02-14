@@ -1,6 +1,7 @@
 # pylint: disable=wildcard-import
 """Statistical tests and diagnostics for ArviZ."""
 from .stats_utils import *
+from .stats_refitting import *
 from .stats import *
 from .diagnostics import *
 
@@ -25,4 +26,5 @@ __all__ = [
     "autocov",
     "make_ufunc",
     "wrap_xarray_ufunc",
+    "reloo",
 ]

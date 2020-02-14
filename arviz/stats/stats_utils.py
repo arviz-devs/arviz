@@ -2,6 +2,7 @@
 from collections.abc import Sequence
 import logging
 import warnings
+from copy import copy as _copy, deepcopy as _deepcopy
 
 import numpy as np
 import pandas as pd
@@ -468,6 +469,16 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
     def __repr__(self):
         """Alias to ``__str__``."""
         return self.__str__()
+
+    def copy(self, deep=True):
+        """Perform a pandas deep copy of the ELPDData plus a copy of the stored data."""
+        copied_obj = pd.Series.copy(self)
+        for key in copied_obj.keys():
+            if deep:
+                copied_obj[key] = _deepcopy(copied_obj[key])
+            else:
+                copied_obj[key] = _copy(copied_obj[key])
+        return ELPDData(copied_obj)
 
 
 @conditional_jit
