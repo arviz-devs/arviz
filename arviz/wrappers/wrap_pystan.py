@@ -5,12 +5,22 @@ from ..data import from_pystan
 
 
 class PyStanSamplingWrapper(SamplingWrapper):
-    """PyStan sampling wrapper base class."""
+    """PyStan sampling wrapper base class.
+
+    See the documentation on  :ref:`wrappers_api` for a more detailed
+    description. An example of ``PyStanSamplingWrapper`` usage can be found
+    in the :doc:`pystan_refitting <../notebooks/pystan_refitting>`.
+
+    Warnings
+    --------
+    Sampling wrappers are an experimental feature in a very early stage. Please use them
+    with caution.
+    """
 
     def sel_observations(self, idx):
         """Select a subset of the observations in idata_orig.
 
-        *Not implemented*: This method must be implemented on a model basis.
+        **Not implemented**: This method must be implemented on a model basis.
         It is documented here to show its format and call signature.
 
         Parameters

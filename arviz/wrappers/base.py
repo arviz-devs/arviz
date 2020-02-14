@@ -13,7 +13,7 @@ class SamplingWrapper:
     functions requiring refitting like Leave Future Out or Simulation Based Calibration can be
     performed from ArviZ.
 
-    For more info on wrappers see :ref:`wrappers`
+    For more info on wrappers see :ref:`wrappers_api`
 
     Parameters
     ----------
@@ -30,6 +30,11 @@ class SamplingWrapper:
         method.
     idata_kwargs: dict, optional
         kwargs are stored as class attributes to be used in the ``get_inference_data`` method.
+
+    Warnings
+    --------
+    Sampling wrappers are an experimental feature in a very early stage. Please use them
+    with caution.
     """
 
     def __init__(
@@ -52,7 +57,7 @@ class SamplingWrapper:
     def sel_observations(self, idx):
         """Select a subset of the observations in idata_orig.
 
-        *Not implemented*: This method must be implemented by the SamplingWrapper subclasses.
+        **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
         It is documented here to show its format and call signature.
 
         Parameters
@@ -72,7 +77,7 @@ class SamplingWrapper:
     def sample(self, modified_observed_data):
         """Sample ``self.model`` on the ``modified_observed_data`` subset.
 
-        *Not implemented*: This method must be implemented by the SamplingWrapper subclasses.
+        **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
         It is documented here to show its format and call signature.
 
         Parameters
@@ -90,7 +95,7 @@ class SamplingWrapper:
     def get_inference_data(self, fitted_model):
         """Convert the ``fitted_model`` to an InferenceData object.
 
-        *Not implemented*: This method must be implemented by the SamplingWrapper subclasses.
+        **Not implemented**: This method must be implemented by the SamplingWrapper subclasses.
         It is documented here to show its format and call signature.
 
         Parameters

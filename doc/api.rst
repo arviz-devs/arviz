@@ -129,11 +129,26 @@ rcParams
 
    rc_context
 
+.. _wrappers_api:
+
 Wrappers
 --------
+Experimental feature
 
 .. autosummary::
-      :toctree: generated/
-      :template: class.rst
+    :toctree: generated/
+    :template: class_members.rst
 
-      SamplingWrapper
+    SamplingWrapper
+    PyStanSamplingWrapper
+
+.. _stats_refit_api:
+
+Stats (requiring refitting)
+---------------------------
+Experimental feature
+
+.. autosummary::
+    :toctree: generated/
+
+    reloo

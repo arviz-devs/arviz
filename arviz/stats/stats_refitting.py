@@ -1,5 +1,6 @@
 """Stats functions that require refitting the model."""
 import logging
+import warnings
 import numpy as np
 
 from .stats import loo
@@ -32,9 +33,10 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     Arguments
     ---------
     wrapper: SamplingWrapper-like
-        Class (preferably a subclass of ``az.SamplingWrapper``) implementing the methods described
+        Class (preferably a subclass of ``az.SamplingWrapper``, see :ref:`wrappers_api`
+        for details) implementing the methods described
         in the SamplingWrapper docs. This allows ArviZ to call **any** sampling backend
-        (like PyStan or PyMC3) using always the same syntax.
+        (like PyStan or emcee) using always the same syntax.
     loo_orig : ELPDData, optional
         ELPDData instance with pointwise loo results. The pareto_k attribute will be checked
         for values above the threshold.
@@ -46,7 +48,7 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
 
     Returns
     -------
-    reloo: ELPDData
+    ELPDData
         ELPDData instance containing the PSIS approximation where possible and the exact
         LOO-CV result where PSIS failed. The Pareto shape of the observations where exact
         LOO-CV was performed is artificially set to 0, but as PSIS is not performed, it
@@ -63,6 +65,10 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     This is not generally recommended
     nor intended, however, if needed, this function can be used to achieve the result.
 
+    Warnings
+    --------
+    Sampling wrappers are an experimental feature in a very early stage. Please use them
+    with caution.
     """
     required_methods = ("sel_observations", "sample", "get_inference_data", "log_likelihood__i")
     not_implemented = wrapper.check_implemented_methods(required_methods)
@@ -87,6 +93,9 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
         scale_value = -1
     lppd_orig = loo_orig.p_loo + loo_orig.loo / scale_value
     n_data_points = loo_orig.n_data_points
+
+    if verbose:
+        warnings.warn("reloo is an experimental and untested feature", UserWarning)
 
     if np.any(khats > k_thresh):
         for idx in np.argwhere(khats.values > 0.7):
