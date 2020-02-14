@@ -13,9 +13,12 @@
 * Added `transform` argument to `plot_trace`, `plot_forest`, `plot_pair`, `plot_posterior`, `plot_rank`, `plot_parallel`,  `plot_violin`,`plot_density`, `plot_joint` (#1036)
 * Add `marker` functionality to `bokeh_plot_elpd` (#1040)
 * Add `ridgeplot_quantiles` argument to `plot_forest` (#1047)
-* Added the functionality [interactive legends](https://docs.bokeh.org/en/1.4.0/docs/user_guide/interaction/legends.html) for bokeh plots of `densityplot`, `energyplot` 
+* Added the functionality [interactive legends](https://docs.bokeh.org/en/1.4.0/docs/user_guide/interaction/legends.html) for bokeh plots of `densityplot`, `energyplot`
   and `essplot` (#1024)
 * New defaults for cross validation: `loo` (old: waic) and `log` -scale (old: `deviance` -scale) (#1067)
+* **Experimental Feature**: Added `arviz.wrappers` module to allow ArviZ to
+  refit the models if necessary
+* **Experimental Feature**: Added `reloo` function to ArviZ
 
 
 ### Maintenance and fixes
