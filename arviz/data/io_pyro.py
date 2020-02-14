@@ -92,7 +92,6 @@ class PyroConverter:
     def log_likelihood_to_xarray(self):
         """Extract log likelihood from Pyro posterior."""
         data = {}
-        dims = None
         if self.observations is not None:
             try:
                 samples = self.posterior.get_samples(group_by_chain=False)
@@ -106,7 +105,7 @@ class PyroConverter:
             except:  # pylint: disable=bare-except
                 # cannot get vectorized trace
                 return None
-        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
