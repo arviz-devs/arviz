@@ -330,6 +330,7 @@ class PyStan3Converter:
         data = {
             obs_var_name: log_likelihood_draws[log_like_name]
             for obs_var_name, log_like_name in log_likelihood.items()
+            if log_like_name in log_likelihood_draws
         }
 
         return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
