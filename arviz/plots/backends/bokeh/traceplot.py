@@ -23,6 +23,7 @@ def plot_trace(
     rug,
     lines,
     combined,
+    chain_prop,
     legend,
     plot_kwargs: [Dict],
     fill_kwargs: [Dict],
@@ -31,7 +32,6 @@ def plot_trace(
     trace_kwargs: [Dict],
     plotters,
     divergence_data,
-    colors,
     backend_config,
     backend_kwargs: [Dict],
     show,
@@ -149,7 +149,7 @@ def plot_trace(
                 data=cds_data,
                 x_name=draw_name,
                 y_name=y_name,
-                colors=colors,
+                chain_prop=chain_prop,
                 combined=combined,
                 rug=rug,
                 legend=legend,
@@ -160,7 +160,7 @@ def plot_trace(
                 rug_kwargs=rug_kwargs,
             )
         else:
-            for y_name in cds_var_groups[var_name]:
+            for idx, y_name in enumerate(cds_var_groups[var_name]):
                 if rug:
                     rug_kwargs["y"] = y_name
                 _plot_chains_bokeh(
@@ -169,7 +169,7 @@ def plot_trace(
                     data=cds_data,
                     x_name=draw_name,
                     y_name=y_name,
-                    colors=colors,
+                    chain_prop=chain_prop,
                     combined=combined,
                     rug=rug,
                     legend=legend,
@@ -267,7 +267,7 @@ def _plot_chains_bokeh(
     data,
     x_name,
     y_name,
-    colors,
+    chain_prop,
     combined,
     rug,
     legend,
@@ -282,7 +282,11 @@ def _plot_chains_bokeh(
         if legend:
             trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
         ax_trace.line(
-            x=x_name, y=y_name, source=cds, line_color=colors[chain_idx], **trace_kwargs,
+            x=x_name,
+            y=y_name,
+            source=cds,
+            **{chain_prop[0]: chain_prop[1][chain_idx]},
+            **trace_kwargs,
         )
         if marker:
             ax_trace.circle(
@@ -290,19 +294,19 @@ def _plot_chains_bokeh(
                 y=y_name,
                 source=cds,
                 radius=0.30,
-                line_color=colors[chain_idx],
-                fill_color=colors[chain_idx],
                 alpha=0.5,
+                **{
+                    chain_prop[0]: chain_prop[1][chain_idx],
+                },
             )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
-            plot_kwargs["line_color"] = colors[chain_idx]
+            plot_kwargs[chain_prop[0]] = chain_prop[1][chain_idx]
             plot_dist(
                 cds.data[y_name],
                 ax=ax_density,
-                color=colors[chain_idx],
                 rug=rug,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
@@ -312,15 +316,16 @@ def _plot_chains_bokeh(
                 backend_kwargs={},
                 show=False,
             )
+            plot_kwargs.pop(chain_prop[0])
 
     if combined:
         rug_kwargs["cds"] = data
         if legend:
             plot_kwargs["legend_label"] = "combined chains"
+        plot_kwargs[chain_prop[0]] = chain_prop[1][-1]
         plot_dist(
             np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
             ax=ax_density,
-            color=colors[-1],
             rug=rug,
             hist_kwargs=hist_kwargs,
             plot_kwargs=plot_kwargs,
@@ -330,3 +335,4 @@ def _plot_chains_bokeh(
             backend_kwargs={},
             show=False,
         )
+        plot_kwargs.pop(chain_prop[0])

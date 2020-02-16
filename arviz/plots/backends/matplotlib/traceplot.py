@@ -1,4 +1,5 @@
 """Matplotlib traceplot."""
+from itertools import cycle
 
 import warnings
 import matplotlib.pyplot as plt
@@ -17,8 +18,9 @@ def plot_trace(
     figsize,
     rug,
     lines,
-    compact,
+    compact_prop,
     combined,
+    chain_prop,
     legend,
     plot_kwargs,
     fill_kwargs,
@@ -27,7 +29,6 @@ def plot_trace(
     trace_kwargs,
     plotters,
     divergence_data,
-    colors,
     backend_kwargs,
     show,
 ):
@@ -148,12 +149,15 @@ def plot_trace(
         value = np.atleast_2d(value)
 
         if len(value.shape) == 2:
+            if compact_prop:
+                plot_kwargs[compact_prop[0]] = compact_prop[1][0]
+                trace_kwargs[compact_prop[0]] = compact_prop[1][0]
             _plot_chains_mpl(
                 axes,
                 idx,
                 value,
                 data,
-                colors,
+                chain_prop,
                 combined,
                 xt_labelsize,
                 rug,
@@ -163,15 +167,23 @@ def plot_trace(
                 fill_kwargs,
                 rug_kwargs,
             )
+            if compact_prop:
+                plot_kwargs.pop(compact_prop[0])
+                trace_kwargs.pop(compact_prop[0])
         else:
             value = value.reshape((value.shape[0], value.shape[1], -1))
-            for sub_idx in range(value.shape[2]):
+            compact_prop_cycle = cycle(compact_prop[1])
+            handles = []
+            for sub_idx, prop in zip(range(value.shape[2]), compact_prop_cycle):
+                if compact_prop:
+                    plot_kwargs[compact_prop[0]] = prop
+                    trace_kwargs[compact_prop[0]] = prop
                 _plot_chains_mpl(
                     axes,
                     idx,
                     value[..., sub_idx],
                     data,
-                    colors,
+                    chain_prop,
                     combined,
                     xt_labelsize,
                     rug,
@@ -181,6 +193,16 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                 )
+                if legend:
+                    handles.append(
+                        Line2D(
+                            [], [], label="dim", **{chain_prop[0]: chain_prop[1][0]}, **plot_kwargs
+                        )
+                    )
+            if legend:
+                axes[idx, 0].legend(handles=handles, title="extra dims")
+            plot_kwargs.pop(compact_prop[0], None)
+            trace_kwargs.pop(compact_prop[0], None)
 
         if value[0].dtype.kind == "i":
             xticks = get_bins(value)
@@ -252,11 +274,16 @@ def plot_trace(
         axes[idx, 1].set_ylim(*ylims[1])
     if legend:
         handles = [
-            Line2D([], [], color=color, label=chain_id)
-            for chain_id, color in zip(data.chain.values, colors)
+            Line2D([], [], label=chain_id, **{chain_prop[0]: prop}, **trace_kwargs)
+            for chain_id, prop in zip(data.chain.values, chain_prop[1])
         ]
         if combined:
-            handles.insert(0, Line2D([], [], color=colors[-1], label="combined"))
+            handles.insert(
+                0,
+                Line2D(
+                    [], [], label="combined", **{chain_prop[0]: chain_prop[1][-1]}, **trace_kwargs
+                ),
+            )
         axes[0, 1].legend(handles=handles, title="chain")
 
     if backend_show(show):
@@ -270,7 +297,7 @@ def _plot_chains_mpl(
     idx,
     value,
     data,
-    colors,
+    chain_prop,
     combined,
     xt_labelsize,
     rug,
@@ -281,10 +308,12 @@ def _plot_chains_mpl(
     rug_kwargs,
 ):
     for chain_idx, row in enumerate(value):
-        axes[idx, 1].plot(data.draw.values, row, color=colors[chain_idx], **trace_kwargs)
+        axes[idx, 1].plot(
+            data.draw.values, row, **{chain_prop[0]: chain_prop[1][chain_idx]}, **trace_kwargs
+        )
 
         if not combined:
-            plot_kwargs["color"] = colors[chain_idx]
+            plot_kwargs[chain_prop[0]] = chain_prop[1][chain_idx]
             plot_dist(
                 values=row,
                 textsize=xt_labelsize,
@@ -297,9 +326,10 @@ def _plot_chains_mpl(
                 backend="matplotlib",
                 show=False,
             )
+            plot_kwargs.pop(chain_prop[0])
 
     if combined:
-        plot_kwargs["color"] = colors[-1]
+        plot_kwargs[chain_prop[0]] = chain_prop[1][-1]
         plot_dist(
             values=value.flatten(),
             textsize=xt_labelsize,
@@ -312,3 +342,4 @@ def _plot_chains_mpl(
             backend="matplotlib",
             show=False,
         )
+        plot_kwargs.pop(chain_prop[0])

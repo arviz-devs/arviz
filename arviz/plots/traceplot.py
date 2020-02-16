@@ -20,9 +20,9 @@ def plot_trace(
     rug=False,
     lines=None,
     compact=False,
-    compact_prop="linestyle",
+    compact_prop=None,
     combined=False,
-    combined_prop="color",
+    chain_prop=None,
     legend=False,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -154,17 +154,42 @@ def plot_trace(
     if lines is None:
         lines = ()
 
-    num_colors = len(data.chain) + 1 if combined else len(data.chain)
+    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
+    if not combined and not compact:
+        if backend == "bokeh":
+            chain_prop = (
+                "line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"]
+            ) if chain_prop is None else chain_prop
+        else:
+            chain_prop = "color" if chain_prop is None else chain_prop
+    else:
+        chain_prop = (
+            (
+                "line_dash" if backend == "bokeh" else "linestyle",
+                ("solid", "dotted", "dashed", "dashdot"),
+            )
+            if chain_prop is None
+            else chain_prop
+        )
+        if backend == "bokeh":
+            compact_prop = (
+                "line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"]
+            ) if compact_prop is None else compact_prop
+        else:
+            compact_prop = "color" if compact_prop is None else compact_prop
 
     # TODO: matplotlib is always required by arviz. Can we get rid of it?
     # TODO: kind of related: move mpl specific code to backend and
     # define prop_cycle instead of only colors
-    colors = [
-        prop
-        for _, prop in zip(
-            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        )
-    ]
+    if isinstance(chain_prop, str):
+        chain_prop = (chain_prop, plt.rcParams["axes.prop_cycle"].by_key()[chain_prop])
+    chain_prop = (
+        chain_prop[0],
+        [prop for _, prop in zip(range(num_chain_props), cycle(chain_prop[1]))],
+    )
+
+    if isinstance(compact_prop, str):
+        compact_prop = (compact_prop, plt.rcParams["axes.prop_cycle"].by_key()[compact_prop])
 
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}
@@ -216,14 +241,14 @@ def plot_trace(
         rug_kwargs=rug_kwargs,
         hist_kwargs=hist_kwargs,
         trace_kwargs=trace_kwargs,
-        compact = compact,
+        compact_prop=compact_prop,
         combined=combined,
+        chain_prop=chain_prop,
         legend=legend,
         # Generated kwargs
         divergence_data=divergence_data,
         # skip_dims=skip_dims,
         plotters=plotters,
-        colors=colors,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -234,6 +259,7 @@ def plot_trace(
 
     if backend == "bokeh":
         trace_plot_args.update(backend_config=backend_config)
+        trace_plot_args.pop("compact_prop")
 
     plot = get_plotting_function("plot_trace", "traceplot", backend)
     axes = plot(**trace_plot_args)
