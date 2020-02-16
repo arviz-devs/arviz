@@ -63,9 +63,14 @@ def plot_trace(
         vertical lines on the density and horizontal lines on the trace.
     compact : bool
         Plot multidimensional variables in a single plot.
+    compact_prop : tuple of (str, list_like)
+        Tuple containing the property name and the property values to distinguish diferent dimensions
+        with compact=True
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
+    chain_prop : tuple of (str, list_like)
+        Tuple containing the property name and the property values to distinguish diferent chains
     legend : bool
         Add a legend to the figure with the chain color code.
     plot_kwargs : dict

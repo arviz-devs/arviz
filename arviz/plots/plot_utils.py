@@ -609,10 +609,11 @@ def format_coords_as_labels(dataarray, skip_dims=None):
     skip_dims : str of list_like, optional
         Dimensions whose values should not be included in the labels
     """
-    if skip_dims:
-        coord_labels = dataarray.coords.to_index().values
+    if skip_dims is None:
+        coord_labels = dataarray.coords.to_index()
     else:
-        coord_labels = dataarray.coords.to_index().droplevel(skip_dims).drop_duplicates().values
+        coord_labels = dataarray.coords.to_index().droplevel(skip_dims).drop_duplicates()
+    coord_labels = coord_labels.values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]

@@ -286,15 +286,16 @@ def plot_trace(
         axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
         axes[idx, 1].set_ylim(*ylims[1])
     if legend:
+        legend_kwargs = trace_kwargs if combined else plot_kwargs
         handles = [
-            Line2D([], [], label=chain_id, **{chain_prop[0]: prop}, **trace_kwargs)
+            Line2D([], [], label=chain_id, **{chain_prop[0]: prop}, **legend_kwargs)
             for chain_id, prop in zip(data.chain.values, chain_prop[1])
         ]
         if combined:
             handles.insert(
                 0,
                 Line2D(
-                    [], [], label="combined", **{chain_prop[0]: chain_prop[1][-1]}, **trace_kwargs
+                    [], [], label="combined", **{chain_prop[0]: chain_prop[1][-1]}, **plot_kwargs
                 ),
             )
         axes[0, 1].legend(handles=handles, title="chain")
