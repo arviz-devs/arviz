@@ -5,7 +5,13 @@ import matplotlib.cm as cm
 from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
-from .plot_utils import get_coords, format_coords_as_labels, color_from_dim, get_plotting_function
+from .plot_utils import (
+    get_coords,
+    format_coords_as_labels,
+    color_from_dim,
+    get_plotting_function,
+    scatter_dealiaser,
+)
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
 
@@ -144,6 +150,8 @@ def plot_elpd(
 
     if plot_kwargs is None:
         plot_kwargs = {}
+    else:
+        plot_kwargs = scatter_dealiaser(plot_kwargs)
     if backend == "bokeh":
         plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
 

@@ -11,6 +11,7 @@ import packaging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.cbook as cbook
 import xarray as xr
 
 
@@ -897,3 +898,15 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     grid /= norm_factor
 
     return grid, xmin, xmax, ymin, ymax
+
+
+def scatter_dealiaser(args):
+    """De-aliase the kwargs passed to plots."""
+    dealiasers = {
+        "s": ["markersize", "size"],
+        "c": ["color", "colors"],
+        "marker": ["markers", "mk"],
+        "edgecolors": ["edgecolor", "ec"],
+        "linewidths": ["linewidth", "lw"],
+    }
+    return cbook.normalize_kwargs(args, dealiasers)
