@@ -395,7 +395,6 @@ def hpd(ary, credible_interval=None, circular=False, multimodal=False, skipna=Fa
         hpd_intervals = np.array(hpd_intervals)
 
     else:
-        ary = ary.copy()
         if skipna:
             nans = np.isnan(ary)
             if not nans.all():
