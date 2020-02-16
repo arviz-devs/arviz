@@ -599,9 +599,20 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def format_coords_as_labels(dataarray):
-    """Format 1d or multi-d dataarray coords as strings."""
-    coord_labels = dataarray.coords.to_index().values
+def format_coords_as_labels(dataarray, skip_dims=None):
+    """Format 1d or multi-d dataarray coords as strings.
+
+    Parameters
+    ----------
+    dataarray : xarray.DataArray
+        DataArray whose coordinates will be converted to labels.
+    skip_dims : str of list_like, optional
+        Dimensions whose values should not be included in the labels
+    """
+    if skip_dims:
+        coord_labels = dataarray.coords.to_index().values
+    else:
+        coord_labels = dataarray.coords.to_index().droplevel(skip_dims).drop_duplicates().values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]

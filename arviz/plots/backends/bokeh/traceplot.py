@@ -32,6 +32,7 @@ def plot_trace(
     trace_kwargs: [Dict],
     plotters,
     divergence_data,
+    axes,
     backend_config,
     backend_kwargs: [Dict],
     show,
@@ -67,16 +68,17 @@ def plot_trace(
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)
 
-    axes = []
-    for i in range(len(plotters)):
-        if i != 0:
-            _axes = [
-                bkp.figure(**backend_kwargs),
-                bkp.figure(x_range=axes[0][1].x_range, **backend_kwargs),
-            ]
-        else:
-            _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
-        axes.append(_axes)
+    if axes is None:
+        axes = []
+        for i in range(len(plotters)):
+            if i != 0:
+                _axes = [
+                    bkp.figure(**backend_kwargs),
+                    bkp.figure(x_range=axes[0][1].x_range, **backend_kwargs),
+                ]
+            else:
+                _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
+            axes.append(_axes)
 
     axes = np.array(axes)
 
@@ -160,7 +162,8 @@ def plot_trace(
                 rug_kwargs=rug_kwargs,
             )
         else:
-            for idx, y_name in enumerate(cds_var_groups[var_name]):
+            for y_name in cds_var_groups[var_name]:
+                print(y_name, cds_var_groups[var_name])
                 if rug:
                     rug_kwargs["y"] = y_name
                 _plot_chains_bokeh(
@@ -295,9 +298,7 @@ def _plot_chains_bokeh(
                 source=cds,
                 radius=0.30,
                 alpha=0.5,
-                **{
-                    chain_prop[0]: chain_prop[1][chain_idx],
-                },
+                **{chain_prop[0]: chain_prop[1][chain_idx],},
             )
         if not combined:
             rug_kwargs["cds"] = cds

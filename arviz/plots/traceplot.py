@@ -29,6 +29,7 @@ def plot_trace(
     rug_kwargs=None,
     hist_kwargs=None,
     trace_kwargs=None,
+    ax=None,
     backend=None,
     backend_config=None,
     backend_kwargs=None,
@@ -155,11 +156,13 @@ def plot_trace(
         lines = ()
 
     num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
-    if not combined and not compact:
+    if not compact:
         if backend == "bokeh":
             chain_prop = (
-                "line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"]
-            ) if chain_prop is None else chain_prop
+                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                if chain_prop is None
+                else chain_prop
+            )
         else:
             chain_prop = "color" if chain_prop is None else chain_prop
     else:
@@ -173,8 +176,10 @@ def plot_trace(
         )
         if backend == "bokeh":
             compact_prop = (
-                "line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"]
-            ) if compact_prop is None else compact_prop
+                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                if compact_prop is None
+                else compact_prop
+            )
         else:
             compact_prop = "color" if compact_prop is None else compact_prop
 
@@ -249,6 +254,7 @@ def plot_trace(
         divergence_data=divergence_data,
         # skip_dims=skip_dims,
         plotters=plotters,
+        axes=ax,
         backend_kwargs=backend_kwargs,
         show=show,
     )
