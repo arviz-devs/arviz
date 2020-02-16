@@ -59,11 +59,21 @@ For more detailed steps on a typical development workflow see the
 [Pull request checklist](#pull-request-checklist)
 
 
-### Docstring formatting
+### Docstring formatting and type hints
 Docstrings should follow the
-[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
+Extra guidance can also be found in
+[pandas docstring guide](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
 Please reasonably document any additions or changes to the codebase,
 when in doubt, add a docstring.
+
+The different formatting and aim between numpydoc style type description and
+[type hints](https://docs.python.org/3/library/typing.html)
+should be noted. numpydoc style targets docstrings and aims to be human
+readable whereas type hints target function definitions and `.pyi` files and
+aim to help third party tools such as type checkers or IDEs. ArviZ does not
+require functions to include type hints
+however contributions including them are welcome.
 
 #### Documentation for user facing methods
 If changes are made to a method documented in the
@@ -101,6 +111,12 @@ please consider adding inline documentation examples.
    ```
 
 Alternatively, there is a script to create a docker environment for development.  See: [Developing in Docker](#Developing-in-Docker).
+
+Note: Building the documentation locally requires saving Bokeh plots as
+images. To do this, bokeh needs some [extra dependencies](https://docs.bokeh.org/en/latest/docs/user_guide/export.html#exporting-plots)
+that can not be installed with pip and are therefore not in
+``requirements-dev.txt``. To build documentation locally without having to
+install these extra dependencies, Docker can be used. See: [Building documentation with Docker](#building-documentation-with-docker)
 
 5. Develop the feature on your feature branch. Add changed files using ``git add`` and then ``git commit`` files:
 
@@ -220,6 +236,12 @@ Alternatively, to start a jupyter notebook, there are two steps, first run:
     $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
+
+### Building documentation with Docker
+The documentation can be build with Docker by running `./scripts/container.sh
+--sphinx-build`. The docker image contains by default all dependencies needed
+for building the documentation. After having build the docs in the Docker
+container, they can be checked at `doc/build`.
 
 ## Running the benchmark tests
 
