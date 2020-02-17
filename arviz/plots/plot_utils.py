@@ -818,7 +818,9 @@ def _cov(data):
         x -= avg[:, None]
         prod = _dot(x, x.T.conj())
         prod *= np.true_divide(1, ddof)
-        return prod.squeeze()
+        prod = prod.squeeze()
+        prod += 1e-6 * np.eye(prod.shape[0])
+        return prod
     else:
         raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
@@ -872,7 +874,6 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
 
     scotts_factor = len_x ** (-1 / 6)
     cov = _cov(xyi)
-    cov += 1e-6 * np.eye(cov.shape[0])
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
