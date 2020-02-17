@@ -872,7 +872,7 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
 
     scotts_factor = len_x ** (-1 / 6)
     cov = _cov(xyi)
-    cov += 1E-6 * np.eye(cov.shape[0])
+    cov += 1e-6 * np.eye(cov.shape[0])
     std_devs = np.diag(cov ** 0.5)
     kern_nx, kern_ny = np.round(scotts_factor * 2 * np.pi * std_devs)
 
