@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
+import warnings
 
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
@@ -124,6 +125,11 @@ def plot_trace(
 
     _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
 
+    # Check the input for lines
+    if lines is not None:
+        if lines[0] not in [plotters[i][0] for i in range(len(plotters))]:
+            warnings.warn("A valid var_name should be provided")
+
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
 
@@ -219,6 +225,10 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
+                if not all(np.issubdtype(type(val), np.number) for val in line_values):
+                    raise ValueError(
+                        "line-positions should be numeric, found {}".format(line_values)
+                    )
             axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
             axes[idx, 1].hlines(
                 line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
