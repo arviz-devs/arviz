@@ -1,4 +1,5 @@
 """Matplotlib jointplot."""
+import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,7 +24,9 @@ def plot_joint(
     backend_kwargs,
     show,
 ):
+
     """Matplotlib joint plot."""
+
     if backend_kwargs is None:
         backend_kwargs = {}
 

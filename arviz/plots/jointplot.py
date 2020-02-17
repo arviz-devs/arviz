@@ -140,10 +140,7 @@ def plot_joint(
         ... )
 
     """
-
-    warnings.warn(
-        "plot_joint will be deprecated. Please use plot_pair instead.", PendingDeprecationWarning,
-    )
+    warnings.warn("plot_joint will be deprecated. Please use plot_pair instead.")
 
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:

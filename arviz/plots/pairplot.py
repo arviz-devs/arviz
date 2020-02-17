@@ -26,9 +26,9 @@ def plot_pair(
     plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    diagonal=False,
     marginal_kwargs=None,
     show=None,
-    diagonal=False,
     point_estimate=None,
     point_estimate_kwargs=None,
 ):
@@ -79,8 +79,14 @@ def plot_pair(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    diagonal : bool, optional
+        If True the pairplot will include marginal distributions for every variable
     marginal_kwargs : dicts, optional
-        Additional keywords modifying the marginals distributions (top and right subplot)
+        Additional keywords modifying the marginals distributions
+    point_estimate : str, optional
+        Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be plotted using a scatter marker and vertical/horizontal lines.
+    point_estimate : dict, optional
+        Additional keywords modifying the point estimate plot. Default color is orange
     show : bool, optional
         Call backend show function.
 

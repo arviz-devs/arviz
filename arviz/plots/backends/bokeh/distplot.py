@@ -1,6 +1,7 @@
 """Bokeh Distplot."""
 import bokeh.plotting as bkp
 import numpy as np
+import matplotlib.pyplot as plt
 
 from . import backend_kwarg_defaults
 from .. import show_layout
@@ -55,6 +56,7 @@ def plot_dist(
         if plot_kwargs is None:
             plot_kwargs = {}
 
+        color = plt.rcParams["axes.prop_cycle"].by_key()["color"][0]
         plot_kwargs.setdefault("line_color", color)
         legend = label is not None
 

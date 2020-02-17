@@ -69,20 +69,27 @@ def plot_pair(
         backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
         if diagonal:
             for row in range(numvars):
-                row_ax = []            
-                for col in range(numvars):
+                row_ax = []
+                for n, col in enumerate(range(numvars)):
                     if row < col:
                         row_ax.append(None)
                     elif row == col and numvars == 2:
-                        ax_ = bkp.figure(
+                        if n == 0:
+                            ax_h = bkp.figure(
                                 width=int(figsize[0] / (numvars - 1) * dpi),
                                 height=int(figsize[1] / (numvars - 1) + 2 * dpi),
                             )
-                        row_ax.append(ax_)
+                            row_ax.append(ax_h)
+                        elif n == 1:
+                            ax_v = bkp.figure(
+                                width=int(figsize[0] / (numvars - 1) + 2 * dpi),
+                                height=int(figsize[1] / (numvars - 1) * dpi),
+                            )
+                            row_ax.append(ax_v)
                     else:
                         ax_ = bkp.figure(
-                                **backend_kwargs
-                            )
+                            **backend_kwargs
+                        )
                         row_ax.append(ax_)
                 ax.append(row_ax)
             ax = np.array(ax)
@@ -93,12 +100,13 @@ def plot_pair(
                     if row < col:
                         row_ax.append(None)
                     else:
+
                         ax_ = bkp.figure(**backend_kwargs)
                         row_ax.append(ax_)
 
                 ax.append(row_ax)
             ax = np.array(ax)
-    
+
     tmp_flat_var_names = None
     if len(flat_var_names) == len(list(set(flat_var_names))):
         source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
@@ -120,26 +128,40 @@ def plot_pair(
         source_div = CDSView(
             source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
         )
-    
+
     if diagonal:
         var = 0
     else:
         var = 1
-    
+
     for i in range(0, numvars - var):
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
         for j in range(0, numvars - var):
 
-            var2 = flat_var_names[j + var] if tmp_flat_var_names is None else tmp_flat_var_names[j + var]
+            var2 = (
+                flat_var_names[j + var]
+                if tmp_flat_var_names is None
+                else tmp_flat_var_names[j + var]
+            )
 
             if j == i and diagonal:
-
+                if numvars == 2 and j == 1:
+                    rotate = True
+                else:
+                    rotate = False
                 var1_dist = infdata_group[i]
-                plot_dist(var1_dist, ax=ax[j, i], show=False, backend="bokeh", **marginal_kwargs)
-            
+                plot_dist(
+                    var1_dist,
+                    ax=ax[j, i],
+                    show=False,
+                    backend="bokeh",
+                    rotated=rotate,
+                    **marginal_kwargs
+                )
+
             if j + var > i:
-                
+
                 if kind == "scatter":
                     if divergences:
                         ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
@@ -148,7 +170,7 @@ def plot_pair(
 
                 elif kind == "kde":
                     var1_kde = infdata_group[i]
-                    var2_kde = infdata_group[j+ var]
+                    var2_kde = infdata_group[j + var]
                     plot_kde(
                         var1_kde,
                         var2_kde,
@@ -167,7 +189,7 @@ def plot_pair(
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(var1_hexbin, var2_hexbin, size=0.5)
                 else:
-                    
+
                     ax[j, i].circle(flat_var_names[0], flat_var_names[1], source=source)
                     plot_kde(
                         infdata_group[0],
@@ -200,24 +222,26 @@ def plot_pair(
                     ax[j, i].square(
                         pe_x,
                         pe_y,
-                        line_width=figsize[0] + 4,
-                        line_color="red",
+                        line_width=figsize[0] + 2,
+                        line_color="orange",
                         **point_estimate_kwargs
                     )
 
                     ax_hline = Span(
                         location=pe_y,
                         dimension="width",
-                        line_color="red",
                         line_dash="solid",
+                        line_color="orange",
                         line_width=3,
+                        **point_estimate_kwargs
                     )
                     ax_vline = Span(
                         location=pe_x,
                         dimension="height",
-                        line_color="red",
                         line_dash="solid",
+                        line_color="orange",
                         line_width=3,
+                        **point_estimate_kwargs
                     )
                     ax[j, i].add_layout(ax_hline)
                     ax[j, i].add_layout(ax_vline)
@@ -230,11 +254,23 @@ def plot_pair(
                         ax_pe_vline = Span(
                             location=pe,
                             dimension="height",
-                            line_color="red",
                             line_dash="solid",
                             line_width=3,
+                            line_color="orange",
+                            **point_estimate_kwargs
                         )
                         ax[-1, -1].add_layout(ax_pe_vline)
+
+                        if numvars == 2:
+                            ax_pe_hline = Span(
+                                location=pe,
+                                dimension="width",
+                                line_dash="solid",
+                                line_width=3,
+                                line_color="orange",
+                                **point_estimate_kwargs
+                            )
+                            ax[-1, -1].add_layout(ax_pe_hline)
 
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + var]
