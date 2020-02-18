@@ -36,6 +36,7 @@
 * Fix `io_pymc3.py` to handle models with `potentials` (#1043)
 * Fix several inconsistencies between schema and `from_pymc3` implementation
   in groups `prior`, `prior_predictive` and `observed_data` (#1045)
+* Stabilize covariance matrix for `plot_kde_2d` (#1075)
 
 ### Deprecation
 
