@@ -224,5 +224,5 @@ def test_bokeh_import():
 )
 def test_matplotlib_kwarg_dealiaser(params):
     dealiased = matplotlib_kwarg_dealiaser(params["input"][0], kind=params["input"][1])
-    for returned in dealiased.keys():
+    for returned in dealiased:
         assert returned in params["output"]
