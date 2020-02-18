@@ -127,8 +127,8 @@ def plot_pair(
             )
 
         if point_estimate:
-            pe_x = calculate_point_estimate(point_estimate, x, 0.5)
-            pe_y = calculate_point_estimate(point_estimate, y, 0.5)
+            pe_x = calculate_point_estimate(point_estimate, x)
+            pe_y = calculate_point_estimate(point_estimate, y)
             if diagonal:
                 ax_hist_x.axvline(pe_x, **point_estimate_kwargs)
                 ax_hist_y.axhline(pe_y, **point_estimate_kwargs)
@@ -228,15 +228,15 @@ def plot_pair(
                         cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
 
                     if point_estimate:
-                        pe_x = calculate_point_estimate(point_estimate, var1, 0.5)
-                        pe_y = calculate_point_estimate(point_estimate, var2, 0.5)
+                        pe_x = calculate_point_estimate(point_estimate, var1)
+                        pe_y = calculate_point_estimate(point_estimate, var2)
                         ax[j, i].axvline(pe_x, **point_estimate_kwargs)
                         ax[j, i].axhline(pe_y, **point_estimate_kwargs)
 
                         if diagonal:
                             ax[j - 1, i].axvline(pe_x, **point_estimate_kwargs)
-                            pe = calculate_point_estimate(point_estimate, infdata_group[-1], 0.5)
-                            ax[-1, -1].axvline(pe, **point_estimate_kwargs)
+                            pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
+                            ax[-1, -1].axvline(pe_last, **point_estimate_kwargs)
 
                         ax[j, i].scatter(
                             pe_x,

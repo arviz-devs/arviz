@@ -61,51 +61,44 @@ def plot_pair(
         )
         numvars = vars_to_plot
 
-    (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+    (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+
+    if diagonal:
+        var = 0
+    else:
+        var = 1
 
     if ax is None:
         ax = []
         backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
-        if diagonal:
-            for row in range(numvars):
-                row_ax = []
-                for n, col in enumerate(range(numvars)):
-                    if row < col:
-                        row_ax.append(None)
-                    elif row == col and numvars == 2:
-                        if n == 0:
-                            ax_h = bkp.figure(
-                                width=int(figsize[0] / (numvars - 1) * dpi),
-                                height=int(figsize[1] / (numvars - 1) + 2 * dpi),
-                            )
-                            row_ax.append(ax_h)
-                        elif n == 1:
-                            ax_v = bkp.figure(
-                                width=int(figsize[0] / (numvars - 1) + 2 * dpi),
-                                height=int(figsize[1] / (numvars - 1) * dpi),
-                            )
-                            row_ax.append(ax_v)
-                    else:
-                        ax_ = bkp.figure(
-                            **backend_kwargs
+        for row in range(numvars - var):
+            row_ax = []
+            for n, col in enumerate(range(numvars - var)):
+                if row < col:
+                    row_ax.append(None)
+                elif row == col and numvars == 2:
+                    if n == 0:
+                        ax_h = bkp.figure(
+                            width=int(figsize[0] / (numvars - 1) * dpi),
+                            height=int(figsize[1] / (numvars - 1) + 2 * dpi),
                         )
-                        row_ax.append(ax_)
-                ax.append(row_ax)
-            ax = np.array(ax)
-        else:
-            for row in range(numvars - 1):
-                row_ax = []
-                for col in range(numvars - 1):
-                    if row < col:
-                        row_ax.append(None)
-                    else:
-
-                        ax_ = bkp.figure(**backend_kwargs)
-                        row_ax.append(ax_)
-
-                ax.append(row_ax)
-            ax = np.array(ax)
+                        row_ax.append(ax_h)
+                    elif n == 1:
+                        ax_v = bkp.figure(
+                            width=int(figsize[0] / (numvars - 1) + 2 * dpi),
+                            height=int(figsize[1] / (numvars - 1) * dpi),
+                        )
+                        row_ax.append(ax_v)
+                else:
+                    ax_ = bkp.figure(
+                        **backend_kwargs
+                    )
+                    row_ax.append(ax_)
+            ax.append(row_ax)
+        ax = np.array(ax)
+    else:
+        assert ax.shape == (numvars - var, numvars - var)
 
     tmp_flat_var_names = None
     if len(flat_var_names) == len(list(set(flat_var_names))):
@@ -129,11 +122,6 @@ def plot_pair(
             source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
         )
 
-    if diagonal:
-        var = 0
-    else:
-        var = 1
-
     for i in range(0, numvars - var):
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
@@ -146,10 +134,7 @@ def plot_pair(
             )
 
             if j == i and diagonal:
-                if numvars == 2 and j == 1:
-                    rotate = True
-                else:
-                    rotate = False
+                rotate = numvars == 2 and j == 1
                 var1_dist = infdata_group[i]
                 plot_dist(
                     var1_dist,
@@ -160,7 +145,7 @@ def plot_pair(
                     **marginal_kwargs
                 )
 
-            if j + var > i:
+            elif j + var > i:
 
                 if kind == "scatter":
                     if divergences:
@@ -216,8 +201,8 @@ def plot_pair(
                 if point_estimate:
                     var1_pe = infdata_group[i]
                     var2_pe = infdata_group[j]
-                    pe_x = calculate_point_estimate(point_estimate, var1_pe, 0.5)
-                    pe_y = calculate_point_estimate(point_estimate, var2_pe, 0.5)
+                    pe_x = calculate_point_estimate(point_estimate, var1_pe)
+                    pe_y = calculate_point_estimate(point_estimate, var2_pe)
 
                     ax[j, i].square(
                         pe_x,
@@ -250,9 +235,9 @@ def plot_pair(
 
                         ax[j - 1, i].add_layout(ax_vline)
 
-                        pe = calculate_point_estimate(point_estimate, infdata_group[-1], 0.5)
+                        pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
                         ax_pe_vline = Span(
-                            location=pe,
+                            location=pe_last,
                             dimension="height",
                             line_dash="solid",
                             line_width=3,
@@ -263,7 +248,7 @@ def plot_pair(
 
                         if numvars == 2:
                             ax_pe_hline = Span(
-                                location=pe,
+                                location=pe_last,
                                 dimension="width",
                                 line_dash="solid",
                                 line_width=3,

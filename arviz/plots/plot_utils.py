@@ -701,7 +701,7 @@ def get_plotting_function(plot_name, plot_module, backend):
     return plotting_method
 
 
-def calculate_point_estimate(point_estimate, values, bw):
+def calculate_point_estimate(point_estimate, values, bw=4.5):
     """Validate and calculate the point estimate.
 
     Parameters

@@ -84,9 +84,10 @@ def plot_pair(
     marginal_kwargs : dicts, optional
         Additional keywords modifying the marginals distributions
     point_estimate : str, optional
-        Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be plotted using a scatter marker and vertical/horizontal lines.
-    point_estimate : dict, optional
-        Additional keywords modifying the point estimate plot. Default color is orange
+        Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
+        plotted using a scatter marker and vertical/horizontal lines.
+    point_estimate_kwargs : dict, optional
+        Additional keywords modifying the point estimate plot.
     show : bool, optional
         Call backend show function.
 
@@ -145,7 +146,7 @@ def plot_pair(
     if plot_kwargs is None:
         plot_kwargs = {}
 
-    if kind == "scatter" or kind == "scatter_kde":
+    if kind in ("scatter", "scatter_kde"):
         plot_kwargs.setdefault("marker", ".")
         plot_kwargs.setdefault("lw", 0)
 
