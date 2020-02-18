@@ -6,6 +6,7 @@ from .plot_utils import (
     filter_plotters_list,
     default_grid,
     get_plotting_function,
+    dealiaser,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -118,6 +119,8 @@ def plot_violin(
 
     if shade_kwargs is None:
         shade_kwargs = {}
+    else:
+        shade_kwargs = dealiaser(shade_kwargs, type="hexbin")
 
     rows, cols = default_grid(len(plotters))
 
@@ -127,6 +130,8 @@ def plot_violin(
 
     if rug_kwargs is None:
         rug_kwargs = {}
+    else:
+        rug_kwargs = dealiaser(rug_kwargs, type="plot")
 
     if credible_interval is None:
         credible_interval = rcParams["stats.credible_interval"]

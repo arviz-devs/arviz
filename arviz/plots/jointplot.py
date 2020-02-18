@@ -1,6 +1,12 @@
 """Joint scatter plot of two variables."""
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_function
+from .plot_utils import (
+    _scale_fig_size,
+    xarray_var_iter,
+    get_coords,
+    get_plotting_function,
+    dealiaser,
+)
 from ..utils import _var_names
 
 
@@ -158,6 +164,14 @@ def plot_joint(
 
     if joint_kwargs is None:
         joint_kwargs = {}
+    else:
+        if kind == "kde":
+            types = "plot"
+        elif kind == "scatter":
+            types = "scatter"
+        else:
+            types = "hexbin"
+        joint_kwargs = dealiaser(joint_kwargs, type=types)
 
     if marginal_kwargs is None:
         marginal_kwargs = {}

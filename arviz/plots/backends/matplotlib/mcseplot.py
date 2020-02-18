@@ -8,6 +8,7 @@ from ....stats.stats_utils import quantile as _quantile
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    dealiaser,
 )
 
 
@@ -89,6 +90,8 @@ def plot_mcse(
         if rug:
             if rug_kwargs is None:
                 rug_kwargs = {}
+            else:
+                rug_kwargs = dealiaser(rug_kwargs, type="plot")
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):

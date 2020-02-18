@@ -11,6 +11,7 @@ from .plot_utils import (
     get_coords,
     filter_plotters_list,
     get_plotting_function,
+    dealiaser,
 )
 from ..utils import _var_names
 
@@ -255,6 +256,8 @@ def plot_ess(
     kwargs.setdefault("zorder", 3)
     if extra_kwargs is None:
         extra_kwargs = {}
+    else:
+        extra_kwargs = dealiaser(extra_kwargs, type="plot")
     if kind == "evolution":
         extra_kwargs = {
             **extra_kwargs,
@@ -270,6 +273,8 @@ def plot_ess(
     kwargs.setdefault("label", kind)
     if hline_kwargs is None:
         hline_kwargs = {}
+    else:
+        hline_kwargs = dealiaser(hline_kwargs, type="plot")
     hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
     hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
     hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
@@ -279,6 +284,8 @@ def plot_ess(
         sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
         if text_kwargs is None:
             text_kwargs = {}
+        else:
+            text_kwargs = dealiaser(text_kwargs, type="text")
         text_x = text_kwargs.pop("x", 1)
         text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])

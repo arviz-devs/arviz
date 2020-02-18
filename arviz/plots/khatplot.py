@@ -11,6 +11,7 @@ from .plot_utils import (
     color_from_dim,
     format_coords_as_labels,
     get_plotting_function,
+    dealiaser,
 )
 from ..stats import ELPDData
 
@@ -133,6 +134,8 @@ def plot_khat(
     """
     if hlines_kwargs is None:
         hlines_kwargs = {}
+    else:
+        hlines_kwargs = dealiaser(hlines_kwargs, type="hlines")
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -172,6 +175,9 @@ def plot_khat(
     if markersize is None:
         markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
         # for dots to have the same size
+    # scatter plot kwargs dealiasing
+    if kwargs is not None:
+        kwargs = dealiaser(kwargs, type="scatter")
     kwargs.setdefault("s", markersize)
     kwargs.setdefault("marker", "+")
     color_mapping = None

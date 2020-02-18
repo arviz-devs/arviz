@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function
+from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function, dealiaser
 from ..utils import _var_names
 
 
@@ -131,13 +131,20 @@ def plot_pair(
 
     if plot_kwargs is None:
         plot_kwargs = {}
-
-    if kind == "scatter":
-        plot_kwargs.setdefault("marker", ".")
-        plot_kwargs.setdefault("lw", 0)
+    else:
+        if kind == "scatter":
+            plot_kwargs = dealiaser(plot_kwargs, type="scatter")
+            plot_kwargs.setdefault("marker", ".")
+            plot_kwargs.setdefault("lw", 0)
+        elif kind == "kde":
+            plot_kwargs = dealiaser(plot_kwargs, type="plot")
+        else:
+            plot_kwargs = dealiaser(plot_kwargs, type="hexbin")
 
     if divergences_kwargs is None:
         divergences_kwargs = {}
+    else:
+        divergences_kwargs = dealiaser(divergences_kwargs, type="plot")
 
     divergences_kwargs.setdefault("marker", "o")
     divergences_kwargs.setdefault("markeredgecolor", "k")

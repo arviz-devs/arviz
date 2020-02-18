@@ -9,6 +9,7 @@ from .plot_utils import (
     _scale_fig_size,
     get_plotting_function,
     _fast_kde,
+    dealiaser,
 )
 from ..rcparams import rcParams
 
@@ -139,6 +140,8 @@ def plot_loo_pit(
 
     if plot_kwargs is None:
         plot_kwargs = {}
+    else:
+        plot_kwargs = dealiaser(plot_kwargs, type="plot")
     plot_kwargs["color"] = to_hex(color)
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
@@ -157,6 +160,8 @@ def plot_loo_pit(
 
     if plot_unif_kwargs is None:
         plot_unif_kwargs = {}
+    else:
+        plot_unif_kwargs = dealiaser(plot_unif_kwargs, type="plot")
     light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
     light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
     light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation

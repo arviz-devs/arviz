@@ -900,13 +900,16 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     return grid, xmin, xmax, ymin, ymax
 
 
-def scatter_dealiaser(args):
+def dealiaser(args, type):
     """De-aliase the kwargs passed to plots."""
-    dealiasers = {
-        "s": ["markersize", "size"],
-        "c": ["color", "colors"],
-        "marker": ["markers", "mk"],
-        "edgecolors": ["edgecolor", "ec"],
-        "linewidths": ["linewidth", "lw"],
+    dealiaser_dict = {
+        "scatter": mpl.collections.PathCollection,
+        "plot": mpl.lines.Line2D,
+        "hist": mpl.patches.Patch,
+        "hexbin": mpl.collections.PolyCollection,
+        "hlines": mpl.collections.LineCollection,
+        "text": mpl.text.Text,
+        "contour": mpl.contour.ContourSet,
+        "pcolormesh": mpl.collections.QuadMesh,
     }
-    return cbook.normalize_kwargs(args, dealiasers)
+    return cbook.normalize_kwargs(args, getattr(dealiaser_dict[type], "_alias_map", {}))
