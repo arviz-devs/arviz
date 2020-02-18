@@ -73,8 +73,7 @@ def plot_pair(
             ax = bkp.figure(
                 width=int(figsize[0] * dpi),
                 height=int(figsize[1] * dpi),
-                **backend_kwargs,
-                tooltips=TOOLTIPS
+                **backend_kwargs
             )
 
         if kind == "scatter":
