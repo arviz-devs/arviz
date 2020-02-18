@@ -1,9 +1,9 @@
 """Matplotlib traceplot."""
 
+import warnings
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import warnings
 
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
@@ -49,8 +49,8 @@ def plot_trace(
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
         variables.
-    lines : tuple
-        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
+    lines : tuple or list
+        list of tuple of (var_name, {'coord': selection}, [line_positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
@@ -127,8 +127,10 @@ def plot_trace(
 
     # Check the input for lines
     if lines is not None:
-        if lines[0] not in [plotters[i][0] for i in range(len(plotters))]:
-            warnings.warn("A valid var_name should be provided")
+        all_var_names = set([plotters[i][0] for i in range(len(plotters))])
+        for line in lines:
+            if line[0] not in all_var_names:
+                warnings.warn("A valid var_name should be provided, found {} expected one of {}".format(line[0], all_var_names))
 
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
@@ -225,7 +227,7 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
-                if not all(np.issubdtype(type(val), np.number) for val in line_values):
+                if not np.issubdtype(line_values.dtype, np.number):
                     raise ValueError(
                         "line-positions should be numeric, found {}".format(line_values)
                     )
