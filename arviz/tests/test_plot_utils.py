@@ -13,6 +13,7 @@ from ..plots.plot_utils import (
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rc_context
 
@@ -200,3 +201,28 @@ def test_bokeh_import():
     from arviz.plots.backends.bokeh.distplot import plot_dist
 
     assert plot is plot_dist
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"input": ({"ls": 1}, "scatter",), "output": ("linestyle",)},
+        {
+            "input": ({"aa": True, "dashes": "-",}, "scatter"),
+            "output": ("antialiased", "linestyle"),
+        },
+        {
+            "input": ({"mfc": "blue", "c": "blue", "linewidth": 2}, "plot",),
+            "output": ("markerfacecolor", "color", "linewidth"),
+        },
+        {"input": ({"ec": "blue", "fc": "black"}, "hist"), "output": ("edgecolor", "facecolor")},
+        {
+            "input": ({"edgecolors": "blue", "lw": 3}, "hlines"),
+            "output": ("edgecolor", "linewidth"),
+        },
+    ],
+)
+def test_matplotlib_kwarg_dealiaser(params):
+    dealiased = matplotlib_kwarg_dealiaser(params["input"][0], kind=params["input"][1])
+    for returned in dealiased.keys():
+        assert returned in params["output"]
