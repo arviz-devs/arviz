@@ -819,7 +819,9 @@ def _cov(data):
         x -= avg[:, None]
         prod = _dot(x, x.T.conj())
         prod *= np.true_divide(1, ddof)
-        return prod.squeeze()
+        prod = prod.squeeze()
+        prod += 1e-6 * np.eye(prod.shape[0])
+        return prod
     else:
         raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
