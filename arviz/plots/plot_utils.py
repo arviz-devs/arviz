@@ -900,9 +900,9 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     return grid, xmin, xmax, ymin, ymax
 
 
-def dealiaser(args, type):
+def matplotlib_kwarg_dealiaser(args, kind):
     """De-aliase the kwargs passed to plots."""
-    dealiaser_dict = {
+    matplotlib_kwarg_dealiaser_dict = {
         "scatter": mpl.collections.PathCollection,
         "plot": mpl.lines.Line2D,
         "hist": mpl.patches.Patch,
@@ -912,4 +912,4 @@ def dealiaser(args, type):
         "contour": mpl.contour.ContourSet,
         "pcolormesh": mpl.collections.QuadMesh,
     }
-    return cbook.normalize_kwargs(args, getattr(dealiaser_dict[type], "_alias_map", {}))
+    return cbook.normalize_kwargs(args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {}))

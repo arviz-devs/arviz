@@ -4,7 +4,7 @@ from matplotlib.pyplot import rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, get_plotting_function, dealiaser
+from .plot_utils import _scale_fig_size, get_plotting_function, matplotlib_kwarg_dealiaser
 
 
 def plot_energy(
@@ -99,7 +99,7 @@ def plot_energy(
         plot_kwargs = {}
     else:
         types = "hist" if kind in {"hist", "histogram"} else "plot"
-        plot_kwargs = dealiaser(plot_kwargs, type=types)
+        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 

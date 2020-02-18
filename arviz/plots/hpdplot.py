@@ -4,7 +4,7 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
 from ..stats import hpd
-from .plot_utils import get_plotting_function, dealiaser
+from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 
 
@@ -67,7 +67,7 @@ def plot_hpd(
     if plot_kwargs is None:
         plot_kwargs = {}
     else:
-        plot_kwargs = dealiaser(plot_kwargs, type="plot")
+        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
     plot_kwargs.setdefault("alpha", 0)
 

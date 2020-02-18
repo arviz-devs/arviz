@@ -4,7 +4,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, dealiaser
+from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, matplotlib_kwarg_dealiaser
 from ..data import convert_to_dataset
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -185,7 +185,7 @@ def plot_trace(
     if trace_kwargs is None:
         trace_kwargs = {}
     else:
-        trace_kwargs = dealiaser(trace_kwargs, type="plot")
+        trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
     trace_kwargs.setdefault("alpha", 0.35)
 
     if hist_kwargs is None:

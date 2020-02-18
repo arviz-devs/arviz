@@ -11,7 +11,7 @@ from .plot_utils import (
     get_coords,
     filter_plotters_list,
     get_plotting_function,
-    dealiaser,
+    matplotlib_kwarg_dealiaser,
 )
 from ..utils import _var_names
 
@@ -142,7 +142,7 @@ def plot_mcse(
     if extra_kwargs is None:
         extra_kwargs = {}
     else:
-        extra_kwargs = dealiaser(extra_kwargs, type="plot")
+        extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
     extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
     extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
     extra_kwargs.setdefault("color", "k")
@@ -153,7 +153,7 @@ def plot_mcse(
         if text_kwargs is None:
             text_kwargs = {}
         else:
-            text_kwargs = dealiaser(text_kwargs, type="text")
+            text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
         text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])

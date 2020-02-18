@@ -10,7 +10,7 @@ from .plot_utils import (
     format_coords_as_labels,
     color_from_dim,
     get_plotting_function,
-    dealiaser,
+    matplotlib_kwarg_dealiaser,
 )
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
@@ -151,7 +151,7 @@ def plot_elpd(
     if plot_kwargs is None:
         plot_kwargs = {}
     else:
-        plot_kwargs = dealiaser(plot_kwargs, type="scatter")
+        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
 
     if backend == "bokeh":
         plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])

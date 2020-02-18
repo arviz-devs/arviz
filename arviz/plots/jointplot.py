@@ -5,7 +5,7 @@ from .plot_utils import (
     xarray_var_iter,
     get_coords,
     get_plotting_function,
-    dealiaser,
+    matplotlib_kwarg_dealiaser,
 )
 from ..utils import _var_names
 
@@ -171,7 +171,7 @@ def plot_joint(
             types = "scatter"
         else:
             types = "hexbin"
-        joint_kwargs = dealiaser(joint_kwargs, type=types)
+        joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
 
     if marginal_kwargs is None:
         marginal_kwargs = {}

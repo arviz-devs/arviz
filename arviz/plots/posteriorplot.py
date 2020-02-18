@@ -9,7 +9,7 @@ from .plot_utils import (
     get_coords,
     filter_plotters_list,
     get_plotting_function,
-    dealiaser,
+    matplotlib_kwarg_dealiaser,
 )
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -211,9 +211,9 @@ def plot_posterior(
     )
     if kwargs is not None:
         if kind == "hist":
-            kwargs = dealiaser(kwargs, type="hist")
+            kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
         else:
-            kwargs = dealiaser(kwargs, type="plot")
+            kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     kwargs.setdefault("linewidth", _linewidth)
 
     posteriorplot_kwargs = dict(

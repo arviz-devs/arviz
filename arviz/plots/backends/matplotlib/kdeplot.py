@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ...plot_utils import _scale_fig_size, dealiaser
+from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
 
 
 def plot_kde(
@@ -56,7 +56,7 @@ def plot_kde(
         if plot_kwargs is None:
             plot_kwargs = {}
         else:
-            plot_kwargs = dealiaser(plot_kwargs, type="plot")
+            plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
         plot_kwargs.setdefault("color", "C0")
 
         default_color = plot_kwargs.get("color")
@@ -64,14 +64,14 @@ def plot_kde(
         if fill_kwargs is None:
             fill_kwargs = {}
         else:
-            fill_kwargs = dealiaser(fill_kwargs, type="hexbin")
+            fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
 
         fill_kwargs.setdefault("color", default_color)
 
         if rug_kwargs is None:
             rug_kwargs = {}
         else:
-            rug_kwargs = dealiaser(rug_kwargs, type="plot")
+            rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
         rug_kwargs.setdefault("marker", "_" if rotated else "|")
         rug_kwargs.setdefault("linestyle", "None")
         rug_kwargs.setdefault("color", default_color)
@@ -131,16 +131,16 @@ def plot_kde(
         if contour_kwargs is None:
             contour_kwargs = {}
         else:
-            contour_kwargs = dealiaser(contour_kwargs, type="contour")
+            contour_kwargs = matplotlib_kwarg_dealiaser(contour_kwargs, "contour")
         contour_kwargs.setdefault("colors", "0.5")
         if contourf_kwargs is None:
             contourf_kwargs = {}
         else:
-            contourf_kwargs = dealiaser(contourf_kwargs, type="contour")
+            contourf_kwargs = matplotlib_kwarg_dealiaser(contourf_kwargs, "contour")
         if pcolormesh_kwargs is None:
             pcolormesh_kwargs = {}
         else:
-            pcolormesh_kwargs = dealiaser(pcolormesh_kwargs, type="pcolormesh")
+            pcolormesh_kwargs = matplotlib_kwarg_dealiaser(pcolormesh_kwargs, "pcolormesh")
 
         # gridsize = (128, 128) if contour else (256, 256)
 
