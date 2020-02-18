@@ -42,11 +42,12 @@ def plot_pair(
         ),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
-    TOOLTIPS  = [
-    (flat_var_names[0], "@{}".format(flat_var_names[0])),
-    (flat_var_names[1], "@{}".format(flat_var_names[1]))
+    TOOLTIPS = [
+        (flat_var_names[0], "@{}".format(flat_var_names[0])),
+        (flat_var_names[1], "@{}".format(flat_var_names[1])),
     ]
+    backend_kwargs.setdefault("tooltips", TOOLTIPS)
+    dpi = backend_kwargs.pop("dpi")
     if numvars == 2:
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
@@ -70,7 +71,10 @@ def plot_pair(
 
         if ax is None:
             ax = bkp.figure(
-                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs, tooltips=TOOLTIPS
+                width=int(figsize[0] * dpi),
+                height=int(figsize[1] * dpi),
+                **backend_kwargs,
+                tooltips=TOOLTIPS
             )
 
         if kind == "scatter":
