@@ -3,7 +3,12 @@ import warnings
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function, matplotlib_kwarg_dealiaser
+from .plot_utils import (
+    xarray_to_ndarray,
+    get_coords,
+    get_plotting_function,
+    matplotlib_kwarg_dealiaser,
+)
 from ..utils import _var_names
 
 
@@ -135,7 +140,7 @@ def plot_pair(
         if kind == "scatter":
             plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
             plot_kwargs.setdefault("marker", ".")
-            plot_kwargs.setdefault("lw", 0)
+            plot_kwargs.setdefault("linewidth", 0)
         elif kind == "kde":
             plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
         else:

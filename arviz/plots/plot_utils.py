@@ -914,4 +914,6 @@ def matplotlib_kwarg_dealiaser(args, kind):
         "contour": mpl.contour.ContourSet,
         "pcolormesh": mpl.collections.QuadMesh,
     }
-    return cbook.normalize_kwargs(args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {}))
+    return cbook.normalize_kwargs(
+        args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {})
+    )
