@@ -36,8 +36,16 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest --deselect-from-file select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
+      python -m pytest --deselect-from-file .azure-pipelines/select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
+
+  - script: |
+      echo env
+    displayName: 'env'
+
+  - script: |
+      ls -alh
+    displayName: 'ls'
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()

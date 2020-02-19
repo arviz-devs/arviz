@@ -47,7 +47,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest --select-from-file backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
+      python -m pytest --select-from-file .azure-pipelines/select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
   - script: |
