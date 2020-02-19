@@ -30,10 +30,8 @@ jobs:
       versionSpec: '$(python.version)'
     displayName: 'Use Python $(python.version): $(name)'
 
-  - task: Bash@3
-    inputs:
-      targetType: 'filePath'
-      scriptPath: '$(Build.SourcesDirectory)/.azure-pipelines/azure_install_backends.sh'
+  - script: |
+      .azure-pipelines/azure_install_backends.sh'
     displayName: 'Install packages'
 
   - script: |
