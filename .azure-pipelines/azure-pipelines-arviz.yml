@@ -45,7 +45,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest arviz/tests/backend_tests --cov arviz --cov-report html --report-log=log_${name}.json
+      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
   - script: |

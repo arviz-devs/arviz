@@ -576,5 +576,6 @@ def pystan_version():
     return int(pystan.__version__[0])
 
 
-def precompile_models(eight_schools_params, draws, chains):
+def test_precompile_models(eight_schools_params, draws, chains):
+    """Precompile model files."""
     load_cached_models(eight_schools_params, draws, chains)
