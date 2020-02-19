@@ -1,4 +1,3 @@
-(logname)# Azure Pipelines config for ArviZ
 jobs:
 - job: Backend
   pool:
