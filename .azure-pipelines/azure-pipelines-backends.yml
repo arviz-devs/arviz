@@ -32,7 +32,7 @@ jobs:
 
   - task: Bash@3
     inputs:
-      scriptPath: 'azure_install_backends.sh'
+      scriptPath: '.azure-pipelines/azure_install_backends.sh'
     displayName: 'Install packages'
 
   - script: |
