@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 set -ex # fail on first error, print commands
 
 # Install ArviZ dependencies
@@ -45,7 +44,7 @@ fi
 if [ "$(pymc3.version)" = "latest" ]; then
     python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
 else
-    python -m pip --no-cache-dir install pymc3==${pymc3.version}
+(   python -m pip --no-cache-dir install pymc3==${pymc3.version}
 fi
 
 python -m pip install --no-cache-dir -r requirements-external.txt
