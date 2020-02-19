@@ -1,22 +1,23 @@
 """Plot kde or histograms and values from MCMC samples."""
 from itertools import cycle
 import warnings
+from typing import Callable, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 
 from .plot_utils import get_plotting_function, get_coords, xarray_var_iter
-from ..data import convert_to_dataset
+from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
 
 
 def plot_trace(
-    data,
-    var_names=None,
-    transform=None,
-    coords=None,
-    divergences="bottom",
-    figsize=None,
+    data: InferenceData,
+    var_names: Optional[List[str]]=None,
+    transform: Optional[Callable]=None,
+    coords: Optional[CoordSpec]=None,
+    divergences: Optional[str]="bottom",
+    figsize: Optional[Tuple[float, float]]=None,
     rug=False,
     lines=None,
     compact=False,
@@ -47,7 +48,7 @@ def plot_trace(
         Refer to documentation of az.convert_to_dataset for details
     var_names : string, or list of strings
         One or more variables to be plotted.
-    coords : mapping, optional
+    coords : dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
@@ -83,11 +84,11 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_config: dict, optional
+    backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
-    backend_kwargs: bool, optional
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
