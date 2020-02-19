@@ -37,6 +37,10 @@ jobs:
     displayName: 'Install requirements'
 
   - script: |
+      python -m pip install .
+    displayName: 'Install ArviZ package'
+
+  - script: |
       python -m pip freeze
     displayName: 'Print packages'
 

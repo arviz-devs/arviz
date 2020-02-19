@@ -43,8 +43,16 @@ jobs:
     displayName: 'Install requirements'
 
   - script: |
+      python -m pip install .
+    displayName: 'Install ArviZ package'
+
+  - script: |
       python -m pip freeze
     displayName: 'Print packages'
+
+  - script: |
+      python -c "from arviz.tests import helpers as h;h.load_cached_models(h.eight_schools_params(), h.draws(), h.chains())"
+    displayName: 'precompile models'
 
   - script: |
       python -m pytest arviz/tests --select-from-file .azure-pipelines/select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
