@@ -33,7 +33,7 @@ jobs:
   - task: Bash@3
     inputs:
       targetType: 'filePath'
-      scriptPath: '.azure-pipelines/azure_install_backends.sh'
+      scriptPath: '$(Build.SourcesDirectory)/.azure-pipelines/azure_install_backends.sh'
     displayName: 'Install packages'
 
   - script: |
