@@ -30,7 +30,7 @@ jobs:
       versionSpec: '$(python.version)'
     displayName: 'Use Python $(python.version): $(name)'
 
-  - task: InstallPackages
+  - task: InstallPackages@0
     inputs:
       scriptPath: 'azure_install_backends.sh'
     displayName: 'Install packages'
@@ -63,19 +63,19 @@ jobs:
       python -m black examples
     displayName: 'black'
 
-  - task: PublishTestResults@2
+  - task: PublishTestResults@0
     condition: succeededOrFailed()
     inputs:
       testResultsFiles: '**/test-*.xml'
       testRunTitle: 'Publish test results for Python $(python.version)'
 
-  - task: PublishCodeCoverageResults@1
+  - task: PublishCodeCoverageResults@0
     inputs:
       codeCoverageTool: JaCoCo
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishBuildArtifacts@0
     inputs:
       pathtoPublish: 'log_${name}.json'
       artifactName: 'log_${name}'
