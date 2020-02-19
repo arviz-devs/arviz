@@ -1,0 +1,61 @@
+# Azure Pipelines config for ArviZ
+trigger:
+- master
+
+jobs:
+- job: build
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8"
+      Python_37:
+        python.version: 3.7
+        name: "Python 3.7"
+      Python_36:
+        python.version: 3.6
+        name: "Python 3.6"
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version): $(name)'
+
+  - script: |
+      python -m pip install  --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install pytest-azurepipelines pytest-reportlog
+    displayName: 'Install requirements'
+
+  - script: |
+      python -m pip freeze
+    displayName: 'Print packages'
+
+  - script: |
+      python -m pytest --deselect-from-file select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
+    display: 'pytest'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+      testRunTitle: 'Publish test results for Python $(python.version)'
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: JaCoCo
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'log_${name}.json'
+      artifactName: 'log_${name}'

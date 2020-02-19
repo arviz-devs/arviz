@@ -1,0 +1,42 @@
+============================= test session starts =============================
+platform win32 -- Python 3.7.5, pytest-5.3.0, py-1.8.0, pluggy-0.13.0
+rootdir: C:\Users\aroha\github\arviz
+collected 3339 items / 4 errors / 3339 deselected
+
+=================================== ERRORS ====================================
+_______________ ERROR collecting arviz/tests/test_data_emcee.py _______________
+ImportError while importing test module 'C:\Users\aroha\github\arviz\arviz\tests\test_data_emcee.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+arviz\tests\test_data_emcee.py:6: in <module>
+    import emcee  # pylint: disable=unused-import
+E   ModuleNotFoundError: No module named 'emcee'
+______________ ERROR collecting arviz/tests/test_data_numpyro.py ______________
+ImportError while importing test module 'C:\Users\aroha\github\arviz\arviz\tests\test_data_numpyro.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+arviz\tests\test_data_numpyro.py:4: in <module>
+    from jax.random import PRNGKey
+E   ModuleNotFoundError: No module named 'jax'
+_______________ ERROR collecting arviz/tests/test_data_pymc.py ________________
+ImportError while importing test module 'C:\Users\aroha\github\arviz\arviz\tests\test_data_pymc.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+arviz\tests\test_data_pymc.py:9: in <module>
+    import pymc3 as pm
+E   ModuleNotFoundError: No module named 'pymc3'
+_______________ ERROR collecting arviz/tests/test_data_pyro.py ________________
+ImportError while importing test module 'C:\Users\aroha\github\arviz\arviz\tests\test_data_pyro.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+arviz\tests\test_data_pyro.py:5: in <module>
+    import torch
+E   ModuleNotFoundError: No module named 'torch'
+============================== warnings summary ===============================
+C:\Users\aroha\miniconda3\envs\stan\lib\site-packages\_pytest\mark\structures.py:322
+  C:\Users\aroha\miniconda3\envs\stan\lib\site-packages\_pytest\mark\structures.py:322: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/latest/mark.html
+    PytestUnknownMarkWarning,
+
+-- Docs: https://docs.pytest.org/en/latest/warnings.html
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!
+================ 3339 deselected, 1 warning, 4 errors in 1.21s ================

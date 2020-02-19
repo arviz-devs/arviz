@@ -1,0 +1,84 @@
+# Azure Pipelines config for ArviZ
+trigger:
+- master
+
+jobs:
+- job: build
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_37_Latest:
+        python.version: 3.7
+        pystan.version: "latest"
+        pyro.version: "latest"
+        emcee.version: "latest"
+        name: "Backend Latest"
+      Python_37_PyStan_3_Pyro_1_Emcee_2_TF_1:
+        python.version: 3.7
+        pystan.version: "preview"
+        pyro.version: 1.0.0
+        pytorch.version: 1.3.0
+        emcee.version: 2
+        tensorflow.version: 1
+        name: "Backend Special"
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version): $(name)'
+
+  - task: InstallPackages
+    inputs:
+      scriptPath: 'azure_install_backends.sh'
+    displayName: 'Install packages'
+
+  - script: |
+      python -m pip install  --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install pytest-azurepipelines pytest-reportlog pytest-select
+    displayName: 'Install requirements'
+
+  - script: |
+      python -m pip freeze
+    displayName: 'Print packages'
+
+  - script: |
+      python -m pytest --select-from-file backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
+    display: 'pytest'
+
+  - script: |
+      python -m pylint arviz
+      python -m pylint examples
+    displayName: 'pylint'
+
+  - script: |
+      python -m pydocstyle arviz
+    displayName: 'pydocstyle'
+
+  - script: |
+      python -m black arviz
+      python -m black examples
+    displayName: 'black'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+      testRunTitle: 'Publish test results for Python $(python.version)'
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: JaCoCo
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'log_${name}.json'
+      artifactName: 'log_${name}'
