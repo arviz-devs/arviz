@@ -1,5 +1,5 @@
 jobs:
-- job: build
+- job: ArviZ-tests
   pool:
     vmImage: 'ubuntu-latest'
   variables:
