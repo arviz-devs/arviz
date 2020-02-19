@@ -25,6 +25,11 @@ jobs:
     displayName: 'Use Python $(python.version): $(name)'
 
   - script: |
+      ls
+      env
+      pwd
+
+  - script: |
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
