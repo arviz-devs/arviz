@@ -46,6 +46,7 @@ jobs:
 
   - script: |
       pytest arviz/tests --collect-only --quiet | grep -v ^arviz/tests/test_data_ | sed '/^$/,$ d' > .azure-pipelines/select_main_tests.txt
+      tail -100 .azure-pipelines/select_main_tests.txt
       python -m pytest arviz/tests --select-from-file .azure-pipelines/select_main_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
