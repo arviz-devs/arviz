@@ -1,5 +1,5 @@
 jobs:
-- job: Backend
+- job: ExternalTests
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -13,8 +13,7 @@ jobs:
         pystan.version: "latest"
         pyro.version: "latest"
         emcee.version: "latest"
-        logname: "backend_latest"
-        name: "Backend Latest"
+        name: "External latest"
       Python_37_PyStan_3_Pyro_1_Emcee_2_TF_1:
         python.version: 3.7
         pystan.version: "preview"
@@ -22,8 +21,7 @@ jobs:
         pytorch.version: 1.3.0
         emcee.version: 2
         tensorflow.version: 1
-        logname: "backend_special"
-        name: "Backend Special"
+        name: "External special"
 
   steps:
   - task: UsePythonVersion@0
@@ -107,7 +105,7 @@ jobs:
     displayName: 'precompile models'
 
   - script: |
-      python -m pytest arviz/tests/backend_tests --cov arviz --cov-report html --report-log=log_${logname}.json
+      python -m pytest arviz/tests/external_tests --cov arviz --cov-report html --report-log=log_pytest_external.json
     displayName: 'pytest'
 
   - script: |
@@ -137,5 +135,5 @@ jobs:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'log_${logname}.json'
+      pathtoPublish: 'log_pytest_external.json'
       artifactName: 'pytest log report'

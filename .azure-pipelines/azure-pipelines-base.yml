@@ -1,5 +1,5 @@
 jobs:
-- job: ArviZ
+- job: BaseTests
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -10,15 +10,12 @@ jobs:
     matrix:
       Python_38:
         python.version: 3.8
-        logname: "python38"
         name: "Python 3.8"
       Python_37:
         python.version: 3.7
-        logname: "python37"
         name: "Python 3.7"
       Python_36:
         python.version: 3.6
-        logname: "python36"
         name: "Python 3.6"
 
   steps:
@@ -56,7 +53,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html --report-log=log_${logname}.json
+      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html --report-log=log_pytest_base.json
     displayName: 'pytest'
 
   - script: |
@@ -81,5 +78,5 @@ jobs:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'log_${logname}.json'
+      pathtoPublish: 'log_pytest_base.json'
       artifactName: 'pytest log report'
