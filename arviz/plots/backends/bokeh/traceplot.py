@@ -62,9 +62,14 @@ def plot_trace(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+    tooltips = [
+        (var_names[0], "@{}".format(var_names[0])),
+        (var_names[1], "@{}".format(var_names[1])),
+    ]
 
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
     backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
+    backend_kwargs.setdefault("tooltips", tooltips)
 
     figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
 
