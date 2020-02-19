@@ -31,6 +31,7 @@ jobs:
     displayName: 'Use Python $(python.version): $(name)'
 
   - task: Bash@3
+    targetType: 'inline'
     inputs:
       scriptPath: '.azure-pipelines/azure_install_backends.sh'
     displayName: 'Install packages'
