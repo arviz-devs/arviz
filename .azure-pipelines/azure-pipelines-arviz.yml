@@ -25,7 +25,8 @@ jobs:
     displayName: 'Use Python $(python.version)'
 
   - script: |
-      apt-get update && apt-get install -y ffmpeg
+      apt-get update
+      apt-get install -y ffmpeg
     displayName: 'Install external libraries'
 
   - script: |
