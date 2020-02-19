@@ -196,7 +196,7 @@ class TestDataPyStan:
                     y ~ normal(0,1);
                 }
             """
-            from pystan import StanModel
+            from pystan import StanModel  # pylint: disable=import-error
 
             model = StanModel(model_code=model_code)
             fit = model.sampling(iter=10, chains=2, check_hmc_diagnostics=False)
@@ -217,7 +217,7 @@ class TestDataPyStan:
     @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
     def test_index_order(self, data, eight_schools_params):
         """Test 0-indexed data."""
-        import pystan
+        import pystan  # pylint: disable=import-error
 
         fit = data.model.sampling(data=eight_schools_params)
         if pystan.__version__ >= "2.18":
