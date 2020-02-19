@@ -46,7 +46,7 @@ def test_bad_rc_file():
 def test_warning_rc_file(caplog):
     """Test invalid lines and duplicated keys log warnings and bad value raises error."""
     path = os.path.dirname(os.path.abspath(__file__))
-    read_rcfile(os.path.join(path, "test.rcparams"))
+    read_rcfile(os.path.join(path, "..", "test.rcparams"))
     records = caplog.records
     assert len(records) == 1
     assert records[0].levelname == "WARNING"
@@ -105,7 +105,7 @@ def test_rcparams_repr_str():
 
 ### Test arvizrc.template file is up to date ###
 def test_rctemplate_updated():
-    fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../arvizrc.template")
+    fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../arvizrc.template")
     rc_pars_template = read_rcfile(fname)
     assert all([key in rc_pars_template.keys() for key in rcParams.keys()])
     assert all([value == rc_pars_template[key] for key, value in rcParams.items()])
