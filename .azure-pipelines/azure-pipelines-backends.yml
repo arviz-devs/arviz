@@ -94,7 +94,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -c "from arviz.tests import helpers as h;h.load_cached_models(h.eight_schools_params, h.draws, h.chains)"
+      python -c "from arviz.tests import helpers as h;h.precompile_models()"
     displayName: 'precompile models'
 
   - script: |

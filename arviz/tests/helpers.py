@@ -574,3 +574,7 @@ def pystan_version():
     except ImportError:
         import stan as pystan  # pylint: disable=import-error
     return int(pystan.__version__[0])
+
+
+def precompile_models(eight_schools_params, draws, chains):
+    load_cached_models(eight_schools_params, draws, chains)
