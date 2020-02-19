@@ -2,6 +2,7 @@
 
 set -ex # fail on first error, print commands
 
+env
 # Install ArviZ dependencies
 python -m pip install --upgrade pip
 
