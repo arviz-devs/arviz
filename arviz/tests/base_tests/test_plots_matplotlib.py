@@ -8,8 +8,8 @@ from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 
-from ..data import from_dict, load_arviz_data
-from ..stats import compare, loo, waic
+from ...data import from_dict, load_arviz_data
+from ...stats import compare, loo, waic
 from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -17,8 +17,8 @@ from ..helpers import (  # pylint: disable=unused-import
     multidim_models,
     create_multidimensional_model,
 )
-from ..rcparams import rcParams, rc_context
-from ..plots import (
+from ...rcparams import rcParams, rc_context
+from ...plots import (
     plot_density,
     plot_trace,
     plot_energy,
@@ -41,7 +41,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.plot_utils import _fast_kde, _cov
+from ...plots.plot_utils import _fast_kde, _cov
 
 rcParams["data.load"] = "eager"
 

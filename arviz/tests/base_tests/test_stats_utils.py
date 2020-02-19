@@ -6,8 +6,8 @@ import pytest
 from scipy.special import logsumexp
 from scipy.stats import circstd
 
-from ..data import load_arviz_data
-from ..stats.stats_utils import (
+from ...data import load_arviz_data
+from ...stats.stats_utils import (
     logsumexp as _logsumexp,
     make_ufunc,
     wrap_xarray_ufunc,

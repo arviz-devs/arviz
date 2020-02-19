@@ -5,9 +5,9 @@ import pytest
 from xarray.core.indexing import MemoryCachedArray
 
 
-from ..data import load_arviz_data, datasets
-from ..stats import compare
-from ..rcparams import (
+from ...data import load_arviz_data, datasets
+from ...stats import compare
+from ...rcparams import (
     rcParams,
     rc_context,
     _make_validate_choice,

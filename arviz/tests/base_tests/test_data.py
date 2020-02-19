@@ -21,8 +21,8 @@ from arviz import (
     clear_data_home,
     InferenceData,
 )
-from ..data.base import generate_dims_coords, make_attrs
-from ..data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
+from ...data.base import generate_dims_coords, make_attrs
+from ...data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,

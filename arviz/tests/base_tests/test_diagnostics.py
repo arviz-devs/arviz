@@ -6,10 +6,10 @@ from numpy.testing import assert_almost_equal, assert_array_almost_equal
 import pandas as pd
 import pytest
 
-from ..data import load_arviz_data, from_cmdstan
-from ..plots.plot_utils import xarray_var_iter
-from ..stats import bfmi, rhat, ess, mcse, geweke
-from ..stats.diagnostics import (
+from ...data import load_arviz_data, from_cmdstan
+from ...plots.plot_utils import xarray_var_iter
+from ...stats import bfmi, rhat, ess, mcse, geweke
+from ...stats.diagnostics import (
     ks_summary,
     _ess,
     _ess_quantile,
@@ -21,8 +21,8 @@ from ..stats.diagnostics import (
     _conv_quantile,
     _split_chains,
 )
-from ..utils import Numba
-from ..rcparams import rcParams
+from ...utils import Numba
+from ...rcparams import rcParams
 
 # For tests only, recommended value should be closer to 1.01-1.05
 # See discussion in https://github.com/stan-dev/rstan/pull/618
