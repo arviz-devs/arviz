@@ -54,7 +54,7 @@ jobs:
     displayName: 'precompile models'
 
   - script: |
-      pytest arviz/tests --collect-only --quiet | grep -v ^arviz/tests/test_data_ | sed '/^$/,$ d' > .azure-pipelines/select_main_tests.txt
+      ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | sed '/^$/,$ d' | sed '/^$/d' > .azure-pipelines/select_main_tests.txt
       python -m pytest arviz/tests --deselect-from-file .azure-pipelines/select_main_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
