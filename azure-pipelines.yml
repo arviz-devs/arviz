@@ -5,5 +5,5 @@
 # -*- mode: yaml -*-
 
 jobs:
-  - template: ./.azure-pipelines/azure-pipelines-arviz.yml
-  - template: ./.azure-pipelines/azure-pipelines-backends.yml
+  - template: .azure-pipelines/azure-pipelines-arviz.yml
+  - template: .azure-pipelines/azure-pipelines-backends.yml
