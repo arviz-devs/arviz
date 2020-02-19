@@ -1,5 +1,5 @@
 numpydoc
-pydocstyle<5.0
+pydocstyle
 pylint
 pytest
 pytest-cov
