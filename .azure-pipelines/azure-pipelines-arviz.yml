@@ -25,9 +25,16 @@ jobs:
     displayName: 'Use Python $(python.version)'
 
   - script: |
+    apt-get update && apt-get install -y ffmpeg
+  displayName: 'Install external libraries'
+
+  - script: |
       ls
       env
       pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
 
   - script: |
       python -m pip install  --no-cache-dir -r requirements.txt

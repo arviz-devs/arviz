@@ -496,7 +496,7 @@ def test_plot_ppc_save_animation(models, kind):
     )
     assert axes
     assert anim
-    animations_folder = "saved_animations"
+    animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
     path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
     anim.save(path)
@@ -521,7 +521,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     )
     assert axes
     assert anim
-    animations_folder = "saved_animations"
+    animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
     path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
     anim.save(path)

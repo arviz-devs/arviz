@@ -31,6 +31,14 @@ jobs:
     displayName: 'Use Python $(python.version): $(name)'
 
   - script: |
+      ls
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
       python -m pip install --upgrade pip
 
       if [ "$(pytorch.version)" = "latest" ]; then
@@ -103,7 +111,6 @@ jobs:
 
   - script: |
       python -m pylint arviz
-      python -m pylint examples
     displayName: 'pylint'
 
   - script: |
