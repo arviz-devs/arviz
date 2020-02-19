@@ -33,7 +33,7 @@ jobs:
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install pytest-azurepipelines pytest-reportlog pytest-select
+      python -m pip install pytest-azurepipelines pytest-reportlog
     displayName: 'Install requirements'
 
   - script: |
@@ -45,8 +45,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | grep arviz/tests/test_ > .azure-pipelines/select_main_tests.txt
-      python -m pytest arviz/tests --select-from-file .azure-pipelines/select_main_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
+      python -m pytest arviz/tests/backend_tests --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
   - script: |

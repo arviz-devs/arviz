@@ -107,7 +107,7 @@ class TestDiagnostics:
         """
         # download input files
         here = os.path.dirname(os.path.abspath(__file__))
-        data_directory = os.path.join(here, "saved_models")
+        data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
         posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_values.csv")

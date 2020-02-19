@@ -10,7 +10,7 @@ import pytest
 
 from ..data import from_dict, load_arviz_data
 from ..stats import compare, loo, waic
-from .helpers import (  # pylint: disable=unused-import
+from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     create_model,

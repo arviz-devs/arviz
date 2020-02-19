@@ -18,7 +18,7 @@ from ..rcparams import (
     read_rcfile,
 )
 
-from .helpers import models  # pylint: disable=unused-import
+from ..helpers import models  # pylint: disable=unused-import
 
 ### Test rcparams classes ###
 def test_rc_context_dict():

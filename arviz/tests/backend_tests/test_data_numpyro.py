@@ -5,7 +5,7 @@ from jax.random import PRNGKey
 from numpyro.infer import Predictive
 
 from ..data.io_numpyro import from_numpyro
-from .helpers import (  # pylint: disable=unused-import
+from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
     draws,

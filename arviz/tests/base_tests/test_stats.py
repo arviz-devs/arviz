@@ -22,7 +22,7 @@ from ..stats import (
 )
 from ..stats.stats import _gpinv
 from ..utils import Numba
-from .helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
+from ..helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
 from ..rcparams import rcParams
 
 
