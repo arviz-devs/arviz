@@ -127,7 +127,8 @@ def plot_trace(
 
     # Check the input for lines
     if lines is not None:
-        all_var_names = set([plotter[0] for plotter in plotters])
+        all_var_names = set(plotter[0] for plotter in plotters)
+
         invalid_var_names = set()
         for line in lines:
             if line[0] not in all_var_names:
