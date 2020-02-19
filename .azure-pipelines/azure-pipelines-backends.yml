@@ -1,7 +1,4 @@
 # Azure Pipelines config for ArviZ
-trigger:
-- master
-
 jobs:
 - job: build
   pool:
@@ -50,7 +47,7 @@ jobs:
 
   - script: |
       python -m pytest --select-from-file backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
-    display: 'pytest'
+    displayName: 'pytest'
 
   - script: |
       python -m pylint arviz
