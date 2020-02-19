@@ -6,6 +6,6 @@
 trigger:
   - master
 
-jobs
+jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml
   - template: .azure-pipelines/azure-pipelines-external.yml
