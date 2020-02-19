@@ -1,6 +1,6 @@
 # Azure Pipelines config for ArviZ
 jobs:
-- job: ArviZ-backend-tests
+- job: Backend
   pool:
     vmImage: 'ubuntu-latest'
   variables:
