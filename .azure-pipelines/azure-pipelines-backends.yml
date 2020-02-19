@@ -72,7 +72,7 @@ jobs:
       if [ "$(pymc3.version)" = "latest" ]; then
           python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
       else
-      (   python -m pip --no-cache-dir install pymc3==${pymc3.version}
+          python -m pip --no-cache-dir install pymc3==${pymc3.version}
       fi
 
       python -m pip install --no-cache-dir -r requirements-external.txt
@@ -98,7 +98,7 @@ jobs:
     displayName: 'precompile models'
 
   - script: |
-      ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | sed '/^$/,$ d' | sed '/^$/d' > .azure-pipelines/select_main_tests.txt
+      ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | grep ^arviz/tests/test_ > .azure-pipelines/select_main_tests.txt
       python -m pytest arviz/tests --deselect-from-file .azure-pipelines/select_main_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 

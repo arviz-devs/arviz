@@ -45,7 +45,6 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | grep ^arviz/tests/test_
       ls -p arviz/tests | grep -v / | grep -v test_data_ | grep test_ | sed 's/^/arviz\/tests\//' | xargs -n1 pytest --collect-only --quiet | grep arviz/tests/test_ > .azure-pipelines/select_main_tests.txt
       python -m pytest arviz/tests --select-from-file .azure-pipelines/select_main_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
