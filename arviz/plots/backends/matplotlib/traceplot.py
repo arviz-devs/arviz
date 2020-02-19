@@ -127,10 +127,17 @@ def plot_trace(
 
     # Check the input for lines
     if lines is not None:
-        all_var_names = set([plotters[i][0] for i in range(len(plotters))])
+        all_var_names = set([plotter[0] for plotter in plotters])
+        invalid_var_names = set()
         for line in lines:
             if line[0] not in all_var_names:
-                warnings.warn("A valid var_name should be provided, found {} expected one of {}".format(line[0], all_var_names))
+                invalid_var_names.add(line[0])
+        if len(invalid_var_names):
+            warnings.warn(
+                "A valid var_name should be provided, found {} expected from {}".format(
+                    invalid_var_names, all_var_names
+                )
+            )
 
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
