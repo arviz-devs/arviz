@@ -39,19 +39,19 @@ jobs:
       python -m pytest --deselect-from-file select_backend_tests.txt --cov arviz --cov-report html --report-log=log_${name}.json
     displayName: 'pytest'
 
-  - task: PublishTestResults@0
+  - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:
       testResultsFiles: '**/test-*.xml'
       testRunTitle: 'Publish test results for Python $(python.version)'
 
-  - task: PublishCodeCoverageResults@0
+  - task: PublishCodeCoverageResults@1
     inputs:
       codeCoverageTool: JaCoCo
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - task: PublishBuildArtifacts@0
+  - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: 'log_${name}.json'
       artifactName: 'log_${name}'
