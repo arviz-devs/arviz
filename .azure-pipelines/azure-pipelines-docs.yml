@@ -3,14 +3,13 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  condition: succeeded() # and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  # use and after GH_TOKEN exists and has been tested first
+  condition: succeeded() # and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
-    - name: GH_TOKEN # this needs to be a secret value and is removed from here
-      value: 'dummy_value'
   timeoutInMinutes: 360
   strategy:
     matrix:
@@ -58,7 +57,5 @@ jobs:
     displayName: 'Debug information 2'
 
   - script: |
-      echo deploy-fake
-      echo https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git
-      #ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
+      ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
     displayName: 'Deploy docs'
