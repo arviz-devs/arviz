@@ -156,6 +156,21 @@ def test_plot_trace_max_subplots_warning(models):
     assert axes.shape
 
 
+@pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
+def test_plot_trace_invalid_varname_warning(models, kwargs):
+    with pytest.warns(UserWarning, match="valid var.+should be provided"):
+        axes = plot_trace(models.model_1, **kwargs)
+    assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
+)
+def test_plot_trace_bad_lines_value(models, bad_kwargs):
+    with pytest.raises(ValueError, match="line-positions should be numeric"):
+        plot_trace(models.model_1, **bad_kwargs)
+
+
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
 @pytest.mark.parametrize(
     "args_expected",
@@ -701,7 +716,6 @@ def test_plot_posterior_point_estimates(models, point_estimate):
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
-
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     axes = plot_compare(model_compare, **kwargs)
