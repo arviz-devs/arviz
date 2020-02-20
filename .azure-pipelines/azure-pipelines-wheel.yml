@@ -58,5 +58,5 @@ jobs:
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: 'dist'
-      artifactName: 'ArviZ wheel'
+      artifactName: 'arviz_wheel_dist'
     displayName: 'Publish the wheel'
