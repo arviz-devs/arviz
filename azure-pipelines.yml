@@ -14,3 +14,4 @@ trigger:
 jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml
   - template: .azure-pipelines/azure-pipelines-external.yml
+  - template: .azure-pipelines/azure-pipelines-wheel.yml
