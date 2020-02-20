@@ -517,6 +517,7 @@ class _sampledict:
     def insert(self, k, val, idx):
         """
         Insert `val` as the value of the `idx`th sample for the variable `k`.
+
         Parameters
         ----------
         k: str
