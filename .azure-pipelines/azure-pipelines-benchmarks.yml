@@ -42,7 +42,7 @@ jobs:
     displayName: 'Run the benchmarks'
 
   - script: |
-      python -m asv show master
+      git log --pretty=format:'%h' -n 1 | python -m asv show
     displayName: 'Print results'
 
   - script: |
