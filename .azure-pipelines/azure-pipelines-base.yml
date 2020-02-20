@@ -41,7 +41,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install pytest-azurepipelines
+      python -m pip install pytest-azurepipelines codecov
     displayName: 'Install requirements'
 
   - script: |
@@ -53,7 +53,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html
+      python -m pytest arviz/tests/base_tests --cov arviz
     displayName: 'pytest'
 
   - script: |
@@ -68,9 +68,6 @@ jobs:
       testRunTitle: 'Publish test results for Python $(python.version)'
     displayName: 'Publish Test Results'
 
-  - task: PublishCodeCoverageResults@1
-    inputs:
-      codeCoverageTool: JaCoCo
-      summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
-      reportDirectory: '$(System.DefaultWorkingDirectory)/htmlcov'
-    displayName: 'Publish Code Coverage Results'
+  - script: |
+      python -m codecov
+    displayName: 'upload coverage'

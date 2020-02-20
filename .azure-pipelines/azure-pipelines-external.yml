@@ -89,7 +89,7 @@ jobs:
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
-      python -m pip install pytest-azurepipelines
+      python -m pip install pytest-azurepipelines codecov
     displayName: 'Install requirements'
 
   - script: |
@@ -105,7 +105,7 @@ jobs:
     displayName: 'precompile models'
 
   - script: |
-      python -m pytest arviz/tests/external_tests --cov arviz --cov-report html
+      python -m pytest arviz/tests/external_tests --cov arviz
     displayName: 'pytest'
 
   - script: |
@@ -127,8 +127,6 @@ jobs:
       testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
       testRunTitle: 'Publish test results for Python $(python.version)'
 
-  - task: PublishCodeCoverageResults@1
-    inputs:
-      codeCoverageTool: Cobertura
-      summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
-      reportDirectory: '$(System.DefaultWorkingDirectory)/htmlcov'
+  - script: |
+      python -m codecov
+    displayName: 'upload coverage'
