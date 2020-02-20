@@ -39,9 +39,9 @@ jobs:
       python -m asv run
     displayName: 'Run the benchmarks'
 
-    - script: |
-        python -m asv show master
-      displayName: 'Print results'
+  - script: |
+      python -m asv show master
+    displayName: 'Print results'
 
   - script: |
       python -m asv publish
