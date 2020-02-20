@@ -13,11 +13,11 @@ from ..rcparams import rcParams
 
 def plot_trace(
     data: InferenceData,
-    var_names: Optional[List[str]]=None,
-    transform: Optional[Callable]=None,
-    coords: Optional[CoordSpec]=None,
-    divergences: Optional[str]="bottom",
-    figsize: Optional[Tuple[float, float]]=None,
+    var_names: Optional[List[str]] = None,
+    transform: Optional[Callable] = None,
+    coords: Optional[CoordSpec] = None,
+    divergences: Optional[str] = "bottom",
+    figsize: Optional[Tuple[float, float]] = None,
     rug=False,
     lines=None,
     compact=False,
