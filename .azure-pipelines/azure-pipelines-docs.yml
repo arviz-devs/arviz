@@ -56,9 +56,3 @@ jobs:
       echo deploy-fake
       echo "ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build"
     displayName: 'Deploy docs'
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: 'dist'
-      artifactName: 'arviz_wheel_dist'
-    displayName: 'Publish the wheel'
