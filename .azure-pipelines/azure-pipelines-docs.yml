@@ -1,5 +1,5 @@
 jobs:
-- job: BuildWheel
+- job: BuildDocs
   dependsOn:
     - BaseTests
     - ExternalTests
@@ -9,7 +9,7 @@ jobs:
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
-    - name: GH_TOKEN
+    - name: GH_TOKEN # this needs to be a secret value and is removed from here
       value: 'dummy_value'
   timeoutInMinutes: 360
   strategy:
@@ -54,5 +54,6 @@ jobs:
 
   - script: |
       echo deploy-fake
-      echo "ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build"
+      echo https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git
+      #ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
     displayName: 'Deploy docs'
