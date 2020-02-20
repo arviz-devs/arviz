@@ -158,7 +158,7 @@ def test_plot_trace_max_subplots_warning(models):
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning, match="valid var.+should be provided"):
         axes = plot_trace(models.model_1, **kwargs)
     assert axes.shape
 
@@ -167,7 +167,7 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
     "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
 )
 def test_plot_trace_bad_lines_value(models, bad_kwargs):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="line-positions should be numeric"):
         plot_trace(models.model_1, **bad_kwargs)
 
 

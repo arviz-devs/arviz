@@ -133,7 +133,7 @@ def plot_trace(
         for line in lines:
             if line[0] not in all_var_names:
                 invalid_var_names.add(line[0])
-        if len(invalid_var_names):
+        if invalid_var_names:
             warnings.warn(
                 "A valid var_name should be provided, found {} expected from {}".format(
                     invalid_var_names, all_var_names
