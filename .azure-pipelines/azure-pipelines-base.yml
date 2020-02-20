@@ -77,7 +77,6 @@ jobs:
 - job: BuildWheel
   dependsOn:
     - BaseTests
-    - ExternalTests
   condition: succeeded() # and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
   pool:
     vmImage: 'ubuntu-latest'
