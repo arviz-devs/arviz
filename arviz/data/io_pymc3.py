@@ -56,6 +56,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         trace=None,
         prior=None,
         posterior_predictive=None,
+        log_likelihood=None,
         predictions=None,
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
@@ -99,6 +100,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
+        self.log_likelihood = log_likelihood
         self.predictions = predictions
 
         def arbitrary_element(dct: Dict[Any, np.ndarray]) -> np.ndarray:
@@ -153,18 +155,25 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Compute log likelihood of each observation."""
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
-        cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
-        log_likelihood_dict = {}
+        if isinstance(self.log_likelihood, list):
+            cached = [
+                (var, var.logp_elemwise)
+                for var in self.model.observed_RVs
+                if var in self.log_likelihood
+            ]
+        else:
+            cached = [(var, var.logp_elemwise) for var in self.model.observed_RVs]
+        log_likelihood_dict = utils._sampledict(  # pylint: disable=protected-access
+            len(self.trace.chains)
+        )
         for var, log_like_fun in cached:
-            chain_likelihoods = []
             for chain in self.trace.chains:
                 log_like_chain = [
                     self.log_likelihood_vals_point(point, var, log_like_fun)
                     for point in self.trace.points([chain])
                 ]
-                chain_likelihoods.append(np.stack(log_like_chain))
-            log_likelihood_dict[var.name] = np.stack(chain_likelihoods)
-        return log_likelihood_dict
+                log_likelihood_dict.insert(var.name, np.stack(log_like_chain), chain)
+        return log_likelihood_dict.sample_dict
 
     @requires("trace")
     def posterior_to_xarray(self):
@@ -343,7 +352,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         id_dict = {
             "posterior": self.posterior_to_xarray(),
             "sample_stats": self.sample_stats_to_xarray(),
-            "log_likelihood": self.log_likelihood_to_xarray(),
+            "log_likelihood": self.log_likelihood_to_xarray()
+            if self.log_likelihood is not False
+            else None,
             "posterior_predictive": self.posterior_predictive_to_xarray(),
             "predictions": self.predictions_to_xarray(),
             **self.priors_to_xarray(),
@@ -361,6 +372,7 @@ def from_pymc3(
     *,
     prior: Optional[Dict[str, Any]] = None,
     posterior_predictive: Optional[Dict[str, Any]] = None,
+    log_likelihood: Optional = None,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None
@@ -380,6 +392,9 @@ def from_pymc3(
     posterior_predictive : dict, optional
         Dictionary with the variable names as keys, and values numpy arrays
         containing posterior predictive samples.
+    log_likelihood : list, optional
+        List of variables to calculate `log_likelihood`. Defaults to None which calculates
+        `log_likelihood` for all observed variables. If set to False, log_likelihood is skipped.
     coords : dict of {str: array-like}, optional
         Map of coordinate names to coordinate values
     dims : dict of {str: list of str}, optional
@@ -396,6 +411,7 @@ def from_pymc3(
         trace=trace,
         prior=prior,
         posterior_predictive=posterior_predictive,
+        log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
         model=model,

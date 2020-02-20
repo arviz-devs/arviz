@@ -488,3 +488,55 @@ def flatten_inference_data_to_dict(
 
                         data_dict[var_name_dim] = var_values[loc]
     return data_dict
+
+
+class _sampledict:
+    """
+    Utility for preallocating a dict with values.
+
+    Parameters
+    ----------
+    samples: int
+        The number of keys for the dict.
+
+    Attributes
+    ----------
+    sample_dict: Dict[str, np.ndarray]
+        Dictionary with filled values. Should be extracted
+        after a procedure has filled the `_sampledict` using the
+        `insert()` method
+    """
+
+    sample_dict = {}
+    _len = None
+
+    def __init__(self, samples: int):
+        self._len = samples
+        self.sample_dict = {}
+
+    def insert(self, k, val, idx):
+        """
+        Insert `val` as the value of the `idx`th sample for the variable `k`.
+        Parameters
+        ----------
+        k: str
+            Name of the variable.
+        val: anything that can go into a numpy array (including a numpy array)
+            The value of the `idx`th sample from variable `k`
+        ids: int
+            The index of the sample we are inserting into the trace.
+        """
+        if hasattr(val, "shape"):
+            value_shape = tuple(val.shape)
+        else:
+            value_shape = ()
+
+        # initialize new keys
+        if k not in self.sample_dict:
+            array_shape = (self._len,) + value_shape
+            self.sample_dict[k] = np.empty(array_shape)
+
+        if value_shape == ():
+            self.sample_dict[k][idx] = val
+        else:
+            self.sample_dict[k][idx, :] = val
