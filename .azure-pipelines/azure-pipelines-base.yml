@@ -30,7 +30,7 @@ jobs:
     displayName: 'Install external libraries'
 
   - script: |
-      ls
+      ls -ahl
       env
       pwd
       gcc --version
@@ -41,7 +41,7 @@ jobs:
       python -m pip install  --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install pytest-azurepipelines pytest-reportlog
+      python -m pip install pytest-azurepipelines
     displayName: 'Install requirements'
 
   - script: |
@@ -53,16 +53,13 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html --report-log=log_pytest_base.json
+      python -m pytest arviz/tests/base_tests --cov arviz --cov-report html
     displayName: 'pytest'
 
   - script: |
-      echo env
-    displayName: 'env'
-
-  - script: |
-      ls -alh
-    displayName: 'ls'
+      ls -ahl
+      env
+    displayName: 'Debug information 2'
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()
@@ -76,7 +73,42 @@ jobs:
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+
+- job: BuildWheel
+  dependsOn:
+    - BaseTests
+    - ExternalTests
+  condition: succeeded() # and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8 - wheel"
+
+  - script: |
+      # if [[ $(BUILD_SOURCEBRANCH) == ref/tags/* ]]; then
+      python -m venv wheel_env --copies --clear
+      source ./wheel_env/bin/activate
+      which python
+      python -m pip install --upgrade pip
+      python -m pip install -r requirements.txt
+      python setup.py sdist bdist_wheel
+      cd dist
+      ls -lh
+      # try to install and import the wheel
+      ls | grep *.whl | xargs python -m pip install
+      python -c "import arviz; print(arviz)"
+      cd ..
+      tar -zcf arviz_dist.tar.gz dist
+    displayName: 'Build a wheel'
+
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'log_pytest_base.json'
-      artifactName: 'pytest log report'
+      pathtoPublish: 'arviz_dist.tar.gz'
+      artifactName: 'arviz_dist.tar.gz'

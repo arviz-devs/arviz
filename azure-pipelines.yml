@@ -4,7 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 # -*- mode: yaml -*-
 trigger:
-  - master
+  branches:
+    include:
+    - master
+  tags:
+    include:
+    - '*'
 
 jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml
