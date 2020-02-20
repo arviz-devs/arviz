@@ -66,17 +66,20 @@ jobs:
     inputs:
       testResultsFiles: '**/test-*.xml'
       testRunTitle: 'Publish test results for Python $(python.version)'
+    displayName: 'Publish Test Results'
 
   - task: PublishCodeCoverageResults@1
     inputs:
       codeCoverageTool: JaCoCo
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+    displayName: 'Publish Code Coverage Results'
 
 
 - job: BuildWheel
   dependsOn:
     - BaseTests
+    - ExternalTests
   condition: succeeded() # and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
   pool:
     vmImage: 'ubuntu-latest'
@@ -90,24 +93,38 @@ jobs:
         python.version: 3.8
         name: "Python 3.8 - wheel"
 
+  steps:
+
   - script: |
-      # if [[ $(BUILD_SOURCEBRANCH) == ref/tags/* ]]; then
       python -m venv wheel_env --copies --clear
       source ./wheel_env/bin/activate
       which python
+    displayName: 'Create a clean venv'
+
+  - script: |
       python -m pip install --upgrade pip
       python -m pip install -r requirements.txt
+    displayName: 'Install requirements'
+
+  - script: |
       python setup.py sdist bdist_wheel
+      ls -lh dist
+    displayName: 'Build a wheel'
+
+  - script: |
       cd dist
       ls -lh
-      # try to install and import the wheel
       ls | grep *.whl | xargs python -m pip install
       python -c "import arviz; print(arviz)"
       cd ..
-      tar -zcf arviz_dist.tar.gz dist
-    displayName: 'Build a wheel'
+    displayName: 'Install and test the wheel'
+
+  - script: |
+      tar -zcvf arviz_dist.tar.gz dist
+    displayName: 'Pack the dist folder'
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: 'arviz_dist.tar.gz'
       artifactName: 'arviz_dist.tar.gz'
+    displayName: 'Publish the wheel'
