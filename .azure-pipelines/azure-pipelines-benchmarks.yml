@@ -36,6 +36,7 @@ jobs:
     displayName: 'Debug information 2'
 
   - script: |
+      python -m asv machine --yes
       python -m asv run
     displayName: 'Run the benchmarks'
 
