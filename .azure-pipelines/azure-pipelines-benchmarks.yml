@@ -44,19 +44,11 @@ jobs:
 
   - script: |
       git log --pretty=format:'%h' -n 1 | xargs python -m asv show
-    displayName: 'Print results'
-
-  - script: |
-      python -m asv publish
-    displayName: 'Create html'
-
-  - script: |
-      ls -ahl
-      env
-    displayName: 'Debug information 3'
+      git log --pretty=format:'%h' -n 1 | xargs python -m asv show > benchmark_results.txt
+    displayName: 'Print and save results'
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: '.asv/html'
-      artifactName: 'Benchmarks html'
+      pathtoPublish: 'benchmark_results.txt'
+      artifactName: 'Benchmarks'
     displayName: 'Publish the benchmarks'
