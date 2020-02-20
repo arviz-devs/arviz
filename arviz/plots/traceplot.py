@@ -1,11 +1,11 @@
 """Plot kde or histograms and values from MCMC samples."""
 from itertools import cycle
 import warnings
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Any
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_function, get_coords, xarray_var_iter
+from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, KwargSpec
 from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -18,23 +18,23 @@ def plot_trace(
     coords: Optional[CoordSpec] = None,
     divergences: Optional[str] = "bottom",
     figsize: Optional[Tuple[float, float]] = None,
-    rug=False,
-    lines=None,
-    compact=False,
-    compact_prop=None,
-    combined=False,
-    chain_prop=None,
-    legend=False,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    hist_kwargs=None,
-    trace_kwargs=None,
+    rug: bool = False,
+    lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
+    compact: bool = False,
+    compact_prop: Optional[Tuple[str, Any]] = None,
+    combined: bool = False,
+    chain_prop: Optional[Tuple[str, Any]] = None,
+    legend: bool = False,
+    plot_kwargs: Optional[KwargSpec] = None,
+    fill_kwargs: Optional[KwargSpec] = None,
+    rug_kwargs: Optional[KwargSpec] = None,
+    hist_kwargs: Optional[KwargSpec] = None,
+    trace_kwargs: Optional[KwargSpec] = None,
     ax=None,
-    backend=None,
-    backend_config=None,
-    backend_kwargs=None,
-    show=None,
+    backend: Optional[str] = None,
+    backend_config: Optional[KwargSpec] = None,
+    backend_kwargs: Optional[KwargSpec] = None,
+    show: Optional[bool] = None,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -46,49 +46,43 @@ def plot_trace(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : string, or list of strings
+    var_names : str or list of str, optional
         One or more variables to be plotted.
     coords : dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    divergences : {"bottom", "top", None, False}
-        Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
-    transform : callable
+    divergences : {"bottom", "top", None}, optional
+        Plot location of divergences on the traceplots.
+    transform : callable, optional
         Function to transform data (defaults to None i.e.the identity function)
-    figsize : figure size tuple
+    figsize : tuple of (float, float), optional
         If None, size is (12, variables * 2)
-    rug : bool
+    rug : bool, optional
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
-    lines : tuple
-        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
+    lines : list of tuple of (str, dict, array_like), optional
+        List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
-    compact : bool
+    compact : bool, optional
         Plot multidimensional variables in a single plot.
-    compact_prop : tuple of (str, list_like)
+    compact_prop : tuple of (str, array_like), optional
         Tuple containing the property name and the property values to distinguish diferent
         dimensions with compact=True
-    combined : bool
+    combined : bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    chain_prop : tuple of (str, list_like)
+    chain_prop : tuple of (str, array_like), optional
         Tuple containing the property name and the property values to distinguish diferent chains
-    legend : bool
+    legend : bool, optional
         Add a legend to the figure with the chain color code.
-    plot_kwargs : dict
+    plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs : dict, optional
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    fill_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    rug_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    hist_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
-    trace_kwargs : dict
+    trace_kwargs : dict, optional
         Extra keyword arguments passed to `plt.plot`
-    backend : str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend : {"matplotlib", "bokeh"}, optional
+        Select plotting backend.
     backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
-    backend_kwargs : bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     show : bool, optional

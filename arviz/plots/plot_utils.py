@@ -1,5 +1,6 @@
 """Utilities for plotting."""
 import warnings
+from typing import Dict, Any
 from itertools import product, tee
 import importlib
 from scipy.signal import convolve, convolve2d
@@ -16,6 +17,8 @@ import xarray as xr
 
 from ..utils import conditional_jit, _stack
 from ..rcparams import rcParams
+
+KwargSpec = Dict[str, Any]
 
 
 def make_2d(ary):
