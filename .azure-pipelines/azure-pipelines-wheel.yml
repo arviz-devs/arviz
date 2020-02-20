@@ -46,7 +46,7 @@ jobs:
       cd dist
       ls -lh
       ls | grep *.whl | xargs python -m pip install
-      python -c "import arviz; print(arviz);print(arviz.summary(arviz.load_arviz_data("non_centered_eight"))"
+      python -c "import arviz as az; print(az);print(az.summary(az.load_arviz_data('non_centered_eight')))"
       cd ..
     displayName: 'Install and test the wheel'
 
