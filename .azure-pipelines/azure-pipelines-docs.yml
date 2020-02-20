@@ -1,0 +1,64 @@
+jobs:
+- job: BuildWheel
+  dependsOn:
+    - BaseTests
+    - ExternalTests
+  condition: succeeded() # and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+    - name: GH_TOKEN
+      value: 'dummy_value'
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8 - docs"
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      ls -ahl
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
+      python -m pip install --no-cache-dir -r requirements-docs.txt
+      conda install phantomjs -c -conda-forge -y
+    displayName: 'Install requirements'
+
+  - script: |
+      python -msphinx -M clean doc doc/build
+      sphinx-build doc doc/build -b html
+    displayName: 'Build a docs'
+
+  - script: |
+      ls -ahl
+      env
+    displayName: 'Debug information 2'
+
+  - script: |
+      echo deploy-fake
+      echo "ghp-import -pfnr https://${GH_TOKEN}@github.com/${BUILD_REPOSITORY_NAME}.git doc/build"
+    displayName: 'Deploy docs'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'dist'
+      artifactName: 'arviz_wheel_dist'
+    displayName: 'Publish the wheel'
