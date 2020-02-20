@@ -46,13 +46,9 @@ jobs:
       cd dist
       ls -lh
       ls | grep *.whl | xargs python -m pip install
-      python -c "import arviz; print(arviz)"
+      python -c "import arviz; print(arviz);print(arviz.summary(arviz.load_arviz_data("non_centered_eight"))"
       cd ..
     displayName: 'Install and test the wheel'
-
-  - script: |
-      tar -zcvf arviz_dist.tar.gz dist
-    displayName: 'Pack the dist folder'
 
   - script: |
       ls -ahl
@@ -61,6 +57,6 @@ jobs:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'arviz_dist.tar.gz'
-      artifactName: 'arviz_dist.tar.gz'
+      pathtoPublish: 'dist'
+      artifactName: 'ArviZ wheel'
     displayName: 'Publish the wheel'

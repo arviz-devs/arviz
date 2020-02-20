@@ -1,0 +1,59 @@
+jobs:
+- job: Benchmarks
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8 - benchmarks"
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      ls -ahl
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
+      python -m pip install asv
+    displayName: 'Install requirements'
+
+  - script: |
+      python -m pip freeze
+    displayName: 'Debug information 2'
+
+  - script: |
+      python -m asv run
+    displayName: 'Run the benchmark'
+
+    - script: |
+        python -m asv show master
+      displayName: 'Print results'
+
+  - script: |
+      python -m asv publish
+    displayName: 'Create html'
+
+  - script: |
+      ls -ahl
+      env
+    displayName: 'Debug information 3'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '.asv/html'
+      artifactName: 'Benchmarks html'
+    displayName: 'Publish the benchmarks'
