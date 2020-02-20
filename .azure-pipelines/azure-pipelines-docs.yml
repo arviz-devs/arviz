@@ -39,7 +39,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-docs.txt
-      conda install phantomjs -c -conda-forge -y
+      conda install --channel conda-forge -y phantomjs
     displayName: 'Install requirements'
 
   - script: |
