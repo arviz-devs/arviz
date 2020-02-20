@@ -105,7 +105,7 @@ jobs:
     displayName: 'precompile models'
 
   - script: |
-      python -m pytest arviz/tests/external_tests --cov arviz
+      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
     displayName: 'pytest'
 
   - script: |
@@ -128,5 +128,5 @@ jobs:
       testRunTitle: 'Publish test results for Python $(python.version)'
 
   - script: |
-      python -m codecov
+      python -m codecov --token=$(CODECOV_TOKEN)
     displayName: 'upload coverage'

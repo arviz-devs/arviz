@@ -53,7 +53,7 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      python -m pytest arviz/tests/base_tests --cov arviz
+      python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
     displayName: 'pytest'
 
   - script: |
@@ -69,5 +69,5 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
-      python -m codecov
+      python -m codecov --token=$(CODECOV_TOKEN)
     displayName: 'upload coverage'
