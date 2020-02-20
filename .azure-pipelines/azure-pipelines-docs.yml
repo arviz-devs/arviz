@@ -34,6 +34,11 @@ jobs:
     displayName: 'Debug information'
 
   - script: |
+      sudo apt-get update
+      sudo apt-get install -y pandoc
+    displayName: 'Install external libraries'
+
+  - script: |
       python -m pip install --upgrade pip
       python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
