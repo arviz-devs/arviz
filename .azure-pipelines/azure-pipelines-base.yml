@@ -111,6 +111,7 @@ jobs:
   - script: |
       python -m pip install --upgrade pip
       python -m pip install --no-cache-dir -r requirements.txt
+      pip install wheel
     displayName: 'Install requirements'
 
   - script: |
