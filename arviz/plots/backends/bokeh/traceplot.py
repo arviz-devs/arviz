@@ -62,9 +62,10 @@ def plot_trace(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+    labels = [make_label(var_name,selection) for idx,(var_name,selection,value) in enumerate(plotters)]
     tooltips = [
-        (var_names[0], "@{}".format(var_names[0])),
-        (var_names[1], "@{}".format(var_names[1])),
+        (labels[0], "@{}".format(labels[0])),
+        (labels[1], "@{}".format(labels[1])),
     ]
 
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
