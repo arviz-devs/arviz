@@ -3,8 +3,7 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  # use and after GH_TOKEN exists and has been tested first
-  condition: succeeded() # and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
