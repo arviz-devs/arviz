@@ -7,8 +7,8 @@ from scipy.stats import linregress
 from xarray import Dataset, DataArray
 
 
-from ..data import load_arviz_data, from_dict, convert_to_inference_data, concat
-from ..stats import (
+from ...data import load_arviz_data, from_dict, convert_to_inference_data, concat
+from ...stats import (
     compare,
     hpd,
     loo,
@@ -20,10 +20,10 @@ from ..stats import (
     ess,
     apply_test_function,
 )
-from ..stats.stats import _gpinv
-from ..utils import Numba
-from .helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
-from ..rcparams import rcParams
+from ...stats.stats import _gpinv
+from ...utils import Numba
+from ..helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
+from ...rcparams import rcParams
 
 
 rcParams["data.load"] = "eager"

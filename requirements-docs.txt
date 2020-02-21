@@ -1,0 +1,10 @@
+ghp-import
+ipython
+nbsphinx
+numpydoc
+pydocstyle
+Sphinx>=1.8.3
+sphinx-bootstrap-theme
+sphinx-gallery
+selenium
+m2r

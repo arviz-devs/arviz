@@ -6,8 +6,8 @@ import torch
 import pyro
 from pyro.infer import Predictive
 
-from ..data.io_pyro import from_pyro
-from .helpers import (  # pylint: disable=unused-import
+from ...data.io_pyro import from_pyro
+from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
     draws,

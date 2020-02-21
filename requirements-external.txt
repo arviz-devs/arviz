@@ -1,0 +1,8 @@
+emcee
+pymc3 @ git+https://github.com/pymc-devs/pymc3
+pystan
+cmdstanpy
+pyro-ppl>=1.0.0
+tensorflow
+tensorflow-probability
+numpyro>=0.2.1

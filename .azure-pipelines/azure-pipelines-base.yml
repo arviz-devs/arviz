@@ -1,0 +1,73 @@
+jobs:
+- job: BaseTests
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8"
+      Python_37:
+        python.version: 3.7
+        name: "Python 3.7"
+      Python_36:
+        python.version: 3.6
+        name: "Python 3.6"
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y ffmpeg
+    displayName: 'Install external libraries'
+
+  - script: |
+      ls -ahl
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
+      python -m pip install --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install pytest-azurepipelines codecov
+    displayName: 'Install requirements'
+
+  - script: |
+      python -m pip install .
+    displayName: 'Install ArviZ package'
+
+  - script: |
+      python -m pip freeze
+    displayName: 'Print packages'
+
+  - script: |
+      python -m pytest arviz/tests/base_tests --cov arviz --cov-report=xml
+    displayName: 'pytest'
+
+  - script: |
+      ls -ahl
+      env
+    displayName: 'Debug information 2'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
+      testRunTitle: 'Publish test results for Python $(python.version)'
+    displayName: 'Publish Test Results'
+
+  - script: |
+      python -m codecov --token=$(CODECOV_TOKEN)
+    displayName: 'upload coverage'
