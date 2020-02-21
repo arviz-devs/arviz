@@ -163,7 +163,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 for var in self.model.observed_RVs
                 if var.name in self.log_likelihood
             ]
-        log_likelihood_dict = pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
+        log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
             len(self.trace.chains)
         )
         for var, log_like_fun in cached:
@@ -370,7 +370,7 @@ def from_pymc3(
     *,
     prior: Optional[Dict[str, Any]] = None,
     posterior_predictive: Optional[Dict[str, Any]] = None,
-    log_likelihood: True,
+    log_likelihood: Optional = True,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None
