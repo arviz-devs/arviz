@@ -20,9 +20,12 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    plot_kwargs,
-    contour,
     fill_last,
+    contour,
+    plot_kwargs,
+    scatter_kwargs,
+    kde_kwargs,
+    hexbin_kwargs,
     gridsize,
     colorbar,
     divergences,
@@ -35,6 +38,7 @@ def plot_pair(
     diagonal,
     point_estimate,
     point_estimate_kwargs,
+    point_estimate_marker_kwargs,
 ):
     """Matplotlib pairplot."""
     if backend_kwargs is None:
@@ -46,74 +50,72 @@ def plot_pair(
     }
     backend_kwargs.pop("constrained_layout")
 
+    if kind != "kde":
+        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contour_kwargs", {})
+        kde_kwargs["contour_kwargs"].setdefault("colors", "k")
+
+    # pylint: disable=R1702
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
 
-        if marginal_kwargs is None:
-            marginal_kwargs = {}
-
         marginal_kwargs.setdefault("plot_kwargs", {})
-        marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
+        marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
         # Flatten data
         x = infdata_group[0].flatten()
         y = infdata_group[1].flatten()
-
-        if diagonal:
-            # Instantiate figure and grid
-            fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
-            grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
-
-            if ax is None:
+        if ax is None:
+            if diagonal:
+                # Instantiate figure and grid
+                fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
+                grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
                 # Set up main plot
                 ax = fig.add_subplot(grid[1:, :-1])
-            # Set up top KDE
-            ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=ax)
-            # Set up right KDE
-            ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=ax)
+                # Set up top KDE
+                ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=ax)
+                # Set up right KDE
+                ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=ax)
 
-            for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
-                plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
+                for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
+                    plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
 
-            ax_hist_x.set_xlim(ax.get_xlim())
-            ax_hist_y.set_ylim(ax.get_ylim())
+                ax_hist_x.set_xlim(ax.get_xlim())
+                ax_hist_y.set_ylim(ax.get_ylim())
 
-            # Personalize axes
-            ax_hist_x.tick_params(labelleft=False, labelbottom=False)
-            ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+                # Personalize axes
+                ax_hist_x.tick_params(labelleft=False, labelbottom=False)
+                ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+            else:
+                fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
         else:
-            if ax is None:
-                fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            if diagonal:
+                assert ax.shape == (numvars, numvars)
+                ax[0, 1].remove()
+                ax_hist_x = ax[0, 0]
+                ax_hist_y = ax[1, 1]
+                ax = ax[1, 0]
+                for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
+                    plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
+            else:
+                ax = np.atleast_2d(ax)[0, 0]
 
-        if kind == "scatter":
-            ax.plot(infdata_group[0], infdata_group[1], **plot_kwargs)
-        elif kind == "kde":
-            plot_kde(
+        if "scatter" in kind:
+            ax.plot(infdata_group[0], infdata_group[1], **scatter_kwargs, **plot_kwargs)
+        if "kde" in kind:
+            plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs, **plot_kwargs)
+        if "hexbin" in kind:
+            hexbin = ax.hexbin(
                 infdata_group[0],
                 infdata_group[1],
-                contour=contour,
-                fill_last=fill_last,
-                ax=ax,
+                mincnt=1,
+                gridsize=gridsize,
+                **hexbin_kwargs,
                 **plot_kwargs
             )
-        elif kind == "hexbin":
-            hexbin = ax.hexbin(
-                infdata_group[0], infdata_group[1], mincnt=1, gridsize=gridsize, **plot_kwargs
-            )
             ax.grid(False)
-
-        else:
-            ax.plot(infdata_group[0], infdata_group[1], zorder=-1, **plot_kwargs)
-            plot_kde(
-                infdata_group[0],
-                infdata_group[1],
-                ax=ax,
-                contourf_kwargs={"alpha": 0},
-                contour_kwargs={"colors": "k"},
-                fill_last=False,
-            )
 
         if kind == "hexbin" and colorbar:
             cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
@@ -172,7 +174,7 @@ def plot_pair(
                     ax[j, i].remove()
                     continue
 
-                if i == j:
+                elif i == j:
                     if diagonal:
                         loc = "right"
                         plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
@@ -182,34 +184,24 @@ def plot_pair(
                         continue
 
                 else:
-                    if kind == "scatter":
-                        ax[j, i].plot(var1, var2, **plot_kwargs)
+                    if "scatter" in kind:
+                        ax[j, i].plot(var1, var2, **scatter_kwargs)
 
-                    elif kind == "kde":
+                    if "kde" in kind:
+
                         plot_kde(
                             var1,
                             var2,
-                            contour=contour,
-                            fill_last=fill_last,
                             ax=ax[j, i],
-                            **plot_kwargs
+                            fill_last=fill_last,
+                            contour=contour,
+                            **kde_kwargs
                         )
 
-                    elif kind == "hexbin":
+                    if "hexbin" in kind:
                         ax[j, i].grid(False)
                         hexbin = ax[j, i].hexbin(
-                            var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs
-                        )
-
-                    else:
-                        ax[j, i].plot(var1, var2, **plot_kwargs, zorder=-1)
-                        plot_kde(
-                            var1,
-                            var2,
-                            ax=ax[j, i],
-                            contourf_kwargs={"alpha": 0},
-                            contour_kwargs={"colors": "k"},
-                            fill_last=False,
+                            var1, var2, mincnt=1, gridsize=gridsize, **hexbin_kwargs
                         )
 
                     if divergences:
@@ -239,12 +231,7 @@ def plot_pair(
                             ax[-1, -1].axvline(pe_last, **point_estimate_kwargs)
 
                         ax[j, i].scatter(
-                            pe_x,
-                            pe_y,
-                            marker="s",
-                            s=figsize[0] + 50,
-                            **point_estimate_kwargs,
-                            zorder=4
+                            pe_x, pe_y, s=figsize[0] + 50, zorder=4, **point_estimate_marker_kwargs
                         )
 
                 if j != numvars - 1:

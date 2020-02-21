@@ -22,8 +22,10 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    plot_kwargs,
+    kde_kwargs,
+    hexbin_kwargs,
     contour,
+    plot_kwargs,
     fill_last,
     divergences,
     diverging_mask,
@@ -44,8 +46,11 @@ def plot_pair(
         **backend_kwargs,
     }
 
-    if marginal_kwargs is None:
-        marginal_kwargs = {}
+    if kind != "kde":
+        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
+        kde_kwargs.setdefault("contour_kwargs", {})
+        kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
+        kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
 
     dpi = backend_kwargs.pop("dpi")
     max_plots = (
@@ -63,6 +68,20 @@ def plot_pair(
 
     (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
 
+    def get_width_and_height(jointplot, rotate):
+        """Compute subplots dimensions for two or more variables"""
+        if jointplot:
+            if rotate:
+                width = int(figsize[0] / (numvars - 1) + 2 * dpi)
+                height = int(figsize[1] / (numvars - 1) * dpi)
+            else:
+                width = int(figsize[0] / (numvars - 1) * dpi)
+                height = int(figsize[1] / (numvars - 1) + 2 * dpi)
+        else:
+            width = int(figsize[0] / (numvars - 1) * dpi)
+            height = int(figsize[1] / (numvars - 1) * dpi)
+        return width, height
+
     if diagonal:
         var = 0
     else:
@@ -77,23 +96,11 @@ def plot_pair(
             for n, col in enumerate(range(numvars - var)):
                 if row < col:
                     row_ax.append(None)
-                elif row == col and numvars == 2:
-                    if n == 0:
-                        ax_h = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * dpi),
-                            height=int(figsize[1] / (numvars - 1) + 2 * dpi),
-                        )
-                        row_ax.append(ax_h)
-                    elif n == 1:
-                        ax_v = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) + 2 * dpi),
-                            height=int(figsize[1] / (numvars - 1) * dpi),
-                        )
-                        row_ax.append(ax_v)
                 else:
-                    ax_ = bkp.figure(
-                        **backend_kwargs
-                    )
+                    jointplot = row == col and numvars == 2 and diagonal
+                    rotate = n == 1
+                    width, height = get_width_and_height(jointplot, rotate)
+                    ax_ = bkp.figure(width=width, height=height)
                     row_ax.append(ax_)
             ax.append(row_ax)
         ax = np.array(ax)
@@ -122,7 +129,9 @@ def plot_pair(
             source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
         )
 
+    # pylint: disable=R1702
     for i in range(0, numvars - var):
+
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
         for j in range(0, numvars - var):
@@ -142,18 +151,18 @@ def plot_pair(
                     show=False,
                     backend="bokeh",
                     rotated=rotate,
-                    **marginal_kwargs
+                    **marginal_kwargs,
                 )
 
             elif j + var > i:
 
-                if kind == "scatter":
+                if "scatter" in kind:
                     if divergences:
                         ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
                     else:
                         ax[j, i].circle(var1, var2, source=source)
 
-                elif kind == "kde":
+                if "kde" in kind:
                     var1_kde = infdata_group[i]
                     var2_kde = infdata_group[j + var]
                     plot_kde(
@@ -165,25 +174,16 @@ def plot_pair(
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
-                        **plot_kwargs
+                        **kde_kwargs,
+                        **plot_kwargs,
                     )
 
-                elif kind == "hexbin":
+                if "hexbin" in kind:
                     var1_hexbin = infdata_group[i]
                     var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1_hexbin, var2_hexbin, size=0.5)
-                else:
-
-                    ax[j, i].circle(flat_var_names[0], flat_var_names[1], source=source)
-                    plot_kde(
-                        infdata_group[0],
-                        infdata_group[1],
-                        ax=ax[j, i],
-                        fill_last=False,
-                        backend="bokeh",
-                        show=False,
-                        contour_kwargs={"fill_alpha": 0, "line_alpha": 1},
+                    ax[j, i].hexbin(
+                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs, **plot_kwargs
                     )
 
                 if divergences:
@@ -204,29 +204,21 @@ def plot_pair(
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
 
-                    ax[j, i].square(
-                        pe_x,
-                        pe_y,
-                        line_width=figsize[0] + 2,
-                        line_color="orange",
-                        **point_estimate_kwargs
-                    )
+                    ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 2, **point_estimate_kwargs)
 
                     ax_hline = Span(
                         location=pe_y,
                         dimension="width",
                         line_dash="solid",
-                        line_color="orange",
                         line_width=3,
-                        **point_estimate_kwargs
+                        **point_estimate_kwargs,
                     )
                     ax_vline = Span(
                         location=pe_x,
                         dimension="height",
                         line_dash="solid",
-                        line_color="orange",
                         line_width=3,
-                        **point_estimate_kwargs
+                        **point_estimate_kwargs,
                     )
                     ax[j, i].add_layout(ax_hline)
                     ax[j, i].add_layout(ax_vline)
@@ -241,8 +233,7 @@ def plot_pair(
                             dimension="height",
                             line_dash="solid",
                             line_width=3,
-                            line_color="orange",
-                            **point_estimate_kwargs
+                            **point_estimate_kwargs,
                         )
                         ax[-1, -1].add_layout(ax_pe_vline)
 
@@ -252,8 +243,7 @@ def plot_pair(
                                 dimension="width",
                                 line_dash="solid",
                                 line_width=3,
-                                line_color="orange",
-                                **point_estimate_kwargs
+                                **point_estimate_kwargs,
                             )
                             ax[-1, -1].add_layout(ax_pe_hline)
 

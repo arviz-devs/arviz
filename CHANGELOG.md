@@ -16,6 +16,9 @@
 ### New features
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3, pystan, cmdstan and cmdstanpy translations (#983, #1032 and #1064)
 * Started adding pointwise log likelihood storage support (#794, #1044 and #1064)
+* Added `diagonal`, `point_estimate`, `point_estimate_kwargs`, `point_estimate_marker_kwargs`, `scatter_kwargs`, `kde_kwargs` and `hexbin_kwargs` to `plot_pair` #1079
+* Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 and pystan translations (#983 and #1032)
+* Started adding pointwise log likelihood storage support (#794, #1044)
 * Violinplot: rug-plot option (#997)
 * Integrated rcParams `plot.point_estimate` (#994), `stats.ic_scale` (#993) and `stats.credible_interval` (#1017)
 * Added `group` argument to `plot_ppc` (#1008), `plot_pair` (#1009) and `plot_joint` (#1012)

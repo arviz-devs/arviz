@@ -55,8 +55,8 @@ def plot_dist(
     elif kind == "kde":
         if plot_kwargs is None:
             plot_kwargs = {}
-
-        color = plt.rcParams["axes.prop_cycle"].by_key()["color"][0]
+        if color is None:
+            color = plt.rcParams["axes.prop_cycle"].by_key()["color"][0]
         plot_kwargs.setdefault("line_color", color)
         legend = label is not None
 
