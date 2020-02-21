@@ -1,8 +1,6 @@
 ghp-import
 ipython
 nbsphinx
-numpydoc
-pydocstyle<5.0
 Sphinx>=1.8.3
 sphinx-bootstrap-theme
 sphinx-gallery
