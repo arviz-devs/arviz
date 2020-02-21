@@ -1,6 +1,6 @@
 """Pareto tail indices plot."""
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array,to_hex
+from matplotlib.colors import to_rgba_array, to_hex
 import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
