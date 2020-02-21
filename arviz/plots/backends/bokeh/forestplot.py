@@ -95,12 +95,8 @@ def plot_forest(
         ),
         **backend_kwargs,
     }
-    tooltips = [
-        (var_names[0], "@{}".format(var_names[0])),
-        (var_names[1], "@{}".format(var_names[1])),
-    ]
+
     dpi = backend_kwargs.pop("dpi")
-    backend_kwargs.setdefault("tooltips", tooltips)
 
     if ax is None:
         axes = []

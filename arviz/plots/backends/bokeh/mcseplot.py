@@ -46,11 +46,7 @@ def plot_mcse(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    tooltips = [
-        (plotters[0], "@{}".format(plotters[0])),
-        (plotters[1], "@{}".format(plotters[1])),
-    ]
-    backend_kwargs.setdefault("tooltips", tooltips)
+
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
