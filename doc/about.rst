@@ -32,3 +32,5 @@ Contributors
 
 See the `GitHub contributor
 page <https://github.com/arviz-devs/arviz/graphs/contributors>`__
+
+THIS IS TEST (azure)
