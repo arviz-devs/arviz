@@ -1,6 +1,6 @@
 """Pareto tail indices plot."""
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
+from matplotlib.colors import to_rgba_array,to_hex
 import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
@@ -137,13 +137,14 @@ def plot_khat(
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
-    hlines_kwargs.setdefault("color", "C1")
+    hlines_kwargs.setdefault("color", to_hex("C1"))
 
     if coords is None:
         coords = {}
 
     if color is None:
         color = "C0"
+    color = to_hex(color)
 
     if isinstance(khats, np.ndarray):
         khats = khats.flatten()
