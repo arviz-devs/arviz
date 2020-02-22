@@ -1,7 +1,7 @@
 """PyMC3-specific conversion code."""
 import logging
 import warnings
-from typing import Dict, List, Any, Optional, TYPE_CHECKING
+from typing import Dict, List, Any, Optional, Iterable, Union, TYPE_CHECKING
 from types import ModuleType
 
 import numpy as np
@@ -370,7 +370,7 @@ def from_pymc3(
     *,
     prior: Optional[Dict[str, Any]] = None,
     posterior_predictive: Optional[Dict[str, Any]] = None,
-    log_likelihood: Optional = True,
+    log_likelihood: Union[bool, Iterable[str]] = True,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None
