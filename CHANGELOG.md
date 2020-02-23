@@ -19,6 +19,7 @@
 * **Experimental Feature**: Added `arviz.wrappers` module to allow ArviZ to
   refit the models if necessary
 * **Experimental Feature**: Added `reloo` function to ArviZ
+* ArviZ version to InferenceData attributes. (#1086)
 
 
 ### Maintenance and fixes
