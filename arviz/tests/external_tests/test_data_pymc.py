@@ -215,7 +215,6 @@ class TestDataPyMC3:
             pm.Normal("y1", x, 1, observed=y1_data)
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
-            inference_data = from_pymc3(trace=trace)
             inference_data = from_pymc3(trace=trace, log_likelihood=log_likelihood)
         test_dict = {
             "posterior": ["x"],

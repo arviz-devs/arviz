@@ -204,7 +204,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Extract log likelihood and log_p data from PyMC3 trace."""
         if self.predictions or not self.log_likelihood:
             return None
-        data = self._extract_log_likelihood()
+        try:
+            data = self._extract_log_likelihood()
+        except TypeError:
+            warnings.warn(
+                """Could not compute log_likelihood, it will be omitted.
+                Check your model object or set log_likelihood=False"""
+            )
+            return None
         return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
