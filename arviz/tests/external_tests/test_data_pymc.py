@@ -206,7 +206,8 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
-    def test_multiple_observed_rv(self):
+    @pytest.mark.parametrize("log_likelihood", [True, False, ["y1"]])
+    def test_multiple_observed_rv(self, log_likelihood):
         y1_data = np.random.randn(10)
         y2_data = np.random.randn(100)
         with pm.Model():
@@ -215,12 +216,19 @@ class TestDataPyMC3:
             pm.Normal("y2", x, 1, observed=y2_data)
             trace = pm.sample(100, chains=2)
             inference_data = from_pymc3(trace=trace)
+            inference_data = from_pymc3(trace=trace, log_likelihood=log_likelihood)
         test_dict = {
             "posterior": ["x"],
             "observed_data": ["y1", "y2"],
             "log_likelihood": ["y1", "y2"],
             "sample_stats": ["diverging", "lp"],
         }
+        if not log_likelihood:
+            test_dict.pop("log_likelihood")
+            test_dict["~log_likelihood"] = []
+        if isinstance(log_likelihood, list):
+            test_dict["log_likelihood"] = ["y1", "~y2"]
+
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
