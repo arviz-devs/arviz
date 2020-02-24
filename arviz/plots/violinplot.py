@@ -117,10 +117,7 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    if shade_kwargs is None:
-        shade_kwargs = {}
-    else:
-        shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
+    shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
 
     rows, cols = default_grid(len(plotters))
 
@@ -128,10 +125,7 @@ def plot_violin(
         figsize, textsize, rows, cols
     )
 
-    if rug_kwargs is None:
-        rug_kwargs = {}
-    else:
-        rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
 
     if credible_interval is None:
         credible_interval = rcParams["stats.credible_interval"]

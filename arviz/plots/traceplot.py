@@ -187,10 +187,7 @@ def plot_trace(
     if figsize is None:
         figsize = (12, len(plotters) * 2)
 
-    if trace_kwargs is None:
-        trace_kwargs = {}
-    else:
-        trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
+    trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
     trace_kwargs.setdefault("alpha", 0.35)
 
     if hist_kwargs is None:

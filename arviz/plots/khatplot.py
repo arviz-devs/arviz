@@ -132,10 +132,7 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
-    if hlines_kwargs is None:
-        hlines_kwargs = {}
-    else:
-        hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
+    hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -175,9 +172,8 @@ def plot_khat(
     if markersize is None:
         markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
         # for dots to have the same size
-    # scatter plot kwargs dealiasing
-    if kwargs is not None:
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
+
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
     kwargs.setdefault("s", markersize)
     kwargs.setdefault("marker", "+")
     color_mapping = None

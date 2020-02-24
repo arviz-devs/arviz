@@ -138,10 +138,7 @@ def plot_loo_pit(
     loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    else:
-        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs["color"] = to_hex(color)
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
@@ -158,10 +155,7 @@ def plot_loo_pit(
     plot_kwargs.setdefault("label", label)
     plot_kwargs.setdefault("zorder", 5)
 
-    if plot_unif_kwargs is None:
-        plot_unif_kwargs = {}
-    else:
-        plot_unif_kwargs = matplotlib_kwarg_dealiaser(plot_unif_kwargs, "plot")
+    plot_unif_kwargs = matplotlib_kwarg_dealiaser(plot_unif_kwargs, "plot")
     light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
     light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
     light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation

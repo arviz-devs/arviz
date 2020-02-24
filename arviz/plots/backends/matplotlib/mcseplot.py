@@ -88,10 +88,7 @@ def plot_mcse(
                     **text_kwargs,
                 )
         if rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
-            else:
-                rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
+            rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):

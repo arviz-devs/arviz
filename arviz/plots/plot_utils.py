@@ -904,6 +904,8 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
 
 def matplotlib_kwarg_dealiaser(args, kind):
     """De-aliase the kwargs passed to plots."""
+    if args is None:
+        return {}
     matplotlib_kwarg_dealiaser_dict = {
         "scatter": mpl.collections.PathCollection,
         "plot": mpl.lines.Line2D,

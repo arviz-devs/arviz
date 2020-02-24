@@ -148,10 +148,7 @@ def plot_elpd(
     if coords is None:
         coords = {}
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    else:
-        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
 
     if backend == "bokeh":
         plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])

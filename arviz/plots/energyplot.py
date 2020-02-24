@@ -92,14 +92,9 @@ def plot_energy(
     """
     energy = convert_to_dataset(data, group="sample_stats").energy.values
 
-    if fill_kwargs is None:
-        fill_kwargs = {}
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    else:
-        types = "hist" if kind in {"hist", "histogram"} else "plot"
-        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
+    types = "hist" if kind in {"hist", "histogram"} else "plot"
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 

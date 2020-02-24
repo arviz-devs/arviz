@@ -50,11 +50,7 @@ def plot_dist(
         )
 
     elif kind == "kde":
-        if plot_kwargs is None:
-            plot_kwargs = {}
-        else:
-            plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
-
+        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
         plot_kwargs.setdefault("color", color)
         legend = label is not None
 

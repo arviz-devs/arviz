@@ -209,11 +209,10 @@ def plot_posterior(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    if kwargs is not None:
-        if kind == "hist":
-            kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
-        else:
-            kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    if kind == "hist":
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
+    else:
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     kwargs.setdefault("linewidth", _linewidth)
 
     posteriorplot_kwargs = dict(

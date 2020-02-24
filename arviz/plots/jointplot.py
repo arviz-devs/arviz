@@ -162,16 +162,13 @@ def plot_joint(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
-    if joint_kwargs is None:
-        joint_kwargs = {}
+    if kind == "kde":
+        types = "plot"
+    elif kind == "scatter":
+        types = "scatter"
     else:
-        if kind == "kde":
-            types = "plot"
-        elif kind == "scatter":
-            types = "scatter"
-        else:
-            types = "hexbin"
-        joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
+        types = "hexbin"
+    joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
 
     if marginal_kwargs is None:
         marginal_kwargs = {}

@@ -248,18 +248,15 @@ def plot_ess(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    if kwargs is not None:
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     _linestyle = "-" if kind == "evolution" else "none"
     kwargs.setdefault("linestyle", _linestyle)
     kwargs.setdefault("linewidth", _linewidth)
     kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
-    else:
-        extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
     if kind == "evolution":
         extra_kwargs = {
             **extra_kwargs,
@@ -273,10 +270,8 @@ def plot_ess(
         extra_kwargs.setdefault("color", "k")
         extra_kwargs.setdefault("alpha", 0.5)
     kwargs.setdefault("label", kind)
-    if hline_kwargs is None:
-        hline_kwargs = {}
-    else:
-        hline_kwargs = matplotlib_kwarg_dealiaser(hline_kwargs, "plot")
+
+    hline_kwargs = matplotlib_kwarg_dealiaser(hline_kwargs, "plot")
     hline_kwargs.setdefault("linewidth", _linewidth)
     hline_kwargs.setdefault("linestyle", "--")
     hline_kwargs.setdefault("color", "gray")
@@ -284,10 +279,7 @@ def plot_ess(
     if extra_methods:
         mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
         sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
-        if text_kwargs is None:
-            text_kwargs = {}
-        else:
-            text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
         text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])

@@ -139,10 +139,8 @@ def plot_mcse(
     kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "_" if errorbar else "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
-    else:
-        extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
     extra_kwargs.setdefault("linestyle", "-")
     extra_kwargs.setdefault("linewidth", _linewidth / 2)
     extra_kwargs.setdefault("color", "k")
@@ -150,10 +148,8 @@ def plot_mcse(
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")
         sd_mcse = mcse(data, var_names=var_names, method="sd")
-        if text_kwargs is None:
-            text_kwargs = {}
-        else:
-            text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
+
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
         text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
