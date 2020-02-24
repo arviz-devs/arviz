@@ -3,12 +3,7 @@ import warnings
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import (
-    xarray_to_ndarray,
-    get_coords,
-    get_plotting_function,
-    matplotlib_kwarg_dealiaser,
-)
+from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function
 from ..utils import _var_names
 
 
@@ -34,7 +29,6 @@ def plot_pair(
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
-
     Parameters
     ----------
     data : obj
@@ -81,18 +75,14 @@ def plot_pair(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
-
     Returns
     -------
     axes : matplotlib axes or bokeh figures
-
     Examples
     --------
     KDE Pair Plot
-
     .. plot::
         :context: close-figs
-
         >>> import arviz as az
         >>> centered = az.load_arviz_data('centered_eight')
         >>> coords = {'school': ['Choate', 'Deerfield']}
@@ -102,23 +92,17 @@ def plot_pair(
         >>>             coords=coords,
         >>>             divergences=True,
         >>>             textsize=18)
-
     Hexbin pair plot
-
     .. plot::
         :context: close-figs
-
         >>> az.plot_pair(centered,
         >>>             var_names=['theta', 'mu'],
         >>>             coords=coords,
         >>>             textsize=18,
         >>>             kind='hexbin')
-
     Pair plot showing divergences
-
     .. plot::
         :context: close-figs
-
         >>> az.plot_pair(centered,
         ...             var_names=['theta', 'mu', 'tau'],
         ...             coords=coords,
@@ -136,20 +120,13 @@ def plot_pair(
 
     if plot_kwargs is None:
         plot_kwargs = {}
-    else:
-        if kind == "scatter":
-            plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
-            plot_kwargs.setdefault("marker", ".")
-            plot_kwargs.setdefault("linewidth", 0)
-        elif kind == "kde":
-            plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
-        else:
-            plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "hexbin")
+
+    if kind == "scatter":
+        plot_kwargs.setdefault("marker", ".")
+        plot_kwargs.setdefault("lw", 0)
 
     if divergences_kwargs is None:
         divergences_kwargs = {}
-    else:
-        divergences_kwargs = matplotlib_kwarg_dealiaser(divergences_kwargs, "plot")
 
     divergences_kwargs.setdefault("marker", "o")
     divergences_kwargs.setdefault("markeredgecolor", "k")
