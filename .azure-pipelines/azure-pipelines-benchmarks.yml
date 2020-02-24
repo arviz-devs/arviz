@@ -41,11 +41,13 @@ jobs:
       cat hashestobenchmark.txt
       python -m asv run HASHFILE:hashestobenchmark.txt
     displayName: 'Run the benchmarks'
+    workingDirectory: asv_benchmarks/
 
   - script: |
       git log --pretty=format:'%h' -n 1 | xargs python -m asv show
-      git log --pretty=format:'%h' -n 1 | xargs python -m asv show > benchmark_results.txt
+      git log --pretty=format:'%h' -n 1 | xargs python -m asv show > ../benchmark_results.txt
     displayName: 'Print and save results'
+    workingDirectory: asv_benchmarks/
 
   - task: PublishBuildArtifacts@1
     inputs:
