@@ -3,8 +3,8 @@ import numpy as np
 import xarray as xr
 import pytest
 
-from ..data import from_dict
-from ..plots.plot_utils import (
+from ...data import from_dict
+from ...plots.plot_utils import (
     make_2d,
     xarray_to_ndarray,
     xarray_var_iter,
@@ -15,7 +15,7 @@ from ..plots.plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
-from ..rcparams import rc_context
+from ...rcparams import rc_context
 
 
 @pytest.mark.parametrize(

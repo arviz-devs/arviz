@@ -1,0 +1,62 @@
+jobs:
+- job: BuildWheel
+  dependsOn:
+    - BaseTests
+    - ExternalTests
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_38:
+        python.version: 3.8
+        name: "Python 3.8 - wheel"
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      ls -ahl
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install --no-cache-dir -r requirements.txt
+      pip install wheel
+    displayName: 'Install requirements'
+
+  - script: |
+      python setup.py sdist bdist_wheel
+      ls -lh dist
+    displayName: 'Build a wheel'
+
+  - script: |
+      cd dist
+      ls -lh
+      ls | grep *.whl | xargs python -m pip install
+      python -c "import arviz as az; print(az);print(az.summary(az.load_arviz_data('non_centered_eight')))"
+      cd ..
+    displayName: 'Install and test the wheel'
+
+  - script: |
+      ls -ahl
+      env
+    displayName: 'Debug information 2'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'dist'
+      artifactName: 'arviz_wheel_dist'
+    displayName: 'Publish the wheel'

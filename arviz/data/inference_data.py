@@ -287,8 +287,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
         In [1]: import arviz as az
            ...: import numpy as np
            ...: data = {
-           ...:     "a": (["chain", "draw", "a_dim"], np.random.normal(size=(4, 100, 3))),
-           ...:     "b": (["chain", "draw"], np.random.normal(size=(4, 100))),
+           ...:     "a": np.random.normal(size=(4, 100, 3)),
+           ...:     "b": np.random.normal(size=(4, 100)),
            ...: }
            ...: coords = {"a_dim": ["x", "y", "z"]}
            ...: dataA = az.from_dict(data, coords=coords, dims={"a": ["a_dim"]})

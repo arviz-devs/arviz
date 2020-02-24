@@ -1,5 +1,6 @@
 """Matplotlib traceplot."""
 
+import warnings
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
@@ -48,8 +49,8 @@ def plot_trace(
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
         variables.
-    lines : tuple
-        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
+    lines : tuple or list
+        list of tuple of (var_name, {'coord': selection}, [line_positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
@@ -123,6 +124,21 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
+
+    # Check the input for lines
+    if lines is not None:
+        all_var_names = set(plotter[0] for plotter in plotters)
+
+        invalid_var_names = set()
+        for line in lines:
+            if line[0] not in all_var_names:
+                invalid_var_names.add(line[0])
+        if invalid_var_names:
+            warnings.warn(
+                "A valid var_name should be provided, found {} expected from {}".format(
+                    invalid_var_names, all_var_names
+                )
+            )
 
     for idx, (var_name, selection, value) in enumerate(plotters):
         value = np.atleast_2d(value)
@@ -219,6 +235,10 @@ def plot_trace(
                 line_values = [vlines]
             else:
                 line_values = np.atleast_1d(vlines).ravel()
+                if not np.issubdtype(line_values.dtype, np.number):
+                    raise ValueError(
+                        "line-positions should be numeric, found {}".format(line_values)
+                    )
             axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
             axes[idx, 1].hlines(
                 line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]

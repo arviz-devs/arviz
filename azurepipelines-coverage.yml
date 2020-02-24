@@ -1,5 +1,0 @@
-coverage:
-  status:
-    comments: off
-    diff:
-      target: 50%

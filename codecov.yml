@@ -1,0 +1,5 @@
+ignore:
+  - arviz/tests/
+
+comment:
+  after_n_builds: 5

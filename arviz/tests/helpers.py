@@ -467,7 +467,7 @@ def pystan_noncentered_schools(data, draws, chains):
         }
     """
     if pystan_version() == 2:
-        import pystan
+        import pystan  # pylint: disable=import-error
 
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(
@@ -570,7 +570,12 @@ def pystan_version():
 
     """
     try:
-        import pystan
+        import pystan  # pylint: disable=import-error
     except ImportError:
         import stan as pystan  # pylint: disable=import-error
     return int(pystan.__version__[0])
+
+
+def test_precompile_models(eight_schools_params, draws, chains):
+    """Precompile model files."""
+    load_cached_models(eight_schools_params, draws, chains)

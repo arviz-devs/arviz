@@ -1,8 +1,7 @@
 <img src="https://arviz-devs.github.io/arviz/_static/logo.png" height=100></img>
 
-[![Build Status](https://travis-ci.org/arviz-devs/arviz.svg?branch=master)](https://travis-ci.org/arviz-devs/arviz)
 [![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master)
-[![Coverage Status](https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master)](https://coveralls.io/github/arviz-devs/arviz?branch=master)
+[![codecov](https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg)](https://codecov.io/gh/arviz-devs/arviz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/arviz-devs/community)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg)](https://doi.org/10.5281/zenodo.2540945)

@@ -7,7 +7,7 @@ import importlib
 import numpy as np
 import pytest
 
-from ..utils import (
+from ...utils import (
     _var_names,
     numba_check,
     Numba,
@@ -18,8 +18,8 @@ from ..utils import (
     expand_dims,
     flatten_inference_data_to_dict,
 )
-from ..data import load_arviz_data, from_dict
-from ..stats.stats_utils import stats_variance_2d as svar
+from ...data import load_arviz_data, from_dict
+from ...stats.stats_utils import stats_variance_2d as svar
 
 
 @pytest.fixture(scope="session")

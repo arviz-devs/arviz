@@ -6,16 +6,16 @@ from pandas import DataFrame
 import numpy as np
 import pytest
 
-from ..data import from_dict, load_arviz_data
-from .helpers import (  # pylint: disable=unused-import
+from ...data import from_dict, load_arviz_data
+from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     create_model,
     multidim_models,
     create_multidimensional_model,
 )
-from ..rcparams import rcParams, rc_context
-from ..plots import (
+from ...rcparams import rcParams, rc_context
+from ...plots import (
     plot_autocorr,
     plot_compare,
     plot_density,
@@ -38,7 +38,7 @@ from ..plots import (
     plot_ppc,
     plot_violin,
 )
-from ..stats import compare, loo, waic
+from ...stats import compare, loo, waic
 
 rcParams["data.load"] = "eager"
 
