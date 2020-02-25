@@ -18,6 +18,7 @@ import xarray as xr
 
 from ..utils import conditional_jit, _stack
 from ..rcparams import rcParams
+from ..stats.stats_utils import histogram as _histogram
 
 KwargSpec = Dict[str, Any]
 
@@ -793,7 +794,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
         warnings.warn("kde plot failed, you may want to check your data")
         return np.array([np.nan]), np.nan, np.nan
 
-    hist, bin_edges = np.histogram(x, bins=n_bins, range=(xmin, xmax))
+    hist, bin_edges = _histogram(x, bins=n_bins, range=(xmin, xmax))
     grid = hist / (hist.sum() * np.diff(bin_edges))
 
     # _, grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax))
