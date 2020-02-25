@@ -88,9 +88,9 @@ def plot_trace(
             )
         else:
             label = plotters[i][1]
-        tooltip = [(label,"@{}".format(label))]
+        tooltip = [(str(label), "@{}".format(label))]
         if "tooltips" in backend_kwargs:
-        	del backend_kwargs["tooltips"]
+            del backend_kwargs["tooltips"]
         backend_kwargs.setdefault("tooltips", tooltip)
         if i != 0:
             _axes = [
