@@ -62,17 +62,9 @@ def plot_trace(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
-    labels = [
-        make_label(var_name, selection) for idx, (var_name, selection, value) in enumerate(plotters)
-    ]
-    tooltips = [
-        (labels[0], "@{}".format(labels[0])),
-        (labels[1], "@{}".format(labels[1])),
-    ]
 
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
     backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
-    backend_kwargs.setdefault("tooltips", tooltips)
 
     figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
 
@@ -81,6 +73,25 @@ def plot_trace(
 
     axes = []
     for i in range(len(plotters)):
+        if plotters[i][1]:
+            label = "{}_ARVIZ_CDS_SELECTION_{}".format(
+                plotters[i][0],
+                "_".join(
+                    str(item)
+                    for key, value in plotters[i][1].items()
+                    for item in (
+                        [key, value]
+                        if (isinstance(value, str) or not isinstance(value, Iterable))
+                        else [key, *value]
+                    )
+                ),
+            )
+        else:
+            label = plotters[i][1]
+        tooltip = [(label,"@{}".format(label))]
+        if "tooltips" in backend_kwargs:
+        	del backend_kwargs["tooltips"]
+        backend_kwargs.setdefault("tooltips", tooltip)
         if i != 0:
             _axes = [
                 bkp.figure(**backend_kwargs),
