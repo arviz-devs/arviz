@@ -20,6 +20,7 @@
   refit the models if necessary
 * **Experimental Feature**: Added `reloo` function to ArviZ
 * ArviZ version to InferenceData attributes. (#1086)
+* Add `log_likelihood` argument to `from_pymc3`
 
 
 ### Maintenance and fixes
@@ -42,6 +43,7 @@
 * Moved CI and docs (build & deploy) to Azure Pipelines and started using codecov (#1080)
 
 ### Deprecation
+* `from_pymc3` now requires PyMC3>=3.8
 
 ### Documentation
 * Updated `InferenceData` schema specification (`log_likelihood`,
