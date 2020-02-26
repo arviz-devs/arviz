@@ -105,59 +105,65 @@ def ColumnDataSource(*args, **kwargs):
     return ColumnDataSource(*args, **kwargs)
 
 
-def show_layout(ax, show):
+def create_layout(ax):
+    """Transform bokeh array of figures to layout."""
+    ax = np.atleast_2d(ax)
+    subplot_order = rcParams["plot.bokeh.layout.order"]
+    if subplot_order in ("row", "column"):
+        # set up 1D list of axes
+        ax = [item for item in ax.ravel().tolist() if item is not None]
+        show_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
+        layout_args = {}
+        if subplot_order == "row" and rcParams["plot.bokeh.layout.order_n"] == 1:
+            from bokeh.layouts import row as layout
+        elif subplot_order == "column" and rcParams["plot.bokeh.layout.order_n"] == 1:
+            from bokeh.layouts import column as layout
+        else:
+            from bokeh.layouts import layout
+
+        if rcParams["plot.bokeh.layout.order_n"] != 1:
+            n = rcParams["plot.bokeh.layout.order_n"]
+            ax = np.array(ax + [None for _ in range(int(np.ceil(len(ax) / n)) - len(ax))])
+            if subplot_order == "row":
+                ax = ax.reshape(n, -1)
+            else:
+                ax = ax.reshape(-1, n)
+            ax = ax.tolist()
+    else:
+        if subplot_order in ("square", "square_trimmed"):
+            ax = [item for item in ax.ravel().tolist() if item is not None]
+            n = int(np.ceil(len(ax) ** 0.5))
+            ax = ax + [None for _ in range(n ** 2 - len(ax))]
+            ax = np.array(ax).reshape(n, n)
+        ax = ax.tolist()
+        if (subplot_order == "square_trimmed") and any(
+            all(item is None for item in row) for row in ax
+        ):
+            from bokeh.layouts import layout
+
+            ax = [row for row in ax if not all(item is None for item in row)]
+            layout_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
+        else:
+            from bokeh.layouts import gridplot as layout
+
+            layout_args = {
+                "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
+                "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
+            }
+        show_args = {}
+
+    return layout(ax, **layout_args), show_args
+
+
+def show_layout(ax, show=None):
     """Call bokeh show for a layout."""
     if show is None:
         show = rcParams["plot.bokeh.show"]
     if show:
         import bokeh.plotting as bkp
 
-        ax = np.atleast_2d(ax)
-        subplot_order = rcParams["plot.bokeh.layout.order"]
-        if subplot_order in ("row", "column"):
-            # set up 1D list of axes
-            ax = [item for item in ax.ravel().tolist() if item is not None]
-            show_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
-            layout_args = {}
-            if subplot_order == "row" and rcParams["plot.bokeh.layout.order_n"] == 1:
-                from bokeh.layouts import row as layout
-            elif subplot_order == "column" and rcParams["plot.bokeh.layout.order_n"] == 1:
-                from bokeh.layouts import column as layout
-            else:
-                from bokeh.layouts import layout
-
-            if rcParams["plot.bokeh.layout.order_n"] != 1:
-                n = rcParams["plot.bokeh.layout.order_n"]
-                ax = np.array(ax + [None for _ in range(int(np.ceil(len(ax) / n)) - len(ax))])
-                if subplot_order == "row":
-                    ax = ax.reshape(n, -1)
-                else:
-                    ax = ax.reshape(-1, n)
-                ax = ax.tolist()
-        else:
-            if subplot_order in ("square", "square_trimmed"):
-                ax = [item for item in ax.ravel().tolist() if item is not None]
-                n = int(np.ceil(len(ax) ** 0.5))
-                ax = ax + [None for _ in range(n ** 2 - len(ax))]
-                ax = np.array(ax).reshape(n, n)
-            ax = ax.tolist()
-            if (subplot_order == "square_trimmed") and any(
-                all(item is None for item in row) for row in ax
-            ):
-                from bokeh.layouts import layout
-
-                ax = [row for row in ax if not all(item is None for item in row)]
-                layout_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
-            else:
-                from bokeh.layouts import gridplot as layout
-
-                layout_args = {
-                    "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
-                    "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
-                }
-            show_args = {}
-
-        bkp.show(layout(ax, **layout_args), **show_args)
+        layout, show_args = create_layout(ax)
+        bkp.show(layout, **show_args)
 
 
 def _copy_docstring(lib, function):
