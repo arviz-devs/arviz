@@ -169,7 +169,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             )
         except AttributeError:
             raise AttributeError(
-                "Either upgrade PyMC3 to latest version or downgrade ArviZ for log_likelihood."
+                "Installed version of ArviZ requires PyMC3>=3.8. Please upgrade with "
+                "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
             )
         for var, log_like_fun in cached:
             for chain in self.trace.chains:
