@@ -163,9 +163,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 for var in self.model.observed_RVs
                 if var.name in self.log_likelihood
             ]
-        log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
-            len(self.trace.chains)
-        )
+        try:
+            log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
+                len(self.trace.chains)
+            )
+        except ImportError:
+            raise ImportError(
+                "Either upgrade PyMC3 to latest version or downgrade ArviZ for log_likelihood."
+            )
         for var, log_like_fun in cached:
             for chain in self.trace.chains:
                 log_like_chain = [
