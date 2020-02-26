@@ -11,7 +11,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 
 
 def plot_kde(
@@ -231,8 +231,7 @@ def plot_kde(
             glyphs.append(image)
             ax.x_range.range_padding = ax.y_range.range_padding = 0
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     if return_glyph:
         return ax, glyphs

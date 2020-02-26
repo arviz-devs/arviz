@@ -1,5 +1,7 @@
 # pylint: disable=wrong-import-position
 """Bokeh Plotting Backend."""
+from bokeh.layouts import layout
+import bokeh.plotting as bkp
 from packaging import version
 
 
@@ -21,6 +23,9 @@ def backend_show(show):
         show = rcParams["plot.bokeh.show"]
     return show
 
+def show_layout(ax, show):
+    if backend_show(show):
+        bkp.show(layout(axes, toolbar_location=rcParams["plot.bokeh.layout.toolbar_location"], sizing_mode=rcParams["plot.bokeh.layout.sizing_mode"]))
 
 from .autocorrplot import plot_autocorr
 from .compareplot import plot_compare

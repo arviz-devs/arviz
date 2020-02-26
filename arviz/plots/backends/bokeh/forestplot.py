@@ -11,7 +11,7 @@ from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
 from ....rcparams import rcParams
 from ....stats import hpd
@@ -179,9 +179,7 @@ def plot_forest(
     ].group_offset
     axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes.tolist(), show)
 
     return axes
 

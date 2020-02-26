@@ -8,7 +8,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -112,8 +112,7 @@ def plot_pair(
         ax.xaxis.axis_label = flat_var_names[0]
         ax.yaxis.axis_label = flat_var_names[1]
 
-        if backend_show(show):
-            bkp.show(ax)
+        show_layout(ax, show)
 
     else:
         max_plots = (
@@ -225,8 +224,6 @@ def plot_pair(
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + 1]
 
-        if backend_show(show):
-            grid = gridplot(ax.tolist(), toolbar_location="above")
-            bkp.show(grid)
+        show_layout(ax.tolist(), show)
 
     return ax

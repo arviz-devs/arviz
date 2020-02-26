@@ -3,7 +3,7 @@ import bokeh.plotting as bkp
 from bokeh.models import Label
 from bokeh.models.annotations import Legend
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
@@ -101,7 +101,6 @@ def plot_energy(
         ax.add_layout(legend, "above")
         ax.legend.click_policy = "hide"
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax

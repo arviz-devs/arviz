@@ -8,7 +8,7 @@ from bokeh.models.annotations import Title
 from bokeh.models import ColumnDataSource
 import bokeh.models.markers as mk
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams, _validate_bokeh_marker
 
@@ -57,8 +57,7 @@ def plot_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
 
-        if backend_show(show):
-            bkp.show(ax, toolbar_location="above")
+        show_layout(ax, show)
 
     else:
         max_plots = (
@@ -129,8 +128,8 @@ def plot_elpd(
                     plot_kwargs,
                 )
 
-        if backend_show(show):
-            bkp.show(gridplot(ax.tolist(), toolbar_location="above"))
+        show_layout(ax.tolist(), show)
+
     return ax
 
 

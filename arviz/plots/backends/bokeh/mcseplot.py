@@ -7,7 +7,7 @@ from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -170,8 +170,6 @@ def plot_mcse(
             ax_.y_range._property_values["start"] = -0.05  # pylint: disable=protected-access
             ax_.y_range._property_values["end"] = 1  # pylint: disable=protected-access
 
-    if backend_show(show):
-        grid = gridplot(ax.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(ax.tolist(), show)
 
     return ax

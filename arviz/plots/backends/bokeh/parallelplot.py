@@ -4,7 +4,7 @@ import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 
 
 def plot_parallel(
@@ -61,7 +61,6 @@ def plot_parallel(
     ax.x_range = DataRange1d(bounds=backend_config["bounds_x_range"], min_interval=2)
     ax.y_range = DataRange1d(bounds=backend_config["bounds_y_range"], min_interval=5)
 
-    if backend_show(show):
-        bkp.show(ax)
+    show_layout(ax, show)
 
     return ax

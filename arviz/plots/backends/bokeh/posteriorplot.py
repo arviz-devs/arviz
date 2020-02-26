@@ -7,7 +7,7 @@ import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
@@ -88,9 +88,7 @@ def plot_posterior(
         _title.text = make_label(var_name, selection)
         ax_.title = _title
 
-    if backend_show(show):
-        grid = gridplot(ax.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(ax.tolist(), show)
 
     return ax
 

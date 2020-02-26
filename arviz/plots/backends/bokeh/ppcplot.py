@@ -3,7 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -239,9 +239,7 @@ def plot_ppc(
             xlabel = var_name
         ax_i.xaxis.axis_label = xlabel
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes.tolist(), show)
 
     return axes
 

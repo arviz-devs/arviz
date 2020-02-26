@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
 
@@ -143,7 +143,6 @@ def plot_loo_pit(
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax

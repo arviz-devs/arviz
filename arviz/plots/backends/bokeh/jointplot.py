@@ -3,7 +3,7 @@ import bokeh.plotting as bkp
 import numpy as np
 from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
@@ -104,8 +104,6 @@ def plot_joint(
             **marginal_kwargs
         )
 
-    if backend_show(show):
-        grid = gridplot([[ax_hist_x, None], [axjoin, ax_hist_y]], toolbar_location="above")
-        bkp.show(grid)
+    show_layout([[ax_hist_x, None], [axjoin, ax_hist_y]], show)
 
     return np.array([[ax_hist_x, None], [axjoin, ax_hist_y]])

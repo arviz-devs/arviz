@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import get_bins
 
@@ -88,8 +88,8 @@ def plot_dist(
     else:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
+
     return ax
 
 

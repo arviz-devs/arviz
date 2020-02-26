@@ -5,7 +5,7 @@ import bokeh.plotting as bkp
 from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title, Legend
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -99,9 +99,7 @@ def plot_density(
         ax1.add_layout(legend, "above")
         ax1.legend.click_policy = "hide"
 
-    if backend_show(show):
-        grid = gridplot(ax.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(ax.tolist(), show)
 
     return ax
 

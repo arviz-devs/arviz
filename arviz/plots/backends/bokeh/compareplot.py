@@ -2,7 +2,7 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, show_layout
 
 
 def plot_compare(
@@ -130,7 +130,6 @@ def plot_compare(
     ax.y_range._property_values["start"] = -1 + step  # pylint: disable=protected-access
     ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax
