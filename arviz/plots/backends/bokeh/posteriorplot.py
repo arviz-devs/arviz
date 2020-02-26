@@ -5,7 +5,8 @@ from typing import Optional
 from bokeh.models.annotations import Title
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
@@ -86,7 +87,7 @@ def plot_posterior(
         _title.text = make_label(var_name, selection)
         ax_.title = _title
 
-    show_layout(ax.tolist(), show)
+    show_layout(ax, show)
 
     return ax
 

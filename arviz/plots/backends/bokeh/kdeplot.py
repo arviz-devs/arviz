@@ -11,7 +11,8 @@ from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 
 
 def plot_kde(

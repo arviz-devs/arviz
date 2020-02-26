@@ -5,7 +5,8 @@ from bokeh.models.tickers import FixedTicker
 import numpy as np
 import scipy.stats
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import (
     _create_axes_grid,
     make_label,
@@ -124,6 +125,6 @@ def plot_rank(
         _title.text = make_label(var_name, selection)
         ax.title = _title
 
-    show_layout(axes.tolist(), show)
+    show_layout(axes, show)
 
     return axes

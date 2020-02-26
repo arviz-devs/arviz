@@ -3,7 +3,8 @@ import bokeh.plotting as bkp
 from bokeh.models import Label
 from bokeh.models.annotations import Legend
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi

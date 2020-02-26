@@ -5,7 +5,8 @@ from bokeh.models.annotations import Title, Legend
 import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -167,6 +168,6 @@ def plot_ess(
         ax_.xaxis.axis_label = "Total number of draws" if kind == "evolution" else "Quantile"
         ax_.yaxis.axis_label = ylabel.format("Relative ESS" if relative else "ESS")
 
-    show_layout(ax.tolist(), show)
+    show_layout(ax, show)
 
     return ax

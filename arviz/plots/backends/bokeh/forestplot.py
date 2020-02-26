@@ -10,7 +10,8 @@ from bokeh.models.tickers import FixedTicker
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
 from ....rcparams import rcParams
 from ....stats import hpd
@@ -178,7 +179,7 @@ def plot_forest(
     ].group_offset
     axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
-    show_layout(axes.tolist(), show)
+    show_layout(axes, show)
 
     return axes
 

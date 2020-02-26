@@ -4,7 +4,8 @@ from bokeh.models.annotations import Title
 import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -167,6 +168,6 @@ def plot_mcse(
             ax_.y_range._property_values["start"] = -0.05  # pylint: disable=protected-access
             ax_.y_range._property_values["end"] = 1  # pylint: disable=protected-access
 
-    show_layout(ax.tolist(), show)
+    show_layout(ax, show)
 
     return ax

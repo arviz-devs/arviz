@@ -7,7 +7,8 @@ from bokeh.models import ColumnDataSource
 import bokeh.models.markers as mk
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams, _validate_bokeh_marker
 
@@ -127,7 +128,7 @@ def plot_elpd(
                     plot_kwargs,
                 )
 
-        show_layout(ax.tolist(), show)
+        show_layout(ax, show)
 
     return ax
 

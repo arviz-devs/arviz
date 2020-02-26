@@ -2,7 +2,8 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...hpdplot import plot_hpd
 from ...kdeplot import _fast_kde
 

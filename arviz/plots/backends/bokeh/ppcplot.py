@@ -1,7 +1,8 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -237,7 +238,7 @@ def plot_ppc(
             xlabel = var_name
         ax_i.xaxis.axis_label = xlabel
 
-    show_layout(axes.tolist(), show)
+    show_layout(axes, show)
 
     return axes
 

@@ -17,6 +17,8 @@ plot.bokeh.bounds_y_range    : auto        # either auto, None or tuple of size 
 plot.bokeh.figure.dpi        : 60          # dots (pixels) per inch
 plot.bokeh.figure.height     : 500         # num of pixels
 plot.bokeh.figure.width      : 500         # num of pixels
+plot.bokeh.layout.order      : default     # Select subplot structure for bokeh. One of "default", "column", "row", "square", "square_trimmed"
+plot.bokeh.layout.order_n    : 1           # Select subplot structure for order column or row
 plot.bokeh.layout.sizing_mode: fixed       # Responsive layout. One of "fixed",
                                            # "stretch_width", "stretch_height", "stretch_both",
                                            # "scale_width", "scale_height", "scale_both"
@@ -37,4 +39,4 @@ plot.point_estimate          : mean        # One of mean, median, mode or None
 # rcParams related with statistical and diagnostic functions
 stats.credible_interval      : 0.94
 stats.information_criterion  : loo       # One of loo, waic
-stats.ic_scale               : log   # One of deviance, log, negative_log
+stats.ic_scale               : log       # One of deviance, log, negative_log

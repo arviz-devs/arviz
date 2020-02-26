@@ -2,7 +2,8 @@
 from bokeh.models.annotations import Title
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import _fast_kde
 from ...plot_utils import get_bins, make_label, _create_axes_grid
 from ....stats import hpd
@@ -88,7 +89,7 @@ def plot_violin(
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
 
-    show_layout(ax.tolist(), show)
+    show_layout(ax, show)
 
     return ax
 

@@ -162,6 +162,11 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
     "plot.bokeh.figure.width": (500, _validate_positive_int),
+    "plot.bokeh.layout.order": (
+        "default",
+        _make_validate_choice({"default", "column", "row", "square", "square_trimmed"}),
+    ),
+    "plot.bokeh.layout.order_n": (1, _validate_positive_int),
     "plot.bokeh.layout.sizing_mode": (
         "fixed",
         _make_validate_choice(

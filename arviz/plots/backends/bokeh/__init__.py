@@ -1,9 +1,7 @@
 # pylint: disable=wrong-import-position
 """Bokeh Plotting Backend."""
-from bokeh.layouts import layout
-import bokeh.plotting as bkp
-import numpy as np
 from packaging import version
+from ....rcparams import rcParams
 
 
 def backend_kwarg_defaults(*args, **kwargs):
@@ -16,26 +14,6 @@ def backend_kwarg_defaults(*args, **kwargs):
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
     return defaults
-
-
-def backend_show(show):
-    """Set default behaviour for show if not explicitly defined."""
-    if show is None:
-        show = rcParams["plot.bokeh.show"]
-    return show
-
-
-def show_layout(ax, show):
-    """Call bokeh show for a layout."""
-    if backend_show(show):
-        ax = np.atleast_2d(np.array(ax)).tolist()
-        bkp.show(
-            layout(
-                ax,
-                toolbar_location=rcParams["plot.bokeh.layout.toolbar_location"],
-                sizing_mode=rcParams["plot.bokeh.layout.sizing_mode"],
-            )
-        )
 
 
 from .autocorrplot import plot_autocorr
@@ -59,7 +37,6 @@ from .posteriorplot import plot_posterior
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from ....rcparams import rcParams
 
 
 def check_bokeh_version():

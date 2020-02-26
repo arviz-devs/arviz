@@ -5,7 +5,8 @@ import bokeh.plotting as bkp
 from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 
 
 def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):

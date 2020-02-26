@@ -5,7 +5,8 @@ import bokeh.plotting as bkp
 from bokeh.models import Span
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ....stats.stats_utils import histogram
 
 

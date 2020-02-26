@@ -6,7 +6,8 @@ import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter
 import numpy as np
 
-from . import backend_kwarg_defaults, show_layout
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -222,6 +223,6 @@ def plot_pair(
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + 1]
 
-        show_layout(ax.tolist(), show)
+        show_layout(ax, show)
 
     return ax
