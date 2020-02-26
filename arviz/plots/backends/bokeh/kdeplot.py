@@ -4,12 +4,12 @@ from collections.abc import Callable
 from numbers import Integral
 
 import bokeh.plotting as bkp
-import matplotlib._contour as _contour
-import numpy as np
 from bokeh.models import ColumnDataSource, Dash, Range1d
+import matplotlib._contour as _contour
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 

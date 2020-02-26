@@ -2,8 +2,8 @@
 from itertools import cycle
 
 import bokeh.plotting as bkp
-import numpy as np
 from matplotlib.pyplot import rcParams as mpl_rcParams
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 

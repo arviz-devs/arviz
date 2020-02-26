@@ -1,11 +1,9 @@
 """Bokeh rankplot."""
-import bokeh.plotting as bkp
-import numpy as np
-import scipy.stats
-from bokeh.layouts import gridplot
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
+import numpy as np
+import scipy.stats
 
 from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import (

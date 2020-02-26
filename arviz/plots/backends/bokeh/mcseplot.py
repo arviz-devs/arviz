@@ -1,10 +1,7 @@
 """Bokeh mcseplot."""
-
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
+import numpy as np
 from scipy.stats import rankdata
 
 from . import backend_kwarg_defaults, show_layout

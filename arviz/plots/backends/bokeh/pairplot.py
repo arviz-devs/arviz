@@ -1,12 +1,10 @@
 """Bokeh pairplot."""
-
 import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde

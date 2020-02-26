@@ -1,10 +1,8 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title, Legend
+import numpy as np
 from scipy.stats import rankdata
 
 from . import backend_kwarg_defaults, show_layout

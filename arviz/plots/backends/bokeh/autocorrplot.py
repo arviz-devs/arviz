@@ -1,9 +1,7 @@
 """Bokeh Autocorrplot."""
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import DataRange1d
 from bokeh.models.annotations import Title
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import _create_axes_grid, make_label

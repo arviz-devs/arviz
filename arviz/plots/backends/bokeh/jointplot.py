@@ -1,7 +1,7 @@
 """Bokeh jointplot."""
 import bokeh.plotting as bkp
 import numpy as np
-from bokeh.layouts import gridplot
+
 
 from . import backend_kwarg_defaults, show_layout
 from ...distplot import plot_dist

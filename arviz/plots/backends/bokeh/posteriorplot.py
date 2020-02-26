@@ -2,10 +2,8 @@
 from numbers import Number
 from typing import Optional
 
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde

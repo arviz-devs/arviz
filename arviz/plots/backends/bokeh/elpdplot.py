@@ -2,11 +2,10 @@
 import warnings
 
 import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 from bokeh.models import ColumnDataSource
 import bokeh.models.markers as mk
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import _scale_fig_size

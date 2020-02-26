@@ -1,7 +1,5 @@
 """Bokeh Posterior predictive plot."""
-import bokeh.plotting as bkp
 import numpy as np
-from bokeh.layouts import gridplot
 
 from . import backend_kwarg_defaults, show_layout
 from ...kdeplot import plot_kde, _fast_kde

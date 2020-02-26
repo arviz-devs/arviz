@@ -4,12 +4,11 @@ from collections import defaultdict, OrderedDict
 from itertools import cycle, tee
 
 import bokeh.plotting as bkp
-import matplotlib.pyplot as plt
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
+import matplotlib.pyplot as plt
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde

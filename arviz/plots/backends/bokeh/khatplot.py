@@ -2,8 +2,8 @@
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
-import numpy as np
 from bokeh.models import Span
+import numpy as np
 
 from . import backend_kwarg_defaults, show_layout
 from ....stats.stats_utils import histogram
