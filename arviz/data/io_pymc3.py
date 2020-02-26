@@ -310,8 +310,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         for var in self.model.deterministics:
             ancestors = self.theano.tensor.gof.graph.ancestors(var.owner.inputs)
             # no dependency on a random variable
-
-            # pylint: disable=E1101
             if not any((isinstance(a, self.pymc3.model.PyMC3Variable) for a in ancestors)):
                 constant_data_vars[var.name] = var
 

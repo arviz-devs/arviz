@@ -108,7 +108,7 @@ def plot_pair(
         assert ax.shape == (numvars - var, numvars - var)
 
     tmp_flat_var_names = None
-    if len(flat_var_names) == len(list(set(flat_var_names))):
+    if len(flat_var_names) == len(set(flat_var_names)):
         source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
     else:
         tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
@@ -129,7 +129,7 @@ def plot_pair(
             source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
         )
 
-    # pylint: disable=R1702
+    # pylint: disable=too-many-nested-blocks
     for i in range(0, numvars - var):
 
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
@@ -141,6 +141,9 @@ def plot_pair(
                 if tmp_flat_var_names is None
                 else tmp_flat_var_names[j + var]
             )
+
+            var1_ary = infdata_group[i]
+            var2_ary = infdata_group[j + var]
 
             if j == i and diagonal:
                 rotate = numvars == 2 and j == 1
@@ -163,11 +166,9 @@ def plot_pair(
                         ax[j, i].circle(var1, var2, source=source)
 
                 if "kde" in kind:
-                    var1_kde = infdata_group[i]
-                    var2_kde = infdata_group[j + var]
                     plot_kde(
-                        var1_kde,
-                        var2_kde,
+                        var1_ary,
+                        var2_ary,
                         contour=contour,
                         fill_last=fill_last,
                         ax=ax[j, i],
@@ -179,12 +180,8 @@ def plot_pair(
                     )
 
                 if "hexbin" in kind:
-                    var1_hexbin = infdata_group[i]
-                    var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(
-                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs, **plot_kwargs
-                    )
+                    ax[j, i].hexbin(var1_ary, var2_ary, size=0.5, **hexbin_kwargs, **plot_kwargs)
 
                 if divergences:
                     ax[j, i].circle(
@@ -199,10 +196,8 @@ def plot_pair(
                     )
 
                 if point_estimate:
-                    var1_pe = infdata_group[i]
-                    var2_pe = infdata_group[j]
-                    pe_x = calculate_point_estimate(point_estimate, var1_pe)
-                    pe_y = calculate_point_estimate(point_estimate, var2_pe)
+                    pe_x = calculate_point_estimate(point_estimate, var1_ary)
+                    pe_y = calculate_point_estimate(point_estimate, var2_ary)
 
                     ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 2, **point_estimate_kwargs)
 

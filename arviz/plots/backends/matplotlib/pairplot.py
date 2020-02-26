@@ -55,7 +55,7 @@ def plot_pair(
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
 
-    # pylint: disable=R1702
+    # pylint: disable=too-many-nested-blocks
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
