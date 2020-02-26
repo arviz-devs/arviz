@@ -2,6 +2,7 @@
 """Bokeh Plotting Backend."""
 from bokeh.layouts import layout
 import bokeh.plotting as bkp
+import numpy as np
 from packaging import version
 
 
@@ -27,6 +28,7 @@ def backend_show(show):
 def show_layout(ax, show):
     """Call bokeh show for a layout."""
     if backend_show(show):
+        ax = np.atleast_2d(np.array(ax)).tolist()
         bkp.show(
             layout(
                 ax,
