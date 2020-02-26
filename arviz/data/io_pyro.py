@@ -4,7 +4,7 @@ import numpy as np
 from packaging import version
 import xarray as xr
 
-from .inference_data import InferenceData
+from .inference_data import InferenceData, concat
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 from .. import utils
 
@@ -21,7 +21,15 @@ class PyroConverter:
     ndraws = None  # type: int
 
     def __init__(
-        self, *, posterior=None, prior=None, posterior_predictive=None, coords=None, dims=None
+        self,
+        *,
+        posterior=None,
+        prior=None,
+        posterior_predictive=None,
+        predictions=None,
+        coords=None,
+        dims=None,
+        pred_dims=None
     ):
         """Convert Pyro data into an InferenceData object.
 
@@ -33,10 +41,14 @@ class PyroConverter:
             Prior samples from a Pyro model
         posterior_predictive : dict
             Posterior predictive samples for the posterior
+        predictions: dict
+            Out of sample predictions
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
+        pred_dims: dict
+            Dims for predictions data. Map variable names to their coordinates.
         """
         self.posterior = posterior
         if posterior is not None:
@@ -45,9 +57,14 @@ class PyroConverter:
             self.nchains = self.ndraws = 0
         self.prior = prior
         self.posterior_predictive = posterior_predictive
+        self.predictions = predictions
         self.coords = coords
         self.dims = dims
+        self.pred_dims = pred_dims
         import pyro
+
+        if self.predictions is not None and self.pred_dims is None:
+            raise ValueError("Prediction dims are needed for predictions group.")
 
         self.pyro = pyro
         if posterior is not None:
@@ -107,11 +124,10 @@ class PyroConverter:
                 return None
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
-    @requires("posterior_predictive")
-    def posterior_predictive_to_xarray(self):
-        """Convert posterior_predictive samples to xarray."""
+    def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
+        """Convert posterior_predictive or prediction samples to xarray."""
         data = {}
-        for k, ary in self.posterior_predictive.items():
+        for k, ary in dct.items():
             ary = ary.detach().cpu().numpy()
             shape = ary.shape
             if shape[0] == self.nchains and shape[1] == self.ndraws:
@@ -124,7 +140,19 @@ class PyroConverter:
                     "posterior predictive shape not compatible with number of chains and draws."
                     "This can mean that some draws or even whole chains are not represented."
                 )
-        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=dims)
+
+    @requires("posterior_predictive")
+    def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(
+            self.posterior_predictive, self.dims
+        )
+
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions (out of sample predictions) to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(self.predictions, self.pred_dims)
 
     def priors_to_xarray(self):
         """Convert prior samples (and if possible prior predictive too) to xarray."""
@@ -183,13 +211,25 @@ class PyroConverter:
                 "sample_stats": self.sample_stats_to_xarray(),
                 "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
             }
         )
 
 
-def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
+def from_pyro(
+    posterior=None,
+    *,
+    prior=None,
+    posterior_predictive=None,
+    predictions=None,
+    coords=None,
+    dims=None,
+    pred_dims=None,
+    idata_origin=None,
+    inplace=False
+):
     """Convert Pyro data into an InferenceData object.
 
     Parameters
@@ -200,15 +240,45 @@ def from_pyro(posterior=None, *, prior=None, posterior_predictive=None, coords=N
         Prior samples from a Pyro model
     posterior_predictive : dict
         Posterior predictive samples for the posterior
+    predictions: dict
+        Out of sample predictions
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
+    pred_dims: dict
+        Dims for predictions data. Map variable names to their coordinates.
+    idata_origin: InferenceData, optional
+        If supplied, then modify this inference data in place, adding `predictions` group.
+    inplace: boolean, optional
+        If idata_origin is supplied and inplace is True, merge the `predictions` into idata_origin,
+        rather than returning a fresh InferenceData object.
     """
-    return PyroConverter(
+    data = PyroConverter(
         posterior=posterior,
         prior=prior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
         coords=coords,
         dims=dims,
+        pred_dims=pred_dims,
     ).to_inference_data()
+
+    if inplace and not idata_origin:
+        raise ValueError(
+            (
+                "Do not pass True for inplace unless passing"
+                "an existing InferenceData as idata_orig"
+            )
+        )
+    if idata_origin is None:
+        return data
+    else:
+        if inplace:
+            concat([idata_origin, data], dim=None, inplace=True)
+            return idata_origin
+        else:
+            # if we are not returning in place, then merge the old groups into the new inference
+            # data and return that.
+            concat([data, idata_origin], dim=None, copy=True, inplace=True)
+            return data
