@@ -32,7 +32,7 @@ class PyroConverter:
         coords=None,
         dims=None,
         pred_dims=None,
-        num_chains=None
+        num_chains=None,
     ):
         """Convert Pyro data into an InferenceData object.
 
@@ -309,5 +309,5 @@ def from_pyro(
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,
-        num_chains=num_chains
+        num_chains=num_chains,
     ).to_inference_data()
