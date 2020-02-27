@@ -14,7 +14,7 @@ from ...stats.stats_utils import (
     wrap_xarray_ufunc,
     not_valid,
     ELPDData,
-    normalize_dtypes,
+    normalize_dataframe_dtypes,
     stats_variance_2d,
     histogram,
     _sqrt,
