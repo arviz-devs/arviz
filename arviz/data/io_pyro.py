@@ -27,9 +27,12 @@ class PyroConverter:
         prior=None,
         posterior_predictive=None,
         predictions=None,
+        constant_data=None,
+        predictions_constant_data=None,
         coords=None,
         dims=None,
-        pred_dims=None
+        pred_dims=None,
+        num_chains=None
     ):
         """Convert Pyro data into an InferenceData object.
 
@@ -43,12 +46,18 @@ class PyroConverter:
             Posterior predictive samples for the posterior
         predictions: dict
             Out of sample predictions
+        constant_data: dict
+            Dictionary containing constant data variables mapped to their values.
+        predictions_constant_data: dict
+            Constant data used for out-of-sample predictions.
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
         pred_dims: dict
             Dims for predictions data. Map variable names to their coordinates.
+        num_chains: int
+            Number of chains used for sampling. Only needed when posterior is not provided.
         """
         self.posterior = posterior
         if posterior is not None:
@@ -58,9 +67,12 @@ class PyroConverter:
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.predictions = predictions
+        self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.coords = coords
         self.dims = dims
         self.pred_dims = pred_dims
+        self.num_chains = num_chains
         import pyro
 
         if self.predictions is not None and self.pred_dims is None:
@@ -134,6 +146,9 @@ class PyroConverter:
                 data[k] = ary
             elif shape[0] == self.nchains * self.ndraws:
                 data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
+            elif self.num_chains is not None:
+                draws = shape[0] // self.num_chains
+                data[k] = ary.reshape((self.num_chains, draws, *shape[1:]))
             else:
                 data[k] = utils.expand_dims(ary)
                 _log.warning(
@@ -203,6 +218,32 @@ class PyroConverter:
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.pyro))
 
+    def convert_constant_data_to_xarray(self, dct, dims):
+        """Convert constant_data or predictions_constant_data to xarray."""
+        if dims is None:
+            dims = {}
+        constant_data = {}
+        for name, vals in dct.items():
+            vals = utils.one_de(vals)
+            val_dims = dims.get(name)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, name, dims=val_dims, coords=self.coords
+            )
+            # filter coords based on the dims
+            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
+            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pyro))
+
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant_data to xarray."""
+        return self.convert_constant_data_to_xarray(self.constant_data, self.dims)
+
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions_constant_data to xarray."""
+        return self.convert_constant_data_to_xarray(self.predictions_constant_data, self.pred_dims)
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         return InferenceData(
@@ -212,6 +253,8 @@ class PyroConverter:
                 "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "predictions": self.predictions_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
+                "predictions_constant_data": self.predictions_constant_data_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
             }
@@ -224,11 +267,12 @@ def from_pyro(
     prior=None,
     posterior_predictive=None,
     predictions=None,
+    constant_data=None,
+    predictions_constant_data=None,
     coords=None,
     dims=None,
     pred_dims=None,
-    idata_origin=None,
-    inplace=False
+    num_chains=None,
 ):
     """Convert Pyro data into an InferenceData object.
 
@@ -242,43 +286,28 @@ def from_pyro(
         Posterior predictive samples for the posterior
     predictions: dict
         Out of sample predictions
+    constant_data: dict
+        Dictionary containing constant data variables mapped to their values.
+    predictions_constant_data: dict
+        Constant data used for out-of-sample predictions.
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
     pred_dims: dict
         Dims for predictions data. Map variable names to their coordinates.
-    idata_origin: InferenceData, optional
-        If supplied, then modify this inference data in place, adding `predictions` group.
-    inplace: boolean, optional
-        If idata_origin is supplied and inplace is True, merge the `predictions` into idata_origin,
-        rather than returning a fresh InferenceData object.
+    num_chains: int
+        Number of chains used for sampling. Only needed when posterior is not provided.
     """
-    data = PyroConverter(
+    return PyroConverter(
         posterior=posterior,
         prior=prior,
         posterior_predictive=posterior_predictive,
         predictions=predictions,
+        constant_data=constant_data,
+        predictions_constant_data=predictions_constant_data,
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,
+        num_chains=num_chains
     ).to_inference_data()
-
-    if inplace and not idata_origin:
-        raise ValueError(
-            (
-                "Do not pass True for inplace unless passing"
-                "an existing InferenceData as idata_orig"
-            )
-        )
-    if idata_origin is None:
-        return data
-    else:
-        if inplace:
-            concat([idata_origin, data], dim=None, inplace=True)
-            return idata_origin
-        else:
-            # if we are not returning in place, then merge the old groups into the new inference
-            # data and return that.
-            concat([data, idata_origin], dim=None, copy=True, inplace=True)
-            return data
