@@ -5,6 +5,7 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, get_plotting_function
+from ..rcparams import rcParams
 
 
 def plot_energy(
@@ -135,6 +136,10 @@ def plot_energy(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

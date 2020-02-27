@@ -156,6 +156,10 @@ def plot_violin(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
 
         violinplot_kwargs.pop("ax_labelsize")

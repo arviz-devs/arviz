@@ -118,7 +118,6 @@ def create_layout(ax, force_layout=False):
             "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
             "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
         }
-        show_args = {}
     elif any(item in subplot_order for item in ("row", "column")):
         # check number of rows
         match = re.match(r"(\d*)(row|column)", subplot_order)
@@ -126,8 +125,7 @@ def create_layout(ax, force_layout=False):
         subplot_order = match.group(2)
         # set up 1D list of axes
         ax = [item for item in ax.ravel().tolist() if item is not None]
-        show_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
-        layout_args = {}
+        layout_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
         if subplot_order == "row" and n == 1:
             from bokeh.layouts import row as layout
         elif subplot_order == "column" and n == 1:
@@ -163,20 +161,19 @@ def create_layout(ax, force_layout=False):
                 "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
                 "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
             }
-        show_args = {}
 
-    return layout(ax, **layout_args), show_args
+    return layout(ax, **layout_args)
 
 
-def show_layout(ax, show=None, force_layout=False):
-    """Call bokeh show for a layout."""
+def show_layout(ax, show=True, force_layout=False):
+    """Create a layout and call bokeh show."""
     if show is None:
         show = rcParams["plot.bokeh.show"]
     if show:
         import bokeh.plotting as bkp
 
-        layout, show_args = create_layout(ax, force_layout=force_layout)
-        bkp.show(layout, **show_args)
+        layout = create_layout(ax, force_layout=force_layout)
+        bkp.show(layout)
 
 
 def _copy_docstring(lib, function):

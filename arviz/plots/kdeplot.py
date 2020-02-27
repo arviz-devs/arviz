@@ -4,6 +4,7 @@ import xarray as xr
 
 from ..data import InferenceData
 from .plot_utils import get_plotting_function, _fast_kde, _fast_kde_2d
+from ..rcparams import rcParams
 
 
 def plot_kde(
@@ -218,6 +219,10 @@ def plot_kde(
         return_glyph=return_glyph,
         **kwargs,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
         kde_plot_args.pop("textsize")

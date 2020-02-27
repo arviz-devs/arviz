@@ -224,6 +224,10 @@ def plot_trace(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
         trace_plot_args.update(backend_config=backend_config)
 

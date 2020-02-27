@@ -7,6 +7,7 @@ from .plot_utils import (
     filter_plotters_list,
     get_plotting_function,
 )
+from ..rcparams import rcParams
 from ..utils import _var_names
 
 
@@ -126,6 +127,10 @@ def plot_autocorr(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 
