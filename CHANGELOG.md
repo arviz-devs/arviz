@@ -41,6 +41,7 @@
 * Stabilize covariance matrix for `plot_kde_2d` (#1075)
 * Removed extra dim in `prior` data in `from_pyro` (#1071)
 * Moved CI and docs (build & deploy) to Azure Pipelines and started using codecov (#1080)
+* Normalize pandas dataframe dtypes (#1092)
 
 ### Deprecation
 * `from_pymc3` now requires PyMC3>=3.8
