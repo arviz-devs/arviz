@@ -95,11 +95,13 @@ def plot_forest(
 
     if ax is None:
         axes = []
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault(
-            "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
-        )
+
         for i, width_r in zip(range(ncols), width_ratios):
+            backend_kwargs_i = backend_kwargs.copy()
+            backend_kwargs_i.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs_i.setdefault(
+                "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
+            )
             if i == 0:
                 ax = bkp.figure(**backend_kwargs,)
                 _y_range = ax.y_range
