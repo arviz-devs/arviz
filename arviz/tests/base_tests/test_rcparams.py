@@ -148,9 +148,9 @@ def test_make_validate_choice(args, allow_none, typeof):
         ("or in regex", "square"),
     ],
 )
-def test_make_validate_choice_regex(args, allow_none, typeof):
+def test_make_validate_choice_regex(args, allow_none):
     accepted_values = {"row", "column"}
-    accepted_values_regex = {"\d*row", "\d*column"}
+    accepted_values_regex = {r"\d*row", r"\d*column"}
     validate_choice = _make_validate_choice_regex(
         accepted_values, accepted_values_regex, allow_none=allow_none, typeof=str
     )
