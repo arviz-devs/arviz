@@ -18,8 +18,7 @@ plot.bokeh.figure.dpi        : 60          # dots (pixels) per inch
 plot.bokeh.figure.height     : 500         # num of pixels
 plot.bokeh.figure.width      : 500         # num of pixels
 plot.bokeh.layout.order      : default     # Select subplot structure for bokeh. One of "default", "column", "row", "square", "square_trimmed"
-                                           # or "Ncolumn" ("Nrow") where N is integer number of columns (rows), e.g. "4row" for 4 rows
-plot.bokeh.layout.order_n    : 1           # Select subplot structure for order column or row
+                                           # or "Ncolumn" ("Nrow") where N is an integer number of columns (rows), e.g. "4row" for 4 rows
 plot.bokeh.layout.sizing_mode: fixed       # Responsive layout. One of "fixed",
                                            # "stretch_width", "stretch_height", "stretch_both",
                                            # "scale_width", "scale_height", "scale_both"
