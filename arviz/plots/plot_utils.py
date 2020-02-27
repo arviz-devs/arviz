@@ -224,21 +224,14 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
         from .backends.bokeh import backend_kwarg_defaults
 
         backend_kwargs = {
-            **backend_kwarg_defaults(
-                ("tools", "plot.bokeh.tools"),
-                ("output_backend", "plot.bokeh.output_backend"),
-                ("width", "plot.bokeh.figure.width"),
-                ("height", "plot.bokeh.figure.height"),
-                ("dpi", "plot.bokeh.figure.dpi"),
-            ),
+            **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
             **backend_kwargs,
         }
         dpi = backend_kwargs.pop("dpi")
         if "figsize" in kwargs:
             figsize = kwargs["figsize"]
-            figsize = int(figsize[0] * dpi / cols), int(figsize[1] * dpi / rows)
-            backend_kwargs["width"] = figsize[0]
-            backend_kwargs["height"] = figsize[1]
+            backend_kwargs.setdefault("width", int(figsize[0] * dpi / cols))
+            backend_kwargs.setdefault("height", int(figsize[1] * dpi / rows))
 
         sharex = kwargs.get("sharex", False)
         sharey = kwargs.get("sharey", False)

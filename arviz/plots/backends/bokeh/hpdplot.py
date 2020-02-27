@@ -15,12 +15,7 @@ def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show)
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("width", "plot.bokeh.figure.width"),
-            ("height", "plot.bokeh.figure.height"),
-        ),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
     if ax is None:

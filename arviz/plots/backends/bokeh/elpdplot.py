@@ -34,11 +34,7 @@ def plot_elpd(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -49,9 +45,9 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            ax = bkp.figure(
-                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
-            )
+            backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs.setdefault("height", int(figsize[1] * dpi))
+            ax = bkp.figure(**backend_kwargs)
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs

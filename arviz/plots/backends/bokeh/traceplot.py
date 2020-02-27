@@ -54,11 +54,7 @@ def plot_trace(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")

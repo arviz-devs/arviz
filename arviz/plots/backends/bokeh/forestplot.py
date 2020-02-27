@@ -88,32 +88,23 @@ def plot_forest(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
 
     if ax is None:
         axes = []
+        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+        backend_kwargs.setdefault(
+            "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
+        )
         for i, width_r in zip(range(ncols), width_ratios):
             if i == 0:
-                ax = bkp.figure(
-                    height=int(figsize[0]) * dpi,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
-                    **backend_kwargs,
-                )
+                ax = bkp.figure(**backend_kwargs,)
                 _y_range = ax.y_range
             else:
-                ax = bkp.figure(
-                    height=figsize[0] * dpi,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
-                    y_range=_y_range,
-                    **backend_kwargs,
-                )
+                ax = bkp.figure(y_range=_y_range, **backend_kwargs,)
             axes.append(ax)
     else:
         axes = ax

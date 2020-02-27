@@ -13,6 +13,18 @@ def backend_kwarg_defaults(*args, **kwargs):
     # add needed default args from arviz.rcParams
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
+
+    for key, arg in {
+        "toolbar_location": "plot.bokeh.layout.toolbar_location",
+        "tools": "plot.bokeh.tools",
+        "output_backend": "plot.bokeh.output_backend",
+        "height": "plot.bokeh.figure.height",
+        "width": "plot.bokeh.figure.width",
+    }.items():
+        # by default, ignore height and width if dpi is used
+        if key in ("height", "width") and "dpi" in defaults:
+            continue
+        defaults.setdefault(key, rcParams[arg])
     return defaults
 
 

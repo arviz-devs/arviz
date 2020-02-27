@@ -27,17 +27,15 @@ def plot_compare(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
 
     if ax is None:
-        ax = bkp.figure(width=figsize[0] * dpi, height=figsize[1] * dpi, **backend_kwargs)
+        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
+        ax = bkp.figure(**backend_kwargs)
 
     yticks_pos = list(yticks_pos)
 

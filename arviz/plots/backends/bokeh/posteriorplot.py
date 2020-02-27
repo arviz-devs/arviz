@@ -45,7 +45,7 @@ def plot_posterior(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     if ax is None:

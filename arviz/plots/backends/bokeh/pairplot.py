@@ -34,11 +34,7 @@ def plot_pair(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -64,9 +60,9 @@ def plot_pair(
             )
 
         if ax is None:
-            ax = bkp.figure(
-                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
-            )
+            backend_kwargs["width"] = int(figsize[0] * dpi)
+            backend_kwargs["height"] = int(figsize[1] * dpi)
+            ax = bkp.figure(**backend_kwargs)
 
         if kind == "scatter":
             if divergences:
@@ -131,17 +127,15 @@ def plot_pair(
 
         if ax is None:
             ax = []
+            backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
+            backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
             for row in range(numvars - 1):
                 row_ax = []
                 for col in range(numvars - 1):
                     if row < col:
                         row_ax.append(None)
                     else:
-                        ax_ = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * dpi),
-                            height=int(figsize[1] / (numvars - 1) * dpi),
-                            **backend_kwargs
-                        )
+                        ax_ = bkp.figure(**backend_kwargs)
                         row_ax.append(ax_)
                 ax.append(row_ax)
             ax = np.array(ax)
