@@ -20,7 +20,7 @@ from .stats_utils import (
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     logsumexp as _logsumexp,
     ELPDData,
-    normalize_dtypes as _normalize_dtypes,
+    normalize_dataframe_dtypes as _normalize_dataframe_dtypes,
     stats_variance_2d as svar,
     histogram,
     _circular_standard_deviation,
@@ -286,7 +286,7 @@ def compare(
                 res[scale_col],
             )
 
-    df_comp = _normalize_dtypes(df_comp)
+    df_comp = _normalize_dataframe_dtypes(df_comp)
 
     return df_comp.sort_values(by=ic, ascending=ascending)
 
@@ -1097,11 +1097,11 @@ def summary(
                 df.index = list(df.index)
                 df = df.T
             dfs.append(df)
-        summary_df = _normalize_dtypes(pd.concat(dfs, sort=False))
+        summary_df = _normalize_dataframe_dtypes(pd.concat(dfs, sort=False))
     elif fmt.lower() == "long":
         df = joined.to_dataframe().reset_index().set_index("metric")
         df.index = list(df.index)
-        summary_df = _normalize_dtypes(df)
+        summary_df = _normalize_dataframe_dtypes(df)
     else:
         # format is 'xarray'
         summary_df = joined

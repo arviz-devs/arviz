@@ -2,6 +2,7 @@
 #  pylint: disable=no-member
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+import pandas as pd
 import pytest
 from scipy.special import logsumexp
 from scipy.stats import circstd
@@ -13,6 +14,7 @@ from ...stats.stats_utils import (
     wrap_xarray_ufunc,
     not_valid,
     ELPDData,
+    normalize_dtypes,
     stats_variance_2d,
     histogram,
     _sqrt,
@@ -293,3 +295,17 @@ def test_circular_standard_deviation_1d(data):
     assert np.allclose(
         _circular_standard_deviation(data, high=high, low=low), circstd(data, high=high, low=low),
     )
+
+
+def test_normalize_dataframe_dtypes():
+    dataframe = pd.DataFrame(
+        {
+            "int": np.array([1, 2, 3], dtype=np.int32),
+            "float": np.array([1, 2, 3], dtype=np.float32),
+            "bool": np.array([1, 0, 0], dtype=np.bool),
+        }
+    )
+    dataframe = normalize_dataframe_dtypes(dataframe)
+    assert dataframe["int"].dtype == np.int64
+    assert dataframe["float"].dtype == np.float64
+    assert dataframe["bool"].dtype == np.bool
