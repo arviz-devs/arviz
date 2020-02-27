@@ -232,7 +232,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
-        "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
+        "reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover",
         lambda x: x,
     ),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
