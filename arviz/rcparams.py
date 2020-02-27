@@ -50,7 +50,9 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     return validate_choice
 
 
-def _make_validate_choice_regex(accepted_values, accepted_values_regex, allow_none, typeof=str):
+def _make_validate_choice_regex(
+    accepted_values, accepted_values_regex, allow_none=False, typeof=str
+):
     """Validate value is in accepted_values with regex.
 
     Parameters
