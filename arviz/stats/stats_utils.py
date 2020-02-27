@@ -561,3 +561,17 @@ def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, a
     c_c = np.cos(ang).mean(axis=axis)
     r_r = np.hypot(s_s, c_c)
     return ((high - low) / 2.0 / np.pi) * np.sqrt(-2 * np.log(r_r))
+
+
+def normalize_dtypes(dataframe):
+    """Normalize dataframe dtypes for common cases."""
+    columns = dataframe.columns
+    for column in columns:
+        dtype = dataframe[column].dtype
+        if isinstance(dtype, np.floating):
+            if dtype != np.dtype("float64"):
+                dataframe[column] = dataframe[column].astype("float64")
+        elif isinstance(dtype, np.integer):
+            if dtype != np.dtype("int64"):
+                dataframe[column] = dataframe[column].astype("int64")
+    return dataframe
