@@ -11,6 +11,7 @@ from ...rcparams import (
     rcParams,
     rc_context,
     _make_validate_choice,
+    _make_validate_choice_regex,
     make_iterable_validator,
     _validate_float_or_none,
     _validate_positive_int_or_none,
