@@ -1,5 +1,6 @@
 # pylint: disable=no-member,invalid-name,redefined-outer-name
 """ArviZ plotting backends."""
+import re
 import numpy as np
 from pandas import DataFrame
 
@@ -118,20 +119,23 @@ def create_layout(ax, force_layout=False):
             "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
         }
         show_args = {}
-    elif subplot_order in ("row", "column"):
+    elif any(item in subplot_order for item in ("row", "column")):
+        # check number of rows
+        match = re.match(r"(\d*)(row|column)", subplot_order)
+        n = int(match.group(1)) if match.group(1) is not None else 1
+        subplot_order = match.group(2)
         # set up 1D list of axes
         ax = [item for item in ax.ravel().tolist() if item is not None]
         show_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
         layout_args = {}
-        if subplot_order == "row" and rcParams["plot.bokeh.layout.order_n"] == 1:
+        if subplot_order == "row" and n == 1:
             from bokeh.layouts import row as layout
-        elif subplot_order == "column" and rcParams["plot.bokeh.layout.order_n"] == 1:
+        elif subplot_order == "column" and n == 1:
             from bokeh.layouts import column as layout
         else:
             from bokeh.layouts import layout
 
-        if rcParams["plot.bokeh.layout.order_n"] != 1:
-            n = rcParams["plot.bokeh.layout.order_n"]
+        if n != 1:
             ax = np.array(ax + [None for _ in range(int(np.ceil(len(ax) / n)) - len(ax))])
             if subplot_order == "row":
                 ax = ax.reshape(n, -1)

@@ -50,6 +50,48 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     return validate_choice
 
 
+def _make_validate_choice_regex(accepted_values, accepted_values_regex, allow_none, typeof=str):
+    """Validate value is in accepted_values with regex.
+
+    Parameters
+    ----------
+    accepted_values : iterable
+        Iterable containing all accepted_values.
+    accepted_values_regex : iterable
+        Iterable containing all accepted_values with regex string.
+    allow_none: boolean, optional
+        Whether to accept ``None`` in addition to the values in ``accepted_values``.
+    typeof: type, optional
+        Type the values should be converted to.
+    """
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
+    def validate_choice_regex(value):
+        if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
+            return None
+        try:
+            value = typeof(value)
+        except (ValueError, TypeError):
+            raise ValueError("Could not convert to {}".format(typeof.__name__))
+        if isinstance(value, str):
+            value = value.lower()
+
+        if value in accepted_values:
+            # Convert value to python boolean if string matches
+            value = {"true": True, "false": False}.get(value, value)
+            return value
+        elif any(re.match(pattern, value) for pattern in accepted_values_regex):
+            return value
+        raise ValueError(
+            "{} is not one of {} or in regex {}{}".format(
+                value, accepted_values, accepted_values_regex, " nor None" if allow_none else ""
+            )
+        )
+
+    return validate_choice_regex
+
+
 def _validate_positive_int(value):
     """Validate value is a natural number."""
     try:
@@ -164,9 +206,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.layout.order": (
         "default",
-        _make_validate_choice({"default", "column", "row", "square", "square_trimmed"}),
+        _make_validate_choice_regex(
+            {"default", r"column", r"row", "square", "square_trimmed"}, {r"\d*column", r"\d*row"}
+        ),
     ),
-    "plot.bokeh.layout.order_n": (1, _validate_positive_int),
     "plot.bokeh.layout.sizing_mode": (
         "fixed",
         _make_validate_choice(
