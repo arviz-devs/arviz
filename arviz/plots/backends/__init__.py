@@ -168,14 +168,14 @@ def create_layout(ax, force_layout=False):
     return layout(ax, **layout_args), show_args
 
 
-def show_layout(ax, show=None):
+def show_layout(ax, show=None, force_layout=False):
     """Call bokeh show for a layout."""
     if show is None:
         show = rcParams["plot.bokeh.show"]
     if show:
         import bokeh.plotting as bkp
 
-        layout, show_args = create_layout(ax)
+        layout, show_args = create_layout(ax, force_layout=force_layout)
         bkp.show(layout, **show_args)
 
 
