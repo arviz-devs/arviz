@@ -3,11 +3,11 @@ ignore:
 
 codecov:
     notify:
-        after_n_builds: 5
+        after_n_builds: 4
 
 comment:
     behavior: new
-    after_n_builds: 5
+    after_n_builds: 4
     branches:
         - "master"
 
