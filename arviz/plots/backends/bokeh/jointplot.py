@@ -42,14 +42,16 @@ def plot_joint(
         backend_kwargs_hist_x = backend_kwargs.copy()
         backend_kwargs_hist_x.setdefault("width", int(figsize[0] * dpi * 0.8))
         backend_kwargs_hist_x.setdefault("height", int(figsize[1] * dpi * 0.2))
-        backend_kwargs_hist_x["x_range"] = axjoin.x_range
 
         backend_kwargs_hist_y = backend_kwargs.copy()
         backend_kwargs_hist_y.setdefault("width", int(figsize[0] * dpi * 0.2))
         backend_kwargs_hist_y.setdefault("height", int(figsize[1] * dpi * 0.8))
-        backend_kwargs_hist_y["y_range"] = axjoin.y_range
 
         axjoin = bkp.figure(**backend_kwargs_join)
+
+        backend_kwargs_hist_x["x_range"] = axjoin.x_range
+        backend_kwargs_hist_y["y_range"] = axjoin.y_range
+
         ax_hist_x = bkp.figure(**backend_kwargs_hist_x)
         ax_hist_y = bkp.figure(**backend_kwargs_hist_y)
 
