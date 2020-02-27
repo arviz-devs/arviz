@@ -6,6 +6,18 @@ codecov:
         after_n_builds: 5
 
 comment:
+    behavior: default
     after_n_builds: 5
     branches:
         - "master"
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+
+    patch:
+      default:
+        target: 75%
