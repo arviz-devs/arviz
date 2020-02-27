@@ -105,6 +105,6 @@ def plot_joint(
             **marginal_kwargs
         )
 
-    show_layout([[ax_hist_x, None], [axjoin, ax_hist_y]], show)
+    show_layout([[ax_hist_x, None], [axjoin, ax_hist_y]], show, force_layout=True)
 
     return np.array([[ax_hist_x, None], [axjoin, ax_hist_y]])

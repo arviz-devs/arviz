@@ -105,11 +105,20 @@ def ColumnDataSource(*args, **kwargs):
     return ColumnDataSource(*args, **kwargs)
 
 
-def create_layout(ax):
+def create_layout(ax, force_layout=False):
     """Transform bokeh array of figures to layout."""
     ax = np.atleast_2d(ax)
     subplot_order = rcParams["plot.bokeh.layout.order"]
-    if subplot_order in ("row", "column"):
+    if force_layout:
+        from bokeh.layouts import gridplot as layout
+
+        ax = ax.tolist()
+        layout_args = {
+            "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
+            "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
+        }
+        show_args = {}
+    elif subplot_order in ("row", "column"):
         # set up 1D list of axes
         ax = [item for item in ax.ravel().tolist() if item is not None]
         show_args = {"sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"]}
