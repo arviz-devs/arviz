@@ -60,10 +60,6 @@ class PyroConverter:
             Number of chains used for sampling. Only needed when posterior is not provided.
         """
         self.posterior = posterior
-        if posterior is not None:
-            self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
-        else:
-            self.nchains = self.ndraws = 0
         self.prior = prior
         self.posterior_predictive = posterior_predictive
         self.predictions = predictions
