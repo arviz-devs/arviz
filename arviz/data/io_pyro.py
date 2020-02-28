@@ -4,7 +4,7 @@ import numpy as np
 from packaging import version
 import xarray as xr
 
-from .inference_data import InferenceData, concat
+from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 from .. import utils
 
@@ -78,6 +78,9 @@ class PyroConverter:
         if self.predictions is not None and self.pred_dims is None:
             raise ValueError("Prediction dims are needed for predictions group.")
 
+        def arbitrary_element(dct):
+            return next(iter(dct.values()))
+
         self.pyro = pyro
         if posterior is not None:
             self.nchains, self.ndraws = posterior.num_chains, posterior.num_samples
@@ -87,7 +90,25 @@ class PyroConverter:
                 self._args = self.posterior._args  # pylint: disable=protected-access
                 self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
         else:
-            self.nchains = self.ndraws = 0
+            if self.num_chains is not None:
+                self.nchains = self.num_chains
+            else:
+                raise ValueError("`num_chains` is needed if trace is not given.")
+            get_from = None
+            if predictions is not None:
+                get_from = predictions
+            elif posterior_predictive is not None:
+                get_from = posterior_predictive
+            elif prior is not None:
+                get_from = prior
+            if get_from is None:
+                # pylint: disable=line-too-long
+                raise ValueError(
+                    """When constructing InferenceData must have at least
+                                    one of trace, prior, posterior_predictive or predictions."""
+                )
+            aelem = arbitrary_element(get_from)
+            self.ndraws = aelem.shape[0] // self.num_chains
 
         observations = {}
         if self.model is not None:
@@ -146,9 +167,6 @@ class PyroConverter:
                 data[k] = ary
             elif shape[0] == self.nchains * self.ndraws:
                 data[k] = ary.reshape((self.nchains, self.ndraws, *shape[1:]))
-            elif self.num_chains is not None:
-                draws = shape[0] // self.num_chains
-                data[k] = ary.reshape((self.num_chains, draws, *shape[1:]))
             else:
                 data[k] = utils.expand_dims(ary)
                 _log.warning(
@@ -166,7 +184,7 @@ class PyroConverter:
 
     @requires("predictions")
     def predictions_to_xarray(self):
-        """Convert predictions (out of sample predictions) to xarray."""
+        """Convert predictions to xarray."""
         return self.translate_posterior_predictive_dict_to_xarray(self.predictions, self.pred_dims)
 
     def priors_to_xarray(self):
