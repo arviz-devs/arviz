@@ -161,7 +161,9 @@ def create_layout(ax, force_layout=False):
                 "sizing_mode": rcParams["plot.bokeh.layout.sizing_mode"],
                 "toolbar_location": rcParams["plot.bokeh.layout.toolbar_location"],
             }
-
+    # ignore "fixed" sizing_mode without explicit width and height
+    if layout_args.get("sizing_mode", "") == "fixed":
+        layout_args.pop("sizing_mode")
     return layout(ax, **layout_args)
 
 
