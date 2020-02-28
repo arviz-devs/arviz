@@ -50,9 +50,7 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     return validate_choice
 
 
-def _make_validate_choice_regex(
-    accepted_values, accepted_values_regex, allow_none=False, typeof=str
-):
+def _make_validate_choice_regex(accepted_values, accepted_values_regex, allow_none=False):
     """Validate value is in accepted_values with regex.
 
     Parameters
@@ -72,10 +70,7 @@ def _make_validate_choice_regex(
     def validate_choice_regex(value):
         if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
             return None
-        try:
-            value = typeof(value)
-        except (ValueError, TypeError):
-            raise ValueError("Could not convert to {}".format(typeof.__name__))
+        value = str(value)
         if isinstance(value, str):
             value = value.lower()
 

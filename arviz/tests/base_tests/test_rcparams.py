@@ -153,7 +153,7 @@ def test_make_validate_choice_regex(args, allow_none):
     accepted_values = {"row", "column"}
     accepted_values_regex = {r"\d*row", r"\d*column"}
     validate_choice = _make_validate_choice_regex(
-        accepted_values, accepted_values_regex, allow_none=allow_none, typeof=str
+        accepted_values, accepted_values_regex, allow_none=allow_none
     )
     raise_error, value = args
     if value is None and not allow_none:

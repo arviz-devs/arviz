@@ -21,6 +21,7 @@
 * **Experimental Feature**: Added `reloo` function to ArviZ
 * ArviZ version to InferenceData attributes. (#1086)
 * Add `log_likelihood` argument to `from_pymc3`
+* Integrated rcParams for `plot.bokeh.layout` and `plot.backend`. (#1089)
 
 
 ### Maintenance and fixes
