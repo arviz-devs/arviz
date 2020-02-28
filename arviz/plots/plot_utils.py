@@ -4,6 +4,7 @@ from typing import Dict, Any
 from itertools import product, tee
 import importlib
 from scipy.stats import mode
+from matplotlib.colors import to_hex
 
 import packaging
 import numpy as np
@@ -488,6 +489,23 @@ def color_from_dim(dataarray, dim_name):
     else:
         colors = [color_mapping[coord] for coord in coord_values]
     return colors, color_mapping
+
+
+def vectorized_to_hex(rgba_c):
+    """Converts a vector of RGBA values to a vector of hex values
+
+    Parameters
+    ----------
+    rgba_c: vector of RGBA values
+
+    Returns
+    -------
+    rgba_hex : vector of hex values
+    """
+    rgba_hex=[]
+    for rgba in range(len(rgba_c)):
+        rgba_hex.append(to_hex(rgba_c[rgba]))
+    return rgba_hex
 
 
 def format_coords_as_labels(dataarray, skip_dims=None):
