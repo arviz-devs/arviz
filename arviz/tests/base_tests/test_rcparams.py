@@ -11,6 +11,7 @@ from ...rcparams import (
     rcParams,
     rc_context,
     _make_validate_choice,
+    _make_validate_choice_regex,
     make_iterable_validator,
     _validate_float_or_none,
     _validate_positive_int_or_none,
@@ -135,6 +136,34 @@ def test_make_validate_choice(args, allow_none, typeof):
     else:
         value = validate_choice(value)
         assert value in accepted_values or value is None
+
+
+@pytest.mark.parametrize("allow_none", (True, False))
+@pytest.mark.parametrize(
+    "args",
+    [
+        (False, None),
+        (False, "row"),
+        (False, "54row"),
+        (False, "4column"),
+        ("or in regex", "square"),
+    ],
+)
+def test_make_validate_choice_regex(args, allow_none):
+    accepted_values = {"row", "column"}
+    accepted_values_regex = {r"\d*row", r"\d*column"}
+    validate_choice = _make_validate_choice_regex(
+        accepted_values, accepted_values_regex, allow_none=allow_none
+    )
+    raise_error, value = args
+    if value is None and not allow_none:
+        raise_error = "or in regex"
+    if raise_error:
+        with pytest.raises(ValueError, match=raise_error):
+            validate_choice(value)
+    else:
+        value_result = validate_choice(value)
+        assert value == value_result
 
 
 @pytest.mark.parametrize("allow_none", (True, False))

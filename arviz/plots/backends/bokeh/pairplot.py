@@ -1,14 +1,13 @@
 """Bokeh pairplot."""
-
 import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams
@@ -35,11 +34,7 @@ def plot_pair(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -65,9 +60,9 @@ def plot_pair(
             )
 
         if ax is None:
-            ax = bkp.figure(
-                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
-            )
+            backend_kwargs["width"] = int(figsize[0] * dpi)
+            backend_kwargs["height"] = int(figsize[1] * dpi)
+            ax = bkp.figure(**backend_kwargs)
 
         if kind == "scatter":
             if divergences:
@@ -112,8 +107,7 @@ def plot_pair(
         ax.xaxis.axis_label = flat_var_names[0]
         ax.yaxis.axis_label = flat_var_names[1]
 
-        if backend_show(show):
-            bkp.show(ax)
+        show_layout(ax, show)
 
     else:
         max_plots = (
@@ -133,17 +127,15 @@ def plot_pair(
 
         if ax is None:
             ax = []
+            backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
+            backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
             for row in range(numvars - 1):
                 row_ax = []
                 for col in range(numvars - 1):
                     if row < col:
                         row_ax.append(None)
                     else:
-                        ax_ = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * dpi),
-                            height=int(figsize[1] / (numvars - 1) * dpi),
-                            **backend_kwargs
-                        )
+                        ax_ = bkp.figure(**backend_kwargs)
                         row_ax.append(ax_)
                 ax.append(row_ax)
             ax = np.array(ax)
@@ -225,8 +217,6 @@ def plot_pair(
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + 1]
 
-        if backend_show(show):
-            grid = gridplot(ax.tolist(), toolbar_location="above")
-            bkp.show(grid)
+        show_layout(ax, show)
 
     return ax

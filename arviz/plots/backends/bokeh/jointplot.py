@@ -1,9 +1,10 @@
 """Bokeh jointplot."""
 import bokeh.plotting as bkp
 import numpy as np
-from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults, backend_show
+
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
 from ...plot_utils import make_label
@@ -28,30 +29,31 @@ def plot_joint(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
     if ax is None:
-        axjoin = bkp.figure(
-            width=int(figsize[0] * dpi * 0.8), height=int(figsize[1] * dpi * 0.8), **backend_kwargs
-        )
-        ax_hist_x = bkp.figure(
-            width=int(figsize[0] * dpi * 0.8),
-            height=int(figsize[1] * dpi * 0.2),
-            x_range=axjoin.x_range,
-            **backend_kwargs
-        )
-        ax_hist_y = bkp.figure(
-            width=int(figsize[0] * dpi * 0.2),
-            height=int(figsize[1] * dpi * 0.8),
-            y_range=axjoin.y_range,
-            **backend_kwargs
-        )
+
+        backend_kwargs_join = backend_kwargs.copy()
+        backend_kwargs_join.setdefault("width", int(figsize[0] * dpi * 0.8))
+        backend_kwargs_join.setdefault("height", int(figsize[1] * dpi * 0.8))
+
+        backend_kwargs_hist_x = backend_kwargs.copy()
+        backend_kwargs_hist_x.setdefault("width", int(figsize[0] * dpi * 0.8))
+        backend_kwargs_hist_x.setdefault("height", int(figsize[1] * dpi * 0.2))
+
+        backend_kwargs_hist_y = backend_kwargs.copy()
+        backend_kwargs_hist_y.setdefault("width", int(figsize[0] * dpi * 0.2))
+        backend_kwargs_hist_y.setdefault("height", int(figsize[1] * dpi * 0.8))
+
+        axjoin = bkp.figure(**backend_kwargs_join)
+
+        backend_kwargs_hist_x["x_range"] = axjoin.x_range
+        backend_kwargs_hist_y["y_range"] = axjoin.y_range
+
+        ax_hist_x = bkp.figure(**backend_kwargs_hist_x)
+        ax_hist_y = bkp.figure(**backend_kwargs_hist_y)
 
     elif len(ax) == 2 and len(ax[0]) == 2 and len(ax[1]) == 2:
         ax_hist_x, _ = ax[0]
@@ -104,8 +106,6 @@ def plot_joint(
             **marginal_kwargs
         )
 
-    if backend_show(show):
-        grid = gridplot([[ax_hist_x, None], [axjoin, ax_hist_y]], toolbar_location="above")
-        bkp.show(grid)
+    show_layout([[ax_hist_x, None], [axjoin, ax_hist_y]], show, force_layout=True)
 
     return np.array([[ax_hist_x, None], [axjoin, ax_hist_y]])

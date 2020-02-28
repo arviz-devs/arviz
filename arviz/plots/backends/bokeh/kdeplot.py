@@ -4,14 +4,15 @@ from collections.abc import Callable
 from numbers import Integral
 
 import bokeh.plotting as bkp
-import matplotlib._contour as _contour
-import numpy as np
 from bokeh.models import ColumnDataSource, Dash, Range1d
+import matplotlib._contour as _contour
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 
 
 def plot_kde(
@@ -47,12 +48,7 @@ def plot_kde(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("width", "plot.bokeh.figure.width"),
-            ("height", "plot.bokeh.figure.height"),
-        ),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
     if ax is None:
@@ -231,8 +227,7 @@ def plot_kde(
             glyphs.append(image)
             ax.x_range.range_padding = ax.y_range.range_padding = 0
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     if return_glyph:
         return ax, glyphs

@@ -2,7 +2,8 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 
 
 def plot_compare(
@@ -26,17 +27,15 @@ def plot_compare(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
 
     if ax is None:
-        ax = bkp.figure(width=figsize[0] * dpi, height=figsize[1] * dpi, **backend_kwargs)
+        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
+        ax = bkp.figure(**backend_kwargs)
 
     yticks_pos = list(yticks_pos)
 
@@ -130,7 +129,6 @@ def plot_compare(
     ax.y_range._property_values["start"] = -1 + step  # pylint: disable=protected-access
     ax.y_range._property_values["end"] = 0 - step  # pylint: disable=protected-access
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax

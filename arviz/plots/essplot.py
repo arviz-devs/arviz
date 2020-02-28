@@ -12,6 +12,7 @@ from .plot_utils import (
     filter_plotters_list,
     get_plotting_function,
 )
+from ..rcparams import rcParams
 from ..utils import _var_names
 
 
@@ -321,6 +322,10 @@ def plot_ess(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_ess", "essplot", backend)
