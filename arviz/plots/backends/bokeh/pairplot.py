@@ -25,7 +25,7 @@ def plot_pair(
     kde_kwargs,
     hexbin_kwargs,
     contour,
-    plot_kwargs,
+    plot_kwargs,  # pylint: disable=unused-argument
     fill_last,
     divergences,
     diverging_mask,
@@ -176,12 +176,11 @@ def plot_pair(
                         backend_kwargs={},
                         show=False,
                         **kde_kwargs,
-                        **plot_kwargs,
                     )
 
                 if "hexbin" in kind:
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1_ary, var2_ary, size=0.5, **hexbin_kwargs, **plot_kwargs)
+                    ax[j, i].hexbin(var1_ary, var2_ary, size=0.5, **hexbin_kwargs)
 
                 if divergences:
                     ax[j, i].circle(

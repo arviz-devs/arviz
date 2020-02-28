@@ -22,7 +22,7 @@ def plot_pair(
     kind,
     fill_last,
     contour,
-    plot_kwargs,
+    plot_kwargs,  # pylint: disable=unused-argument
     scatter_kwargs,
     kde_kwargs,
     hexbin_kwargs,
@@ -103,17 +103,12 @@ def plot_pair(
                 ax = np.atleast_2d(ax)[0, 0]
 
         if "scatter" in kind:
-            ax.plot(infdata_group[0], infdata_group[1], **scatter_kwargs, **plot_kwargs)
+            ax.plot(infdata_group[0], infdata_group[1], **scatter_kwargs)
         if "kde" in kind:
-            plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs, **plot_kwargs)
+            plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs)
         if "hexbin" in kind:
             hexbin = ax.hexbin(
-                infdata_group[0],
-                infdata_group[1],
-                mincnt=1,
-                gridsize=gridsize,
-                **hexbin_kwargs,
-                **plot_kwargs
+                infdata_group[0], infdata_group[1], mincnt=1, gridsize=gridsize, **hexbin_kwargs,
             )
             ax.grid(False)
 
@@ -125,7 +120,7 @@ def plot_pair(
             ax.plot(
                 infdata_group[0][diverging_mask],
                 infdata_group[1][diverging_mask],
-                **divergences_kwargs
+                **divergences_kwargs,
             )
 
         if point_estimate:
@@ -195,7 +190,7 @@ def plot_pair(
                             ax=ax[j, i],
                             fill_last=fill_last,
                             contour=contour,
-                            **kde_kwargs
+                            **kde_kwargs,
                         )
 
                     if "hexbin" in kind:

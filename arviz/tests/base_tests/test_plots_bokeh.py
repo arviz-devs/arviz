@@ -710,9 +710,7 @@ def test_plot_pair(models, kwargs):
     assert np.any(ax)
 
 
-@pytest.mark.parametrize(
-    "kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}, {"diagonal": False}]
-)
+@pytest.mark.parametrize("kwargs", [{"kind": "scatter"}, {"kind": "kde"}, {"kind": "hexbin"}])
 def test_plot_pair_2var(discrete_model, kwargs):
     ax = plot_pair(
         discrete_model, ax=np.atleast_2d(bkp.figure()), backend="bokeh", show=False, **kwargs
