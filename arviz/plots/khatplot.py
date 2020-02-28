@@ -13,6 +13,7 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..stats import ELPDData
+from ..rcparams import rcParams
 
 
 def plot_khat(
@@ -224,6 +225,10 @@ def plot_khat(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

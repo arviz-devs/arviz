@@ -4,6 +4,7 @@ import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
 from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function
+from ..rcparams import rcParams
 from ..utils import _var_names
 
 
@@ -208,6 +209,10 @@ def plot_pair(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
         pairplot_kwargs.pop("gridsize", None)

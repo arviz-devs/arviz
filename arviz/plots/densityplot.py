@@ -12,8 +12,8 @@ from .plot_utils import (
     default_grid,
     get_plotting_function,
 )
-from ..utils import _var_names
 from ..rcparams import rcParams
+from ..utils import _var_names
 
 
 # pylint:disable-msg=too-many-function-args
@@ -246,6 +246,10 @@ def plot_density(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

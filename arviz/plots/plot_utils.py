@@ -219,6 +219,10 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
     if backend_kwargs is None:
         backend_kwargs = {}
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
         from bokeh.plotting import figure
         from .backends.bokeh import backend_kwarg_defaults
@@ -642,8 +646,11 @@ def get_plotting_function(plot_name, plot_module, backend):
         "mpl": "matplotlib",
         "bokeh": "bokeh",
         "matplotlib": "matplotlib",
-        None: "matplotlib",
     }
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     try:
         backend = _backend[backend]
