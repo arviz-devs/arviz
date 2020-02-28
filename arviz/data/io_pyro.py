@@ -85,11 +85,8 @@ class PyroConverter:
                 # model arguments and keyword arguments
                 self._args = self.posterior._args  # pylint: disable=protected-access
                 self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
-        else:
-            if self.num_chains is not None:
-                self.nchains = self.num_chains
-            else:
-                raise ValueError("`num_chains` is needed if trace is not given.")
+        elif self.num_chains is not None:
+            self.nchains = self.num_chains
             get_from = None
             if predictions is not None:
                 get_from = predictions
@@ -105,6 +102,8 @@ class PyroConverter:
                 )
             aelem = arbitrary_element(get_from)
             self.ndraws = aelem.shape[0] // self.num_chains
+        else:
+            raise ValueError("`num_chains` is needed if trace is not given.")
 
         observations = {}
         if self.model is not None:
