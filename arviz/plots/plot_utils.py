@@ -492,12 +492,12 @@ def color_from_dim(dataarray, dim_name):
 
 
 def vectorized_to_hex(rgba_c, keep_alpha=False):
-    """Converts a vector of RGBA values to a vector of hex values
+    """Convert a vector of RGBA values to a vector of hex values
 
     Parameters
     ----------
     rgba_c: array
-        array of RGBA values
+        array of RGBA values.
     keep_alpha: boolean
         to select if alpha values should be kept in the final hex values.
 
