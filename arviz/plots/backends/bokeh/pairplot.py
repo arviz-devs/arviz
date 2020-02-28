@@ -4,7 +4,6 @@ from uuid import uuid4
 
 import bokeh.plotting as bkp
 import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter, Span
 
 from . import backend_kwarg_defaults
@@ -25,7 +24,7 @@ def plot_pair(
     kde_kwargs,
     hexbin_kwargs,
     contour,
-    plot_kwargs,  # pylint: disable=unused-argument
+    plot_kwargs,
     fill_last,
     divergences,
     diverging_mask,
@@ -68,8 +67,28 @@ def plot_pair(
 
     (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
 
+    tmp_flat_var_names = None
+    if len(flat_var_names) == len(list(set(flat_var_names))):
+        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
+    else:
+        tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
+        source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
+    if divergences:
+        divergenve_name = "divergences_{}".format(str(uuid4()))
+        source_dict[divergenve_name] = np.array(diverging_mask).astype(bool).astype(int).astype(str)
+
+    source = ColumnDataSource(data=source_dict)
+
+    if divergences:
+        source_nondiv = CDSView(
+            source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+        )
+        source_div = CDSView(
+            source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
+        )
+
     def get_width_and_height(jointplot, rotate):
-        """Compute subplots dimensions for two or more variables"""
+        """Compute subplots dimensions for two or more variables."""
         if jointplot:
             if rotate:
                 width = int(figsize[0] / (numvars - 1) + 2 * dpi)
@@ -93,43 +112,40 @@ def plot_pair(
         backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
         for row in range(numvars - var):
             row_ax = []
+            var1 = (
+                flat_var_names[row + var]
+                if tmp_flat_var_names is None
+                else tmp_flat_var_names[row + var]
+            )
             for n, col in enumerate(range(numvars - var)):
+                var2 = (
+                    flat_var_names[col] if tmp_flat_var_names is None else tmp_flat_var_names[col]
+                )
+                backend_kwargs_copy = backend_kwargs.copy()
+                if "scatter" in kind:
+                    tooltips = [
+                        (var2, "@{{{}}}".format(var2)),
+                        (var1, "@{{{}}}".format(var1)),
+                    ]
+                    backend_kwargs_copy.setdefault("tooltips", tooltips)
+                else:
+                    tooltips = None
                 if row < col:
                     row_ax.append(None)
                 else:
                     jointplot = row == col and numvars == 2 and diagonal
                     rotate = n == 1
                     width, height = get_width_and_height(jointplot, rotate)
-                    ax_ = bkp.figure(width=width, height=height)
+                    if jointplot:
+                        ax_ = bkp.figure(width=width, height=height, tooltips=tooltips)
+                    else:
+                        ax_ = bkp.figure(**backend_kwargs_copy)
                     row_ax.append(ax_)
             ax.append(row_ax)
         ax = np.array(ax)
     else:
         assert ax.shape == (numvars - var, numvars - var)
-
-    tmp_flat_var_names = None
-    if len(flat_var_names) == len(set(flat_var_names)):
-        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
-    else:
-        tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
-        source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
-    if divergences:
-        divergenve_name = "divergences_{}".format(str(uuid4()))
-        source_dict[divergenve_name] = (
-            np.array(diverging_mask).astype(bool).astype(int).astype(str)
-        )
-
-    source = ColumnDataSource(data=source_dict)
-
-    if divergences:
-        source_nondiv = CDSView(
-            source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
-        )
-        source_div = CDSView(
-            source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
-        )
-
-    # pylint: disable=too-many-nested-blocks
+    # pylint: disable=R1702
     for i in range(0, numvars - var):
 
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
@@ -141,9 +157,6 @@ def plot_pair(
                 if tmp_flat_var_names is None
                 else tmp_flat_var_names[j + var]
             )
-
-            var1_ary = infdata_group[i]
-            var2_ary = infdata_group[j + var]
 
             if j == i and diagonal:
                 rotate = numvars == 2 and j == 1
@@ -166,9 +179,11 @@ def plot_pair(
                         ax[j, i].circle(var1, var2, source=source)
 
                 if "kde" in kind:
+                    var1_kde = infdata_group[i]
+                    var2_kde = infdata_group[j + var]
                     plot_kde(
-                        var1_ary,
-                        var2_ary,
+                        var1_kde,
+                        var2_kde,
                         contour=contour,
                         fill_last=fill_last,
                         ax=ax[j, i],
@@ -176,11 +191,16 @@ def plot_pair(
                         backend_kwargs={},
                         show=False,
                         **kde_kwargs,
+                        **plot_kwargs,
                     )
 
                 if "hexbin" in kind:
+                    var1_hexbin = infdata_group[i]
+                    var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1_ary, var2_ary, size=0.5, **hexbin_kwargs)
+                    ax[j, i].hexbin(
+                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs, **plot_kwargs
+                    )
 
                 if divergences:
                     ax[j, i].circle(
@@ -195,8 +215,10 @@ def plot_pair(
                     )
 
                 if point_estimate:
-                    pe_x = calculate_point_estimate(point_estimate, var1_ary)
-                    pe_y = calculate_point_estimate(point_estimate, var2_ary)
+                    var1_pe = infdata_group[i]
+                    var2_pe = infdata_group[j]
+                    pe_x = calculate_point_estimate(point_estimate, var1_pe)
+                    pe_y = calculate_point_estimate(point_estimate, var2_pe)
 
                     ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 2, **point_estimate_kwargs)
 
