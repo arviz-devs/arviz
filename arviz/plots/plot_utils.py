@@ -492,7 +492,7 @@ def color_from_dim(dataarray, dim_name):
 
 
 def vectorized_to_hex(rgba_c, keep_alpha=False):
-    """Convert a vector of RGBA values to a vector of hex values
+    """Convert a vector of RGBA values to a vector of hex values.
 
     Parameters
     ----------
