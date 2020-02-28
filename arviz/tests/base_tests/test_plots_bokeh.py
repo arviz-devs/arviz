@@ -846,6 +846,7 @@ def test_plot_ppc_grid(models):
         flatten=["obs_dim"],
         coords={"obs_dim": [1, 2, 3]},
         backend="bokeh",
+        show=False,
     )
     assert len(axes.ravel()) == 1
 
