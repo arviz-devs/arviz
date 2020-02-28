@@ -502,7 +502,7 @@ def vectorized_to_hex(rgba_c):
     -------
     rgba_hex : vector of hex values
     """
-    rgba_hex=[]
+    rgba_hex = []
     for rgba in range(len(rgba_c)):
         rgba_hex.append(to_hex(rgba_c[rgba]))
     return rgba_hex

@@ -1,6 +1,6 @@
 """Pareto tail indices plot."""
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array,to_hex
+from matplotlib.colors import to_rgba_array, to_hex
 import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
@@ -201,7 +201,7 @@ def plot_khat(
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
-    rgba_c=vectorized_to_hex(rgba_c)
+    rgba_c = vectorized_to_hex(rgba_c)
 
     plot_khat_kwargs = dict(
         hover_label=hover_label,
