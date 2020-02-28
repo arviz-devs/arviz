@@ -71,9 +71,6 @@ class PyroConverter:
         self.num_chains = num_chains
         import pyro
 
-        if self.predictions is not None and self.pred_dims is None:
-            raise ValueError("Prediction dims are needed for predictions group.")
-
         def arbitrary_element(dct):
             return next(iter(dct.values()))
 
