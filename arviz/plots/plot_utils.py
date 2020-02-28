@@ -469,7 +469,7 @@ def color_from_dim(dataarray, dim_name):
     ----------
     dataarray : xarray.DataArray
     dim_name : str
-        dimension whose coordinates will be used as color code.
+    dimension whose coordinates will be used as color code.
 
     Returns
     -------
@@ -491,20 +491,21 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def vectorized_to_hex(rgba_c):
+def vectorized_to_hex(rgba_c, keep_alpha=False):
     """Converts a vector of RGBA values to a vector of hex values
 
     Parameters
     ----------
-    rgba_c: vector of RGBA values
+    rgba_c: array
+        array of RGBA values
+    keep_alpha: boolean
+        to select if alpha values should be kept in the final hex values.
 
     Returns
     -------
     rgba_hex : vector of hex values
     """
-    rgba_hex = []
-    for rgba in range(len(rgba_c)):
-        rgba_hex.append(to_hex(rgba_c[rgba]))
+    rgba_hex = [to_hex(rgba_c[rgba], keep_alpha) for rgba in range(len(rgba_c))]
     return rgba_hex
 
 
