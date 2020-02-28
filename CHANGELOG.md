@@ -17,11 +17,12 @@
   and `essplot` (#1024)
 * New defaults for cross validation: `loo` (old: waic) and `log` -scale (old: `deviance` -scale) (#1067)
 * **Experimental Feature**: Added `arviz.wrappers` module to allow ArviZ to
-  refit the models if necessary
-* **Experimental Feature**: Added `reloo` function to ArviZ
+  refit the models if necessary (#771)
+* **Experimental Feature**: Added `reloo` function to ArviZ (#771)
 * ArviZ version to InferenceData attributes. (#1086)
-* Add `log_likelihood` argument to `from_pymc3`
+* Add `log_likelihood` argument to `from_pymc3` (#1082)
 * Integrated rcParams for `plot.bokeh.layout` and `plot.backend`. (#1089)
+* Add automatic legends in `plot_trace` with compact=True (matplotlib only) (#1070)
 
 
 ### Maintenance and fixes
