@@ -95,7 +95,6 @@ def plot_forest(
         ),
         **backend_kwargs,
     }
-
     dpi = backend_kwargs.pop("dpi")
 
     if ax is None:
