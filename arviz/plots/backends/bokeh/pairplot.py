@@ -42,13 +42,15 @@ def plot_pair(
         ),
         **backend_kwargs,
     }
-    tooltips = [
-        (flat_var_names[0], "@{}".format(flat_var_names[0])),
-        (flat_var_names[1], "@{}".format(flat_var_names[1])),
-    ]
-    backend_kwargs.setdefault("tooltips", tooltips)
     dpi = backend_kwargs.pop("dpi")
     if numvars == 2:
+        if kind == "scatter":
+            tooltips = [
+                (flat_var_names[1], "@{{{}}}".format(flat_var_names[1])),
+                (flat_var_names[0], "@{{{}}}".format(flat_var_names[0])),
+            ]
+            backend_kwargs.setdefault("tooltips", tooltips)
+        
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
         source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
@@ -136,23 +138,6 @@ def plot_pair(
 
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
 
-        if ax is None:
-            ax = []
-            for row in range(numvars - 1):
-                row_ax = []
-                for col in range(numvars - 1):
-                    if row < col:
-                        row_ax.append(None)
-                    else:
-                        ax_ = bkp.figure(
-                            width=int(figsize[0] / (numvars - 1) * dpi),
-                            height=int(figsize[1] / (numvars - 1) * dpi),
-                            **backend_kwargs
-                        )
-                        row_ax.append(ax_)
-                ax.append(row_ax)
-            ax = np.array(ax)
-
         tmp_flat_var_names = None
         if len(flat_var_names) == len(list(set(flat_var_names))):
             source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
@@ -174,6 +159,42 @@ def plot_pair(
             source_div = CDSView(
                 source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
             )
+
+        if ax is None:
+            ax = []
+            for row in range(numvars - 1):
+                row_ax = []
+                var2 = (
+                    flat_var_names[row + 1]
+                    if tmp_flat_var_names is None
+                    else tmp_flat_var_names[row + 1]
+                )
+                for col in range(numvars - 1):
+                    if row < col:
+                        row_ax.append(None)
+                        continue
+
+                    var1 = (
+                        flat_var_names[col]
+                        if tmp_flat_var_names is None
+                        else tmp_flat_var_names[col]
+                    )
+                    backend_kwargs_copy = backend_kwargs.copy()
+                    if kind == "scatter":
+                        tooltips = [
+                            (var2, "@{{{}}}".format(var2)),
+                            (var1, "@{{{}}}".format(var1)),
+                        ]
+                        backend_kwargs_copy.setdefault("tooltips", tooltips)
+
+                    ax_ = bkp.figure(
+                        width=int(figsize[0] / (numvars - 1) * dpi),
+                        height=int(figsize[1] / (numvars - 1) * dpi),
+                        **backend_kwargs_copy
+                    )
+                    row_ax.append(ax_)
+                ax.append(row_ax)
+            ax = np.array(ax)
 
         for i in range(0, numvars - 1):
             var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
