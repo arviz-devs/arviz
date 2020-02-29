@@ -7,7 +7,6 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
-from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_function
 from ..rcparams import rcParams
 from ..utils import _var_names
 

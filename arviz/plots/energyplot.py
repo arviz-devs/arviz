@@ -5,7 +5,6 @@ import numpy as np
 
 from ..data import convert_to_dataset
 from .plot_utils import _scale_fig_size, get_plotting_function, matplotlib_kwarg_dealiaser
-from .plot_utils import _scale_fig_size, get_plotting_function
 from ..rcparams import rcParams
 
 
