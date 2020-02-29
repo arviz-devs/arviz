@@ -1,5 +1,6 @@
 """Joint scatter plot of two variables."""
 from ..data import convert_to_dataset
+<<<<<<< HEAD
 from .plot_utils import (
     _scale_fig_size,
     xarray_var_iter,
@@ -7,6 +8,10 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
+=======
+from .plot_utils import _scale_fig_size, xarray_var_iter, get_coords, get_plotting_function
+from ..rcparams import rcParams
+>>>>>>> master
 from ..utils import _var_names
 
 
@@ -190,6 +195,10 @@ def plot_joint(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

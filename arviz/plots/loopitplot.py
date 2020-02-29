@@ -248,6 +248,10 @@ def plot_loo_pit(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
 
         if (

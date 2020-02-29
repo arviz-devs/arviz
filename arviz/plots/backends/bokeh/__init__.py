@@ -1,6 +1,7 @@
 # pylint: disable=wrong-import-position
 """Bokeh Plotting Backend."""
 from packaging import version
+from ....rcparams import rcParams
 
 
 def backend_kwarg_defaults(*args, **kwargs):
@@ -12,14 +13,19 @@ def backend_kwarg_defaults(*args, **kwargs):
     # add needed default args from arviz.rcParams
     for key, arg in args:
         defaults.setdefault(key, rcParams[arg])
+
+    for key, arg in {
+        "toolbar_location": "plot.bokeh.layout.toolbar_location",
+        "tools": "plot.bokeh.tools",
+        "output_backend": "plot.bokeh.output_backend",
+        "height": "plot.bokeh.figure.height",
+        "width": "plot.bokeh.figure.width",
+    }.items():
+        # by default, ignore height and width if dpi is used
+        if key in ("height", "width") and "dpi" in defaults:
+            continue
+        defaults.setdefault(key, rcParams[arg])
     return defaults
-
-
-def backend_show(show):
-    """Set default behaviour for show if not explicitly defined."""
-    if show is None:
-        show = rcParams["plot.bokeh.show"]
-    return show
 
 
 from .autocorrplot import plot_autocorr
@@ -43,7 +49,6 @@ from .posteriorplot import plot_posterior
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from ....rcparams import rcParams
 
 
 def check_bokeh_version():

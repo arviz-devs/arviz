@@ -2,10 +2,11 @@
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
-import numpy as np
 from bokeh.models import Span
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ....stats.stats_utils import histogram
 
 
@@ -29,16 +30,14 @@ def plot_khat(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
     if ax is None:
-        ax = bkp.figure(width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs)
+        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
+        ax = bkp.figure(**backend_kwargs)
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
         for idx, rgba_c_ in enumerate(rgba_c):
@@ -87,7 +86,6 @@ def plot_khat(
     elif ymax > 1 & annotate:
         ax.y_range._property_values["end"] = 1.1 * ymax  # pylint: disable=protected-access
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax

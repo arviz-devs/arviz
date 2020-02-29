@@ -1,10 +1,15 @@
 """Plot energy transition distribution in HMC inference."""
 from itertools import cycle
-from matplotlib.pyplot import rcParams
+from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
+<<<<<<< HEAD
 from .plot_utils import _scale_fig_size, get_plotting_function, matplotlib_kwarg_dealiaser
+=======
+from .plot_utils import _scale_fig_size, get_plotting_function
+from ..rcparams import rcParams
+>>>>>>> master
 
 
 def plot_energy(
@@ -99,7 +104,7 @@ def plot_energy(
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     _colors = [
-        prop for _, prop in zip(range(10), cycle(rcParams["axes.prop_cycle"].by_key()["color"]))
+        prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
     ]
     if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
         fill_color[1].startswith("C") and len(fill_color[1]) == 2
@@ -133,6 +138,10 @@ def plot_energy(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

@@ -119,6 +119,10 @@ def plot_hpd(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_hpd", "hpdplot", backend)
     ax = plot(**hpdplot_kwargs)

@@ -1,6 +1,11 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
+<<<<<<< HEAD
 from .plot_utils import get_bins, get_plotting_function, matplotlib_kwarg_dealiaser
+=======
+from .plot_utils import get_bins, get_plotting_function
+from ..rcparams import rcParams
+>>>>>>> master
 
 
 def plot_dist(
@@ -188,6 +193,10 @@ def plot_dist(
         show=show,
         **kwargs,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     plot = get_plotting_function("plot_dist", "distplot", backend)
     ax = plot(**dist_plot_args)

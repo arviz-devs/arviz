@@ -13,6 +13,7 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
+from ..rcparams import rcParams
 from ..utils import _var_names
 
 
@@ -187,6 +188,10 @@ def plot_mcse(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
         mcse_kwargs.pop("kwargs")

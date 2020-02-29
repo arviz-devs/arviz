@@ -2,6 +2,7 @@
 import numpy as np
 
 from .plot_utils import _scale_fig_size, get_plotting_function
+from ..rcparams import rcParams
 
 
 def plot_compare(
@@ -133,6 +134,10 @@ def plot_compare(
         backend_kwargs=backend_kwargs,
         show=show,
     )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
     if backend == "bokeh":
 

@@ -1,13 +1,12 @@
 """Bokeh rankplot."""
-import bokeh.plotting as bkp
-import numpy as np
-import scipy.stats
-from bokeh.layouts import gridplot
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
+import numpy as np
+import scipy.stats
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import (
     _create_axes_grid,
     make_label,
@@ -35,7 +34,7 @@ def plot_rank(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     if axes is None:
@@ -126,8 +125,6 @@ def plot_rank(
         _title.text = make_label(var_name, selection)
         ax.title = _title
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes, show)
 
     return axes
