@@ -491,13 +491,13 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def vectorized_to_hex(rgba_c, keep_alpha=False):
-    """Convert a vector of RGBA values to a vector of hex values.
+def vectorized_to_hex(c, keep_alpha=False):
+    """Convert a color (including vector of colors) to hex
 
     Parameters
     ----------
-    rgba_c: array
-        array of RGBA values.
+    c: Matplotlib color
+
     keep_alpha: boolean
         to select if alpha values should be kept in the final hex values.
 
@@ -505,8 +505,12 @@ def vectorized_to_hex(rgba_c, keep_alpha=False):
     -------
     rgba_hex : vector of hex values
     """
-    rgba_hex = [to_hex(rgba_c[rgba], keep_alpha) for rgba in range(len(rgba_c))]
-    return rgba_hex
+    try:
+        hex_color=to_hex(c, keep_alpha=False)
+
+    except:
+        hex_color = [to_hex(color, keep_alpha) for color in c]
+    return hex_color
 
 
 def format_coords_as_labels(dataarray, skip_dims=None):
