@@ -196,7 +196,7 @@ def plot_density(
             label = make_label(var_name, selection)
             if label not in all_labels:
                 all_labels.append(label)
-    length_plotters = max(length_plotters)
+    length_plotters = len(all_labels)
     max_plots = rcParams["plot.max_subplots"]
     max_plots = length_plotters if max_plots is None else max_plots
     if length_plotters > max_plots:
