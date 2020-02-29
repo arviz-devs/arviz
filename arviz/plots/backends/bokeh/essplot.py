@@ -1,13 +1,12 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import Dash, Span, ColumnDataSource
 from bokeh.models.annotations import Title, Legend
+import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -54,7 +53,7 @@ def plot_ess(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     if ax is None:
@@ -169,8 +168,6 @@ def plot_ess(
         ax_.xaxis.axis_label = "Total number of draws" if kind == "evolution" else "Quantile"
         ax_.yaxis.axis_label = ylabel.format("Relative ESS" if relative else "ESS")
 
-    if backend_show(show):
-        grid = gridplot(ax.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(ax, show)
 
     return ax

@@ -1,10 +1,9 @@
 """Bokeh Violinplot."""
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import _fast_kde
 from ...plot_utils import get_bins, make_label, _create_axes_grid
 from ....stats import hpd
@@ -35,7 +34,7 @@ def plot_violin(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     if ax is None:
@@ -90,9 +89,7 @@ def plot_violin(
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
 
-    if backend_show(show):
-        grid = gridplot(ax.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(ax, show)
 
     return ax
 

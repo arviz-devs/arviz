@@ -8,17 +8,17 @@ from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 
-from ..data import from_dict, load_arviz_data
-from ..stats import compare, loo, waic
-from .helpers import (  # pylint: disable=unused-import
+from ...data import from_dict, load_arviz_data
+from ...stats import compare, loo, waic
+from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     create_model,
     multidim_models,
     create_multidimensional_model,
 )
-from ..rcparams import rcParams, rc_context
-from ..plots import (
+from ...rcparams import rcParams, rc_context
+from ...plots import (
     plot_density,
     plot_trace,
     plot_energy,
@@ -41,7 +41,7 @@ from ..plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ..plots.plot_utils import _fast_kde, _cov
+from ...plots.plot_utils import _fast_kde, _cov
 
 rcParams["data.load"] = "eager"
 
@@ -112,6 +112,14 @@ def test_plot_density_discrete(discrete_model):
     assert axes.shape[0] == 2
 
 
+def test_plot_density_no_subset():
+    """Test plot_density works when variables are not subset of one another (#1093)."""
+    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
+    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    axes = plot_density([model_ab, model_bc])
+    assert axes.shape[0] == 3
+
+
 def test_plot_density_bad_kwargs(models):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     with pytest.raises(ValueError):
@@ -154,6 +162,21 @@ def test_plot_trace_max_subplots_warning(models):
         with rc_context(rc={"plot.max_subplots": 1}):
             axes = plot_trace(models.model_1)
     assert axes.shape
+
+
+@pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
+def test_plot_trace_invalid_varname_warning(models, kwargs):
+    with pytest.warns(UserWarning, match="valid var.+should be provided"):
+        axes = plot_trace(models.model_1, **kwargs)
+    assert axes.shape
+
+
+@pytest.mark.parametrize(
+    "bad_kwargs", [{"var_names": ["mu", "tau"], "lines": [("mu", {}, ["hey"])]}]
+)
+def test_plot_trace_bad_lines_value(models, bad_kwargs):
+    with pytest.raises(ValueError, match="line-positions should be numeric"):
+        plot_trace(models.model_1, **bad_kwargs)
 
 
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
@@ -481,7 +504,7 @@ def test_plot_ppc_save_animation(models, kind):
     )
     assert axes
     assert anim
-    animations_folder = "saved_animations"
+    animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
     path = os.path.join(animations_folder, "ppc_{}_animation.mp4".format(kind))
     anim.save(path)
@@ -506,7 +529,7 @@ def test_plot_ppc_discrete_save_animation(kind):
     )
     assert axes
     assert anim
-    animations_folder = "saved_animations"
+    animations_folder = "../saved_animations"
     os.makedirs(animations_folder, exist_ok=True)
     path = os.path.join(animations_folder, "ppc_discrete_{}_animation.mp4".format(kind))
     anim.save(path)
@@ -701,7 +724,6 @@ def test_plot_posterior_point_estimates(models, point_estimate):
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
 def test_plot_compare(models, kwargs):
-
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     axes = plot_compare(model_compare, **kwargs)

@@ -6,16 +6,16 @@ from pandas import DataFrame
 import numpy as np
 import pytest
 
-from ..data import from_dict, load_arviz_data
-from .helpers import (  # pylint: disable=unused-import
+from ...data import from_dict, load_arviz_data
+from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
     create_model,
     multidim_models,
     create_multidimensional_model,
 )
-from ..rcparams import rcParams, rc_context
-from ..plots import (
+from ...rcparams import rcParams, rc_context
+from ...plots import (
     plot_autocorr,
     plot_compare,
     plot_density,
@@ -38,7 +38,7 @@ from ..plots import (
     plot_ppc,
     plot_violin,
 )
-from ..stats import compare, loo, waic
+from ...stats import compare, loo, waic
 
 rcParams["data.load"] = "eager"
 
@@ -88,6 +88,14 @@ def test_plot_density_float(models, kwargs):
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=0.9, backend="bokeh", show=False)
     assert axes.shape[0] == 1
+
+
+def test_plot_density_no_subset():
+    """Test plot_density works when variables are not subset of one another (#1093)."""
+    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
+    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    axes = plot_density([model_ab, model_bc])
+    assert axes.shape[0] == 3
 
 
 def test_plot_density_bad_kwargs(models):

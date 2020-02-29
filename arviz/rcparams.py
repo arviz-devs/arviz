@@ -50,6 +50,45 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
     return validate_choice
 
 
+def _make_validate_choice_regex(accepted_values, accepted_values_regex, allow_none=False):
+    """Validate value is in accepted_values with regex.
+
+    Parameters
+    ----------
+    accepted_values : iterable
+        Iterable containing all accepted_values.
+    accepted_values_regex : iterable
+        Iterable containing all accepted_values with regex string.
+    allow_none: boolean, optional
+        Whether to accept ``None`` in addition to the values in ``accepted_values``.
+    typeof: type, optional
+        Type the values should be converted to.
+    """
+    # no blank lines allowed after function docstring by pydocstyle,
+    # but black requires white line before function
+
+    def validate_choice_regex(value):
+        if allow_none and (value is None or isinstance(value, str) and value.lower() == "none"):
+            return None
+        value = str(value)
+        if isinstance(value, str):
+            value = value.lower()
+
+        if value in accepted_values:
+            # Convert value to python boolean if string matches
+            value = {"true": True, "false": False}.get(value, value)
+            return value
+        elif any(re.match(pattern, value) for pattern in accepted_values_regex):
+            return value
+        raise ValueError(
+            "{} is not one of {} or in regex {}{}".format(
+                value, accepted_values, accepted_values_regex, " nor None" if allow_none else ""
+            )
+        )
+
+    return validate_choice_regex
+
+
 def _validate_positive_int(value):
     """Validate value is a natural number."""
     try:
@@ -160,13 +199,37 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
-    "plot.bokeh.figure.width": (500, _validate_positive_int),
     "plot.bokeh.figure.height": (500, _validate_positive_int),
+    "plot.bokeh.figure.width": (500, _validate_positive_int),
+    "plot.bokeh.layout.order": (
+        "default",
+        _make_validate_choice_regex(
+            {"default", r"column", r"row", "square", "square_trimmed"}, {r"\d*column", r"\d*row"}
+        ),
+    ),
+    "plot.bokeh.layout.sizing_mode": (
+        "fixed",
+        _make_validate_choice(
+            {
+                "fixed",
+                "stretch_width",
+                "stretch_height",
+                "stretch_both",
+                "scale_width",
+                "scale_height",
+                "scale_both",
+            }
+        ),
+    ),
+    "plot.bokeh.layout.toolbar_location": (
+        "above",
+        _make_validate_choice({"above", "below", "left", "right"}, allow_none=True),
+    ),
     "plot.bokeh.marker": ("Cross", _validate_bokeh_marker),
     "plot.bokeh.output_backend": ("webgl", _make_validate_choice({"canvas", "svg", "webgl"})),
     "plot.bokeh.show": (True, _validate_boolean),
     "plot.bokeh.tools": (
-        "pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover",
+        "reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover",
         lambda x: x,
     ),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),

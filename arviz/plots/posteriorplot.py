@@ -234,6 +234,10 @@ def plot_posterior(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
 
         posteriorplot_kwargs.pop("xt_labelsize")

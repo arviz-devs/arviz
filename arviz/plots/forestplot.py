@@ -200,6 +200,10 @@ def plot_forest(
         show=show,
     )
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if backend == "bokeh":
         plot_forest_kwargs.update(backend_config=backend_config)
 

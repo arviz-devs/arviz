@@ -1,11 +1,10 @@
 """Bokeh Autocorrplot."""
-import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import DataRange1d
 from bokeh.models.annotations import Title
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import _create_axes_grid, make_label
 from ....stats import autocorr
 
@@ -39,7 +38,7 @@ def plot_autocorr(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
 
@@ -89,6 +88,6 @@ def plot_autocorr(
         ax.x_range = data_range_x
         ax.y_range = data_range_y
 
-    if backend_show(show):
-        bkp.show(gridplot(axes.tolist(), toolbar_location="above"))
+    show_layout(axes, show)
+
     return axes

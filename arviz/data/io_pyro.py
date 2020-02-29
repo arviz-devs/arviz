@@ -144,7 +144,10 @@ class PyroConverter:
                 None
                 if var_names is None
                 else dict_to_dataset(
-                    {k: utils.expand_dims(self.prior[k].detach().cpu().numpy()) for k in var_names},
+                    {
+                        k: utils.expand_dims(np.squeeze(self.prior[k].detach().cpu().numpy()))
+                        for k in var_names
+                    },
                     library=self.pyro,
                     coords=self.coords,
                     dims=self.dims,

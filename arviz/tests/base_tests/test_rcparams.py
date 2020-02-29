@@ -5,12 +5,13 @@ import pytest
 from xarray.core.indexing import MemoryCachedArray
 
 
-from ..data import load_arviz_data, datasets
-from ..stats import compare
-from ..rcparams import (
+from ...data import load_arviz_data, datasets
+from ...stats import compare
+from ...rcparams import (
     rcParams,
     rc_context,
     _make_validate_choice,
+    _make_validate_choice_regex,
     make_iterable_validator,
     _validate_float_or_none,
     _validate_positive_int_or_none,
@@ -18,7 +19,7 @@ from ..rcparams import (
     read_rcfile,
 )
 
-from .helpers import models  # pylint: disable=unused-import
+from ..helpers import models  # pylint: disable=unused-import
 
 ### Test rcparams classes ###
 def test_rc_context_dict():
@@ -31,7 +32,7 @@ def test_rc_context_dict():
 def test_rc_context_file():
     path = os.path.dirname(os.path.abspath(__file__))
     rcParams["data.load"] = "lazy"
-    with rc_context(fname=os.path.join(path, "test.rcparams")):
+    with rc_context(fname=os.path.join(path, "../test.rcparams")):
         assert rcParams["data.load"] == "eager"
     assert rcParams["data.load"] == "lazy"
 
@@ -40,13 +41,13 @@ def test_bad_rc_file():
     """Test bad value raises error."""
     path = os.path.dirname(os.path.abspath(__file__))
     with pytest.raises(ValueError, match="Bad val "):
-        read_rcfile(os.path.join(path, "bad.rcparams"))
+        read_rcfile(os.path.join(path, "../bad.rcparams"))
 
 
 def test_warning_rc_file(caplog):
     """Test invalid lines and duplicated keys log warnings and bad value raises error."""
     path = os.path.dirname(os.path.abspath(__file__))
-    read_rcfile(os.path.join(path, "test.rcparams"))
+    read_rcfile(os.path.join(path, "../test.rcparams"))
     records = caplog.records
     assert len(records) == 1
     assert records[0].levelname == "WARNING"
@@ -105,7 +106,7 @@ def test_rcparams_repr_str():
 
 ### Test arvizrc.template file is up to date ###
 def test_rctemplate_updated():
-    fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../arvizrc.template")
+    fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../arvizrc.template")
     rc_pars_template = read_rcfile(fname)
     assert all([key in rc_pars_template.keys() for key in rcParams.keys()])
     assert all([value == rc_pars_template[key] for key, value in rcParams.items()])
@@ -135,6 +136,34 @@ def test_make_validate_choice(args, allow_none, typeof):
     else:
         value = validate_choice(value)
         assert value in accepted_values or value is None
+
+
+@pytest.mark.parametrize("allow_none", (True, False))
+@pytest.mark.parametrize(
+    "args",
+    [
+        (False, None),
+        (False, "row"),
+        (False, "54row"),
+        (False, "4column"),
+        ("or in regex", "square"),
+    ],
+)
+def test_make_validate_choice_regex(args, allow_none):
+    accepted_values = {"row", "column"}
+    accepted_values_regex = {r"\d*row", r"\d*column"}
+    validate_choice = _make_validate_choice_regex(
+        accepted_values, accepted_values_regex, allow_none=allow_none
+    )
+    raise_error, value = args
+    if value is None and not allow_none:
+        raise_error = "or in regex"
+    if raise_error:
+        with pytest.raises(ValueError, match=raise_error):
+            validate_choice(value)
+    else:
+        value_result = validate_choice(value)
+        assert value == value_result
 
 
 @pytest.mark.parametrize("allow_none", (True, False))

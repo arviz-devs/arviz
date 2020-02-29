@@ -171,7 +171,7 @@ Here is the citation in BibTeX format
     </div>
 
 
-.. |Build Status| image:: https://travis-ci.org/arviz-devs/arviz.png?branch=master
-   :target: https://travis-ci.org/arviz-devs/arviz
-.. |Coverage Status| image:: https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master
-   :target: https://coveralls.io/github/arviz-devs/arviz?branch=master
+.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master
+   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master
+.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/arviz-devs/arviz

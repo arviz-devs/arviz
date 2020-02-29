@@ -7,6 +7,7 @@ import pkg_resources
 import xarray as xr
 
 from .. import utils
+from .. import __version__
 
 CoordSpec = Dict[str, List[Any]]
 DimSpec = Dict[str, List[str]]
@@ -215,7 +216,10 @@ def make_attrs(attrs=None, library=None):
     dict
         attrs
     """
-    default_attrs = {"created_at": datetime.datetime.utcnow().isoformat()}
+    default_attrs = {
+        "created_at": datetime.datetime.utcnow().isoformat(),
+        "arviz_version": __version__,
+    }
     if library is not None:
         library_name = library.__name__
         default_attrs["inference_library"] = library_name

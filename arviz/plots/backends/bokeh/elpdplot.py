@@ -2,13 +2,13 @@
 import warnings
 
 import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models.annotations import Title
 from bokeh.models import ColumnDataSource
 import bokeh.models.markers as mk
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import _scale_fig_size
 from ....rcparams import rcParams, _validate_bokeh_marker
 
@@ -34,11 +34,7 @@ def plot_elpd(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -49,16 +45,15 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            ax = bkp.figure(
-                width=int(figsize[0] * dpi), height=int(figsize[1] * dpi), **backend_kwargs
-            )
+            backend_kwargs.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs.setdefault("height", int(figsize[1] * dpi))
+            ax = bkp.figure(**backend_kwargs)
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
         )
 
-        if backend_show(show):
-            bkp.show(ax, toolbar_location="above")
+        show_layout(ax, show)
 
     else:
         max_plots = (
@@ -129,8 +124,8 @@ def plot_elpd(
                     plot_kwargs,
                 )
 
-        if backend_show(show):
-            bkp.show(gridplot(ax.tolist(), toolbar_location="above"))
+        show_layout(ax, show)
+
     return ax
 
 

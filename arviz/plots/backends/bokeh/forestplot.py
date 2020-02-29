@@ -4,14 +4,14 @@ from collections import defaultdict, OrderedDict
 from itertools import cycle, tee
 
 import bokeh.plotting as bkp
-import matplotlib.pyplot as plt
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
+import matplotlib.pyplot as plt
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
 from ....rcparams import rcParams
 from ....stats import hpd
@@ -88,32 +88,25 @@ def plot_forest(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
 
     if ax is None:
         axes = []
+
         for i, width_r in zip(range(ncols), width_ratios):
+            backend_kwargs_i = backend_kwargs.copy()
+            backend_kwargs_i.setdefault("width", int(figsize[0] * dpi))
+            backend_kwargs_i.setdefault(
+                "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
+            )
             if i == 0:
-                ax = bkp.figure(
-                    height=int(figsize[0]) * dpi,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
-                    **backend_kwargs,
-                )
+                ax = bkp.figure(**backend_kwargs,)
                 _y_range = ax.y_range
             else:
-                ax = bkp.figure(
-                    height=figsize[0] * dpi,
-                    width=int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25),
-                    y_range=_y_range,
-                    **backend_kwargs,
-                )
+                ax = bkp.figure(y_range=_y_range, **backend_kwargs,)
             axes.append(ax)
     else:
         axes = ax
@@ -179,9 +172,7 @@ def plot_forest(
     ].group_offset
     axes[0, 0].y_range._property_values["end"] = y_max  # pylint: disable=protected-access
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes, show)
 
     return axes
 

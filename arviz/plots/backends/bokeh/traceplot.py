@@ -4,12 +4,12 @@ from collections.abc import Iterable
 from typing import Dict
 
 import bokeh.plotting as bkp
-import numpy as np
-from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
 from bokeh.models.annotations import Title
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...distplot import plot_dist
 from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
 from ....rcparams import rcParams
@@ -54,11 +54,7 @@ def plot_trace(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -279,9 +275,7 @@ def plot_trace(
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
                     axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes, show)
 
     return axes
 

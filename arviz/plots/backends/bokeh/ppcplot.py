@@ -1,9 +1,8 @@
 """Bokeh Posterior predictive plot."""
-import bokeh.plotting as bkp
 import numpy as np
-from bokeh.layouts import gridplot
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 from ...kdeplot import plot_kde, _fast_kde
 from ...plot_utils import (
     _create_axes_grid,
@@ -38,7 +37,7 @@ def plot_ppc(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     if ax is None:
@@ -239,9 +238,7 @@ def plot_ppc(
             xlabel = var_name
         ax_i.xaxis.axis_label = xlabel
 
-    if backend_show(show):
-        grid = gridplot(axes.tolist(), toolbar_location="above")
-        bkp.show(grid)
+    show_layout(axes, show)
 
     return axes
 

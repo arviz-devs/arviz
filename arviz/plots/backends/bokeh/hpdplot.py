@@ -2,10 +2,11 @@
 from itertools import cycle
 
 import bokeh.plotting as bkp
-import numpy as np
 from matplotlib.pyplot import rcParams as mpl_rcParams
+import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults
+from .. import show_layout
 
 
 def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
@@ -14,12 +15,7 @@ def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show)
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("tools", "plot.bokeh.tools"),
-            ("output_backend", "plot.bokeh.output_backend"),
-            ("width", "plot.bokeh.figure.width"),
-            ("height", "plot.bokeh.figure.height"),
-        ),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
     if ax is None:
@@ -54,7 +50,6 @@ def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show)
         **plot_kwargs
     )
 
-    if backend_show(show):
-        bkp.show(ax, toolbar_location="above")
+    show_layout(ax, show)
 
     return ax

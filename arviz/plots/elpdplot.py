@@ -135,7 +135,11 @@ def plot_elpd(
                 set(scales)
             )
         )
-    backend = rcParams["plot.backend"] if backend is None else backend.lower()
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     numvars = len(compare_dict)
     models = list(compare_dict.keys())
 
