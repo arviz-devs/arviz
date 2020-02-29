@@ -4,12 +4,9 @@ from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
-<<<<<<< HEAD
 from .plot_utils import _scale_fig_size, get_plotting_function, matplotlib_kwarg_dealiaser
-=======
 from .plot_utils import _scale_fig_size, get_plotting_function
 from ..rcparams import rcParams
->>>>>>> master
 
 
 def plot_energy(
