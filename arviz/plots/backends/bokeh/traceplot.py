@@ -163,7 +163,6 @@ def plot_trace(
             )
         else:
             for y_name in cds_var_groups[var_name]:
-                print(y_name, cds_var_groups[var_name])
                 if rug:
                     rug_kwargs["y"] = y_name
                 _plot_chains_bokeh(
