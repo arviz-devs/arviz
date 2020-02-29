@@ -506,7 +506,7 @@ def vectorized_to_hex(c, keep_alpha=False):
     rgba_hex : vector of hex values
     """
     try:
-        hex_color=to_hex(c, keep_alpha=False)
+        hex_color = to_hex(c, keep_alpha=False)
 
     except:
         hex_color = [to_hex(color, keep_alpha) for color in c]
