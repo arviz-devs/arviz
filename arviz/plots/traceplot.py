@@ -12,7 +12,6 @@ from .plot_utils import (
     KwargSpec,
     matplotlib_kwarg_dealiaser,
 )
-from ..data import convert_to_dataset
 from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
