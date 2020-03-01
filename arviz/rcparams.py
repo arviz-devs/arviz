@@ -196,6 +196,11 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
+    "plot.max_subplots": (40, _validate_positive_int_or_none),
+    "plot.point_estimate": (
+        "mean",
+        _make_validate_choice({"mean", "median", "mode"}, allow_none=True),
+    ),
     "plot.bokeh.bounds_x_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.bounds_y_range": ("auto", _validate_bokeh_bounds),
     "plot.bokeh.figure.dpi": (60, _validate_positive_int),
@@ -234,11 +239,6 @@ defaultParams = {  # pylint: disable=invalid-name
     ),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
-    "plot.max_subplots": (40, _validate_positive_int_or_none),
-    "plot.point_estimate": (
-        "mean",
-        _make_validate_choice({"mean", "median", "mode"}, allow_none=True),
-    ),
     "stats.credible_interval": (0.94, _validate_probability),
     "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
     "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),

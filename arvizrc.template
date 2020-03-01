@@ -11,7 +11,10 @@ data.load                    : lazy  # Sets the default data loading mode.
 ### PLOT  ###
 # rcParams related with plotting functions
 plot.backend                 : matplotlib  # One of bokeh, matplotlib
+plot.max_subplots            : 40          # Maximum number of subplots.
+plot.point_estimate          : mean        # One of mean, median, mode or None
 
+# bokeh specific rcParams
 plot.bokeh.bounds_x_range    : auto        # either auto, None or tuple of size 2
 plot.bokeh.bounds_y_range    : auto        # either auto, None or tuple of size 2
 plot.bokeh.figure.dpi        : 60          # dots (pixels) per inch
@@ -30,11 +33,9 @@ plot.bokeh.show              : true        # call bokeh.plotting.show for figure
 plot.bokeh.tools             : reset,pan,box_zoom,wheel_zoom,lasso_select,undo,save,hover
                                            # pan,box_zoom,wheel_zoom,box_select,lasso_select,undo,redo,reset,save,hover
 
+# matplotlib specific rcParams
 plot.matplotlib.constrained_layout : true  # One of "true" or "false"
 plot.matplotlib.show         : false       # call plt.show. One of "true", "false"
-
-plot.max_subplots            : 40          # Maximum number of subplots.
-plot.point_estimate          : mean        # One of mean, median, mode or None
 
 ### STATS ###
 # rcParams related with statistical and diagnostic functions

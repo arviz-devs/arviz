@@ -1,5 +1,6 @@
 """Utilities for plotting."""
 import warnings
+from typing import Dict, Any
 from itertools import product, tee
 import importlib
 from scipy.signal import convolve, convolve2d
@@ -17,6 +18,8 @@ import xarray as xr
 
 from ..utils import conditional_jit, _stack
 from ..rcparams import rcParams
+
+KwargSpec = Dict[str, Any]
 
 
 def make_2d(ary):
@@ -600,9 +603,21 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def format_coords_as_labels(dataarray):
-    """Format 1d or multi-d dataarray coords as strings."""
-    coord_labels = dataarray.coords.to_index().values
+def format_coords_as_labels(dataarray, skip_dims=None):
+    """Format 1d or multi-d dataarray coords as strings.
+
+    Parameters
+    ----------
+    dataarray : xarray.DataArray
+        DataArray whose coordinates will be converted to labels.
+    skip_dims : str of list_like, optional
+        Dimensions whose values should not be included in the labels
+    """
+    if skip_dims is None:
+        coord_labels = dataarray.coords.to_index()
+    else:
+        coord_labels = dataarray.coords.to_index().droplevel(skip_dims).drop_duplicates()
+    coord_labels = coord_labels.values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]
