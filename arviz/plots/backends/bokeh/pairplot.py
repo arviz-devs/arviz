@@ -45,7 +45,7 @@ def plot_pair(
                 (flat_var_names[0], "@{{{}}}".format(flat_var_names[0])),
             ]
             backend_kwargs.setdefault("tooltips", tooltips)
-        
+
         (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
 
         source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
