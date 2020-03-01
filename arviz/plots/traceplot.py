@@ -1,36 +1,40 @@
 """Plot kde or histograms and values from MCMC samples."""
 from itertools import cycle
 import warnings
+from typing import Callable, List, Optional, Tuple, Any
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_function, get_coords, xarray_var_iter
-from ..data import convert_to_dataset
+from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, KwargSpec
+from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
 
 
 def plot_trace(
-    data,
-    var_names=None,
-    transform=None,
-    coords=None,
-    divergences="bottom",
-    figsize=None,
-    rug=False,
-    lines=None,
-    compact=False,
-    combined=False,
-    legend=False,
-    plot_kwargs=None,
-    fill_kwargs=None,
-    rug_kwargs=None,
-    hist_kwargs=None,
-    trace_kwargs=None,
-    backend=None,
-    backend_config=None,
-    backend_kwargs=None,
-    show=None,
+    data: InferenceData,
+    var_names: Optional[List[str]] = None,
+    transform: Optional[Callable] = None,
+    coords: Optional[CoordSpec] = None,
+    divergences: Optional[str] = "bottom",
+    figsize: Optional[Tuple[float, float]] = None,
+    rug: bool = False,
+    lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
+    compact: bool = False,
+    compact_prop: Optional[Tuple[str, Any]] = None,
+    combined: bool = False,
+    chain_prop: Optional[Tuple[str, Any]] = None,
+    legend: bool = False,
+    plot_kwargs: Optional[KwargSpec] = None,
+    fill_kwargs: Optional[KwargSpec] = None,
+    rug_kwargs: Optional[KwargSpec] = None,
+    hist_kwargs: Optional[KwargSpec] = None,
+    trace_kwargs: Optional[KwargSpec] = None,
+    ax=None,
+    backend: Optional[str] = None,
+    backend_config: Optional[KwargSpec] = None,
+    backend_kwargs: Optional[KwargSpec] = None,
+    show: Optional[bool] = None,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
 
@@ -42,44 +46,43 @@ def plot_trace(
     data : obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : string, or list of strings
+    var_names : str or list of str, optional
         One or more variables to be plotted.
-    coords : mapping, optional
+    coords : dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    divergences : {"bottom", "top", None, False}
-        Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
-    transform : callable
+    divergences : {"bottom", "top", None}, optional
+        Plot location of divergences on the traceplots.
+    transform : callable, optional
         Function to transform data (defaults to None i.e.the identity function)
-    figsize : figure size tuple
+    figsize : tuple of (float, float), optional
         If None, size is (12, variables * 2)
-    rug : bool
+    rug : bool, optional
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
-    lines : tuple
-        Tuple of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
+    lines : list of tuple of (str, dict, array_like), optional
+        List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
-    compact : bool
+    compact : bool, optional
         Plot multidimensional variables in a single plot.
-    combined : bool
+    compact_prop : tuple of (str, array_like), optional
+        Tuple containing the property name and the property values to distinguish diferent
+        dimensions with compact=True
+    combined : bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    legend : bool
+    chain_prop : tuple of (str, array_like), optional
+        Tuple containing the property name and the property values to distinguish diferent chains
+    legend : bool, optional
         Add a legend to the figure with the chain color code.
-    plot_kwargs : dict
+    plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs : dict, optional
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    fill_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    rug_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    hist_kwargs : dict
-        Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
-    trace_kwargs : dict
+    trace_kwargs : dict, optional
         Extra keyword arguments passed to `plt.plot`
-    backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_config: dict, optional
+    backend : {"matplotlib", "bokeh"}, optional
+        Select plotting backend.
+    backend_config : dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
-    backend_kwargs: bool, optional
+    backend_kwargs : dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
     show : bool, optional
@@ -152,15 +155,46 @@ def plot_trace(
     if lines is None:
         lines = ()
 
-    num_colors = len(data.chain) + 1 if combined else len(data.chain)
+    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
+    if not compact:
+        if backend == "bokeh":
+            chain_prop = (
+                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                if chain_prop is None
+                else chain_prop
+            )
+        else:
+            chain_prop = "color" if chain_prop is None else chain_prop
+    else:
+        chain_prop = (
+            (
+                "line_dash" if backend == "bokeh" else "linestyle",
+                ("solid", "dotted", "dashed", "dashdot"),
+            )
+            if chain_prop is None
+            else chain_prop
+        )
+        if backend == "bokeh":
+            compact_prop = (
+                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                if compact_prop is None
+                else compact_prop
+            )
+        else:
+            compact_prop = "color" if compact_prop is None else compact_prop
 
     # TODO: matplotlib is always required by arviz. Can we get rid of it?
-    colors = [
-        prop
-        for _, prop in zip(
-            range(num_colors), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-        )
-    ]
+    # TODO: kind of related: move mpl specific code to backend and
+    # define prop_cycle instead of only colors
+    if isinstance(chain_prop, str):
+        chain_prop = (chain_prop, plt.rcParams["axes.prop_cycle"].by_key()[chain_prop])
+    chain_prop = (
+        chain_prop[0],
+        [prop for _, prop in zip(range(num_chain_props), cycle(chain_prop[1]))],
+    )
+
+    if isinstance(compact_prop, str):
+        compact_prop = (compact_prop, plt.rcParams["axes.prop_cycle"].by_key()[compact_prop])
 
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}
@@ -212,14 +246,15 @@ def plot_trace(
         rug_kwargs=rug_kwargs,
         hist_kwargs=hist_kwargs,
         trace_kwargs=trace_kwargs,
-        # compact = compact,
+        compact_prop=compact_prop,
         combined=combined,
+        chain_prop=chain_prop,
         legend=legend,
         # Generated kwargs
         divergence_data=divergence_data,
         # skip_dims=skip_dims,
         plotters=plotters,
-        colors=colors,
+        axes=ax,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -230,6 +265,7 @@ def plot_trace(
 
     if backend == "bokeh":
         trace_plot_args.update(backend_config=backend_config)
+        trace_plot_args.pop("compact_prop")
 
     plot = get_plotting_function("plot_trace", "traceplot", backend)
     axes = plot(**trace_plot_args)

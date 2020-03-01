@@ -141,7 +141,7 @@ def test_plot_density_bad_kwargs(models):
         {"combined": True},
         {"compact": True},
         {"combined": True, "compact": True, "legend": True},
-        {"divergences": "top"},
+        {"divergences": "top", "legend": True},
         {"divergences": False},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
@@ -150,6 +150,23 @@ def test_plot_density_bad_kwargs(models):
 def test_plot_trace(models, kwargs):
     axes = plot_trace(models.model_1, **kwargs)
     assert axes.shape
+
+
+@pytest.mark.parametrize("compact", [True, False],)
+@pytest.mark.parametrize("combined", [True, False],)
+def test_plot_trace_legend(compact, combined):
+    idata = load_arviz_data("rugby")
+    axes = plot_trace(
+        idata, var_names=["home", "atts_star"], compact=compact, combined=combined, legend=True
+    )
+    assert axes[0, 1].get_legend()
+    compact_legend = axes[1, 0].get_legend()
+    if compact:
+        assert axes.shape == (2, 2)
+        assert compact_legend
+    else:
+        assert axes.shape == (7, 2)
+        assert not compact_legend
 
 
 def test_plot_trace_discrete(discrete_model):
@@ -302,8 +319,9 @@ def test_plot_kde(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("x", [np.random.randn(8), np.random.randn(8, 8), np.random.randn(8, 8, 8)])
-def test_cov(x):
+@pytest.mark.parametrize("shape", [(8,), (8, 8), (8, 8, 8)])
+def test_cov(shape):
+    x = np.random.randn(*shape)
     if x.ndim <= 2:
         assert np.allclose(_cov(x), np.cov(x))
     else:
