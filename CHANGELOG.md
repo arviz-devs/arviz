@@ -23,6 +23,7 @@
 * Add `log_likelihood` argument to `from_pymc3` (#1082)
 * Integrated rcParams for `plot.bokeh.layout` and `plot.backend`. (#1089)
 * Add automatic legends in `plot_trace` with compact=True (matplotlib only) (#1070)
+* Updated hover information for `plot_pair` with bokeh backend (#1074)
 
 
 ### Maintenance and fixes
