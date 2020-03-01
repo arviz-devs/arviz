@@ -30,6 +30,7 @@ def plot_pair(
 ):
     """
     Plot a scatter or hexbin matrix of the sampled parameters.
+
     Parameters
     ----------
     data : obj
@@ -76,9 +77,11 @@ def plot_pair(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
     Examples
     --------
     KDE Pair Plot
