@@ -9,10 +9,10 @@ from .plot_utils import (
     get_plotting_function,
     get_coords,
     xarray_var_iter,
+    KwargSpec,
     matplotlib_kwarg_dealiaser,
 )
 from ..data import convert_to_dataset
-from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, KwargSpec
 from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
