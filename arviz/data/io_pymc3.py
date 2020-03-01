@@ -159,7 +159,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         multi_observations = {}
         for obs in self.model.observed_RVs:
             if hasattr(obs, "observations"):
-                observations[obs.name] = obs.observation
+                observations[obs.name] = obs.observations
             elif hasattr(obs, "data"):
                 for key, val in obs.data.items():
                     multi_observations[key] = val
