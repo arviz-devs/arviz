@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import,invalid-name,wrong-import-position
 """ArviZ is a library for exploratory analysis of Bayesian models."""
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 
 import os
 import logging
