@@ -12,6 +12,7 @@ import packaging
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.cbook as cbook
 import xarray as xr
 
 
@@ -914,3 +915,24 @@ def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     grid /= norm_factor
 
     return grid, xmin, xmax, ymin, ymax
+
+
+def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
+    """De-aliase the kwargs passed to plots."""
+    if args is None:
+        return {}
+    matplotlib_kwarg_dealiaser_dict = {
+        "scatter": mpl.collections.PathCollection,
+        "plot": mpl.lines.Line2D,
+        "hist": mpl.patches.Patch,
+        "hexbin": mpl.collections.PolyCollection,
+        "hlines": mpl.collections.LineCollection,
+        "text": mpl.text.Text,
+        "contour": mpl.contour.ContourSet,
+        "pcolormesh": mpl.collections.QuadMesh,
+    }
+    if backend == "matplotlib":
+        return cbook.normalize_kwargs(
+            args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {})
+        )
+    return args

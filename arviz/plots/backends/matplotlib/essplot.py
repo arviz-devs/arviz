@@ -7,6 +7,7 @@ from . import backend_show
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    matplotlib_kwarg_dealiaser,
 )
 
 
@@ -63,8 +64,7 @@ def plot_ess(
             ess_tail = ess_tail_dataset[var_name].sel(**selection)
             ax_.plot(xdata, ess_tail, **extra_kwargs)
         elif rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
+            rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
             if not hasattr(idata, "sample_stats"):
                 raise ValueError("InferenceData object must contain sample_stats for rug plot")
             if not hasattr(idata.sample_stats, rug_kind):

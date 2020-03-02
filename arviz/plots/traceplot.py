@@ -5,7 +5,13 @@ from typing import Callable, List, Optional, Tuple, Any
 
 import matplotlib.pyplot as plt
 
-from .plot_utils import get_plotting_function, get_coords, xarray_var_iter, KwargSpec
+from .plot_utils import (
+    get_plotting_function,
+    get_coords,
+    xarray_var_iter,
+    KwargSpec,
+    matplotlib_kwarg_dealiaser,
+)
 from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names
 from ..rcparams import rcParams
@@ -216,8 +222,7 @@ def plot_trace(
     if figsize is None:
         figsize = (12, len(plotters) * 2)
 
-    if trace_kwargs is None:
-        trace_kwargs = {}
+    trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
     trace_kwargs.setdefault("alpha", 0.35)
 
     if hist_kwargs is None:

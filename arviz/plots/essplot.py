@@ -11,6 +11,7 @@ from .plot_utils import (
     get_coords,
     filter_plotters_list,
     get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
 from ..utils import _var_names
@@ -248,14 +249,15 @@ def plot_ess(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    _linestyle = kwargs.pop("ls", "-" if kind == "evolution" else "none")
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    _linestyle = "-" if kind == "evolution" else "none"
     kwargs.setdefault("linestyle", _linestyle)
-    kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
-    kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
     if kind == "evolution":
         extra_kwargs = {
             **extra_kwargs,
@@ -264,28 +266,27 @@ def plot_ess(
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
     else:
-        extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
-        extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+        extra_kwargs.setdefault("linestyle", "-")
+        extra_kwargs.setdefault("linewidth", _linewidth / 2)
         extra_kwargs.setdefault("color", "k")
         extra_kwargs.setdefault("alpha", 0.5)
     kwargs.setdefault("label", kind)
-    if hline_kwargs is None:
-        hline_kwargs = {}
-    hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
-    hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
-    hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
+
+    hline_kwargs = matplotlib_kwarg_dealiaser(hline_kwargs, "plot")
+    hline_kwargs.setdefault("linewidth", _linewidth)
+    hline_kwargs.setdefault("linestyle", "--")
+    hline_kwargs.setdefault("color", "gray")
     hline_kwargs.setdefault("alpha", 0.7)
     if extra_methods:
         mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
         sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
-        if text_kwargs is None:
-            text_kwargs = {}
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
-        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
         text_kwargs.setdefault("color", extra_kwargs["color"])
-        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
 
     essplot_kwargs = dict(
         ax=ax,

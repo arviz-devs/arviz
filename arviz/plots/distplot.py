@@ -1,6 +1,7 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-from .plot_utils import get_bins, get_plotting_function
+
+from .plot_utils import get_bins, get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 
 
@@ -148,9 +149,7 @@ def plot_dist(
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
-        if hist_kwargs is None:
-            hist_kwargs = {}
-
+        hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
         hist_kwargs.setdefault("bins", get_bins(values))
         hist_kwargs.setdefault("cumulative", cumulative)
         hist_kwargs.setdefault("color", color)

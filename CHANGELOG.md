@@ -16,9 +16,9 @@
 * Added the functionality [interactive legends](https://docs.bokeh.org/en/1.4.0/docs/user_guide/interaction/legends.html) for bokeh plots of `densityplot`, `energyplot`
   and `essplot` (#1024)
 * New defaults for cross validation: `loo` (old: waic) and `log` -scale (old: `deviance` -scale) (#1067)
-* **Experimental Feature**: Added `arviz.wrappers` module to allow ArviZ to
-  refit the models if necessary (#771)
+* **Experimental Feature**: Added `arviz.wrappers` module to allow ArviZ to refit the models if necessary (#771)
 * **Experimental Feature**: Added `reloo` function to ArviZ (#771)
+* Added new helper function `matplotlib_kwarg_dealiaser` (#1073)
 * ArviZ version to InferenceData attributes. (#1086)
 * Add `log_likelihood` argument to `from_pymc3` (#1082)
 * Integrated rcParams for `plot.bokeh.layout` and `plot.backend`. (#1089)

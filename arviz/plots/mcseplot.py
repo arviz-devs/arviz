@@ -11,6 +11,7 @@ from .plot_utils import (
     get_coords,
     filter_plotters_list,
     get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
 from ..utils import _var_names
@@ -134,28 +135,29 @@ def plot_mcse(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    kwargs.setdefault("linestyle", kwargs.pop("ls", "none"))
-    kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
-    kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs.setdefault("linestyle", "none")
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "_" if errorbar else "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
-    extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
-    extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+    extra_kwargs.setdefault("linestyle", "-")
+    extra_kwargs.setdefault("linewidth", _linewidth / 2)
     extra_kwargs.setdefault("color", "k")
     extra_kwargs.setdefault("alpha", 0.5)
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")
         sd_mcse = mcse(data, var_names=var_names, method="sd")
-        if text_kwargs is None:
-            text_kwargs = {}
+
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
-        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
         text_kwargs.setdefault("color", extra_kwargs["color"])
-        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
 
     mcse_kwargs = dict(
         ax=ax,

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from . import backend_show
 from ...kdeplot import plot_kde
+from ...plot_utils import matplotlib_kwarg_dealiaser
 
 
 def plot_dist(
@@ -49,9 +50,7 @@ def plot_dist(
         )
 
     elif kind == "kde":
-        if plot_kwargs is None:
-            plot_kwargs = {}
-
+        plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
         plot_kwargs.setdefault("color", color)
         legend = label is not None
 

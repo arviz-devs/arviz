@@ -4,7 +4,7 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
 from ..stats import hpd
-from .plot_utils import get_plotting_function
+from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 
 
@@ -64,13 +64,11 @@ def plot_hpd(
     -------
     axes : matplotlib axes or bokeh figures
     """
-    if plot_kwargs is None:
-        plot_kwargs = {}
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
     plot_kwargs.setdefault("alpha", 0)
 
-    if fill_kwargs is None:
-        fill_kwargs = {}
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
     fill_kwargs.setdefault("color", color)
     fill_kwargs.setdefault("alpha", 0.5)
 

@@ -11,6 +11,7 @@ from .plot_utils import (
     color_from_dim,
     format_coords_as_labels,
     get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
 from ..stats import ELPDData
 from ..rcparams import rcParams
@@ -132,8 +133,7 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
-    if hlines_kwargs is None:
-        hlines_kwargs = {}
+    hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -173,6 +173,8 @@ def plot_khat(
     if markersize is None:
         markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
         # for dots to have the same size
+
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
     kwargs.setdefault("s", markersize)
     kwargs.setdefault("marker", "+")
     color_mapping = None
