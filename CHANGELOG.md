@@ -3,6 +3,17 @@
 ## v0.x.x Unreleased
 
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+
+## v0.7.0 (2020 Mar 2)
+
+### New features
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3, pystan, cmdstan and cmdstanpy translations (#983, #1032 and #1064)
 * Started adding pointwise log likelihood storage support (#794, #1044 and #1064)
 * Violinplot: rug-plot option (#997)
