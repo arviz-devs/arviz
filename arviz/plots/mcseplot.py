@@ -135,6 +135,7 @@ def plot_mcse(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     kwargs.setdefault("linestyle", "none")
     kwargs.setdefault("linewidth", _linewidth)
     kwargs.setdefault("markersize", _markersize)
