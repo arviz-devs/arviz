@@ -139,8 +139,8 @@ def plot_khat(
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
-    hlines_kwargs.setdefault("color","C1")
-    hlines_kwargs["color"]=vectorized_to_hex(hlines_kwargs["color"])
+    hlines_kwargs.setdefault("color", "C1")
+    hlines_kwargs["color"] = vectorized_to_hex(hlines_kwargs["color"])
 
     if coords is None:
         coords = {}
