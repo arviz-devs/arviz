@@ -15,6 +15,7 @@ from ...plots.plot_utils import (
     matplotlib_kwarg_dealiaser,
     xarray_to_ndarray,
     xarray_var_iter,
+    vectorized_to_hex
 )
 from ...rcparams import rc_context
 from ...numeric_utils import get_bins
@@ -229,3 +230,13 @@ def test_matplotlib_kwarg_dealiaser(params):
     dealiased = matplotlib_kwarg_dealiaser(params["input"][0], kind=params["input"][1])
     for returned in dealiased:
         assert returned in params["output"]
+
+
+def test_vectorized_to_hex():
+    test_list=[]
+    test_list.append(vectorized_to_hex('#0000ff'))
+    test_list.append(vectorized_to_hex('blue'))
+    test_list.append(vectorized_to_hex([0.0,0.0,1.0]))
+    test_list.append(vectorized_to_hex(['blue','blue']))
+    
+    assert test_list==['#0000ff','#0000ff','#0000ff',['#0000ff','#0000ff']]

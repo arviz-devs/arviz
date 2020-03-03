@@ -508,7 +508,7 @@ def vectorized_to_hex(c, keep_alpha=False):
     try:
         hex_color = to_hex(c, keep_alpha=False)
 
-    except ...:
+    except ValueError:
         hex_color = [to_hex(color, keep_alpha) for color in c]
     return hex_color
 
