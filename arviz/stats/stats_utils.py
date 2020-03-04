@@ -114,27 +114,35 @@ def make_ufunc(
     elif check_shape is None:
         check_shape = False
 
-    def _ufunc(*args, out=None, **kwargs):
+    def _ufunc(*args, out=None, out_shape=None, **kwargs):
         """General ufunc for single-output function."""
         arys = args[:n_input]
+        n_dims_out = None
         if out is None:
-            out = np.empty(arys[-1].shape[:-n_dims])
+            if out_shape is None:
+                out = np.empty(arys[-1].shape[:-n_dims])
+            else:
+                out = np.empty((*arys[-1].shape[:-n_dims], *out_shape))
+                n_dims_out = -len(out_shape)
         elif check_shape:
             if out.shape != arys[-1].shape[:-n_dims]:
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
                 msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
                 raise TypeError(msg)
-        for idx in np.ndindex(out.shape):
+        for idx in np.ndindex(out.shape[:n_dims_out]):
             arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
             out[idx] = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))[index]
         return out
 
-    def _multi_ufunc(*args, out=None, **kwargs):
+    def _multi_ufunc(*args, out=None, out_shape=None, **kwargs):
         """General ufunc for multi-output function."""
         arys = args[:n_input]
         element_shape = arys[-1].shape[:-n_dims]
         if out is None:
-            out = tuple(np.empty(element_shape) for _ in range(n_output))
+            if out_shape is None:
+                out = tuple(np.empty(element_shape) for _ in range(n_output))
+            else:
+                out = tuple(np.empty((*element_shape, *out_shape)) for _ in range(n_output))
         elif check_shape:
             raise_error = False
             correct_shape = tuple(element_shape for _ in range(n_output))
@@ -200,12 +208,14 @@ def wrap_xarray_ufunc(
     if func_kwargs is None:
         func_kwargs = {}
 
-    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
     kwargs.setdefault(
         "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + 1))
     )
+    ufunc_kwargs.setdefault("n_dims", len(kwargs["input_core_dims"][-1]))
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
+    
+    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
     return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
 
