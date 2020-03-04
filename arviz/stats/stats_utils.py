@@ -208,13 +208,12 @@ def wrap_xarray_ufunc(
     if func_kwargs is None:
         func_kwargs = {}
 
-
     kwargs.setdefault(
         "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + 1))
     )
     ufunc_kwargs.setdefault("n_dims", len(kwargs["input_core_dims"][-1]))
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
-    
+
     callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
     return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
