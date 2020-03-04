@@ -3,7 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
-
+* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 ### Maintenance and fixes
 
 ### Deprecation
@@ -14,10 +14,8 @@
 ## v0.7.0 (2020 Mar 2)
 
 ### New features
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3, pystan, cmdstan and cmdstanpy translations (#983, #1032 and #1064)
 * Started adding pointwise log likelihood storage support (#794, #1044 and #1064)
-* Added `diagonal`, `point_estimate`, `point_estimate_kwargs`, `point_estimate_marker_kwargs`, `scatter_kwargs`, `kde_kwargs` and `hexbin_kwargs` to `plot_pair` #1079
 * Add out-of-sample predictions (`predictions` and  `predictions_constant_data` groups) to pymc3 and pystan translations (#983 and #1032)
 * Started adding pointwise log likelihood storage support (#794, #1044)
 * Violinplot: rug-plot option (#997)
