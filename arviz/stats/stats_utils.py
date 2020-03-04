@@ -209,7 +209,7 @@ def wrap_xarray_ufunc(
         func_kwargs = {}
 
     kwargs.setdefault(
-        "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + 1))
+        "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + len(datasets)))
     )
     ufunc_kwargs.setdefault("n_dims", len(kwargs["input_core_dims"][-1]))
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
