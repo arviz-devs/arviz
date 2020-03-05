@@ -89,8 +89,8 @@ def plot_density(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     ax: numpy array of matplotlib axes or bokeh figures, optional
-        Array of locations into which to plot the densities. If not supplied, Arviz will create its
-        own array of plot areas (and return it).
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
