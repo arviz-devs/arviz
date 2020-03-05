@@ -206,7 +206,7 @@ def test_bokeh_import():
 @pytest.mark.parametrize(
     "params",
     [
-        {"input": ({"dashes": "-",}, "scatter"), "output": "linestyle", },
+        {"input": ({"dashes": "-",}, "scatter"), "output": "linestyle",},
         {
             "input": ({"mfc": "blue", "c": "blue", "line_width": 2}, "plot",),
             "output": ("markerfacecolor", "color", "line_width"),
