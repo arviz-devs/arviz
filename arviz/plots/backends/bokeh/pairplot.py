@@ -150,6 +150,7 @@ def plot_pair(
         ax = np.array(ax)
     else:
         assert ax.shape == (numvars - var, numvars - var)
+
     # pylint: disable=too-many-nested-blocks
     for i in range(0, numvars - var):
 

@@ -88,6 +88,9 @@ def plot_pair(
                 for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
                     plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
 
+                ax_hist_x.set_xlim(ax.get_xlim())
+                ax_hist_y.set_ylim(ax.get_ylim())
+
                 # Personalize axes
                 ax_hist_x.tick_params(labelleft=False, labelbottom=False)
                 ax_hist_y.tick_params(labelleft=False, labelbottom=False)

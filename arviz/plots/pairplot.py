@@ -17,7 +17,7 @@ def plot_pair(
     textsize=None,
     kind="scatter",
     gridsize="auto",
-    contour=False,
+    contour=True,
     plot_kwargs=None,
     fill_last=False,
     divergences=False,
