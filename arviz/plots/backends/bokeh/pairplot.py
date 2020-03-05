@@ -293,7 +293,6 @@ def plot_pair(
                     y = reference_values_copy[flat_var_names[i]]
                     if x and y:
                         ax[j, i].circle(y, x, **reference_values_kwargs)
-
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + var]
 
