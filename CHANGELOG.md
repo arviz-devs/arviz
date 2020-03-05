@@ -18,6 +18,7 @@
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 
+* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)

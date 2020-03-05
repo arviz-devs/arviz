@@ -259,9 +259,8 @@ def plot_pair(
                     var2_pe = infdata_group[j]
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
-
                     ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 1, **point_estimate_kwargs)
-
+                    
                     ax_hline = Span(
                         location=pe_y,
                         dimension="width",
