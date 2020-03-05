@@ -152,8 +152,12 @@ def test_plot_trace(models, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize("compact", [True, False],)
-@pytest.mark.parametrize("combined", [True, False],)
+@pytest.mark.parametrize(
+    "compact", [True, False],
+)
+@pytest.mark.parametrize(
+    "combined", [True, False],
+)
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
     axes = plot_trace(
@@ -389,12 +393,12 @@ def test_plot_kde_inference_data(models):
             "var_names": "theta",
             "divergences": True,
             "coords": {"theta_dim_0": [0, 1]},
-            "plot_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C"},
         },
         {
             "divergences": True,
-            "plot_kwargs": {"marker": "x"},
+            "scatter_kwargs": {"marker": "x"},
             "divergences_kwargs": {"marker": "*", "c": "C"},
             "var_names": ["theta", "mu"],
         },
@@ -406,7 +410,7 @@ def test_plot_kde_inference_data(models):
             "var_names": ["theta"],
             "coords": {"theta_dim_0": [0, 1]},
             "colorbar": True,
-            "plot_kwargs": {"cmap": "viridis"},
+            "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
         },
     ],

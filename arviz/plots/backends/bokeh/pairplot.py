@@ -3,13 +3,14 @@ import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, CDSView, GroupFilter
 import numpy as np
+from bokeh.models import ColumnDataSource, CDSView, GroupFilter, Span
 
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size
+from ...distplot import plot_dist
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from ....rcparams import rcParams
 
 
@@ -20,13 +21,19 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    plot_kwargs,
+    kde_kwargs,
+    hexbin_kwargs,
     contour,
+    plot_kwargs,
     fill_last,
     divergences,
     diverging_mask,
     flat_var_names,
     backend_kwargs,
+    diagonal,
+    marginal_kwargs,
+    point_estimate,
+    point_estimate_kwargs,
     show,
 ):
     """Bokeh pair plot."""
@@ -37,179 +44,143 @@ def plot_pair(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    if kind != "kde":
+        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
+        kde_kwargs.setdefault("contour_kwargs", {})
+        kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
+        kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
+
     dpi = backend_kwargs.pop("dpi")
-    if numvars == 2:
-        if kind == "scatter":
-            tooltips = [
-                (flat_var_names[1], "@{{{}}}".format(flat_var_names[1])),
-                (flat_var_names[0], "@{{{}}}".format(flat_var_names[0])),
-            ]
-            backend_kwargs.setdefault("tooltips", tooltips)
-
-        (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 1, numvars - 1)
-
-        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
-
-        if divergences:
-            divergenve_name = "divergences_{}".format(str(uuid4()))
-            source_dict[divergenve_name] = (
-                np.array(diverging_mask).astype(bool).astype(int).astype(str)
-            )
-
-        source = ColumnDataSource(data=source_dict)
-
-        if divergences:
-            source_nondiv = CDSView(
-                source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
-            )
-            source_div = CDSView(
-                source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
-            )
-
-        if ax is None:
-            backend_kwargs["width"] = int(figsize[0] * dpi)
-            backend_kwargs["height"] = int(figsize[1] * dpi)
-            ax = bkp.figure(**backend_kwargs)
-
-        if kind == "scatter":
-            if divergences:
-                ax.circle(
-                    flat_var_names[0],
-                    flat_var_names[1],
-                    source=source,
-                    view=source_nondiv,
-                    legend_label="non-divergent",
-                )
-            else:
-                ax.circle(flat_var_names[0], flat_var_names[1], source=source)
-        elif kind == "kde":
-            plot_kde(
-                infdata_group[0],
-                infdata_group[1],
-                contour=contour,
-                fill_last=fill_last,
-                ax=ax,
-                backend="bokeh",
-                backend_kwargs={},
-                show=False,
-            )
-        else:
-            ax.hexbin(infdata_group[0], infdata_group[1], size=0.5)
-            ax.grid.visible = False
-
-        if divergences:
-            ax.circle(
-                flat_var_names[0],
-                flat_var_names[1],
-                line_color="black",
-                fill_color="orange",
-                line_width=1,
-                size=6,
-                source=source,
-                view=source_div,
-                legend_label="divergent",
-            )
-            ax.legend.click_policy = "hide"
-
-        ax.xaxis.axis_label = flat_var_names[0]
-        ax.yaxis.axis_label = flat_var_names[1]
-
-        show_layout(ax, show)
-
-    else:
-        max_plots = (
-            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+    max_plots = (
+        numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+    )
+    vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
+    if vars_to_plot < numvars:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of resulting pair plots with these variables, generating only a "
+            "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
+            UserWarning,
         )
-        vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
-        if vars_to_plot < numvars:
-            warnings.warn(
-                "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
-                "of resulting pair plots with these variables, generating only a "
-                "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
-                UserWarning,
-            )
-            numvars = vars_to_plot
+        numvars = vars_to_plot
 
-        (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+    (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
 
-        tmp_flat_var_names = None
-        if len(flat_var_names) == len(list(set(flat_var_names))):
-            source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
+    tmp_flat_var_names = None
+    if len(flat_var_names) == len(list(set(flat_var_names))):
+        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
+    else:
+        tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
+        source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
+    if divergences:
+        divergenve_name = "divergences_{}".format(str(uuid4()))
+        source_dict[divergenve_name] = np.array(diverging_mask).astype(bool).astype(int).astype(str)
+
+    source = ColumnDataSource(data=source_dict)
+
+    if divergences:
+        source_nondiv = CDSView(
+            source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+        )
+        source_div = CDSView(
+            source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
+        )
+
+    def get_width_and_height(jointplot, rotate):
+        """Compute subplots dimensions for two or more variables."""
+        if jointplot:
+            if rotate:
+                width = int(figsize[0] / (numvars - 1) + 2 * dpi)
+                height = int(figsize[1] / (numvars - 1) * dpi)
+            else:
+                width = int(figsize[0] / (numvars - 1) * dpi)
+                height = int(figsize[1] / (numvars - 1) + 2 * dpi)
         else:
-            tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
-            source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
-        if divergences:
-            divergenve_name = "divergences_{}".format(str(uuid4()))
-            source_dict[divergenve_name] = (
-                np.array(diverging_mask).astype(bool).astype(int).astype(str)
-            )
+            width = int(figsize[0] / (numvars - 1) * dpi)
+            height = int(figsize[1] / (numvars - 1) * dpi)
+        return width, height
 
-        source = ColumnDataSource(data=source_dict)
+    if diagonal:
+        var = 0
+    else:
+        var = 1
 
-        if divergences:
-            source_nondiv = CDSView(
-                source=source, filters=[GroupFilter(column_name=divergenve_name, group="0")]
+    if ax is None:
+        ax = []
+        backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
+        backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
+        for row in range(numvars - var):
+            row_ax = []
+            var1 = (
+                flat_var_names[row + var]
+                if tmp_flat_var_names is None
+                else tmp_flat_var_names[row + var]
             )
-            source_div = CDSView(
-                source=source, filters=[GroupFilter(column_name=divergenve_name, group="1")]
-            )
-
-        if ax is None:
-            ax = []
-            backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
-            backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
-            for row in range(numvars - 1):
-                row_ax = []
+            for n, col in enumerate(range(numvars - var)):
                 var2 = (
-                    flat_var_names[row + 1]
-                    if tmp_flat_var_names is None
-                    else tmp_flat_var_names[row + 1]
+                    flat_var_names[col] if tmp_flat_var_names is None else tmp_flat_var_names[col]
                 )
-                for col in range(numvars - 1):
-                    if row < col:
-                        row_ax.append(None)
-                        continue
-
-                    var1 = (
-                        flat_var_names[col]
-                        if tmp_flat_var_names is None
-                        else tmp_flat_var_names[col]
-                    )
-                    backend_kwargs_copy = backend_kwargs.copy()
-                    if kind == "scatter":
-                        tooltips = [
-                            (var2, "@{{{}}}".format(var2)),
-                            (var1, "@{{{}}}".format(var1)),
-                        ]
-                        backend_kwargs_copy.setdefault("tooltips", tooltips)
-
-                    ax_ = bkp.figure(**backend_kwargs_copy)
+                backend_kwargs_copy = backend_kwargs.copy()
+                if "scatter" in kind:
+                    tooltips = [
+                        (var2, "@{{{}}}".format(var2)),
+                        (var1, "@{{{}}}".format(var1)),
+                    ]
+                    backend_kwargs_copy.setdefault("tooltips", tooltips)
+                else:
+                    tooltips = None
+                if row < col:
+                    row_ax.append(None)
+                else:
+                    jointplot = row == col and numvars == 2 and diagonal
+                    rotate = n == 1
+                    width, height = get_width_and_height(jointplot, rotate)
+                    if jointplot:
+                        ax_ = bkp.figure(width=width, height=height, tooltips=tooltips)
+                    else:
+                        ax_ = bkp.figure(**backend_kwargs_copy)
                     row_ax.append(ax_)
-                ax.append(row_ax)
-            ax = np.array(ax)
+            ax.append(row_ax)
+        ax = np.array(ax)
+    else:
+        assert ax.shape == (numvars - var, numvars - var)
+    # pylint: disable=R1702
+    for i in range(0, numvars - var):
 
-        for i in range(0, numvars - 1):
-            var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
+        var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
-            for j in range(0, numvars - 1):
-                if j < i:
-                    continue
+        for j in range(0, numvars - var):
 
-                var2 = (
-                    flat_var_names[j + 1]
-                    if tmp_flat_var_names is None
-                    else tmp_flat_var_names[j + 1]
+            var2 = (
+                flat_var_names[j + var]
+                if tmp_flat_var_names is None
+                else tmp_flat_var_names[j + var]
+            )
+
+            if j == i and diagonal:
+                rotate = numvars == 2 and j == 1
+                var1_dist = infdata_group[i]
+                plot_dist(
+                    var1_dist,
+                    ax=ax[j, i],
+                    show=False,
+                    backend="bokeh",
+                    rotated=rotate,
+                    **marginal_kwargs,
                 )
 
-                if kind == "scatter":
+            elif j + var > i:
+
+                if "scatter" in kind:
                     if divergences:
                         ax[j, i].circle(var1, var2, source=source, view=source_nondiv)
                     else:
                         ax[j, i].circle(var1, var2, source=source)
 
-                elif kind == "kde":
+                if "kde" in kind:
                     var1_kde = infdata_group[i]
-                    var2_kde = infdata_group[j + 1]
+                    var2_kde = infdata_group[j + var]
                     plot_kde(
                         var1_kde,
                         var2_kde,
@@ -219,14 +190,17 @@ def plot_pair(
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
-                        **plot_kwargs
+                        **kde_kwargs,
+                        **plot_kwargs,
                     )
 
-                else:
+                if "hexbin" in kind:
                     var1_hexbin = infdata_group[i]
-                    var2_hexbin = infdata_group[j + 1]
+                    var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
-                    ax[j, i].hexbin(var1_hexbin, var2_hexbin, size=0.5)
+                    ax[j, i].hexbin(
+                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs, **plot_kwargs
+                    )
 
                 if divergences:
                     ax[j, i].circle(
@@ -240,9 +214,58 @@ def plot_pair(
                         view=source_div,
                     )
 
-                ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + 1]
+                if point_estimate:
+                    var1_pe = infdata_group[i]
+                    var2_pe = infdata_group[j]
+                    pe_x = calculate_point_estimate(point_estimate, var1_pe)
+                    pe_y = calculate_point_estimate(point_estimate, var2_pe)
 
-        show_layout(ax, show)
+                    ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 2, **point_estimate_kwargs)
+
+                    ax_hline = Span(
+                        location=pe_y,
+                        dimension="width",
+                        line_dash="solid",
+                        line_width=3,
+                        **point_estimate_kwargs,
+                    )
+                    ax_vline = Span(
+                        location=pe_x,
+                        dimension="height",
+                        line_dash="solid",
+                        line_width=3,
+                        **point_estimate_kwargs,
+                    )
+                    ax[j, i].add_layout(ax_hline)
+                    ax[j, i].add_layout(ax_vline)
+
+                    if diagonal:
+
+                        ax[j - 1, i].add_layout(ax_vline)
+
+                        pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
+                        ax_pe_vline = Span(
+                            location=pe_last,
+                            dimension="height",
+                            line_dash="solid",
+                            line_width=3,
+                            **point_estimate_kwargs,
+                        )
+                        ax[-1, -1].add_layout(ax_pe_vline)
+
+                        if numvars == 2:
+                            ax_pe_hline = Span(
+                                location=pe_last,
+                                dimension="width",
+                                line_dash="solid",
+                                line_width=3,
+                                **point_estimate_kwargs,
+                            )
+                            ax[-1, -1].add_layout(ax_pe_hline)
+
+                ax[j, i].xaxis.axis_label = flat_var_names[i]
+                ax[j, i].yaxis.axis_label = flat_var_names[j + var]
+
+    show_layout(ax, show)
 
     return ax

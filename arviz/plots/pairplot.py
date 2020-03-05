@@ -18,18 +18,26 @@ def plot_pair(
     kind="scatter",
     gridsize="auto",
     contour=True,
-    fill_last=True,
+    plot_kwargs=None,
+    fill_last=False,
     divergences=False,
     colorbar=False,
     ax=None,
     divergences_kwargs=None,
-    plot_kwargs=None,
+    scatter_kwargs=None,
+    kde_kwargs=None,
+    hexbin_kwargs=None,
     backend=None,
     backend_kwargs=None,
+    diagonal=False,
+    marginal_kwargs=None,
+    point_estimate=None,
+    point_estimate_kwargs=None,
+    point_estimate_marker_kwargs=None,
     show=None,
 ):
     """
-    Plot a scatter or hexbin matrix of the sampled parameters.
+    Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
 
     Parameters
     ----------
@@ -47,7 +55,7 @@ def plot_pair(
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
     kind : str
-        Type of plot to display (scatter, kde or hexbin)
+        Type of plot to display (scatter, kde and/or hexbin)
     gridsize : int or (int, int), optional
         Only works for kind=hexbin.
         The number of hexagons in the x-direction. The corresponding number of hexagons in the
@@ -68,13 +76,29 @@ def plot_pair(
         Matplotlib axes or bokeh figures.
     divergences_kwargs : dicts, optional
         Additional keywords passed to ax.scatter for divergences
-    plot_kwargs : dicts, optional
-        Additional keywords passed to ax.plot, az.plot_kde or ax.hexbin
+    scatter_kwargs:
+        Additional keywords passed to ax.plot when using scatter kind
+    kde_kwargs : dict, optional
+        Additional keywords passed to az.plot_kde when using kde kind
+    hexbin_kwargs : dict, optional
+        Additional keywords passed to ax.hexbin when using hexbin kind
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
+    diagonal : bool, optional
+        If True pairplot will include marginal distributions for every variable
+    marginal_kwargs : dict, optional
+        Additional keywords passed to az.plot_dist, modifying the marginal distributions
+        plotted in the diagonal.
+    point_estimate : str, optional
+        Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
+        plotted using a scatter marker and vertical/horizontal lines.
+    point_estimate_kwargs : dict, optional
+        Additional keywords passed to ax.vline, ax.hline (matplotlib) or ax.square, Span (bokeh)
+    point_estimate_marker_kwargs: dict, optional
+        Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
     show : bool, optional
         Call backend show function.
 
@@ -122,9 +146,18 @@ def plot_pair(
         ...             textsize=18)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
-    if kind not in valid_kinds:
+    if isinstance(kind, str):
+        kind_boolean = kind in valid_kinds
+    else:
+        kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
+    if not np.all(kind_boolean):
+
         raise ValueError(
             ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
+        )
+    if fill_last or contour:
+        warnings.warn(
+            "fill_last and contour will be deprecated.", UserWarning,
         )
 
     if coords is None:
@@ -132,10 +165,25 @@ def plot_pair(
 
     if plot_kwargs is None:
         plot_kwargs = {}
+    else:
+        warnings.warn(
+            "plot_kwargs will be deprecated."
+            " Please use scatter_kwargs, kde_kwargs and/or hexbin_kwargs",
+            UserWarning,
+        )
 
-    if kind == "scatter":
-        plot_kwargs.setdefault("marker", ".")
-        plot_kwargs.setdefault("lw", 0)
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
+
+    scatter_kwargs.setdefault("marker", ".")
+    scatter_kwargs.setdefault("lw", 0)
+    scatter_kwargs.setdefault("zorder", 0)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
+    if hexbin_kwargs is None:
+        hexbin_kwargs = {}
 
     if divergences_kwargs is None:
         divergences_kwargs = {}
@@ -144,6 +192,18 @@ def plot_pair(
     divergences_kwargs.setdefault("markeredgecolor", "k")
     divergences_kwargs.setdefault("color", "C1")
     divergences_kwargs.setdefault("lw", 0)
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    if point_estimate_kwargs is None:
+        point_estimate_kwargs = {}
+
+    if point_estimate_marker_kwargs is None:
+        point_estimate_marker_kwargs = {}
+
+    point_estimate_marker_kwargs.setdefault("marker", "s")
+    point_estimate_marker_kwargs.setdefault("color", "C1")
 
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
@@ -198,6 +258,9 @@ def plot_pair(
         textsize=textsize,
         kind=kind,
         plot_kwargs=plot_kwargs,
+        scatter_kwargs=scatter_kwargs,
+        kde_kwargs=kde_kwargs,
+        hexbin_kwargs=hexbin_kwargs,
         contour=contour,
         fill_last=fill_last,
         gridsize=gridsize,
@@ -207,7 +270,12 @@ def plot_pair(
         divergences_kwargs=divergences_kwargs,
         flat_var_names=flat_var_names,
         backend_kwargs=backend_kwargs,
+        marginal_kwargs=marginal_kwargs,
         show=show,
+        diagonal=diagonal,
+        point_estimate=point_estimate,
+        point_estimate_kwargs=point_estimate_kwargs,
+        point_estimate_marker_kwargs=point_estimate_marker_kwargs,
     )
 
     if backend is None:
@@ -219,6 +287,11 @@ def plot_pair(
         pairplot_kwargs.pop("colorbar", None)
         pairplot_kwargs.pop("divergences_kwargs", None)
         pairplot_kwargs.pop("hexbin_values", None)
+        pairplot_kwargs.pop("scatter_kwargs", None)
+        pairplot_kwargs.pop("point_estimate_marker_kwargs", None)
+        point_estimate_kwargs.setdefault("line_color", "orange")
+    else:
+        point_estimate_kwargs.setdefault("color", "C1")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_pair", "pairplot", backend)
