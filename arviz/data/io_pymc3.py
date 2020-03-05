@@ -90,7 +90,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         else:
             self.nchains = self.ndraws = 0
 
-        if model is None:
+        if self.model is None:
             warnings.warn(
                 "Using `from_pymc3` without the model will be deprecated in a future release. "
                 "Not using the model will return less accurate and less useful results. "
