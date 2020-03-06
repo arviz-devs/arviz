@@ -20,8 +20,8 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    fill_last,
-    contour,
+    fill_last,  # pylint: disable=unused-argument
+    contour,  # pylint: disable=unused-argument
     plot_kwargs,  # pylint: disable=unused-argument
     scatter_kwargs,
     kde_kwargs,
@@ -185,12 +185,7 @@ def plot_pair(
                     if "kde" in kind:
 
                         plot_kde(
-                            var1,
-                            var2,
-                            ax=ax[j, i],
-                            fill_last=fill_last,
-                            contour=contour,
-                            **kde_kwargs,
+                            var1, var2, ax=ax[j, i], **kde_kwargs,
                         )
 
                     if "hexbin" in kind:
