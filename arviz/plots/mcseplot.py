@@ -65,7 +65,7 @@ def plot_mcse(
     n_points : int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    ax: numpy array of matplotlib axes or bokeh figures, optional
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     rug_kwargs : dict

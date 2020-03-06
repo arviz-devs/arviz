@@ -104,7 +104,7 @@ def plot_ppc(
         Keywords passed to `animation.FuncAnimation`.
     legend : bool
         Add legend to figure. By default True.
-    ax: numpy array of matplotlib axes or bokeh figures, optional
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend: str, optional

@@ -73,7 +73,7 @@ def plot_rank(
         wheter to plot or not the x and y labels, defaults to True
     figsize : tuple
         Figure size. If None it will be defined automatically.
-    ax: numpy array of matplotlib axes or bokeh figures, optional
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
     backend: str, optional
