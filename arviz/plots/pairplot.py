@@ -46,8 +46,8 @@ def plot_pair(
         Refer to documentation of az.convert_to_dataset for details
     group : str, optional
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
-    var_names : list of variable names
-        Variables to be plotted, if None all variable are plotted
+    var_names : list of variable names, optional
+        Variables to be plotted, if ``None`` all variables are plotted
     coords : mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     figsize : figure size tuple

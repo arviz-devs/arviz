@@ -71,8 +71,9 @@ def plot_ess(
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
     min_ess : int
         Minimum number of ESS desired.
-    ax: axes, optional
-        Matplotlib axes or bokeh figures.
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
     extra_kwargs : dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
