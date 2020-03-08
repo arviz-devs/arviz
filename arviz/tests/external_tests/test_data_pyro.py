@@ -33,10 +33,15 @@ class TestDataPyro:
         prior = Predictive(model, num_samples=500)(
             eight_schools_params["J"], torch.from_numpy(eight_schools_params["sigma"]).float()
         )
+        predictions_data = {"J": 8, "sigma": np.array([5.0, 7.0, 12.0, 4.0, 6.0, 10.0, 3.0, 9.0])}
+        predictions = Predictive(model, posterior_samples)(
+            predictions_data["J"], torch.from_numpy(predictions_data["sigma"]).float()
+        )
         return from_pyro(
             posterior=data.obj,
             prior=prior,
             posterior_predictive=posterior_predictive,
+            predictions=predictions,
             coords={"school": np.arange(eight_schools_params["J"])},
             dims={"theta": ["school"], "eta": ["school"]},
         )
@@ -47,6 +52,7 @@ class TestDataPyro:
             "posterior": ["mu", "tau", "eta"],
             "sample_stats": ["diverging"],
             "posterior_predictive": ["obs"],
+            "predictions": ["obs"],
             "prior": ["mu", "tau", "eta"],
             "prior_predictive": ["obs"],
         }
@@ -123,3 +129,41 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
+
+    def test_inference_data_constant_data(self):
+        import pyro.distributions as dist
+        from pyro.infer import MCMC, NUTS
+
+        x1 = 10
+        x2 = 12
+        y1 = torch.randn(10)
+
+        def model_constant_data(x, y1=None):
+            _x = pyro.sample("x", dist.Normal(1, 3))
+            pyro.sample("y1", dist.Normal(x * _x, 1), obs=y1)
+
+        nuts_kernel = NUTS(model_constant_data)
+        mcmc = MCMC(nuts_kernel, num_samples=10)
+        mcmc.run(x=x1, y1=y1)
+        posterior = mcmc.get_samples()
+        posterior_predictive = Predictive(model_constant_data, posterior)(x1)
+        predictions = Predictive(model_constant_data, posterior)(x2)
+        inference_data = from_pyro(
+            mcmc,
+            posterior_predictive=posterior_predictive,
+            predictions=predictions,
+            constant_data={"x1": x1},
+            predictions_constant_data={"x2": x2},
+        )
+        test_dict = {
+            "posterior": ["x"],
+            "posterior_predictive": ["y1"],
+            "sample_stats": ["diverging"],
+            "log_likelihood": ["y1"],
+            "predictions": ["y1"],
+            "observed_data": ["y1"],
+            "constant_data": ["x1"],
+            "predictions_constant_data": ["x2"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails

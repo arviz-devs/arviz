@@ -32,7 +32,7 @@ class PyroConverter:
         coords=None,
         dims=None,
         pred_dims=None,
-        num_chains=None,
+        num_chains=1,
     ):
         """Convert Pyro data into an InferenceData object.
 
@@ -57,7 +57,7 @@ class PyroConverter:
         pred_dims: dict
             Dims for predictions data. Map variable names to their coordinates.
         num_chains: int
-            Number of chains used for sampling. Only needed when posterior is not provided.
+            Number of chains used for sampling. Ignored if posterior is present.
         """
         self.posterior = posterior
         self.prior = prior
@@ -68,7 +68,6 @@ class PyroConverter:
         self.coords = coords
         self.dims = dims
         self.pred_dims = pred_dims
-        self.num_chains = num_chains
         import pyro
 
         def arbitrary_element(dct):
@@ -82,8 +81,8 @@ class PyroConverter:
                 # model arguments and keyword arguments
                 self._args = self.posterior._args  # pylint: disable=protected-access
                 self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
-        elif self.num_chains is not None:
-            self.nchains = self.num_chains
+        else:
+            self.nchains = num_chains
             get_from = None
             if predictions is not None:
                 get_from = predictions
@@ -98,9 +97,7 @@ class PyroConverter:
                                     one of trace, prior, posterior_predictive or predictions."""
                 )
             aelem = arbitrary_element(get_from)
-            self.ndraws = aelem.shape[0] // self.num_chains
-        else:
-            raise ValueError("`num_chains` is needed if trace is not given.")
+            self.ndraws = aelem.shape[0] // self.nchains
 
         observations = {}
         if self.model is not None:
@@ -282,7 +279,7 @@ def from_pyro(
     coords=None,
     dims=None,
     pred_dims=None,
-    num_chains=None,
+    num_chains=1,
 ):
     """Convert Pyro data into an InferenceData object.
 
@@ -307,7 +304,7 @@ def from_pyro(
     pred_dims: dict
         Dims for predictions data. Map variable names to their coordinates.
     num_chains: int
-        Number of chains used for sampling. Only needed when posterior is not provided.
+        Number of chains used for sampling. Ignored if posterior is present.
     """
     return PyroConverter(
         posterior=posterior,
