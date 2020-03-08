@@ -111,7 +111,7 @@ def test_make_ufunc_out_shape(out_shape):
     res = wrap_xarray_ufunc(
         func, ary, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1}
     )
-    assert res.shape == tuple([4] + list(out_shape))
+    assert res.shape == tuple(list(ary.shape)[:-1] + list(out_shape))
 
 
 @pytest.mark.parametrize("n_output", (1, 2, 3))
