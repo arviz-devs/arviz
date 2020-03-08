@@ -105,7 +105,7 @@ def test_wrap_ufunc_output(quantile, arg):
 
 
 @pytest.mark.parametrize("out_shape", ((1, 2), (1, 2, 3), (2, 3, 4, 5)))
-def test_make_ufunc_out_shape(out_shape):
+def test_wrap_ufunc_out_shape(out_shape):
     func = lambda x: np.random.rand(*out_shape)
     ary = np.ones((4, 100))
     res = wrap_xarray_ufunc(
