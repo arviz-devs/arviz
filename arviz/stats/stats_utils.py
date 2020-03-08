@@ -189,6 +189,7 @@ def wrap_xarray_ufunc(
             - 'n_input', int, by default len(datasets)
             - 'index', slice, by default Ellipsis
             - 'ravel', bool, by default True
+            - 'out_shape', int, by default None
     func_args : tuple
         Arguments passed to 'ufunc'.
     func_kwargs : dict

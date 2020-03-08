@@ -104,6 +104,16 @@ def test_wrap_ufunc_output(quantile, arg):
         assert len(res) == n_output
 
 
+@pytest.mark.parametrize("out_shape", ((1, 2), (1, 2, 3), (2, 3, 4, 5)))
+def test_make_ufunc_out_shape(out_shape):
+    func = lambda x: np.random.rand(*out_shape)
+    ary = np.ones((4, 100))
+    res = wrap_xarray_ufunc(
+        func, ary, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1}
+    )
+    assert res.shape == tuple([4] + list(out_shape))
+
+
 @pytest.mark.parametrize("n_output", (1, 2, 3))
 def test_make_ufunc(n_output):
     if n_output == 3:
