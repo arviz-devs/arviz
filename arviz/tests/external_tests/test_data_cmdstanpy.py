@@ -32,10 +32,12 @@ class TestDataCmdStanPy:
 
     @pytest.fixture(scope="class")
     def data(self, filepaths):
-        from cmdstanpy import CmdStanMCMC
-        from cmdstanpy.stanfit import RunSet
-        from cmdstanpy.model import CmdStanArgs, SamplerArgs
-
+        # Skip tests if cmdstanpy not installed
+        CmdStanMCMC = pytest.importorskip("cmdstanpy.CmdStanMCMC")
+        RunSet = pytest.importorskip("cmdstanpy.stanfit.RunSet")
+        CmdStanArgs = pytest.importorskip("cmdstanpy.model.CmdStanArgs")
+        SamplerArgs = pytest.importorskip("cmdstanpy.model.SamplerArgs")
+        
         class Data:
             args = CmdStanArgs(
                 "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()

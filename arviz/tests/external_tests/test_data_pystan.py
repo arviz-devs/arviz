@@ -1,9 +1,12 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
+import importlib
 from collections import OrderedDict
+
 import numpy as np
 import pytest
 
 from arviz import from_pystan
+
 from ...data.io_pystan import get_draws, get_draws_stan3  # pylint: disable=unused-import
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -13,6 +16,12 @@ from ..helpers import (  # pylint: disable=unused-import
     load_cached_models,
     pystan_version,
 )
+
+# Check if either stan or pystan is installed
+pystan_installed = (importlib.util.find_spec("pystan") is not None) or (
+    importlib.util.find_spec("stan") is not None
+)
+pytestmark = pytest.mark.skipif(~pystan_installed, reason="pystan/stan tests only required for CI")
 
 
 class TestDataPyStan:
@@ -217,7 +226,8 @@ class TestDataPyStan:
     @pytest.mark.skipif(pystan_version() != 2, reason="PyStan 2.x required")
     def test_index_order(self, data, eight_schools_params):
         """Test 0-indexed data."""
-        import pystan  # pylint: disable=import-error
+        # Skip test if pystan not installed
+        pystan = pytest.importorskip("pystan")  # pylint: disable=import-error
 
         fit = data.model.sampling(data=eight_schools_params)
         if pystan.__version__ >= "2.18":

@@ -1,21 +1,24 @@
 """Tests use the 'bokeh' backend."""
 # pylint: disable=redefined-outer-name,too-many-lines
 from copy import deepcopy
-import bokeh.plotting as bkp
-from pandas import DataFrame
+
 import numpy as np
 import pytest
+# Skip tests if bokeh not installed
+bkp = pytest.importorskip("bokeh.plotting")
+from pandas import DataFrame  # pylint: disable=wrong-import-position
 
-from ...data import from_dict, load_arviz_data
-from ..helpers import (  # pylint: disable=unused-import
+
+from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
+    create_model,
+    create_multidimensional_model,
     eight_schools_params,
     models,
-    create_model,
     multidim_models,
-    create_multidimensional_model,
 )
-from ...rcparams import rcParams, rc_context
-from ...plots import (
+from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
+from ...plots import (  # pylint: disable=wrong-import-position
     plot_autocorr,
     plot_compare,
     plot_density,
@@ -31,14 +34,15 @@ from ...plots import (
     plot_loo_pit,
     plot_mcse,
     plot_pair,
-    plot_rank,
-    plot_trace,
     plot_parallel,
     plot_posterior,
     plot_ppc,
+    plot_rank,
+    plot_trace,
     plot_violin,
 )
-from ...stats import compare, loo, waic
+from ...stats import compare, loo, waic  # pylint: disable=wrong-import-position
+
 
 rcParams["data.load"] = "eager"
 

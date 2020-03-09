@@ -571,9 +571,15 @@ def pystan_version():
     """
     try:
         import pystan  # pylint: disable=import-error
+        version = int(pystan.__version__[0])
     except ImportError:
+        pass
+    try:
         import stan as pystan  # pylint: disable=import-error
-    return int(pystan.__version__[0])
+        version = int(pystan.__version__[0])
+    except ImportError:
+        version = None
+    return version
 
 
 def test_precompile_models(eight_schools_params, draws, chains):

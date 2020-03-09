@@ -6,10 +6,11 @@ import pytest
 
 import numpy as np
 from numpy import ma
-import pymc3 as pm
+# Skip all tests if pymc3 not installed
+pm = pytest.importorskip("pymc3")
 
-from arviz import from_pymc3, from_pymc3_predictions, InferenceData
-from ..helpers import (  # pylint: disable=unused-import
+from arviz import from_pymc3, from_pymc3_predictions, InferenceData  # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,

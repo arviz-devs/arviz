@@ -11,6 +11,8 @@ from ..helpers import (  # pylint: disable=unused-import
     load_cached_models,
 )
 
+# Skip all tests if tensorflow_probability not installed
+pytest.importorskip("tensorflow_probability")
 
 class TestDataTfp:
     @pytest.fixture(scope="class")

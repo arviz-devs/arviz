@@ -2,12 +2,13 @@
 import numpy as np
 import packaging
 import pytest
-import torch
-import pyro
-from pyro.infer import Predictive
+# Skip all tests if pyro or pytorch not installed
+torch = pytest.importorskip("torch")
+pyro = pytest.importorskip("pyro")
+Predictive = pytest.importorskip("pyro.infer.Predictive")
 
-from ...data.io_pyro import from_pyro
-from ..helpers import (  # pylint: disable=unused-import
+from ...data.io_pyro import from_pyro # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,
