@@ -90,14 +90,14 @@ class PyroConverter:
                 get_from = posterior_predictive
             elif prior is not None:
                 get_from = prior
-            if get_from is None:
-                # pylint: disable=line-too-long
+            if get_from is None and constant_data is None and predictions_constant_data is None:
                 raise ValueError(
                     """When constructing InferenceData must have at least
                                     one of trace, prior, posterior_predictive or predictions."""
                 )
-            aelem = arbitrary_element(get_from)
-            self.ndraws = aelem.shape[0] // self.nchains
+            if get_from is not None:
+                aelem = arbitrary_element(get_from)
+                self.ndraws = aelem.shape[0] // self.nchains
 
         observations = {}
         if self.model is not None:
