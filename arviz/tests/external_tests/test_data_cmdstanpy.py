@@ -33,11 +33,11 @@ class TestDataCmdStanPy:
     @pytest.fixture(scope="class")
     def data(self, filepaths):
         # Skip tests if cmdstanpy not installed
-        CmdStanMCMC = pytest.importorskip("cmdstanpy.CmdStanMCMC")
-        RunSet = pytest.importorskip("cmdstanpy.stanfit.RunSet")
-        CmdStanArgs = pytest.importorskip("cmdstanpy.model.CmdStanArgs")
-        SamplerArgs = pytest.importorskip("cmdstanpy.model.SamplerArgs")
-        
+        CmdStanMCMC = pytest.importorskip("cmdstanpy.CmdStanMCMC")  #pylint: disable=invalid-name
+        RunSet = pytest.importorskip("cmdstanpy.stanfit.RunSet")  #pylint: disable=invalid-name
+        CmdStanArgs = pytest.importorskip("cmdstanpy.model.CmdStanArgs")  #pylint: disable=invalid-name
+        SamplerArgs = pytest.importorskip("cmdstanpy.model.SamplerArgs")  #pylint: disable=invalid-name
+
         class Data:
             args = CmdStanArgs(
                 "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()

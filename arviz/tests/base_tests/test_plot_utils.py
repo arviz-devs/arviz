@@ -196,7 +196,9 @@ def test_filter_plotter_list_warning():
     assert len(plotters_filtered) == 5
 
 
-@pytest.mark.skipif(importlib.util.find_spec("bokeh") is None, reason="bokeh tests only required for CI")
+@pytest.mark.skipif(
+    importlib.util.find_spec("bokeh") is None, reason="test requires bokeh which is not installed"
+)
 def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     plot = get_plotting_function("plot_dist", "distplot", "bokeh")

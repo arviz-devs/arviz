@@ -21,7 +21,9 @@ from ..helpers import (  # pylint: disable=unused-import
 pystan_installed = (importlib.util.find_spec("pystan") is not None) or (
     importlib.util.find_spec("stan") is not None
 )
-pytestmark = pytest.mark.skipif(~pystan_installed, reason="pystan/stan tests only required for CI")
+pytestmark = pytest.mark.skipif(
+    ~pystan_installed, reason="test requires stan/pystan which is not installed"
+)
 
 
 class TestDataPyStan:

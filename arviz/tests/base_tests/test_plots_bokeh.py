@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 # Skip tests if bokeh not installed
-bkp = pytest.importorskip("bokeh.plotting")
+bkp = pytest.importorskip("bokeh.plotting")  # pylint: disable=invalid-name
 from pandas import DataFrame  # pylint: disable=wrong-import-position
 
 
