@@ -1,5 +1,5 @@
 """
-Point Estimate Pairplor
+Point Estimate Pairplot
 ===============
 
 _thumb: .2, .5
