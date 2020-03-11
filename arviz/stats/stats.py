@@ -305,7 +305,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=None, circular=False, multimodal=False, skipna=False):
+def hpd(ary, *, credible_interval=None, circular=False, multimodal=False, skipna=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -343,91 +343,87 @@ def hpd(ary, credible_interval=None, circular=False, multimodal=False, skipna=Fa
            ...: data = np.random.normal(size=2000)
            ...: az.hpd(data, credible_interval=.68)
     """
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
-    else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
-    if ary.ndim > 1:
-        hpd_array = np.array(
-            [
-                hpd(
-                    row,
-                    credible_interval=credible_interval,
-                    circular=circular,
-                    multimodal=multimodal,
-                )
-                for row in ary.T
-            ]
-        )
-        return hpd_array
+    if isinstance(ary, np.ndarray):
+        ary = np.atleast_2d(ary)
+    ary = convert_to_dataset(ary, group="posterior")
 
-    if multimodal:
-        if skipna:
-            ary = ary[~np.isnan(ary)]
+    def _hpd(ary=ary, credible_interval=credible_interval, circular=circular, multimodal=multimodal, skipna=skipna):
 
-        if ary.dtype.kind == "f":
-            density, lower, upper = _fast_kde(ary)
-            range_x = upper - lower
-            dx = range_x / len(density)
-            bins = np.linspace(lower, upper, len(density))
+        if credible_interval is None:
+            credible_interval = rcParams["stats.credible_interval"]
         else:
-            bins = get_bins(ary)
-            _, density, _ = histogram(ary, bins=bins)
-            dx = np.diff(bins)[0]
+            if not 1 >= credible_interval > 0:
+                raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
-        density *= dx
+        if multimodal:
+            if skipna:
+                ary = ary[~np.isnan(ary)]
 
-        idx = np.argsort(-density)
-        intervals = bins[idx][density[idx].cumsum() <= credible_interval]
-        intervals.sort()
-
-        intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
-
-        hpd_intervals = []
-        for interval in intervals_splitted:
-            if interval.size == 0:
-                hpd_intervals.append((bins[0], bins[0]))
+            if ary.dtype.kind == "f":
+                density, lower, upper = _fast_kde(ary)
+                range_x = upper - lower
+                dx = range_x / len(density)
+                bins = np.linspace(lower, upper, len(density))
             else:
-                hpd_intervals.append((interval[0], interval[-1]))
+                bins = get_bins(ary)
+                _, density, _ = histogram(ary, bins=bins)
+                dx = np.diff(bins)[0]
 
-        hpd_intervals = np.array(hpd_intervals)
+            density *= dx
 
-    else:
-        if skipna:
-            nans = np.isnan(ary)
-            if not nans.all():
-                ary = ary[~nans]
-        n = len(ary)
+            idx = np.argsort(-density)
+            intervals = bins[idx][density[idx].cumsum() <= credible_interval]
+            intervals.sort()
 
-        if circular:
-            mean = st.circmean(ary, high=np.pi, low=-np.pi)
-            ary = ary - mean
-            ary = np.arctan2(np.sin(ary), np.cos(ary))
+            intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-        ary = np.sort(ary)
-        interval_idx_inc = int(np.floor(credible_interval * n))
-        n_intervals = n - interval_idx_inc
-        interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+            hpd_intervals = []
+            for interval in intervals_splitted:
+                if interval.size == 0:
+                    hpd_intervals.append((bins[0], bins[0]))
+                else:
+                    hpd_intervals.append((interval[0], interval[-1]))
 
-        if len(interval_width) == 0:
-            raise ValueError("Too few elements for interval calculation. ")
+            hpd_intervals = np.array(hpd_intervals)
 
-        min_idx = np.argmin(interval_width)
-        hdi_min = ary[min_idx]
-        hdi_max = ary[min_idx + interval_idx_inc]
+        else:
+            if skipna:
+                nans = np.isnan(ary)
+                if not nans.all():
+                    ary = ary[~nans]
+            n = len(ary)
 
-        if circular:
-            hdi_min = hdi_min + mean
-            hdi_max = hdi_max + mean
-            hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
-            hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+            if circular:
+                mean = st.circmean(ary, high=np.pi, low=-np.pi)
+                ary = ary - mean
+                ary = np.arctan2(np.sin(ary), np.cos(ary))
 
-        hpd_intervals = np.array([hdi_min, hdi_max])
+            ary = np.sort(ary)
+            interval_idx_inc = int(np.floor(credible_interval * n))
+            n_intervals = n - interval_idx_inc
+            interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
-    return hpd_intervals
+            if len(interval_width) == 0:
+                raise ValueError("Too few elements for interval calculation. ")
 
+            min_idx = np.argmin(interval_width)
+            hdi_min = ary[min_idx]
+            hdi_max = ary[min_idx + interval_idx_inc]
+
+            if circular:
+                hdi_min = hdi_min + mean
+                hdi_max = hdi_max + mean
+                hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
+                hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+
+            hpd_intervals = np.array([hdi_min, hdi_max])
+
+        return hpd_intervals
+
+    func_kwargs = {"out_shape": (2,)}
+    kwargs = {"input_core_dims": [["chain"]], "output_core_dims": [['hpd']]}
+    return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs).to_array().values[0]
 
 def loo(data, pointwise=False, reff=None, scale=None):
     """Pareto-smoothed importance sampling leave-one-out cross-validation.
