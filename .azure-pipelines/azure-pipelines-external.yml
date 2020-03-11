@@ -128,5 +128,5 @@ jobs:
       testRunTitle: 'Publish test results for Python $(python.version)'
 
   - script: |
-      python -m codecov --token=$(CODECOV_TOKEN) -n "$(name)"
+      python scripts/codecov_uploader.py
     displayName: 'upload coverage'
