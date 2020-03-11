@@ -93,7 +93,7 @@ class PyroConverter:
             if get_from is None and constant_data is None and predictions_constant_data is None:
                 raise ValueError(
                     """When constructing InferenceData must have at least
-                                    one of trace, prior, posterior_predictive or predictions."""
+                                    one of posterior, prior, posterior_predictive or predictions."""
                 )
             if get_from is not None:
                 aelem = arbitrary_element(get_from)

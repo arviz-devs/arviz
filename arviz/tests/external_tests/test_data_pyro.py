@@ -25,12 +25,20 @@ class TestDataPyro:
         return Data
 
     @pytest.fixture(scope="class")
-    def predictions_data(self, data):
+    def predictions_params(self):
+        """Predictions data for eight schools."""
+        return {
+            "J": 8,
+            "sigma": np.array([5.0, 7.0, 12.0, 4.0, 6.0, 10.0, 3.0, 9.0]),
+        }
+
+    @pytest.fixture(scope="class")
+    def predictions_data(self, data, predictions_params):
+        """Generate predictions for predictions_params"""
         posterior_samples = data.obj.get_samples()
         model = data.obj.kernel.model
-        pred_data = {"J": 8, "sigma": np.array([5.0, 7.0, 12.0, 4.0, 6.0, 10.0, 3.0, 9.0])}
         predictions = Predictive(model, posterior_samples)(
-            pred_data["J"], torch.from_numpy(pred_data["sigma"]).float()
+            predictions_params["J"], torch.from_numpy(predictions_params["sigma"]).float()
         )
         return predictions
 
@@ -70,6 +78,11 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+        # test dims
+        dims = inference_data.posterior_predictive.dims["school"]
+        pred_dims = inference_data.predictions.dims["school_pred"]
+        assert dims == 8, pred_dims == 8
+
     @pytest.mark.skipif(
         packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
         reason="requires pyro 1.0.0 or higher",
@@ -80,7 +93,9 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
 
-    def test_inference_data_no_posterior(self, data, eight_schools_params, predictions_data):
+    def test_inference_data_no_posterior(
+        self, data, eight_schools_params, predictions_data, predictions_params
+    ):
         posterior_samples = data.obj.get_samples()
         model = data.obj.kernel.model
         posterior_predictive = Predictive(model, posterior_samples)(
@@ -91,10 +106,7 @@ class TestDataPyro:
         )
         predictions = predictions_data
         constant_data = {"J": 8, "sigma": eight_schools_params["sigma"]}
-        predictions_constant_data = {
-            "J": 8,
-            "sigma": np.array([5.0, 7.0, 12.0, 4.0, 6.0, 10.0, 3.0, 9.0]),
-        }
+        predictions_constant_data = predictions_params
         # only prior
         inference_data = from_pyro(prior=prior)
         test_dict = {"prior": ["mu", "tau", "eta"]}
@@ -211,26 +223,8 @@ class TestDataPyro:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
-    def test_inference_data_dims(self, data, eight_schools_params, predictions_data):
-        inference_data = self.get_inference_data(data, eight_schools_params, predictions_data)
-        test_dict = {
-            "posterior": ["mu", "tau", "eta"],
-            "sample_stats": ["diverging"],
-            "posterior_predictive": ["obs"],
-            "predictions": ["obs"],
-            "prior": ["mu", "tau", "eta"],
-            "prior_predictive": ["obs"],
-        }
-        fails = check_multiple_attrs(test_dict, inference_data)
-        assert not fails
-
-        dims = inference_data.posterior_predictive["obs"].shape[2:]
-        pred_dims = inference_data.predictions["obs"].shape[2:]
-        assert dims == (8,)
-        assert pred_dims == (8,)
-
-    def test_inference_data_num_chains(self, predictions_data):
+    def test_inference_data_num_chains(self, predictions_data, chains):
         predictions = predictions_data
-        inference_data = from_pyro(predictions=predictions, num_chains=2)
+        inference_data = from_pyro(predictions=predictions, num_chains=chains)
         nchains = inference_data.predictions.dims["chain"]
-        assert nchains == 2
+        assert nchains == chains
