@@ -4,6 +4,8 @@
 
 ### New features
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
+* Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
+* Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 ### Maintenance and fixes
 
 ### Deprecation
