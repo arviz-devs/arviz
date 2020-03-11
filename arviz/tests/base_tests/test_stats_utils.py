@@ -109,10 +109,43 @@ def test_wrap_ufunc_output(quantile, arg):
 def test_wrap_ufunc_out_shape(out_shape, input_dim):
     func = lambda x: np.random.rand(*out_shape)
     ary = np.ones(input_dim)
-    result1 = wrap_xarray_ufunc(
+    res = wrap_xarray_ufunc(
         func, ary, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1}
     )
-    assert result1.shape == tuple(list(ary.shape)[:-1] + list(out_shape))
+    assert res.shape == (*ary.shape[:-1], *out_shape)
+
+
+@pytest.mark.parametrize("out_shape", ((1, 2), (1, 2, 3), (2, 3, 4, 5)))
+def test_wrap_ufunc_out_shape_multi_input(out_shape):
+    func = lambda x, y: np.random.rand(*out_shape)
+    ary1 = np.ones((4, 100))
+    ary2 = np.ones((4, 5))
+    res = wrap_xarray_ufunc(
+        func, ary1, ary2, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1}
+    )
+
+    assert res.shape == (*ary1.shape[:-1], *out_shape)
+
+
+@pytest.mark.parametrize("out_shape", ((1, 2), (1, 2, 3), (2, 3, 4, 5)))
+def test_wrap_ufunc_out_shape_multi_output_same(out_shape):
+    func = lambda x: (np.random.rand(*out_shape), np.random.rand(*out_shape))
+    ary = np.ones((4, 100))
+    res1, res2 = wrap_xarray_ufunc(
+        func, ary, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1, "n_output": 2}
+    )
+    assert res1.shape == (*ary.shape[:-1], *out_shape)
+    assert res2.shape == (*ary.shape[:-1], *out_shape)
+
+
+def test_wrap_ufunc_out_shape_multi_output_diff():
+    func = lambda x: (np.random.rand(5), np.random.rand(10))
+    ary = np.ones((4, 100))
+    res1, res2 = wrap_xarray_ufunc(
+        func, ary, func_kwargs={"out_shape": (5, 10)}, ufunc_kwargs={"n_dims": 1, "n_output": 2}
+    )
+    assert res1.shape == (*ary.shape[:-1], 10)
+    assert res2.shape == (*ary.shape[:-1], 10)
 
 
 @pytest.mark.parametrize("n_output", (1, 2, 3))
