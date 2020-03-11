@@ -81,7 +81,8 @@ class TestDataPyro:
         # test dims
         dims = inference_data.posterior_predictive.dims["school"]
         pred_dims = inference_data.predictions.dims["school_pred"]
-        assert dims == 8, pred_dims == 8
+        assert dims == 8
+        assert pred_dims == 8
 
     @pytest.mark.skipif(
         packaging.version.parse(pyro.__version__) < packaging.version.parse("1.0.0"),
