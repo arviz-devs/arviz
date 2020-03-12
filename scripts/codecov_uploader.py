@@ -1,13 +1,19 @@
-from os import environ
+from subprocess import run, PIPE
 from time import sleep
-from codecov import main as codecov
 
 for _ in range(10):
     try:
         print("Sending coverage information")
-        codecov("--token", environ["CODECOV_TOKEN"], "--name", environ["NAME"], "--required")
+        cmd = ["--token=$(CODECOV_TOKEN)", "--name=$(NAME)", "--required"]
+        output = run(cmd, stdout=PIPE, stderr=PIPE)
+        if "Error:" in output.stdout.decode("utf-8"):
+            print("Error found in stdout")
+            raise ValueError("Upload failed")
+        elif "Error:" in output.stderr.decode("utf-8"):
+            print("Error found in stderr")
+            raise ValueError("Upload failed")
     except Exception as exc:
-        print("Codecov failed: {}".format(exc), flush=True)
+        print("Codecov upload failed: {}".format(exc), flush=True)
         sleep(30)
         continue
     else:
