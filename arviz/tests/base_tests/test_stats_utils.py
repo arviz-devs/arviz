@@ -123,7 +123,6 @@ def test_wrap_ufunc_out_shape_multi_input(out_shape):
     res = wrap_xarray_ufunc(
         func, ary1, ary2, func_kwargs={"out_shape": out_shape}, ufunc_kwargs={"n_dims": 1}
     )
-
     assert res.shape == (*ary1.shape[:-1], *out_shape)
 
 
