@@ -76,5 +76,6 @@ jobs:
           then
               break
           fi
+          sleep 30
       done
     displayName: 'upload coverage'
