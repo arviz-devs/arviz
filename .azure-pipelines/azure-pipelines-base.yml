@@ -77,5 +77,4 @@ jobs:
               break
           fi
       done
-      python scripts/codecov_uploader.py
     displayName: 'upload coverage'
