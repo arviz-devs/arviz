@@ -142,7 +142,8 @@ def make_ufunc(
             if out_shape is None:
                 out = tuple(np.empty(element_shape) for _ in range(n_output))
             else:
-                out = tuple(np.empty((*element_shape, *out_shape)) for _ in range(n_output))
+                out = tuple(np.empty((*element_shape, *out_shape[i])) for i in range(n_output))
+
         elif check_shape:
             raise_error = False
             correct_shape = tuple(element_shape for _ in range(n_output))
