@@ -69,5 +69,13 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
+      for i in {1..5}
+      do
+          python -m codecov --token=$(CODECOV_TOKEN) --name=$(NAME) --required
+          if [ "$?" -eq 0 ]
+          then
+              break
+          fi
+      done
       python scripts/codecov_uploader.py
     displayName: 'upload coverage'
