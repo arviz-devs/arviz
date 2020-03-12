@@ -22,7 +22,7 @@ def plot_posterior(
     coords=None,
     figsize=None,
     textsize=None,
-    credible_interval=None,
+    credible_interval="auto",
     multimodal=False,
     round_to: Optional[int] = None,
     point_estimate="auto",
@@ -189,9 +189,9 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
-    if credible_interval is None:
+    if credible_interval == "auto":
         credible_interval = rcParams["stats.credible_interval"]
-    else:
+    elif credible_interval is not None:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
@@ -245,7 +245,6 @@ def plot_posterior(
     backend = backend.lower()
 
     if backend == "bokeh":
-
         posteriorplot_kwargs.pop("xt_labelsize")
         posteriorplot_kwargs.pop("titlesize")
 

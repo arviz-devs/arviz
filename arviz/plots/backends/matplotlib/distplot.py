@@ -8,29 +8,29 @@ from ...plot_utils import matplotlib_kwarg_dealiaser
 
 
 def plot_dist(
-    values,
-    values2,
-    color,
-    kind,
-    cumulative,
-    label,
-    rotated,
-    rug,
-    bw,
-    quantiles,
-    contour,
-    fill_last,
-    textsize,
-    plot_kwargs,
-    fill_kwargs,
-    rug_kwargs,
-    contour_kwargs,
-    contourf_kwargs,
-    pcolormesh_kwargs,
-    hist_kwargs,
-    ax,
-    backend_kwargs,
-    show,
+        values,
+        values2,
+        color,
+        kind,
+        cumulative,
+        label,
+        rotated,
+        rug,
+        bw,
+        quantiles,
+        contour,
+        fill_last,
+        textsize,
+        plot_kwargs,
+        fill_kwargs,
+        rug_kwargs,
+        contour_kwargs,
+        contourf_kwargs,
+        pcolormesh_kwargs,
+        hist_kwargs,
+        ax,
+        backend_kwargs,
+        show,
 ):
     """Matplotlib distplot."""
     if backend_kwargs is not None:
@@ -91,8 +91,11 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
         raise NotImplementedError("Insert hexbin plot here")
 
     bins = hist_kwargs.pop("bins")
+    if type(values).__name__ == "DataArray":
+        ax.hist(values.values.flatten(), bins=bins, **hist_kwargs)
+    else:
+        ax.hist(values, bins=bins, **hist_kwargs)
 
-    ax.hist(values, bins=bins, **hist_kwargs)
     if rotated:
         ax.set_yticks(bins[:-1])
     else:
