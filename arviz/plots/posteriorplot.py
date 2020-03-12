@@ -245,6 +245,7 @@ def plot_posterior(
     backend = backend.lower()
 
     if backend == "bokeh":
+
         posteriorplot_kwargs.pop("xt_labelsize")
         posteriorplot_kwargs.pop("titlesize")
 
