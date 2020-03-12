@@ -4,7 +4,7 @@ from time import sleep
 for _ in range(10):
     try:
         print("Sending coverage information")
-        cmd = ["--token=$(CODECOV_TOKEN)", "--name=$(NAME)", "--required"]
+        cmd = ["python", "-m", "codecov", "--token=$(CODECOV_TOKEN)", "--name=$(NAME)", "--required"]
         output = run(cmd, stdout=PIPE, stderr=PIPE)
         if "Error:" in output.stdout.decode("utf-8"):
             print("Error found in stdout")
