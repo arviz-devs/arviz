@@ -5,7 +5,7 @@ for _ in range(10):
     try:
         print("Sending coverage information")
         cmd = ["python", "-m", "codecov", "--token=$(CODECOV_TOKEN)", "--name=$(NAME)", "--required"]
-        output = run(cmd, stdout=PIPE, stderr=PIPE)
+        output = run(cmd, stdout=PIPE, stderr=PIPE, shell=True)
         print("\nSTDOUT: \n", output.stdout.decode("utf-8"), "\n")
         print("\nSTDERR: \n", output.stderr.decode("utf-8"), "\n")
         if "Error:" in output.stdout.decode("utf-8"):
