@@ -115,8 +115,8 @@ def test_wrap_ufunc_out_shape(out_shape, input_dim):
     assert res.shape == (*ary.shape[:-1], *out_shape)
 
 
-@pytest.mark.parametrize("out_shape", ((1, 2), (1, 2, 3), (2, 3, 4, 5)))
-def test_wrap_ufunc_out_shape_multi_input(out_shape):
+def test_wrap_ufunc_out_shape_multi_input():
+    out_shape = (2,4)
     func = lambda x, y: np.random.rand(*out_shape)
     ary1 = np.ones((4, 100))
     ary2 = np.ones((4, 5))
