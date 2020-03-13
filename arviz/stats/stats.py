@@ -44,7 +44,7 @@ __all__ = [
 
 
 def compare(
-    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
+        dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -305,7 +305,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, *, group =None, credible_interval=None, circular=False, multimodal=False, skipna=False):
+def hpd(ary, *, group=None, credible_interval=None, circular=False, multimodal=False, skipna=False):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -315,6 +315,8 @@ def hpd(ary, *, group =None, credible_interval=None, circular=False, multimodal=
     ----------
     ary : Numpy array
         An array containing posterior samples
+    group : List
+        An list containing the dimensions to compute hpd
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
     circular : bool, optional
@@ -525,7 +527,7 @@ def loo(data, pointwise=False, reff=None, scale=None):
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
-                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+                    np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
@@ -811,20 +813,20 @@ def r2_score(y_true, y_pred):
 
 
 def summary(
-    data,
-    var_names: Optional[List[str]] = None,
-    fmt: str = "wide",
-    kind: str = "all",
-    round_to=None,
-    include_circ=None,
-    stat_funcs=None,
-    extend=True,
-    credible_interval=None,
-    order="C",
-    index_origin=None,
-    skipna=False,
-    coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None,
+        data,
+        var_names: Optional[List[str]] = None,
+        fmt: str = "wide",
+        kind: str = "all",
+        round_to=None,
+        include_circ=None,
+        stat_funcs=None,
+        extend=True,
+        credible_interval=None,
+        order="C",
+        index_origin=None,
+        skipna=False,
+        coords: Optional[CoordSpec] = None,
+        dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -1407,22 +1409,22 @@ def _loo_pit(y, y_hat, log_weights):
 
 
 def apply_test_function(
-    idata,
-    func,
-    group="both",
-    var_names=None,
-    pointwise=False,
-    out_data_shape=None,
-    out_pp_shape=None,
-    out_name_data="T",
-    out_name_pp=None,
-    func_args=None,
-    func_kwargs=None,
-    ufunc_kwargs=None,
-    wrap_data_kwargs=None,
-    wrap_pp_kwargs=None,
-    inplace=True,
-    overwrite=None,
+        idata,
+        func,
+        group="both",
+        var_names=None,
+        pointwise=False,
+        out_data_shape=None,
+        out_pp_shape=None,
+        out_name_data="T",
+        out_name_pp=None,
+        func_args=None,
+        func_kwargs=None,
+        ufunc_kwargs=None,
+        wrap_data_kwargs=None,
+        wrap_pp_kwargs=None,
+        inplace=True,
+        overwrite=None,
 ):
     """Apply a Bayesian test function to an InferenceData object.
 
