@@ -130,7 +130,7 @@ jobs:
   - script: |
       for i in {1..5}
       do
-          python -m codecov --token $(CODECOV_TOKEN) --name "$(NAME)" --required
+          python -m codecov --token $(CODECOV_TOKEN) --name "$(NAME)" --required -v
           if [ "$?" -eq 0 ]
           then
               break
