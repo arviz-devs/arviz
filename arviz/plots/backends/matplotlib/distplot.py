@@ -1,11 +1,12 @@
 """Matplotlib distplot."""
 import warnings
 import matplotlib.pyplot as plt
-
+import numpy as np
 from . import backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import matplotlib_kwarg_dealiaser
-
+import xarray as xr
+from ....data import InferenceData
 
 def plot_dist(
     values,
@@ -87,14 +88,19 @@ def plot_dist(
 
 def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
+    if isinstance(values, xr.Dataset):
+        raise ValueError(
+            "Cannot directly convert xarray.Dataset to numpy array. Instead, create an xarray.DataArray first or Use plot_posterior, plot_density, plot_joint"
+            "or plot_pair instead of plot_dist"
+        )
+    if isinstance(values, InferenceData):
+        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_dist")
+
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
 
     bins = hist_kwargs.pop("bins")
-    if type(values).__name__ == "DataArray":
-        ax.hist(values.values.flatten(), bins=bins, **hist_kwargs)
-    else:
-        ax.hist(values, bins=bins, **hist_kwargs)
+    ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
     if rotated:
         ax.set_yticks(bins[:-1])
