@@ -5,6 +5,7 @@ import numpy as np
 from . import backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import matplotlib_kwarg_dealiaser
+from ...plot_utils import get_bins
 
 
 def plot_dist(
