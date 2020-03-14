@@ -65,9 +65,9 @@ if isinstance(ax, ndarray):
     if len(ax.shape) == 1:
         export_png(gridplot([ax.tolist()]), filename="{pngfilename}")
     else:
-        export_png(gridplot(ax.tolist()), "{pngfilename}")
+        export_png(gridplot(ax.tolist()), filename="{pngfilename}")
 else:
-    export_png(ax, "{pngfilename}")
+    export_png(ax, filename="{pngfilename}")
 """
 
 INDEX_TEMPLATE = """
