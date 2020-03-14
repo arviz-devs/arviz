@@ -9,6 +9,7 @@
 ### Deprecation
 
 ### Documentation
+* Image thumbs generation updated to be Bokeh 2 compatible (#1116)
 
 
 ## v0.7.0 (2020 Mar 2)

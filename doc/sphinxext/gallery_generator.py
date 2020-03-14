@@ -36,7 +36,7 @@ MPL_RST_TEMPLATE = """
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
 
-**API documentation:** {api_name} 
+**API documentation:** {api_name}
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -52,7 +52,7 @@ BOKEH_RST_TEMPLATE = """
 
 **Python source code:** :download:`[download source: {fname}]<{fname}>`
 
-**API documentation:** {api_name} 
+**API documentation:** {api_name}
 
 .. literalinclude:: {fname}
     :lines: {end_line}-
@@ -63,7 +63,7 @@ RST_TEMPLATES = {"matplotlib": MPL_RST_TEMPLATE, "bokeh": BOKEH_RST_TEMPLATE}
 BOKEH_EXPORT_CODE = """\n
 if isinstance(ax, ndarray):
     if len(ax.shape) == 1:
-        export_png(gridplot([ax.tolist()]), "{pngfilename}")
+        export_png(gridplot([ax.tolist()]), filename="{pngfilename}")
     else:
         export_png(gridplot(ax.tolist()), "{pngfilename}")
 else:
