@@ -42,7 +42,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-docs.txt
-      conda install geckodriver firefox --channel conda-forge
+      conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
 
   - script: |
