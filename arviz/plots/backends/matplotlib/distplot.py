@@ -2,10 +2,10 @@
 import warnings
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 from . import backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import matplotlib_kwarg_dealiaser
-import xarray as xr
 from ....data import InferenceData
 
 def plot_dist(
@@ -90,7 +90,9 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
     """Add a histogram for the data to the axes."""
     if isinstance(values, xr.Dataset):
         raise ValueError(
-            "Cannot directly convert xarray.Dataset to numpy array. Instead, create an xarray.DataArray first or Use plot_posterior, plot_density, plot_joint"
+            "Cannot directly convert xarray.Dataset to numpy array."
+            " Instead, create an xarray.DataArray first "
+            "or Use plot_posterior, plot_density, plot_joint"
             "or plot_pair instead of plot_dist"
         )
     if isinstance(values, InferenceData):
