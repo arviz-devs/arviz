@@ -1,7 +1,9 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
 
+import xarray as xr
 from .plot_utils import get_bins, get_plotting_function, matplotlib_kwarg_dealiaser
+from ..data import InferenceData
 from ..rcparams import rcParams
 
 
@@ -142,6 +144,16 @@ def plot_dist(
 
         >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
+    if isinstance(values, xr.Dataset):
+        raise ValueError(
+            "Cannot directly convert xarray.Dataset to numpy array."
+            " Instead, create an xarray.DataArray first "
+            "or Use plot_posterior, plot_density, plot_joint"
+            "or plot_pair instead of plot_dist"
+        )
+    if isinstance(values, InferenceData):
+        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_dist")
+
     if kind not in ["auto", "kde", "hist"]:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 

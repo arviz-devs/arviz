@@ -115,7 +115,7 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
     if bins is None:
         bins = get_bins(values)
     density = hist_kwargs.pop("density", True)
-    hist, edges = np.histogram(values, density=density, bins=bins)
+    hist, edges = np.histogram(np.asarray(values).flatten(), density=density, bins=bins)
     if hist_kwargs.pop("cumulative", False):
         hist = np.cumsum(hist)
         hist /= hist[-1]
