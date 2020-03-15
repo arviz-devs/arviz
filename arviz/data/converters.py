@@ -97,6 +97,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
         dataset = obj
+    elif isinstance(obj, xr.DataArray):
+        dataset = obj.to_dataset()
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
@@ -109,6 +111,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         return from_cmdstan(**kwargs)
     else:
         allowable_types = (
+            "xarray dataarray",
             "xarray dataset",
             "dict",
             "netcdf filename",
