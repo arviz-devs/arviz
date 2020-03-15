@@ -33,6 +33,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             | emcee sampler: Automatically extracts data
             | pyro MCMC: Automatically extracts data
             | xarray.Dataset: adds to InferenceData as only group
+            | xarray.DataArray: creates an xarray dataset as the only group
             | dict: creates an xarray dataset as the only group
             | numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
@@ -152,6 +153,7 @@ def convert_to_dataset(obj, *, group="posterior", coords=None, dims=None):
             pystan fit: Automatically extracts data
             pymc3 trace: Automatically extracts data
             xarray.Dataset: adds to InferenceData as only group
+            xarray.DataArray: creates an xarray dataset as the only group
             dict: creates an xarray dataset as the only group
             numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
