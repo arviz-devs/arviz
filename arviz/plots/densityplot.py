@@ -153,13 +153,12 @@ def plot_density(
     """
 
     if not isinstance(data, (list, tuple)):
-        if transform is not None:
-            data = transform(data)
         datasets = [convert_to_dataset(data, group=group)]
     else:
-        if transform is not None:
-            data = [transform(datum) for datum in data]
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
+
+    if transform is not None:
+        datasets = [transform(dataset) for dataset in datasets]
 
     var_names = _var_names(var_names, datasets)
     n_data = len(datasets)

@@ -145,6 +145,7 @@ def plot_forest(
     """
     if not isinstance(data, (list, tuple)):
         data = [data]
+
     if transform is not None:
         data = [transform(datum) for datum in data]
 
