@@ -69,5 +69,5 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -v
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -v -C "$(SYSTEM_PULLREQUEST_SOURCECOMMITID)"
     displayName: 'upload coverage'
