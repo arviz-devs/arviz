@@ -151,7 +151,6 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
