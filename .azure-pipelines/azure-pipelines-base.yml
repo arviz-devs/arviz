@@ -69,13 +69,5 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
-      for i in {1..5}
-      do
-          python -m codecov --token $(CODECOV_TOKEN) --name "$(NAME)" --required -v
-          if [ "$?" -eq 0 ]
-          then
-              break
-          fi
-          sleep 90
-      done
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -v
     displayName: 'upload coverage'
