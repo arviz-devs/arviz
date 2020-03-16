@@ -99,6 +99,7 @@ def fig_ax():
         {"colors": "k"},
         {"hpd_markers": ["v"]},
         {"shade": 1},
+        {"transform": lambda x: x + 1},
     ],
 )
 def test_plot_density_float(models, kwargs):
@@ -205,7 +206,7 @@ def test_plot_trace_bad_lines_value(models, bad_kwargs):
     "args_expected",
     [
         ({}, 1),
-        ({"var_names": "mu"}, 1),
+        ({"var_names": "mu", "transform": lambda x: x + 1}, 1),
         ({"var_names": "mu", "rope": (-1, 1)}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
