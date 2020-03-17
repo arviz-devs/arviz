@@ -45,6 +45,11 @@ def plot_pair(
         **backend_kwargs,
     }
 
+    if hexbin_kwargs is None:
+        hexbin_kwargs = {}
+
+    hexbin_kwargs.setdefault("size", 0.5)
+
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
         kde_kwargs.setdefault("contour_kwargs", {})
@@ -199,7 +204,7 @@ def plot_pair(
                     var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(
-                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs,
+                        var1_hexbin, var2_hexbin, **hexbin_kwargs,
                     )
 
                 if divergences:

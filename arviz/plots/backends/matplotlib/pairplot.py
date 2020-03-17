@@ -50,6 +50,11 @@ def plot_pair(
     }
     backend_kwargs.pop("constrained_layout")
 
+    if hexbin_kwargs is None:
+        hexbin_kwargs = {}
+
+    hexbin_kwargs.setdefault("mincnt", 1)
+
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
         kde_kwargs.setdefault("contour_kwargs", {})
@@ -108,7 +113,7 @@ def plot_pair(
             plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs)
         if "hexbin" in kind:
             hexbin = ax.hexbin(
-                infdata_group[0], infdata_group[1], mincnt=1, gridsize=gridsize, **hexbin_kwargs,
+                infdata_group[0], infdata_group[1], gridsize=gridsize, **hexbin_kwargs,
             )
             ax.grid(False)
 
@@ -190,9 +195,7 @@ def plot_pair(
 
                     if "hexbin" in kind:
                         ax[j, i].grid(False)
-                        hexbin = ax[j, i].hexbin(
-                            var1, var2, mincnt=1, gridsize=gridsize, **hexbin_kwargs
-                        )
+                        hexbin = ax[j, i].hexbin(var1, var2, gridsize=gridsize, **hexbin_kwargs)
 
                     if divergences:
                         ax[j, i].plot(
