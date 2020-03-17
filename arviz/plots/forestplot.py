@@ -146,14 +146,14 @@ def plot_forest(
     if not isinstance(data, (list, tuple)):
         data = [data]
 
-    if transform is not None:
-        data = [transform(datum) for datum in data]
-
     if coords is None:
         coords = {}
+
+    datasets = [convert_to_dataset(datum) for datum in reversed(data)]
+    if transform is not None:
+        datasets = [transform(dataset) for dataset in datasets]
     datasets = get_coords(
-        [convert_to_dataset(datum) for datum in reversed(data)],
-        list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords,
+        datasets, list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords
     )
 
     var_names = _var_names(var_names, datasets)
