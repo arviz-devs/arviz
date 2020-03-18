@@ -23,6 +23,7 @@ SUPPORTED_GROUPS = [
     "prior_predictive",
     "predictions",
     "predictions_constant_data",
+    "_warmup",
 ]
 
 
@@ -34,7 +35,7 @@ class InferenceData:
     on ``InferenceData`` methods and their low level implementation.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, save_warmup=None, **kwargs):
         """Initialize InferenceData object from keyword xarray datasets.
 
         Parameters
@@ -83,8 +84,14 @@ class InferenceData:
                 warnings.warn(
                     "{} group is not defined in the InferenceData scheme".format(key), UserWarning
                 )
+        warmup_dict = {}
         for key in key_list:
-            dataset = kwargs[key]
+            if "_data" not in key:
+                dataset, dataset_warmup = kwargs[key]
+                if save_warmup:
+                    warmup_dict[key] = dataset_warmup, None
+            else:
+                dataset = kwargs[key]
             if dataset is None:
                 continue
             elif not isinstance(dataset, xr.Dataset):
@@ -93,7 +100,10 @@ class InferenceData:
                     "(argument '{}' was type '{}')".format(key, type(dataset))
                 )
             setattr(self, key, dataset)
-            self._groups.append(key)
+            if key != "_warmup":
+                self._groups.append(key)
+        if save_warmup:
+            setattr(self, "_warmup", InferenceData(save_warmup=False, **warmup_dict))
 
     def __repr__(self):
         """Make string representation of object."""
@@ -103,7 +113,8 @@ class InferenceData:
 
     def __delattr__(self, group):
         """Delete a group from the InferenceData object."""
-        self._groups.remove(group)
+        if group in self._groups:
+            self._groups.remove(group)
         object.__delattr__(self, group)
 
     @staticmethod
@@ -131,10 +142,10 @@ class InferenceData:
         for group in data_groups:
             with xr.open_dataset(filename, group=group) as data:
                 if rcParams["data.load"] == "eager":
-                    groups[group] = data.load()
+                    groups[group] = data.load(), None
                 else:
-                    groups[group] = data
-        return InferenceData(**groups)
+                    groups[group] = data, None
+        return InferenceData(save_warmup=False, **groups)
 
     def to_netcdf(self, filename, compress=True, groups=None):
         """Write InferenceData to file using netcdf4.
