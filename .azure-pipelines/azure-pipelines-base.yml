@@ -69,8 +69,5 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
-      export BUILD_SOURCEVERSION_ORIGINAL=$BUILD_SOURCEVERSION
-      export BUILD_SOURCEVERSION=$SYSTEM_PULLREQUEST_SOURCECOMMITID
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -v
-      export BUILD_SOURCEVERSION=$BUILD_SOURCEVERSION_ORIGINAL
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $SYSTEM_PULLREQUEST_SOURCECOMMITID -v
     displayName: 'upload coverage'
