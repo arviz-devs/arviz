@@ -44,7 +44,13 @@ def non_centered_eight():
 def test_hpd():
     normal_sample = np.random.randn(5000000)
     interval = hpd(normal_sample)
-    assert_array_almost_equal(interval.x.values, [-1.88, 1.88], 2)
+    assert_array_almost_equal(interval, [-1.88, 1.88], 2)
+
+
+def test_hpd_multidimension():
+    normal_sample = np.random.randn(12000, 10, 3)
+    result = hpd(normal_sample)
+    assert result.shape == (10, 3, 2,)
 
 
 def test_hpd_multimodal():
@@ -58,7 +64,7 @@ def test_hpd_multimodal():
 def test_hpd_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
     interval = hpd(normal_sample, circular=True)
-    assert_array_almost_equal(interval.x.values, [0.6, -0.6], 1)
+    assert_array_almost_equal(interval, [0.6, -0.6], 1)
 
 
 def test_hpd_bad_ci():
@@ -72,7 +78,7 @@ def test_hpd_skipna():
     interval = hpd(normal_sample[10:])
     normal_sample[:10] = np.nan
     interval_ = hpd(normal_sample, skipna=True)
-    assert_array_almost_equal(interval.x.values, interval_.x.values)
+    assert_array_almost_equal(interval, interval_)
 
 
 def test_r2_score():

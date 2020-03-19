@@ -305,7 +305,17 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, *, credible_interval=None, circular=False, multimodal=False, skipna=False, **kwargs):
+def hpd(
+    ary,
+    *,
+    group="posterior",
+    var_names=None,
+    credible_interval=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    **kwargs
+):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
 
@@ -313,10 +323,14 @@ def hpd(ary, *, credible_interval=None, circular=False, multimodal=False, skipna
 
     Parameters
     ----------
-    ary : Numpy array
-        An array containing posterior samples
-    group : List
-        An list containing the dimensions to compute hpd
+    ary : obj
+        onject containing posterior samples.
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
+    group : str, optional
+         Specifies which InferenceData group should be used to calculate hpd.  Defaults to 'posterior'
+    var_names : list
+        Names of variables to include in the hpd report
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
     circular : bool, optional
@@ -354,17 +368,27 @@ def hpd(ary, *, credible_interval=None, circular=False, multimodal=False, skipna
     if multimodal:
         return _hpd_multimodal(ary, credible_interval, skipna)
 
-    if isinstance(ary, np.ndarray):
-        ary = convert_to_dataset(ary)
-
-    kwargs.setdefault("input_core_dims", [["chain", "draw"]])
-    kwargs.setdefault("output_core_dims", [["hpd"]])
     func_kwargs = {
         "credible_interval": credible_interval,
         "circular": circular,
         "skipna": skipna,
         "out_shape": (2,),
     }
+    kwargs.setdefault("output_core_dims", [["hpd"]])
+
+    if isinstance(ary, np.ndarray):
+        if len(ary.shape) == 1:
+            return _hpd(ary, credible_interval, circular, skipna)
+        ary = convert_to_dataset(ary)
+        kwargs.setdefault("input_core_dims", [["chain"]])
+        return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs).to_array().values[0]
+
+    ary = convert_to_dataset(ary, group=group)
+    var_names = _var_names(var_names, ary)
+
+    ary = ary if var_names is None else ary[var_names]
+
+    kwargs.setdefault("input_core_dims", [["chain", "draw"]])
     return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs)
 
 
@@ -407,7 +431,7 @@ def _hpd(ary, credible_interval, circular, skipna):
 
 def _hpd_multimodal(ary, credible_interval, skipna):
     """Compute hpd if the distribution is multimodal"""
-
+    ary = ary.flatten()
     if skipna:
         ary = ary[~np.isnan(ary)]
 
