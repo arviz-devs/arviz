@@ -69,5 +69,14 @@ jobs:
     displayName: 'Publish Test Results'
 
   - script: |
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $SYSTEM_PULLREQUEST_SOURCECOMMITID
+      
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C ${SYSTEM_PULLREQUEST_SOURCECOMMITID}
+      
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
+      
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C ${BUILD_SOURCEVERSION}
+      
+      
       bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $SYSTEM_PULLREQUEST_SOURCECOMMITID -v
     displayName: 'upload coverage'
