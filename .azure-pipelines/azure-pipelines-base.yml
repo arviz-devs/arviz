@@ -70,17 +70,4 @@ jobs:
 
   - script: |
       bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
-      
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)"
-      
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION -v -d > codecov_upload_build_source_version.txt
-      
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -v -d > codecov_upload_basic.txt
     displayName: 'upload coverage'
-   
-  - task: PublishTestResults@2
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: '$(System.DefaultWorkingDirectory)/codecov_upload_*.txt'
-      testRunTitle: 'Publish codecov debug results'
-    displayName: 'Publish Codecov Results'
