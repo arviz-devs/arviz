@@ -3,12 +3,16 @@
 ## v0.x.x Unreleased
 
 ### New features
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
+* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 ### Maintenance and fixes
-
+* Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
+* Fixed hist kind of `plot_dist` with multidimensional input (#1115)
+* Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData is a list or tuple (#1121)`
 ### Deprecation
 
 ### Documentation
+* Image thumbs generation updated to be Bokeh 2 compatible (#1116)
+* Add new examples for `plot_pair` (#1110)
 
 
 ## v0.7.0 (2020 Mar 2)

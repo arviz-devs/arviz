@@ -151,12 +151,13 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
-    if transform is not None:
-        data = transform(data)
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
+
+    if transform is not None:
+        datasets = [transform(dataset) for dataset in datasets]
 
     var_names = _var_names(var_names, datasets)
     n_data = len(datasets)
