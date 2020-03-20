@@ -11,6 +11,11 @@ trigger:
     include:
     - '*'
 
+pr:
+  branches:
+    include:
+    - master
+
 jobs:
   - template: .azure-pipelines/azure-pipelines-base.yml
   - template: .azure-pipelines/azure-pipelines-external.yml

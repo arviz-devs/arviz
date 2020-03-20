@@ -23,9 +23,9 @@ def plot_pair(
     kind,
     kde_kwargs,
     hexbin_kwargs,
-    contour,
-    plot_kwargs,
-    fill_last,
+    contour,  # pylint: disable=unused-argument
+    plot_kwargs,  # pylint: disable=unused-argument
+    fill_last,  # pylint: disable=unused-argument
     divergences,
     diverging_mask,
     flat_var_names,
@@ -44,6 +44,11 @@ def plot_pair(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    if hexbin_kwargs is None:
+        hexbin_kwargs = {}
+
+    hexbin_kwargs.setdefault("size", 0.5)
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
@@ -145,7 +150,7 @@ def plot_pair(
         ax = np.array(ax)
     else:
         assert ax.shape == (numvars - var, numvars - var)
-    # pylint: disable=R1702
+    # pylint: disable=too-many-nested-blocks
     for i in range(0, numvars - var):
 
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
@@ -170,6 +175,9 @@ def plot_pair(
                     **marginal_kwargs,
                 )
 
+                ax[j, i].xaxis.axis_label = flat_var_names[i]
+                ax[j, i].yaxis.axis_label = flat_var_names[j + var]
+
             elif j + var > i:
 
                 if "scatter" in kind:
@@ -184,14 +192,11 @@ def plot_pair(
                     plot_kde(
                         var1_kde,
                         var2_kde,
-                        contour=contour,
-                        fill_last=fill_last,
                         ax=ax[j, i],
                         backend="bokeh",
                         backend_kwargs={},
                         show=False,
                         **kde_kwargs,
-                        **plot_kwargs,
                     )
 
                 if "hexbin" in kind:
@@ -199,7 +204,7 @@ def plot_pair(
                     var2_hexbin = infdata_group[j + var]
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(
-                        var1_hexbin, var2_hexbin, size=0.5, **hexbin_kwargs, **plot_kwargs
+                        var1_hexbin, var2_hexbin, **hexbin_kwargs,
                     )
 
                 if divergences:
@@ -220,7 +225,7 @@ def plot_pair(
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
 
-                    ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 2, **point_estimate_kwargs)
+                    ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 1, **point_estimate_kwargs)
 
                     ax_hline = Span(
                         location=pe_y,

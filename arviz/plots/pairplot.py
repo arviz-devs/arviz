@@ -17,7 +17,7 @@ def plot_pair(
     textsize=None,
     kind="scatter",
     gridsize="auto",
-    contour=True,
+    contour=False,
     plot_kwargs=None,
     fill_last=False,
     divergences=False,
@@ -157,7 +157,7 @@ def plot_pair(
         )
     if fill_last or contour:
         warnings.warn(
-            "fill_last and contour will be deprecated.", UserWarning,
+            "fill_last and contour will be deprecated. Please use kde_kwargs", UserWarning,
         )
 
     if coords is None:
