@@ -47,10 +47,33 @@ def test_hpd():
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
+def test_hpd_2darray():
+    normal_sample = np.random.randn(12000, 5)
+    result = hpd(normal_sample)
+    assert result.shape == (5, 2,)
+
+
 def test_hpd_multidimension():
     normal_sample = np.random.randn(12000, 10, 3)
     result = hpd(normal_sample)
     assert result.shape == (10, 3, 2,)
+
+
+def test_hpd_idata():
+    data = load_arviz_data("centered_eight")
+    normal_sample = data.posterior
+    result = hpd(normal_sample)
+    assert isinstance(result, Dataset)
+    assert result.dims == {"school": 8, "hpd": 2}
+
+    result = hpd(normal_sample, **{"input_core_dims": [["chain"]]})
+    assert isinstance(result, Dataset)
+    assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
+
+    result = hpd(normal_sample, var_names=["mu", "theta"])
+    assert isinstance(result, Dataset)
+    assert result.dims == {"hpd": 2, "school": 8}
+    assert list(result.data_vars.keys()) == ["mu", "theta"]
 
 
 def test_hpd_multimodal():

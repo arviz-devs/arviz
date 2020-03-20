@@ -324,11 +324,11 @@ def hpd(
     Parameters
     ----------
     ary : obj
-        onject containing posterior samples.
+        object containing posterior samples.
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
     group : str, optional
-         Specifies which InferenceData group should be used to calculate hpd.  Defaults to 'posterior'
+         Specifies which InferenceData group should be used to calculate hpd. Defaults to 'posterior'
     var_names : list
         Names of variables to include in the hpd report
     credible_interval : float, optional
@@ -342,10 +342,14 @@ def hpd(
         modes are well separated.
     skipna : bool
         If true ignores nan values when computing the hpd interval. Defaults to false.
+    kwargs : dict, optional
+        Additional keywords passed to ax.scatter
+        For example, to calculate hpd over "chain" dimension, Pass "input_core_dims" to "chain" in
+        the dictionary.
 
     Returns
     -------
-    np.ndarray
+    np.ndarray or xarray.Dataset, depending upon input
         lower(s) and upper(s) values of the interval(s).
 
     Examples
@@ -381,14 +385,13 @@ def hpd(
             return _hpd(ary, credible_interval, circular, skipna)
         ary = convert_to_dataset(ary)
         kwargs.setdefault("input_core_dims", [["chain"]])
-        return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs).to_array().values[0]
+        return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs).x.values
 
     ary = convert_to_dataset(ary, group=group)
     var_names = _var_names(var_names, ary)
 
     ary = ary if var_names is None else ary[var_names]
 
-    kwargs.setdefault("input_core_dims", [["chain", "draw"]])
     return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs)
 
 
