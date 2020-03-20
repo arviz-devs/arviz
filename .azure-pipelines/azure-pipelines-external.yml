@@ -128,5 +128,5 @@ jobs:
       testRunTitle: 'Publish test results for Python $(python.version)'
 
   - script: |
-      python -m codecov --token=$(CODECOV_TOKEN)
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
     displayName: 'upload coverage'

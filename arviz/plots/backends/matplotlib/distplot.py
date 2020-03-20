@@ -1,10 +1,11 @@
 """Matplotlib distplot."""
 import warnings
 import matplotlib.pyplot as plt
-
+import numpy as np
 from . import backend_show
 from ...kdeplot import plot_kde
 from ...plot_utils import matplotlib_kwarg_dealiaser
+from ...plot_utils import get_bins
 
 
 def plot_dist(
@@ -91,8 +92,10 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
         raise NotImplementedError("Insert hexbin plot here")
 
     bins = hist_kwargs.pop("bins")
+    if bins is None:
+        bins = get_bins(values)
+    ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
-    ax.hist(values, bins=bins, **hist_kwargs)
     if rotated:
         ax.set_yticks(bins[:-1])
     else:
