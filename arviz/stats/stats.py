@@ -343,9 +343,8 @@ def hpd(
     skipna : bool
         If true ignores nan values when computing the hpd interval. Defaults to false.
     kwargs : dict, optional
-        Additional keywords passed to ax.scatter
-        For example, to calculate hpd over "chain" dimension, Pass "input_core_dims" to "chain" in
-        the dictionary.
+        Additional keywords passed to `wrap_xarray_ufunc`.
+        See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
 
     Returns
     -------
@@ -362,6 +361,28 @@ def hpd(
            ...: import numpy as np
            ...: data = np.random.normal(size=2000)
            ...: az.hpd(data, credible_interval=.68)
+
+    Calculate the hpd of a dataset:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('centered_eight')
+           ...: az.hpd(data)
+
+    We can also calculate the hpd of some of the variables of dataset:
+
+    .. ipython::
+
+        In [1]: az.hpd(data, var_names=["mu", "theta"])
+
+    If we want to calculate the hpd over specified dimension of dataset,
+    we can pass `input_core_dims` by kwargs:
+
+    .. ipython::
+
+        In [1]: az.hpd(data, **{"input_core_dims": [["chain"]]})
+
     """
     if credible_interval is None:
         credible_interval = rcParams["stats.credible_interval"]
@@ -390,7 +411,7 @@ def hpd(
     ary = convert_to_dataset(ary, group=group)
     var_names = _var_names(var_names, ary)
 
-    ary = ary if var_names is None else ary[var_names]
+    ary = ary[var_names] if var_names else ary
 
     return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs)
 

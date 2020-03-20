@@ -59,21 +59,32 @@ def test_hpd_multidimension():
     assert result.shape == (10, 3, 2,)
 
 
-def test_hpd_idata():
-    data = load_arviz_data("centered_eight")
-    normal_sample = data.posterior
-    result = hpd(normal_sample)
+def test_hpd_idata(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data)
     assert isinstance(result, Dataset)
     assert result.dims == {"school": 8, "hpd": 2}
 
-    result = hpd(normal_sample, **{"input_core_dims": [["chain"]]})
+    result = hpd(data, **{"input_core_dims": [["chain"]]})
     assert isinstance(result, Dataset)
     assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
 
-    result = hpd(normal_sample, var_names=["mu", "theta"])
+
+def test_hpd_idata_varnames(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, var_names=["mu", "theta"])
     assert isinstance(result, Dataset)
     assert result.dims == {"hpd": 2, "school": 8}
     assert list(result.data_vars.keys()) == ["mu", "theta"]
+
+
+def test_hpd_idata_group(centered_eight):
+    result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
+    result_prior = hpd(centered_eight, group="prior", var_names="mu")
+    assert result_prior.dims == {"hpd": 2}
+    print(result_posterior.mu.values, result_prior.mu.values)
+    assert result_posterior.mu.values[0] > result_prior.mu.values[0]
+    assert result_posterior.mu.values[1] > result_prior.mu.values[1]
 
 
 def test_hpd_multimodal():
