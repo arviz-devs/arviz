@@ -879,16 +879,18 @@ class TestConversions:
 class TestDataArrayToDataset:
     def test_1d_dataset(self):
         size = 100
-        dataset = convert_to_dataset(xr.DataArray(np.random.randn(1,size),dims=('chain','draw')))
+        dataset = convert_to_dataset(xr.DataArray(np.random.randn(1, size), dims=('chain', 'draw')))
         assert len(dataset.data_vars) == 1
 
-        assert dataset.chain.shape == (1,)
-        assert dataset.draw.shape == (size,)
+        assert dataset.chain.shape == (1, )
+        assert dataset.draw.shape == (size, )
 
 
     def test_nd_to_dataset(self):
         shape = (1, 2, 3, 4, 5)
-        dataset = convert_to_dataset(xr.DataArray(np.random.randn(*shape),dims=('chain','draw','dim_0','dim_1','dim_2')))
+        dataset = convert_to_dataset(
+            xr.DataArray(np.random.randn(*shape),
+            dims=('chain', 'draw', 'dim_0', 'dim_1', 'dim_2')))
         assert len(dataset.data_vars) == 1
         var_name = list(dataset.data_vars)[0]
 
@@ -898,7 +900,9 @@ class TestDataArrayToDataset:
 
     def test_nd_to_inference_data(self):
         shape = (1, 2, 3, 4, 5)
-        inference_data = convert_to_inference_data(xr.DataArray(np.random.randn(*shape),dims=('chain','draw','dim_0','dim_1','dim_2')), group="prior")
+        inference_data = convert_to_inference_data(
+            xr.DataArray(np.random.randn(*shape),
+            dims=('chain', 'draw', 'dim_0', 'dim_1', 'dim_2')), group="prior")
         assert hasattr(inference_data, "prior")
         assert len(inference_data.prior.data_vars) == 1
         var_name = list(inference_data.prior.data_vars)[0]
