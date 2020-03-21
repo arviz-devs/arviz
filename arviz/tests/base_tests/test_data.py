@@ -873,3 +873,37 @@ class TestConversions:
         assert isinstance(inference_data, InferenceData)
         assert set(inference_data.posterior.coords["Ivies"].values) == set(IVIES)
         assert inference_data.posterior["theta"].dims == ("chain", "draw", "Ivies")
+
+
+
+class TestDataArrayToDataset:
+    def test_1d_dataset(self):
+        size = 100
+        dataset = convert_to_dataset(xr.DataArray(np.random.randn(1,size),dims=('chain','draw')))
+        assert len(dataset.data_vars) == 1
+
+        assert dataset.chain.shape == (1,)
+        assert dataset.draw.shape == (size,)
+
+
+    def test_nd_to_dataset(self):
+        shape = (1, 2, 3, 4, 5)
+        dataset = convert_to_dataset(xr.DataArray(np.random.randn(*shape),dims=('chain','draw','dim_0','dim_1','dim_2')))
+        assert len(dataset.data_vars) == 1
+        var_name = list(dataset.data_vars)[0]
+
+        assert dataset.chain.shape == shape[:1]
+        assert dataset.draw.shape == shape[1:2]
+        assert dataset[var_name].shape == shape
+
+    def test_nd_to_inference_data(self):
+        shape = (1, 2, 3, 4, 5)
+        inference_data = convert_to_inference_data(xr.DataArray(np.random.randn(*shape),dims=('chain','draw','dim_0','dim_1','dim_2')), group="prior")
+        assert hasattr(inference_data, "prior")
+        assert len(inference_data.prior.data_vars) == 1
+        var_name = list(inference_data.prior.data_vars)[0]
+
+        assert inference_data.prior.chain.shape == shape[:1]
+        assert inference_data.prior.draw.shape == shape[1:2]
+        assert inference_data.prior[var_name].shape == shape
+        assert repr(inference_data).startswith("Inference data with groups")
