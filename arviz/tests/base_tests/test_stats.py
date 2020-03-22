@@ -87,6 +87,12 @@ def test_hpd_idata_group(centered_eight):
     assert range_posterior < range_prior
 
 
+def test_hpd_sel(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, sel={"chain":[0, 1, 3]}, **{"input_core_dims": [["draw"]]})
+    assert_array_equal(result.coords["chain"], [0, 1, 3])
+
+
 def test_hpd_multimodal():
     normal_sample = np.concatenate(
         (np.random.normal(-4, 1, 2500000), np.random.normal(2, 0.5, 2500000))
