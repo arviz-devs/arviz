@@ -4,16 +4,14 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
-# Skip tests if bokeh not installed
-bkp = pytest.importorskip("bokeh.plotting")  # pylint: disable=invalid-name
 from pandas import DataFrame  # pylint: disable=wrong-import-position
-
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     create_model,
     create_multidimensional_model,
     eight_schools_params,
+    importorskip,
     models,
     multidim_models,
 )
@@ -42,6 +40,9 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_violin,
 )
 from ...stats import compare, loo, waic  # pylint: disable=wrong-import-position
+
+# Skip tests if bokeh not installed
+bkp = importorskip("bokeh.plotting")  # pylint: disable=invalid-name
 
 
 rcParams["data.load"] = "eager"

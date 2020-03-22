@@ -2,19 +2,21 @@
 import numpy as np
 import packaging
 import pytest
-# Skip all tests if pyro or pytorch not installed
-torch = pytest.importorskip("torch")
-pyro = pytest.importorskip("pyro")
-Predictive = pytest.importorskip("pyro.infer.Predictive")
 
-from ...data.io_pyro import from_pyro # pylint: disable=wrong-import-position
+from ...data.io_pyro import from_pyro  # pylint: disable=wrong-import-position
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    importorskip,
     load_cached_models,
 )
+
+# Skip all tests if pyro or pytorch not installed
+torch = importorskip("torch")
+pyro = importorskip("pyro")
+Predictive = importorskip("pyro.infer.Predictive")
 
 
 class TestDataPyro:

@@ -12,6 +12,7 @@ from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    importorskip,
     load_cached_models,
     pystan_version,
 )
@@ -33,10 +34,10 @@ class TestDataCmdStanPy:
     @pytest.fixture(scope="class")
     def data(self, filepaths):
         # Skip tests if cmdstanpy not installed
-        CmdStanMCMC = pytest.importorskip("cmdstanpy.CmdStanMCMC")  #pylint: disable=invalid-name
-        RunSet = pytest.importorskip("cmdstanpy.stanfit.RunSet")  #pylint: disable=invalid-name
-        CmdStanArgs = pytest.importorskip("cmdstanpy.model.CmdStanArgs")  #pylint: disable=invalid-name
-        SamplerArgs = pytest.importorskip("cmdstanpy.model.SamplerArgs")  #pylint: disable=invalid-name
+        CmdStanMCMC = importorskip("cmdstanpy.CmdStanMCMC")  # pylint: disable=invalid-name
+        RunSet = importorskip("cmdstanpy.stanfit.RunSet")  # pylint: disable=invalid-name
+        CmdStanArgs = importorskip("cmdstanpy.model.CmdStanArgs")  # pylint: disable=invalid-name
+        SamplerArgs = importorskip("cmdstanpy.model.SamplerArgs")  # pylint: disable=invalid-name
 
         class Data:
             args = CmdStanArgs(

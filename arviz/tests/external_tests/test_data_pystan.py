@@ -13,6 +13,7 @@ from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    importorskip,
     load_cached_models,
     pystan_version,
 )
@@ -229,7 +230,7 @@ class TestDataPyStan:
     def test_index_order(self, data, eight_schools_params):
         """Test 0-indexed data."""
         # Skip test if pystan not installed
-        pystan = pytest.importorskip("pystan")  # pylint: disable=import-error
+        pystan = importorskip("pystan")  # pylint: disable=import-error
 
         fit = data.model.sampling(data=eight_schools_params)
         if pystan.__version__ >= "2.18":
