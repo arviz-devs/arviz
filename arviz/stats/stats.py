@@ -328,7 +328,8 @@ def hpd(
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
     group : str, optional
-         Specifies which InferenceData group should be used to calculate hpd. Defaults to 'posterior'
+         Specifies which InferenceData group should be used to calculate hpd.
+         Defaults to 'posterior'
     var_names : list
         Names of variables to include in the hpd report
     credible_interval : float, optional

@@ -82,9 +82,9 @@ def test_hpd_idata_group(centered_eight):
     result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
     result_prior = hpd(centered_eight, group="prior", var_names="mu")
     assert result_prior.dims == {"hpd": 2}
-    print(result_posterior.mu.values, result_prior.mu.values)
-    assert result_posterior.mu.values[0] > result_prior.mu.values[0]
-    assert result_posterior.mu.values[1] > result_prior.mu.values[1]
+    range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
+    range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
+    assert range_posterior < range_prior
 
 
 def test_hpd_multimodal():
