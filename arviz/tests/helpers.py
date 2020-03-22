@@ -16,8 +16,6 @@ from packaging.version import Version
 from ..data import InferenceData, from_dict
 
 _log = logging.getLogger(__name__)
-# ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
-ARVIZ_CI_MACHINE = os.environ.get("ARVIZ_CI_MACHINE") is not None
 
 
 @pytest.fixture(scope="module")
@@ -608,6 +606,8 @@ def importorskip(
     Example::
         docutils = pytest.importorskip("docutils")
     """
+    # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
+    ARVIZ_CI_MACHINE = os.environ.get("ARVIZ_CI_MACHINE") is not None
     if ARVIZ_CI_MACHINE:
         __import__(modname)
         mod = sys.modules[modname]
