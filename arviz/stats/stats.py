@@ -44,7 +44,7 @@ __all__ = [
 
 
 def compare(
-        dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
+    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -306,16 +306,15 @@ def _ic_matrix(ics, ic_i):
 
 
 def hpd(
-        ary,
-        *,
-        group="posterior",
-        var_names=None,
-        sel=None,
-        credible_interval=None,
-        circular=False,
-        multimodal=False,
-        skipna=False,
-        **kwargs
+    ary,
+    credible_interval=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    group="posterior",
+    var_names=None,
+    sel=None,
+    **kwargs
 ):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
@@ -328,13 +327,6 @@ def hpd(
         object containing posterior samples.
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
-    group : str, optional
-         Specifies which InferenceData group should be used to calculate hpd.
-         Defaults to 'posterior'
-    var_names : list, optional
-        Names of variables to include in the hpd report
-    sel: dict, optional
-        To calculate hpd over selection on all groups.
     credible_interval : float, optional
         Credible interval to compute. Defaults to 0.94.
     circular : bool, optional
@@ -346,6 +338,13 @@ def hpd(
         modes are well separated.
     skipna : bool
         If true ignores nan values when computing the hpd interval. Defaults to false.
+    group : str, optional
+         Specifies which InferenceData group should be used to calculate hpd.
+         Defaults to 'posterior'
+    var_names : list, optional
+        Names of variables to include in the hpd report
+    sel: dict, optional
+        To calculate hpd over selection on all groups.
     kwargs : dict, optional
         Additional keywords passed to `wrap_xarray_ufunc`.
         See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
@@ -590,7 +589,7 @@ def loo(data, pointwise=False, reff=None, scale=None):
             ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
-                    np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
+                np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
     log_weights, pareto_shape = psislw(-log_likelihood, reff)
@@ -876,20 +875,20 @@ def r2_score(y_true, y_pred):
 
 
 def summary(
-        data,
-        var_names: Optional[List[str]] = None,
-        fmt: str = "wide",
-        kind: str = "all",
-        round_to=None,
-        include_circ=None,
-        stat_funcs=None,
-        extend=True,
-        credible_interval=None,
-        order="C",
-        index_origin=None,
-        skipna=False,
-        coords: Optional[CoordSpec] = None,
-        dims: Optional[DimSpec] = None,
+    data,
+    var_names: Optional[List[str]] = None,
+    fmt: str = "wide",
+    kind: str = "all",
+    round_to=None,
+    include_circ=None,
+    stat_funcs=None,
+    extend=True,
+    credible_interval=None,
+    order="C",
+    index_origin=None,
+    skipna=False,
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -1472,22 +1471,22 @@ def _loo_pit(y, y_hat, log_weights):
 
 
 def apply_test_function(
-        idata,
-        func,
-        group="both",
-        var_names=None,
-        pointwise=False,
-        out_data_shape=None,
-        out_pp_shape=None,
-        out_name_data="T",
-        out_name_pp=None,
-        func_args=None,
-        func_kwargs=None,
-        ufunc_kwargs=None,
-        wrap_data_kwargs=None,
-        wrap_pp_kwargs=None,
-        inplace=True,
-        overwrite=None,
+    idata,
+    func,
+    group="both",
+    var_names=None,
+    pointwise=False,
+    out_data_shape=None,
+    out_pp_shape=None,
+    out_name_data="T",
+    out_name_pp=None,
+    func_args=None,
+    func_kwargs=None,
+    ufunc_kwargs=None,
+    wrap_data_kwargs=None,
+    wrap_pp_kwargs=None,
+    inplace=True,
+    overwrite=None,
 ):
     """Apply a Bayesian test function to an InferenceData object.
 

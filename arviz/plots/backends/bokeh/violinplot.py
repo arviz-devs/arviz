@@ -66,7 +66,7 @@ def plot_violin(
             ax_.scatter(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
-        hpd_intervals = hpd(val, credible_interval=credible_interval, multimodal=False)
+        hpd_intervals = hpd(val, credible_interval, multimodal=False)
 
         if quartiles:
             ax_.line(

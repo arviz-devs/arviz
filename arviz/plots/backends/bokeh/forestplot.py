@@ -548,7 +548,7 @@ class VarHandler:
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval=credible_interval, multimodal=False)
+            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):

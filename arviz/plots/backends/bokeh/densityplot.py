@@ -124,7 +124,7 @@ def _d_helper(
 
     if vec.dtype.kind == "f":
         if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval=credible_interval, multimodal=False)
+            hpd_ = hpd(vec, credible_interval, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
@@ -174,7 +174,7 @@ def _d_helper(
             )
 
     else:
-        xmin, xmax = hpd(vec, credible_interval=credible_interval, multimodal=False)
+        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
         bins = get_bins(vec)
 
         _, hist, edges = histogram(vec, bins=bins)
