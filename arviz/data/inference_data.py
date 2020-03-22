@@ -86,14 +86,13 @@ class InferenceData:
                 )
         warmup_dict = {}
         for key in key_list:
-            if "_data" not in key:
+            dataset = kwargs[key]
+            if dataset is None:
+                continue
+            elif isinstance(dataset, (list, tuple)):
                 dataset, dataset_warmup = kwargs[key]
                 if save_warmup:
                     warmup_dict[key] = dataset_warmup, None
-            else:
-                dataset = kwargs[key]
-            if dataset is None:
-                continue
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
