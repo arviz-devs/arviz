@@ -465,7 +465,7 @@ def _hpd(ary, credible_interval, circular, skipna):
 
 
 def _hpd_multimodal(ary, credible_interval, skipna):
-    """Compute hpd if the distribution is multimodal"""
+    """Compute hpd if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
         ary = ary[~np.isnan(ary)]
