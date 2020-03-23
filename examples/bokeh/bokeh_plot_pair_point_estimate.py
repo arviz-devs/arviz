@@ -13,13 +13,14 @@ centered = az.load_arviz_data("centered_eight")
 coords = {"school": ["Choate", "Deerfield"]}
 ax = az.plot_pair(
     centered,
-    var_names=["mu", 'theta'],
-    kind =['scatter', 'kde'], 
-    kde_kwargs={'fill_last':False},
+    var_names=["mu", "theta"],
+    kind=["scatter", "kde"],
+    kde_kwargs={"fill_last": False},
     diagonal=True,
     coords=coords,
-    point_estimate='median', 
-    figsize=(10,8), 
-    backend='bokeh')
+    point_estimate="median",
+    figsize=(10, 8),
+    backend="bokeh",
+)
 
 plt.show()
