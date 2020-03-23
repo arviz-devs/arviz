@@ -623,8 +623,7 @@ def importorskip(
             # of existing directories with the same name we're trying to
             # import but without a __init__.py file
             warnings.simplefilter("ignore")
-            __import__(modname)
-        mod = sys.modules[modname]
+            mod = importlib.import_module(modname)
         if minversion is None:
             return mod
         verattr = getattr(mod, "__version__", None)
