@@ -6,6 +6,7 @@ import pytest
 import xarray as xr
 
 from ...data import from_dict
+from ..helpers import running_on_ci
 from ...plots.plot_utils import (
     filter_plotters_list,
     format_sig_figs,
@@ -197,7 +198,8 @@ def test_filter_plotter_list_warning():
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("bokeh") is None, reason="test requires bokeh which is not installed"
+    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    reason="test requires bokeh which is not installed",
 )
 def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""

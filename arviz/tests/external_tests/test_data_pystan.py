@@ -16,6 +16,7 @@ from ..helpers import (  # pylint: disable=unused-import
     importorskip,
     load_cached_models,
     pystan_version,
+    running_on_ci,
 )
 
 # Check if either pystan or pystan3 is installed
@@ -23,7 +24,8 @@ pystan_installed = (importlib.util.find_spec("pystan") is not None) or (
     importlib.util.find_spec("stan") is not None
 )
 pytestmark = pytest.mark.skipif(
-    ~pystan_installed, reason="test requires pystan/pystan3 which is not installed"
+    ~pystan_installed & ~running_on_ci(),
+    reason="test requires pystan/pystan3 which is not installed",
 )
 
 

@@ -9,6 +9,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
+from ..helpers import running_on_ci
 from ...stats.stats_utils import stats_variance_2d as svar
 from ...utils import (
     Numba,
@@ -18,7 +19,8 @@ from ...utils import (
 from .test_utils import utils_with_numba_import_fail  # pylint: disable=unused-import
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    importlib.util.find_spec("numba") is None, reason="test requires numba which is not installed"
+    (importlib.util.find_spec("numba") is None) & ~running_on_ci(),
+    reason="test requires numba which is not installed",
 )
 
 
