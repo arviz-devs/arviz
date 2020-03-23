@@ -590,6 +590,11 @@ def test_precompile_models(eight_schools_params, draws, chains):
     load_cached_models(eight_schools_params, draws, chains)
 
 
+def running_on_ci() -> bool:
+    """Returns True if running on CI machine"""
+    return os.environ.get("ARVIZ_CI_MACHINE") is not None
+
+
 def importorskip(
     modname: str, minversion: Optional[str] = None, reason: Optional[str] = None
 ) -> Any:
@@ -607,7 +612,7 @@ def importorskip(
         docutils = pytest.importorskip("docutils")
     """
     # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
-    ARVIZ_CI_MACHINE = os.environ.get("ARVIZ_CI_MACHINE") is not None
+    ARVIZ_CI_MACHINE = running_on_ci()
     if ARVIZ_CI_MACHINE:
         import warnings
 
