@@ -609,7 +609,16 @@ def importorskip(
     # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
     ARVIZ_CI_MACHINE = os.environ.get("ARVIZ_CI_MACHINE") is not None
     if ARVIZ_CI_MACHINE:
-        __import__(modname)
+        import warnings
+
+        compile(modname, "", "eval")  # to catch syntaxerrors
+
+        with warnings.catch_warnings():
+            # make sure to ignore ImportWarnings that might happen because
+            # of existing directories with the same name we're trying to
+            # import but without a __init__.py file
+            warnings.simplefilter("ignore")
+            __import__(modname)
         mod = sys.modules[modname]
         if minversion is None:
             return mod
