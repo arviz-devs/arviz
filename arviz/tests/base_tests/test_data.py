@@ -879,9 +879,9 @@ class TestConversions:
 class TestDataArrayToDataset:
     def test_1d_dataset(self):
         size = 100
-        dataset = convert_to_dataset(xr.DataArray(np.random.randn(1, size), dims=('chain', 'draw')))
+        dataset = convert_to_dataset(xr.DataArray(np.random.randn(1, size), name="plot", dims=('chain', 'draw')))
         assert len(dataset.data_vars) == 1
-
+        assert dataset.variables.get("plot") is not None
         assert dataset.chain.shape == (1, )
         assert dataset.draw.shape == (size, )
 
@@ -910,4 +910,3 @@ class TestDataArrayToDataset:
         assert inference_data.prior.chain.shape == shape[:1]
         assert inference_data.prior.draw.shape == shape[1:2]
         assert inference_data.prior[var_name].shape == shape
-        assert repr(inference_data).startswith("Inference data with groups")
