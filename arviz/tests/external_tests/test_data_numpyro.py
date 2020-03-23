@@ -13,8 +13,10 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
 )
 
 # Skip all tests if jax or numpyro not installed
-PRNGKey = importorskip("jax.random.PRNGKey")
-Predictive = importorskip("numpyro.infer.Predictive")
+jax = importorskip("jax")
+PRNGKey = jax.random.PRNGKey
+pyro = importorskip("pyro")
+Predictive = pyro.infer.Predictive
 
 class TestDataNumPyro:
     @pytest.fixture(scope="class")

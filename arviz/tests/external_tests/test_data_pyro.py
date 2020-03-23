@@ -16,7 +16,7 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
 # Skip all tests if pyro or pytorch not installed
 torch = importorskip("torch")
 pyro = importorskip("pyro")
-Predictive = importorskip("pyro.infer.Predictive")
+Predictive = pyro.infer.Predictive
 
 
 class TestDataPyro:
