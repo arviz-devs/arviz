@@ -117,8 +117,8 @@ jobs:
     displayName: 'pydocstyle'
 
   - script: |
-      python -m black arviz
-      python -m black examples
+      python -m black --check arviz
+      python -m black --check examples
     displayName: 'black'
 
   - task: PublishTestResults@2
