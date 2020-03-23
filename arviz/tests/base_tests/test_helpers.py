@@ -4,8 +4,9 @@ from _pytest.outcomes import Skipped
 from ..helpers import importorskip
 
 
-def test_importorskip_local():
+def test_importorskip_local(monkeypatch):
     """Test ``importorskip`` run on local machine with non-existent module, which should skip."""
+    monkeypatch.delenv("ARVIZ_CI_MACHINE", raising=False)
     with pytest.raises(Skipped):
         importorskip("non-existent-function")
 
