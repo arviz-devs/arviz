@@ -384,13 +384,13 @@ def hpd(
 
     .. ipython::
 
-        In [1]: az.hpd(data, **{"input_core_dims": [["chain"]]})
+        In [1]: az.hpd(data, input_core_dims = [["chain"]])
 
     We can also calculate the hpd over a particular selection over all groups:
 
     .. ipython::
 
-        In [1]: az.hpd(data, sel={"chain":[0, 1, 3]}, **{"input_core_dims": [["draw"]]})
+        In [1]: az.hpd(data, sel={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
 
     """
     if credible_interval is None:

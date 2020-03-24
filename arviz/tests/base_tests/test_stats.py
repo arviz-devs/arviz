@@ -65,7 +65,7 @@ def test_hpd_idata(centered_eight):
     assert isinstance(result, Dataset)
     assert result.dims == {"school": 8, "hpd": 2}
 
-    result = hpd(data, **{"input_core_dims": [["chain"]]})
+    result = hpd(data, input_core_dims=[["chain"]])
     assert isinstance(result, Dataset)
     assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
 
@@ -89,7 +89,7 @@ def test_hpd_idata_group(centered_eight):
 
 def test_hpd_sel(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, sel={"chain":[0, 1, 3]}, **{"input_core_dims": [["draw"]]})
+    result = hpd(data, sel={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
     assert_array_equal(result.coords["chain"], [0, 1, 3])
 
 
