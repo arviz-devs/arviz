@@ -15,7 +15,7 @@ ax = az.plot_pair(
     kind="hexbin",
     figsize=(8, 8),
     diagonal=True,
-    marginal_kwargs={'plot_kwargs' : {'line_width' : 3, 'line_color' : 'black'}},
-    hexbin_kwargs={'size' : 1.5},
+    marginal_kwargs={"plot_kwargs": {"line_width": 3, "line_color": "black"}},
+    hexbin_kwargs={"size": 1.5},
     backend="bokeh",
 )
