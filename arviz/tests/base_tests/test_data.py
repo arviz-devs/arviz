@@ -882,7 +882,7 @@ class TestDataArrayToDataset:
         dataset = convert_to_dataset(xr.DataArray(np.random.randn(1, size),
                                                   name="plot", dims=('chain', 'draw')))
         assert len(dataset.data_vars) == 1
-        assert dataset.variables.get("plot") is not None
+        assert "plot" in dataset.data_vars
         assert dataset.chain.shape == (1, )
         assert dataset.draw.shape == (size, )
 
