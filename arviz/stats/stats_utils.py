@@ -129,9 +129,16 @@ def make_ufunc(
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
                 msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
                 raise TypeError(msg)
+        func_out = np.empty(out_shape)
         for idx in np.ndindex(out.shape[:n_dims_out]):
             arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
-            out[idx] = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))[index]
+            ret = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))
+            if ret.shape[0] != out_shape[0]:
+                func_out[:] = np.NaN
+                func_out[:ret.shape[0], :] = ret
+            else:
+                func_out = ret
+            out[idx] = np.asarray(func_out)[index]
         return out
 
     def _multi_ufunc(*args, out=None, out_shape=None, **kwargs):

@@ -399,24 +399,25 @@ def hpd(
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
-    if multimodal:
-        return _hpd_multimodal(ary, credible_interval, skipna)
-
     func_kwargs = {
         "credible_interval": credible_interval,
-        "circular": circular,
         "skipna": skipna,
-        "out_shape": (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hpd"]])
+    kwargs.setdefault("output_core_dims", [["hpd", "hpd2"] if multimodal else ["hpd"]])
+    if not multimodal:
+        func_kwargs["circular"] = circular
+
+    func = _hpd_multimodal if multimodal else _hpd
 
     if isinstance(ary, np.ndarray):
         if len(ary.shape) == 1:
-            return _hpd(ary, credible_interval, circular, skipna)
+            return func(ary, **func_kwargs)
+        func_kwargs["out_shape"] = (10, 2,) if multimodal else (2,)
         ary = convert_to_dataset(ary)
         kwargs.setdefault("input_core_dims", [["chain"]])
-        return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs).x.values
+        return _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).x.values
 
+    func_kwargs["out_shape"] = (10, 2,) if multimodal else (2,)
     ary = convert_to_dataset(ary, group=group)
     if sel is not None:
         ary = ary.sel(**sel)
@@ -424,7 +425,7 @@ def hpd(
 
     ary = ary[var_names] if var_names else ary
 
-    return _wrap_xarray_ufunc(_hpd, ary, func_kwargs=func_kwargs, **kwargs)
+    return _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
 
 
 def _hpd(ary, credible_interval, circular, skipna):
