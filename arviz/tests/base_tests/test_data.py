@@ -892,9 +892,9 @@ class TestDataArrayToDataset:
         dataset = convert_to_dataset(
             xr.DataArray(np.random.randn(*shape),
             dims=('chain', 'draw', 'dim_0', 'dim_1', 'dim_2')))
-        assert len(dataset.data_vars) == 1
         var_name = list(dataset.data_vars)[0]
 
+        assert len(dataset.data_vars) == 1
         assert dataset.chain.shape == shape[:1]
         assert dataset.draw.shape == shape[1:2]
         assert dataset[var_name].shape == shape
@@ -904,10 +904,10 @@ class TestDataArrayToDataset:
         inference_data = convert_to_inference_data(
             xr.DataArray(np.random.randn(*shape),
             dims=('chain', 'draw', 'dim_0', 'dim_1', 'dim_2')), group="prior")
-        assert hasattr(inference_data, "prior")
-        assert len(inference_data.prior.data_vars) == 1
         var_name = list(inference_data.prior.data_vars)[0]
 
+        assert hasattr(inference_data, "prior")
+        assert len(inference_data.prior.data_vars) == 1
         assert inference_data.prior.chain.shape == shape[:1]
         assert inference_data.prior.draw.shape == shape[1:2]
         assert inference_data.prior[var_name].shape == shape
