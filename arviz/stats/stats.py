@@ -418,9 +418,9 @@ def hpd(
     if isinstance(ary, np.ndarray):
         if len(ary.shape) == 1:
             func_kwargs.pop("out_shape")
-            out_func = func(ary, **func_kwargs)
-            out = out_func[~np.isnan(out_func)]
-            return out.reshape(out.shape[0] // 2, 2) if multimodal else out_func
+            hpd_data = func(ary, **func_kwargs)
+            out = hpd_data[~np.isnan(hpd_data)]
+            return out.reshape(out.shape[0] // 2, 2) if multimodal else hpd_data
         ary = convert_to_dataset(ary)
         kwargs.setdefault("input_core_dims", [["chain"]])
         res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
@@ -432,8 +432,8 @@ def hpd(
     var_names = _var_names(var_names, ary)
     ary = ary[var_names] if var_names else ary
 
-    res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
-    return res.dropna("mode", how="all") if multimodal else res
+    hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    return hpd_data.dropna("mode", how="all") if multimodal else hpd_data
 
 
 def _hpd(ary, credible_interval, circular, skipna):
