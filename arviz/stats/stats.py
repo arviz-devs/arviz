@@ -12,7 +12,7 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..plots.plot_utils import _fast_kde, get_bins
+from ..plots.plot_utils import _fast_kde, get_bins, get_coords
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
@@ -313,7 +313,8 @@ def hpd(
     skipna=False,
     group="posterior",
     var_names=None,
-    sel=None,
+    coords=None,
+    max_modes=10,
     **kwargs
 ):
     """
@@ -343,8 +344,10 @@ def hpd(
          Defaults to 'posterior'
     var_names : list, optional
         Names of variables to include in the hpd report
-    sel: dict, optional
-        To calculate hpd over selection on all groups.
+    coords: mapping, optional
+        Specifies the subset over to calculate hpd.
+    max_modes: int, optional
+        Specifies the maximume number of modes for multimodal case.
     kwargs : dict, optional
         Additional keywords passed to `wrap_xarray_ufunc`.
         See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
@@ -390,7 +393,7 @@ def hpd(
 
     .. ipython::
 
-        In [1]: az.hpd(data, sel={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
+        In [1]: az.hpd(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
 
     """
     if credible_interval is None:
@@ -402,30 +405,35 @@ def hpd(
     func_kwargs = {
         "credible_interval": credible_interval,
         "skipna": skipna,
+        "out_shape": (max_modes, 2,) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hpd", "hpd2"] if multimodal else ["hpd"]])
+    kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
     if not multimodal:
         func_kwargs["circular"] = circular
+    if multimodal:
+        func_kwargs["max_modes"] = max_modes
 
     func = _hpd_multimodal if multimodal else _hpd
 
     if isinstance(ary, np.ndarray):
         if len(ary.shape) == 1:
-            return func(ary, **func_kwargs)
-        func_kwargs["out_shape"] = (10, 2,) if multimodal else (2,)
+            func_kwargs.pop("out_shape")
+            out_func = func(ary, **func_kwargs)
+            out = out_func[~np.isnan(out_func)]
+            return out.reshape(out.shape[0] // 2, 2) if multimodal else out_func
         ary = convert_to_dataset(ary)
         kwargs.setdefault("input_core_dims", [["chain"]])
-        return _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).x.values
+        res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+        return res.dropna("mode", how="all").x.values if multimodal else res.x.values
 
-    func_kwargs["out_shape"] = (10, 2,) if multimodal else (2,)
     ary = convert_to_dataset(ary, group=group)
-    if sel is not None:
-        ary = ary.sel(**sel)
+    if coords is not None:
+        ary = get_coords(ary, coords)
     var_names = _var_names(var_names, ary)
-
     ary = ary[var_names] if var_names else ary
 
-    return _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    return res.dropna("mode", how="all") if multimodal else res
 
 
 def _hpd(ary, credible_interval, circular, skipna):
@@ -465,7 +473,7 @@ def _hpd(ary, credible_interval, circular, skipna):
     return hpd_intervals
 
 
-def _hpd_multimodal(ary, credible_interval, skipna):
+def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
     """Compute hpd if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
@@ -489,12 +497,17 @@ def _hpd_multimodal(ary, credible_interval, skipna):
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    hpd_intervals = []
-    for interval in intervals_splitted:
+    hpd_intervals = np.full((max_modes, 2,), np.nan,)
+    for i, interval in enumerate(intervals_splitted):
+        if i == max_modes:
+            warnings.warn(
+                "found more modes than {0}, returning only the first {0} modes", max_modes
+            )
+            break
         if interval.size == 0:
-            hpd_intervals.append((bins[0], bins[0]))
+            hpd_intervals[i] = np.asarray([bins[0], bins[0]])
         else:
-            hpd_intervals.append((interval[0], interval[-1]))
+            hpd_intervals[i] = np.asarray([interval[0], interval[-1]])
 
     return np.array(hpd_intervals)
 

@@ -87,9 +87,9 @@ def test_hpd_idata_group(centered_eight):
     assert range_posterior < range_prior
 
 
-def test_hpd_sel(centered_eight):
+def test_hpd_coords(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, sel={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
+    result = hpd(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
     assert_array_equal(result.coords["chain"], [0, 1, 3])
 
 
