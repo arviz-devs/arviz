@@ -69,7 +69,9 @@ class TestDataNumPyro:
         )
 
     def test_inference_data(self, data, eight_schools_params, predictions_data, predictions_params):
-        inference_data = self.get_inference_data(data, eight_schools_params, predictions_data, predictions_params)
+        inference_data = self.get_inference_data(
+            data, eight_schools_params, predictions_data, predictions_params
+        )
         test_dict = {
             "posterior": ["mu", "tau", "eta"],
             "sample_stats": ["diverging", "tree_size", "depth"],
