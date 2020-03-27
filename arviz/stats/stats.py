@@ -410,7 +410,7 @@ def hpd(
     kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
     if not multimodal:
         func_kwargs["circular"] = circular
-    if multimodal:
+    else:
         func_kwargs["max_modes"] = max_modes
 
     func = _hpd_multimodal if multimodal else _hpd
@@ -419,8 +419,8 @@ def hpd(
         if len(ary.shape) == 1:
             func_kwargs.pop("out_shape")
             hpd_data = func(ary, **func_kwargs)
-            out = hpd_data[~np.isnan(hpd_data)]
-            return out.reshape(out.shape[0] // 2, 2) if multimodal else hpd_data
+            return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
+
         ary = convert_to_dataset(ary)
         kwargs.setdefault("input_core_dims", [["chain"]])
         res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
