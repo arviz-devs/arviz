@@ -418,7 +418,7 @@ def hpd(
     if isinstance(ary, np.ndarray):
         if len(ary.shape) == 1:
             func_kwargs.pop("out_shape")
-            hpd_data = func(ary, **func_kwargs)
+            hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
             return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
 
         ary = convert_to_dataset(ary)
