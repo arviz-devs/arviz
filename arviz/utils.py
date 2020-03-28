@@ -344,9 +344,12 @@ def flatten_inference_data_to_dict(
     var_names : str or list of str, optional
         Variables to be processed, if None all variables are processed.
     groups : str or list of str, optional
-        Select groups for CDS. Default groups are {"posterior_groups", "prior_groups"}
+        Select groups for CDS. Default groups are
+        {"posterior_groups", "prior_groups", "posterior_groups_warmup"}
             - posterior_groups: posterior, posterior_predictive, sample_stats
             - prior_groups: prior, prior_predictive, sample_stats_prior
+            - posterior_groups_warmup: _warmup_posterior, _warmup_posterior_predictive,
+                                       _warmup_sample_stats
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
     dimension : str, or list of str, optional
@@ -393,8 +396,15 @@ def flatten_inference_data_to_dict(
             groups = ["posterior", "posterior_predictive", "sample_stats"]
         elif groups.lower() == "prior_groups":
             groups = ["prior", "prior_predictive", "sample_stats_prior"]
+        elif groups.lower() == "posterior_groups_warmup":
+            groups = ["_warmup_posterior", "_warmup_posterior_predictive", "_warmup_sample_stats"]
         else:
-            raise TypeError("Valid predefined groups are {posterior_groups, prior_groups}")
+            raise TypeError(
+                (
+                    "Valid predefined groups are "
+                    "{posterior_groups, prior_groups, posterior_groups_warmup}"
+                )
+            )
 
     if dimensions is None:
         dimensions = "chain", "draw"

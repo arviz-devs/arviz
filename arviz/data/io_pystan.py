@@ -2,12 +2,14 @@
 """PyStan-specific conversion code."""
 from collections import OrderedDict
 import re
+import warnings
 
 import numpy as np
 import xarray as xr
 
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+from ..rcparams import rcParams
 
 
 class PyStanConverter:
@@ -27,7 +29,7 @@ class PyStanConverter:
         log_likelihood=None,
         coords=None,
         dims=None,
-        save_warmup=False,
+        save_warmup=None,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -40,7 +42,7 @@ class PyStanConverter:
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
-        self.save_warmup = save_warmup
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         import pystan  # pylint: disable=import-error
 
@@ -167,28 +169,20 @@ class PyStanConverter:
 
         ignore = prior_predictive + ["lp__"]
 
-        data, data_warmup = get_draws(prior, ignore=ignore, warmup=self.save_warmup)
-        return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
-        )
+        data, _ = get_draws(prior, ignore=ignore, warmup=False)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats_prior from prior."""
         prior = self.prior
-        data, data_warmup = get_sample_stats(prior, warmup=self.save_warmup)
+        data, _ = get_sample_stats(prior, warmup=False)
 
         # lp__
-        stat_lp, stat_lp_warmup = get_draws(prior, variables="lp__", warmup=self.save_warmup)
+        stat_lp, _ = get_draws(prior, variables="lp__", warmup=False)
         data["lp"] = stat_lp["lp__"]
-        if stat_lp_warmup:
-            data_warmup["lp"] = stat_lp_warmup["lp__"]
 
-        return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
-        )
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("prior")
     @requires("prior_predictive")
@@ -196,23 +190,20 @@ class PyStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior = self.prior
         prior_predictive = self.prior_predictive
-        data, data_warmup = get_draws(prior, variables=prior_predictive, warmup=self.save_warmup)
-        return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
-        )
+        data, _ = get_draws(prior, variables=prior_predictive, warmup=False)
+        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
-    @requires(["observed_data", "constant_data"])
-    def observed_and_constant_data_to_xarray(self):
-        """Convert observed and constant data to xarray."""
+    @requires(["observed_data", "constant_data", "predictions_constant_data"])
+    def data_to_xarray(self):
+        """Convert observed, constant data and predictions constant data to xarray."""
         posterior = self.posterior
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
         obs_const_dict = {}
-        for group_name in ("observed_data", "constant_data"):
+        for group_name in ("observed_data", "constant_data", "predictions_constant_data"):
             names = getattr(self, group_name)
             if names is None:
                 continue
@@ -230,27 +221,6 @@ class PyStanConverter:
             )
         return obs_const_dict
 
-    @requires("posterior")
-    @requires("predictions_constant_data")
-    def predictions_constant_data_to_xarray(self):
-        """Convert predictions constant data to xarray."""
-        posterior = self.posterior
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
-        names = self.predictions_constant_data
-        names = [names] if isinstance(names, str) else names
-        data = OrderedDict()
-        for key in names:
-            vals = np.atleast_1d(posterior.data[key])
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=data, attrs=make_attrs(library=self.pystan))
-
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -258,8 +228,7 @@ class PyStanConverter:
         the `posterior` and `sample_stats` can not be extracted), then the InferenceData
         will not have those groups.
         """
-        obs_const_dict = self.observed_and_constant_data_to_xarray()
-        predictions_const_data = self.predictions_constant_data_to_xarray()
+        data_dict = self.data_to_xarray()
         return InferenceData(
             save_warmup=self.save_warmup,
             **{
@@ -271,12 +240,7 @@ class PyStanConverter:
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
-                **({} if obs_const_dict is None else obs_const_dict),
-                **(
-                    {}
-                    if predictions_const_data is None
-                    else {"predictions_constant_data": predictions_const_data}
-                ),
+                **({} if data_dict is None else data_dict),
             },
         )
 
@@ -513,7 +477,7 @@ class PyStan3Converter:
         )
 
 
-def get_draws(fit, variables=None, ignore=None, warmup=True):
+def get_draws(fit, variables=None, ignore=None, warmup=False):
     """Extract draws from PyStan fit."""
     if ignore is None:
         ignore = []
@@ -767,7 +731,7 @@ def from_pystan(
     dims=None,
     posterior_model=None,
     prior_model=None,
-    save_warmup=False,
+    save_warmup=None,
 ):
     """Convert PyStan data into an InferenceData object.
 
@@ -811,7 +775,8 @@ def from_pystan(
     prior_model : stan.model.Model
         PyStan3 specific model object. Needed for automatic dtype parsing.
     save_warmup : bool
-        Save warmup iterations to InferenceData.warmup InferenceData object.
+        Save warmup iterations InferenceData object. If not defined, use default
+        defined by the rcParams.
 
     Returns
     -------
@@ -820,6 +785,10 @@ def from_pystan(
     check_posterior = (posterior is not None) and (type(posterior).__module__ == "stan.fit")
     check_prior = (prior is not None) and (type(prior).__module__ == "stan.fit")
     if check_posterior or check_prior:
+        if save_warmup:
+            warnings.warn(
+                "save_warmup is not currently supported for PyStan3", UserWarning,
+            )
         return PyStan3Converter(
             posterior=posterior,
             posterior_model=posterior_model,

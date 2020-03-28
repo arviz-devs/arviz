@@ -16,6 +16,9 @@ class InferenceData:
     posterior_predictive: Optional[xr.Dataset]
     predictions: Optional[xr.Dataset]
     predictions_constant_data: Optional[xr.Dataset]
+    _warmup_posterior: Optional[xr.Dataset]
+    _warmup_posterior_predictive: Optional[xr.Dataset]
+    _warmup_predictions: Optional[xr.Dataset]
     def __init__(self, **kwargs): ...
     def __repr__(self) -> str: ...
     def __delattr__(self, group: str) -> None: ...

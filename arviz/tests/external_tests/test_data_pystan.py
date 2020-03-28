@@ -105,6 +105,7 @@ class TestDataPyStan:
             dims=None,
             posterior_model=data.model,
             prior_model=data.model,
+            save_warmup=True if pystan_version() == 2 else False,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
@@ -162,6 +163,10 @@ class TestDataPyStan:
             "prior": ["theta"],
             "sample_stats": ["diverging", "lp"],
         }
+        if pystan_version() == 2:
+            test_dict.update(
+                {"_warmup_posterior": ["theta"], "_warmup_sample_stats": ["diverging", "lp"]}
+            )
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails
 
