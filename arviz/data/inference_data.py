@@ -98,6 +98,7 @@ class InferenceData:
                 )
         for key in key_list:
             dataset = kwargs[key]
+            dataset_warmup = None
             if dataset is None:
                 continue
             elif isinstance(dataset, (list, tuple)):
@@ -107,12 +108,15 @@ class InferenceData:
                     "Arguments to InferenceData must be xarray Datasets "
                     "(argument '{}' was type '{}')".format(key, type(dataset))
                 )
-            setattr(self, key, dataset)
-            self._groups.append(key)
-            if save_warmup or key.startswith("_warmup_"):
-                if not key.startswith("_warmup_"):
-                    key = "_warmup_{}".format(key)
-                setattr(self, key)
+            if not key.startswith("_warmup_"):
+                setattr(self, key, dataset)
+                self._groups.append(key)
+            elif key.startswith("_warmup_"):
+                setattr(self, key, dataset)
+                self._groups_warmup.append(key)
+            if save_warmup and dataset_warmup is not None:
+                key = "_warmup_{}".format(key)
+                setattr(self, key, dataset_warmup)
                 self._groups_warmup.append(key)
 
     def __repr__(self):
