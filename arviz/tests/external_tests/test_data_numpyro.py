@@ -143,7 +143,11 @@ class TestDataNumPyro:
 
     def test_inference_data_only_posterior(self, data):
         idata = from_numpyro(data.obj)
-        test_dict = {"posterior": ["mu", "tau", "eta"], "sample_stats": ["diverging"]}
+        test_dict = {
+            "posterior": ["mu", "tau", "eta"],
+            "sample_stats": ["diverging"],
+            "log_likelihood": ["obs"],
+        }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
 
