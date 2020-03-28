@@ -88,6 +88,7 @@ class InferenceData:
         """
         self._groups = []
         self._groups_warmup = []
+        save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP if key in kwargs]
         for key in kwargs:
             if key not in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP:
@@ -95,7 +96,6 @@ class InferenceData:
                 warnings.warn(
                     "{} group is not defined in the InferenceData scheme".format(key), UserWarning
                 )
-        save_warmup = kwargs.pop("save_warmup", False)
         for key in key_list:
             dataset = kwargs[key]
             if dataset is None:
