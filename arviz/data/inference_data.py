@@ -111,7 +111,7 @@ class InferenceData:
             self._groups.append(key)
             if save_warmup or key.startswith("_warmup_"):
                 if not key.startswith("_warmup_"):
-                    key = "_warmup_{key}".format(key)
+                    key = "_warmup_{}".format(key)
                 setattr(self, key)
                 self._groups_warmup.append(key)
 
