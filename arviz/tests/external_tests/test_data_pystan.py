@@ -208,7 +208,7 @@ class TestDataPyStan:
     def test_get_draws(self, data):
         fit = data.obj
         if pystan_version() == 2:
-            draws = get_draws(fit, variables=["theta", "theta"])
+            draws, _ = get_draws(fit, variables=["theta", "theta"])
             assert draws.get("theta") is not None
         else:
             draws = get_draws_stan3(fit, variables=["theta", "theta"])
