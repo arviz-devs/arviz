@@ -129,65 +129,41 @@ class DictConverter:
 
         return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
 
-    @requires("observed_data")
-    def observed_data_to_xarray(self):
-        """Convert observed_data to xarray."""
-        data = self.observed_data
+    def data_to_xarray(self, dct, group):
+        """Convert data to xarray."""
+        data = dct
         if not isinstance(data, dict):
-            raise TypeError("DictConverter.observed_data is not a dictionary")
+            raise TypeError("DictConverter.{} is not a dictionary".format(group))
         if self.dims is None:
             dims = {}
         else:
             dims = self.dims
-        observed_data = dict()
+        new_data = dict()
         for key, vals in data.items():
             vals = utils.one_de(vals)
             val_dims = dims.get(key)
             val_dims, coords = generate_dims_coords(
                 vals.shape, key, dims=val_dims, coords=self.coords
             )
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=None))
+            new_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=new_data, attrs=make_attrs(library=None))
+
+    @requires("observed_data")
+    def observed_data_to_xarray(self):
+        """Convert observed_data to xarray."""
+        return self.data_to_xarray(self.observed_data, group="observed_data")
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
         """Convert constant_data to xarray."""
-        data = self.constant_data
-        if not isinstance(data, dict):
-            raise TypeError("DictConverter.constant_data is not a dictionary")
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
-        constant_data = dict()
-        for key, vals in data.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=None))
+        return self.data_to_xarray(self.constant_data, group="constant_data")
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
-        data = self.predictions_constant_data
-        if not isinstance(data, dict):
-            raise TypeError("DictConverter.predictions_constant_data is not a dictionary")
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
-        predictions_constant_data = dict()
-        for key, vals in data.items():
-            vals = utils.one_de(vals)
-            val_dims = dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=predictions_constant_data, attrs=make_attrs(library=None))
+        return self.data_to_xarray(
+            self.predictions_constant_data, group="predictions_constant_data"
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
