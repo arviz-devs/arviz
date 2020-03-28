@@ -105,7 +105,7 @@ class TestDataPyStan:
             dims=None,
             posterior_model=data.model,
             prior_model=data.model,
-            save_warmup=True if pystan_version() == 2 else False,
+            save_warmup=pystan_version() == 2,
         )
 
     def test_sampler_stats(self, data, eight_schools_params):
