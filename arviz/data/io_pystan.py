@@ -27,7 +27,7 @@ class PyStanConverter:
         log_likelihood=None,
         coords=None,
         dims=None,
-        save_warmup=True,
+        save_warmup=False,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -767,7 +767,7 @@ def from_pystan(
     dims=None,
     posterior_model=None,
     prior_model=None,
-    save_warmup=True,
+    save_warmup=False,
 ):
     """Convert PyStan data into an InferenceData object.
 
