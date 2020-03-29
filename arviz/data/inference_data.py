@@ -36,6 +36,8 @@ SUPPORTED_GROUPS_WARMUP = [
     "_warmup_predictions",
 ]
 
+SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
+
 
 class InferenceData:
     """Container for inference data storage using xarray.
@@ -89,9 +91,9 @@ class InferenceData:
         self._groups = []
         self._groups_warmup = []
         save_warmup = kwargs.pop("save_warmup", False)
-        key_list = [key for key in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP if key in kwargs]
+        key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
-            if key not in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP:
+            if key not in SUPPORTED_GROUPS_ALL:
                 key_list.append(key)
                 warnings.warn(
                     "{} group is not defined in the InferenceData scheme".format(key), UserWarning
@@ -135,6 +137,10 @@ class InferenceData:
         elif group in self._groups_warmup:
             self._groups_warmup.remove(group)
         object.__delattr__(self, group)
+
+    @property
+    def _groups_all():
+        return self._groups + self._groups_warmup
 
     @staticmethod
     def from_netcdf(filename):
@@ -185,11 +191,11 @@ class InferenceData:
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
-        if self._groups or self._groups_warmup:  # check's whether a group is present or not.
+        if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
-                groups = self._groups + self._groups_warmup
+                groups = self._groups_all
             else:
-                groups = [group for group in self._groups + self._groups_warmup if group in groups]
+                groups = [group for group in self._groups_all if group in groups]
 
             for group in groups:
                 data = getattr(self, group)
@@ -208,7 +214,7 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, inplace=False, chain_prior=False, **kwargs):
+    def sel(self, inplace=False, chain_prior=False, warmup=False, **kwargs):
         """Perform an xarray selection on all groups.
 
         Loops over all groups to perform Dataset.sel(key=item)
@@ -225,9 +231,11 @@ class InferenceData:
             otherwise, return the modified copy.
         chain_prior: bool, optional
             If ``False``, do not select prior related groups using ``chain`` dim.
-            Otherwise, use selection on ``chain`` if present
+            Otherwise, use selection on ``chain`` if present.
+        warmup: bool, optional
+            If ``False``, do not select warmup groups.
         **kwargs : mapping
-            It must be accepted by Dataset.sel()
+            It must be accepted by Dataset.sel().
 
         Returns
         -------
@@ -260,14 +268,7 @@ class InferenceData:
 
         """
         out = self if inplace else deepcopy(self)
-        for group in self._groups:
-            dataset = getattr(self, group)
-            valid_keys = set(kwargs.keys()).intersection(dataset.dims)
-            if not chain_prior and "prior" in group:
-                valid_keys -= {"chain"}
-            dataset = dataset.sel(**{key: kwargs[key] for key in valid_keys})
-            setattr(out, group, dataset)
-        for group in self._groups_warmup:
+        for group in self._groups_all if warmup else self._groups:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             if not chain_prior and "prior" in group:
@@ -397,12 +398,12 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     if dim is None:
         arg0 = args[0]
-        arg0_groups = ccopy(arg0._groups + arg0._groups_warmup)
+        arg0_groups = ccopy(arg0._groups_all)
         args_groups = dict()
         # check if groups are independent
         # Concat over unique groups
         for arg in args[1:]:
-            for group in arg._groups + arg._groups_warmup:
+            for group in arg._groups_all:
                 if group in args_groups or group in arg0_groups:
                     msg = (
                         "Concatenating overlapping groups is not supported unless `dim` is defined."
@@ -419,13 +420,9 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 group_data = getattr(arg0, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
-        other_groups = [
-            group
-            for group in args_groups
-            if group not in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
-        ]
+        other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
 
-        for group in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP + other_groups:
+        for group in SUPPORTED_GROUPS_ALL + other_groups:
             if group not in args_groups:
                 continue
             if inplace:
@@ -438,9 +435,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 inference_data_dict[group] = args_groups[group]
         if inplace:
             other_groups = [
-                group
-                for group in arg0_groups
-                if group not in SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
+                group for group in arg0_groups if group not in SUPPORTED_GROUPS_ALL
             ] + other_groups
             sorted_groups = [
                 group for group in SUPPORTED_GROUPS + other_groups if group in arg0._groups
@@ -454,15 +449,15 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
             setattr(arg0, "_groups_warmup", sorted_groups_warmup)
     else:
         arg0 = args[0]
-        arg0_groups = arg0._groups + arg0._groups_warmup
+        arg0_groups = arg0._groups_all
         for arg in args[1:]:
             for group0 in arg0_groups:
-                if group0 not in arg._groups + arg._groups_warmup:
+                if group0 not in arg._groups_all:
                     if group0 == "observed_data":
                         continue
                     msg = "Mismatch between the groups."
                     raise TypeError(msg)
-            for group in arg._groups + arg._groups_warmup:
+            for group in arg._groups_all:
                 if group not in ["observed_data", "constant_data", "predictions_constant_data"]:
                     # assert that groups are equal
                     if group not in arg0_groups:
