@@ -139,7 +139,7 @@ class InferenceData:
         object.__delattr__(self, group)
 
     @property
-    def _groups_all():
+    def _groups_all(self):
         return self._groups + self._groups_warmup
 
     @staticmethod
