@@ -45,7 +45,7 @@ COPY $SRC_DIR/scripts/ opt/arviz/scripts
 WORKDIR /opt/arviz
 
 
-# Create conda environment. Defaults to Python 3.6
+# Create conda environment. Defaults to Python 3.7
 RUN ./scripts/create_testenv.sh
 
 
