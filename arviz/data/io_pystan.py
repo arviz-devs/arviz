@@ -577,7 +577,7 @@ def get_draws(fit, variables=None, ignore=None, warmup=False):
     return data, data_warmup
 
 
-def get_sample_stats(fit, warmup=True):
+def get_sample_stats(fit, warmup=False):
     """Extract sample stats from PyStan fit."""
     dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
