@@ -38,6 +38,9 @@ RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
 # Copy requirements and environment installation scripts
 COPY $SRC_DIR/requirements.txt  opt/arviz/
 COPY $SRC_DIR/requirements-dev.txt  opt/arviz/
+COPY $SRC_DIR/requirements-docs.txt  opt/arviz/
+COPY $SRC_DIR/requirements-external.txt  opt/arviz/
+COPY $SRC_DIR/requirements-optional.txt  opt/arviz/
 COPY $SRC_DIR/scripts/ opt/arviz/scripts
 WORKDIR /opt/arviz
 

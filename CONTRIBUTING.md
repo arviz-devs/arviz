@@ -31,7 +31,7 @@ to ensure that any new contribution does not strongly overlap with existing func
 ## Steps before starting work
 Before starting a work on a pull request double check that no one else is working on the ticket in both issue tickets and pull requests.
 
-### If an issue ticket exists 
+### If an issue ticket exists
 If an issue exists check the ticket to ensure no one else has started work. If first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
 
 ### If an issue ticket doesn't exist
@@ -122,7 +122,7 @@ install these extra dependencies, Docker can be used. See: [Building documentati
 
    ```bash
    $ git add modified_files
-   $ git commit
+   $ git commit -m "commit message here"
    ```
 
    to record your changes locally.
@@ -171,13 +171,13 @@ tools:
 * Save plots as part of tests. Plots will save to a directory named test_images by default
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save
+  $ pytest arviz/tests/base_tests/<name of test>.py --save
   ```
 
 * Optionally save plots to a user named directory. This is useful for comparing changes across branches
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save user_defined_directory
+  $ pytest arviz/tests/base_tests/<name of test>.py --save user_defined_directory
   ```
 
 
@@ -188,7 +188,7 @@ tools:
   $ pytest --cov=arviz --cov-report=html arviz/tests/
   ```
 
-* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6
+* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6+
 
   ```bash
   $ pip install black

@@ -95,7 +95,10 @@ fi
 #  Install editable using the setup.py
 pip install  --no-cache-dir -r requirements.txt
 pip install --no-cache-dir -r requirements-dev.txt
+pip install --no-cache-dir -r requirements-docs.txt
+pip install --no-cache-dir -r requirements-external.txt
+pip install --no-cache-dir -r requirements-optional.txt
 
 if [ "$NAME" = "SPHINX" ]; then
-    conda install -y -c conda-forge selenium phantomjs
+    conda install -y geckodriver firefox --channel conda-forge
 fi
