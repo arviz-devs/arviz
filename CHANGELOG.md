@@ -3,7 +3,11 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
+* Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
+* Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
+* Allow xarray.Dataarray input for plots.(#1120)
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
