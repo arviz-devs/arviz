@@ -24,7 +24,7 @@ pystan_installed = (importlib.util.find_spec("pystan") is not None) or (
     importlib.util.find_spec("stan") is not None
 )
 pytestmark = pytest.mark.skipif(
-    not pystan_installed & (not running_on_ci()),
+    not (pystan_installed | running_on_ci()),
     reason="test requires pystan/pystan3 which is not installed",
 )
 
