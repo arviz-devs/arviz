@@ -415,16 +415,14 @@ def hpd(
 
     func = _hpd_multimodal if multimodal else _hpd
 
-    if isinstance(ary, np.ndarray):
-        if len(ary.shape) == 1:
-            func_kwargs.pop("out_shape")
-            hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
-            return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
+    isarray = isinstance(ary, np.ndarray)
+    if isarray and ary.ndim <= 1:
+        func_kwargs.pop("out_shape")
+        hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
+        return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
 
-        ary = convert_to_dataset(ary)
+    if isarray:
         kwargs.setdefault("input_core_dims", [["chain"]])
-        res = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
-        return res.dropna("mode", how="all").x.values if multimodal else res.x.values
 
     ary = convert_to_dataset(ary, group=group)
     if coords is not None:
@@ -433,7 +431,8 @@ def hpd(
     ary = ary[var_names] if var_names else ary
 
     hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
-    return hpd_data.dropna("mode", how="all") if multimodal else hpd_data
+    hpd_data = hpd_data.dropna("mode", how="all") if multimodal else hpd_data
+    return hpd_data.x.values if isarray else hpd_data
 
 
 def _hpd(ary, credible_interval, circular, skipna):
