@@ -591,15 +591,17 @@ def test_precompile_models(eight_schools_params, draws, chains):
 
 
 def running_on_ci() -> bool:
-    """Returns True if running on CI machine"""
+    """Return True if running on CI machine."""
     return os.environ.get("ARVIZ_CI_MACHINE") is not None
 
 
 def importorskip(
     modname: str, minversion: Optional[str] = None, reason: Optional[str] = None
 ) -> Any:
-    """Imports and returns the requested module ``modname``. Doesn't allow skips on CI machine
-        borrowed and modified from ``pytest.importorskip``
+    """Import and return the requested module ``modname``.
+
+        Doesn't allow skips on CI machine.
+        Borrowed and modified from ``pytest.importorskip``.
     :param str modname: the name of the module to import
     :param str minversion: if given, the imported module's ``__version__``
         attribute must be at least this minimal version, otherwise the test is
