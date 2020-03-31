@@ -2,16 +2,18 @@
 """Test helper functions."""
 import gzip
 import importlib
+import logging
 import os
 import pickle
 import sys
-import logging
-from typing import Dict, List, Tuple, Union
-import pytest
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
+import pytest
+from _pytest.outcomes import Skipped
+from packaging.version import Version
 
-from ..data import from_dict, InferenceData
-
+from ..data import InferenceData, from_dict
 
 _log = logging.getLogger(__name__)
 
@@ -571,11 +573,70 @@ def pystan_version():
     """
     try:
         import pystan  # pylint: disable=import-error
+
+        version = int(pystan.__version__[0])
     except ImportError:
-        import stan as pystan  # pylint: disable=import-error
-    return int(pystan.__version__[0])
+        try:
+            import stan as pystan  # pylint: disable=import-error
+
+            version = int(pystan.__version__[0])
+        except ImportError:
+            version = None
+    return version
 
 
 def test_precompile_models(eight_schools_params, draws, chains):
     """Precompile model files."""
     load_cached_models(eight_schools_params, draws, chains)
+
+
+def running_on_ci() -> bool:
+    """Return True if running on CI machine."""
+    return os.environ.get("ARVIZ_CI_MACHINE") is not None
+
+
+def importorskip(
+    modname: str, minversion: Optional[str] = None, reason: Optional[str] = None
+) -> Any:
+    """Import and return the requested module ``modname``.
+
+        Doesn't allow skips on CI machine.
+        Borrowed and modified from ``pytest.importorskip``.
+    :param str modname: the name of the module to import
+    :param str minversion: if given, the imported module's ``__version__``
+        attribute must be at least this minimal version, otherwise the test is
+        still skipped.
+    :param str reason: if given, this reason is shown as the message when the
+        module cannot be imported.
+    :returns: The imported module. This should be assigned to its canonical
+        name.
+    Example::
+        docutils = pytest.importorskip("docutils")
+    """
+    # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
+    ARVIZ_CI_MACHINE = running_on_ci()
+    if ARVIZ_CI_MACHINE:
+        import warnings
+
+        compile(modname, "", "eval")  # to catch syntaxerrors
+
+        with warnings.catch_warnings():
+            # make sure to ignore ImportWarnings that might happen because
+            # of existing directories with the same name we're trying to
+            # import but without a __init__.py file
+            warnings.simplefilter("ignore")
+            __import__(modname)
+        mod = sys.modules[modname]
+        if minversion is None:
+            return mod
+        verattr = getattr(mod, "__version__", None)
+        if minversion is not None:
+            if verattr is None or Version(verattr) < Version(minversion):
+                raise Skipped(
+                    "module %r has __version__ %r, required is: %r"
+                    % (modname, verattr, minversion),
+                    allow_module_level=True,
+                )
+        return mod
+    else:
+        return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)
