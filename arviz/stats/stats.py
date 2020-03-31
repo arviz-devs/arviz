@@ -805,7 +805,6 @@ def r2_score(y_true, y_pred):
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
 
-
     Examples
     --------
     Calculate R² for Bayesian regression models :
