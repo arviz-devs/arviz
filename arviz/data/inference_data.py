@@ -13,27 +13,26 @@ from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
     "posterior",
-    "sample_stats",
-    "log_likelihood",
     "posterior_predictive",
+    "predictions",
+    "log_likelihood",
+    "sample_stats",
+    "prior",
+    "prior_predictive",
+    "sample_stats_prior",
     "observed_data",
     "constant_data",
-    "prior",
-    "sample_stats_prior",
-    "prior_predictive",
-    "predictions",
     "predictions_constant_data",
 ]
 
+WARMUP_TAG = "_warmup_"
+
 SUPPORTED_GROUPS_WARMUP = [
-    "_warmup_posterior",
-    "_warmup_sample_stats",
-    "_warmup_log_likelihood",
-    "_warmup_posterior_predictive",
-    "_warmup_prior",
-    "_warmup_sample_stats_prior",
-    "_warmup_prior_predictive",
-    "_warmup_predictions",
+    "{}posterior".format(WARMUP_TAG),
+    "{}posterior_predictive".format(WARMUP_TAG),
+    "{}predictions".format(WARMUP_TAG),
+    "{}sample_stats".format(WARMUP_TAG),
+    "{}log_likelihood".format(WARMUP_TAG),
 ]
 
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
@@ -110,16 +109,19 @@ class InferenceData:
                     "Arguments to InferenceData must be xarray Datasets "
                     "(argument '{}' was type '{}')".format(key, type(dataset))
                 )
-            if not key.startswith("_warmup_"):
-                setattr(self, key, dataset)
-                self._groups.append(key)
-            elif key.startswith("_warmup_"):
-                setattr(self, key, dataset)
-                self._groups_warmup.append(key)
+            if not key.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, key, dataset)
+                    self._groups.append(key)
+            elif key.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, key, dataset)
+                    self._groups_warmup.append(key)
             if save_warmup and dataset_warmup is not None:
-                key = "_warmup_{}".format(key)
-                setattr(self, key, dataset_warmup)
-                self._groups_warmup.append(key)
+                if dataset_warmup:
+                    key = "{}{}".format(WARMUP_TAG, key)
+                    setattr(self, key, dataset_warmup)
+                    self._groups_warmup.append(key)
 
     def __repr__(self):
         """Make string representation of object."""
@@ -127,7 +129,7 @@ class InferenceData:
             options="\n\t> ".join(self._groups)
         )
         if self._groups_warmup:
-            msg += "warmup iterations saved."
+            msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
         return msg
 
     def __delattr__(self, group):
@@ -426,7 +428,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
             if group not in args_groups:
                 continue
             if inplace:
-                if group.startswith("_warmup_"):
+                if group.startswith(WARMUP_TAG):
                     arg0._groups_warmup.append(group)
                 else:
                     arg0._groups.append(group)
@@ -458,6 +460,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     msg = "Mismatch between the groups."
                     raise TypeError(msg)
             for group in arg._groups_all:
+                # handle data groups seperately
                 if group not in ["observed_data", "constant_data", "predictions_constant_data"]:
                     # assert that groups are equal
                     if group not in arg0_groups:
