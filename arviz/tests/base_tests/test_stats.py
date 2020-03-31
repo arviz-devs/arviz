@@ -56,7 +56,7 @@ def test_hpd_2darray():
 def test_hpd_multidimension():
     normal_sample = np.random.randn(12000, 10, 3)
     result = hpd(normal_sample)
-    assert result.shape == (10, 3, 2,)
+    assert result.shape == (3, 2,)
 
 
 def test_hpd_idata(centered_eight):

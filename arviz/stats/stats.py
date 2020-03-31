@@ -421,7 +421,7 @@ def hpd(
         hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
         return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
 
-    if isarray:
+    if isarray and ary.ndim == 2:
         kwargs.setdefault("input_core_dims", [["chain"]])
 
     ary = convert_to_dataset(ary, group=group)
