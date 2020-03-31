@@ -611,6 +611,18 @@ def psislw(log_weights, reff=1.0):
         Smoothed log weights
     kss : array
         Pareto tail indices
+
+    Examples
+    --------
+    Get Pareto smoothed importance sampling (PSIS):
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: log_likelihood = data.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+           ...: az.psislw(-log_likelihood, reff=0.8)
+
     """
     if hasattr(log_weights, "sample"):
         n_samples = len(log_weights.sample)
@@ -792,6 +804,19 @@ def r2_score(y_true, y_pred):
     Pandas Series with the following indices:
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
+
+
+    Examples
+    --------
+    Calculate R² for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: y_true=np.random.randn(10)
+           ...: y_pred=y_true+np.random.normal(0,0.5,10)
+           ...: az.r2_score(y_true,y_pred)
+
     """
     _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:
