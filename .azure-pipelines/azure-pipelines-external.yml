@@ -5,6 +5,8 @@ jobs:
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
+    - name: ARVIZ_CI_MACHINE
+      value: 1
   timeoutInMinutes: 360
   strategy:
     matrix:

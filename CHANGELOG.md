@@ -8,6 +8,7 @@
 * Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * Allow xarray.Dataarray input for plots.(#1120)
+* Skip test for optional/extra dependencies when not installed (#1113)
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
@@ -212,4 +213,3 @@
 ## v0.3.0 (2018 Dec 14)
 
 * First Beta Release
-

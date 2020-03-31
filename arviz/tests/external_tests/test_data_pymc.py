@@ -1,21 +1,24 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from sys import version_info
-from typing import Tuple, Dict
-import pytest
-
+from typing import Dict, Tuple
 
 import numpy as np
+import pytest
 from numpy import ma
-import pymc3 as pm
 
-from arviz import from_pymc3, from_pymc3_predictions, InferenceData
-from ..helpers import (  # pylint: disable=unused-import
+from arviz import from_pymc3, from_pymc3_predictions, InferenceData  # pylint: disable=wrong-import-position
+
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    importorskip,
     load_cached_models,
 )
+
+# Skip all tests if pymc3 not installed
+pm = importorskip("pymc3")
 
 
 class TestDataPyMC3:

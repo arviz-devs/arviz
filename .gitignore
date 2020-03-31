@@ -62,6 +62,7 @@ target/
 
 # IDE configs
 .idea/
+.vscode/
 
 saved_animations/
 
