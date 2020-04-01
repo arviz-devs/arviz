@@ -144,6 +144,8 @@ def test_plot_density_bad_kwargs(models):
         {"combined": True, "compact": True, "legend": True},
         {"divergences": "top", "legend": True},
         {"divergences": False},
+        {"kind": "rank_vlines"},
+        {"kind": "rank_bars"},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
     ],
@@ -160,7 +162,7 @@ def test_plot_trace_legend(compact, combined):
     axes = plot_trace(
         idata, var_names=["home", "atts_star"], compact=compact, combined=combined, legend=True
     )
-    assert axes[0, 1].get_legend()
+    assert axes[0, 0].get_legend()
     compact_legend = axes[1, 0].get_legend()
     if compact:
         assert axes.shape == (2, 2)
