@@ -1,19 +1,22 @@
 # pylint: disable=redefined-outer-name
+import importlib
+
 import numpy as np
-import xarray as xr
 import pytest
+import xarray as xr
 
 from ...data import from_dict
+from ..helpers import running_on_ci
 from ...plots.plot_utils import (
-    make_2d,
-    xarray_to_ndarray,
-    xarray_var_iter,
-    get_bins,
-    get_coords,
     filter_plotters_list,
     format_sig_figs,
+    get_bins,
+    get_coords,
     get_plotting_function,
+    make_2d,
     matplotlib_kwarg_dealiaser,
+    xarray_to_ndarray,
+    xarray_var_iter,
 )
 from ...rcparams import rc_context
 
@@ -194,6 +197,10 @@ def test_filter_plotter_list_warning():
     assert len(plotters_filtered) == 5
 
 
+@pytest.mark.skipif(
+    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    reason="test requires bokeh which is not installed",
+)
 def test_bokeh_import():
     """Tests that correct method is returned on bokeh import"""
     plot = get_plotting_function("plot_dist", "distplot", "bokeh")

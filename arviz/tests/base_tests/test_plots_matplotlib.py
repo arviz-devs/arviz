@@ -153,12 +153,8 @@ def test_plot_trace(models, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize(
-    "compact", [True, False],
-)
-@pytest.mark.parametrize(
-    "combined", [True, False],
-)
+@pytest.mark.parametrize("compact", [True, False])
+@pytest.mark.parametrize("combined", [True, False])
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
     axes = plot_trace(

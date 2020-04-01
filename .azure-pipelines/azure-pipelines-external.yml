@@ -5,6 +5,8 @@ jobs:
   variables:
     - name: NUMBA_DISABLE_JIT
       value: 1
+    - name: ARVIZ_CI_MACHINE
+      value: 1
   timeoutInMinutes: 360
   strategy:
     matrix:
@@ -117,8 +119,8 @@ jobs:
     displayName: 'pydocstyle'
 
   - script: |
-      python -m black arviz
-      python -m black examples
+      python -m black --check arviz
+      python -m black --check examples
     displayName: 'black'
 
   - task: PublishTestResults@2
