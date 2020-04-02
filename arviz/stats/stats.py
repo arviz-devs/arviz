@@ -812,9 +812,10 @@ def r2_score(y_true, y_pred):
     .. ipython::
 
         In [1]: import arviz as az
-           ...: y_true=np.random.randn(10)
-           ...: y_pred=y_true+np.random.normal(0,0.5,10)
-           ...: az.r2_score(y_true,y_pred)
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_score(y_true, y_pred)
 
     """
     _numba_flag = Numba.numba_flag
