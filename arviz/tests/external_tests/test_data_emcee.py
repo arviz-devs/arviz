@@ -3,10 +3,8 @@ import os
 import numpy as np
 import pytest
 
-import emcee  # pylint: disable=unused-import
-
-from arviz import from_emcee
-from ..helpers import (  # pylint: disable=unused-import
+from arviz import from_emcee  # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,
@@ -15,7 +13,11 @@ from ..helpers import (  # pylint: disable=unused-import
     needs_emcee3_func,
     eight_schools_params,
     load_cached_models,
+    importorskip,
 )
+
+# Skip all tests if emcee not installed
+emcee = importorskip("emcee")
 
 needs_emcee3 = needs_emcee3_func()
 

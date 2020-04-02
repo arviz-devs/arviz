@@ -1,30 +1,28 @@
 # pylint: disable=redefined-outer-name, no-member
 from copy import deepcopy
+
 import numpy as np
-from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 import pytest
+from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 from scipy.stats import linregress
-from xarray import Dataset, DataArray
+from xarray import DataArray, Dataset
 
-
-from ...data import load_arviz_data, from_dict, convert_to_inference_data, concat
+from ...data import concat, convert_to_inference_data, from_dict, load_arviz_data
+from ...rcparams import rcParams
 from ...stats import (
+    apply_test_function,
     compare,
+    ess,
     hpd,
     loo,
-    r2_score,
-    waic,
-    psislw,
-    summary,
     loo_pit,
-    ess,
-    apply_test_function,
+    psislw,
+    r2_score,
+    summary,
+    waic,
 )
 from ...stats.stats import _gpinv
-from ...utils import Numba
 from ..helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
-from ...rcparams import rcParams
-
 
 rcParams["data.load"] = "eager"
 
@@ -45,6 +43,52 @@ def test_hpd():
     normal_sample = np.random.randn(5000000)
     interval = hpd(normal_sample)
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
+
+
+def test_hpd_2darray():
+    normal_sample = np.random.randn(12000, 5)
+    result = hpd(normal_sample)
+    assert result.shape == (5, 2,)
+
+
+def test_hpd_multidimension():
+    normal_sample = np.random.randn(12000, 10, 3)
+    result = hpd(normal_sample)
+    assert result.shape == (3, 2,)
+
+
+def test_hpd_idata(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data)
+    assert isinstance(result, Dataset)
+    assert result.dims == {"school": 8, "hpd": 2}
+
+    result = hpd(data, input_core_dims=[["chain"]])
+    assert isinstance(result, Dataset)
+    assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
+
+
+def test_hpd_idata_varnames(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, var_names=["mu", "theta"])
+    assert isinstance(result, Dataset)
+    assert result.dims == {"hpd": 2, "school": 8}
+    assert list(result.data_vars.keys()) == ["mu", "theta"]
+
+
+def test_hpd_idata_group(centered_eight):
+    result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
+    result_prior = hpd(centered_eight, group="prior", var_names="mu")
+    assert result_prior.dims == {"hpd": 2}
+    range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
+    range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
+    assert range_posterior < range_prior
+
+
+def test_hpd_coords(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
+    assert_array_equal(result.coords["chain"], [0, 1, 3])
 
 
 def test_hpd_multimodal():
@@ -152,16 +196,6 @@ def test_summary_var_names(centered_eight, var_names_expected):
     var_names, expected = var_names_expected
     summary_df = summary(centered_eight, var_names=var_names)
     assert len(summary_df.index) == expected
-
-
-@pytest.mark.parametrize("include_circ", [True, False])
-def test_summary_include_circ(centered_eight, include_circ):
-    assert summary(centered_eight, include_circ=include_circ) is not None
-    state = Numba.numba_flag
-    Numba.disable_numba()
-    assert summary(centered_eight, include_circ=include_circ) is not NotImplementedError
-    Numba.enable_numba()
-    assert state == Numba.numba_flag
 
 
 METRICS_NAMES = [
@@ -630,21 +664,3 @@ def test_apply_test_function_should_overwrite_error(centered_eight):
     """Test error when overwrite=False but out_name is already a present variable."""
     with pytest.raises(ValueError, match="Should overwrite"):
         apply_test_function(centered_eight, lambda y, theta: y, out_name_data="obs")
-
-
-def test_numba_stats():
-    """Numba test for r2_score"""
-    state = Numba.numba_flag  # Store the current state of Numba
-    set_1 = np.random.randn(100, 100)
-    set_2 = np.random.randn(100, 100)
-    set_3 = np.random.rand(100)
-    set_4 = np.random.rand(100)
-    Numba.disable_numba()
-    non_numba = r2_score(set_1, set_2)
-    non_numba_one_dimensional = r2_score(set_3, set_4)
-    Numba.enable_numba()
-    with_numba = r2_score(set_1, set_2)
-    with_numba_one_dimensional = r2_score(set_3, set_4)
-    assert state == Numba.numba_flag  # Ensure that inital state = final state
-    assert np.allclose(non_numba, with_numba)
-    assert np.allclose(non_numba_one_dimensional, with_numba_one_dimensional)

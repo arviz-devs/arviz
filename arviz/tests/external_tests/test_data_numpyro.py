@@ -1,18 +1,22 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import numpy as np
 import pytest
-from jax.random import PRNGKey
-from numpyro.infer import Predictive
 
-from ...data.io_numpyro import from_numpyro
-from ..helpers import (  # pylint: disable=unused-import
+from ...data.io_numpyro import from_numpyro  # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    importorskip,
     load_cached_models,
 )
 
+# Skip all tests if jax or numpyro not installed
+jax = importorskip("jax")
+PRNGKey = jax.random.PRNGKey
+numpyro = importorskip("numpyro")
+Predictive = numpyro.infer.Predictive
 
 class TestDataNumPyro:
     @pytest.fixture(scope="class")
