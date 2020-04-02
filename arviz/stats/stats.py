@@ -612,6 +612,10 @@ def psislw(log_weights, reff=1.0):
     kss : array
         Pareto tail indices
 
+    References
+    ----------
+    * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+
     Examples
     --------
     Get Pareto smoothed importance sampling (PSIS):
