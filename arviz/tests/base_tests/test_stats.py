@@ -45,6 +45,52 @@ def test_hpd():
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
+def test_hpd_2darray():
+    normal_sample = np.random.randn(12000, 5)
+    result = hpd(normal_sample)
+    assert result.shape == (5, 2,)
+
+
+def test_hpd_multidimension():
+    normal_sample = np.random.randn(12000, 10, 3)
+    result = hpd(normal_sample)
+    assert result.shape == (3, 2,)
+
+
+def test_hpd_idata(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data)
+    assert isinstance(result, Dataset)
+    assert result.dims == {"school": 8, "hpd": 2}
+
+    result = hpd(data, input_core_dims=[["chain"]])
+    assert isinstance(result, Dataset)
+    assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
+
+
+def test_hpd_idata_varnames(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, var_names=["mu", "theta"])
+    assert isinstance(result, Dataset)
+    assert result.dims == {"hpd": 2, "school": 8}
+    assert list(result.data_vars.keys()) == ["mu", "theta"]
+
+
+def test_hpd_idata_group(centered_eight):
+    result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
+    result_prior = hpd(centered_eight, group="prior", var_names="mu")
+    assert result_prior.dims == {"hpd": 2}
+    range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
+    range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
+    assert range_posterior < range_prior
+
+
+def test_hpd_coords(centered_eight):
+    data = centered_eight.posterior
+    result = hpd(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
+    assert_array_equal(result.coords["chain"], [0, 1, 3])
+
+
 def test_hpd_multimodal():
     normal_sample = np.concatenate(
         (np.random.normal(-4, 1, 2500000), np.random.normal(2, 0.5, 2500000))
