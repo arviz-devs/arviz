@@ -10,10 +10,7 @@ import matplotlib.pyplot as plt
 from .rcparams import rcParams
 
 
-def _var_names(
-    var_names,
-    data
-):
+def _var_names(var_names, data):
     """Handle var_names input across arviz.
 
     Parameters
