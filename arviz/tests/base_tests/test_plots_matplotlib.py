@@ -446,6 +446,11 @@ def test_plot_pair_divergences_warning(has_sample_stats):
         ax = plot_pair(data, divergences=True)
     assert np.all(ax)
 
+def test_plot_pair_overlaid(models):
+    ax = plot_pair(models.model_1)
+    ax2 = plot_pair(models.model_2, ax=ax)
+    assert ax is ax2
+    assert np.all(ax)
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])

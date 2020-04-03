@@ -98,7 +98,8 @@ def plot_pair(
         else:
             if diagonal:
                 assert ax.shape == (numvars, numvars)
-                ax[0, 1].remove()
+                if ax[0, 1].get_figure() is not None:
+                    ax[0, 1].remove()
                 ax_hist_x = ax[0, 0]
                 ax_hist_y = ax[1, 1]
                 ax = ax[1, 0]
@@ -171,7 +172,8 @@ def plot_pair(
             for j in range(0, numvars):
                 var2 = infdata_group[j]
                 if i > j:
-                    ax[j, i].remove()
+                    if ax[j, i].get_figure() is not None:
+                        ax[j, i].remove()
                     continue
 
                 elif i == j:
@@ -180,7 +182,8 @@ def plot_pair(
                         plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
                     else:
                         loc = "left"
-                        ax[j, i].remove()
+                        if ax[j, i].get_figure() is not None:
+                            ax[j, i].remove()
                         continue
 
                 else:
