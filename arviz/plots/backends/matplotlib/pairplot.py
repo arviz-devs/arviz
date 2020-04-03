@@ -83,7 +83,7 @@ def plot_pair(
                 ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=ax)
                 # Set up right KDE
                 ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=ax)
-                ax_return = np.array([[ax_hist_x, None],[ax, ax_hist_y]])
+                ax_return = np.array([[ax_hist_x, None], [ax, ax_hist_y]])
 
                 for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
                     plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
@@ -96,7 +96,7 @@ def plot_pair(
         else:
             if diagonal:
                 assert ax.shape == (numvars, numvars)
-                if ax[0,1] is not None and ax[0,1].get_figure() is not None:
+                if ax[0, 1] is not None and ax[0, 1].get_figure() is not None:
                     ax[0, 1].remove()
                 ax_return = ax
                 ax_hist_x = ax[0, 0]
