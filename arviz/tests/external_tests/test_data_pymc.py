@@ -6,7 +6,11 @@ import numpy as np
 import pytest
 from numpy import ma
 
-from arviz import from_pymc3, from_pymc3_predictions, InferenceData  # pylint: disable=wrong-import-position
+from arviz import (
+    from_pymc3,
+    from_pymc3_predictions,
+    InferenceData,
+)  # pylint: disable=wrong-import-position
 
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,

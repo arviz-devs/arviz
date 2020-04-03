@@ -451,10 +451,10 @@ def test_plot_pair_divergences_warning(has_sample_stats):
     "kwargs", [{}, {"diagonal": True}, {"diagonal": True, "var_names": ["mu", "tau"]}]
 )
 def test_plot_pair_overlaid(models, kwargs):
-    ax = plot_pair(models.model_1)
-    ax2 = plot_pair(models.model_2, ax=ax)
+    ax = plot_pair(models.model_1, **kwargs)
+    ax2 = plot_pair(models.model_2, ax=ax, **kwargs)
     assert ax is ax2
-    assert np.all(ax)
+    assert ax.shape
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
