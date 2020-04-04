@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
-from ....stats.stats_utils import _fast_kde
+from ....kde_utils import _fast_kde
 from ...hpdplot import plot_hpd
 
 

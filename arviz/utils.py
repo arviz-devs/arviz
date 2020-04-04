@@ -319,6 +319,37 @@ def expand_dims(x):
     return x.reshape(shape[:0] + (1,) + shape[0:])
 
 
+@conditional_jit(cache=True)
+def _dot(x, y):
+    return np.dot(x, y)
+
+
+def _cov_1d(x):
+    x = x - x.mean(axis=0)
+    ddof = x.shape[0] - 1
+    return np.dot(x.T, x.conj()) / ddof
+
+
+def _cov(data):
+    if data.ndim == 1:
+        return _cov_1d(data)
+    elif data.ndim == 2:
+        x = data.astype(float)
+        avg, _ = np.average(x, axis=1, weights=None, returned=True)
+        ddof = x.shape[1] - 1
+        if ddof <= 0:
+            warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+            ddof = 0.0
+        x -= avg[:, None]
+        prod = _dot(x, x.T.conj())
+        prod *= np.true_divide(1, ddof)
+        prod = prod.squeeze()
+        prod += 1e-6 * np.eye(prod.shape[0])
+        return prod
+    else:
+        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
+
+
 @conditional_jit
 def full(shape, x, dtype=None):
     """Jitting numpy full."""

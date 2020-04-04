@@ -9,7 +9,7 @@ import scipy.signal as ss
 import warnings
 import arviz as az
 from arviz.stats.stats_utils import _circular_standard_deviation
-from arviz.plots.plot_utils import _fast_kde, _fast_kde_2d
+from arviz.kde_utils import _fast_kde, _fast_kde_2d
 
 
 class Hist:

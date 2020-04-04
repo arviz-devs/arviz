@@ -4,7 +4,8 @@ import numpy as np
 
 from . import backend_show
 from ....stats import hpd
-from ....stats.stats_utils import histogram, _fast_kde, get_bins
+from ....stats.stats_utils import histogram, get_bins
+from ....kde_utils import _fast_kde
 from ...plot_utils import make_label, _create_axes_grid
 
 
