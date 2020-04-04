@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde
-from ...plot_utils import get_bins
+from ....stats.stats_utils import get_bins
 
 
 def plot_dist(

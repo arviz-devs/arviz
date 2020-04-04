@@ -8,6 +8,13 @@ import xarray as xr
 from ...data import from_dict
 from ..helpers import running_on_ci
 from ...plots.plot_utils import (
+<<<<<<< HEAD
+=======
+    make_2d,
+    xarray_to_ndarray,
+    xarray_var_iter,
+    get_coords,
+>>>>>>> move plot_kde and get_bins
     filter_plotters_list,
     format_sig_figs,
     get_bins,
@@ -19,6 +26,7 @@ from ...plots.plot_utils import (
     xarray_var_iter,
 )
 from ...rcparams import rc_context
+from ...stats.stats_utils import get_bins
 
 
 @pytest.mark.parametrize(

@@ -12,7 +12,10 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
+<<<<<<< HEAD
 from ..plots.plot_utils import _fast_kde, get_bins, get_coords
+=======
+>>>>>>> move plot_kde and get_bins
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
@@ -24,6 +27,8 @@ from .stats_utils import (
     histogram,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
+    _fast_kde,
+    get_bins,
 )
 from ..utils import _var_names, Numba, _numba_var
 from ..rcparams import rcParams

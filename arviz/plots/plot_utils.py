@@ -17,6 +17,7 @@ import xarray as xr
 
 
 from ..utils import conditional_jit, _stack
+from ..stats.stats_utils import _fast_kde
 from ..rcparams import rcParams
 from ..stats.stats_utils import histogram as _histogram
 
@@ -98,48 +99,6 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     markersize = rc_markersize * scale_factor
 
     return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
-
-
-def get_bins(values):
-    """
-    Automatically compute the number of bins for discrete variables.
-
-    Parameters
-    ----------
-    values = numpy array
-        values
-
-    Returns
-    -------
-    array with the bins
-
-    Notes
-    -----
-    Computes the width of the bins by taking the maximun of the Sturges and the Freedman-Diaconis
-    estimators. Acording to numpy `np.histogram` this provides good all around performance.
-
-    The Sturges is a very simplistic estimator based on the assumption of normality of the data.
-    This estimator has poor performance for non-normal data, which becomes especially obvious for
-    large data sets. The estimate depends only on size of the data.
-
-    The Freedman-Diaconis rule uses interquartile range (IQR) to estimate the binwidth.
-    It is considered a robusts version of the Scott rule as the IQR is less affected by outliers
-    than the standard deviation. However, the IQR depends on fewer points than the standard
-    deviation, so it is less accurate, especially for long tailed distributions.
-    """
-    x_min = values.min().astype(int)
-    x_max = values.max().astype(int)
-
-    # Sturges histogram bin estimator
-    bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
-
-    # The Freedman-Diaconis histogram bin estimator.
-    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
-    bins_fd = 2 * iqr * values.size ** (-1 / 3)
-
-    width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
-
-    return np.arange(x_min, x_max + width + 1, width)
 
 
 def _sturges_formula(dataset, mult=1):
@@ -745,6 +704,7 @@ def calculate_point_estimate(point_estimate, values, bw=4.5):
     return point_value
 
 
+<<<<<<< HEAD
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
 
@@ -816,6 +776,8 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
     return density, xmin, xmax
 
 
+=======
+>>>>>>> move plot_kde and get_bins
 def _cov_1d(x):
     x = x - x.mean(axis=0)
     ddof = x.shape[0] - 1
