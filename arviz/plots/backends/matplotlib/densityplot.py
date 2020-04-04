@@ -9,7 +9,8 @@ from ...plot_utils import (
     _create_axes_grid,
     calculate_point_estimate,
 )
-from ....stats.stats_utils import _fast_kde, get_bins
+from ....stats.stats_utils import get_bins
+from ....kde_utils import _fast_kde
 
 
 def plot_density(

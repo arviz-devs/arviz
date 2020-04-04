@@ -27,9 +27,9 @@ from .stats_utils import (
     histogram,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
-    _fast_kde,
     get_bins,
 )
+from ..kde_utils import _fast_kde
 from ..utils import _var_names, Numba, _numba_var
 from ..rcparams import rcParams
 
