@@ -12,11 +12,11 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_bins, _fast_kde
+from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
-from ....stats.stats_utils import histogram
+from ....stats.stats_utils import histogram, _fast_kde, get_bins
 from ....utils import conditional_jit
 
 

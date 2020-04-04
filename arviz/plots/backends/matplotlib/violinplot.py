@@ -4,8 +4,8 @@ import numpy as np
 
 from . import backend_show
 from ....stats import hpd
-from ....stats.stats_utils import histogram
-from ...plot_utils import get_bins, make_label, _create_axes_grid, _fast_kde
+from ....stats.stats_utils import histogram, _fast_kde, get_bins
+from ...plot_utils import make_label, _create_axes_grid
 
 
 def plot_violin(
