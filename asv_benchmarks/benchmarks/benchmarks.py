@@ -26,17 +26,6 @@ class Hist:
     def time_histogram(self, numba_flag):
         histogram(self.data, bins=100)
 
-        #try:
-        #    data = np.random.rand(10000, 1000)
-        #    import numba
-        #    @numba.njit(cache=True)
-        #    def _hist(data):
-        #        return np.histogram(data, bins=100)
-        #    return _hist(data)
-        #except ImportError:
-        #    data = np.random.rand(10000, 1000)
-        #    return np.histogram(data, bins=100)
-
 
 class Variance:
     params = (True, False)
@@ -51,34 +40,6 @@ class Variance:
 
     def time_variance(self, numba_flag):
         stats_variance_2d(self.data)
-
-        #try:
-        #    data = np.random.randn(10000, 10000)
-        #    import numba
-        #    @numba.njit(cache=True)
-        #    def stats_variance_1d(data, ddof=0):
-        #        a, b = 0, 0
-        #        for i in data:
-        #            a = a + i
-        #            b = b + i * i
-        #        var = b / (len(data)) - ((a / (len(data))) ** 2)
-        #        var = var * (len(data) / (len(data) - ddof))
-        #        return var
-        #    def stats_variance_2d(data, ddof=0, axis=1):
-        #        a, b = data.shape
-        #        if axis == 1:
-        #            var = np.zeros(a)
-        #            for i in range(a):
-        #                var[i] = stats_variance_1d(data[i], ddof=ddof)
-        #        else:
-        #            var = np.zeros(b)
-        #            for i in range(b):
-        #                var[i] = stats_variance_1d(data[:, i], ddof=ddof)
-        #        return var
-        #   return stats_variance_2d(data)
-        #except ImportError:
-        #    data = np.random.randn(10000, 10000)
-        #    return np.var(data, axis=1)
 
 
 class CircStd:
@@ -117,13 +78,12 @@ class Fast_KDE_2d:
     def setup(self, numba_flag, n):
         self.x = np.random.randn(n//10, 10)
         self.y = np.random.randn(n//10, 10)
-
-    def time_fast_kde_2d(self, numba_flag, n):
         if numba_flag:
             az.Numba.enable_numba()
         else:
             az.Numba.disable_numba()
 
+    def time_fast_kde_2d(self, numba_flag, n):
         _fast_kde_2d(self.x, self.y)
 
 class Atleast_Nd:
