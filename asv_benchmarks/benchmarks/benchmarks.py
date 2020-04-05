@@ -8,58 +8,77 @@ from scipy.sparse import coo_matrix
 import scipy.signal as ss
 import warnings
 import arviz as az
-from arviz.stats.stats_utils import _circular_standard_deviation
+from arviz.stats.stats_utils import _circular_standard_deviation, histogram, stats_variance_2d
 from arviz.kde_utils import _fast_kde, _fast_kde_2d
 
 
 class Hist:
+    params = (True, False)
+    param_names = "Numba"
+
+    def setup(self, numba_flag):
+        self.data = np.random.rand(10000, 1000)
+        if numba_flag:
+            az.Numba.enable_numba()
+        else:
+            az.Numba.disable_numba()
+
     def time_histogram(self):
-        try:
-            data = np.random.rand(10000, 1000)
-            import numba
+        histogram(self.data, bins=100)
 
-            @numba.njit(cache=True)
-            def _hist(data):
-                return np.histogram(data, bins=100)
-
-            return _hist(data)
-        except ImportError:
-            data = np.random.rand(10000, 1000)
-            return np.histogram(data, bins=100)
+        #try:
+        #    data = np.random.rand(10000, 1000)
+        #    import numba
+        #    @numba.njit(cache=True)
+        #    def _hist(data):
+        #        return np.histogram(data, bins=100)
+        #    return _hist(data)
+        #except ImportError:
+        #    data = np.random.rand(10000, 1000)
+        #    return np.histogram(data, bins=100)
 
 
 class Variance:
+    params = (True, False)
+    param_names = "Numba"
+
+    def setup(self, numba_flag):
+        self.data = np.random.rand(10000, 10000)
+        if numba_flag:
+            az.Numba.enable_numba()
+        else:
+            az.Numba.disable_numba()
+
     def time_variance(self):
-        try:
-            data = np.random.randn(10000, 10000)
-            import numba
+        stats_variance_2d(self.data)
 
-            @numba.njit(cache=True)
-            def stats_variance_1d(data, ddof=0):
-                a, b = 0, 0
-                for i in data:
-                    a = a + i
-                    b = b + i * i
-                var = b / (len(data)) - ((a / (len(data))) ** 2)
-                var = var * (len(data) / (len(data) - ddof))
-                return var
-
-            def stats_variance_2d(data, ddof=0, axis=1):
-                a, b = data.shape
-                if axis == 1:
-                    var = np.zeros(a)
-                    for i in range(a):
-                        var[i] = stats_variance_1d(data[i], ddof=ddof)
-                else:
-                    var = np.zeros(b)
-                    for i in range(b):
-                        var[i] = stats_variance_1d(data[:, i], ddof=ddof)
-                return var
-
-            return stats_variance_2d(data)
-        except ImportError:
-            data = np.random.randn(10000, 10000)
-            return np.var(data, axis=1)
+        #try:
+        #    data = np.random.randn(10000, 10000)
+        #    import numba
+        #    @numba.njit(cache=True)
+        #    def stats_variance_1d(data, ddof=0):
+        #        a, b = 0, 0
+        #        for i in data:
+        #            a = a + i
+        #            b = b + i * i
+        #        var = b / (len(data)) - ((a / (len(data))) ** 2)
+        #        var = var * (len(data) / (len(data) - ddof))
+        #        return var
+        #    def stats_variance_2d(data, ddof=0, axis=1):
+        #        a, b = data.shape
+        #        if axis == 1:
+        #            var = np.zeros(a)
+        #            for i in range(a):
+        #                var[i] = stats_variance_1d(data[i], ddof=ddof)
+        #        else:
+        #            var = np.zeros(b)
+        #            for i in range(b):
+        #                var[i] = stats_variance_1d(data[:, i], ddof=ddof)
+        #        return var
+        #   return stats_variance_2d(data)
+        #except ImportError:
+        #    data = np.random.randn(10000, 10000)
+        #    return np.var(data, axis=1)
 
 
 class CircStd:
@@ -73,7 +92,7 @@ class CircStd:
         else:
             self.circstd = circstd
 
-    def time_circ_std(self, numba_flag):
+    def time_circ_std(self):
         self.circstd(self.data)
 
 
@@ -83,13 +102,12 @@ class Fast_Kde_1d:
 
     def setup(self, numba_flag, n):
         self.x = np.random.randn(n//10, 10)
-
-    def time_fast_kde_normal(self, numba_flag, n):
         if numba_flag:
             az.Numba.enable_numba()
         else:
             az.Numba.disable_numba()
 
+    def time_fast_kde_normal(self):
         _fast_kde(self.x)
 
 class Fast_KDE_2d:
