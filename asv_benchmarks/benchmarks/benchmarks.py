@@ -23,7 +23,7 @@ class Hist:
         else:
             az.Numba.disable_numba()
 
-    def time_histogram(self):
+    def time_histogram(self, numba_flag):
         histogram(self.data, bins=100)
 
         #try:
@@ -49,7 +49,7 @@ class Variance:
         else:
             az.Numba.disable_numba()
 
-    def time_variance(self):
+    def time_variance(self, numba_flag):
         stats_variance_2d(self.data)
 
         #try:
@@ -92,7 +92,7 @@ class CircStd:
         else:
             self.circstd = circstd
 
-    def time_circ_std(self):
+    def time_circ_std(self, numba_flag):
         self.circstd(self.data)
 
 
@@ -107,7 +107,7 @@ class Fast_Kde_1d:
         else:
             az.Numba.disable_numba()
 
-    def time_fast_kde_normal(self):
+    def time_fast_kde_normal(self, numba_flag, n):
         _fast_kde(self.x)
 
 class Fast_KDE_2d:
