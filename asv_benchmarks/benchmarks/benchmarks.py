@@ -44,7 +44,7 @@ class Variance:
 
 class CircStd:
     params = (True, False)
-    param_names = "Numba",
+    param_names = "Numba"
 
     def setup(self, numba_flag):
         self.data = np.random.randn(10000, 1000)
