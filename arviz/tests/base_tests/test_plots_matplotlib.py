@@ -447,6 +447,16 @@ def test_plot_pair_divergences_warning(has_sample_stats):
     assert np.all(ax)
 
 
+@pytest.mark.parametrize(
+    "kwargs", [{}, {"diagonal": True}, {"diagonal": True, "var_names": ["mu", "tau"]}]
+)
+def test_plot_pair_overlaid(models, kwargs):
+    ax = plot_pair(models.model_1, **kwargs)
+    ax2 = plot_pair(models.model_2, ax=ax, **kwargs)
+    assert ax is ax2
+    assert ax.shape
+
+
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
