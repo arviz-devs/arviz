@@ -32,7 +32,7 @@ ENV LANG=C.UTF-8
 
 # Update container
 RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
-    dos2unix && rm -rf /var/lib/apt/lists/*
+    dos2unix libgtk-3-dev libdbus-glib-1-dev libxt-dev && rm -rf /var/lib/apt/lists/*
 
 
 # Copy requirements and environment installation scripts
