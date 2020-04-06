@@ -32,7 +32,7 @@ ENV LANG=C.UTF-8
 
 # Update container
 RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    dos2unix && rm -rf /var/lib/apt/lists/*
 
 
 # Copy requirements and environment installation scripts
@@ -42,6 +42,7 @@ COPY $SRC_DIR/requirements-docs.txt  opt/arviz/
 COPY $SRC_DIR/requirements-external.txt  opt/arviz/
 COPY $SRC_DIR/requirements-optional.txt  opt/arviz/
 COPY $SRC_DIR/scripts/ opt/arviz/scripts
+RUN find opt/arviz/ -type f -print0 | xargs -0 dos2unix
 WORKDIR /opt/arviz
 
 
@@ -58,6 +59,7 @@ RUN echo ". /root/activate_conda.sh" > /root/.bashrc
 RUN conda clean --all
 
 COPY $SRC_DIR /opt/arviz
+RUN find opt/arviz/ -type f -print0 | xargs -0 dos2unix
 
 # Clear any cached models from copied from host filesystem
 RUN rm -f arviz/tests/saved_models/*.pkl
