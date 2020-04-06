@@ -276,7 +276,7 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 
 ### Building documentation with Docker
 The documentation can be build with Docker by running `./scripts/container.sh
---sphinx-build`. The docker image contains by default all dependencies needed
+--docs`. The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
 container, they can be checked at `doc/build`.
 
