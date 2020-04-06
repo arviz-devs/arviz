@@ -131,6 +131,8 @@ def test_plot_density_bad_kwargs(models):
         {"combined": True, "compact": True, "legend": True},
         {"divergences": "top"},
         {"divergences": False},
+        {"kind": "rank_vlines"},
+        {"kind": "rank_bars"},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
     ],

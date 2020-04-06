@@ -11,6 +11,7 @@ import numpy as np
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...distplot import plot_dist
+from ...rankplot import plot_rank
 from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
 from ....rcparams import rcParams
 
@@ -19,6 +20,7 @@ def plot_trace(
     data,
     var_names,
     divergences,
+    kind,
     figsize,
     rug,
     lines,
@@ -30,6 +32,7 @@ def plot_trace(
     rug_kwargs: [Dict],
     hist_kwargs: [Dict],
     trace_kwargs: [Dict],
+    rank_kwargs: [Dict],
     plotters,
     divergence_data,
     axes,
@@ -67,6 +70,9 @@ def plot_trace(
 
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)
+
+    if rank_kwargs is None:
+        rank_kwargs = {}
 
     if axes is None:
         axes = []
@@ -154,12 +160,14 @@ def plot_trace(
                 chain_prop=chain_prop,
                 combined=combined,
                 rug=rug,
+                kind=kind,
                 legend=legend,
                 trace_kwargs=trace_kwargs,
                 hist_kwargs=hist_kwargs,
                 plot_kwargs=plot_kwargs,
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
+                rank_kwargs=rank_kwargs,
             )
         else:
             for y_name in cds_var_groups[var_name]:
@@ -174,12 +182,14 @@ def plot_trace(
                     chain_prop=chain_prop,
                     combined=combined,
                     rug=rug,
+                    kind=kind,
                     legend=legend,
                     trace_kwargs=trace_kwargs,
                     hist_kwargs=hist_kwargs,
                     plot_kwargs=plot_kwargs,
                     fill_kwargs=fill_kwargs,
                     rug_kwargs=rug_kwargs,
+                    rank_kwargs=rank_kwargs,
                 )
 
         for col in (0, 1):
@@ -272,33 +282,36 @@ def _plot_chains_bokeh(
     chain_prop,
     combined,
     rug,
+    kind,
     legend,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
+    rank_kwargs,
 ):
     marker = trace_kwargs.pop("marker", True)
     for chain_idx, cds in data.items():
-        if legend:
-            trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
-        ax_trace.line(
-            x=x_name,
-            y=y_name,
-            source=cds,
-            **{chain_prop[0]: chain_prop[1][chain_idx]},
-            **trace_kwargs,
-        )
-        if marker:
-            ax_trace.circle(
+        if kind == "trace":
+            if legend:
+                trace_kwargs["legend_label"] = "chain {}".format(chain_idx)
+            ax_trace.line(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                radius=0.30,
-                alpha=0.5,
-                **{chain_prop[0]: chain_prop[1][chain_idx],},
+                **{chain_prop[0]: chain_prop[1][chain_idx]},
+                **trace_kwargs,
             )
+            if marker:
+                ax_trace.circle(
+                    x=x_name,
+                    y=y_name,
+                    source=cds,
+                    radius=0.30,
+                    alpha=0.5,
+                    **{chain_prop[0]: chain_prop[1][chain_idx],},
+                )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
@@ -317,6 +330,13 @@ def _plot_chains_bokeh(
                 show=False,
             )
             plot_kwargs.pop(chain_prop[0])
+
+    if kind == "rank_bars":
+        value = np.array([item.data[y_name] for item in data.values()])
+        plot_rank(value, kind="bars", axes=ax_trace, backend="bokeh", show=False, **rank_kwargs)
+    elif kind == "rank_vlines":
+        value = np.array([item.data[y_name] for item in data.values()])
+        plot_rank(value, kind="vlines", axes=ax_trace, backend="bokeh", show=False, **rank_kwargs)
 
     if combined:
         rug_kwargs["cds"] = data
