@@ -18,6 +18,7 @@ PRNGKey = jax.random.PRNGKey
 numpyro = importorskip("numpyro")
 Predictive = numpyro.infer.Predictive
 
+
 class TestDataNumPyro:
     @pytest.fixture(scope="class")
     def data(self, eight_schools_params, draws, chains):

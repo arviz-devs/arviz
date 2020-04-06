@@ -101,7 +101,7 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         dataset = obj
     elif isinstance(obj, xr.DataArray):
         if obj.name is None:
-            obj.name = 'x'
+            obj.name = "x"
         dataset = obj.to_dataset()
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
