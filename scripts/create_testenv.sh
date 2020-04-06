@@ -15,7 +15,6 @@ PYRO_VERSION=${PYRO_VERSION:-latest}
 EMCEE_VERSION=${EMCEE_VERSION:-latest}
 TF_VERSION=${TF_VERSION:-latest}
 PYMC3_VERSION=${PYMC3_VERSION:-latest}
-NAME=${NAME:-UNIT}
 
 
 if [[ $* != *--global* ]]; then
@@ -93,12 +92,13 @@ fi
 
 
 #  Install editable using the setup.py
-pip install  --no-cache-dir -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 pip install --no-cache-dir -r requirements-dev.txt
 pip install --no-cache-dir -r requirements-docs.txt
 pip install --no-cache-dir -r requirements-external.txt
 pip install --no-cache-dir -r requirements-optional.txt
 
-if [ "$NAME" = "SPHINX" ]; then
-    conda install -y geckodriver firefox --channel conda-forge
-fi
+conda install -y geckodriver firefox jupyterlab ipywidgets nodejs --channel conda-forge
+
+jupyter nbextension enable --py widgetsnbextension
+jupyter labextension install @jupyter-widgets/jupyterlab-manager

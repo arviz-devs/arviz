@@ -213,6 +213,33 @@ tools:
 We have provided a Dockerfile which helps for isolating build problems, and local development.
 Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
+### container.sh & container.ps1
+
+Predefined docker commands can be run with a `./scripts/container.sh` (on Linux and macOS)
+and with `./scripts/container.ps1`. The scripts enables developer easily to call predefined docker commands.
+User can use one or multiple flags.
+
+They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
+
+    $ ./scripts/container.sh --clear-cache
+    $ ./scripts/container.sh --build
+
+    $ ./scripts/container.sh --test
+    $ ./scripts/container.sh --docs
+    $ ./scripts/container.sh --shell
+    $ ./scripts/container.sh --notebook
+    $ ./scripts/container.sh --lab
+
+
+    $ powershell.exe -File ./scripts/container.sh --clear-cache
+    $ powershell.exe -File ./scripts/container.sh --build
+
+    $ powershell.exe -File ./scripts/container.sh --test
+    $ powershell.exe -File ./scripts/container.sh --docs
+    $ powershell.exe -File ./scripts/container.sh --shell
+    $ powershell.exe -File ./scripts/container.sh --notebook
+    $ powershell.exe -File ./scripts/container.sh --lab
+
 ### Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
 First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
@@ -229,9 +256,19 @@ To start a bash shell inside Docker, run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
 
+and for Windows, use %CD% on cmd.exe and $pwd.Path on powershell.
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ -it arviz bash
+
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker exec jupyter-dock bash -c "pip install jupyter"
+    $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
+
+and the same on Windows
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec jupyter-dock bash -c "pip install jupyter"
     $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
