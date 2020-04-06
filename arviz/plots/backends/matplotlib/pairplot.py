@@ -39,6 +39,8 @@ def plot_pair(
     point_estimate,
     point_estimate_kwargs,
     point_estimate_marker_kwargs,
+    true_values,
+    true_values_kwargs,
 ):
     """Matplotlib pairplot."""
     if backend_kwargs is None:
@@ -59,6 +61,36 @@ def plot_pair(
         kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
+
+    if true_values:
+        true_values_copy = {}
+        label = []
+        for variable in list(true_values.keys()):
+            if " " in variable:
+                variable_copy = variable.replace(" ", "\n", 1)
+            else:
+                variable_copy = variable
+
+            label.append(variable_copy)
+            true_values_copy[variable_copy] = true_values[variable]
+
+        difference = set(flat_var_names).difference(set(label))
+
+        for dif in difference:
+            true_values_copy[dif] = None
+
+        if difference:
+            warn = [dif.replace("\n", " ", 1) for dif in difference]
+            warnings.warn(
+                "Argument true_values does not include true value for: {}".format(", ".join(warn)),
+                UserWarning,
+            )
+
+    if true_values_kwargs is None:
+        true_values_kwargs = {}
+
+    true_values_kwargs.setdefault("color", "C3")
+    true_values_kwargs.setdefault("s", 30)
 
     # pylint: disable=too-many-nested-blocks
     if numvars == 2:
@@ -143,6 +175,12 @@ def plot_pair(
 
             ax.scatter(pe_x, pe_y, marker="s", s=figsize[0] + 50, **point_estimate_kwargs, zorder=4)
 
+        if true_values:
+            ax.scatter(
+                true_values_copy[flat_var_names[0]],
+                true_values_copy[flat_var_names[1]],
+                **true_values_kwargs,
+            )
         ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
         ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
@@ -230,6 +268,13 @@ def plot_pair(
 
                         ax[j, i].scatter(
                             pe_x, pe_y, s=figsize[0] + 50, zorder=4, **point_estimate_marker_kwargs
+                        )
+
+                    if true_values:
+                        ax[j, i].scatter(
+                            true_values_copy[flat_var_names[i]],
+                            true_values_copy[flat_var_names[j]],
+                            **true_values_kwargs,
                         )
 
                 if j != numvars - 1:

@@ -3,6 +3,8 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables
+* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
 * Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
