@@ -3,9 +3,6 @@ import warnings
 from typing import Dict, Any
 from itertools import product, tee
 import importlib
-from scipy.signal import convolve, convolve2d
-from scipy.sparse import coo_matrix
-from scipy.signal.windows import gaussian
 from scipy.stats import mode
 
 import packaging
@@ -96,28 +93,6 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     markersize = rc_markersize * scale_factor
 
     return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
-
-
-def _sturges_formula(dataset, mult=1):
-    """Use Sturges' formula to determine number of bins.
-
-    See https://en.wikipedia.org/wiki/Histogram#Sturges'_formula
-    or https://doi.org/10.1080%2F01621459.1926.10502161
-
-    Parameters
-    ----------
-    dataset: xarray.DataSet
-        Must have the `draw` dimension
-
-    mult: float
-        Used to scale the number of bins up or down. Default is 1 for Sturges' formula.
-
-    Returns
-    -------
-    int
-        Number of bins to use
-    """
-    return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
 
 
 def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
