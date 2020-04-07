@@ -231,14 +231,14 @@ They are executed on the following order: clear-cache, build, test, docs, shell,
     $ ./scripts/container.sh --lab
 
 
-    $ powershell.exe -File ./scripts/container.sh --clear-cache
-    $ powershell.exe -File ./scripts/container.sh --build
+    $ powershell.exe -File ./scripts/container.ps1 --clear-cache
+    $ powershell.exe -File ./scripts/container.ps1 --build
 
-    $ powershell.exe -File ./scripts/container.sh --test
-    $ powershell.exe -File ./scripts/container.sh --docs
-    $ powershell.exe -File ./scripts/container.sh --shell
-    $ powershell.exe -File ./scripts/container.sh --notebook
-    $ powershell.exe -File ./scripts/container.sh --lab
+    $ powershell.exe -File ./scripts/container.ps1 --test
+    $ powershell.exe -File ./scripts/container.ps1 --docs
+    $ powershell.exe -File ./scripts/container.ps1 --shell
+    $ powershell.exe -File ./scripts/container.ps1 --notebook
+    $ powershell.exe -File ./scripts/container.ps1 --lab
 
 ### Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
