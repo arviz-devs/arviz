@@ -8,13 +8,12 @@ from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
     default_grid,
-    get_coords,
     filter_plotters_list,
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
-from ..utils import _var_names
+from ..utils import _var_names, get_coords
 
 
 def plot_mcse(
