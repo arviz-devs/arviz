@@ -34,8 +34,8 @@ def plot_pair(
     marginal_kwargs,
     point_estimate,
     point_estimate_kwargs,
-    true_values,
-    true_values_kwargs,
+    reference_values,
+    reference_values_kwargs,
     show,
 ):
     """Bokeh pair plot."""
@@ -58,35 +58,37 @@ def plot_pair(
         kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
 
-    if true_values:
-        true_values_copy = {}
+    if reference_values:
+        reference_values_copy = {}
         label = []
-        for variable in list(true_values.keys()):
+        for variable in list(reference_values.keys()):
             if " " in variable:
                 variable_copy = variable.replace(" ", "\n", 1)
             else:
                 variable_copy = variable
 
             label.append(variable_copy)
-            true_values_copy[variable_copy] = true_values[variable]
+            reference_values_copy[variable_copy] = reference_values[variable]
 
         difference = set(flat_var_names).difference(set(label))
 
         for dif in difference:
-            true_values_copy[dif] = None
+            reference_values_copy[dif] = None
 
         if difference:
             warn = [dif.replace("\n", " ", 1) for dif in difference]
             warnings.warn(
-                "Argument true_values does not include true value for: {}".format(", ".join(warn)),
+                "Argument reference_values does not include true value for: {}".format(
+                    ", ".join(warn)
+                ),
                 UserWarning,
             )
 
-    if true_values_kwargs is None:
-        true_values_kwargs = {}
+    if reference_values_kwargs is None:
+        reference_values_kwargs = {}
 
-    true_values_kwargs.setdefault("line_color", "red")
-    true_values_kwargs.setdefault("line_width", 5)
+    reference_values_kwargs.setdefault("line_color", "red")
+    reference_values_kwargs.setdefault("line_width", 5)
 
     dpi = backend_kwargs.pop("dpi")
     max_plots = (
@@ -301,11 +303,11 @@ def plot_pair(
                             )
                             ax[-1, -1].add_layout(ax_pe_hline)
 
-                if true_values:
-                    x = true_values_copy[flat_var_names[j + var]]
-                    y = true_values_copy[flat_var_names[i]]
+                if reference_values:
+                    x = reference_values_copy[flat_var_names[j + var]]
+                    y = reference_values_copy[flat_var_names[i]]
                     if x and y:
-                        ax[j, i].circle(y, x, **true_values_kwargs)
+                        ax[j, i].circle(y, x, **reference_values_kwargs)
 
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + var]

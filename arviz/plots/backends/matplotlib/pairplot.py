@@ -39,8 +39,8 @@ def plot_pair(
     point_estimate,
     point_estimate_kwargs,
     point_estimate_marker_kwargs,
-    true_values,
-    true_values_kwargs,
+    reference_values,
+    reference_values_kwargs,
 ):
     """Matplotlib pairplot."""
     if backend_kwargs is None:
@@ -62,35 +62,37 @@ def plot_pair(
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
 
-    if true_values:
-        true_values_copy = {}
+    if reference_values:
+        reference_values_copy = {}
         label = []
-        for variable in list(true_values.keys()):
+        for variable in list(reference_values.keys()):
             if " " in variable:
                 variable_copy = variable.replace(" ", "\n", 1)
             else:
                 variable_copy = variable
 
             label.append(variable_copy)
-            true_values_copy[variable_copy] = true_values[variable]
+            reference_values_copy[variable_copy] = reference_values[variable]
 
         difference = set(flat_var_names).difference(set(label))
 
         for dif in difference:
-            true_values_copy[dif] = None
+            reference_values_copy[dif] = None
 
         if difference:
             warn = [dif.replace("\n", " ", 1) for dif in difference]
             warnings.warn(
-                "Argument true_values does not include true value for: {}".format(", ".join(warn)),
+                "Argument reference_values does not include true value for: {}".format(
+                    ", ".join(warn)
+                ),
                 UserWarning,
             )
 
-    if true_values_kwargs is None:
-        true_values_kwargs = {}
+    if reference_values_kwargs is None:
+        reference_values_kwargs = {}
 
-    true_values_kwargs.setdefault("color", "C3")
-    true_values_kwargs.setdefault("s", 30)
+    reference_values_kwargs.setdefault("color", "C3")
+    reference_values_kwargs.setdefault("marker", "o")
 
     # pylint: disable=too-many-nested-blocks
     if numvars == 2:
@@ -119,9 +121,6 @@ def plot_pair(
 
                 for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
                     plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax_, **marginal_kwargs)
-
-                ax_hist_x.set_xlim(ax.get_xlim())
-                ax_hist_y.set_ylim(ax.get_ylim())
 
                 # Personalize axes
                 ax_hist_x.tick_params(labelleft=False, labelbottom=False)
@@ -175,11 +174,11 @@ def plot_pair(
 
             ax.scatter(pe_x, pe_y, marker="s", s=figsize[0] + 50, **point_estimate_kwargs, zorder=4)
 
-        if true_values:
-            ax.scatter(
-                true_values_copy[flat_var_names[0]],
-                true_values_copy[flat_var_names[1]],
-                **true_values_kwargs,
+        if reference_values:
+            ax.plot(
+                reference_values_copy[flat_var_names[0]],
+                reference_values_copy[flat_var_names[1]],
+                **reference_values_kwargs,
             )
         ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
         ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
@@ -270,11 +269,11 @@ def plot_pair(
                             pe_x, pe_y, s=figsize[0] + 50, zorder=4, **point_estimate_marker_kwargs
                         )
 
-                    if true_values:
-                        ax[j, i].scatter(
-                            true_values_copy[flat_var_names[i]],
-                            true_values_copy[flat_var_names[j]],
-                            **true_values_kwargs,
+                    if reference_values:
+                        ax[j, i].plot(
+                            reference_values_copy[flat_var_names[i]],
+                            reference_values_copy[flat_var_names[j]],
+                            **reference_values_kwargs,
                         )
 
                 if j != numvars - 1:

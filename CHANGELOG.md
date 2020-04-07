@@ -3,16 +3,14 @@
 ## v0.x.x Unreleased
 
 ### New features
-* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables
+* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
 * Add `num_chains` and `pred_dims` arguments to io_pyro #1090
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * Allow xarray.Dataarray input for plots.(#1120)
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
 * Add option to display rank plots instead of trace (#1134)
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
