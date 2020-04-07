@@ -7,8 +7,6 @@ from copy import copy as _copy, deepcopy as _deepcopy
 import numpy as np
 import pandas as pd
 from scipy.fftpack import next_fast_len
-from scipy.signal import convolve
-from scipy.signal.windows import gaussian
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 from ..utils import conditional_jit, conditional_vect
@@ -616,3 +614,25 @@ def get_bins(values):
     width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
 
     return np.arange(x_min, x_max + width + 1, width)
+
+
+def _sturges_formula(dataset, mult=1):
+    """Use Sturges' formula to determine number of bins.
+
+    See https://en.wikipedia.org/wiki/Histogram#Sturges'_formula
+    or https://doi.org/10.1080%2F01621459.1926.10502161
+
+    Parameters
+    ----------
+    dataset: xarray.DataSet
+        Must have the `draw` dimension
+
+    mult: float
+        Used to scale the number of bins up or down. Default is 1 for Sturges' formula.
+
+    Returns
+    -------
+    int
+        Number of bins to use
+    """
+    return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
