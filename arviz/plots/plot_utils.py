@@ -486,51 +486,6 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     return unpacked_var_names, unpacked_data
 
 
-def get_coords(data, coords):
-    """Subselects xarray DataSet or DataArray object to provided coords. Raises exception if fails.
-
-    Raises
-    ------
-    ValueError
-        If coords name are not available in data
-
-    KeyError
-        If coords dims are not available in data
-
-    Returns
-    -------
-    data: xarray
-        xarray.DataSet or xarray.DataArray object, same type as input
-    """
-    if not isinstance(data, (list, tuple)):
-        try:
-            return data.sel(**coords)
-
-        except ValueError:
-            invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
-
-        except KeyError as err:
-            raise KeyError(
-                (
-                    "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
-                    "Check that coords structure is correct and"
-                    " dimensions are valid. {}"
-                ).format(err)
-            )
-    if not isinstance(coords, (list, tuple)):
-        coords = [coords] * len(data)
-    data_subset = []
-    for idx, (datum, coords_dict) in enumerate(zip(data, coords)):
-        try:
-            data_subset.append(get_coords(datum, coords_dict))
-        except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err))
-        except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err))
-    return data_subset
-
-
 def color_from_dim(dataarray, dim_name):
     """Return colors and color mapping of a DataArray using coord values as color code.
 
