@@ -530,6 +530,7 @@ def flatten_inference_data_to_dict(
                         data_dict[var_name_dim] = var_values[loc]
     return data_dict
 
+
 def get_coords(data, coords):
     """Subselects xarray DataSet or DataArray object to provided coords. Raises exception if fails.
 
