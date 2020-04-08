@@ -21,7 +21,7 @@
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
 * Image thumbs generation updated to be Bokeh 2 compatible (#1116)
 * Add new examples for `plot_pair` (#1110)
-
+* Add examples for `psislw` and `r2_score` (#1129) 
 
 ## v0.7.0 (2020 Mar 2)
 
