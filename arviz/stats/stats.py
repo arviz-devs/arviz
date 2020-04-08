@@ -700,7 +700,7 @@ def psislw(log_weights, reff=1.0):
 
     Examples
     --------
-    Get Pareto smoothed importance sampling (PSIS):
+    Get Pareto smoothed importance sampling (PSIS) log weights:
 
     .. ipython::
 
