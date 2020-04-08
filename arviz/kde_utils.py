@@ -1,4 +1,4 @@
-"""KDE functions for ArviZ"""
+"""KDE functions for ArviZ."""
 import warnings
 import numpy as np
 from scipy.signal import convolve, convolve2d
