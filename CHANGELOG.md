@@ -15,6 +15,7 @@
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
 * Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData` is a list or tuple (#1121)
 * Fixed overlaid pairplots issue (#1135)
+* Update Docker building steps (#1127)
 ### Deprecation
 
 ### Documentation
