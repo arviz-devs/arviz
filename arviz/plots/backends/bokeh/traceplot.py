@@ -86,7 +86,7 @@ def plot_trace(
                 _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
             axes.append(_axes)
 
-    axes = np.array(axes)
+    axes = np.atleast_2d(axes)
 
     cds_data = {}
     cds_var_groups = {}
@@ -333,10 +333,10 @@ def _plot_chains_bokeh(
 
     if kind == "rank_bars":
         value = np.array([item.data[y_name] for item in data.values()])
-        plot_rank(value, kind="bars", axes=ax_trace, backend="bokeh", show=False, **rank_kwargs)
+        plot_rank(value, kind="bars", ax=ax_trace, backend="bokeh", show=False, **rank_kwargs)
     elif kind == "rank_vlines":
         value = np.array([item.data[y_name] for item in data.values()])
-        plot_rank(value, kind="vlines", axes=ax_trace, backend="bokeh", show=False, **rank_kwargs)
+        plot_rank(value, kind="vlines", ax=ax_trace, backend="bokeh", show=False, **rank_kwargs)
 
     if combined:
         rug_kwargs["cds"] = data
