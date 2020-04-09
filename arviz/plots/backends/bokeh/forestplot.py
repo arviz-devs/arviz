@@ -16,8 +16,7 @@ from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
 from ....stats import hpd
 from ....stats.diagnostics import _ess, _rhat
-from ....stats.stats_utils import histogram, get_bins
-from ....kde_utils import _fast_kde
+from ....numeric_utils import _fast_kde, histogram, get_bins
 from ....utils import conditional_jit
 
 

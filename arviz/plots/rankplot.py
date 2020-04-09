@@ -12,7 +12,7 @@ from .plot_utils import (
 )
 from ..rcparams import rcParams
 from ..utils import _var_names
-from ..stats.stats_utils import _sturges_formula
+from ..numeric_utils import _sturges_formula
 
 
 def plot_rank(

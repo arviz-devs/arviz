@@ -20,12 +20,10 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
-    histogram,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
-    get_bins,
 )
-from ..kde_utils import _fast_kde
+from ..numeric_utils import _fast_kde, histogram, get_bins
 from ..utils import _var_names, Numba, _numba_var, get_coords
 from ..rcparams import rcParams
 

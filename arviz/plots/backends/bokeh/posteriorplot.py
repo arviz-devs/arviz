@@ -16,7 +16,7 @@ from ...plot_utils import (
     calculate_point_estimate,
 )
 from ....stats import hpd
-from ....stats.stats_utils import get_bins
+from ....numeric_utils import get_bins
 
 
 def plot_posterior(

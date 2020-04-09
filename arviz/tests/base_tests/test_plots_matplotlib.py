@@ -42,7 +42,7 @@ from ...plots import (
     plot_mcse,
 )
 from ...utils import _cov
-from ...kde_utils import _fast_kde
+from ...numeric_utils import _fast_kde
 
 rcParams["data.load"] = "eager"
 

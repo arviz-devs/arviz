@@ -12,7 +12,7 @@ import matplotlib as mpl
 import matplotlib.cbook as cbook
 import xarray as xr
 
-from ..kde_utils import _fast_kde
+from ..numeric_utils import _fast_kde
 from ..rcparams import rcParams
 
 KwargSpec = Dict[str, Any]

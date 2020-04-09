@@ -20,7 +20,7 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from ..kde_utils import _fast_kde_2d
+from ..numeric_utils import _fast_kde_2d
 
 
 __all__ = [

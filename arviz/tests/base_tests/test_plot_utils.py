@@ -17,7 +17,7 @@ from ...plots.plot_utils import (
     xarray_var_iter,
 )
 from ...rcparams import rc_context
-from ...stats.stats_utils import get_bins
+from ...numeric_utils import get_bins
 from ...utils import get_coords
 
 

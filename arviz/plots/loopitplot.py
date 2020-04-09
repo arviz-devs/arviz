@@ -5,7 +5,7 @@ from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
-from ..kde_utils import _fast_kde
+from ..numeric_utils import _fast_kde
 from .plot_utils import (
     _scale_fig_size,
     get_plotting_function,

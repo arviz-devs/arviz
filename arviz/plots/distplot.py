@@ -3,7 +3,7 @@
 
 import xarray as xr
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
-from ..stats.stats_utils import get_bins
+from ..numeric_utils import get_bins
 from ..data import InferenceData
 from ..rcparams import rcParams
 

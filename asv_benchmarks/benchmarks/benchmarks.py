@@ -4,8 +4,8 @@
 import numpy as np
 from scipy.stats import circstd
 import arviz as az
-from arviz.stats.stats_utils import _circular_standard_deviation, histogram, stats_variance_2d
-from arviz.kde_utils import _fast_kde, _fast_kde_2d
+from arviz.stats.stats_utils import _circular_standard_deviation, stats_variance_2d
+from arviz.numeric_utils import _fast_kde, _fast_kde_2d, histogram
 
 
 class Hist:

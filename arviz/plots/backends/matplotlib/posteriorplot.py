@@ -14,7 +14,7 @@ from ...plot_utils import (
     round_num,
     calculate_point_estimate,
 )
-from ....stats.stats_utils import get_bins
+from ....numeric_utils import get_bins
 
 
 def plot_posterior(
