@@ -2,11 +2,7 @@
 # See "Writing benchmarks" in the airspeed velocity docs for more information.
 # https://asv.readthedocs.io/en/stable/
 import numpy as np
-from numpy import newaxis
 from scipy.stats import circstd
-from scipy.sparse import coo_matrix
-import scipy.signal as ss
-import warnings
 import arviz as az
 from arviz.stats.stats_utils import _circular_standard_deviation, histogram, stats_variance_2d
 from arviz.kde_utils import _fast_kde, _fast_kde_2d
@@ -14,7 +10,7 @@ from arviz.kde_utils import _fast_kde, _fast_kde_2d
 
 class Hist:
     params = (True, False)
-    param_names = "Numba"
+    param_names = ("Numba",)
 
     def setup(self, numba_flag):
         self.data = np.random.rand(10000, 1000)
@@ -29,10 +25,10 @@ class Hist:
 
 class Variance:
     params = (True, False)
-    param_names = "Numba"
+    param_names = ("Numba",)
 
     def setup(self, numba_flag):
-        self.data = np.random.rand(10000, 10000)
+        self.data = np.random.rand(10000, 1000)
         if numba_flag:
             az.Numba.enable_numba()
         else:
@@ -44,7 +40,7 @@ class Variance:
 
 class CircStd:
     params = (True, False)
-    param_names = "Numba"
+    param_names = ("Numba",)
 
     def setup(self, numba_flag):
         self.data = np.random.randn(10000, 1000)
