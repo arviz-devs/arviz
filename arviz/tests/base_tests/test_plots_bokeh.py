@@ -710,6 +710,11 @@ def test_plot_mcse_no_divergences(models):
             "coords": {"theta_dim_0": [0, 1]},
             "textsize": 20,
         },
+        {
+            "point_estimate": "mean",
+            "reference_values": {"mu": 0, "tau": 0},
+            "reference_values_kwargs": {"line_color": "blue"},
+        },
     ],
 )
 def test_plot_pair(models, kwargs):

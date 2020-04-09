@@ -416,6 +416,11 @@ def test_plot_kde_inference_data(models):
             "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
         },
+        {
+            "point_estimate": "mean",
+            "reference_values": {"mu": 0, "tau": 0},
+            "reference_values_kwargs": {"c": "C", "marker": "*"},
+        },
     ],
 )
 def test_plot_pair(models, kwargs):

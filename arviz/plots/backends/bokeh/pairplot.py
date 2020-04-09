@@ -78,7 +78,7 @@ def plot_pair(
         if difference:
             warn = [dif.replace("\n", " ", 1) for dif in difference]
             warnings.warn(
-                "Argument reference_values does not include true value for: {}".format(
+                "Argument reference_values does not include reference value for: {}".format(
                     ", ".join(warn)
                 ),
                 UserWarning,

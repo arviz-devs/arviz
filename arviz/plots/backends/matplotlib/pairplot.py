@@ -76,13 +76,10 @@ def plot_pair(
 
         difference = set(flat_var_names).difference(set(label))
 
-        for dif in difference:
-            reference_values_copy[dif] = None
-
         if difference:
             warn = [dif.replace("\n", " ", 1) for dif in difference]
             warnings.warn(
-                "Argument reference_values does not include true value for: {}".format(
+                "Argument reference_values does not include reference value for: {}".format(
                     ", ".join(warn)
                 ),
                 UserWarning,
@@ -270,11 +267,14 @@ def plot_pair(
                         )
 
                     if reference_values:
-                        ax[j, i].plot(
-                            reference_values_copy[flat_var_names[i]],
-                            reference_values_copy[flat_var_names[j]],
-                            **reference_values_kwargs,
-                        )
+                        x_name = flat_var_names[i]
+                        y_name = flat_var_names[j]
+                        if x_name and y_name not in difference:
+                            ax[j, i].plot(
+                                reference_values_copy[x_name],
+                                reference_values_copy[y_name],
+                                **reference_values_kwargs,
+                            )
 
                 if j != numvars - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
