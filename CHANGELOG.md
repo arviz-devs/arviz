@@ -10,12 +10,15 @@
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
 * Add option to display rank plots instead of trace (#1134)
+
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
 * Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData` is a list or tuple (#1121)
 * Fixed overlaid pairplots issue (#1135)
 * Update Docker building steps (#1127)
+* Rank plot: rename `axes` arguemt to `ax` (#1144)
+
 ### Deprecation
 
 ### Documentation
