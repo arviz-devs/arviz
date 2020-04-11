@@ -5,29 +5,27 @@ import numpy as np
 
 from . import backend_show
 from ...kdeplot import plot_kde
-from ...plot_utils import (
-    _create_axes_grid,
-)
+from ...plot_utils import _create_axes_grid
 
 colors = {
-    'prior': "red",
-    'posterior': "blue",
-    'observed': "yellow",
+    "prior": "red",
+    "posterior": "blue",
+    "observed": "yellow",
 }
 
 
 def plot_pp(
-        ax,
-        length_plotters,
-        rows,
-        cols,
-        figsize,
-        pp_plotters,
-        linewidth,
-        legend,
-        groups,
-        backend_kwargs,
-        show,
+    ax,
+    length_plotters,
+    rows,
+    cols,
+    figsize,
+    pp_plotters,
+    linewidth,
+    legend,
+    groups,
+    backend_kwargs,
+    show,
 ):
     """Matplotlib pp plot."""
     if ax is None:
@@ -36,7 +34,7 @@ def plot_pp(
         )
         axes = []
         for i in range(cols, rows * cols, 2 * cols):
-            axes += list(ax[i - cols:i])
+            axes += list(ax[i - cols : i])
             gs = ax[i].get_gridspec()
             for j in range(i, i + cols):
                 ax[j].remove()
@@ -52,8 +50,8 @@ def plot_pp(
                 )
             )
 
-    matplotlib.rc('xtick', labelsize=7)
-    matplotlib.rc('ytick', labelsize=7)
+    matplotlib.rc("xtick", labelsize=7)
+    matplotlib.rc("ytick", labelsize=7)
 
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
@@ -85,18 +83,12 @@ def plot_pp(
 
 
 def _pp_helper(
-        ax,
-        data,
-        group,
-        var_name,
-        coord_name,
-        color,
-        linewidth,
+    ax, data, group, var_name, coord_name, color, linewidth,
 ):
     plot_kde(
         data,
         label="{} {} {}".format(group, var_name, coord_name),
-        plot_kwargs={"color": color, "linewidth": linewidth, },
+        plot_kwargs={"color": color, "linewidth": linewidth,},
         fill_kwargs={"alpha": 0},
         ax=ax,
     )

@@ -7,7 +7,6 @@ import numpy as np
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
-
     get_plotting_function,
 )
 from ..rcparams import rcParams
@@ -16,16 +15,16 @@ _log = logging.getLogger(__name__)
 
 
 def plot_pp(
-        data,
-        figsize=None,
-        textsize=None,
-        vars=None,
-        coords=None,
-        legend=True,
-        ax=None,
-        backend=None,
-        backend_kwargs=None,
-        show=None,
+    data,
+    figsize=None,
+    textsize=None,
+    vars=None,
+    coords=None,
+    legend=True,
+    ax=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
 ):
     """
     Plot for posterior-prior predictive.
@@ -101,14 +100,7 @@ def plot_pp(
             coord[key] = np.where(np.in1d(group[key], coords[key]))[0]
 
         plotters = [
-            tup
-            for tup in
-            xarray_var_iter(
-                group.isel(coord),
-                var_names=vars,
-                combined=True,
-            )
-
+            tup for tup in xarray_var_iter(group.isel(coord), var_names=vars, combined=True,)
         ]
         pp_plotters.append(plotters)
 
