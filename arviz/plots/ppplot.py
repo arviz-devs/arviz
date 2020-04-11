@@ -1,4 +1,4 @@
-"""Posterior-Prior plot."""
+"""Posterior/Prior plot."""
 from numbers import Integral
 import platform
 import logging

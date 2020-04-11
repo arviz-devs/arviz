@@ -1,4 +1,4 @@
-"""Matplotib Posterior predictive plot."""
+"""Matplotib Prior/Posterior plot."""
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
