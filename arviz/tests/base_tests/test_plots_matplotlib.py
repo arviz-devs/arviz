@@ -41,7 +41,8 @@ from ...plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ...plots.plot_utils import _fast_kde, _cov
+from ...utils import _cov
+from ...numeric_utils import _fast_kde
 
 rcParams["data.load"] = "eager"
 

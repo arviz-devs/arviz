@@ -10,8 +10,6 @@ from ..helpers import running_on_ci
 from ...plots.plot_utils import (
     filter_plotters_list,
     format_sig_figs,
-    get_bins,
-    get_coords,
     get_plotting_function,
     make_2d,
     matplotlib_kwarg_dealiaser,
@@ -19,6 +17,8 @@ from ...plots.plot_utils import (
     xarray_var_iter,
 )
 from ...rcparams import rc_context
+from ...numeric_utils import get_bins
+from ...utils import get_coords
 
 
 @pytest.mark.parametrize(

@@ -4,11 +4,8 @@ import numpy as np
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import (
-    _create_axes_grid,
-    get_bins,
-)
-from ....stats.stats_utils import histogram
+from ...plot_utils import _create_axes_grid
+from ....numeric_utils import histogram, get_bins
 
 
 def plot_ppc(

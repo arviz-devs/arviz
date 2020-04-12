@@ -12,7 +12,6 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..plots.plot_utils import _fast_kde, get_bins, get_coords
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
@@ -21,11 +20,11 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
-    histogram,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
 )
-from ..utils import _var_names, Numba, _numba_var
+from ..numeric_utils import _fast_kde, histogram, get_bins
+from ..utils import _var_names, Numba, _numba_var, get_coords
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)

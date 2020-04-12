@@ -192,7 +192,7 @@ tools:
 
   ```bash
   $ pip install black
-  $ black arviz/ examples/
+  $ black arviz/ examples/ asv_benchmarks/
   ```
 
 * Your code passes pylint

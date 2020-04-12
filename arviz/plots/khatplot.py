@@ -7,7 +7,6 @@ from xarray import DataArray
 
 from .plot_utils import (
     _scale_fig_size,
-    get_coords,
     color_from_dim,
     format_coords_as_labels,
     get_plotting_function,
@@ -15,6 +14,7 @@ from .plot_utils import (
 )
 from ..stats import ELPDData
 from ..rcparams import rcParams
+from ..utils import get_coords
 
 
 def plot_khat(

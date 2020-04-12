@@ -3,9 +3,9 @@ import warnings
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_coords, get_plotting_function
+from .plot_utils import xarray_to_ndarray, get_plotting_function
 from ..rcparams import rcParams
-from ..utils import _var_names
+from ..utils import _var_names, get_coords
 
 
 def plot_pair(
