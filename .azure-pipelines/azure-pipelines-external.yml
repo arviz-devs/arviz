@@ -119,7 +119,7 @@ jobs:
     displayName: 'pydocstyle'
 
   - script: |
-      python -m black --check arviz examples
+      python -m black --check arviz examples asv_benchmarks
     displayName: 'black'
 
   - task: PublishTestResults@2

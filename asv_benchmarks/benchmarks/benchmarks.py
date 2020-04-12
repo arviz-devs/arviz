@@ -34,7 +34,7 @@ class Variance:
         else:
             az.Numba.disable_numba()
 
-    def time_variance(self, numba_flag):
+    def time_variance_2d(self, numba_flag):
         stats_variance_2d(self.data)
 
 
@@ -54,11 +54,11 @@ class CircStd:
 
 
 class Fast_Kde_1d:
-    params = [(True, False), (10**5, 10**6, 10**7)]
+    params = [(True, False), (10 ** 5, 10 ** 6, 10 ** 7)]
     param_names = ("Numba", "n")
 
     def setup(self, numba_flag, n):
-        self.x = np.random.randn(n//10, 10)
+        self.x = np.random.randn(n // 10, 10)
         if numba_flag:
             az.Numba.enable_numba()
         else:
@@ -67,20 +67,22 @@ class Fast_Kde_1d:
     def time_fast_kde_normal(self, numba_flag, n):
         _fast_kde(self.x)
 
-class Fast_KDE_2d:
-    params = [(True, False), (10**5, 10**6)]
-    param_names = ("Numba", "n")
 
-    def setup(self, numba_flag, n):
-        self.x = np.random.randn(n//10, 10)
-        self.y = np.random.randn(n//10, 10)
+class Fast_KDE_2d:
+    params = [(True, False), ((100, 10 ** 4), (10 ** 4, 100), (1000, 1000))]
+    param_names = ("Numba", "shape")
+
+    def setup(self, numba_flag, shape):
+        self.x = np.random.randn(*shape)
+        self.y = np.random.randn(*shape)
         if numba_flag:
             az.Numba.enable_numba()
         else:
             az.Numba.disable_numba()
 
-    def time_fast_kde_2d(self, numba_flag, n):
+    def time_fast_kde_2d(self, numba_flag, shape):
         _fast_kde_2d(self.x, self.y)
+
 
 class Atleast_Nd:
     params = ("az.utils", "numpy")
