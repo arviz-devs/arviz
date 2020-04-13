@@ -9,7 +9,8 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
-from ...plot_utils import _scale_fig_size, get_bins, make_label, format_coords_as_labels
+from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels
+from ....numeric_utils import get_bins
 
 
 def plot_trace(

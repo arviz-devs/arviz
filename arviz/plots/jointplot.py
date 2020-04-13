@@ -5,12 +5,11 @@ from ..data import convert_to_dataset
 from .plot_utils import (
     _scale_fig_size,
     xarray_var_iter,
-    get_coords,
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
-from ..utils import _var_names
+from ..utils import _var_names, get_coords
 
 
 def plot_joint(

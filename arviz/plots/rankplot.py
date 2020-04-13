@@ -8,11 +8,11 @@ from .plot_utils import (
     xarray_var_iter,
     default_grid,
     filter_plotters_list,
-    _sturges_formula,
     get_plotting_function,
 )
 from ..rcparams import rcParams
 from ..utils import _var_names
+from ..numeric_utils import _sturges_formula
 
 
 def plot_rank(

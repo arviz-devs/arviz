@@ -17,6 +17,8 @@
 * Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData` is a list or tuple (#1121)
 * Fixed overlaid pairplots issue (#1135)
 * Update Docker building steps (#1127)
+* Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
+* Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
 * Rank plot: rename `axes` argument to `ax` (#1144)
 
 ### Deprecation
