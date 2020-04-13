@@ -4,7 +4,5 @@ pylint
 pytest
 pytest-cov
 black ; python_version >= '3.6'
-# needed to build docs:
-m2r
 sphinx-bootstrap-theme 
 selenium
