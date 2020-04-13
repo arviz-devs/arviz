@@ -17,7 +17,7 @@ def plot_pair(
     textsize=None,
     kind="scatter",
     gridsize="auto",
-    contour=False,
+    contour=True,
     plot_kwargs=None,
     fill_last=False,
     divergences=False,
@@ -34,6 +34,8 @@ def plot_pair(
     point_estimate=None,
     point_estimate_kwargs=None,
     point_estimate_marker_kwargs=None,
+    reference_values=None,
+    reference_values_kwargs=None,
     show=None,
 ):
     """
@@ -99,6 +101,11 @@ def plot_pair(
         Additional keywords passed to ax.vline, ax.hline (matplotlib) or ax.square, Span (bokeh)
     point_estimate_marker_kwargs: dict, optional
         Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
+    reference_values : dict, optional
+        Reference values for the plotted variables. The Reference values will be plotted
+        using a scatter marker
+    reference_values_kwargs : dict, optional
+        Additional keywords passed to ax.plot or ax.circle in reference values plot
     show : bool, optional
         Call backend show function.
 
@@ -276,6 +283,8 @@ def plot_pair(
         point_estimate=point_estimate,
         point_estimate_kwargs=point_estimate_kwargs,
         point_estimate_marker_kwargs=point_estimate_marker_kwargs,
+        reference_values=reference_values,
+        reference_values_kwargs=reference_values_kwargs,
     )
 
     if backend is None:
