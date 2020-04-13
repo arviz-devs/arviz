@@ -75,7 +75,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         Refer to documentation of ``az.convert_to_dataset`` for details.
         For ndarray: shape = (chain, draw).
         For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
-    var_names : string or list of strings
+    var_names : str or list of str
         Names of variables to include in the return value Dataset.
     method : str, optional, default "bulk"
         Select ess method. Valid methods are:
