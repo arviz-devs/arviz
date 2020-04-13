@@ -66,18 +66,18 @@ def bfmi(data):
 
 
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
-    r"""Calculate estimate of the effective sample size.
+    r"""Calculate estimate of the effective sample size (ESS).
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an ``az.InferenceData`` object.
+        Refer to documentation of ``az.convert_to_dataset`` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
-    var_names : list
-        Names of variables to include in the effective_sample_size_mean report
-    method : str
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+    var_names : str or list of str
+        Names of variables to include in the return value Dataset.
+    method : str, optional, default "bulk"
         Select ess method. Valid methods are:
 
         - "bulk"
@@ -90,12 +90,11 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
-
     relative : bool
         Return relative ess
         `ress = ess / n`
     prob : float, optional
-        probability value for "tail" and "quantile" ess functions.
+        probability value for "tail" and "quantile" ESS functions.
 
     Returns
     -------
@@ -104,8 +103,10 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     Notes
     -----
-    The basic ess diagnostic is computed by:
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
+    The basic ESS (:math:`N_{\mathit{eff}}`) diagnostic is computed by:
+
+    .. math:: \hat{N}_{\mathit{eff}} = \frac{MN}{\hat{\tau}}
+
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
 
     where :math:`M` is the number of chains, :math:`N` the number of draws,
