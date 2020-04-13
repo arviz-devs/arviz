@@ -10,6 +10,7 @@
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
 * Add option to display rank plots instead of trace (#1134)
+
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
@@ -18,6 +19,8 @@
 * Update Docker building steps (#1127)
 * Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
 * Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
+* Rank plot: rename `axes` argument to `ax` (#1144)
+
 ### Deprecation
 
 ### Documentation

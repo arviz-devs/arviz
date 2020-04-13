@@ -26,7 +26,7 @@ def plot_rank(
     ref_line=True,
     labels=True,
     figsize=None,
-    axes=None,
+    ax=None,
     backend=None,
     backend_kwargs=None,
     show=None,
@@ -136,7 +136,7 @@ def plot_rank(
         bins = _sturges_formula(posterior_data, mult=2)
 
     rows, cols = default_grid(length_plotters)
-    if axes is None:
+    if ax is None:
         figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
             figsize, None, rows=rows, cols=cols
         )
@@ -155,7 +155,7 @@ def plot_rank(
         colors = [colors] * chains
 
     rankplot_kwargs = dict(
-        axes=axes,
+        axes=ax,
         length_plotters=length_plotters,
         rows=rows,
         cols=cols,
