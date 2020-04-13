@@ -11,7 +11,6 @@
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
 * Add option to display rank plots instead of trace (#1134)
-
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) to `from_dict` (#1125)
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro and numpyro translation (#1090, #1125)
 * Add `num_chains` and `pred_dims` arguments to from_pyro and from_numpyro (#1090, #1125)
