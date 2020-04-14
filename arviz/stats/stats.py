@@ -141,9 +141,11 @@ def compare(
     if scale == "log":
         scale_value = 1
         ascending = False
-        warnings.warn("\nThe scale is now log by default. Use 'scale' argument if you "
-                      "rely on a specific value.\n A higher log-score (or a lower "
-                      "deviance) indicates a model with better predictive accuracy.")
+        warnings.warn(
+            "\nThe scale is now log by default. Use 'scale' argument if you "
+            "rely on a specific value.\n A higher log-score (or a lower "
+            "deviance) indicates a model with better predictive accuracy."
+        )
     else:
         if scale == "negative_log":
             scale_value = -1
@@ -320,7 +322,7 @@ def hpd(
     var_names=None,
     coords=None,
     max_modes=10,
-    **kwargs
+    **kwargs,
 ):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
@@ -410,7 +412,7 @@ def hpd(
     func_kwargs = {
         "credible_interval": credible_interval,
         "skipna": skipna,
-        "out_shape": (max_modes, 2,) if multimodal else (2,),
+        "out_shape": (max_modes, 2) if multimodal else (2,),
     }
     kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
     if not multimodal:
@@ -501,7 +503,7 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    hpd_intervals = np.full((max_modes, 2,), np.nan,)
+    hpd_intervals = np.full((max_modes, 2), np.nan)
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
