@@ -427,10 +427,6 @@ def get_log_likelihood(idata, var_name=None):
 
 BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
 
-The scale is now log by default. Use 'scale' argument if you rely on a specific value.
-A higher log-score (or a lower deviance) indicates a model with better predictive 
-accuracy.
-
 {{0:{0}}} Estimate       SE
 {{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
 p_{{kind:{1}}} {{3:8.2f}}        -"""
@@ -443,6 +439,10 @@ Pareto k diagnostic values:
    (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
+SCALE_WARNING_FORMAT = """
+The scale is now log by default. Use 'scale' argument if you rely on a specific value. 
+A higher log-score (or a lower deviance) indicates a model with better predictive 
+accuracy."""
 SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
 
 
@@ -479,6 +479,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
             )
             base = "\n".join([base, extended])
+        base = "\n".join([base, SCALE_WARNING_FORMAT])
         return base
 
     def __repr__(self):
