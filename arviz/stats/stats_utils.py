@@ -427,6 +427,10 @@ def get_log_likelihood(idata, var_name=None):
 
 BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
 
+The scale is now log by default. Use 'scale' argument if you rely on a specific value.
+A higher log-score (or a lower deviance) indicates a model with better predictive 
+accuracy.
+
 {{0:{0}}} Estimate       SE
 {{scale}}_{{kind}} {{1:8.2f}}  {{2:7.2f}}
 p_{{kind:{1}}} {{3:8.2f}}        -"""
