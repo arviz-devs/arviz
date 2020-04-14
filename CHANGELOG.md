@@ -3,25 +3,32 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
 * Add `num_chains` and `pred_dims` arguments to io_pyro #1090
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * Allow xarray.Dataarray input for plots.(#1120)
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
+* Add option to display rank plots instead of trace (#1134)
+
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
 * Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData` is a list or tuple (#1121)
 * Fixed overlaid pairplots issue (#1135)
+* Update Docker building steps (#1127)
+* Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
+* Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
+* Rank plot: rename `axes` argument to `ax` (#1144)
+
 ### Deprecation
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
 * Image thumbs generation updated to be Bokeh 2 compatible (#1116)
 * Add new examples for `plot_pair` (#1110)
-
+* Add examples for `psislw` and `r2_score` (#1129) 
 
 ## v0.7.0 (2020 Mar 2)
 
@@ -216,3 +223,4 @@
 ## v0.3.0 (2018 Dec 14)
 
 * First Beta Release
+

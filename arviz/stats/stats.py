@@ -12,7 +12,6 @@ import scipy.stats as st
 from scipy.optimize import minimize
 import xarray as xr
 
-from ..plots.plot_utils import _fast_kde, get_bins, get_coords
 from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
 from .diagnostics import _multichain_statistics, _mc_error, ess
 from .stats_utils import (
@@ -21,11 +20,11 @@ from .stats_utils import (
     logsumexp as _logsumexp,
     ELPDData,
     stats_variance_2d as svar,
-    histogram,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
 )
-from ..utils import _var_names, Numba, _numba_var
+from ..numeric_utils import _fast_kde, histogram, get_bins
+from ..utils import _var_names, Numba, _numba_var, get_coords
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
@@ -693,6 +692,22 @@ def psislw(log_weights, reff=1.0):
         Smoothed log weights
     kss : array
         Pareto tail indices
+
+    References
+    ----------
+    * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+
+    Examples
+    --------
+    Get Pareto smoothed importance sampling (PSIS) log weights:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: log_likelihood = data.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+           ...: az.psislw(-log_likelihood, reff=0.8)
+
     """
     if hasattr(log_weights, "sample"):
         n_samples = len(log_weights.sample)
@@ -874,6 +889,19 @@ def r2_score(y_true, y_pred):
     Pandas Series with the following indices:
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
+
+    Examples
+    --------
+    Calculate R² for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_score(y_true, y_pred)
+
     """
     _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:

@@ -7,13 +7,12 @@ import matplotlib.pyplot as plt
 
 from .plot_utils import (
     get_plotting_function,
-    get_coords,
     xarray_var_iter,
     KwargSpec,
     matplotlib_kwarg_dealiaser,
 )
 from ..data import convert_to_dataset, InferenceData, CoordSpec
-from ..utils import _var_names
+from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
 
 
@@ -23,6 +22,7 @@ def plot_trace(
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
     divergences: Optional[str] = "bottom",
+    kind: Optional[str] = "trace",
     figsize: Optional[Tuple[float, float]] = None,
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
@@ -36,13 +36,14 @@ def plot_trace(
     rug_kwargs: Optional[KwargSpec] = None,
     hist_kwargs: Optional[KwargSpec] = None,
     trace_kwargs: Optional[KwargSpec] = None,
+    rank_kwargs: Optional[KwargSpec] = None,
     ax=None,
     backend: Optional[str] = None,
     backend_config: Optional[KwargSpec] = None,
     backend_kwargs: Optional[KwargSpec] = None,
     show: Optional[bool] = None,
 ):
-    """Plot distribution (histogram or kernel density estimates) and sampled values.
+    """Plot distribution (histogram or kernel density estimates) and sampled values or rank plot.
 
     If `divergences` data is available in `sample_stats`, will plot the location of divergences as
     dashed vertical lines.
@@ -58,6 +59,8 @@ def plot_trace(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     divergences : {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
+    kind : {"trace", "rank_bar", "rank_vlines"}, optional
+        Choose between plotting sampled values per iteration and rank plots.
     transform : callable, optional
         Function to transform data (defaults to None i.e.the identity function)
     figsize : tuple of (float, float), optional
@@ -118,6 +121,13 @@ def plot_trace(
 
         >>> az.plot_trace(data, compact=True)
 
+    Display a rank plot instead of trace
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_trace(data, var_names=["mu", "tau"], kind="rank_bars")
+
     Combine all chains into one distribution
 
     .. plot::
@@ -135,6 +145,9 @@ def plot_trace(
         >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, lines=lines)
 
     """
+    if kind not in {"trace", "rank_vlines", "rank_bars"}:
+        raise ValueError("The value of kind must be either trace, rank_vlines or rank_bars.")
+
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
@@ -235,6 +248,8 @@ def plot_trace(
         fill_kwargs = {}
     if rug_kwargs is None:
         rug_kwargs = {}
+    if rank_kwargs is None:
+        rank_kwargs = {}
 
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
@@ -243,6 +258,7 @@ def plot_trace(
         var_names=var_names,
         # coords = coords,
         divergences=divergences,
+        kind=kind,
         figsize=figsize,
         rug=rug,
         lines=lines,
@@ -251,6 +267,7 @@ def plot_trace(
         rug_kwargs=rug_kwargs,
         hist_kwargs=hist_kwargs,
         trace_kwargs=trace_kwargs,
+        rank_kwargs=rank_kwargs,
         compact_prop=compact_prop,
         combined=combined,
         chain_prop=chain_prop,

@@ -8,13 +8,16 @@ import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, get_bins, make_label, format_coords_as_labels
+from ...rankplot import plot_rank
+from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels
+from ....numeric_utils import get_bins
 
 
 def plot_trace(
     data,
     var_names,  # pylint: disable=unused-argument
     divergences,
+    kind,
     figsize,
     rug,
     lines,
@@ -27,6 +30,7 @@ def plot_trace(
     rug_kwargs,
     hist_kwargs,
     trace_kwargs,
+    rank_kwargs,
     plotters,
     divergence_data,
     axes,
@@ -47,6 +51,8 @@ def plot_trace(
         One or more variables to be plotted.
     divergences : {"bottom", "top", None, False}
         Plot location of divergences on the traceplots. Options are "bottom", "top", or False-y.
+    kind : {"trace", "rank_bar", "rank_vlines"}, optional
+        Choose between plotting sampled values per iteration and rank plots.
     figsize : figure size tuple
         If None, size is (12, variables * 2)
     rug : bool
@@ -70,6 +76,8 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects discrete variables.
     trace_kwargs : dict
         Extra keyword arguments passed to `plt.plot`
+    rank_kwargs : dict
+        Extra keyword arguments passed to `arviz.plot_rank`
     Returns
     -------
     axes : matplotlib axes
@@ -129,6 +137,7 @@ def plot_trace(
     if axes is None:
         _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
 
+    axes = np.atleast_2d(axes)
     # Check the input for lines
     if lines is not None:
         all_var_names = set(plotter[0] for plotter in plotters)
@@ -160,11 +169,13 @@ def plot_trace(
                 combined,
                 xt_labelsize,
                 rug,
+                kind,
                 trace_kwargs,
                 hist_kwargs,
                 plot_kwargs,
                 fill_kwargs,
                 rug_kwargs,
+                rank_kwargs,
             )
             if compact_prop:
                 plot_kwargs.pop(compact_prop[0])
@@ -197,11 +208,13 @@ def plot_trace(
                     combined,
                     xt_labelsize,
                     rug,
+                    kind,
                     trace_kwargs,
                     hist_kwargs,
                     plot_kwargs,
                     fill_kwargs,
                     rug_kwargs,
+                    rank_kwargs,
                 )
                 if legend:
                     handles.append(
@@ -241,18 +254,19 @@ def plot_trace(
                     else:
                         ylocs = [ylim[0] for ylim in ylims]
                     values = value[chain, div_idxs]
-                    axes[idx, 1].plot(
-                        div_draws,
-                        np.zeros_like(div_idxs) + ylocs[1],
-                        marker="|",
-                        color="black",
-                        markeredgewidth=1.5,
-                        markersize=30,
-                        linestyle="None",
-                        alpha=hist_kwargs["alpha"],
-                        zorder=-5,
-                    )
-                    axes[idx, 1].set_ylim(*ylims[1])
+                    if kind == "trace":
+                        axes[idx, 1].plot(
+                            div_draws,
+                            np.zeros_like(div_idxs) + ylocs[1],
+                            marker="|",
+                            color="black",
+                            markeredgewidth=1.5,
+                            markersize=30,
+                            linestyle="None",
+                            alpha=hist_kwargs["alpha"],
+                            zorder=-5,
+                        )
+                        axes[idx, 1].set_ylim(*ylims[1])
                     axes[idx, 0].plot(
                         values,
                         np.zeros_like(values) + ylocs[0],
@@ -276,12 +290,18 @@ def plot_trace(
                         "line-positions should be numeric, found {}".format(line_values)
                     )
             axes[idx, 0].vlines(line_values, *ylims[0], colors="black", linewidth=1.5, alpha=0.75)
-            axes[idx, 1].hlines(
-                line_values, *xlims[1], colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
-            )
+            if kind == "trace":
+                axes[idx, 1].hlines(
+                    line_values,
+                    *xlims[1],
+                    colors="black",
+                    linewidth=1.5,
+                    alpha=trace_kwargs["alpha"]
+                )
         axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
-        axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
-        axes[idx, 1].set_ylim(*ylims[1])
+        if kind == "trace":
+            axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
+            axes[idx, 1].set_ylim(*ylims[1])
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
         handles = [
@@ -295,7 +315,7 @@ def plot_trace(
                     [], [], label="combined", **{chain_prop[0]: chain_prop[1][-1]}, **plot_kwargs
                 ),
             )
-        axes[0, 1].legend(handles=handles, title="chain")
+        axes[0, 0].legend(handles=handles, title="chain")
 
     if backend_show(show):
         plt.show()
@@ -312,16 +332,19 @@ def _plot_chains_mpl(
     combined,
     xt_labelsize,
     rug,
+    kind,
     trace_kwargs,
     hist_kwargs,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
+    rank_kwargs,
 ):
     for chain_idx, row in enumerate(value):
-        axes[idx, 1].plot(
-            data.draw.values, row, **{chain_prop[0]: chain_prop[1][chain_idx]}, **trace_kwargs
-        )
+        if kind == "trace":
+            axes[idx, 1].plot(
+                data.draw.values, row, **{chain_prop[0]: chain_prop[1][chain_idx]}, **trace_kwargs
+            )
 
         if not combined:
             plot_kwargs[chain_prop[0]] = chain_prop[1][chain_idx]
@@ -338,6 +361,11 @@ def _plot_chains_mpl(
                 show=False,
             )
             plot_kwargs.pop(chain_prop[0])
+
+    if kind == "rank_bars":
+        plot_rank(data=value, kind="bars", ax=axes[idx, 1], **rank_kwargs)
+    elif kind == "rank_vlines":
+        plot_rank(data=value, kind="vlines", ax=axes[idx, 1], **rank_kwargs)
 
     if combined:
         plot_kwargs[chain_prop[0]] = chain_prop[1][-1]

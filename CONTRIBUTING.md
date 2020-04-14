@@ -31,7 +31,7 @@ to ensure that any new contribution does not strongly overlap with existing func
 ## Steps before starting work
 Before starting a work on a pull request double check that no one else is working on the ticket in both issue tickets and pull requests.
 
-### If an issue ticket exists 
+### If an issue ticket exists
 If an issue exists check the ticket to ensure no one else has started work. If first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
 
 ### If an issue ticket doesn't exist
@@ -122,7 +122,7 @@ install these extra dependencies, Docker can be used. See: [Building documentati
 
    ```bash
    $ git add modified_files
-   $ git commit
+   $ git commit -m "commit message here"
    ```
 
    to record your changes locally.
@@ -171,13 +171,13 @@ tools:
 * Save plots as part of tests. Plots will save to a directory named test_images by default
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save
+  $ pytest arviz/tests/base_tests/<name of test>.py --save
   ```
 
 * Optionally save plots to a user named directory. This is useful for comparing changes across branches
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save user_defined_directory
+  $ pytest arviz/tests/base_tests/<name of test>.py --save user_defined_directory
   ```
 
 
@@ -188,11 +188,11 @@ tools:
   $ pytest --cov=arviz --cov-report=html arviz/tests/
   ```
 
-* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6
+* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6+
 
   ```bash
   $ pip install black
-  $ black arviz/ examples/
+  $ black arviz/ examples/ asv_benchmarks/
   ```
 
 * Your code passes pylint
@@ -213,6 +213,33 @@ tools:
 We have provided a Dockerfile which helps for isolating build problems, and local development.
 Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
+### container.sh & container.ps1
+
+Predefined docker commands can be run with a `./scripts/container.sh` (on Linux and macOS)
+and with `./scripts/container.ps1`. The scripts enables developer easily to call predefined docker commands.
+User can use one or multiple flags.
+
+They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
+
+    $ ./scripts/container.sh --clear-cache
+    $ ./scripts/container.sh --build
+
+    $ ./scripts/container.sh --test
+    $ ./scripts/container.sh --docs
+    $ ./scripts/container.sh --shell
+    $ ./scripts/container.sh --notebook
+    $ ./scripts/container.sh --lab
+
+
+    $ powershell.exe -File ./scripts/container.ps1 --clear-cache
+    $ powershell.exe -File ./scripts/container.ps1 --build
+
+    $ powershell.exe -File ./scripts/container.ps1 --test
+    $ powershell.exe -File ./scripts/container.ps1 --docs
+    $ powershell.exe -File ./scripts/container.ps1 --shell
+    $ powershell.exe -File ./scripts/container.ps1 --notebook
+    $ powershell.exe -File ./scripts/container.ps1 --lab
+
 ### Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
 First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
@@ -229,9 +256,19 @@ To start a bash shell inside Docker, run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
 
+and for Windows, use %CD% on cmd.exe and $pwd.Path on powershell.
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ -it arviz bash
+
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker exec jupyter-dock bash -c "pip install jupyter"
+    $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
+
+and the same on Windows
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
     $ docker exec jupyter-dock bash -c "pip install jupyter"
     $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
@@ -239,7 +276,7 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 
 ### Building documentation with Docker
 The documentation can be build with Docker by running `./scripts/container.sh
---sphinx-build`. The docker image contains by default all dependencies needed
+--docs`. The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
 container, they can be checked at `doc/build`.
 

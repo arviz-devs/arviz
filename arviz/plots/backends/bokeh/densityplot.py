@@ -10,11 +10,9 @@ from ...plot_utils import (
     make_label,
     _create_axes_grid,
     calculate_point_estimate,
-    _fast_kde,
-    get_bins,
 )
 from ....stats import hpd
-from ....stats.stats_utils import histogram
+from ....numeric_utils import _fast_kde, histogram, get_bins
 
 
 def plot_density(

@@ -131,6 +131,8 @@ def test_plot_density_bad_kwargs(models):
         {"combined": True, "compact": True, "legend": True},
         {"divergences": "top"},
         {"divergences": False},
+        {"kind": "rank_vlines"},
+        {"kind": "rank_bars"},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
     ],
@@ -707,6 +709,11 @@ def test_plot_mcse_no_divergences(models):
             "var_names": ["theta"],
             "coords": {"theta_dim_0": [0, 1]},
             "textsize": 20,
+        },
+        {
+            "point_estimate": "mean",
+            "reference_values": {"mu": 0, "tau": 0},
+            "reference_values_kwargs": {"line_color": "blue"},
         },
     ],
 )

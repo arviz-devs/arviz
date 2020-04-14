@@ -2,7 +2,8 @@
 """Plot distribution as histogram or kernel density estimates."""
 
 import xarray as xr
-from .plot_utils import get_bins, get_plotting_function, matplotlib_kwarg_dealiaser
+from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
+from ..numeric_utils import get_bins
 from ..data import InferenceData
 from ..rcparams import rcParams
 
