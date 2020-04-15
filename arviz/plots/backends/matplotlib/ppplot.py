@@ -1,4 +1,4 @@
-"""Matplotib Prior/Posterior plot."""
+"""Matplotib Posterior predictive plot."""
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -24,6 +24,8 @@ def plot_pp(
     linewidth,
     legend,
     groups,
+    fill_kwargs,
+    plot_kwargs,
     backend_kwargs,
     show,
 ):
@@ -53,6 +55,9 @@ def plot_pp(
     matplotlib.rc("xtick", labelsize=7)
     matplotlib.rc("ytick", labelsize=7)
 
+    plot_kwargs.pop("color", None)
+    plot_kwargs.setdefault("linewidth", linewidth)
+
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
         color = colors[group]
@@ -64,7 +69,8 @@ def plot_pp(
                 var_name=var,
                 coord_name=coord,
                 color=color,
-                linewidth=linewidth,
+                fill_kwargs=fill_kwargs,
+                plot_kwargs=plot_kwargs,
             )
             _pp_helper(
                 ax=axes[(cols + 1) * (idx2) + cols],
@@ -73,7 +79,8 @@ def plot_pp(
                 var_name=var,
                 coord_name=coord,
                 color=color,
-                linewidth=linewidth,
+                fill_kwargs=fill_kwargs,
+                plot_kwargs=plot_kwargs,
             )
 
     if backend_show(show):
@@ -83,12 +90,13 @@ def plot_pp(
 
 
 def _pp_helper(
-    ax, data, group, var_name, coord_name, color, linewidth,
+    ax, data, group, var_name, coord_name, color, fill_kwargs, plot_kwargs,
 ):
+    plot_kwargs["color"] = color
     plot_kde(
         data,
         label="{} {} {}".format(group, var_name, coord_name),
-        plot_kwargs={"color": color, "linewidth": linewidth,},
-        fill_kwargs={"alpha": 0},
+        fill_kwargs=fill_kwargs,
+        plot_kwargs=plot_kwargs,
         ax=ax,
     )

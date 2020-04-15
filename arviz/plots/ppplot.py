@@ -1,4 +1,4 @@
-"""Posterior/Prior plot."""
+"""Posterior-Prior plot."""
 from numbers import Integral
 import platform
 import logging
@@ -22,6 +22,8 @@ def plot_pp(
     coords=None,
     legend=True,
     ax=None,
+    fill_kwargs=None,
+    plot_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
@@ -38,19 +40,6 @@ def plot_pp(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
-    data_pairs : dict
-        Dictionary containing relations between observed data and posterior/prior predictive data.
-        Dictionary structure:
-
-        - key = data var_name
-        - value = posterior/prior predictive var_name
-
-        For example, `data_pairs = {'y' : 'y_hat'}`
-        If None, it will assume that the observed data and the posterior/prior
-        predictive data have the same variable name.
-    var_names : list
-        List of variables to be plotted. Defaults to all observed variables in the
-        model if None.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
@@ -60,6 +49,10 @@ def plot_pp(
         Add legend to figure. By default True.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
+    fill_kwargs : dicts, optional
+        Additional keywords passed to `arviz.plot_kde` (to control the shade)
+    plot_kwargs : dicts, optional
+        Additional keywords passed to `arviz.plot_kde` or `plt.hist` (if type='hist')
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -82,7 +75,6 @@ def plot_pp(
         >>> import arvizz as az
         >>> data = az.load_arviz_data('radon')
         >>> az.plot_pp(data, vars=["defs"], coords={"team" : ["Italy"]})
-        >>> #az.plot_ppc(data,data_pairs={"obs":"obs_hat"})
 
     """
 
@@ -90,6 +82,12 @@ def plot_pp(
 
     if coords is None:
         coords = {}
+
+    if fill_kwargs is None:
+        fill_kwargs = {}
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
 
     pp_plotters = []
     for group in groups:
@@ -121,6 +119,8 @@ def plot_pp(
         linewidth=linewidth,
         legend=legend,
         groups=groups,
+        fill_kwargs=fill_kwargs,
+        plot_kwargs=plot_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )
