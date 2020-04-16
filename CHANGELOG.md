@@ -24,6 +24,7 @@
 * Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
 * Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
 * Rank plot: rename `axes` argument to `ax` (#1144)
+* Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150))
 
 ### Deprecation
 

@@ -48,13 +48,13 @@ def test_hpd():
 def test_hpd_2darray():
     normal_sample = np.random.randn(12000, 5)
     result = hpd(normal_sample)
-    assert result.shape == (5, 2,)
+    assert result.shape == (5, 2)
 
 
 def test_hpd_multidimension():
     normal_sample = np.random.randn(12000, 10, 3)
     result = hpd(normal_sample)
-    assert result.shape == (3, 2,)
+    assert result.shape == (3, 2)
 
 
 def test_hpd_idata(centered_eight):
@@ -429,7 +429,6 @@ def test_loo_print(centered_eight, scale):
     assert loo_data is not None
     assert loo_pointwise is not None
     assert len(loo_data) < len(loo_pointwise)
-    assert loo_data == loo_pointwise[: len(loo_data)]
 
 
 def test_psislw(centered_eight):
