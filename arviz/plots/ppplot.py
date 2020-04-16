@@ -1,7 +1,5 @@
 """Posterior-Prior plot."""
-from numbers import Integral
-import platform
-import logging
+
 import numpy as np
 
 from .plot_utils import (
@@ -11,19 +9,20 @@ from .plot_utils import (
 )
 from ..rcparams import rcParams
 
-_log = logging.getLogger(__name__)
-
 
 def plot_pp(
     data,
     figsize=None,
     textsize=None,
-    vars=None,
+    var_names=None,
     coords=None,
     legend=True,
     ax=None,
     fill_kwargs=None,
-    plot_kwargs=None,
+    prior_plot_kwargs=None,
+    posterior_plot_kwargs=None,
+    prior_kwargs=None,
+    posterior_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
@@ -40,6 +39,9 @@ def plot_pp(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
+    var_names : list
+        List of variables to be plotted. Defaults to all observed variables in the
+        model if None.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
@@ -72,9 +74,9 @@ def plot_pp(
     .. plot::
         :context: close-figs
 
-        >>> import arvizz as az
+        >>> import arviz as az
         >>> data = az.load_arviz_data('radon')
-        >>> az.plot_pp(data, vars=["defs"], coords={"team" : ["Italy"]})
+        >>> az.plot_pp(data, var_names=["defs"], coords={"team" : ["Italy"]})
 
     """
 
@@ -86,8 +88,20 @@ def plot_pp(
     if fill_kwargs is None:
         fill_kwargs = {}
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
+    if prior_plot_kwargs is None:
+        prior_plot_kwargs = {}
+
+    if posterior_plot_kwargs is None:
+        posterior_plot_kwargs = {}
+
+    if prior_kwargs is None:
+        prior_kwargs = {}
+
+    if posterior_kwargs is None:
+        posterior_kwargs = {}
+
+    if backend_kwargs is None:
+        backend_kwargs = {}
 
     pp_plotters = []
     for group in groups:
@@ -98,29 +112,35 @@ def plot_pp(
             coord[key] = np.where(np.in1d(group[key], coords[key]))[0]
 
         plotters = [
-            tup for tup in xarray_var_iter(group.isel(coord), var_names=vars, combined=True,)
+            tup for tup in xarray_var_iter(group.isel(coord), var_names=var_names, combined=True,)
         ]
         pp_plotters.append(plotters)
 
-    cols = len(groups)
-    rows = 2 * len(pp_plotters[0])
+    ngroups = len(groups)
+    nvars = len(pp_plotters[0])
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
+        figsize, textsize, 2 * nvars, ngroups
     )
+
+    prior_plot_kwargs.setdefault("color", "blue")
+    prior_plot_kwargs.setdefault("linewidth", linewidth)
+    posterior_plot_kwargs.setdefault("color", "red")
+    posterior_plot_kwargs.setdefault("linewidth", linewidth)
 
     ppplot_kwargs = dict(
         ax=ax,
-        length_plotters=(cols + 1) * rows,
-        rows=rows,
-        cols=cols,
+        nvars=nvars,
+        ngroups=ngroups,
         figsize=figsize,
         pp_plotters=pp_plotters,
-        linewidth=linewidth,
         legend=legend,
         groups=groups,
         fill_kwargs=fill_kwargs,
-        plot_kwargs=plot_kwargs,
+        prior_plot_kwargs=prior_plot_kwargs,
+        posterior_plot_kwargs=posterior_plot_kwargs,
+        prior_kwargs=prior_kwargs,
+        posterior_kwargs=posterior_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )
