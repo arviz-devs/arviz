@@ -20,7 +20,18 @@ class NumPyroConverter:
     ndraws = None  # type: int
 
     def __init__(
-        self, *, posterior=None, prior=None, posterior_predictive=None, coords=None, dims=None
+        self,
+        *,
+        posterior=None,
+        prior=None,
+        posterior_predictive=None,
+        predictions=None,
+        constant_data=None,
+        predictions_constant_data=None,
+        coords=None,
+        dims=None,
+        pred_dims=None,
+        num_chains=1
     ):
         """Convert NumPyro data into an InferenceData object.
 
@@ -32,10 +43,20 @@ class NumPyroConverter:
             Prior samples from a NumPyro model
         posterior_predictive : dict
             Posterior predictive samples for the posterior
+        predictions: dict
+            Out of sample predictions
+        constant_data: dict
+            Dictionary containing constant data variables mapped to their values.
+        predictions_constant_data: dict
+            Constant data used for out-of-sample predictions.
         coords : dict[str] -> list[str]
             Map of dimensions to coordinates
         dims : dict[str] -> list[str]
             Map variable names to their coordinates
+        pred_dims: dict
+            Dims for predictions data. Map variable names to their coordinates.
+        num_chains: int
+            Number of chains used for sampling. Ignored if posterior is present.
         """
         import jax
         import numpyro
@@ -43,9 +64,16 @@ class NumPyroConverter:
         self.posterior = posterior
         self.prior = jax.device_get(prior)
         self.posterior_predictive = jax.device_get(posterior_predictive)
+        self.predictions = predictions
+        self.constant_data = constant_data
+        self.predictions_constant_data = predictions_constant_data
         self.coords = coords
         self.dims = dims
+        self.pred_dims = pred_dims
         self.numpyro = numpyro
+
+        def arbitrary_element(dct):
+            return next(iter(dct.values()))
 
         if posterior is not None:
             samples = jax.device_get(self.posterior.get_samples(group_by_chain=True))
@@ -65,7 +93,22 @@ class NumPyroConverter:
             self._args = self.posterior._args  # pylint: disable=protected-access
             self._kwargs = self.posterior._kwargs  # pylint: disable=protected-access
         else:
-            self.nchains = self.ndraws = 0
+            self.nchains = num_chains
+            get_from = None
+            if predictions is not None:
+                get_from = predictions
+            elif posterior_predictive is not None:
+                get_from = posterior_predictive
+            elif prior is not None:
+                get_from = prior
+            if get_from is None and constant_data is None and predictions_constant_data is None:
+                raise ValueError(
+                    "When constructing InferenceData must have at least"
+                    " one of posterior, prior, posterior_predictive or predictions."
+                )
+            if get_from is not None:
+                aelem = arbitrary_element(get_from)
+                self.ndraws = aelem.shape[0] // self.nchains
 
         observations = {}
         if self.model is not None:
@@ -120,11 +163,10 @@ class NumPyroConverter:
                 data[obs_name] = np.reshape(log_like.copy(), shape)
         return dict_to_dataset(data, library=self.numpyro, dims=self.dims, coords=self.coords)
 
-    @requires("posterior_predictive")
-    def posterior_predictive_to_xarray(self):
-        """Convert posterior_predictive samples to xarray."""
+    def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
+        """Convert posterior_predictive or prediction samples to xarray."""
         data = {}
-        for k, ary in self.posterior_predictive.items():
+        for k, ary in dct.items():
             shape = ary.shape
             if shape[0] == self.nchains and shape[1] == self.ndraws:
                 data[k] = ary
@@ -136,7 +178,19 @@ class NumPyroConverter:
                     "posterior predictive shape not compatible with number of chains and draws. "
                     "This can mean that some draws or even whole chains are not represented."
                 )
-        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.numpyro, coords=self.coords, dims=dims)
+
+    @requires("posterior_predictive")
+    def posterior_predictive_to_xarray(self):
+        """Convert posterior_predictive samples to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(
+            self.posterior_predictive, self.dims
+        )
+
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert predictions to xarray."""
+        return self.translate_posterior_predictive_dict_to_xarray(self.predictions, self.pred_dims)
 
     def priors_to_xarray(self):
         """Convert prior samples (and if possible prior predictive too) to xarray."""
@@ -184,6 +238,32 @@ class NumPyroConverter:
             observed_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data, attrs=make_attrs(library=self.numpyro))
 
+    def convert_constant_data_to_xarray(self, dct, dims):
+        """Convert constant_data or predictions_constant_data to xarray."""
+        if dims is None:
+            dims = {}
+        constant_data = {}
+        for name, vals in dct.items():
+            vals = utils.one_de(vals)
+            val_dims = dims.get(name)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, name, dims=val_dims, coords=self.coords
+            )
+            # filter coords based on the dims
+            coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
+            constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.numpyro))
+
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant_data to xarray."""
+        return self.convert_constant_data_to_xarray(self.constant_data, self.dims)
+
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions_constant_data to xarray."""
+        return self.convert_constant_data_to_xarray(self.predictions_constant_data, self.pred_dims)
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -197,13 +277,28 @@ class NumPyroConverter:
                 "sample_stats": self.sample_stats_to_xarray(),
                 "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
                 **self.priors_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
+                "constant_data": self.constant_data_to_xarray(),
+                "predictions_constant_data": self.predictions_constant_data_to_xarray(),
             }
         )
 
 
-def from_numpyro(posterior=None, *, prior=None, posterior_predictive=None, coords=None, dims=None):
+def from_numpyro(
+    posterior=None,
+    *,
+    prior=None,
+    posterior_predictive=None,
+    predictions=None,
+    constant_data=None,
+    predictions_constant_data=None,
+    coords=None,
+    dims=None,
+    pred_dims=None,
+    num_chains=1
+):
     """Convert NumPyro data into an InferenceData object.
 
     Parameters
@@ -214,15 +309,30 @@ def from_numpyro(posterior=None, *, prior=None, posterior_predictive=None, coord
         Prior samples from a NumPyro model
     posterior_predictive : dict
         Posterior predictive samples for the posterior
+    predictions: dict
+        Out of sample predictions
+    constant_data: dict
+        Dictionary containing constant data variables mapped to their values.
+    predictions_constant_data: dict
+        Constant data used for out-of-sample predictions.
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     dims : dict[str] -> list[str]
         Map variable names to their coordinates
+    pred_dims: dict
+        Dims for predictions data. Map variable names to their coordinates.
+    num_chains: int
+        Number of chains used for sampling. Ignored if posterior is present.
     """
     return NumPyroConverter(
         posterior=posterior,
         prior=prior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
+        constant_data=constant_data,
+        predictions_constant_data=predictions_constant_data,
         coords=coords,
         dims=dims,
+        pred_dims=pred_dims,
+        num_chains=num_chains,
     ).to_inference_data()
