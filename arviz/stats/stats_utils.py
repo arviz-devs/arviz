@@ -440,7 +440,8 @@ Pareto k diagnostic values:
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
 SCALE_WARNING_FORMAT = """
-The scale is now log by default. Use 'scale' argument if you rely on a specific value. 
+The scale is now log by default. Use 'scale' argument or 'stats.ic_scale' rcParam if 
+you rely on a specific value. 
 A higher log-score (or a lower deviance) indicates a model with better predictive 
 accuracy."""
 SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
