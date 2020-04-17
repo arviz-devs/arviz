@@ -4,6 +4,7 @@ import numpy as np
 
 from .plot_utils import (
     xarray_var_iter,
+    get_coords,
     _scale_fig_size,
     get_plotting_function,
 )
@@ -16,11 +17,9 @@ def plot_pp(
     textsize=None,
     var_names=None,
     coords=None,
+    transform=None,
     legend=True,
     ax=None,
-    fill_kwargs=None,
-    prior_plot_kwargs=None,
-    posterior_plot_kwargs=None,
     prior_kwargs=None,
     posterior_kwargs=None,
     backend=None,
@@ -47,14 +46,16 @@ def plot_pp(
         Dimensions without a mapping specified will include all coordinates for
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
+    transform : callable
+        Function to transform data (defaults to None i.e. the identity function)
     legend : bool
         Add legend to figure. By default True.
     ax: axes, optional
-        Matplotlib axes or bokeh figures.
-    fill_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` (to control the shade)
-    plot_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` or `plt.hist` (if type='hist')
+        Matplotlib axes: a numpy 2d array of matplotlib axes.
+    prior_kwargs : dicts, optional
+        Additional keywords passed to `arviz.plot_kde` for prior group.
+    posterior_kwargs : dicts, optional
+        Additional keywords passed to `arviz.plot_kde` for posterior group.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -82,17 +83,11 @@ def plot_pp(
 
     groups = ["prior", "posterior"]
 
+    if transform is not None:
+        data = transform(data)
+
     if coords is None:
         coords = {}
-
-    if fill_kwargs is None:
-        fill_kwargs = {}
-
-    if prior_plot_kwargs is None:
-        prior_plot_kwargs = {}
-
-    if posterior_plot_kwargs is None:
-        posterior_plot_kwargs = {}
 
     if prior_kwargs is None:
         prior_kwargs = {}
@@ -103,30 +98,28 @@ def plot_pp(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    pp_plotters = []
-    for group in groups:
+    datasets = [getattr(data, group) for group in groups]
+    pp_plotters = [
+        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
+        for data in datasets
+    ]
 
-        group = getattr(data, group)
-        coord = {}
-        for key in coords.keys():
-            coord[key] = np.where(np.in1d(group[key], coords[key]))[0]
-
-        plotters = [
-            tup for tup in xarray_var_iter(group.isel(coord), var_names=var_names, combined=True,)
-        ]
-        pp_plotters.append(plotters)
-
-    ngroups = len(groups)
     nvars = len(pp_plotters[0])
+    ngroups = len(groups)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, 2 * nvars, ngroups
     )
 
-    prior_plot_kwargs.setdefault("color", "blue")
-    prior_plot_kwargs.setdefault("linewidth", linewidth)
+    posterior_plot_kwargs = posterior_kwargs.pop("plot_kwargs", dict())
     posterior_plot_kwargs.setdefault("color", "red")
     posterior_plot_kwargs.setdefault("linewidth", linewidth)
+    posterior_kwargs["plot_kwargs"] = posterior_plot_kwargs
+
+    prior_plot_kwargs = prior_kwargs.pop("plot_kwargs", dict())
+    prior_plot_kwargs.setdefault("color", "blue")
+    prior_plot_kwargs.setdefault("linewidth", linewidth)
+    prior_kwargs["plot_kwargs"] = prior_plot_kwargs
 
     ppplot_kwargs = dict(
         ax=ax,
@@ -136,9 +129,6 @@ def plot_pp(
         pp_plotters=pp_plotters,
         legend=legend,
         groups=groups,
-        fill_kwargs=fill_kwargs,
-        prior_plot_kwargs=prior_plot_kwargs,
-        posterior_plot_kwargs=posterior_plot_kwargs,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
         backend_kwargs=backend_kwargs,

@@ -15,9 +15,6 @@ def plot_pp(
     pp_plotters,
     legend,
     groups,
-    fill_kwargs,
-    prior_plot_kwargs,
-    posterior_plot_kwargs,
     prior_kwargs,
     posterior_kwargs,
     backend_kwargs,
@@ -26,16 +23,14 @@ def plot_pp(
     """Matplotlib pp plot."""
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
-
     if ax is None:
         axes = np.empty((nvars, ngroups + 1), dtype=object)
-        fig = plt.figure(constrained_layout=backend_kwargs, figsize=figsize)
+        fig = plt.figure(**backend_kwargs, figsize=figsize)
         gs = fig.add_gridspec(ncols=ngroups, nrows=nvars * 2)
         for i in range(nvars):
-            axes_single = []
             for j in range(ngroups):
-                axes_single.append(fig.add_subplot(gs[2 * i, j]))
-            axes[i, :] = np.concatenate([axes_single, [fig.add_subplot(gs[2 * i + 1, :])]])
+                axes[i, j] = fig.add_subplot(gs[2 * i, j])
+            axes[i, -1] = fig.add_subplot(gs[2 * i + 1, :])
 
     else:
         axes = ax
@@ -48,7 +43,6 @@ def plot_pp(
 
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
-        plot_kwargs = prior_plot_kwargs if group == "prior" else posterior_plot_kwargs
         kwargs = prior_kwargs if group == "prior" else posterior_kwargs
         for idx2, (var, coord, data,) in enumerate(plotter):
             _pp_helper(
@@ -58,8 +52,6 @@ def plot_pp(
                 var_name=var,
                 coord_name=coord,
                 legend=legend,
-                fill_kwargs=fill_kwargs,
-                plot_kwargs=plot_kwargs,
                 **kwargs,
             )
             _pp_helper(
@@ -69,8 +61,6 @@ def plot_pp(
                 var_name=var,
                 coord_name=coord,
                 legend=legend,
-                fill_kwargs=fill_kwargs,
-                plot_kwargs=plot_kwargs,
                 **kwargs,
             )
 
@@ -80,12 +70,10 @@ def plot_pp(
     return axes
 
 
-def _pp_helper(ax, data, group, var_name, coord_name, legend, fill_kwargs, plot_kwargs, **kwargs):
+def _pp_helper(ax, data, group, var_name, coord_name, legend, **kwargs):
     plot_kde(
         data,
         label="{} {} {}".format(group, var_name, coord_name) if legend else None,
-        fill_kwargs=fill_kwargs,
-        plot_kwargs=plot_kwargs,
         ax=ax,
         **kwargs,
     )
