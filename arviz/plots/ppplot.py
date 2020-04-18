@@ -27,25 +27,23 @@ def plot_pp(
     show=None,
 ):
     """
-    Plot for posterior-prior predictive.
+    Plot for posterior/Prior.
 
     Parameters
     ----------
     data : az.InferenceData object
-        InferenceData object containing the observed and posterior/prior predictive data.
+        InferenceData object containing the posterior/prior data.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
     var_names : list
-        List of variables to be plotted. Defaults to all observed variables in the
-        model if None.
+        List of variables to be plotted.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
-        that dimension. Defaults to including all coordinates for all
-        dimensions if None.
+        that dimension.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     legend : bool
@@ -70,7 +68,7 @@ def plot_pp(
 
     Examples
     --------
-    Plot the observed data KDE overlaid on posterior predictive KDEs.
+    Plot the prior/posterior plot for specified vars and coords.
 
     .. plot::
         :context: close-figs
