@@ -8,6 +8,7 @@ from .plot_utils import (
     _scale_fig_size,
     get_plotting_function,
 )
+from ..utils import _var_names
 from ..rcparams import rcParams
 
 
@@ -18,6 +19,7 @@ def plot_pp(
     var_names=None,
     coords=None,
     transform=None,
+    data_pairs=None,
     legend=True,
     ax=None,
     prior_kwargs=None,
@@ -46,6 +48,16 @@ def plot_pp(
         that dimension.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
+    data_pairs : dict
+        Dictionary containing relations between prior data and posterior data.
+        Dictionary structure:
+
+        - key = prior data var_name
+        - value = posterior var_name
+
+        For example, `data_pairs = {'y' : 'y_hat'}`
+        If None, it will assume that the prior data and the posterior
+        data have the same variable name.
     legend : bool
         Add legend to figure. By default True.
     ax: axes, optional
@@ -96,10 +108,24 @@ def plot_pp(
     if backend_kwargs is None:
         backend_kwargs = {}
 
+    if data_pairs is None:
+        data_pairs = {}
+
     datasets = [getattr(data, group) for group in groups]
+
+    if var_names is None:
+        var_names = list(datasets[0].data_vars)
+    var_names = _var_names(var_names, datasets[0])
+    vars = [var_names]
+    for i in range(1, len(datasets)):
+        var_name =[data_pairs.get(var, var) for var in var_names]
+        var_name = _var_names(var_name,  datasets[i])
+        vars.append(var_name)
+
+
     pp_plotters = [
         list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
-        for data in datasets
+        for data , var in zip(datasets, vars)
     ]
 
     nvars = len(pp_plotters[0])
