@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from .rcparams import rcParams
 
 
-def _var_names(var_names, data, filter=False):
+def _var_names(var_names, data, filter_like=False):
     """Handle var_names input across arviz.
 
     Parameters
@@ -18,6 +18,9 @@ def _var_names(var_names, data, filter=False):
     var_names: str, list, or None
     data : xarray.Dataset
         Posterior data in an xarray
+    filter_like: bool, default=False
+        Whether to interpret var_names as substrings of the real variables names. À la
+        `pandas.filter("like")`.
     Returns
     -------
     var_name: list or None
@@ -51,17 +54,15 @@ def _var_names(var_names, data, filter=False):
             var[1:] for var in var_names if var.startswith("~") and var not in all_vars
         ]
         if excluded_vars:
-            if filter:
+            if filter_like:
                 for var in excluded_vars:
                     if var not in all_vars:
-                        real_vars = [
-                            real_var for real_var in all_vars if var in real_var
-                        ]
+                        real_vars = [real_var for real_var in all_vars if var in real_var]
                         excluded_vars.extend(real_vars)
                         excluded_vars.remove(var)
             var_names = [var for var in all_vars if var not in excluded_vars]
 
-        if filter:
+        if filter_like:
             var_names = [var for var in all_vars for name in var_names if name in var]
 
         existing_vars = np.isin(var_names, all_vars)
