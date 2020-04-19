@@ -253,6 +253,7 @@ def _plot_posterior_op(
             plot_kwargs=kwargs,
             ax=ax,
             rug=False,
+            show=False,
         )
     else:
         if bins is None:
