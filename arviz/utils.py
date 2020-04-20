@@ -2,15 +2,16 @@
 """General utilities."""
 import importlib
 import functools
-import warnings
-import numpy as np
-from numpy import newaxis
+import re
 import matplotlib.pyplot as plt
+import numpy as np
+import warnings
 
+from numpy import newaxis
 from .rcparams import rcParams
 
 
-def _var_names(var_names, data, filter_like=False):
+def _var_names(var_names, data, filter=None):
     """Handle var_names input across arviz.
 
     Parameters
@@ -55,16 +56,24 @@ def _var_names(var_names, data, filter_like=False):
             var[1:] for var in var_names if var.startswith("~") and var not in all_vars
         ]
         if excluded_vars:
-            if filter_like:
-                for var in excluded_vars:
-                    if var not in all_vars:
-                        real_vars = [real_var for real_var in all_vars if var in real_var]
+            if (filter == "like") or (filter == "regex"):
+                for pattern in excluded_vars:
+                    if pattern not in all_vars:
+                        if filter == "like":
+                            real_vars = [real_var for real_var in all_vars if pattern in real_var]
+                        else:
+                            # i.e filter == "regex"
+                            real_vars = [
+                                real_var for real_var in all_vars if re.search(pattern, real_var)
+                            ]
                         excluded_vars.extend(real_vars)
-                        excluded_vars.remove(var)
+                        excluded_vars.remove(pattern)
             var_names = [var for var in all_vars if var not in excluded_vars]
 
-        if filter_like:
+        if filter == "like":
             var_names = [var for var in all_vars for name in var_names if name in var]
+        elif filter == "regex":
+            var_names = [var for var in all_vars for name in var_names if re.search(name, var)]
 
         existing_vars = np.isin(var_names, all_vars)
         if not np.all(existing_vars):
