@@ -75,9 +75,9 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to ax.contour. Ignored for 1D KDE.
+        Keywords passed to ax.contour to draw contour lines. Ignored for 1D KDE.
     contourf_kwargs : dict
-        Keywords passed to ax.contourf. Ignored for 1D KDE.
+        Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     ax: axes, optional
