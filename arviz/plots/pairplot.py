@@ -67,6 +67,7 @@ def plot_pair(
         in the x-direction and the y-direction.
     contour : bool, optional, deprecated, Defaults to True.
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+        **Note:** this default is implemented in the body of the code, not in argument processing.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     divergences : Boolean
@@ -154,13 +155,14 @@ def plot_pair(
         ...             textsize=18)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
+    kind_boolean: Union[bool, List[bool]]
     if isinstance(kind, str):
         kind_boolean = kind in valid_kinds
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
         raise ValueError(
-            ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
+            (f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}")
         )
     if fill_last or contour:
         warnings.warn(
