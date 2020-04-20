@@ -165,6 +165,17 @@ def _validate_bokeh_marker(value):
     return value
 
 
+def _validate_json_dict(value):
+    if isinstance(value, str):
+        import json
+        value = json.loads(value)
+    if isinstance(value, dict):
+        return {key: tuple(item) for key, item in value.items()}
+    raise ValueError("Could not interpret value as dict")
+
+
+
+
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
     """Validate value is an iterable datatype."""
     # based on matplotlib's _listify_validator function
@@ -190,10 +201,19 @@ _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-nam
     _validate_float_or_none, length=2, allow_none=True, allow_auto=True
 )
 
+METAGROUPS = """{
+    "posterior_groups": ["posterior", "posterior_predictive", "sample_stats"],
+    "prior_groups": ["prior", "prior_predictive", "sample_stats_prior"],
+    "posterior_groups_warmup":
+        ["_warmup_posterior", "_warmup_posterior_predictive", "_warmup_sample_stats"],
+    "latent_vars_groups": ["posterior", "prior"],
+    "observed__vars_groups": ["posterior_predictive", "obseved_data", "prior_predictive"]
+}"""
 
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
+    "data.metagroups": (METAGROUPS, _validate_json_dict),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "data.save_warmup": (False, _validate_boolean),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
@@ -406,20 +426,31 @@ def read_rcfile(fname):
     config = RcParams()
     with open(fname, "r") as rcfile:
         try:
+            multiline = False
             for line_no, line in enumerate(rcfile, 1):
                 strippedline = line.split("#", 1)[0].strip()
                 if not strippedline:
                     continue
-                tup = strippedline.split(":", 1)
-                if len(tup) != 2:
-                    error_details = _error_details_fmt % (line_no, line, fname)
-                    _log.warning("Illegal %s", error_details)
-                    continue
-                key, val = tup
-                key = key.strip()
-                val = val.strip()
-                if key in config:
-                    _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
+                if multiline:
+                    val += strippedline
+                    if strippedline == "}":
+                        multiline = False
+                    else:
+                        continue
+                else:
+                    tup = strippedline.split(":", 1)
+                    if len(tup) != 2:
+                        error_details = _error_details_fmt % (line_no, line, fname)
+                        _log.warning("Illegal %s", error_details)
+                        continue
+                    key, val = tup
+                    key = key.strip()
+                    val = val.strip()
+                    if key in config:
+                        _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
+                    if key in {"data.metagroups"}:
+                        multiline = True
+                        continue
                 try:
                     config[key] = val
                 except ValueError as verr:
