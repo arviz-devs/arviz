@@ -56,7 +56,7 @@ def plot_pair(
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
-    kind : str
+    kind : str or List[str]
         Type of plot to display (scatter, kde and/or hexbin)
     gridsize : int or (int, int), optional
         Only works for kind=hexbin.
@@ -158,7 +158,6 @@ def plot_pair(
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
-
         raise ValueError(
             ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
         )
