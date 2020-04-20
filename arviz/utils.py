@@ -19,9 +19,11 @@ def _var_names(var_names, data, filter=None):
     var_names: str, list, or None
     data : xarray.Dataset
         Posterior data in an xarray
-    filter_like: bool, default=False
-        Whether to interpret var_names as substrings of the real variables names. À la
-        `pandas.filter("like")`.
+    filter: Union[None, "like", "regex"], default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
 
     Returns
     -------

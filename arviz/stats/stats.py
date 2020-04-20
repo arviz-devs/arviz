@@ -927,7 +927,7 @@ def r2_score(y_true, y_pred):
 def summary(
     data,
     var_names: Optional[List[str]] = None,
-    filter_like=False,
+    filter=None,
     fmt: str = "wide",
     kind: str = "all",
     round_to=None,
@@ -950,9 +950,11 @@ def summary(
         Refer to documentation of az.convert_to_dataset for details
     var_names: list
         Names of variables to include in summary
-    filter_like: bool, default=False
-        Whether to interpret var_names as substrings of the real variables names. À la
-        `pandas.filter("like")`.
+    filter: Union[None, "like", "regex"], default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
@@ -1046,7 +1048,7 @@ def summary(
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
-    var_names = _var_names(var_names, posterior, filter_like)
+    var_names = _var_names(var_names, posterior, filter)
     posterior = posterior if var_names is None else posterior[var_names]
 
     fmt_group = ("wide", "long", "xarray")
