@@ -21,6 +21,7 @@ def _var_names(var_names, data, filter_like=False):
     filter_like: bool, default=False
         Whether to interpret var_names as substrings of the real variables names. À la
         `pandas.filter("like")`.
+
     Returns
     -------
     var_name: list or None
