@@ -66,7 +66,7 @@ def bfmi(data):
 
 
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
-    r"""Calculate estimate of the effective sample size (ESS).
+    r"""Calculate estimate of the effective sample size (ess).
 
     Parameters
     ----------
@@ -90,11 +90,12 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
+        - "local"
     relative : bool
         Return relative ess
         `ress = ess / n`
-    prob : float, optional
-        probability value for "tail" and "quantile" ESS functions.
+    prob : float, or tuple of two floats, optional
+        probability value for "tail", "quantile" or "local" ess functions.
 
     Returns
     -------
@@ -103,7 +104,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     Notes
     -----
-    The basic ESS (:math:`N_{\mathit{eff}}`) diagnostic is computed by:
+    The basic ess (:math:`N_{\mathit{eff}}`) diagnostic is computed by:
 
     .. math:: \hat{N}_{\mathit{eff}} = \frac{MN}{\hat{\tau}}
 
@@ -164,7 +165,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     if method not in methods:
         raise TypeError(
-            "ESS method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
+            "ess method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
         )
     ess_func = methods[method]
 

@@ -54,12 +54,12 @@ def compare(
 
     Parameters
     ----------
-    dataset_dict : dict[str] -> InferenceData
+    dataset_dict: dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic : str
+    ic: str
         Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
-    method : str
+    method: str
         Method used to estimate the weights for each model. Available options are:
 
         - 'stacking' : stacking of predictive distributions.
@@ -72,46 +72,49 @@ def compare(
     b_samples: int
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
-    alpha : float
+    alpha: float
         The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
-    seed : int or np.random.RandomState instance
+    seed: int or np.random.RandomState instance
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
         np.random state is used.
-    scale : str
+    scale: str
         Output scale for IC. Available options are:
 
         - `log` : (default) log-score (after Vehtari et al. (2017))
         - `negative_log` : -1 * (log-score)
         - `deviance` : -2 * (log-score)
 
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
+
     Returns
     -------
     A DataFrame, ordered from best to worst model (measured by information criteria).
     The index reflects the key with which the models are passed to this function. The columns are:
-    rank : The rank-order of the models. 0 is the best.
-    IC : Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
+    rank: The rank-order of the models. 0 is the best.
+    IC: Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
         Higher IC indicates higher out-of-sample predictive fit ("better" model). Default LOO.
         If `scale` is `deviance` or `negative_log` smaller IC indicates
         higher out-of-sample predictive fit ("better" model).
-    pIC : Estimated effective number of parameters.
-    dIC : Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
+    pIC: Estimated effective number of parameters.
+    dIC: Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
           and the lowest IC (PSIS-LOO `loo` or WAIC `waic`).
           The top-ranked model is always 0.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
         given the data. By default the uncertainty in the weights estimation is considered using
         Bayesian bootstrap.
-    SE : Standard error of the IC estimate.
+    SE: Standard error of the IC estimate.
         If method = BB-pseudo-BMA these values are estimated using Bayesian bootstrap.
-    dSE : Standard error of the difference in IC between each model and the top-ranked model.
+    dSE: Standard error of the difference in IC between each model and the top-ranked model.
         It's always 0 for the top-ranked model.
-    warning : A value of 1 indicates that the computation of the IC may not be reliable.
+    warning: A value of 1 indicates that the computation of the IC may not be reliable.
         This could be indication of WAIC/LOO starting to fail see
         http://arxiv.org/abs/1507.04544 for details.
-    scale : Scale used for the IC.
+    scale: Scale used for the IC.
 
     Examples
     --------
@@ -138,6 +141,12 @@ def compare(
     if scale == "log":
         scale_value = 1
         ascending = False
+        warnings.warn(
+            "\nThe scale is now log by default. Use 'scale' argument or "
+            "'stats.ic_scale' rcParam if you rely on a specific value.\nA higher "
+            "log-score (or a lower deviance) indicates a model with better predictive "
+            "accuracy."
+        )
     else:
         if scale == "negative_log":
             scale_value = -1
@@ -314,7 +323,7 @@ def hpd(
     var_names=None,
     coords=None,
     max_modes=10,
-    **kwargs
+    **kwargs,
 ):
     """
     Calculate highest posterior density (HPD) of array for given credible_interval.
@@ -323,31 +332,31 @@ def hpd(
 
     Parameters
     ----------
-    ary : obj
+    ary: obj
         object containing posterior samples.
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
-    credible_interval : float, optional
+    credible_interval: float, optional
         Credible interval to compute. Defaults to 0.94.
-    circular : bool, optional
+    circular: bool, optional
         Whether to compute the hpd taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
-    multimodal : bool
+    multimodal: bool
         If true it may compute more than one hpd interval if the distribution is multimodal and the
         modes are well separated.
-    skipna : bool
+    skipna: bool
         If true ignores nan values when computing the hpd interval. Defaults to false.
-    group : str, optional
+    group: str, optional
          Specifies which InferenceData group should be used to calculate hpd.
          Defaults to 'posterior'
-    var_names : list, optional
+    var_names: list, optional
         Names of variables to include in the hpd report
     coords: mapping, optional
         Specifies the subset over to calculate hpd.
     max_modes: int, optional
         Specifies the maximume number of modes for multimodal case.
-    kwargs : dict, optional
+    kwargs: dict, optional
         Additional keywords passed to `wrap_xarray_ufunc`.
         See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
 
@@ -404,7 +413,7 @@ def hpd(
     func_kwargs = {
         "credible_interval": credible_interval,
         "skipna": skipna,
-        "out_shape": (max_modes, 2,) if multimodal else (2,),
+        "out_shape": (max_modes, 2) if multimodal else (2,),
     }
     kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
     if not multimodal:
@@ -495,7 +504,7 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    hpd_intervals = np.full((max_modes, 2,), np.nan,)
+    hpd_intervals = np.full((max_modes, 2), np.nan)
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
@@ -519,15 +528,15 @@ def loo(data, pointwise=False, reff=None, scale=None):
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object. Refer to documentation
         of az.convert_to_inference_data for details
-    pointwise : bool, optional
+    pointwise: bool, optional
         if True the pointwise predictive accuracy will be returned. Defaults to False
-    reff : float, optional
+    reff: float, optional
         Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
         the number of actual samples. Computed from trace by default.
-    scale : str
+    scale: str
         Output scale for loo. Available options are:
 
         - `log` : (default) log-score (after Vehtari et al. (2017))
@@ -540,15 +549,15 @@ def loo(data, pointwise=False, reff=None, scale=None):
     Returns
     -------
     pandas.Series with the following rows:
-    loo : approximated Leave-one-out cross-validation
-    loo_se : standard error of loo
-    p_loo : effective number of parameters
-    shape_warn : bool
+    loo: approximated Leave-one-out cross-validation
+    loo_se: standard error of loo
+    p_loo: effective number of parameters
+    shape_warn: bool
         True if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
-    loo_i : array of pointwise predictive accuracy, only if pointwise True
-    pareto_k : array of Pareto shape values, only if pointwise True
-    loo_scale : scale of the loo results
+    loo_i: array of pointwise predictive accuracy, only if pointwise True
+    pareto_k: array of Pareto shape values, only if pointwise True
+    loo_scale: scale of the loo results
 
         The returned object has a custom print method that overrides pd.Series method. It is
         specific to expected log pointwise predictive density (elpd) information criteria.
@@ -681,16 +690,16 @@ def psislw(log_weights, reff=1.0):
 
     Parameters
     ----------
-    log_weights : array
+    log_weights: array
         Array of size (n_observations, n_samples)
-    reff : float
+    reff: float
         relative MCMC efficiency, `ess / n`
 
     Returns
     -------
-    lw_out : array
+    lw_out: array
         Smoothed log weights
-    kss : array
+    kss: array
         Pareto tail indices
 
     References
@@ -743,17 +752,17 @@ def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
 
     Parameters
     ----------
-    log_weights : array
+    log_weights: array
         Array of length n_observations
-    cutoff_ind : int
-    cutoffmin : float
-    k_min : float
+    cutoff_ind: int
+    cutoffmin: float
+    k_min: float
 
     Returns
     -------
-    lw_out : array
+    lw_out: array
         Smoothed log weights
-    kss : float
+    kss: float
         Pareto tail index
     """
     x = np.asarray(log_weights)
@@ -805,14 +814,14 @@ def _gpdfit(ary):
 
     Parameters
     ----------
-    ary : array
+    ary: array
         sorted 1D data array
 
     Returns
     -------
-    k : float
+    k: float
         estimated shape parameter
-    sigma : float
+    sigma: float
         estimated scale parameter
     """
     prior_bs = 3
@@ -879,9 +888,9 @@ def r2_score(y_true, y_pred):
 
     Parameters
     ----------
-    y_true : array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true: array-like of shape = (n_samples) or (n_samples, n_outputs)
         Ground truth (correct) target values.
-    y_pred : array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_pred: array-like of shape = (n_samples) or (n_samples, n_outputs)
         Estimated target values.
 
     Returns
@@ -935,22 +944,22 @@ def summary(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list
+    var_names: list
         Names of variables to include in summary
-    fmt : {'wide', 'long', 'xarray'}
+    fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
-    kind : {'all', 'stats', 'diagnostics'}
+    kind: {'all', 'stats', 'diagnostics'}
         Whether to include the `stats`: `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the `diagnostics`:
         `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
         them.
-    round_to : int
+    round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
-    include_circ : bool
+    include_circ: bool
         Whether to include circular statistics
-    stat_funcs : dict
+    stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
         highest posterior density intervals are included.
@@ -958,18 +967,18 @@ def summary(
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
         `np.mean`, or `scipy.stats.var` would both work.
-    extend : boolean
+    extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
-    credible_interval : float, optional
+    credible_interval: float, optional
         Credible interval to plot. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
-    order : {"C", "F"}
+    order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
-    index_origin : int
+    index_origin: int
         If fmt is "wide, select n-based indexing for multivariate parameters.
         Defaults to rcParam data.index.origin, which is 0.
-    skipna : bool
+    skipna: bool
         If true ignores nan values when computing the summary statistics, it does not affect the
         behaviour of the functions passed to ``stat_funcs``. Defaults to false.
     coords: Dict[str, List[Any]], optional
@@ -1239,13 +1248,13 @@ def waic(data, pointwise=False, scale=None):
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_inference_data for details
-    pointwise : bool
+    pointwise: bool
         if True the pointwise predictive accuracy will be returned.
         Default False
-    scale : str
+    scale: str
         Output scale for WAIC. Available options are:
 
         - `log` : (default) log-score
@@ -1258,14 +1267,14 @@ def waic(data, pointwise=False, scale=None):
     Returns
     -------
     Series with the following rows:
-    waic : widely available information criterion
-    waic_se : standard error of waic
-    p_waic : effective number parameters
-    var_warn : bool
+    waic: widely available information criterion
+    waic_se: standard error of waic
+    p_waic: effective number parameters
+    var_warn: bool
         True if posterior variance of the log predictive
         densities exceeds 0.4
-    waic_i : and array of the pointwise predictive accuracy, only if pointwise True
-    waic_scale : scale of the waic results
+    waic_i: and array of the pointwise predictive accuracy, only if pointwise True
+    waic_scale: scale of the waic results
 
         The returned object has a custom print method that overrides pd.Series method. It is
         specific to expected log pointwise predictive density (elpd) information criteria.
@@ -1378,21 +1387,21 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
     Parameters
     ----------
-    idata : InferenceData
+    idata: InferenceData
         InferenceData object.
-    y : array, DataArray or str
+    y: array, DataArray or str
         Observed data. If str, idata must be present and contain the observed data group
-    y_hat : array, DataArray or str
+    y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
         None, idata must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
-    log_weights : array or DataArray
+    log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
 
     Returns
     -------
-    loo_pit : array or DataArray
+    loo_pit: array or DataArray
         Value of the LOO-PIT at each observed data point.
 
     Examples
@@ -1533,50 +1542,50 @@ def apply_test_function(
 
     Parameters
     ----------
-    idata : InferenceData
+    idata: InferenceData
         InferenceData object on which to apply the test function. This function will add
         new variables to the InferenceData object to store the result without modifying the
         existing ones.
-    func : callable
+    func: callable
         Callable that calculates the test function. It must have the following call signature
         ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
         predictive and ``theta`` the model parameters) even if not all the arguments are
         used.
-    group : str, optional
+    group: str, optional
         Group on which to apply the test function. Can be observed_data, posterior_predictive
         or both.
-    var_names : dict group -> var_names, optional
+    var_names: dict group -> var_names, optional
         Mapping from group name to the variables to be passed to func. It can be a dict of
         strings or lists of strings. There is also the option of using ``both`` as key,
         in which case, the same variables are used in observed data and posterior predictive
         groups
-    pointwise : bool, optional
+    pointwise: bool, optional
         If True, apply the test function to each observation and sample, otherwise, apply
         test function to each sample.
-    out_data_shape, out_pp_shape : tuple, optional
+    out_data_shape, out_pp_shape: tuple, optional
         Output shape of the test function applied to the observed/posterior predictive data.
         If None, the default depends on the value of pointwise.
-    out_name_data, out_name_pp : str, optional
+    out_name_data, out_name_pp: str, optional
         Name of the variables to add to the observed_data and posterior_predictive datasets
         respectively. ``out_name_pp`` can be ``None``, in which case will be taken equal to
         ``out_name_data``.
-    func_args : sequence, optional
+    func_args: sequence, optional
         Passed as is to ``func``
-    func_kwargs : mapping, optional
+    func_kwargs: mapping, optional
         Passed as is to ``func``
-    wrap_data_kwargs, wrap_pp_kwargs : mapping, optional
+    wrap_data_kwargs, wrap_pp_kwargs: mapping, optional
         kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
         are used.
-    inplace : bool, optional
+    inplace: bool, optional
         If True, add the variables inplace, othewise, return a copy of idata with the variables
         added.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
         dataset. If ``None`` it will be the opposite of inplace.
 
     Returns
     -------
-    idata : InferenceData
+    idata: InferenceData
         Output InferenceData object. If ``inplace=True``, it is the same input object modified
         inplace.
 

@@ -120,8 +120,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             if get_from is None:
                 # pylint: disable=line-too-long
                 raise ValueError(
-                    """When constructing InferenceData must have at least
-                                    one of trace, prior, posterior_predictive or predictions."""
+                    "When constructing InferenceData must have at least"
+                    " one of trace, prior, posterior_predictive or predictions."
                 )
 
             aelem = arbitrary_element(get_from)
