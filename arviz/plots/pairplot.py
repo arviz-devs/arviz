@@ -1,5 +1,6 @@
 """Plot a scatter or hexbin of sampled parameters."""
 import warnings
+from typing import Optional, Union, List
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
@@ -11,13 +12,13 @@ from ..utils import _var_names, get_coords
 def plot_pair(
     data,
     group="posterior",
-    var_names=None,
+    var_names: Optional[List[str]] = None,
     coords=None,
     figsize=None,
     textsize=None,
-    kind="scatter",
+    kind: Union[str, List[str]] = "scatter",
     gridsize="auto",
-    contour=True,
+    contour: Optional[bool] = None,
     plot_kwargs=None,
     fill_last=False,
     divergences=False,
@@ -56,7 +57,7 @@ def plot_pair(
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
-    kind : str
+    kind : str or List[str]
         Type of plot to display (scatter, kde and/or hexbin)
     gridsize : int or (int, int), optional
         Only works for kind=hexbin.
@@ -64,8 +65,9 @@ def plot_pair(
         y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
-    contour : bool
+    contour : bool, optional, deprecated, Defaults to True.
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+        **Note:** this default is implemented in the body of the code, not in argument processing.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     divergences : Boolean
@@ -153,19 +155,19 @@ def plot_pair(
         ...             textsize=18)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
+    kind_boolean: Union[bool, List[bool]]
     if isinstance(kind, str):
         kind_boolean = kind in valid_kinds
     else:
         kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
     if not np.all(kind_boolean):
-
-        raise ValueError(
-            ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
-        )
+        raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
     if fill_last or contour:
         warnings.warn(
             "fill_last and contour will be deprecated. Please use kde_kwargs", UserWarning,
         )
+    if contour is None:
+        contour = True
 
     if coords is None:
         coords = {}
