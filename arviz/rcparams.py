@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import re
 import pprint
+import warnings
 import logging
 import locale
 from collections.abc import MutableMapping
@@ -164,16 +165,22 @@ def _validate_bokeh_marker(value):
         raise ValueError("{} is not one of {}".format(value, all_markers))
     return value
 
-
-def _validate_json_dict(value):
-    if isinstance(value, str):
-        import json
-        value = json.loads(value)
-    if isinstance(value, dict):
-        return {key: tuple(item) for key, item in value.items()}
-    raise ValueError("Could not interpret value as dict")
-
-
+def _validate_dict_of_lists(values):
+    if isinstance(values, dict):
+        return {key: tuple(item) for key, item in values.items()}
+    else:
+        validated_dict = {}
+        for value in values:
+            tup = value.split(":", 1)
+            if len(tup) != 2:
+                raise ValueError(f"Could not interpret '{value}' as key: list or str")
+            key, vals = tup
+            key = key.strip(" \"")
+            vals = [val.strip(" \"") for val in vals.strip(" [],").split(",")]
+            if key in validated_dict:
+                warnings.warn(f"Repeated key {key} when validating dict of lists")
+            validated_dict[key] = tuple(vals)
+        return validated_dict
 
 
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
@@ -201,19 +208,19 @@ _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-nam
     _validate_float_or_none, length=2, allow_none=True, allow_auto=True
 )
 
-METAGROUPS = """{
+METAGROUPS = {
     "posterior_groups": ["posterior", "posterior_predictive", "sample_stats"],
     "prior_groups": ["prior", "prior_predictive", "sample_stats_prior"],
     "posterior_groups_warmup":
         ["_warmup_posterior", "_warmup_posterior_predictive", "_warmup_sample_stats"],
     "latent_vars_groups": ["posterior", "prior"],
     "observed__vars_groups": ["posterior_predictive", "obseved_data", "prior_predictive"]
-}"""
+}
 
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
-    "data.metagroups": (METAGROUPS, _validate_json_dict),
+    "data.metagroups": (METAGROUPS, _validate_dict_of_lists),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "data.save_warmup": (False, _validate_boolean),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
@@ -432,10 +439,11 @@ def read_rcfile(fname):
                 if not strippedline:
                     continue
                 if multiline:
-                    val += strippedline
                     if strippedline == "}":
                         multiline = False
+                        val = aux_val
                     else:
+                        aux_val.append(strippedline)
                         continue
                 else:
                     tup = strippedline.split(":", 1)
@@ -449,6 +457,7 @@ def read_rcfile(fname):
                     if key in config:
                         _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
                     if key in {"data.metagroups"}:
+                        aux_val = []
                         multiline = True
                         continue
                 try:
