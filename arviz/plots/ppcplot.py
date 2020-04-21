@@ -3,6 +3,7 @@ from numbers import Integral
 import platform
 import logging
 import numpy as np
+from matplotlib import get_backend
 
 from .plot_utils import (
     xarray_var_iter,
@@ -68,16 +69,15 @@ def plot_ppc(
         - value = posterior/prior predictive var_name
 
         For example, `data_pairs = {'y' : 'y_hat'}`
-        If None, it will assume that the observed data and the posterior/prior
-        predictive data have the same variable name.
+        If None, it will assume that the observed data and the posterior/prior predictive data have
+        the same variable name.
     var_names : list
         List of variables to be plotted. Defaults to all observed variables in the
         model if None.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
-        Dimensions without a mapping specified will include all coordinates for
-        that dimension. Defaults to including all coordinates for all
-        dimensions if None.
+        Dimensions without a mapping specified will include all coordinates for that dimension.
+        Defaults to including all coordinates for all dimensions if None.
     flatten : list
         List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
@@ -91,17 +91,23 @@ def plot_ppc(
         `animation = False` if defaults to a maximum of 5 samples and will set jitter to 0.7
         unless defined otherwise. Otherwise it defaults to all provided samples.
     random_seed : int
-        Random number generator seed passed to numpy.random.seed to allow
-        reproducibility of the plot. By default, no seed will be provided
-        and the plot will change each call if a random sample is specified
-        by `num_pp_samples`.
+        Random number generator seed passed to numpy.random.seed to allow reproducibility of the
+        plot. By default, no seed will be provided and the plot will change each call if a random
+        sample is specified by `num_pp_samples`.
     jitter : float
         If kind is "scatter", jitter will add random uniform noise to the height
         of the ppc samples and observed data. By default 0.
     animated : bool
         Create an animation of one posterior/prior predictive sample per frame. Defaults to False.
+        Only works with matploblib backend.
+        To run animations inside a notebook you have to use the nbAgg backend. Try with
+        `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the default backend
+        with `%matplotlib  inline` or `%matplotlib  auto`.
+        If you experience problems rendering the animation try setting
+        `animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)
+        If you run the animations from a script write `ax, ani = az.plot_ppc(.)`
     animation_kwargs : dict
-        Keywords passed to `animation.FuncAnimation`.
+        Keywords passed to `animation.FuncAnimation`. Ignored with matploblib backend.
     legend : bool
         Add legend to figure. By default True.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
@@ -110,8 +116,8 @@ def plot_ppc(
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+        These are kwargs specific to the backend being used. For additional documentation check the
+        plotting method of the backend.
     group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
         Other value can be 'prior'.
@@ -180,6 +186,10 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if animation_kwargs is None:
         animation_kwargs = {}
     if platform.system() == "Linux":
@@ -187,14 +197,29 @@ def plot_ppc(
     else:
         animation_kwargs.setdefault("blit", False)
 
-    if animated and backend == "bokeh":
-        raise TypeError("Animation option is only supported with matplotlib backend.")
+    if animated:
+        if backend == "matplotlib":
+            try:
+                shell = get_ipython().__class__.__name__
+                if shell == "ZMQInteractiveShell" and get_backend() != "nbAgg":
+                    raise Warning(
+                        "To run animations inside a notebook you have to use the nbAgg backend. "
+                        "Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch "
+                        "back to the default backend with `%matplotlib  inline` or "
+                        "`%matplotlib  auto`."
+                    )
+            except NameError:
+                pass
 
-    if animated and animation_kwargs["blit"] and platform.system() != "Linux":
-        _log.warning(
-            "If you experience problems rendering the animation try setting"
-            "`animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)"
-        )
+            if animation_kwargs["blit"] and platform.system() != "Linux":
+                _log.warning(
+                    "If you experience problems rendering the animation try setting "
+                    "`animation_kwargs({'blit':False}) or changing the plotting backend "
+                    "(e.g. to TkAgg)"
+                )
+
+        elif backend == "bokeh":
+            raise TypeError("Animation option is only supported with matplotlib backend.")
 
     if alpha is None:
         if animated:
@@ -311,10 +336,6 @@ def plot_ppc(
         backend_kwargs=backend_kwargs,
         show=show,
     )
-
-    if backend is None:
-        backend = rcParams["plot.backend"]
-    backend = backend.lower()
 
     if backend == "bokeh":
 
