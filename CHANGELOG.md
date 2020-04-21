@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
 * Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
@@ -24,7 +25,7 @@
 * Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
 * Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
 * Rank plot: rename `axes` argument to `ax` (#1144)
-* Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150))
+* Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150)).
 
 ### Deprecation
 

@@ -6,14 +6,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from ...utils import (
-    _var_names,
-    _stack,
-    one_de,
-    two_de,
-    expand_dims,
-    flatten_inference_data_to_dict,
-)
+from ...utils import _var_names, _stack, one_de, two_de, expand_dims, flatten_inference_data_to_dict
 from ...data import load_arviz_data, from_dict
 
 
@@ -92,6 +85,7 @@ def test_var_names_filter(var_names_expected):
     ).posterior
     var_names, expected, filter = var_names_expected
     assert _var_names(var_names, data, filter) == expected
+
 
 @pytest.fixture(scope="function")
 def utils_with_numba_import_fail(monkeypatch):
