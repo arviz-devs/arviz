@@ -949,7 +949,9 @@ def summary(
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
     var_names: list
-        Names of variables to include in summary
+        Names of variables to include in summary. Prefix the variables by `~` when you
+        want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
+        examples below).
     filter: Union[None, "like", "regex"], default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
@@ -1008,6 +1010,21 @@ def summary(
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
+
+    You can use `filter` to select variables without having to specify all the exact
+    names. Use `filter="like"` to select based on partial naming:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["the"], filter="like")
+
+    Use `filter="regex"` to select based on regular expressions, and prefix the variables
+    you want to exclude by `~`. Here, we exlude from the summary all the variables that
+    start with the letter t:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["~^t"], filter="regex")
 
     Other statistics can be calculated by passing a list of functions
     or a dictionary with key, function pairs.
