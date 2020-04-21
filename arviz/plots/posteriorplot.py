@@ -17,6 +17,7 @@ from ..rcparams import rcParams
 def plot_posterior(
     data,
     var_names=None,
+    filter=None,
     transform=None,
     coords=None,
     figsize=None,
@@ -41,31 +42,37 @@ def plot_posterior(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
-        Variables to be plotted, two variables are required.
-    transform : callable
+    var_names: list of variable names
+        Variables to be plotted, two variables are required. Prefix the variables by `~`
+        when you want to exclude them from the plot.
+    filter: Union[None, "like", "regex"], optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
+    transform: callable
         Function to transform data (defaults to None i.e.the identity function)
-    coords : mapping, optional
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    credible_interval : float, optional
+    credible_interval: float, optional
         Credible intervals. Defaults to 0.94. Use None to hide the credible interval
-    multimodal : bool
+    multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
-    round_to : int, optional
+    round_to: int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
-    point_estimate : Optional[str]
+    point_estimate: Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
-    group : str, optional
+    group: str, optional
         Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list is provided, its
@@ -77,11 +84,11 @@ def plot_posterior(
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
         a histogram is always used.
-    bw : float
+    bw: float
         Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
         smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
         of thumb (the default rule used by SciPy). Only works if `kind == kde`.
-    bins : integer or sequence or 'auto', optional
+    bins: integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
         `range(xmin, xmax + 1)` for discrete variables.
@@ -93,14 +100,14 @@ def plot_posterior(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -125,7 +132,7 @@ def plot_posterior(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu', 'theta'], rope=(-1, 1))
+        >>> az.plot_posterior(data, var_names=['mu', '^the'], filter="regex", rope=(-1, 1))
 
     Plot Region of Practical Equivalence for selected distributions
 
@@ -183,7 +190,7 @@ def plot_posterior(
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter)
 
     if coords is None:
         coords = {}

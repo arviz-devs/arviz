@@ -18,6 +18,7 @@ from ..numeric_utils import _sturges_formula
 def plot_rank(
     data,
     var_names=None,
+    filter=None,
     transform=None,
     coords=None,
     bins=None,
@@ -47,31 +48,37 @@ def plot_rank(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object. Refer to documentation of
         az.convert_to_dataset for details
-    var_names : string or list of variable names
-        Variables to be plotted
-    transform : callable
+    var_names: string or list of variable names
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter: Union[None, "like", "regex"], optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
+    transform: callable
         Function to transform data (defaults to None i.e.the identity function)
-    coords : mapping, optional
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    bins : None or passed to np.histogram
+    bins: None or passed to np.histogram
         Binning strategy used for histogram. By default uses twice the result of Sturges' formula.
         See `np.histogram` documenation for, other available arguments.
-    kind : string
+    kind: string
         If bars (defaults), ranks are represented as stacked histograms (one per chain). If vlines
         ranks are represented as vertical lines above or below `ref_line`.
-    colors : string or list of strings
+    colors: string or list of strings
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
         If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
         models. Defaults to `cycle`.
-    ref_line : boolean
+    ref_line: boolean
         Whether to include a dashed line showing where a uniform distribution would lie
-    labels : bool
+    labels: bool
         wheter to plot or not the x and y labels, defaults to True
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -81,12 +88,12 @@ def plot_rank(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -126,7 +133,7 @@ def plot_rank(
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)
-    var_names = _var_names(var_names, posterior_data)
+    var_names = _var_names(var_names, posterior_data, filter)
     plotters = filter_plotters_list(
         list(xarray_var_iter(posterior_data, var_names=var_names, combined=True)), "plot_rank"
     )

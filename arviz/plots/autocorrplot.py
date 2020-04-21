@@ -14,6 +14,7 @@ from ..utils import _var_names
 def plot_autocorr(
     data,
     var_names=None,
+    filter=None,
     max_lag=None,
     combined=False,
     figsize=None,
@@ -30,18 +31,24 @@ def plot_autocorr(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names, optional
-        Variables to be plotted, if None all variable are plotted.
-        Vector-value stochastics are handled automatically.
-    max_lag : int, optional
+    var_names: list of variable names, optional
+        Variables to be plotted, if None all variable are plotted. Prefix the
+        variables by `~` when you want to exclude them from the plot. Vector-value
+        stochastics are handled automatically.
+    filter: Union[None, "like", "regex"], optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
+    max_lag: int, optional
         Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller
-    combined : bool
+    combined: bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
         Note this is not used if ax is supplied.
     textsize: float
@@ -57,12 +64,12 @@ def plot_autocorr(
     backend_kwargs: dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -88,7 +95,7 @@ def plot_autocorr(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_autocorr(data, var_names=['mu', 'tau'], combined=True)
+        >>> az.plot_autocorr(data, var_names=['~theta'], filter="like", combined=True)
 
 
     Specify maximum lag (x axis bound)
@@ -99,7 +106,7 @@ def plot_autocorr(
         >>> az.plot_autocorr(data, var_names=['mu', 'tau'], max_lag=200, combined=True)
     """
     data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter)
 
     # Default max lag to 100 or max length of chain
     if max_lag is None:

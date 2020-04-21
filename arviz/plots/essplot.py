@@ -19,6 +19,7 @@ from ..utils import _var_names, get_coords
 def plot_ess(
     idata,
     var_names=None,
+    filter=None,
     kind="local",
     relative=False,
     coords=None,
@@ -43,60 +44,66 @@ def plot_ess(
 
     Parameters
     ----------
-    idata : obj
+    idata: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names, optional
-        Variables to be plotted.
-    kind : str, optional
+    var_names: list of variable names, optional
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter: Union[None, "like", "regex"], optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
+    kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
-    relative : bool
+    relative: bool
         Show relative ess in plot ``ress = ess / N``.
-    coords : dict, optional
+    coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple, optional
+    figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    rug : bool
+    rug: bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind : bool
+    rug_kind: bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points : int
+    n_points: int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    extra_methods : bool, optional
+    extra_methods: bool, optional
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
-    min_ess : int
+    min_ess: int
         Minimum number of ESS desired.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    extra_kwargs : dict, optional
+    extra_kwargs: dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
-    text_kwargs : dict, optional
+    text_kwargs: dict, optional
         Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
         for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
-    hline_kwargs : dict, optional
+    hline_kwargs: dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
-    rug_kwargs : dict
+    rug_kwargs: dict
         kwargs passed to rug plot.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     References
     ----------
@@ -125,7 +132,7 @@ def plot_ess(
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="quantile", var_names=["mu", "theta"], coords=coords
+        ...     idata, kind="quantile", var_names=['~theta'], filter="like", coords=coords
         ... )
 
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
@@ -172,7 +179,7 @@ def plot_ess(
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter)
     n_draws = data.dims["draw"]
     n_samples = n_draws * data.dims["chain"]
 
