@@ -100,12 +100,14 @@ def plot_ppc(
     animated : bool
         Create an animation of one posterior/prior predictive sample per frame. Defaults to False.
         Only works with matploblib backend.
-        To run animations inside a notebook you have to use the nbAgg backend. Try with
-        `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the default backend
-        with `%matplotlib  inline` or `%matplotlib  auto`.
+        To run animations inside a notebook you have to use the `nbAgg` matplotlib's backend.
+        Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the
+        default matplotlib's backend with `%matplotlib  inline` or `%matplotlib  auto`.
+        If switching back and forth between matplotlib's backend, you may need to run twice the cell
+        with the animation.
         If you experience problems rendering the animation try setting
-        `animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)
-        If you run the animations from a script write `ax, ani = az.plot_ppc(.)`
+        `animation_kwargs({'blit':False}) or changing the matplotlib's backend (e.g. to TkAgg)
+        If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
     animation_kwargs : dict
         Keywords passed to `animation.FuncAnimation`. Ignored with matploblib backend.
     legend : bool
