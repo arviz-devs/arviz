@@ -15,6 +15,7 @@
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro and numpyro translation (#1090, #1125)
 * Add `num_chains` and `pred_dims` arguments to from_pyro and from_numpyro (#1090, #1125)
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
+
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
@@ -26,6 +27,7 @@
 * Rank plot: rename `axes` argument to `ax` (#1144)
 * Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150))
 * Fixed bug in `plot_posterior` with rcParam "plot.matplotlib.show" = True (#1151)
+* Set `fill_last` argument of `plot_kde` to False by default (#1158)
 
 ### Deprecation
 
@@ -34,6 +36,7 @@
 * Image thumbs generation updated to be Bokeh 2 compatible (#1116)
 * Add new examples for `plot_pair` (#1110)
 * Add examples for `psislw` and `r2_score` (#1129)
+* Add more examples on 2D kde customization (#1158)
 
 ## v0.7.0 (2020 Mar 2)
 
