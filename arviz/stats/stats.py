@@ -321,6 +321,7 @@ def hpd(
     skipna=False,
     group="posterior",
     var_names=None,
+    filter=None,
     coords=None,
     max_modes=10,
     **kwargs,
@@ -351,7 +352,14 @@ def hpd(
          Specifies which InferenceData group should be used to calculate hpd.
          Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hpd report
+        Names of variables to include in the hpd report. Prefix the variables by `~`
+        when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
+        (see `az.summary` for more details).
+    filter: Union[None, "like", "regex"], optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. À la
+        `pandas.filter`.
     coords: mapping, optional
         Specifies the subset over to calculate hpd.
     max_modes: int, optional
@@ -435,7 +443,7 @@ def hpd(
     ary = convert_to_dataset(ary, group=group)
     if coords is not None:
         ary = get_coords(ary, coords)
-    var_names = _var_names(var_names, ary)
+    var_names = _var_names(var_names, ary, filter)
     ary = ary[var_names] if var_names else ary
 
     hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
@@ -952,7 +960,7 @@ def summary(
         Names of variables to include in summary. Prefix the variables by `~` when you
         want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
         examples below).
-    filter: Union[None, "like", "regex"], default=None
+    filter: Union[None, "like", "regex"], optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
          interpret var_names as regular expressions on the real variables names. À la
@@ -1019,8 +1027,8 @@ def summary(
         In [1]: az.summary(data, var_names=["the"], filter="like")
 
     Use `filter="regex"` to select based on regular expressions, and prefix the variables
-    you want to exclude by `~`. Here, we exlude from the summary all the variables that
-    start with the letter t:
+    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    starting with the letter t:
 
     .. ipython::
 
