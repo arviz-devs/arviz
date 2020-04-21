@@ -64,6 +64,35 @@ def test_var_names_key_error(data):
         _var_names(("theta", "tau", "bad_var_name"), data)
 
 
+@pytest.mark.parametrize(
+    "var_names_expected",
+    [
+        (["alpha", "beta"], ["alpha", "beta1", "beta2"], "like"),
+        (["~beta"], ["alpha", "p1", "p2", "phi"], "like"),
+        (["p"], ["alpha", "p1", "p2", "phi"], "like"),
+        (["~p"], ["beta1", "beta2"], "like"),
+        (["^bet"], ["beta1", "beta2"], "regex"),
+        (["^p"], ["p1", "p2", "phi"], "regex"),
+        (["~^p"], ["alpha", "beta1", "beta2"], "regex"),
+        (["p[0-9]+"], ["p1", "p2"], "regex"),
+        (["~p[0-9]+"], ["alpha", "beta1", "beta2", "phi"], "regex"),
+    ],
+)
+def test_var_names_filter(var_names_expected):
+    """Test var_name filter with partial naming or regular expressions."""
+    data = from_dict(
+        posterior={
+            "alpha": np.random.randn(10),
+            "beta1": np.random.randn(10),
+            "beta2": np.random.randn(10),
+            "p1": np.random.randn(10),
+            "p2": np.random.randn(10),
+            "phi": np.random.randn(10),
+        }
+    ).posterior
+    var_names, expected, filter = var_names_expected
+    assert _var_names(var_names, data, filter) == expected
+
 @pytest.fixture(scope="function")
 def utils_with_numba_import_fail(monkeypatch):
     """Patch numba in utils so when its imported it raises ImportError"""
