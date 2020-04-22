@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
+from arviz.data.base import dict_to_dataset
 from ...utils import _var_names, _stack, one_de, two_de, expand_dims, flatten_inference_data_to_dict
 from ...data import load_arviz_data, from_dict
 
@@ -58,7 +59,7 @@ def test_var_names_key_error(data):
 
 
 @pytest.mark.parametrize(
-    "var_names_expected",
+    "var_args",
     [
         (["alpha", "beta"], ["alpha", "beta1", "beta2"], "like"),
         (["~beta"], ["alpha", "p1", "p2", "phi"], "like"),
@@ -71,10 +72,10 @@ def test_var_names_key_error(data):
         (["~p[0-9]+"], ["alpha", "beta1", "beta2", "phi"], "regex"),
     ],
 )
-def test_var_names_filter(var_names_expected):
-    """Test var_name filter with partial naming or regular expressions."""
-    data = from_dict(
-        posterior={
+def test_var_names_filter(var_args):
+    """Test var_names filter with partial naming or regular expressions."""
+    data = dict_to_dataset(
+        {
             "alpha": np.random.randn(10),
             "beta1": np.random.randn(10),
             "beta2": np.random.randn(10),
@@ -82,8 +83,8 @@ def test_var_names_filter(var_names_expected):
             "p2": np.random.randn(10),
             "phi": np.random.randn(10),
         }
-    ).posterior
-    var_names, expected, filter = var_names_expected
+    )
+    var_names, expected, filter = var_args
     assert _var_names(var_names, data, filter) == expected
 
 
