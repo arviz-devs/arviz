@@ -69,6 +69,7 @@ disable=missing-docstring,
         unnecessary-comprehension,
         unsubscriptable-object,
         cyclic-import,
+        redefined-builtin,
 
         #TODO: Remove this once todos are done
         fixme
