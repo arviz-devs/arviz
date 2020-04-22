@@ -18,6 +18,7 @@ style_list = [
     "arviz-darkgrid",
     "arviz-whitegrid",
     "arviz-white",
+    "arviz-grayscale",
 ]
 
 fig = plt.figure(figsize=(12, 12))
