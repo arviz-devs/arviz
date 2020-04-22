@@ -26,7 +26,7 @@ def plot_ppc(
     textsize=None,
     data_pairs=None,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     coords=None,
     flatten=None,
     flatten_pp=None,
@@ -74,7 +74,7 @@ def plot_ppc(
     var_names: list of variable names
         Variables to be plotted, if `None` all variable are plotted. Prefix the
         variables by `~` when you want to exclude them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -224,9 +224,9 @@ def plot_ppc(
 
     if var_names is None:
         var_names = list(observed.data_vars)
-    var_names = _var_names(var_names, observed, filter)
+    var_names = _var_names(var_names, observed, filter_vars)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
-    pp_var_names = _var_names(pp_var_names, predictive_dataset, filter)
+    pp_var_names = _var_names(pp_var_names, predictive_dataset, filter_vars)
 
     if flatten_pp is None and flatten is None:
         flatten_pp = list(predictive_dataset.dims.keys())

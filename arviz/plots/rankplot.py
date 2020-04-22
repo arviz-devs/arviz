@@ -18,7 +18,7 @@ from ..numeric_utils import _sturges_formula
 def plot_rank(
     data,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     transform=None,
     coords=None,
     bins=None,
@@ -54,7 +54,7 @@ def plot_rank(
     var_names: string or list of variable names
         Variables to be plotted. Prefix the variables by `~` when you want to exclude
         them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -133,7 +133,7 @@ def plot_rank(
     posterior_data = convert_to_dataset(data, group="posterior")
     if coords is not None:
         posterior_data = posterior_data.sel(**coords)
-    var_names = _var_names(var_names, posterior_data, filter)
+    var_names = _var_names(var_names, posterior_data, filter_vars)
     plotters = filter_plotters_list(
         list(xarray_var_iter(posterior_data, var_names=var_names, combined=True)), "plot_rank"
     )

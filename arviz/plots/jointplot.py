@@ -16,7 +16,7 @@ def plot_joint(
     data,
     group="posterior",
     var_names=None,
-    filter=None,
+    filter_vars=None,
     transform=None,
     coords=None,
     figsize=None,
@@ -46,7 +46,7 @@ def plot_joint(
         Variables to be plotted. Iterable of two variables or one variable (with subset
         having exactly 2 dimensions) are required. Prefix the variables by `~` when you
         want to exclude them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -162,7 +162,7 @@ def plot_joint(
     if coords is None:
         coords = {}
 
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
 
     plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 

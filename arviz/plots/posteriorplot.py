@@ -17,7 +17,7 @@ from ..rcparams import rcParams
 def plot_posterior(
     data,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     transform=None,
     coords=None,
     figsize=None,
@@ -48,7 +48,7 @@ def plot_posterior(
     var_names: list of variable names
         Variables to be plotted, two variables are required. Prefix the variables by `~`
         when you want to exclude them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -132,7 +132,7 @@ def plot_posterior(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu', '^the'], filter="regex", rope=(-1, 1))
+        >>> az.plot_posterior(data, var_names=['mu', '^the'], filter_vars="regex", rope=(-1, 1))
 
     Plot Region of Practical Equivalence for selected distributions
 
@@ -190,7 +190,7 @@ def plot_posterior(
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
 
     if coords is None:
         coords = {}

@@ -19,7 +19,7 @@ from ..utils import _var_names, get_coords
 def plot_mcse(
     idata,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     coords=None,
     errorbar=False,
     figsize=None,
@@ -47,7 +47,7 @@ def plot_mcse(
     var_names: list of variable names, optional
         Variables to be plotted. Prefix the variables by `~` when you want to exclude
         them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -125,7 +125,7 @@ def plot_mcse(
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
 
     probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
     mcse_dataset = xr.concat(

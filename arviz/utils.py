@@ -12,7 +12,7 @@ from numpy import newaxis
 from .rcparams import rcParams
 
 
-def _var_names(var_names, data, filter=None):
+def _var_names(var_names, data, filter_vars=None):
     """Handle var_names input across arviz.
 
     Parameters
@@ -20,7 +20,7 @@ def _var_names(var_names, data, filter=None):
     var_names: str, list, or None
     data : xarray.Dataset
         Posterior data in an xarray
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
          interpret var_names as regular expressions on the real variables names. A la
@@ -58,16 +58,16 @@ def _var_names(var_names, data, filter=None):
         excluded_vars = [
             var[1:] for var in var_names if var.startswith("~") and var not in all_vars
         ]
-        filter = str(filter).lower()
+        filter_vars = str(filter_vars).lower()
 
         if excluded_vars:
-            if filter in ("like", "regex"):
+            if filter_vars in ("like", "regex"):
                 for pattern in excluded_vars[:]:
                     excluded_vars.remove(pattern)
-                    if filter == "like":
+                    if filter_vars == "like":
                         real_vars = [real_var for real_var in all_vars if pattern in real_var]
                     else:
-                        # i.e filter == "regex"
+                        # i.e filter_vars == "regex"
                         real_vars = [
                             real_var for real_var in all_vars if re.search(pattern, real_var)
                         ]
@@ -75,9 +75,9 @@ def _var_names(var_names, data, filter=None):
             var_names = [var for var in all_vars if var not in excluded_vars]
 
         else:
-            if filter == "like":
+            if filter_vars == "like":
                 var_names = [var for var in all_vars for name in var_names if name in var]
-            elif filter == "regex":
+            elif filter_vars == "regex":
                 var_names = [var for var in all_vars for name in var_names if re.search(name, var)]
 
         existing_vars = np.isin(var_names, all_vars)

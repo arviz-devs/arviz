@@ -10,7 +10,7 @@ def plot_forest(
     kind="forestplot",
     model_names=None,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     transform=None,
     coords=None,
     combined=False,
@@ -53,7 +53,7 @@ def plot_forest(
         List of variables to plot (defaults to None, which results in all
         variables plotted) Prefix the variables by `~` when you want to exclude them
         from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -131,7 +131,7 @@ def plot_forest(
         >>> axes = az.plot_forest(non_centered_data,
         >>>                            kind='forestplot',
         >>>                            var_names=["^the"],
-        >>>                            filter="regex",
+        >>>                            filter_vars="regex",
         >>>                            combined=True,
         >>>                            ridgeplot_overlap=3,
         >>>                            figsize=(9, 7))
@@ -164,7 +164,7 @@ def plot_forest(
         datasets, list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords
     )
 
-    var_names = _var_names(var_names, datasets, filter)
+    var_names = _var_names(var_names, datasets, filter_vars)
 
     ncols, width_ratios = 1, [3]
 

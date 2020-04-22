@@ -89,8 +89,8 @@ def test_var_names_filter(var_args):
             "theta_t": samples,
         }
     )
-    var_names, expected, filter = var_args
-    assert _var_names(var_names, data, filter) == expected
+    var_names, expected, filter_vars = var_args
+    assert _var_names(var_names, data, filter_vars) == expected
 
 
 @pytest.fixture(scope="function")

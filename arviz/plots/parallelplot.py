@@ -12,7 +12,7 @@ from ..stats.stats_utils import stats_variance_2d as svar
 def plot_parallel(
     data,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -41,7 +41,7 @@ def plot_parallel(
         Variables to be plotted, if `None` all variable are plotted. Can be used to change the order
         of the plotted variables. Prefix the variables by `~` when you want to exclude
         them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -111,7 +111,7 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data, filter)
+    var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )

@@ -19,7 +19,7 @@ from ..utils import _var_names, get_coords
 def plot_ess(
     idata,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     kind="local",
     relative=False,
     coords=None,
@@ -50,7 +50,7 @@ def plot_ess(
     var_names: list of variable names, optional
         Variables to be plotted. Prefix the variables by `~` when you want to exclude
         them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -132,7 +132,7 @@ def plot_ess(
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="quantile", var_names=['~thet'], filter="like", coords=coords
+        ...     idata, kind="quantile", var_names=['~thet'], filter_vars="like", coords=coords
         ... )
 
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
@@ -179,7 +179,7 @@ def plot_ess(
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
     n_draws = data.dims["draw"]
     n_samples = n_draws * data.dims["chain"]
 

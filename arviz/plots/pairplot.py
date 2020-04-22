@@ -13,7 +13,7 @@ def plot_pair(
     data,
     group="posterior",
     var_names: Optional[List[str]] = None,
-    filter: Optional[str] = None,
+    filter_vars: Optional[str] = None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -53,7 +53,7 @@ def plot_pair(
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by `~` when you want to exclude them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -157,7 +157,7 @@ def plot_pair(
 
         >>> az.plot_pair(centered,
         ...             var_names=['^t', 'mu'],
-        ...             filter="regex",
+        ...             filter_vars="regex",
         ...             coords=coords,
         ...             divergences=True,
         ...             textsize=18)
@@ -225,7 +225,7 @@ def plot_pair(
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
     grouped_data = convert_to_dataset(data, group=group)
-    var_names = _var_names(var_names, grouped_data, filter)
+    var_names = _var_names(var_names, grouped_data, filter_vars)
     flat_var_names, infdata_group = xarray_to_ndarray(
         get_coords(grouped_data, coords), var_names=var_names, combined=True
     )

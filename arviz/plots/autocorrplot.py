@@ -14,7 +14,7 @@ from ..utils import _var_names
 def plot_autocorr(
     data,
     var_names=None,
-    filter=None,
+    filter_vars=None,
     max_lag=None,
     combined=False,
     figsize=None,
@@ -38,7 +38,7 @@ def plot_autocorr(
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by `~` when you want to exclude them from the plot. Vector-value
         stochastics are handled automatically.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -95,7 +95,7 @@ def plot_autocorr(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_autocorr(data, var_names=['~thet'], filter="like", combined=True)
+        >>> az.plot_autocorr(data, var_names=['~thet'], filter_vars="like", combined=True)
 
 
     Specify maximum lag (x axis bound)
@@ -106,7 +106,7 @@ def plot_autocorr(
         >>> az.plot_autocorr(data, var_names=['mu', 'tau'], max_lag=200, combined=True)
     """
     data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
 
     # Default max lag to 100 or max length of chain
     if max_lag is None:

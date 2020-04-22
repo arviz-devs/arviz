@@ -19,7 +19,7 @@ from ..rcparams import rcParams
 def plot_trace(
     data: InferenceData,
     var_names: Optional[List[str]] = None,
-    filter: Optional[str] = None,
+    filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
     divergences: Optional[str] = "bottom",
@@ -57,7 +57,7 @@ def plot_trace(
     var_names: str or list of str, optional
         One or more variables to be plotted. Prefix the variables by `~` when you want
         to exclude them from the plot.
-    filter: {None, "like", "regex"}, optional, default=None
+    filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
@@ -118,7 +118,7 @@ def plot_trace(
         >>> import arviz as az
         >>> data = az.load_arviz_data('non_centered_eight')
         >>> coords = {'school': ['Choate', 'Lawrenceville']}
-        >>> az.plot_trace(data, var_names=('theta'), filter="like", coords=coords)
+        >>> az.plot_trace(data, var_names=('theta'), filter_vars="like", coords=coords)
 
     Show all dimensions of multidimensional variables in the same plot
 
@@ -139,7 +139,7 @@ def plot_trace(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_trace(data, var_names=('^theta'), filter="regex", coords=coords, combined=True)
+        >>> az.plot_trace(data, var_names=('^theta'), filter_vars="regex", coords=coords, combined=True)
 
 
     Plot reference lines against distribution and trace
@@ -175,7 +175,7 @@ def plot_trace(
     if transform is not None:
         data = transform(data)
 
-    var_names = _var_names(var_names, data, filter)
+    var_names = _var_names(var_names, data, filter_vars)
 
     if lines is None:
         lines = ()
