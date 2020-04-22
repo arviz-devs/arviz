@@ -139,7 +139,9 @@ def plot_trace(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_trace(data, var_names=('^theta'), filter_vars="regex", coords=coords, combined=True)
+        >>> az.plot_trace(
+        >>>     data, var_names=('^theta'), filter_vars="regex", coords=coords, combined=True
+        >>>> )
 
 
     Plot reference lines against distribution and trace
