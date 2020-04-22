@@ -38,10 +38,10 @@ def plot_autocorr(
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by `~` when you want to exclude them from the plot. Vector-value
         stochastics are handled automatically.
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. À la
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     max_lag: int, optional
         Maximum lag to calculate autocorrelation. Defaults to 100 or num draws, whichever is smaller
@@ -90,12 +90,12 @@ def plot_autocorr(
         >>> az.plot_autocorr(data, var_names=['mu', 'tau'] )
 
 
-    Combine chains collapsing by variable
+    Combine chains by variable and select variables by excluding some with partial naming
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_autocorr(data, var_names=['~theta'], filter="like", combined=True)
+        >>> az.plot_autocorr(data, var_names=['~thet'], filter="like", combined=True)
 
 
     Specify maximum lag (x axis bound)

@@ -13,7 +13,7 @@ def plot_pair(
     data,
     group="posterior",
     var_names: Optional[List[str]] = None,
-    filter=None,
+    filter: Optional[str] = None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -53,10 +53,10 @@ def plot_pair(
     var_names: list of variable names, optional
         Variables to be plotted, if None all variable are plotted. Prefix the
         variables by `~` when you want to exclude them from the plot.
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. À la
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
@@ -150,7 +150,7 @@ def plot_pair(
         >>>             textsize=18,
         >>>             kind='hexbin')
 
-    Pair plot showing divergences
+    Pair plot showing divergences and select variables with regular expressions
 
     .. plot::
         :context: close-figs

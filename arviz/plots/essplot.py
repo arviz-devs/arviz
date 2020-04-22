@@ -50,10 +50,10 @@ def plot_ess(
     var_names: list of variable names, optional
         Variables to be plotted. Prefix the variables by `~` when you want to exclude
         them from the plot.
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. À la
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
@@ -126,13 +126,13 @@ def plot_ess(
         ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
         ... )
 
-    Plot quantile ESS.
+    Plot quantile ESS and exclude variables with partial naming
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="quantile", var_names=['~theta'], filter="like", coords=coords
+        ...     idata, kind="quantile", var_names=['~thet'], filter="like", coords=coords
         ... )
 
     Plot ESS evolution as the number of samples increase. When the model is converging properly,

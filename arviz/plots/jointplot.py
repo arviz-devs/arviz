@@ -46,10 +46,10 @@ def plot_joint(
         Variables to be plotted. Iterable of two variables or one variable (with subset
         having exactly 2 dimensions) are required. Prefix the variables by `~` when you
         want to exclude them from the plot.
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. À la
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)

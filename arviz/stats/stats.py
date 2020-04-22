@@ -355,15 +355,15 @@ def hpd(
         Names of variables to include in the hpd report. Prefix the variables by `~`
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
         (see `az.summary` for more details).
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
-         interpret var_names as regular expressions on the real variables names. À la
+         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: mapping, optional
         Specifies the subset over to calculate hpd.
     max_modes: int, optional
-        Specifies the maximume number of modes for multimodal case.
+        Specifies the maximum number of modes for multimodal case.
     kwargs: dict, optional
         Additional keywords passed to `wrap_xarray_ufunc`.
         See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
@@ -960,10 +960,10 @@ def summary(
         Names of variables to include in summary. Prefix the variables by `~` when you
         want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
         examples below).
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
-         interpret var_names as regular expressions on the real variables names. À la
+         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.

@@ -57,10 +57,10 @@ def plot_trace(
     var_names: str or list of str, optional
         One or more variables to be plotted. Prefix the variables by `~` when you want
         to exclude them from the plot.
-    filter: Union[None, "like", "regex"], optional, default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. À la
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
@@ -110,7 +110,7 @@ def plot_trace(
 
     Examples
     --------
-    Plot a subset variables
+    Plot a subset variables and select them with partial naming
 
     .. plot::
         :context: close-figs
@@ -134,7 +134,7 @@ def plot_trace(
 
         >>> az.plot_trace(data, var_names=["mu", "tau"], kind="rank_bars")
 
-    Combine all chains into one distribution
+    Combine all chains into one distribution and select variables with regular expressions
 
     .. plot::
         :context: close-figs
