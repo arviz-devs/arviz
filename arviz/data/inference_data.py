@@ -216,10 +216,10 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, inplace=False, chain_prior=False, warmup=False, **kwargs):
+    def sel(self, groups=None, inplace=False, chain_prior=None, warmup=None, **kwargs):
         """Perform an xarray selection on all groups.
 
-        Loops over all groups to perform Dataset.sel(key=item)
+        Loops groups to perform Dataset.sel(key=item)
         for every kwarg if key is a dimension of the dataset.
         One example could be performing a burn in cut on the InferenceData object
         or discarding a chain. The selection is performed on all relevant groups (like
@@ -228,15 +228,18 @@ class InferenceData:
 
         Parameters
         ----------
-        inplace : bool, optional
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
-        chain_prior: bool, optional
+        chain_prior: bool, optional, deprecated
             If ``False``, do not select prior related groups using ``chain`` dim.
-            Otherwise, use selection on ``chain`` if present.
-        warmup: bool, optional
-            If ``False``, do not select warmup groups.
-        **kwargs : mapping
+            Otherwise, use selection on ``chain`` if present. Default=False
+        warmup: bool, optional, deprecated
+            If ``False``, do not select warmup groups. Default=False
+        **kwargs: mapping
             It must be accepted by Dataset.sel().
 
         Returns
@@ -269,13 +272,162 @@ class InferenceData:
                ...: print(idata_subset.observed_data.coords)
 
         """
+        #TODO: use wrap_xarray_method
+        if chain_prior is not None:
+            warnings.warn(
+                "chain_prior has been deprecated. Use groups argument and "
+                "rcParams['data.metagroups'] instead.",
+                DeprecationWarning,
+            )
+        else:
+            chain_prior = False
+        if warmup is not None:
+            warnings.warn(
+                "warmup has been deprecated. Use groups argument and "
+                "rcParams['data.metagroups'] instead.",
+                DeprecationWarning
+            )
+        if groups is None:
+            groups = self._groups.copy()
+        if warmup:
+            groups.extend([group for group in self._groups_all if "warmup" in group])
+        sel_groups = []
+        metagroups = rcParams["data.metagroups"]
+        for group in groups:
+            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+
         out = self if inplace else deepcopy(self)
-        for group in self._groups_all if warmup else self._groups:
+        for group in sel_groups:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             if not chain_prior and "prior" in group:
                 valid_keys -= {"chain"}
             dataset = dataset.sel(**{key: kwargs[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+
+    def map(self, fun, groups=None, inplace=False, **kwargs):
+        """Apply a function to multiple groups.
+
+        Parameters
+        ----------
+        fun: callable
+            Function to be applied to each group.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping, optional
+            Keyword arguments passed to ``fun``.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        Examples
+        --------
+        Shift observed_data, prior_predictive and posterior_predictive.
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("non_centered_eight")
+               ...: idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_RVs")
+               ...: print(idata_shifted_obs.observed_data)
+               ...: print(idata_shifted_obs.posterior_predictive)
+
+        """
+        if groups is None:
+            groups = self._groups.copy()
+        groups = list(groups)
+        sel_groups = []
+        metagroups = rcParams["data.metagroups"]
+        for group in groups:
+            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+
+        out = self if inplace else deepcopy(self)
+        for group in sel_groups:
+            if group not in self._groups_all:
+                continue
+            dataset = getattr(self, group)
+            dataset = fun(dataset, **kwargs)
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+
+    def _wrap_xarray_method(self, method, groups=None, inplace=False, **kwargs):
+        """Extend and xarray.Dataset method to InferenceData object.
+
+        Parameters
+        ----------
+        method: str
+            Method to be extended. Must be a ``xarray.Dataset`` method.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping, optional
+            Keyword arguments passed to the xarray Dataset method.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        Examples
+        --------
+        Compute the mean of `posterior_groups`:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("non_centered_eight")
+               ...: idata_means = idata._wrap_xarray_method("mean", groups="latent_RVs")
+               ...: print(idata_means.posterior)
+               ...: print(idata_means.observed_data)
+
+        .. ipython::
+
+            In [1]: idata_stack = idata._wrap_xarray_method(
+               ...:     "stack",
+               ...:     groups=["posterior_groups", "prior_groups"],
+               ...:     sample=["chain", "draw"]
+               ...: )
+               ...: print(idata_stack.posterior)
+               ...: print(idata_stack.prior)
+               ...: print(idata_stack.observed_data)
+
+        """
+        if groups is None:
+            groups = self._groups.copy()
+        groups = list(groups)
+        sel_groups = []
+        metagroups = rcParams["data.metagroups"]
+        for group in groups:
+            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+
+        method = getattr(xr.Dataset, method)
+
+        out = self if inplace else deepcopy(self)
+        for group in sel_groups:
+            if group not in self._groups_all:
+                continue
+            dataset = getattr(self, group)
+            dataset = method(dataset, **kwargs)
             setattr(out, group, dataset)
         if inplace:
             return None
