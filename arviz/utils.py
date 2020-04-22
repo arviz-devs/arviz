@@ -3,9 +3,10 @@
 import importlib
 import functools
 import re
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 
 from numpy import newaxis
 from .rcparams import rcParams
@@ -19,10 +20,10 @@ def _var_names(var_names, data, filter=None):
     var_names: str, list, or None
     data : xarray.Dataset
         Posterior data in an xarray
-    filter: Union[None, "like", "regex"], default=None
+    filter: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
          interpret var_names as substrings of the real variables names. If "regex",
-         interpret var_names as regular expressions on the real variables names. À la
+         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
 
     Returns
@@ -57,25 +58,27 @@ def _var_names(var_names, data, filter=None):
         excluded_vars = [
             var[1:] for var in var_names if var.startswith("~") and var not in all_vars
         ]
+        filter = str(filter).lower()
+
         if excluded_vars:
-            if (filter == "like") or (filter == "regex"):
-                for pattern in excluded_vars:
-                    if pattern not in all_vars:
-                        if filter == "like":
-                            real_vars = [real_var for real_var in all_vars if pattern in real_var]
-                        else:
-                            # i.e filter == "regex"
-                            real_vars = [
-                                real_var for real_var in all_vars if re.search(pattern, real_var)
-                            ]
-                        excluded_vars.extend(real_vars)
-                        excluded_vars.remove(pattern)
+            if filter in ("like", "regex"):
+                for pattern in excluded_vars[:]:
+                    excluded_vars.remove(pattern)
+                    if filter == "like":
+                        real_vars = [real_var for real_var in all_vars if pattern in real_var]
+                    else:
+                        # i.e filter == "regex"
+                        real_vars = [
+                            real_var for real_var in all_vars if re.search(pattern, real_var)
+                        ]
+                    excluded_vars.extend(real_vars)
             var_names = [var for var in all_vars if var not in excluded_vars]
 
-        if filter == "like":
-            var_names = [var for var in all_vars for name in var_names if name in var]
-        elif filter == "regex":
-            var_names = [var for var in all_vars for name in var_names if re.search(name, var)]
+        else:
+            if filter == "like":
+                var_names = [var for var in all_vars for name in var_names if name in var]
+            elif filter == "regex":
+                var_names = [var for var in all_vars for name in var_names if re.search(name, var)]
 
         existing_vars = np.isin(var_names, all_vars)
         if not np.all(existing_vars):
