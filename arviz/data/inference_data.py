@@ -272,7 +272,7 @@ class InferenceData:
                ...: print(idata_subset.observed_data.coords)
 
         """
-        #TODO: use wrap_xarray_method
+        # TODO: use wrap_xarray_method
         if chain_prior is not None:
             warnings.warn(
                 "chain_prior has been deprecated. Use groups argument and "
@@ -285,7 +285,7 @@ class InferenceData:
             warnings.warn(
                 "warmup has been deprecated. Use groups argument and "
                 "rcParams['data.metagroups'] instead.",
-                DeprecationWarning
+                DeprecationWarning,
             )
         if groups is None:
             groups = self._groups.copy()
@@ -308,7 +308,6 @@ class InferenceData:
             return None
         else:
             return out
-
 
     def map(self, fun, groups=None, inplace=False, **kwargs):
         """Apply a function to multiple groups.
@@ -364,7 +363,6 @@ class InferenceData:
             return None
         else:
             return out
-
 
     def _wrap_xarray_method(self, method, groups=None, inplace=False, **kwargs):
         """Extend and xarray.Dataset method to InferenceData object.

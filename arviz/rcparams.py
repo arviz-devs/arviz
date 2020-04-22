@@ -165,6 +165,7 @@ def _validate_bokeh_marker(value):
         raise ValueError("{} is not one of {}".format(value, all_markers))
     return value
 
+
 def _validate_dict_of_lists(values):
     if isinstance(values, dict):
         return {key: tuple(item) for key, item in values.items()}
@@ -175,8 +176,8 @@ def _validate_dict_of_lists(values):
             if len(tup) != 2:
                 raise ValueError(f"Could not interpret '{value}' as key: list or str")
             key, vals = tup
-            key = key.strip(" \"")
-            vals = [val.strip(" \"") for val in vals.strip(" [],").split(",")]
+            key = key.strip(' "')
+            vals = [val.strip(' "') for val in vals.strip(" [],").split(",")]
             if key in validated_dict:
                 warnings.warn(f"Repeated key {key} when validating dict of lists")
             validated_dict[key] = tuple(vals)
@@ -211,10 +212,13 @@ _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-nam
 METAGROUPS = {
     "posterior_groups": ["posterior", "posterior_predictive", "sample_stats"],
     "prior_groups": ["prior", "prior_predictive", "sample_stats_prior"],
-    "posterior_groups_warmup":
-        ["_warmup_posterior", "_warmup_posterior_predictive", "_warmup_sample_stats"],
+    "posterior_groups_warmup": [
+        "_warmup_posterior",
+        "_warmup_posterior_predictive",
+        "_warmup_sample_stats",
+    ],
     "latent_vars_groups": ["posterior", "prior"],
-    "observed__vars_groups": ["posterior_predictive", "obseved_data", "prior_predictive"]
+    "observed__vars_groups": ["posterior_predictive", "obseved_data", "prior_predictive"],
 }
 
 defaultParams = {  # pylint: disable=invalid-name
