@@ -19,7 +19,6 @@ def plot_pp(
     var_names=None,
     coords=None,
     transform=None,
-    data_pairs=None,
     legend=True,
     ax=None,
     prior_kwargs=None,
@@ -40,28 +39,21 @@ def plot_pp(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
-    var_names : list
-        List of variables to be plotted.
+    var_names : str, list, list of lists
+        if str, plot the variable. if list, plot all the variables in list
+        of all groups. if list of lists, plot the vars of groups in respective lists.
     coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
-    data_pairs : dict
-        Dictionary containing relations between prior data and posterior data.
-        Dictionary structure:
-
-        - key = prior data var_name
-        - value = posterior var_name
-
-        For example, `data_pairs = {'y' : 'y_hat'}`
-        If None, it will assume that the prior data and the posterior
-        data have the same variable name.
     legend : bool
         Add legend to figure. By default True.
     ax: axes, optional
-        Matplotlib axes: a numpy 2d array of matplotlib axes.
+        Matplotlib axes: a numpy 2d array of matplotlib axes. Returned object will
+        have shape (nvars, 3) where the last column is the combined plot and the
+        first columns are the single plots.
     prior_kwargs : dicts, optional
         Additional keywords passed to `arviz.plot_kde` for prior group.
     posterior_kwargs : dicts, optional
@@ -93,9 +85,6 @@ def plot_pp(
 
     groups = ["prior", "posterior"]
 
-    if transform is not None:
-        data = transform(data)
-
     if coords is None:
         coords = {}
 
@@ -108,24 +97,31 @@ def plot_pp(
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    if data_pairs is None:
-        data_pairs = {}
-
     datasets = [getattr(data, group) for group in groups]
 
     if var_names is None:
         var_names = list(datasets[0].data_vars)
-    var_names = _var_names(var_names, datasets[0])
-    vars = [var_names]
-    for i in range(1, len(datasets)):
-        var_name =[data_pairs.get(var, var) for var in var_names]
-        var_name = _var_names(var_name,  datasets[i])
+
+    if isinstance(var_names, str):
+        var_names = [var_names]
+
+    if isinstance(var_names, list) or isinstance(var_names, tuple):
+        var_names = [list(var_names) for _ in datasets]
+
+    vars = []
+    for i in range(len(datasets)):
+        var_name = _var_names(var_names[i],  datasets[i])
         vars.append(var_name)
 
+    if transform is not None:
+        datasets = [transform(dataset) for dataset in datasets]
 
+    datasets = get_coords(
+        datasets, list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords
+    )
     pp_plotters = [
-        list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
-        for data , var in zip(datasets, vars)
+        list(xarray_var_iter(data, var_names=var, combined=True))
+        for data, var in zip(datasets, vars)
     ]
 
     nvars = len(pp_plotters[0])

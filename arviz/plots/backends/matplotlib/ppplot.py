@@ -4,6 +4,7 @@ import numpy as np
 
 from . import backend_show
 from ...kdeplot import plot_kde
+from ...plot_utils import make_label
 from . import backend_kwarg_defaults
 
 
@@ -44,23 +45,19 @@ def plot_pp(
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
         kwargs = prior_kwargs if group == "prior" else posterior_kwargs
-        for idx2, (var, coord, data,) in enumerate(plotter):
-            _pp_helper(
+        for idx2, (var, selection, data,) in enumerate(plotter):
+            label = make_label(var, selection)
+            label = f"{group} {label}"
+            plot_kde(
+                data,
+                label=label if legend else None,
                 ax=axes[idx2, idx],
-                data=data,
-                group=group,
-                var_name=var,
-                coord_name=coord,
-                legend=legend,
                 **kwargs,
             )
-            _pp_helper(
+            plot_kde(
+                data,
+                label=label if legend else None,
                 ax=axes[idx2, -1],
-                data=data,
-                group=group,
-                var_name=var,
-                coord_name=coord,
-                legend=legend,
                 **kwargs,
             )
 
@@ -69,11 +66,3 @@ def plot_pp(
 
     return axes
 
-
-def _pp_helper(ax, data, group, var_name, coord_name, legend, **kwargs):
-    plot_kde(
-        data,
-        label="{} {} {}".format(group, var_name, coord_name) if legend else None,
-        ax=ax,
-        **kwargs,
-    )
