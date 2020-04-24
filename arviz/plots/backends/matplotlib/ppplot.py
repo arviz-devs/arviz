@@ -65,4 +65,3 @@ def plot_pp(
         plt.show()
 
     return axes
-

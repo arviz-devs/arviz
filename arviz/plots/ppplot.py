@@ -6,6 +6,7 @@ from .plot_utils import (
     _scale_fig_size,
     get_plotting_function,
 )
+from ..utils import _var_names
 from ..rcparams import rcParams
 
 
@@ -105,11 +106,13 @@ def plot_pp(
     if isinstance(var_names[0], str):
         var_names = [var_names for _ in datasets]
 
+    var_names = [_var_names(vars, dataset) for vars, dataset in zip(var_names, datasets)]
+
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
 
     datasets = get_coords(
-        datasets, list(reversed(coords)) if isinstance(coords, (list, tuple)) else coords
+        datasets, list(coords) if isinstance(coords, (list, tuple)) else coords
     )
     pp_plotters = [
         list(xarray_var_iter(data, var_names=var, combined=True))
@@ -123,15 +126,13 @@ def plot_pp(
         figsize, textsize, 2 * nvars, ngroups
     )
 
-    posterior_plot_kwargs = posterior_kwargs.pop("plot_kwargs", dict())
-    posterior_plot_kwargs.setdefault("color", "red")
-    posterior_plot_kwargs.setdefault("linewidth", linewidth)
-    posterior_kwargs["plot_kwargs"] = posterior_plot_kwargs
+    posterior_kwargs.setdefault("plot_kwargs",dict())
+    posterior_kwargs["plot_kwargs"].setdefault("color", "red")
+    posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
-    prior_plot_kwargs = prior_kwargs.pop("plot_kwargs", dict())
-    prior_plot_kwargs.setdefault("color", "blue")
-    prior_plot_kwargs.setdefault("linewidth", linewidth)
-    prior_kwargs["plot_kwargs"] = prior_plot_kwargs
+    prior_kwargs.setdefault("plot_kwargs", dict())
+    prior_kwargs["plot_kwargs"].setdefault("color", "blue")
+    prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     ppplot_kwargs = dict(
         ax=ax,
