@@ -29,7 +29,7 @@ axes.edgecolor: 0
 axes.linewidth: 1
 axes.spines.top: False
 axes.spines.right: False
-image.cmap: gray
+image.cmap: cet_gray #  perceptually uniform gray scale from colorcet (linear_grey_10_95_c0)
 xtick.major.size: 0
 ytick.major.size: 0
 xtick.minor.size: 0
