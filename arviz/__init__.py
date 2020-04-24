@@ -293,10 +293,10 @@ linear_grey_10_95_c0 = [
 ]
 
 
-def mpl_cm(name, colorlist):
+def _mpl_cm(name, colorlist):
     cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
     register_cmap("cet_" + name, cmap=cmap)
 
 
-mpl_cm("gray", linear_grey_10_95_c0)
-mpl_cm("gray_r", list(reversed(linear_grey_10_95_c0)))
+_mpl_cm("gray", linear_grey_10_95_c0)
+_mpl_cm("gray_r", list(reversed(linear_grey_10_95_c0)))

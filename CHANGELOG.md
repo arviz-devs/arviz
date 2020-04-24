@@ -15,6 +15,7 @@
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro and numpyro translation (#1090, #1125)
 * Add `num_chains` and `pred_dims` arguments to from_pyro and from_numpyro (#1090, #1125)
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
+* New grayscale style (#1164)
 
 ### Maintenance and fixes
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
