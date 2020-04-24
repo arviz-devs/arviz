@@ -1,14 +1,11 @@
 """Posterior-Prior plot."""
 
-import numpy as np
-
 from .plot_utils import (
     xarray_var_iter,
     get_coords,
     _scale_fig_size,
     get_plotting_function,
 )
-from ..utils import _var_names
 from ..rcparams import rcParams
 
 
@@ -105,13 +102,8 @@ def plot_pp(
     if isinstance(var_names, str):
         var_names = [var_names]
 
-    if isinstance(var_names, list) or isinstance(var_names, tuple):
-        var_names = [list(var_names) for _ in datasets]
-
-    vars = []
-    for i in range(len(datasets)):
-        var_name = _var_names(var_names[i],  datasets[i])
-        vars.append(var_name)
+    if isinstance(var_names[0], str):
+        var_names = [var_names for _ in datasets]
 
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
@@ -121,7 +113,7 @@ def plot_pp(
     )
     pp_plotters = [
         list(xarray_var_iter(data, var_names=var, combined=True))
-        for data, var in zip(datasets, vars)
+        for data, var in zip(datasets, var_names)
     ]
 
     nvars = len(pp_plotters[0])
