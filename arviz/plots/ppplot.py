@@ -2,11 +2,10 @@
 
 from .plot_utils import (
     xarray_var_iter,
-    get_coords,
     _scale_fig_size,
     get_plotting_function,
 )
-from ..utils import _var_names
+from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
 
 
