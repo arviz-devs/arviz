@@ -21,7 +21,7 @@ from .ppplot import plot_pp
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from .plot_utils import _fast_kde, _fast_kde_2d
+from ..numeric_utils import _fast_kde_2d
 
 
 __all__ = [
@@ -36,7 +36,6 @@ __all__ = [
     "plot_hpd",
     "plot_joint",
     "plot_kde",
-    "_fast_kde",
     "_fast_kde_2d",
     "plot_khat",
     "plot_loo_pit",

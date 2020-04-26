@@ -319,6 +319,37 @@ def expand_dims(x):
     return x.reshape(shape[:0] + (1,) + shape[0:])
 
 
+@conditional_jit(cache=True)
+def _dot(x, y):
+    return np.dot(x, y)
+
+
+def _cov_1d(x):
+    x = x - x.mean(axis=0)
+    ddof = x.shape[0] - 1
+    return np.dot(x.T, x.conj()) / ddof
+
+
+def _cov(data):
+    if data.ndim == 1:
+        return _cov_1d(data)
+    elif data.ndim == 2:
+        x = data.astype(float)
+        avg, _ = np.average(x, axis=1, weights=None, returned=True)
+        ddof = x.shape[1] - 1
+        if ddof <= 0:
+            warnings.warn("Degrees of freedom <= 0 for slice", RuntimeWarning, stacklevel=2)
+            ddof = 0.0
+        x -= avg[:, None]
+        prod = _dot(x, x.T.conj())
+        prod *= np.true_divide(1, ddof)
+        prod = prod.squeeze()
+        prod += 1e-6 * np.eye(prod.shape[0])
+        return prod
+    else:
+        raise ValueError("{} dimension arrays are not supported".format(data.ndim))
+
+
 @conditional_jit
 def full(shape, x, dtype=None):
     """Jitting numpy full."""
@@ -498,3 +529,48 @@ def flatten_inference_data_to_dict(
 
                         data_dict[var_name_dim] = var_values[loc]
     return data_dict
+
+
+def get_coords(data, coords):
+    """Subselects xarray DataSet or DataArray object to provided coords. Raises exception if fails.
+
+    Raises
+    ------
+    ValueError
+        If coords name are not available in data
+
+    KeyError
+        If coords dims are not available in data
+
+    Returns
+    -------
+    data: xarray
+        xarray.DataSet or xarray.DataArray object, same type as input
+    """
+    if not isinstance(data, (list, tuple)):
+        try:
+            return data.sel(**coords)
+
+        except ValueError:
+            invalid_coords = set(coords.keys()) - set(data.coords.keys())
+            raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
+
+        except KeyError as err:
+            raise KeyError(
+                (
+                    "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
+                    "Check that coords structure is correct and"
+                    " dimensions are valid. {}"
+                ).format(err)
+            )
+    if not isinstance(coords, (list, tuple)):
+        coords = [coords] * len(data)
+    data_subset = []
+    for idx, (datum, coords_dict) in enumerate(zip(data, coords)):
+        try:
+            data_subset.append(get_coords(datum, coords_dict))
+        except ValueError as err:
+            raise ValueError("Error in data[{}]: {}".format(idx, err))
+        except KeyError as err:
+            raise KeyError("Error in data[{}]: {}".format(idx, err))
+    return data_subset

@@ -8,10 +8,8 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
-    get_bins,
-    _fast_kde,
 )
-from ....stats.stats_utils import histogram
+from ....numeric_utils import _fast_kde, histogram, get_bins
 
 
 def plot_ppc(

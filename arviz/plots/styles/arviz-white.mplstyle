@@ -29,6 +29,7 @@ axes.edgecolor: 0
 axes.linewidth: 1
 axes.spines.top: False
 axes.spines.right: False
+image.cmap: viridis
 xtick.major.size: 0
 ytick.major.size: 0
 xtick.minor.size: 0

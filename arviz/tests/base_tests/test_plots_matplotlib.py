@@ -42,7 +42,8 @@ from ...plots import (
     plot_loo_pit,
     plot_mcse,
 )
-from ...plots.plot_utils import _fast_kde, _cov
+from ...utils import _cov
+from ...numeric_utils import _fast_kde
 
 rcParams["data.load"] = "eager"
 
@@ -156,8 +157,12 @@ def test_plot_trace(models, kwargs):
     assert axes.shape
 
 
-@pytest.mark.parametrize("compact", [True, False])
-@pytest.mark.parametrize("combined", [True, False])
+@pytest.mark.parametrize(
+    "compact", [True, False],
+)
+@pytest.mark.parametrize(
+    "combined", [True, False],
+)
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
     axes = plot_trace(
@@ -412,6 +417,11 @@ def test_plot_kde_inference_data(models):
             "colorbar": True,
             "hexbin_kwargs": {"cmap": "viridis"},
             "textsize": 20,
+        },
+        {
+            "point_estimate": "mean",
+            "reference_values": {"mu": 0, "tau": 0},
+            "reference_values_kwargs": {"c": "C", "marker": "*"},
         },
     ],
 )

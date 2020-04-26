@@ -1,7 +1,7 @@
 """Forest plot."""
 from ..data import convert_to_dataset
-from .plot_utils import get_coords, get_plotting_function
-from ..utils import _var_names
+from .plot_utils import get_plotting_function
+from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
 
 

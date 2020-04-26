@@ -4,10 +4,9 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...kdeplot import _fast_kde
-from ...plot_utils import get_bins, make_label, _create_axes_grid
+from ....numeric_utils import _fast_kde, histogram, get_bins
+from ...plot_utils import make_label, _create_axes_grid
 from ....stats import hpd
-from ....stats.stats_utils import histogram
 
 
 def plot_violin(

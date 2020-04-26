@@ -13,8 +13,8 @@ from ...plot_utils import (
     format_sig_figs,
     round_num,
     calculate_point_estimate,
-    get_bins,
 )
+from ....numeric_utils import get_bins
 
 
 def plot_posterior(
@@ -253,6 +253,7 @@ def _plot_posterior_op(
             plot_kwargs=kwargs,
             ax=ax,
             rug=False,
+            show=False,
         )
     else:
         if bins is None:

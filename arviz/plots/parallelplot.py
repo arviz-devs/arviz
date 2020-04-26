@@ -3,9 +3,9 @@ import numpy as np
 from scipy.stats.mstats import rankdata
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords, get_plotting_function
+from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_plotting_function
 from ..rcparams import rcParams
-from ..utils import _var_names, _numba_var
+from ..utils import _var_names, _numba_var, get_coords
 from ..stats.stats_utils import stats_variance_2d as svar
 
 

@@ -34,6 +34,8 @@ def plot_pair(
     marginal_kwargs,
     point_estimate,
     point_estimate_kwargs,
+    reference_values,
+    reference_values_kwargs,
     show,
 ):
     """Bokeh pair plot."""
@@ -55,6 +57,38 @@ def plot_pair(
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
+
+    if reference_values:
+        reference_values_copy = {}
+        label = []
+        for variable in list(reference_values.keys()):
+            if " " in variable:
+                variable_copy = variable.replace(" ", "\n", 1)
+            else:
+                variable_copy = variable
+
+            label.append(variable_copy)
+            reference_values_copy[variable_copy] = reference_values[variable]
+
+        difference = set(flat_var_names).difference(set(label))
+
+        for dif in difference:
+            reference_values_copy[dif] = None
+
+        if difference:
+            warn = [dif.replace("\n", " ", 1) for dif in difference]
+            warnings.warn(
+                "Argument reference_values does not include reference value for: {}".format(
+                    ", ".join(warn)
+                ),
+                UserWarning,
+            )
+
+    if reference_values_kwargs is None:
+        reference_values_kwargs = {}
+
+    reference_values_kwargs.setdefault("line_color", "red")
+    reference_values_kwargs.setdefault("line_width", 5)
 
     dpi = backend_kwargs.pop("dpi")
     max_plots = (
@@ -150,6 +184,7 @@ def plot_pair(
         ax = np.array(ax)
     else:
         assert ax.shape == (numvars - var, numvars - var)
+
     # pylint: disable=too-many-nested-blocks
     for i in range(0, numvars - var):
 
@@ -267,6 +302,12 @@ def plot_pair(
                                 **point_estimate_kwargs,
                             )
                             ax[-1, -1].add_layout(ax_pe_hline)
+
+                if reference_values:
+                    x = reference_values_copy[flat_var_names[j + var]]
+                    y = reference_values_copy[flat_var_names[i]]
+                    if x and y:
+                        ax[j, i].circle(y, x, **reference_values_kwargs)
 
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
                 ax[j, i].yaxis.axis_label = flat_var_names[j + var]

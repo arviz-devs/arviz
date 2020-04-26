@@ -9,7 +9,8 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
-from ...plot_utils import _scale_fig_size, get_bins, make_label, format_coords_as_labels
+from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels
+from ....numeric_utils import get_bins
 
 
 def plot_trace(
@@ -136,6 +137,7 @@ def plot_trace(
     if axes is None:
         _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
 
+    axes = np.atleast_2d(axes)
     # Check the input for lines
     if lines is not None:
         all_var_names = set(plotter[0] for plotter in plotters)
@@ -361,9 +363,9 @@ def _plot_chains_mpl(
             plot_kwargs.pop(chain_prop[0])
 
     if kind == "rank_bars":
-        plot_rank(data=value, kind="bars", axes=axes[idx, 1], **rank_kwargs)
+        plot_rank(data=value, kind="bars", ax=axes[idx, 1], **rank_kwargs)
     elif kind == "rank_vlines":
-        plot_rank(data=value, kind="vlines", axes=axes[idx, 1], **rank_kwargs)
+        plot_rank(data=value, kind="vlines", ax=axes[idx, 1], **rank_kwargs)
 
     if combined:
         plot_kwargs[chain_prop[0]] = chain_prop[1][-1]
