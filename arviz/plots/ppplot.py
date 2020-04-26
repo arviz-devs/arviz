@@ -111,9 +111,7 @@ def plot_pp(
     if transform is not None:
         datasets = [transform(dataset) for dataset in datasets]
 
-    datasets = get_coords(
-        datasets, list(coords) if isinstance(coords, (list, tuple)) else coords
-    )
+    datasets = get_coords(datasets, coords)
     pp_plotters = [
         list(xarray_var_iter(data, var_names=var, combined=True))
         for data, var in zip(datasets, var_names)

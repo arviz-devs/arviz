@@ -29,6 +29,7 @@ from ...plots import (
     plot_parallel,
     plot_pair,
     plot_joint,
+    plot_pp,
     plot_ppc,
     plot_violin,
     plot_compare,
@@ -1159,3 +1160,20 @@ def test_plot_mcse_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_mcse(idata, rug=True)
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"]},
+        {"var_names": ["mu"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["eta"], "posterior_kwargs":{"rug": True, "rug_kwargs": {"color": "r"}}},
+        {"var_names": ["tau"], "prior_kwargs":{"fill_kwargs": {"alpha": 0.5}}},
+        {"var_names": ["tau"], "prior_kwargs":{"plot_kwargs": {"color": 'r'}},
+         "posterior_kwargs":{"plot_kwargs": {"color": "b"}}},
+    ],
+)
+def test_plot_pp(models, kwargs):
+    idata = models.model_1
+    ax = plot_pp(idata, **kwargs)
+    assert np.all(ax)
