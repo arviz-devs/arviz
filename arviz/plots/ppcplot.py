@@ -3,7 +3,6 @@ from numbers import Integral
 import platform
 import logging
 import numpy as np
-from matplotlib import get_backend
 
 from .plot_utils import (
     xarray_var_iter,
@@ -199,30 +198,6 @@ def plot_ppc(
     else:
         animation_kwargs.setdefault("blit", False)
 
-    if animated:
-        if backend == "matplotlib":
-            try:
-                shell = get_ipython().__class__.__name__
-                if shell == "ZMQInteractiveShell" and get_backend() != "nbAgg":
-                    raise Warning(
-                        "To run animations inside a notebook you have to use the nbAgg backend. "
-                        "Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch "
-                        "back to the default backend with `%matplotlib  inline` or "
-                        "`%matplotlib  auto`."
-                    )
-            except NameError:
-                pass
-
-            if animation_kwargs["blit"] and platform.system() != "Linux":
-                _log.warning(
-                    "If you experience problems rendering the animation try setting "
-                    "`animation_kwargs({'blit':False}) or changing the plotting backend "
-                    "(e.g. to TkAgg)"
-                )
-
-        elif backend == "bokeh":
-            raise TypeError("Animation option is only supported with matplotlib backend.")
-
     if alpha is None:
         if animated:
             alpha = 1
@@ -340,6 +315,8 @@ def plot_ppc(
     )
 
     if backend == "bokeh":
+        if animated:
+            raise TypeError("Animation option is only supported with matplotlib backend.")
 
         ppcplot_kwargs.pop("animated")
         ppcplot_kwargs.pop("animation_kwargs")
