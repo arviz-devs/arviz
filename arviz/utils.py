@@ -2,15 +2,17 @@
 """General utilities."""
 import importlib
 import functools
+import re
 import warnings
-import numpy as np
-from numpy import newaxis
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+from numpy import newaxis
 from .rcparams import rcParams
 
 
-def _var_names(var_names, data):
+def _var_names(var_names, data, filter_vars=None):
     """Handle var_names input across arviz.
 
     Parameters
@@ -18,6 +20,12 @@ def _var_names(var_names, data):
     var_names: str, list, or None
     data : xarray.Dataset
         Posterior data in an xarray
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+
     Returns
     -------
     var_name: list or None
@@ -37,10 +45,7 @@ def _var_names(var_names, data):
         else:
             all_vars = list(data.data_vars)
 
-        excluded_vars = [i[1:] for i in var_names if i.startswith("~") and i not in all_vars]
-
-        all_vars_tilde = [i for i in all_vars if i.startswith("~")]
-
+        all_vars_tilde = [var for var in all_vars if var.startswith("~")]
         if all_vars_tilde:
             warnings.warn(
                 """ArviZ treats '~' as a negation character for variable selection.
@@ -50,14 +55,36 @@ def _var_names(var_names, data):
                 )
             )
 
-        if excluded_vars:
-            var_names = [i for i in all_vars if i not in excluded_vars]
+        excluded_vars = [
+            var[1:] for var in var_names if var.startswith("~") and var not in all_vars
+        ]
+        filter_vars = str(filter_vars).lower()
 
-        existent_vars = np.isin(var_names, all_vars)
-        if not np.all(existent_vars):
+        if excluded_vars:
+            if filter_vars in ("like", "regex"):
+                for pattern in excluded_vars[:]:
+                    excluded_vars.remove(pattern)
+                    if filter_vars == "like":
+                        real_vars = [real_var for real_var in all_vars if pattern in real_var]
+                    else:
+                        # i.e filter_vars == "regex"
+                        real_vars = [
+                            real_var for real_var in all_vars if re.search(pattern, real_var)
+                        ]
+                    excluded_vars.extend(real_vars)
+            var_names = [var for var in all_vars if var not in excluded_vars]
+
+        else:
+            if filter_vars == "like":
+                var_names = [var for var in all_vars for name in var_names if name in var]
+            elif filter_vars == "regex":
+                var_names = [var for var in all_vars for name in var_names if re.search(name, var)]
+
+        existing_vars = np.isin(var_names, all_vars)
+        if not np.all(existing_vars):
             raise KeyError(
                 "{} var names are not present in dataset".format(
-                    np.array(var_names)[~existent_vars]
+                    np.array(var_names)[~existing_vars]
                 )
             )
 
