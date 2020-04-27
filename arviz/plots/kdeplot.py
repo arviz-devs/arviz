@@ -18,7 +18,7 @@ def plot_kde(
     quantiles=None,
     rotated=False,
     contour=True,
-    fill_last=True,
+    fill_last=False,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -61,7 +61,7 @@ def plot_kde(
     contour : bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last : bool
-        If True fill the last contour of the 2D KDE plot. Defaults to True.
+        If True fill the last contour of the 2D KDE plot. Defaults to False.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
@@ -75,9 +75,9 @@ def plot_kde(
         Use `space` keyword (float) to control the position of the rugplot. The larger this number
         the lower the rugplot.
     contour_kwargs : dict
-        Keywords passed to ax.contour. Ignored for 1D KDE.
+        Keywords passed to ax.contour to draw contour lines. Ignored for 1D KDE.
     contourf_kwargs : dict
-        Keywords passed to ax.contourf. Ignored for 1D KDE.
+        Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     ax: axes, optional
@@ -111,6 +111,7 @@ def plot_kde(
         >>> import arviz as az
         >>> non_centered = az.load_arviz_data('non_centered_eight')
         >>> mu_posterior = np.concatenate(non_centered.posterior["mu"].values)
+        >>> tau_posterior = np.concatenate(non_centered.posterior["tau"].values)
         >>> az.plot_kde(mu_posterior)
 
 
@@ -144,15 +145,26 @@ def plot_kde(
     .. plot::
         :context: close-figs
 
-        >>> tau_posterior = np.concatenate(non_centered.posterior["tau"].values)
         >>> az.plot_kde(mu_posterior, values2=tau_posterior)
 
-    Remove fill for last contour in 2d KDE
+
+    Plot 2d contour KDE, without filling and countour lines using viridis cmap
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_kde(mu_posterior, values2=tau_posterior, fill_last=False)
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior,
+        ...             contour_kwargs={"colors":None, "cmap":plt.cm.viridis},
+        ...             contourf_kwargs={"alpha":0});
+
+    Plot 2d contour KDE, set the number of levels to 3.
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, values2=tau_posterior,
+        ...             contour_kwargs={"levels":3}
+        ...             contourf_kwargs={"levels":3};
 
     Plot 2d smooth KDE
 
