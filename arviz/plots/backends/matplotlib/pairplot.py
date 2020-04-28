@@ -35,7 +35,7 @@ def plot_pair(
     backend_kwargs,
     marginal_kwargs,
     show,
-    diagonal,
+    marginals,
     point_estimate,
     point_estimate_kwargs,
     point_estimate_marker_kwargs,
@@ -91,6 +91,9 @@ def plot_pair(
     reference_values_kwargs.setdefault("color", "C3")
     reference_values_kwargs.setdefault("marker", "o")
 
+    point_estimate_marker_kwargs.setdefault("marker", "s")
+    point_estimate_marker_kwargs.setdefault("color", "C1")
+
     # pylint: disable=too-many-nested-blocks
     if numvars == 2:
         (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
@@ -100,20 +103,34 @@ def plot_pair(
         marginal_kwargs.setdefault("plot_kwargs", {})
         marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
+        point_estimate_marker_kwargs.setdefault("s", figsize[0] + 50)
+
         # Flatten data
         x = infdata_group[0].flatten()
         y = infdata_group[1].flatten()
         if ax is None:
-            if diagonal:
+            if marginals:
                 # Instantiate figure and grid
+                widths = [2, 2, 2, 1]
+                heights = [1.4, 2, 2, 2]
                 fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
-                grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+                grid = plt.GridSpec(
+                    4,
+                    4,
+                    hspace=0.1,
+                    wspace=0.1,
+                    figure=fig,
+                    width_ratios=widths,
+                    height_ratios=heights,
+                )
                 # Set up main plot
                 ax = fig.add_subplot(grid[1:, :-1])
                 # Set up top KDE
                 ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=ax)
+                ax_hist_x.set_yticks([])
                 # Set up right KDE
                 ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=ax)
+                ax_hist_y.set_xticks([])
                 ax_return = np.array([[ax_hist_x, None], [ax, ax_hist_y]])
 
                 for val, ax_, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
@@ -125,7 +142,7 @@ def plot_pair(
             else:
                 fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
         else:
-            if diagonal:
+            if marginals:
                 assert ax.shape == (numvars, numvars)
                 if ax[0, 1] is not None and ax[0, 1].get_figure() is not None:
                     ax[0, 1].remove()
@@ -162,14 +179,14 @@ def plot_pair(
         if point_estimate:
             pe_x = calculate_point_estimate(point_estimate, x)
             pe_y = calculate_point_estimate(point_estimate, y)
-            if diagonal:
+            if marginals:
                 ax_hist_x.axvline(pe_x, **point_estimate_kwargs)
                 ax_hist_y.axhline(pe_y, **point_estimate_kwargs)
 
             ax.axvline(pe_x, **point_estimate_kwargs)
             ax.axhline(pe_y, **point_estimate_kwargs)
 
-            ax.scatter(pe_x, pe_y, marker="s", s=figsize[0] + 50, **point_estimate_kwargs, zorder=4)
+            ax.scatter(pe_x, pe_y, **point_estimate_marker_kwargs, zorder=4)
 
         if reference_values:
             ax.plot(
@@ -199,6 +216,8 @@ def plot_pair(
             figsize, textsize, numvars - 2, numvars - 2
         )
 
+        point_estimate_marker_kwargs.setdefault("s", figsize[0] + 50)
+
         if ax is None:
             fig, ax = plt.subplots(numvars, numvars, figsize=figsize, **backend_kwargs)
         hexbin_values = []
@@ -213,7 +232,7 @@ def plot_pair(
                     continue
 
                 elif i == j:
-                    if diagonal:
+                    if marginals:
                         loc = "right"
                         plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
                     else:
@@ -257,14 +276,12 @@ def plot_pair(
                         ax[j, i].axvline(pe_x, **point_estimate_kwargs)
                         ax[j, i].axhline(pe_y, **point_estimate_kwargs)
 
-                        if diagonal:
+                        if marginals:
                             ax[j - 1, i].axvline(pe_x, **point_estimate_kwargs)
                             pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
                             ax[-1, -1].axvline(pe_last, **point_estimate_kwargs)
 
-                        ax[j, i].scatter(
-                            pe_x, pe_y, s=figsize[0] + 50, zorder=4, **point_estimate_marker_kwargs
-                        )
+                        ax[j, i].scatter(pe_x, pe_y, zorder=4, **point_estimate_marker_kwargs)
 
                     if reference_values:
                         x_name = flat_var_names[i]
@@ -293,6 +310,6 @@ def plot_pair(
     if backend_show(show):
         plt.show()
 
-    if diagonal and numvars == 2:
+    if marginals and numvars == 2:
         return ax_return
     return ax
