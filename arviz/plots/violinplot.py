@@ -15,6 +15,7 @@ from ..rcparams import rcParams
 def plot_violin(
     data,
     var_names=None,
+    filter_vars=None,
     transform=None,
     quartiles=True,
     rug=False,
@@ -40,42 +41,48 @@ def plot_violin(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names: list, optional
-        List of variables to plot (defaults to None, which results in all variables plotted)
-    transform : callable
+    var_names: list of variable names, optional
+        Variables to be plotted, if None all variable are plotted. Prefix the
+        variables by `~` when you want to exclude them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    transform: callable
         Function to transform data (defaults to None i.e. the identity function)
-    quartiles : bool, optional
+    quartiles: bool, optional
         Flag for plotting the interquartile range, in addition to the credible_interval*100%
         intervals. Defaults to True
-    rug : bool
+    rug: bool
         If True adds a jittered rugplot. Defaults to False.
-    credible_interval : float, optional
+    credible_interval: float, optional
         Credible intervals. Defaults to 0.94.
-    shade : float
+    shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
-    bw : float
+    bw: float
         Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
         KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
         (the default rule used by SciPy).
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
         Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
         based on figsize.
-    sharex : bool
+    sharex: bool
         Defaults to True, violinplots share a common x-axis scale.
-    sharey : bool
+    sharey: bool
         Defaults to True, violinplots share a common y-axis scale.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    shade_kwargs : dicts, optional
+    shade_kwargs: dicts, optional
         Additional keywords passed to `fill_between`, or `barh` to control the shade.
-    rug_kwargs : dict
+    rug_kwargs: dict
         Keywords passed to the rug plot. If true only the righ half side of the violin will be
         plotted.
     backend: str, optional
@@ -83,12 +90,12 @@ def plot_violin(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -112,7 +119,7 @@ def plot_violin(
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
 
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
