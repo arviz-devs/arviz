@@ -1176,9 +1176,9 @@ def test_plot_mcse_no_divergences(models):
     [
         {},
         {"var_names": ["theta"]},
-        {"var_names": ["mu"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
         {"var_names": ["eta"], "posterior_kwargs":{"rug": True, "rug_kwargs": {"color": "r"}}},
-        {"var_names": ["tau"], "prior_kwargs":{"fill_kwargs": {"alpha": 0.5}}},
+        {"var_names": ["mu"], "prior_kwargs":{"fill_kwargs": {"alpha": 0.5}}},
         {"var_names": ["tau"], "prior_kwargs":{"plot_kwargs": {"color": 'r'}},
          "posterior_kwargs":{"plot_kwargs": {"color": "b"}}},
     ],
