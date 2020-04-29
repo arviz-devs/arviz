@@ -186,7 +186,7 @@ def plot_pair(
             ax.axvline(pe_x, **point_estimate_kwargs)
             ax.axhline(pe_y, **point_estimate_kwargs)
 
-            ax.scatter(pe_x, pe_y, **point_estimate_marker_kwargs, zorder=4)
+            ax.scatter(pe_x, pe_y, zorder=4, **point_estimate_marker_kwargs)
 
         if reference_values:
             ax.plot(
