@@ -1171,19 +1171,33 @@ def test_plot_mcse_no_divergences(models):
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_mcse(idata, rug=True)
 
+
 @pytest.mark.parametrize(
     "kwargs",
     [
         {},
         {"var_names": ["theta"]},
         {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
-        {"var_names": ["eta"], "posterior_kwargs":{"rug": True, "rug_kwargs": {"color": "r"}}},
-        {"var_names": ["mu"], "prior_kwargs":{"fill_kwargs": {"alpha": 0.5}}},
-        {"var_names": ["tau"], "prior_kwargs":{"plot_kwargs": {"color": 'r'}},
-         "posterior_kwargs":{"plot_kwargs": {"color": "b"}}},
+        {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
+        {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
+        {
+            "var_names": ["tau"],
+            "prior_kwargs": {"plot_kwargs": {"color": "r"}},
+            "posterior_kwargs": {"plot_kwargs": {"color": "b"}},
+        },
     ],
 )
 def test_plot_pp(models, kwargs):
     idata = models.model_1
     ax = plot_pp(idata, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_pp_different_vars():
+    data = from_dict(
+        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
+    )
+    with pytest.raises(TypeError):
+        plot_pp(data, vars="x")
+    ax = plot_pp(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)

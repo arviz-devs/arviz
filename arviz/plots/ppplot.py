@@ -123,7 +123,7 @@ def plot_pp(
         figsize, textsize, 2 * nvars, ngroups
     )
 
-    posterior_kwargs.setdefault("plot_kwargs",dict())
+    posterior_kwargs.setdefault("plot_kwargs", dict())
     posterior_kwargs["plot_kwargs"].setdefault("color", "red")
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 

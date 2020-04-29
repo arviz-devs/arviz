@@ -49,16 +49,10 @@ def plot_pp(
             label = make_label(var, selection)
             label = f"{group} {label}"
             plot_kde(
-                data,
-                label=label if legend else None,
-                ax=axes[idx2, idx],
-                **kwargs,
+                data, label=label if legend else None, ax=axes[idx2, idx], **kwargs,
             )
             plot_kde(
-                data,
-                label=label if legend else None,
-                ax=axes[idx2, -1],
-                **kwargs,
+                data, label=label if legend else None, ax=axes[idx2, -1], **kwargs,
             )
 
     if backend_show(show):
