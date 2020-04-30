@@ -321,6 +321,7 @@ def hpd(
     skipna=False,
     group="posterior",
     var_names=None,
+    filter_vars=None,
     coords=None,
     max_modes=10,
     **kwargs,
@@ -351,11 +352,18 @@ def hpd(
          Specifies which InferenceData group should be used to calculate hpd.
          Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hpd report
+        Names of variables to include in the hpd report. Prefix the variables by `~`
+        when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
+        (see `az.summary` for more details).
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
     coords: mapping, optional
         Specifies the subset over to calculate hpd.
     max_modes: int, optional
-        Specifies the maximume number of modes for multimodal case.
+        Specifies the maximum number of modes for multimodal case.
     kwargs: dict, optional
         Additional keywords passed to `wrap_xarray_ufunc`.
         See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
@@ -435,7 +443,7 @@ def hpd(
     ary = convert_to_dataset(ary, group=group)
     if coords is not None:
         ary = get_coords(ary, coords)
-    var_names = _var_names(var_names, ary)
+    var_names = _var_names(var_names, ary, filter_vars)
     ary = ary[var_names] if var_names else ary
 
     hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
@@ -927,6 +935,7 @@ def r2_score(y_true, y_pred):
 def summary(
     data,
     var_names: Optional[List[str]] = None,
+    filter_vars=None,
     fmt: str = "wide",
     kind: str = "all",
     round_to=None,
@@ -948,7 +957,14 @@ def summary(
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
     var_names: list
-        Names of variables to include in summary
+        Names of variables to include in summary. Prefix the variables by `~` when you
+        want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
+        examples below).
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+         interpret var_names as substrings of the real variables names. If "regex",
+         interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
@@ -1003,6 +1019,21 @@ def summary(
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
 
+    You can use `filter_vars` to select variables without having to specify all the exact
+    names. Use `filter_vars="like"` to select based on partial naming:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["the"], filter_vars="like")
+
+    Use `filter_vars="regex"` to select based on regular expressions, and prefix the variables
+    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    starting with the letter t:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["~^t"], filter_vars="regex")
+
     Other statistics can be calculated by passing a list of functions
     or a dictionary with key, function pairs.
 
@@ -1042,7 +1073,7 @@ def summary(
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
-    var_names = _var_names(var_names, posterior)
+    var_names = _var_names(var_names, posterior, filter_vars)
     posterior = posterior if var_names is None else posterior[var_names]
 
     fmt_group = ("wide", "long", "xarray")

@@ -12,6 +12,7 @@ from ..stats.stats_utils import stats_variance_2d as svar
 def plot_parallel(
     data,
     var_names=None,
+    filter_vars=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -33,31 +34,37 @@ def plot_parallel(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
-        Variables to be plotted, if None all variable are plotted. Can be used to change the order
-        of the plotted variables
-    coords : mapping, optional
+    var_names: list of variable names
+        Variables to be plotted, if `None` all variable are plotted. Can be used to change the order
+        of the plotted variables. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    legend : bool
+    legend: bool
         Flag for plotting legend (defaults to True)
-    colornd : valid matplotlib color
+    colornd: valid matplotlib color
         color for non-divergent points. Defaults to 'k'
-    colord : valid matplotlib color
+    colord: valid matplotlib color
         color for divergent points. Defaults to 'C1'
-    shadend : float
+    shadend: float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
     ax: axes, optional
         Matplotlib axes or bokeh figures.
-    norm_method : str
+    norm_method: str
         Method for normalizing the data. Methods include normal, minmax and rank.
         Defaults to none.
     backend: str, optional
@@ -67,12 +74,12 @@ def plot_parallel(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -104,7 +111,7 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data)
+    var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )

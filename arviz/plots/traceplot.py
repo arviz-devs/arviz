@@ -19,6 +19,7 @@ from ..rcparams import rcParams
 def plot_trace(
     data: InferenceData,
     var_names: Optional[List[str]] = None,
+    filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
     divergences: Optional[str] = "bottom",
@@ -50,61 +51,66 @@ def plot_trace(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : str or list of str, optional
-        One or more variables to be plotted.
-    coords : dict of {str: slice or array_like}, optional
+    var_names: str or list of str, optional
+        One or more variables to be plotted. Prefix the variables by `~` when you want
+        to exclude them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: dict of {str: slice or array_like}, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    divergences : {"bottom", "top", None}, optional
+    divergences: {"bottom", "top", None}, optional
         Plot location of divergences on the traceplots.
-    kind : {"trace", "rank_bar", "rank_vlines"}, optional
+    kind: {"trace", "rank_bar", "rank_vlines"}, optional
         Choose between plotting sampled values per iteration and rank plots.
-    transform : callable, optional
+    transform: callable, optional
         Function to transform data (defaults to None i.e.the identity function)
-    figsize : tuple of (float, float), optional
+    figsize: tuple of (float, float), optional
         If None, size is (12, variables * 2)
-    rug : bool, optional
+    rug: bool, optional
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
-    lines : list of tuple of (str, dict, array_like), optional
+    lines: list of tuple of (str, dict, array_like), optional
         List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
-    compact : bool, optional
+    compact: bool, optional
         Plot multidimensional variables in a single plot.
-    compact_prop : tuple of (str, array_like), optional
+    compact_prop: tuple of (str, array_like), optional
         Tuple containing the property name and the property values to distinguish diferent
         dimensions with compact=True
-    combined : bool, optional
+    combined: bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    chain_prop : tuple of (str, array_like), optional
+    chain_prop: tuple of (str, array_like), optional
         Tuple containing the property name and the property values to distinguish diferent chains
-    legend : bool, optional
+    legend: bool, optional
         Add a legend to the figure with the chain color code.
-    plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs : dict, optional
+    plot_kwargs, fill_kwargs, rug_kwargs, hist_kwargs: dict, optional
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
-    trace_kwargs : dict, optional
+    trace_kwargs: dict, optional
         Extra keyword arguments passed to `plt.plot`
-    backend : {"matplotlib", "bokeh"}, optional
+    backend: {"matplotlib", "bokeh"}, optional
         Select plotting backend.
-    backend_config : dict, optional
+    backend_config: dict, optional
         Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
-    backend_kwargs : dict, optional
+    backend_kwargs: dict, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
-
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
-    Plot a subset variables
+    Plot a subset variables and select them with partial naming
 
     .. plot::
         :context: close-figs
@@ -112,7 +118,7 @@ def plot_trace(
         >>> import arviz as az
         >>> data = az.load_arviz_data('non_centered_eight')
         >>> coords = {'school': ['Choate', 'Lawrenceville']}
-        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords)
+        >>> az.plot_trace(data, var_names=('theta'), filter_vars="like", coords=coords)
 
     Show all dimensions of multidimensional variables in the same plot
 
@@ -128,12 +134,14 @@ def plot_trace(
 
         >>> az.plot_trace(data, var_names=["mu", "tau"], kind="rank_bars")
 
-    Combine all chains into one distribution
+    Combine all chains into one distribution and select variables with regular expressions
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_trace(data, var_names=('theta_t', 'theta'), coords=coords, combined=True)
+        >>> az.plot_trace(
+        >>>     data, var_names=('^theta'), filter_vars="regex", coords=coords, combined=True
+        >>>> )
 
 
     Plot reference lines against distribution and trace
@@ -169,7 +177,7 @@ def plot_trace(
     if transform is not None:
         data = transform(data)
 
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
 
     if lines is None:
         lines = ()
