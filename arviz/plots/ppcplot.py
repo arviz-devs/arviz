@@ -106,9 +106,18 @@ def plot_ppc(
         of the ppc samples and observed data. By default 0.
     animated: bool
         Create an animation of one posterior/prior predictive sample per frame. Defaults to False.
-    animation_kwargs: dict
-        Keywords passed to `animation.FuncAnimation`.
-    legend: bool
+        Only works with matploblib backend.
+        To run animations inside a notebook you have to use the `nbAgg` matplotlib's backend.
+        Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch back to the
+        default matplotlib's backend with `%matplotlib  inline` or `%matplotlib  auto`.
+        If switching back and forth between matplotlib's backend, you may need to run twice the cell
+        with the animation.
+        If you experience problems rendering the animation try setting
+        `animation_kwargs({'blit':False}) or changing the matplotlib's backend (e.g. to TkAgg)
+        If you run the animation from a script write `ax, ani = az.plot_ppc(.)`
+    animation_kwargs : dict
+        Keywords passed to `animation.FuncAnimation`. Ignored with matploblib backend.
+    legend : bool
         Add legend to figure. By default True.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
@@ -186,21 +195,16 @@ def plot_ppc(
     if data_pairs is None:
         data_pairs = {}
 
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     if animation_kwargs is None:
         animation_kwargs = {}
     if platform.system() == "Linux":
         animation_kwargs.setdefault("blit", True)
     else:
         animation_kwargs.setdefault("blit", False)
-
-    if animated and backend == "bokeh":
-        raise TypeError("Animation option is only supported with matplotlib backend.")
-
-    if animated and animation_kwargs["blit"] and platform.system() != "Linux":
-        _log.warning(
-            "If you experience problems rendering the animation try setting"
-            "`animation_kwargs({'blit':False}) or changing the plotting backend (e.g. to TkAgg)"
-        )
 
     if alpha is None:
         if animated:
@@ -318,11 +322,9 @@ def plot_ppc(
         show=show,
     )
 
-    if backend is None:
-        backend = rcParams["plot.backend"]
-    backend = backend.lower()
-
     if backend == "bokeh":
+        if animated:
+            raise TypeError("Animation option is only supported with matplotlib backend.")
 
         ppcplot_kwargs.pop("animated")
         ppcplot_kwargs.pop("animation_kwargs")

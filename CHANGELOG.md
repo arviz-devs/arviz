@@ -30,6 +30,7 @@
 * Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150)).
 * Fixed bug in `plot_posterior` with rcParam "plot.matplotlib.show" = True (#1151)
 * Set `fill_last` argument of `plot_kde` to False by default (#1158)
+* plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
 
