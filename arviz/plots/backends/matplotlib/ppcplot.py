@@ -15,6 +15,7 @@ from ....numeric_utils import _fast_kde, histogram, get_bins
 
 _log = logging.getLogger(__name__)
 
+
 def plot_ppc(
     ax,
     length_plotters,
