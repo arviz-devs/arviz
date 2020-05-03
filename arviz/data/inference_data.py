@@ -217,7 +217,7 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, groups=None, inplace=False, chain_prior=None, warmup=None, **kwargs):
+    def sel(self, groups=None, filter_groups=None, inplace=False, chain_prior=None, warmup=None, **kwargs):
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.sel(key=item)
@@ -273,7 +273,6 @@ class InferenceData:
                ...: print(idata_subset.observed_data.coords)
 
         """
-        # TODO: use wrap_xarray_method
         if chain_prior is not None:
             warnings.warn(
                 "chain_prior has been deprecated. Use groups argument and "
@@ -288,6 +287,7 @@ class InferenceData:
                 "rcParams['data.metagroups'] instead.",
                 DeprecationWarning,
             )
+        #TODO: use self._group_names after deprecating warmup and chain_prior
         if groups is None:
             groups = self._groups.copy()
         if warmup:
