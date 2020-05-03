@@ -232,16 +232,15 @@ def test_matplotlib_kwarg_dealiaser(params):
         assert returned in params["output"]
 
 
-
-@pytest.mark.parametrize("args", ["#0000ff", "blue", [0, 0, 1]])
-def test_vectorized_to_hex_scalar(c):
-    output = vectorized_to_hex(c)
+@pytest.mark.parametrize("c_values", ["#0000ff", "blue", [0, 0, 1]])
+def test_vectorized_to_hex_scalar(c_values):
+    output = vectorized_to_hex(c_values)
     assert output == "#0000ff"
 
 
 @pytest.mark.parametrize(
-    "args", [["blue", "blue"], ["blue", "#0000ff"], np.array([[0, 0, 1], [0, 0, 1]])]
+    "c_values", [["blue", "blue"], ["blue", "#0000ff"], np.array([[0, 0, 1], [0, 0, 1]])]
 )
-def test_vectorized_to_hex_array(c):
-    output = vectorized_to_hex(c)
-    assert np.all([o == "#0000ff" for o in output])
+def test_vectorized_to_hex_array(c_values):
+    output = vectorized_to_hex(c_values)
+    assert np.all([item == "#0000ff" for item in output])

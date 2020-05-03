@@ -8,7 +8,6 @@ from xarray import DataArray
 from .plot_utils import (
     _scale_fig_size,
     color_from_dim,
-    vectorized_to_hex,
     format_coords_as_labels,
     get_plotting_function,
     matplotlib_kwarg_dealiaser,

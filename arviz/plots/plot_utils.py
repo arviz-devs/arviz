@@ -491,8 +491,8 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def vectorized_to_hex(c, keep_alpha=False):
-    """Convert a color (including vector of colors) to hex
+def vectorized_to_hex(c_values, keep_alpha=False):
+    """Convert a color (including vector of colors) to hex.
 
     Parameters
     ----------
@@ -506,10 +506,10 @@ def vectorized_to_hex(c, keep_alpha=False):
     rgba_hex : vector of hex values
     """
     try:
-        hex_color = to_hex(c, keep_alpha)
+        hex_color = to_hex(c_values, keep_alpha)
 
     except ValueError:
-        hex_color = [to_hex(color, keep_alpha) for color in c]
+        hex_color = [to_hex(color, keep_alpha) for color in c_values]
     return hex_color
 
 
