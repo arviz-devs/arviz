@@ -9,6 +9,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
+from ..utils import _subset_list
 from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
@@ -309,7 +310,48 @@ class InferenceData:
         else:
             return out
 
-    def map(self, fun, groups=None, inplace=False, **kwargs):
+    def _group_names(self, groups, filter_groups=None):
+        """Handle expansion of group names input across arviz.
+
+        Parameters
+        ----------
+        groups: str, list of str or None
+            group or metagroup names.
+        idata: xarray.Dataset
+            Posterior data in an xarray
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+
+        Returns
+        -------
+        groups: list
+        """
+        all_groups = self._groups_all
+        if groups is None:
+            groups = all_groups
+        if isinstance(groups, str):
+            groups = [groups]
+        sel_groups = []
+        metagroups = rcParams["data.metagroups"]
+        for group in groups:
+            if group[0] == "~":
+                sel_groups.extend(
+                    [f"~{item}" for item in metagroups[group]] if group in metagroups else [group]
+                )
+            else:
+                sel_groups.extend(metagroups[group] if group in metagroups else [group])
+
+        try:
+            group_names = _subset_list(sel_groups, all_groups, filter_items=filter_groups)
+        except KeyError as err:
+            msg = " ".join(("groups:", f"{err}", "in InferenceData"))
+            raise KeyError(msg)
+        return group_names
+
+    def map(self, fun, groups=None, filter_groups=None, inplace=False, args=None, **kwargs):
         """Apply a function to multiple groups.
 
         Parameters
@@ -322,6 +364,9 @@ class InferenceData:
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
+        args: array_like, optional
+            Positional arguments passed to ``fun``. Assumes the function is called as
+            ``fun(dataset, *args, **kwargs)``.
         **kwargs: mapping, optional
             Keyword arguments passed to ``fun``.
 
@@ -344,27 +389,25 @@ class InferenceData:
                ...: print(idata_shifted_obs.posterior_predictive)
 
         """
-        if groups is None:
-            groups = self._groups.copy()
-        groups = list(groups)
-        sel_groups = []
-        metagroups = rcParams["data.metagroups"]
-        for group in groups:
-            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+        if args is None:
+            args = []
+        groups = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
-        for group in sel_groups:
+        for group in groups:
             if group not in self._groups_all:
                 continue
             dataset = getattr(self, group)
-            dataset = fun(dataset, **kwargs)
+            dataset = fun(dataset, *args, **kwargs)
             setattr(out, group, dataset)
         if inplace:
             return None
         else:
             return out
 
-    def _wrap_xarray_method(self, method, groups=None, inplace=False, **kwargs):
+    def _wrap_xarray_method(
+        self, method, groups=None, filter_groups=None, inplace=False, args=None, **kwargs
+    ):
         """Extend and xarray.Dataset method to InferenceData object.
 
         Parameters
@@ -410,18 +453,14 @@ class InferenceData:
                ...: print(idata_stack.observed_data)
 
         """
-        if groups is None:
-            groups = self._groups.copy()
-        groups = list(groups)
-        sel_groups = []
-        metagroups = rcParams["data.metagroups"]
-        for group in groups:
-            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+        if args is None:
+            args = []
+        groups = self._group_names(groups, filter_groups)
 
         method = getattr(xr.Dataset, method)
 
         out = self if inplace else deepcopy(self)
-        for group in sel_groups:
+        for group in groups:
             if group not in self._groups_all:
                 continue
             dataset = getattr(self, group)
