@@ -96,14 +96,14 @@ def plot_pair(
 
     # pylint: disable=too-many-nested-blocks
     if numvars == 2:
-        (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+        (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
 
         marginal_kwargs.setdefault("plot_kwargs", {})
         marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
-        point_estimate_marker_kwargs.setdefault("s", figsize[0] + 50)
+        point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         # Flatten data
         x = infdata_group[0].flatten()
@@ -186,7 +186,7 @@ def plot_pair(
             ax.axvline(pe_x, **point_estimate_kwargs)
             ax.axhline(pe_y, **point_estimate_kwargs)
 
-            ax.scatter(pe_x, pe_y, zorder=4, **point_estimate_marker_kwargs)
+            ax.scatter(pe_x, pe_y, **point_estimate_marker_kwargs)
 
         if reference_values:
             ax.plot(
@@ -212,11 +212,11 @@ def plot_pair(
             )
             numvars = vars_to_plot
 
-        (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
+        (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 2, numvars - 2
         )
 
-        point_estimate_marker_kwargs.setdefault("s", figsize[0] + 50)
+        point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
             fig, ax = plt.subplots(numvars, numvars, figsize=figsize, **backend_kwargs)
@@ -281,7 +281,7 @@ def plot_pair(
                             pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
                             ax[-1, -1].axvline(pe_last, **point_estimate_kwargs)
 
-                        ax[j, i].scatter(pe_x, pe_y, zorder=4, **point_estimate_marker_kwargs)
+                        ax[j, i].scatter(pe_x, pe_y, **point_estimate_marker_kwargs)
 
                     if reference_values:
                         x_name = flat_var_names[i]

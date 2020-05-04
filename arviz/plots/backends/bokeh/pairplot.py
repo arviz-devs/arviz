@@ -105,9 +105,9 @@ def plot_pair(
         )
         numvars = vars_to_plot
 
-    (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+    (figsize, _, _, _, _, markersize) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
 
-    point_estimate_marker_kwargs.setdefault("line_width", figsize[0] + 1)
+    point_estimate_marker_kwargs.setdefault("line_width", markersize)
     point_estimate_kwargs.setdefault("line_color", "orange")
     point_estimate_kwargs.setdefault("line_width", 3)
     point_estimate_kwargs.setdefault("line_dash", "solid")
