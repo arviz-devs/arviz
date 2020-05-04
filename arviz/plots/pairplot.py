@@ -15,6 +15,7 @@ def plot_pair(
     var_names: Optional[List[str]] = None,
     filter_vars: Optional[str] = None,
     coords=None,
+    marginals=False,
     figsize=None,
     textsize=None,
     kind: Union[str, List[str]] = "scatter",
@@ -31,7 +32,6 @@ def plot_pair(
     hexbin_kwargs=None,
     backend=None,
     backend_kwargs=None,
-    marginals=False,
     marginal_kwargs=None,
     point_estimate=None,
     point_estimate_kwargs=None,
@@ -60,6 +60,8 @@ def plot_pair(
         `pandas.filter`.
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    marginals: bool, optional
+        If True pairplot will include marginal distributions for every variable
     figsize: figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
@@ -98,8 +100,6 @@ def plot_pair(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    diagonal: bool, optional
-        If True pairplot will include marginal distributions for every variable
     marginal_kwargs: dict, optional
         Additional keywords passed to az.plot_dist, modifying the marginal distributions
         plotted in the diagonal.
