@@ -62,7 +62,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
         model=None,
-        save_warmup=None,
+        save_warmup: Optional[bool] = None,
     ):
         import pymc3
         import theano
@@ -81,20 +81,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         except TypeError:
             self.model = None
 
-        # This next line is brittle and may not work forever, but is a secret
-        # way to access the model from the trace.
-        if trace is not None:
-            if self.model is None:
-                self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
-                    0
-                ].model
-            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-            self.ndraws = trace.report.n_draws
-            self.attrs = {"t_sampling": trace.report.t_sampling}
-        else:
-            self.nchains = self.ndraws = 0
-            self.attrs = None
-
         if self.model is None:
             warnings.warn(
                 "Using `from_pymc3` without the model will be deprecated in a future release. "
@@ -102,6 +88,26 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "Make sure you use the model argument or call from_pymc3 within a model context.",
                 PendingDeprecationWarning,
             )
+
+        # This next line is brittle and may not work forever, but is a secret
+        # way to access the model from the trace.
+        self.attrs = None
+        if trace is not None:
+            if self.model is None:
+                self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
+                    0
+                ].model
+            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+            if hasattr(trace.report, "n_tune"):
+                self.ndraws = trace.report.n_draws
+                self.attrs = {
+                    "sampling_time": trace.report.t_sampling,
+                    "tuning_steps": trace.report.n_tune,
+                }
+            else:
+                self.nchains = len(trace)
+        else:
+            self.nchains = self.ndraws = 0
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
@@ -189,7 +195,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("trace")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        var_names = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+        var_names = self.pymc3.util.get_default_varnames(
             self.trace.varnames, include_transformed=False
         )
         data = {}
@@ -203,8 +209,16 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 self.trace[-self.ndraws :].get_values(var_name, combine=False, squeeze=False)
             )
         return (
-            dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pymc3, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pymc3, coords=self.coords, dims=self.dims, attrs=self.attrs
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pymc3,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+            ),
         )
 
     @requires("trace")

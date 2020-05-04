@@ -398,24 +398,35 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
-    @pytest.mark.parametrize('save_warmup', [False, True])
+    @pytest.mark.parametrize("save_warmup", [False, True])
     def test_save_warmup(self, save_warmup):
         with pm.Model():
-            pm.Uniform('u1')
-            pm.Normal('n1')
+            pm.Uniform("u1")
+            pm.Normal("n1")
             trace = pm.sample(
-                tune=100, draws=200,
-                chains=2, cores=1,
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
                 step=pm.Metropolis(),
-                discard_tuned_samples=False
+                discard_tuned_samples=False,
             )
             assert isinstance(trace, pm.backends.base.MultiTrace)
             idata = from_pymc3(trace, save_warmup=save_warmup)
-            assert idata.posterior.sizes['chain'] == 2
-            assert idata.posterior.sizes['draw'] == 200
-            if save_warmup:
-                assert hasattr(idata, '_warmup_posterior')
-                assert hasattr(idata, '_warmup_sample_stats')
-                assert idata._warmup_posterior.sizes['chain'] == 2
-                assert idata._warmup_posterior.sizes['draw'] == 100
-        pass
+        prefix = "" if save_warmup else "~"
+        test_dict = {
+            "posterior": ["u1", "n1"],
+            "sample_stats": ["~tune", "accept"],
+            f"{prefix}_warmup_posterior": ["u1", "n1"],
+            f"{prefix}_warmup_sample_stats": ["~tune"],
+            "~_warmup_log_likelihood": [],
+            "~log_likelihood": [],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert idata.posterior.sizes["chain"] == 2
+        assert idata.posterior.sizes["draw"] == 200
+        if save_warmup:
+            # pylint: disable=protected-access
+            assert idata._warmup_posterior.dims["chain"] == 2
+            assert idata._warmup_posterior.dims["draw"] == 100
