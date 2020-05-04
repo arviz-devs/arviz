@@ -1,4 +1,4 @@
-"""Plot a scatter or hexbin of sampled parameters."""
+"""Plot a scatter, kde and/or hexbin of sampled parameters."""
 import warnings
 from typing import Optional, Union, List
 import numpy as np
@@ -31,7 +31,7 @@ def plot_pair(
     hexbin_kwargs=None,
     backend=None,
     backend_kwargs=None,
-    diagonal=False,
+    marginals=False,
     marginal_kwargs=None,
     point_estimate=None,
     point_estimate_kwargs=None,
@@ -219,9 +219,6 @@ def plot_pair(
     if point_estimate_marker_kwargs is None:
         point_estimate_marker_kwargs = {}
 
-    point_estimate_marker_kwargs.setdefault("marker", "s")
-    point_estimate_marker_kwargs.setdefault("color", "C1")
-
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
     grouped_data = convert_to_dataset(data, group=group)
@@ -289,7 +286,7 @@ def plot_pair(
         backend_kwargs=backend_kwargs,
         marginal_kwargs=marginal_kwargs,
         show=show,
-        diagonal=diagonal,
+        marginals=marginals,
         point_estimate=point_estimate,
         point_estimate_kwargs=point_estimate_kwargs,
         point_estimate_marker_kwargs=point_estimate_marker_kwargs,
@@ -307,8 +304,8 @@ def plot_pair(
         pairplot_kwargs.pop("divergences_kwargs", None)
         pairplot_kwargs.pop("hexbin_values", None)
         pairplot_kwargs.pop("scatter_kwargs", None)
-        pairplot_kwargs.pop("point_estimate_marker_kwargs", None)
         point_estimate_kwargs.setdefault("line_color", "orange")
+        point_estimate_marker_kwargs.setdefault("line_color", "orange")
     else:
         point_estimate_kwargs.setdefault("color", "C1")
 
