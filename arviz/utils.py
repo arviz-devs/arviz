@@ -406,8 +406,8 @@ def flatten_inference_data_to_dict(
         {"posterior_groups", "prior_groups", "posterior_groups_warmup"}
             - posterior_groups: posterior, posterior_predictive, sample_stats
             - prior_groups: prior, prior_predictive, sample_stats_prior
-            - posterior_groups_warmup: _warmup_posterior, _warmup_posterior_predictive,
-                                       _warmup_sample_stats
+            - posterior_groups_warmup: warmup_posterior, warmup_posterior_predictive,
+                                       warmup_sample_stats
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
     dimension : str, or list of str, optional
@@ -455,7 +455,7 @@ def flatten_inference_data_to_dict(
         elif groups.lower() == "prior_groups":
             groups = ["prior", "prior_predictive", "sample_stats_prior"]
         elif groups.lower() == "posterior_groups_warmup":
-            groups = ["_warmup_posterior", "_warmup_posterior_predictive", "_warmup_sample_stats"]
+            groups = ["warmup_posterior", "warmup_posterior_predictive", "warmup_sample_stats"]
         else:
             raise TypeError(
                 (

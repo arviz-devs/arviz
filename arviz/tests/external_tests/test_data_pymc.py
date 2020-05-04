@@ -417,16 +417,15 @@ class TestDataPyMC3:
         test_dict = {
             "posterior": ["u1", "n1"],
             "sample_stats": ["~tune", "accept"],
-            f"{prefix}_warmup_posterior": ["u1", "n1"],
-            f"{prefix}_warmup_sample_stats": ["~tune"],
-            "~_warmup_log_likelihood": [],
+            f"{prefix}warmup_posterior": ["u1", "n1"],
+            f"{prefix}warmup_sample_stats": ["~tune"],
+            "~warmup_log_likelihood": [],
             "~log_likelihood": [],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert idata.posterior.sizes["chain"] == 2
-        assert idata.posterior.sizes["draw"] == 200
+        assert idata.posterior.dims["chain"] == 2
+        assert idata.posterior.dims["draw"] == 200
         if save_warmup:
-            # pylint: disable=protected-access
-            assert idata._warmup_posterior.dims["chain"] == 2
-            assert idata._warmup_posterior.dims["draw"] == 100
+            assert idata.warmup_posterior.dims["chain"] == 2
+            assert idata.warmup_posterior.dims["draw"] == 100

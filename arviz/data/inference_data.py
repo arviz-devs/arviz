@@ -25,7 +25,7 @@ SUPPORTED_GROUPS = [
     "predictions_constant_data",
 ]
 
-WARMUP_TAG = "_warmup_"
+WARMUP_TAG = "warmup_"
 
 SUPPORTED_GROUPS_WARMUP = [
     "{}posterior".format(WARMUP_TAG),

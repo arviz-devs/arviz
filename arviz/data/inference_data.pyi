@@ -19,11 +19,11 @@ class InferenceData:
     prior: Optional[xr.Dataset]
     prior_predictive: Optional[xr.Dataset]
     sample_stats_prior: Optional[xr.Dataset]
-    _warmup_posterior: Optional[xr.Dataset]
-    _warmup_posterior_predictive: Optional[xr.Dataset]
-    _warmup_predictions: Optional[xr.Dataset]
-    _warmup_log_likelihood: Optional[xr.Dataset]
-    _warmup_sample_stats: Optional[xr.Dataset]
+    warmup_posterior: Optional[xr.Dataset]
+    warmup_posterior_predictive: Optional[xr.Dataset]
+    warmup_predictions: Optional[xr.Dataset]
+    warmup_log_likelihood: Optional[xr.Dataset]
+    warmup_sample_stats: Optional[xr.Dataset]
     def __init__(self, **kwargs): ...
     def __repr__(self) -> str: ...
     def __delattr__(self, group: str) -> None: ...
