@@ -210,15 +210,15 @@ _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-nam
 )
 
 METAGROUPS = {
-    "posterior_groups": ["posterior", "posterior_predictive", "sample_stats"],
+    "posterior_groups": ["posterior", "posterior_predictive", "sample_stats", "log_likelihood"],
     "prior_groups": ["prior", "prior_predictive", "sample_stats_prior"],
     "posterior_groups_warmup": [
         "_warmup_posterior",
         "_warmup_posterior_predictive",
         "_warmup_sample_stats",
     ],
-    "latent_vars_groups": ["posterior", "prior"],
-    "observed__vars_groups": ["posterior_predictive", "obseved_data", "prior_predictive"],
+    "latent_vars": ["posterior", "prior"],
+    "observed_vars": ["posterior_predictive", "observed_data", "prior_predictive"],
 }
 
 defaultParams = {  # pylint: disable=invalid-name

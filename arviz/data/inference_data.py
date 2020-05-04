@@ -217,7 +217,15 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, groups=None, filter_groups=None, inplace=False, chain_prior=None, warmup=None, **kwargs):
+    def sel(
+        self,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        chain_prior=None,
+        warmup=None,
+        **kwargs,
+    ):
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.sel(key=item)
@@ -287,18 +295,13 @@ class InferenceData:
                 "rcParams['data.metagroups'] instead.",
                 DeprecationWarning,
             )
-        #TODO: use self._group_names after deprecating warmup and chain_prior
-        if groups is None:
-            groups = self._groups.copy()
+        groups = self._group_names(groups, filter_groups)
         if warmup:
-            groups.extend([group for group in self._groups_all if "warmup" in group])
-        sel_groups = []
-        metagroups = rcParams["data.metagroups"]
-        for group in groups:
-            sel_groups.extend(metagroups[group] if group in metagroups else [group])
+            extra_groups = self._group_names("warmup", filter_groups="like")
+            groups.extend([group for group in extra_groups if group not in groups])
 
         out = self if inplace else deepcopy(self)
-        for group in sel_groups:
+        for group in groups:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             if not chain_prior and "prior" in group:
@@ -339,10 +342,16 @@ class InferenceData:
         for group in groups:
             if group[0] == "~":
                 sel_groups.extend(
-                    [f"~{item}" for item in metagroups[group]] if group in metagroups else [group]
+                    [f"~{item}" for item in metagroups[group] if item in all_groups]
+                    if group in metagroups
+                    else [group]
                 )
             else:
-                sel_groups.extend(metagroups[group] if group in metagroups else [group])
+                sel_groups.extend(
+                    [item for item in metagroups[group] if item in all_groups]
+                    if group in metagroups
+                    else [group]
+                )
 
         try:
             group_names = _subset_list(sel_groups, all_groups, filter_items=filter_groups)
@@ -464,7 +473,7 @@ class InferenceData:
             if group not in self._groups_all:
                 continue
             dataset = getattr(self, group)
-            dataset = method(dataset, **kwargs)
+            dataset = method(dataset, *args, **kwargs)
             setattr(out, group, dataset)
         if inplace:
             return None
