@@ -397,3 +397,35 @@ class TestDataPyMC3:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
+
+    @pytest.mark.parametrize("save_warmup", [False, True])
+    def test_save_warmup(self, save_warmup):
+        with pm.Model():
+            pm.Uniform("u1")
+            pm.Normal("n1")
+            trace = pm.sample(
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
+                step=pm.Metropolis(),
+                discard_tuned_samples=False,
+            )
+            assert isinstance(trace, pm.backends.base.MultiTrace)
+            idata = from_pymc3(trace, save_warmup=save_warmup)
+        prefix = "" if save_warmup else "~"
+        test_dict = {
+            "posterior": ["u1", "n1"],
+            "sample_stats": ["~tune", "accept"],
+            f"{prefix}warmup_posterior": ["u1", "n1"],
+            f"{prefix}warmup_sample_stats": ["~tune"],
+            "~warmup_log_likelihood": [],
+            "~log_likelihood": [],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert idata.posterior.dims["chain"] == 2
+        assert idata.posterior.dims["draw"] == 200
+        if save_warmup:
+            assert idata.warmup_posterior.dims["chain"] == 2
+            assert idata.warmup_posterior.dims["draw"] == 100
