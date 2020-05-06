@@ -17,6 +17,7 @@
 * Add `num_chains` and `pred_dims` arguments to from_pyro and from_numpyro (#1090, #1125)
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
+* Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 
 ### Maintenance and fixes
 * Changed `diagonal` argument for `marginals` and fixed `point_estimate_marker_kwargs` in `plot_pair` (#1167)
