@@ -1,4 +1,5 @@
 """Posterior-Prior plot."""
+import warnings
 
 from .plot_utils import (
     xarray_var_iter,
@@ -11,6 +12,7 @@ from ..rcparams import rcParams
 
 def plot_pp(
     data,
+    groups=None,
     figsize=None,
     textsize=None,
     var_names=None,
@@ -31,6 +33,9 @@ def plot_pp(
     ----------
     data : az.InferenceData object
         InferenceData object containing the posterior/prior data.
+    groups : str or list of str, optional
+        Select groups for plotting. Default group is:
+        {"prior", "posterior"}
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -80,7 +85,12 @@ def plot_pp(
 
     """
 
-    groups = ["prior", "posterior"]
+    if groups is None:
+        groups = ["prior", "posterior"]
+    else:
+        for group in groups:
+            if group not in ['prior', 'posterior', "posterior_predictive", "observed_data", "prior_predictive"]: #TODO: changed to metagroups
+                raise warnings.warn(f"{group} group is not supported")
 
     if coords is None:
         coords = {}
