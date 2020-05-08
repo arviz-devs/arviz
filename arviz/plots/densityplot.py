@@ -13,7 +13,7 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..rcparams import rcParams
-from ..utils import _var_names
+from ..utils import _var_names, credible_interval_warning
 
 
 # pylint:disable-msg=too-many-function-args
@@ -23,7 +23,7 @@ def plot_density(
     data_labels=None,
     var_names=None,
     transform=None,
-    credible_interval=None,
+    hpd_interval=None,
     point_estimate="auto",
     colors="cycle",
     outline=True,
@@ -36,6 +36,7 @@ def plot_density(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
@@ -61,8 +62,8 @@ def plot_density(
         all the variables being plotted.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
-    credible_interval : float
-        Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
+    hpd_interval : float
+        hpd interval. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
@@ -98,7 +99,8 @@ def plot_density(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
-
+    credible_interval: float, optional
+        deprecated: Please see hpd_interval
     Returns
     -------
     axes : matplotlib axes or bokeh figures
@@ -135,7 +137,7 @@ def plot_density(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_density([centered, non_centered], var_names=["mu"], credible_interval=.5)
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], hpd_interval=.5)
 
     Shade plots and/or remove outlines
 
@@ -151,6 +153,9 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
@@ -183,10 +188,10 @@ def plot_density(
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.hpd_interval"]
+    if hpd_interval is None:
+        hpd_interval = rcParams["stats.hpd_interval"]
     else:
-        if not 1 >= credible_interval > 0:
+        if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
@@ -238,7 +243,7 @@ def plot_density(
         xt_labelsize=xt_labelsize,
         linewidth=linewidth,
         markersize=markersize,
-        credible_interval=credible_interval,
+        credible_interval=hpd_interval,
         point_estimate=point_estimate,
         hpd_markers=hpd_markers,
         outline=outline,

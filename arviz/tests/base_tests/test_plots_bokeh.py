@@ -76,8 +76,8 @@ def continuous_model():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hpd_interval": 0.94},
+        {"hpd_interval": 1},
         {"outline": True},
         {"hpd_markers": ["v"]},
         {"shade": 1},
@@ -117,7 +117,7 @@ def test_plot_density_bad_kwargs(models):
         )
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2, backend="bokeh", show=False)
+        plot_density(obj, hpd_interval=2, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(

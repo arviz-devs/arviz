@@ -93,8 +93,8 @@ def fig_ax():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hpd_interval": 0.94},
+        {"hpd_interval": 1},
         {"outline": True},
         {"colors": ["g", "b", "r", "y"]},
         {"colors": "k"},
@@ -131,7 +131,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2)
+        plot_density(obj, hpd_interval=2)
 
 
 @pytest.mark.parametrize(
