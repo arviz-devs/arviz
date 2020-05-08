@@ -18,6 +18,7 @@ from ...plot_utils import (
 from ....stats import hpd
 from ....numeric_utils import get_bins
 
+
 def plot_posterior(
     ax,
     length_plotters,
@@ -255,7 +256,7 @@ def _plot_posterior_op(
 
     format_axes()
     max_data = hist.max()
-    if hpd_interval != 'hide':
+    if hpd_interval != "hide":
         display_hpd(max_data)
     display_point_estimate(max_data)
     display_ref_val(max_data)

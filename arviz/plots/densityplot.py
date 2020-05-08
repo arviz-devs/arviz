@@ -36,7 +36,7 @@ def plot_density(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None
+    credible_interval=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 

@@ -34,7 +34,7 @@ def plot_forest(
     backend_config=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None
+    credible_interval=None,
 ):
     """Forest plot to compare hpd intervals from a number of distributions.
 

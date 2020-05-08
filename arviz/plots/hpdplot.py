@@ -8,6 +8,7 @@ from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 from ..utils import credible_interval_warning
 
+
 def plot_hpd(
     x,
     y,
@@ -22,7 +23,7 @@ def plot_hpd(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval=None
+    credible_interval=None,
 ):
     r"""
     Plot hpd intervals for regression data.

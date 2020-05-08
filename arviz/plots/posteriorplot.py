@@ -196,7 +196,6 @@ def plot_posterior(
     if credible_interval:
         hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
 
-
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
@@ -207,7 +206,7 @@ def plot_posterior(
 
     if hpd_interval is None:
         hpd_interval = rcParams["stats.hpd_interval"]
-    elif hpd_interval not in (None, 'hide'):
+    elif hpd_interval not in (None, "hide"):
         if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
