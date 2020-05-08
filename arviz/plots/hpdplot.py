@@ -99,7 +99,7 @@ def plot_hpd(
         if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
-    hpd_ = hpd(y, credible_interval=hpd_interval, circular=circular, multimodal=False)
+    hpd_ = hpd(y, hpd_interval=hpd_interval, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:

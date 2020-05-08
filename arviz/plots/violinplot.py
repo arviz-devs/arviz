@@ -8,7 +8,7 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
-from ..utils import _var_names
+from ..utils import _var_names, credible_interval_warning
 from ..rcparams import rcParams
 
 
@@ -19,7 +19,7 @@ def plot_violin(
     transform=None,
     quartiles=True,
     rug=False,
-    credible_interval=None,
+    hpd_interval=None,
     shade=0.35,
     bw=4.5,
     sharex=True,
@@ -32,6 +32,8 @@ def plot_violin(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval = None
+
 ):
     """Plot posterior of traces as violin plot.
 
@@ -59,8 +61,8 @@ def plot_violin(
         intervals. Defaults to True
     rug: bool
         If True adds a jittered rugplot. Defaults to False.
-    credible_interval: float, optional
-        Credible intervals. Defaults to 0.94.
+    hpd_interval: float, optional
+        Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
@@ -92,6 +94,8 @@ def plot_violin(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
+    credible_interval: float, optional
+        deprecated: Please see hpd_interval
 
     Returns
     -------
@@ -135,10 +139,10 @@ def plot_violin(
 
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.hpd_interval"]
+    if hpd_interval is None:
+        hpd_interval = rcParams["stats.hpd_interval"]
     else:
-        if not 1 >= credible_interval > 0:
+        if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
@@ -154,7 +158,7 @@ def plot_violin(
         rug=rug,
         rug_kwargs=rug_kwargs,
         bw=bw,
-        credible_interval=credible_interval,
+        hpd_interval=hpd_interval,
         linewidth=linewidth,
         ax_labelsize=ax_labelsize,
         xt_labelsize=xt_labelsize,
