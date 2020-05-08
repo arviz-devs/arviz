@@ -611,7 +611,6 @@ def credible_interval_warning(credible_interval, hpd_interval):
             "Keyword argument credible_interval has been deprecated "
             "Please replace with hpd_interval"
         ),
-        PendingDeprecationWarning,
     )
 
     if isinstance(credible_interval, str) and credible_interval == "auto":
