@@ -1,7 +1,5 @@
 """Matplolib Posterior predictive plot."""
-import platform
-import logging
-from matplotlib import animation, get_backend
+from matplotlib import animation
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,8 +10,6 @@ from ...plot_utils import (
     _create_axes_grid,
 )
 from ....numeric_utils import _fast_kde, histogram, get_bins
-
-_log = logging.getLogger(__name__)
 
 
 def plot_ppc(
@@ -44,26 +40,6 @@ def plot_ppc(
     show,
 ):
     """Matplotlib ppc plot."""
-    if animated:
-        try:
-            shell = get_ipython().__class__.__name__
-            if shell == "ZMQInteractiveShell" and get_backend() != "nbAgg":
-                raise Warning(
-                    "To run animations inside a notebook you have to use the nbAgg backend. "
-                    "Try with `%matplotlib notebook` or  `%matplotlib  nbAgg`. You can switch "
-                    "back to the default backend with `%matplotlib  inline` or "
-                    "`%matplotlib  auto`."
-                )
-        except NameError:
-            pass
-
-        if animation_kwargs["blit"] and platform.system() != "Linux":
-            _log.warning(
-                "If you experience problems rendering the animation try setting "
-                "`animation_kwargs({'blit':False}) or changing the plotting backend "
-                "(e.g. to TkAgg)"
-            )
-
     if ax is None:
         fig, axes = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
@@ -411,10 +387,12 @@ def _set_animation(
 
 def _empirical_cdf(data):
     """Compute empirical cdf of a numpy array.
+
     Parameters
     ----------
     data : np.array
         1d array
+
     Returns
     -------
     np.array, np.array
