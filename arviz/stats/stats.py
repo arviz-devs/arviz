@@ -327,7 +327,7 @@ def hpd(
     **kwargs,
 ):
     """
-    Calculate highest posterior density (HPD) of array for given percentage
+    Calculate highest posterior density (HPD) of array for given percentage.
 
     The HPD is the minimum width Bayesian credible interval (BCI).
 

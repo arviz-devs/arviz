@@ -41,7 +41,6 @@ def plot_posterior(
     show,
 ):
     """Bokeh posterior plot."""
-
     if backend_kwargs is None:
         backend_kwargs = {}
 

@@ -604,8 +604,7 @@ def get_coords(data, coords):
 
 
 def credible_interval_warning(credible_interval, hpd_interval):
-    """Helper method to warn that credible interval will be deprecated"""
-
+    """Replace credible_interval with hpd_interval and to warns of be deprecation."""
     warnings.warn(
         (
             "Keyword argument credible_interval has been deprecated "
