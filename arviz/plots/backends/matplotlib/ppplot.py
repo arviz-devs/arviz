@@ -45,7 +45,13 @@ def plot_pp(
 
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
-        kwargs = prior_kwargs if group.startswith("prior") else posterior_kwargs if group.startswith("posterior") else observed_kwargs
+        kwargs = (
+            prior_kwargs
+            if group.startswith("prior")
+            else posterior_kwargs
+            if group.startswith("posterior")
+            else observed_kwargs
+        )
         for idx2, (var, selection, data,) in enumerate(plotter):
             label = make_label(var, selection)
             label = f"{group} {label}"
