@@ -120,9 +120,7 @@ def plot_violin(
 
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(
-            credible_interval, hpd_interval
-        )
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
 
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
