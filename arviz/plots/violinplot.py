@@ -119,6 +119,11 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(
+            credible_interval, hpd_interval
+        )
+
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
@@ -164,12 +169,7 @@ def plot_violin(
         quartiles=quartiles,
         backend_kwargs=backend_kwargs,
         show=show,
-        credible_interval=None,
     )
-    if credible_interval:
-        violinplot_kwargs["hpd_interval"] = credible_interval_warning(
-            credible_interval, hpd_interval
-        )
 
     if backend is None:
         backend = rcParams["plot.backend"]
