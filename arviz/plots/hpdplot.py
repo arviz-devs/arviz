@@ -6,12 +6,12 @@ from scipy.signal import savgol_filter
 from ..stats import hpd
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
-
+from ..utils import credible_interval_warning
 
 def plot_hpd(
     x,
     y,
-    credible_interval=None,
+    hpd_interval=None,
     color="C1",
     circular=False,
     smooth=True,
@@ -22,6 +22,7 @@ def plot_hpd(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None
 ):
     r"""
     Plot hpd intervals for regression data.
@@ -32,7 +33,7 @@ def plot_hpd(
         Values to plot
     y : array-like
         values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
-    credible_interval : float, optional
+    hpd_interval : float, optional
         Credible interval to plot. Defaults to 0.94.
     color : str
         Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
@@ -59,11 +60,16 @@ def plot_hpd(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+    credible_interval: float, optional
+        deprecated: Please see hpd_interval
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
     plot_kwargs.setdefault("alpha", 0)
@@ -87,13 +93,13 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.hpd_interval"]
+    if hpd_interval is None:
+        hpd_interval = rcParams["stats.hpd_interval"]
     else:
-        if not 1 >= credible_interval > 0:
+        if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
-    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular, multimodal=False)
+    hpd_ = hpd(y, credible_interval=hpd_interval, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:

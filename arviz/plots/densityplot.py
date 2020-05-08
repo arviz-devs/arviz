@@ -243,7 +243,7 @@ def plot_density(
         xt_labelsize=xt_labelsize,
         linewidth=linewidth,
         markersize=markersize,
-        credible_interval=hpd_interval,
+        hpd_interval=hpd_interval,
         point_estimate=point_estimate,
         hpd_markers=hpd_markers,
         outline=outline,
