@@ -19,6 +19,7 @@ from ..utils import _var_names, get_coords
 def plot_mcse(
     idata,
     var_names=None,
+    filter_vars=None,
     coords=None,
     errorbar=False,
     figsize=None,
@@ -40,38 +41,44 @@ def plot_mcse(
 
     Parameters
     ----------
-    idata : obj
+    idata: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names, optional
-        Variables to be plotted.
-    coords : dict, optional
+    var_names: list of variable names, optional
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    errorbar : bool, optional
+    errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
-    figsize : tuple, optional
+    figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    extra_methods : bool, optional
+    extra_methods: bool, optional
         Plot mean and sd MCSE as horizontal lines. Only taken into account when
         ``errorbar=False``.
-    rug : bool
+    rug: bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind : bool
+    rug_kind: bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points : int
+    n_points: int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    rug_kwargs : dict
+    rug_kwargs: dict
         kwargs passed to rug plot.
-    extra_kwargs : dict, optional
+    extra_kwargs: dict, optional
         kwargs passed to ax.plot for extra methods lines.
-    text_kwargs : dict, optional
+    text_kwargs: dict, optional
         kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
     backend: str, optional
@@ -79,14 +86,14 @@ def plot_mcse(
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     References
     ----------
@@ -118,7 +125,7 @@ def plot_mcse(
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
 
     probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
     mcse_dataset = xr.concat(

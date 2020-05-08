@@ -179,7 +179,7 @@ class TestDataPyStan:
         }
         if pystan_version() == 2:
             test_dict.update(
-                {"_warmup_posterior": ["theta"], "_warmup_sample_stats": ["diverging", "lp"]}
+                {"warmup_posterior": ["theta"], "warmup_sample_stats": ["diverging", "lp"]}
             )
         fails = check_multiple_attrs(test_dict, inference_data4)
         assert not fails

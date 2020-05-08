@@ -1,4 +1,4 @@
-"""Plot a scatter or hexbin of sampled parameters."""
+"""Plot a scatter, kde and/or hexbin of sampled parameters."""
 import warnings
 from typing import Optional, Union, List
 import numpy as np
@@ -13,7 +13,9 @@ def plot_pair(
     data,
     group="posterior",
     var_names: Optional[List[str]] = None,
+    filter_vars: Optional[str] = None,
     coords=None,
+    marginals=False,
     figsize=None,
     textsize=None,
     kind: Union[str, List[str]] = "scatter",
@@ -30,7 +32,6 @@ def plot_pair(
     hexbin_kwargs=None,
     backend=None,
     backend_kwargs=None,
-    diagonal=False,
     marginal_kwargs=None,
     point_estimate=None,
     point_estimate_kwargs=None,
@@ -44,22 +45,30 @@ def plot_pair(
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    group : str, optional
+    group: str, optional
         Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
-    var_names : list of variable names, optional
-        Variables to be plotted, if ``None`` all variables are plotted
-    coords : mapping, optional
+    var_names: list of variable names, optional
+        Variables to be plotted, if None all variable are plotted. Prefix the
+        variables by `~` when you want to exclude them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : figure size tuple
+    marginals: bool, optional
+        If True pairplot will include marginal distributions for every variable
+    figsize: figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
     kind : str or List[str]
         Type of plot to display (scatter, kde and/or hexbin)
-    gridsize : int or (int, int), optional
+    gridsize: int or (int, int), optional
         Only works for kind=hexbin.
         The number of hexagons in the x-direction. The corresponding number of hexagons in the
         y-direction is chosen such that the hexagons are approximately regular.
@@ -70,50 +79,48 @@ def plot_pair(
         **Note:** this default is implemented in the body of the code, not in argument processing.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
-    divergences : Boolean
+    divergences: Boolean
         If True divergences will be plotted in a different color, only if group is either 'prior'
         or 'posterior'.
-    colorbar : bool
+    colorbar: bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
     ax: axes, optional
         Matplotlib axes or bokeh figures.
-    divergences_kwargs : dicts, optional
+    divergences_kwargs: dicts, optional
         Additional keywords passed to ax.scatter for divergences
     scatter_kwargs:
         Additional keywords passed to ax.plot when using scatter kind
-    kde_kwargs : dict, optional
+    kde_kwargs: dict, optional
         Additional keywords passed to az.plot_kde when using kde kind
-    hexbin_kwargs : dict, optional
+    hexbin_kwargs: dict, optional
         Additional keywords passed to ax.hexbin when using hexbin kind
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    diagonal : bool, optional
-        If True pairplot will include marginal distributions for every variable
-    marginal_kwargs : dict, optional
+    marginal_kwargs: dict, optional
         Additional keywords passed to az.plot_dist, modifying the marginal distributions
         plotted in the diagonal.
-    point_estimate : str, optional
+    point_estimate: str, optional
         Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
         plotted using a scatter marker and vertical/horizontal lines.
-    point_estimate_kwargs : dict, optional
+    point_estimate_kwargs: dict, optional
         Additional keywords passed to ax.vline, ax.hline (matplotlib) or ax.square, Span (bokeh)
     point_estimate_marker_kwargs: dict, optional
         Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
-    reference_values : dict, optional
+    reference_values: dict, optional
         Reference values for the plotted variables. The Reference values will be plotted
         using a scatter marker
-    reference_values_kwargs : dict, optional
+    reference_values_kwargs: dict, optional
         Additional keywords passed to ax.plot or ax.circle in reference values plot
-    show : bool, optional
+    show: bool, optional
         Call backend show function.
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -143,13 +150,14 @@ def plot_pair(
         >>>             textsize=18,
         >>>             kind='hexbin')
 
-    Pair plot showing divergences
+    Pair plot showing divergences and select variables with regular expressions
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_pair(centered,
-        ...             var_names=['theta', 'mu', 'tau'],
+        ...             var_names=['^t', 'mu'],
+        ...             filter_vars="regex",
         ...             coords=coords,
         ...             divergences=True,
         ...             textsize=18)
@@ -211,13 +219,10 @@ def plot_pair(
     if point_estimate_marker_kwargs is None:
         point_estimate_marker_kwargs = {}
 
-    point_estimate_marker_kwargs.setdefault("marker", "s")
-    point_estimate_marker_kwargs.setdefault("color", "C1")
-
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
     grouped_data = convert_to_dataset(data, group=group)
-    var_names = _var_names(var_names, grouped_data)
+    var_names = _var_names(var_names, grouped_data, filter_vars)
     flat_var_names, infdata_group = xarray_to_ndarray(
         get_coords(grouped_data, coords), var_names=var_names, combined=True
     )
@@ -281,7 +286,7 @@ def plot_pair(
         backend_kwargs=backend_kwargs,
         marginal_kwargs=marginal_kwargs,
         show=show,
-        diagonal=diagonal,
+        marginals=marginals,
         point_estimate=point_estimate,
         point_estimate_kwargs=point_estimate_kwargs,
         point_estimate_marker_kwargs=point_estimate_marker_kwargs,
@@ -299,8 +304,8 @@ def plot_pair(
         pairplot_kwargs.pop("divergences_kwargs", None)
         pairplot_kwargs.pop("hexbin_values", None)
         pairplot_kwargs.pop("scatter_kwargs", None)
-        pairplot_kwargs.pop("point_estimate_marker_kwargs", None)
         point_estimate_kwargs.setdefault("line_color", "orange")
+        point_estimate_marker_kwargs.setdefault("line_color", "orange")
     else:
         point_estimate_kwargs.setdefault("color", "C1")
 

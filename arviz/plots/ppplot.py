@@ -93,6 +93,8 @@ def plot_pp(
     if kind == "observed":
         all_groups = ["observed_data", "prior_predictive", "posterior_predictive"]
 
+
+
     if coords is None:
         coords = {}
 

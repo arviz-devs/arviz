@@ -30,10 +30,11 @@ def plot_pair(
     diverging_mask,
     flat_var_names,
     backend_kwargs,
-    diagonal,
+    marginals,
     marginal_kwargs,
     point_estimate,
     point_estimate_kwargs,
+    point_estimate_marker_kwargs,
     reference_values,
     reference_values_kwargs,
     show,
@@ -104,7 +105,12 @@ def plot_pair(
         )
         numvars = vars_to_plot
 
-    (figsize, _, _, _, _, _) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+    (figsize, _, _, _, _, markersize) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+
+    point_estimate_marker_kwargs.setdefault("line_width", markersize)
+    point_estimate_kwargs.setdefault("line_color", "orange")
+    point_estimate_kwargs.setdefault("line_width", 3)
+    point_estimate_kwargs.setdefault("line_dash", "solid")
 
     tmp_flat_var_names = None
     if len(flat_var_names) == len(list(set(flat_var_names))):
@@ -140,7 +146,7 @@ def plot_pair(
             height = int(figsize[1] / (numvars - 1) * dpi)
         return width, height
 
-    if diagonal:
+    if marginals:
         var = 0
     else:
         var = 1
@@ -172,7 +178,7 @@ def plot_pair(
                 if row < col:
                     row_ax.append(None)
                 else:
-                    jointplot = row == col and numvars == 2 and diagonal
+                    jointplot = row == col and numvars == 2 and marginals
                     rotate = n == 1
                     width, height = get_width_and_height(jointplot, rotate)
                     if jointplot:
@@ -198,7 +204,7 @@ def plot_pair(
                 else tmp_flat_var_names[j + var]
             )
 
-            if j == i and diagonal:
+            if j == i and marginals:
                 rotate = numvars == 2 and j == 1
                 var1_dist = infdata_group[i]
                 plot_dist(
@@ -259,47 +265,26 @@ def plot_pair(
                     var2_pe = infdata_group[j]
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
+                    ax[j, i].square(pe_x, pe_y, **point_estimate_marker_kwargs)
 
-                    ax[j, i].square(pe_x, pe_y, line_width=figsize[0] + 1, **point_estimate_kwargs)
-
-                    ax_hline = Span(
-                        location=pe_y,
-                        dimension="width",
-                        line_dash="solid",
-                        line_width=3,
-                        **point_estimate_kwargs,
-                    )
-                    ax_vline = Span(
-                        location=pe_x,
-                        dimension="height",
-                        line_dash="solid",
-                        line_width=3,
-                        **point_estimate_kwargs,
-                    )
+                    ax_hline = Span(location=pe_y, dimension="width", **point_estimate_kwargs,)
+                    ax_vline = Span(location=pe_x, dimension="height", **point_estimate_kwargs,)
                     ax[j, i].add_layout(ax_hline)
                     ax[j, i].add_layout(ax_vline)
 
-                    if diagonal:
+                    if marginals:
 
                         ax[j - 1, i].add_layout(ax_vline)
 
                         pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
                         ax_pe_vline = Span(
-                            location=pe_last,
-                            dimension="height",
-                            line_dash="solid",
-                            line_width=3,
-                            **point_estimate_kwargs,
+                            location=pe_last, dimension="height", **point_estimate_kwargs,
                         )
                         ax[-1, -1].add_layout(ax_pe_vline)
 
                         if numvars == 2:
                             ax_pe_hline = Span(
-                                location=pe_last,
-                                dimension="width",
-                                line_dash="solid",
-                                line_width=3,
-                                **point_estimate_kwargs,
+                                location=pe_last, dimension="width", **point_estimate_kwargs,
                             )
                             ax[-1, -1].add_layout(ax_pe_hline)
 

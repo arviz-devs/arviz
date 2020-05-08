@@ -461,7 +461,7 @@ def test_plot_pair_divergences_warning(has_sample_stats):
 
 
 @pytest.mark.parametrize(
-    "kwargs", [{}, {"diagonal": True}, {"diagonal": True, "var_names": ["mu", "tau"]}]
+    "kwargs", [{}, {"marginals": True}, {"marginals": True, "var_names": ["mu", "tau"]}]
 )
 def test_plot_pair_overlaid(models, kwargs):
     ax = plot_pair(models.model_1, **kwargs)

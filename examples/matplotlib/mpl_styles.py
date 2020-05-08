@@ -1,7 +1,6 @@
 """
-Styles
+Matplotlib styles
 ======
-
 _thumb: .8, .8
 """
 import matplotlib.pyplot as plt
@@ -18,6 +17,7 @@ style_list = [
     "arviz-darkgrid",
     "arviz-whitegrid",
     "arviz-white",
+    "arviz-grayscale",
 ]
 
 fig = plt.figure(figsize=(12, 12))
