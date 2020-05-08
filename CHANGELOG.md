@@ -35,6 +35,7 @@
 * plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
+* `credible_interval` argument replaced by `hpd_interval`throughout with exception of `plot_loo_pit`
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
