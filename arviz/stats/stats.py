@@ -24,7 +24,7 @@ from .stats_utils import (
     get_log_likelihood as _get_log_likelihood,
 )
 from ..numeric_utils import _fast_kde, histogram, get_bins
-from ..utils import _var_names, Numba, _numba_var, get_coords
+from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
@@ -948,6 +948,7 @@ def summary(
     skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
+    credible_interval=None
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -987,7 +988,7 @@ def summary(
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     hpd_interval: float, optional
-        hpd interval to plot. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
+        hpd interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
@@ -1001,6 +1002,8 @@ def summary(
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+    credible_interval: float, optional
+        deprecated: Please see hpd_interval
 
     Returns
     -------
@@ -1060,6 +1063,9 @@ def summary(
            ...: )
 
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+
     extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
         extra_args["coords"] = coords
