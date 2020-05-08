@@ -1,5 +1,4 @@
 """Posterior-Prior plot."""
-import warnings
 
 from .plot_utils import (
     xarray_var_iter,
@@ -12,7 +11,7 @@ from ..rcparams import rcParams
 
 def plot_pp(
     data,
-    groups=None,
+    kind="latent",
     figsize=None,
     textsize=None,
     var_names=None,
@@ -22,6 +21,7 @@ def plot_pp(
     ax=None,
     prior_kwargs=None,
     posterior_kwargs=None,
+    observed_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
@@ -33,9 +33,10 @@ def plot_pp(
     ----------
     data : az.InferenceData object
         InferenceData object containing the posterior/prior data.
-    groups : str or list of str, optional
-        Select groups for plotting. Default group is:
-        {"prior", "posterior"}
+    kind : str
+        kind of plot to display {"latent", "observed"}, defaults to 'latent'.
+        "latent" includes {"prior", "posterior"} and "observed" includes
+        {"observed_data", "prior_predictive", "posterior_predictive"}
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -57,9 +58,11 @@ def plot_pp(
         have shape (nvars, 3) where the last column is the combined plot and the
         first columns are the single plots.
     prior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` for prior group.
+        Additional keywords passed to `arviz.plot_kde` for prior/predictive groups.
     posterior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` for posterior group.
+        Additional keywords passed to `arviz.plot_kde` for posterior/predictive groups.
+    observed_kwargs : dicts, optional
+        Additional keywords passed to `arviz.plot_kde` for observed_data group.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -85,12 +88,10 @@ def plot_pp(
 
     """
 
-    if groups is None:
-        groups = ["prior", "posterior"]
-    else:
-        for group in groups:
-            if group not in ['prior', 'posterior', "posterior_predictive", "observed_data", "prior_predictive"]: #TODO: changed to metagroups
-                raise warnings.warn(f"{group} group is not supported")
+    all_groups = ["prior", "posterior"]
+
+    if kind == "observed":
+        all_groups = ["observed_data", "prior_predictive", "posterior_predictive"]
 
     if coords is None:
         coords = {}
@@ -101,10 +102,20 @@ def plot_pp(
     if posterior_kwargs is None:
         posterior_kwargs = {}
 
+    if observed_kwargs is None:
+        observed_kwargs = {}
+
     if backend_kwargs is None:
         backend_kwargs = {}
 
-    datasets = [getattr(data, group) for group in groups]
+    datasets = []
+    groups = []
+    for group in all_groups:
+        try:
+            datasets.append(getattr(data, group))
+            groups.append(group)
+        except:
+            pass
 
     if var_names is None:
         var_names = list(datasets[0].data_vars)
@@ -141,6 +152,10 @@ def plot_pp(
     prior_kwargs["plot_kwargs"].setdefault("color", "blue")
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
+    observed_kwargs.setdefault("plot_kwargs", dict())
+    observed_kwargs["plot_kwargs"].setdefault("color", "yellow")
+    observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
+
     ppplot_kwargs = dict(
         ax=ax,
         nvars=nvars,
@@ -151,6 +166,7 @@ def plot_pp(
         groups=groups,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
+        observed_kwargs=observed_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )
