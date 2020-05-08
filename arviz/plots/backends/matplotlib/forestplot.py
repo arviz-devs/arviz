@@ -34,7 +34,7 @@ def plot_forest(
     markersize,
     kind,
     ncols,
-    credible_interval,
+    hpd_interval,
     quartiles,
     rope,
     ridgeplot_overlap,
@@ -91,7 +91,7 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval,
+            hpd_interval,
             quartiles,
             xt_labelsize,
             titlesize,

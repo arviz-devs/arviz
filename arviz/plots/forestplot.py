@@ -202,7 +202,7 @@ def plot_forest(
         markersize=markersize,
         kind=kind,
         ncols=ncols,
-        credible_interval=hpd_interval,
+        hpd_interval=hpd_interval,
         quartiles=quartiles,
         rope=rope,
         ridgeplot_overlap=ridgeplot_overlap,
