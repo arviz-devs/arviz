@@ -108,7 +108,7 @@ def test_hpd_circular():
 def test_hpd_bad_ci():
     normal_sample = np.random.randn(10)
     with pytest.raises(ValueError):
-        hpd(normal_sample, credible_interval=2)
+        hpd(normal_sample, hpd_interval=2)
 
 
 def test_hpd_skipna():
