@@ -614,9 +614,7 @@ def credible_interval_warning(credible_interval, hpd_interval):
     )
 
     if isinstance(credible_interval, str) and credible_interval == "auto":
-        warnings.warn(
-            ("Argument value 'auto' has been renamed to 'hide'", PendingDeprecationWarning)
-        )
+        raise Exception("Argument value 'auto' has been renamed to 'hide'")
 
     if hpd_interval:
         raise Exception(
