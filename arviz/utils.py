@@ -10,7 +10,6 @@ import numpy as np
 
 from numpy import newaxis
 from .rcparams import rcParams
-from . import _log
 
 
 def _var_names(var_names, data, filter_vars=None):

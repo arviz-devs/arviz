@@ -32,7 +32,7 @@ def plot_violin(
     backend=None,
     backend_kwargs=None,
     show=None,
-    credible_interval = None
+    credible_interval=None
 
 ):
     """Plot posterior of traces as violin plot.
@@ -165,7 +165,11 @@ def plot_violin(
         quartiles=quartiles,
         backend_kwargs=backend_kwargs,
         show=show,
+        credible_interval=None
     )
+    if credible_interval:
+        violinplot_kwargs["hpd_interval"] = credible_interval_warning(credible_interval,
+                                                                      hpd_interval)
 
     if backend is None:
         backend = rcParams["plot.backend"]

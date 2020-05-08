@@ -271,7 +271,7 @@ def _plot_posterior_op(
     plot_height = ax.get_ylim()[1]
 
     format_axes()
-    if hpd_interval is not 'hide':
+    if hpd_interval != 'hide':
         display_hpd()
     display_point_estimate()
     display_ref_val()

@@ -255,7 +255,7 @@ def _plot_posterior_op(
 
     format_axes()
     max_data = hist.max()
-    if hpd_interval is not 'hide':
+    if hpd_interval != 'hide':
         display_hpd(max_data)
     display_point_estimate(max_data)
     display_ref_val(max_data)
