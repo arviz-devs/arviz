@@ -948,7 +948,7 @@ def summary(
     skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
-    credible_interval=None
+    credible_interval=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
