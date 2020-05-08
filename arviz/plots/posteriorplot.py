@@ -10,7 +10,7 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
-from ..utils import _var_names, get_coords
+from ..utils import _var_names, get_coords, credible_interval_warning
 from ..rcparams import rcParams
 
 
@@ -22,7 +22,7 @@ def plot_posterior(
     coords=None,
     figsize=None,
     textsize=None,
-    credible_interval="auto",
+    hpd_interval=None,
     multimodal=False,
     round_to: Optional[int] = None,
     point_estimate="auto",
@@ -36,6 +36,7 @@ def plot_posterior(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None,
     **kwargs
 ):
     """Plot Posterior densities in the style of John K. Kruschke's book.
@@ -62,8 +63,11 @@ def plot_posterior(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    credible_interval: float, optional
-        Credible intervals. Defaults to 0.94. Use None to hide the credible interval
+    hpd_interval: float, optional
+        Plots highest posterior density interval for chosen percentage of density.
+        Use 'hide' to hide the credible interval. Defaults to 0.94.
+    hpd_interval: float or str, optional
+        Credible intervals. Defaults to 0.94. Use 'hide' to hide the hpd interval
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
@@ -102,6 +106,8 @@ def plot_posterior(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
+    credible_interval: float or str, optional
+        deprecated: Please see hpd_interval
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -187,6 +193,10 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+
+
     data = convert_to_dataset(data, group=group)
     if transform is not None:
         data = transform(data)
@@ -195,10 +205,10 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
-    if credible_interval == "auto":
-        credible_interval = rcParams["stats.credible_interval"]
-    elif credible_interval is not None:
-        if not 1 >= credible_interval > 0:
+    if hpd_interval is None:
+        hpd_interval = rcParams["stats.credible_interval"]
+    elif hpd_interval not in (None, 'hide'):
+        if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     if point_estimate == "auto":
@@ -234,7 +244,7 @@ def plot_posterior(
         kind=kind,
         point_estimate=point_estimate,
         round_to=round_to,
-        credible_interval=credible_interval,
+        hpd_interval=hpd_interval,
         multimodal=multimodal,
         ref_val=ref_val,
         rope=rope,

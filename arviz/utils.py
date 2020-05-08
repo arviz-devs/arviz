@@ -612,6 +612,11 @@ def credible_interval_warning(credible_interval, hpd_interval):
        "Please replace with hpd_interval"),
        PendingDeprecationWarning)
 
+    if credible_interval == 'auto':
+        warnings.warn(
+            ("Argument value 'auto' has been renamed to 'hide'",
+        PendingDeprecationWarning))
+
     if hpd_interval:
         raise Exception("Both 'credible_interval' and 'hpd_interval' are in "
                         "keyword arguments. Please remove 'credible_interval'")

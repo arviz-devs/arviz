@@ -18,7 +18,6 @@ from ...plot_utils import (
 from ....stats import hpd
 from ....numeric_utils import get_bins
 
-
 def plot_posterior(
     ax,
     length_plotters,
@@ -31,7 +30,7 @@ def plot_posterior(
     kind,
     point_estimate,
     round_to,
-    credible_interval,
+    hpd_interval,
     multimodal,
     ref_val,
     rope,
@@ -41,6 +40,7 @@ def plot_posterior(
     show,
 ):
     """Bokeh posterior plot."""
+
     if backend_kwargs is None:
         backend_kwargs = {}
 
@@ -75,7 +75,7 @@ def plot_posterior(
             kind=kind,
             point_estimate=point_estimate,
             round_to=round_to,
-            credible_interval=credible_interval,
+            hpd_interval=hpd_interval,
             multimodal=multimodal,
             ref_val=ref_val,
             rope=rope,
@@ -103,7 +103,7 @@ def _plot_posterior_op(
     bins,
     kind,
     point_estimate,
-    credible_interval,
+    hpd_interval,
     multimodal,
     ref_val,
     rope,
@@ -199,7 +199,7 @@ def _plot_posterior_op(
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
         hpd_intervals = hpd(
-            values, credible_interval=credible_interval, multimodal=multimodal
+            values, hpd_interval=hpd_interval, multimodal=multimodal
         )  # type: np.ndarray
 
         for hpdi in np.atleast_2d(hpd_intervals):
@@ -214,7 +214,7 @@ def _plot_posterior_op(
                 x=list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
                 y=[max_data * 0.07, max_data * 0.07, max_data * 0.3],
                 text=list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
-                + [format_as_percent(credible_interval) + " HPD"],
+                + [format_as_percent(hpd_interval) + " HPD"],
                 text_align="center",
             )
 
@@ -255,7 +255,7 @@ def _plot_posterior_op(
 
     format_axes()
     max_data = hist.max()
-    if credible_interval is not None:
+    if hpd_interval is not 'hide':
         display_hpd(max_data)
     display_point_estimate(max_data)
     display_ref_val(max_data)

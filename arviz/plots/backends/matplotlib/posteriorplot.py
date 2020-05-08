@@ -29,7 +29,7 @@ def plot_posterior(
     kind,
     point_estimate,
     round_to,
-    credible_interval,
+    hpd_interval,
     multimodal,
     ref_val,
     rope,
@@ -63,7 +63,7 @@ def plot_posterior(
             kind=kind,
             point_estimate=point_estimate,
             round_to=round_to,
-            credible_interval=credible_interval,
+            hpd_interval=hpd_interval,
             multimodal=multimodal,
             ref_val=ref_val,
             rope=rope,
@@ -91,7 +91,7 @@ def _plot_posterior_op(
     bins,
     kind,
     point_estimate,
-    credible_interval,
+    hpd_interval,
     multimodal,
     ref_val,
     rope,
@@ -199,7 +199,7 @@ def _plot_posterior_op(
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
         hpd_intervals = hpd(
-            values, credible_interval=credible_interval, multimodal=multimodal
+            values, hpd_interval=hpd_interval, multimodal=multimodal
         )  # type: np.ndarray
 
         for hpdi in np.atleast_2d(hpd_intervals):
@@ -227,7 +227,7 @@ def _plot_posterior_op(
             ax.text(
                 (hpdi[0] + hpdi[1]) / 2,
                 plot_height * 0.3,
-                format_as_percent(credible_interval) + " HPD",
+                format_as_percent(hpd_interval) + " HPD",
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
@@ -271,7 +271,7 @@ def _plot_posterior_op(
     plot_height = ax.get_ylim()[1]
 
     format_axes()
-    if credible_interval is not None:
+    if hpd_interval is not 'hide':
         display_hpd()
     display_point_estimate()
     display_ref_val()
