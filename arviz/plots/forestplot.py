@@ -3,6 +3,7 @@ from ..data import convert_to_dataset
 from .plot_utils import get_plotting_function
 from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
+from ..utils import credible_interval_warning
 
 
 def plot_forest(
@@ -14,7 +15,7 @@ def plot_forest(
     transform=None,
     coords=None,
     combined=False,
-    credible_interval=None,
+    hpd_interval=None,
     rope=None,
     quartiles=True,
     ess=False,
@@ -33,10 +34,11 @@ def plot_forest(
     backend_config=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None
 ):
-    """Forest plot to compare credible intervals from a number of distributions.
+    """Forest plot to compare hpd intervals from a number of distributions.
 
-    Generates a forest plot of 100*(credible_interval)% credible intervals from
+    Generates a forest plot of 100*(hpd_interval)% hpd intervals from
     a trace or list of traces.
 
     Parameters
@@ -65,14 +67,14 @@ def plot_forest(
     combined: bool
         Flag for combining multiple chains into a single chain. If False (default),
         chains will be plotted separately.
-    credible_interval: float, optional
-        Credible interval to plot. Defaults to 0.94.
+    hpd_interval: float, optional
+        Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list with one
         interval only is provided, the ROPE will be displayed across the y-axis. If more than one
         interval is provided the length of the list should match the number of variables.
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the credible_interval intervals.
+        Flag for plotting the interquartile range, in addition to the hpd_interval intervals.
         Defaults to True
     r_hat: bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
@@ -114,6 +116,8 @@ def plot_forest(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
+    credible_interval: float, optional
+        deprecated: Please see hpd_interval
 
     Returns
     -------
@@ -151,6 +155,9 @@ def plot_forest(
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
+    if credible_interval:
+        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+
     if not isinstance(data, (list, tuple)):
         data = [data]
 
@@ -176,10 +183,10 @@ def plot_forest(
         ncols += 1
         width_ratios.append(1)
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hpd_interval is None:
+        hpd_interval = rcParams["stats.credible_interval"]
     else:
-        if not 1 >= credible_interval > 0:
+        if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     plot_forest_kwargs = dict(
@@ -195,7 +202,7 @@ def plot_forest(
         markersize=markersize,
         kind=kind,
         ncols=ncols,
-        credible_interval=credible_interval,
+        credible_interval=hpd_interval,
         quartiles=quartiles,
         rope=rope,
         ridgeplot_overlap=ridgeplot_overlap,
