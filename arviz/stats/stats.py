@@ -413,7 +413,7 @@ def hpd(
 
     """
     if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+        credible_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
@@ -1068,7 +1068,7 @@ def summary(
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
     if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+        credible_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")

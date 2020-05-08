@@ -88,7 +88,7 @@ def plot_hpd(
         y = y.reshape(new_shape)
 
     if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+        credible_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")

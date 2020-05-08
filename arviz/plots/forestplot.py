@@ -184,7 +184,7 @@ def plot_forest(
         width_ratios.append(1)
 
     if hpd_interval is None:
-        hpd_interval = rcParams["stats.credible_interval"]
+        hpd_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= hpd_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
