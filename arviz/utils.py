@@ -604,17 +604,17 @@ def get_coords(data, coords):
     return data_subset
 
 
-def credible_interval_warnings(**kwargs):
+def credible_interval_warning(credible_interval, hpd_interval):
     """Helper method to warn that credible interval will be deprecated"""
-    if "credible_interval" in kwargs.keys():
-        warnings.warn(
+
+    warnings.warn(
        ("Keyword argument credible_interval has been deprecated ",
        "Please replace with hpd_interval"),
        PendingDeprecationWarning)
 
-        if "hpd_interval" in kwargs.keys():
-            raise Exception("Both 'credible_interval' and 'hpd_interval' are in "
-                            "keyword arguments. Please remove 'credible_interval'")
+    if hpd_interval:
+        raise Exception("Both 'credible_interval' and 'hpd_interval' are in "
+                        "keyword arguments. Please remove 'credible_interval'")
 
-    kwargs["hpd_interval"] = kwargs.pop("credible_interval")
-    return kwargs
+    hpd_interval = credible_interval
+    return hpd_interval
