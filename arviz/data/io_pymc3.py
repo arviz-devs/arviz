@@ -9,6 +9,7 @@ import xarray as xr
 from .. import utils
 from .inference_data import InferenceData, concat
 from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs, CoordSpec, DimSpec
+from ..rcparams import rcParams
 
 if TYPE_CHECKING:
     import pymc3 as pm
@@ -60,7 +61,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         predictions=None,
         coords: Optional[Coords] = None,
         dims: Optional[Dims] = None,
-        model=None
+        model=None,
+        save_warmup: Optional[bool] = None,
     ):
         import pymc3
         import theano
@@ -70,6 +72,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         self.pymc3 = pymc3
         self.theano = theano
 
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.trace = trace
 
         # this permits us to get the model from command-line argument or from with model:
@@ -78,18 +81,6 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         except TypeError:
             self.model = None
 
-        # This next line is brittle and may not work forever, but is a secret
-        # way to access the model from the trace.
-        if trace is not None:
-            if self.model is None:
-                self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
-                    0
-                ].model
-            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-            self.ndraws = len(trace)
-        else:
-            self.nchains = self.ndraws = 0
-
         if self.model is None:
             warnings.warn(
                 "Using `from_pymc3` without the model will be deprecated in a future release. "
@@ -97,6 +88,26 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "Make sure you use the model argument or call from_pymc3 within a model context.",
                 PendingDeprecationWarning,
             )
+
+        # This next line is brittle and may not work forever, but is a secret
+        # way to access the model from the trace.
+        self.attrs = None
+        if trace is not None:
+            if self.model is None:
+                self.model = list(self.trace._straces.values())[  # pylint: disable=protected-access
+                    0
+                ].model
+            self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
+            if hasattr(trace.report, "n_tune"):
+                self.ndraws = trace.report.n_draws
+                self.attrs = {
+                    "sampling_time": trace.report.t_sampling,
+                    "tuning_steps": trace.report.n_tune,
+                }
+            else:
+                self.nchains = len(trace)
+        else:
+            self.nchains = self.ndraws = 0
 
         self.prior = prior
         self.posterior_predictive = posterior_predictive
@@ -151,7 +162,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
     @requires("trace")
     @requires("model")
-    def _extract_log_likelihood(self):
+    def _extract_log_likelihood(self, trace):
         """Compute log likelihood of each observation."""
         # If we have predictions, then we have a thinned trace which does not
         # support extracting a log likelihood.
@@ -165,7 +176,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             ]
         try:
             log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
-                len(self.trace.chains)
+                len(trace.chains)
             )
         except AttributeError:
             raise AttributeError(
@@ -173,10 +184,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
             )
         for var, log_like_fun in cached:
-            for chain in self.trace.chains:
+            for chain in trace.chains:
                 log_like_chain = [
                     self.log_likelihood_vals_point(point, var, log_like_fun)
-                    for point in self.trace.points([chain])
+                    for point in trace.points([chain])
                 ]
                 log_likelihood_dict.insert(var.name, np.stack(log_like_chain), chain)
         return log_likelihood_dict.trace_dict
@@ -184,13 +195,31 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
     @requires("trace")
     def posterior_to_xarray(self):
         """Convert the posterior to an xarray dataset."""
-        var_names = self.pymc3.util.get_default_varnames(  # pylint: disable=no-member
+        var_names = self.pymc3.util.get_default_varnames(
             self.trace.varnames, include_transformed=False
         )
         data = {}
+        data_warmup = {}
         for var_name in var_names:
-            data[var_name] = np.array(self.trace.get_values(var_name, combine=False, squeeze=False))
-        return dict_to_dataset(data, library=self.pymc3, coords=self.coords, dims=self.dims)
+            if self.save_warmup:
+                data_warmup[var_name] = np.array(
+                    self.trace[: -self.ndraws].get_values(var_name, combine=False, squeeze=False)
+                )
+            data[var_name] = np.array(
+                self.trace[-self.ndraws :].get_values(var_name, combine=False, squeeze=False)
+            )
+        return (
+            dict_to_dataset(
+                data, library=self.pymc3, coords=self.coords, dims=self.dims, attrs=self.attrs
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pymc3,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+            ),
+        )
 
     @requires("trace")
     def sample_stats_to_xarray(self):
@@ -198,11 +227,25 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         data = {}
         rename_key = {"model_logp": "lp"}
         data = {}
+        data_warmup = {}
         for stat in self.trace.stat_names:
             name = rename_key.get(stat, stat)
-            data[name] = np.array(self.trace.get_sampler_stats(stat, combine=False))
+            if name == "tune":
+                continue
+            if self.save_warmup:
+                data_warmup[name] = np.array(
+                    self.trace[: -self.ndraws].get_sampler_stats(stat, combine=False)
+                )
+            data[name] = np.array(self.trace[-self.ndraws :].get_sampler_stats(stat, combine=False))
 
-        return dict_to_dataset(data, library=self.pymc3, dims=None, coords=self.coords)
+        return (
+            dict_to_dataset(
+                data, library=self.pymc3, dims=None, coords=self.coords, attrs=self.attrs
+            ),
+            dict_to_dataset(
+                data_warmup, library=self.pymc3, dims=None, coords=self.coords, attrs=self.attrs
+            ),
+        )
 
     @requires("trace")
     @requires("model")
@@ -211,14 +254,20 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         if self.predictions or not self.log_likelihood:
             return None
         try:
-            data = self._extract_log_likelihood()
+            data = self._extract_log_likelihood(self.trace[-self.ndraws :])
         except TypeError:
             warnings.warn(
                 """Could not compute log_likelihood, it will be omitted.
                 Check your model object or set log_likelihood=False"""
             )
             return None
-        return dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords)
+        data_warmup = {}
+        if self.save_warmup:
+            data_warmup = self._extract_log_likelihood(self.trace[: -self.ndraws])
+        return (
+            dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords),
+            dict_to_dataset(data_warmup, library=self.pymc3, dims=self.dims, coords=self.coords),
+        )
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:
         """Take Dict of variables to numpy ndarrays (samples) and translate into dataset."""
@@ -375,7 +424,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             id_dict["predictions_constant_data"] = self.constant_data_to_xarray()
         else:
             id_dict["constant_data"] = self.constant_data_to_xarray()
-        return InferenceData(**id_dict)
+        return InferenceData(save_warmup=self.save_warmup, **id_dict)
 
 
 def from_pymc3(
@@ -386,7 +435,8 @@ def from_pymc3(
     log_likelihood: Union[bool, Iterable[str]] = True,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
-    model: Optional[Model] = None
+    model: Optional[Model] = None,
+    save_warmup: Optional[bool] = None,
 ) -> InferenceData:
     """Convert pymc3 data into an InferenceData object.
 
@@ -413,6 +463,9 @@ def from_pymc3(
     model : pymc3.Model, optional
         Model used to generate ``trace``. It is not necessary to pass ``model`` if in
         ``with`` context.
+    save_warmup : bool, optional
+        Save warmup iterations InferenceData object. If not defined, use default
+        defined by the rcParams.
 
     Returns
     -------
@@ -426,6 +479,7 @@ def from_pymc3(
         coords=coords,
         dims=dims,
         model=model,
+        save_warmup=save_warmup,
     ).to_inference_data()
 
 

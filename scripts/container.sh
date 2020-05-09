@@ -5,6 +5,7 @@ if [[ $* == *--clear-cache* ]]; then
     echo "Removing cached files and models"
     find -type d -name __pycache__ -exec rm -rf {} +
     rm -f arviz/tests/saved_models/*.pkl
+    rm -f arviz/tests/saved_models/*.pkl.gzip
 fi
 
 # Build container for use of testing or notebook

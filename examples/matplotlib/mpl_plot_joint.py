@@ -17,7 +17,7 @@ az.plot_pair(
     var_names=["theta"],
     coords={"school": ["Choate", "Phillips Andover"]},
     kind="hexbin",
-    diagonal=True,
+    marginals=True,
     figsize=(10, 10),
 )
 plt.show()

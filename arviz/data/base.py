@@ -189,7 +189,7 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
     Examples
     --------
-    dict_to_dataset({'x': np.random.randn(4, 100), 'y', np.random.rand(4, 100)})
+    dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
 
     """
     if dims is None:

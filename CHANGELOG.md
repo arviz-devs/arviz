@@ -3,6 +3,7 @@
 ## v0.x.x Unreleased
 
 ### New features
+* Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
 * Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
@@ -15,8 +16,11 @@
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro and numpyro translation (#1090, #1125)
 * Add `num_chains` and `pred_dims` arguments to from_pyro and from_numpyro (#1090, #1125)
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
+* New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
+* Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 
 ### Maintenance and fixes
+* Changed `diagonal` argument for `marginals` and fixed `point_estimate_marker_kwargs` in `plot_pair` (#1167)
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
 * Fixed `TypeError` in `transform` argument of `plot_density` and `plot_forest` when `InferenceData` is a list or tuple (#1121)
@@ -25,9 +29,10 @@
 * Updated benchmarks and moved to asv_benchmarks/benchmarks (#1142)
 * Moved `_fast_kde`, `_fast_kde_2d`, `get_bins` and `_sturges_formula` to `numeric_utils` and `get_coords` to `utils` (#1142)
 * Rank plot: rename `axes` argument to `ax` (#1144)
-* Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150))
+* Added a warning specifying log scale is now the default in compare/loo/waic functions ([#1150](https://github.com/arviz-devs/arviz/pull/1150)).
 * Fixed bug in `plot_posterior` with rcParam "plot.matplotlib.show" = True (#1151)
 * Set `fill_last` argument of `plot_kde` to False by default (#1158)
+* plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
 
