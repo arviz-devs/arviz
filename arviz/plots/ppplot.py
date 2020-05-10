@@ -1,4 +1,5 @@
 """Posterior-Prior plot."""
+import warnings
 
 from .plot_utils import (
     xarray_var_iter,
@@ -27,7 +28,9 @@ def plot_pp(
     show=None,
 ):
     """
-    Plot for posterior/Prior.
+    Plots that compare fitted and unfitted distributions.
+
+    The resulting plots will show the compared distributions (as KDEs) both on separate axes (particularly useful when one of them is substantially tighter than another), and plotted together, so three plots per distribution
 
     Parameters
     ----------
@@ -54,9 +57,7 @@ def plot_pp(
     legend : bool
         Add legend to figure. By default True.
     ax: axes, optional
-        Matplotlib axes: a numpy 2d array of matplotlib axes. Returned object will
-        have shape (nvars, 3) where the last column is the combined plot and the
-        first columns are the single plots.
+        Matplotlib axes: The ax argument should have shape (nvars, 3), where the last column is for the combined before/after plots and columns 0 and 1 are for the before and after plots, respectively.
     prior_kwargs : dicts, optional
         Additional keywords passed to `arviz.plot_kde` for prior/predictive groups.
     posterior_kwargs : dicts, optional
@@ -73,7 +74,7 @@ def plot_pp(
 
     Returns
     -------
-    axes : matplotlib axes or bokeh figures
+    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3) where the last column is the combined plot and the first columns are the single plots.
 
     Examples
     --------
@@ -145,15 +146,15 @@ def plot_pp(
     )
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"].setdefault("color", "red")
+    posterior_kwargs["plot_kwargs"].setdefault("color", "C0")
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"].setdefault("color", "blue")
+    prior_kwargs["plot_kwargs"].setdefault("color", "C1")
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"].setdefault("color", "yellow")
+    observed_kwargs["plot_kwargs"].setdefault("color", "C2")
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     ppplot_kwargs = dict(

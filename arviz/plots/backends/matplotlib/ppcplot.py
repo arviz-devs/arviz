@@ -1,4 +1,4 @@
-"""Matplolib Posterior predictive plot."""
+"""Matplotlib Posterior predictive plot."""
 import platform
 import logging
 from matplotlib import animation, get_backend
