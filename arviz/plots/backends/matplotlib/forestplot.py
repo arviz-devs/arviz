@@ -290,13 +290,13 @@ class PlotHandler:
         return ax
 
     def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
+        self, hpd_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
 
         Parameters
         ----------
-        credible_interval : float
+        hpd_interval : float
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
@@ -312,14 +312,14 @@ class PlotHandler:
             Axes to draw on
         """
         # Quantiles to be calculated
-        endpoint = 100 * (1 - credible_interval) / 2
+        endpoint = 100 * (1 - hpd_interval) / 2
         if quartiles:
             qlist = [endpoint, 25, 50, 75, 100 - endpoint]
         else:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, hpd_interval):
                 if isinstance(rope, dict):
                     self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
@@ -339,7 +339,7 @@ class PlotHandler:
                 )
         ax.tick_params(labelsize=xt_labelsize)
         ax.set_title(
-            "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
+            "{:.1%} HPD Interval".format(hpd_interval), fontsize=titlesize, wrap=True
         )
         if rope is None or isinstance(rope, dict):
             return
@@ -489,11 +489,11 @@ class VarHandler:
             colors.append(data[0][2])  # the colors are all the same
         return labels, ticks, vals, colors
 
-    def treeplot(self, qlist, credible_interval):
+    def treeplot(self, qlist, hpd_interval):
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval, multimodal=False)
+            ntiles[0], ntiles[-1] = hpd(values.flatten(), hpd_interval, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):

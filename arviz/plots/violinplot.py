@@ -56,7 +56,7 @@ def plot_violin(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the credible_interval*100%
+        Flag for plotting the interquartile range, in addition to the hpd_interval*100%
         intervals. Defaults to True
     rug: bool
         If True adds a jittered rugplot. Defaults to False.

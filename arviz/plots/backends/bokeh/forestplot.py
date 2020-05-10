@@ -544,11 +544,11 @@ class VarHandler:
             colors.append(data[0][2])  # the colors are all the same
         return labels, ticks, vals, colors
 
-    def treeplot(self, qlist, credible_interval):
+    def treeplot(self, qlist, hpd_interval):
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval, multimodal=False)
+            ntiles[0], ntiles[-1] = hpd(values.flatten(), hpd_interval, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):

@@ -92,7 +92,7 @@ def _d_helper(
     xt_labelsize,
     linewidth,
     markersize,
-    credible_interval,
+    hpd_interval,
     point_estimate,
     hpd_markers,
     outline,
@@ -121,8 +121,8 @@ def _d_helper(
         Thickness of lines
     markersize : float
         Size of markers
-    credible_interval : float
-        Credible intervals. Defaults to 0.94
+    hpd_interval : float
+        HPD intervals. Defaults to 0.94
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
@@ -132,14 +132,14 @@ def _d_helper(
     ax : matplotlib axes
     """
     if vec.dtype.kind == "f":
-        if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval, multimodal=False)
+        if hpd_interval != 1:
+            hpd_ = hpd(vec, hpd_interval, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
 
         density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= credible_interval
+        density *= hpd_interval
         x = np.linspace(xmin, xmax, len(density))
         ymin = density[0]
         ymax = density[-1]
@@ -153,7 +153,7 @@ def _d_helper(
             ax.fill_between(x, density, color=color, alpha=shade)
 
     else:
-        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
+        xmin, xmax = hpd(vec, hpd_interval, multimodal=False)
         bins = get_bins(vec)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype="step", align="left")

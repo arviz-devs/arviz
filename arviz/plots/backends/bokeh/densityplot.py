@@ -109,7 +109,7 @@ def _d_helper(
     bw,
     line_width,
     markersize,
-    credible_interval,
+    hpd_interval,
     point_estimate,
     hpd_markers,
     outline,
@@ -121,14 +121,14 @@ def _d_helper(
     plotted = []
 
     if vec.dtype.kind == "f":
-        if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval, multimodal=False)
+        if hpd_interval != 1:
+            hpd_ = hpd(vec, hpd_interval, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
 
         density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= credible_interval
+        density *= hpd_interval
         x = np.linspace(xmin, xmax, len(density))
         ymin = density[0]
         ymax = density[-1]
@@ -172,7 +172,7 @@ def _d_helper(
             )
 
     else:
-        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
+        xmin, xmax = hpd(vec, hpd_interval, multimodal=False)
         bins = get_bins(vec)
 
         _, hist, edges = histogram(vec, bins=bins)

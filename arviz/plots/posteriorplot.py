@@ -65,7 +65,7 @@ def plot_posterior(
         on figsize.
     hpd_interval: float, optional
         Plots highest posterior density interval for chosen percentage of density.
-        Use 'hide' to hide the credible interval. Defaults to 0.94.
+        Use 'hide' to hide the HPD interval. Defaults to 0.94.
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
@@ -184,12 +184,12 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], kind='hist')
 
-    Change size of credible interval
+    Change size of HPD interval
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu'], credible_interval=.75)
+        >>> az.plot_posterior(data, var_names=['mu'], hpd_interval=.75)
     """
     if credible_interval:
         hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
@@ -206,7 +206,7 @@ def plot_posterior(
         hpd_interval = rcParams["stats.hpd_interval"]
     elif hpd_interval not in (None, "hide"):
         if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
 
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]

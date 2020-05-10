@@ -35,7 +35,7 @@ def plot_hpd(
     y : array-like
         values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
     hpd_interval : float, optional
-        Credible interval to plot. Defaults to 0.94.
+        HPD interval to plot. Defaults to 0.94.
     color : str
         Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
     circular : bool, optional
@@ -98,7 +98,7 @@ def plot_hpd(
         hpd_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
 
     hpd_ = hpd(y, hpd_interval=hpd_interval, circular=circular, multimodal=False)
 

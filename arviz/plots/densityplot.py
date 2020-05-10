@@ -40,7 +40,7 @@ def plot_density(
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
-    Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
+    Plots are truncated at their 100*(1-alpha)% hpd intervals. Plots are grouped per variable
     and colors assigned to models.
 
     Parameters
@@ -132,7 +132,7 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
 
-    Specify credible interval
+    Specify hpd interval
 
     .. plot::
         :context: close-figs
@@ -192,7 +192,7 @@ def plot_density(
         hpd_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []

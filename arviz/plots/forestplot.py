@@ -187,7 +187,7 @@ def plot_forest(
         hpd_interval = rcParams["stats.hpd_interval"]
     else:
         if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
 
     plot_forest_kwargs = dict(
         ax=ax,
