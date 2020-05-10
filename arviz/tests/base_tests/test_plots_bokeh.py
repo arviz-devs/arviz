@@ -895,6 +895,7 @@ def test_plot_ppc_ax(models, kind):
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
         {"point_estimate": None},
+        {"hpd_interval": "hide"},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},
