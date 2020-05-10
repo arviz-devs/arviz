@@ -338,9 +338,7 @@ class PlotHandler:
                     color=color,
                 )
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title(
-            "{:.1%} HPD Interval".format(hpd_interval), fontsize=titlesize, wrap=True
-        )
+        ax.set_title("{:.1%} HPD Interval".format(hpd_interval), fontsize=titlesize, wrap=True)
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:
