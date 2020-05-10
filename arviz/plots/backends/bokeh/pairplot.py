@@ -105,7 +105,13 @@ def plot_pair(
         )
         numvars = vars_to_plot
 
-    (figsize, _, _, _, _, markersize) = _scale_fig_size(figsize, textsize, numvars - 2, numvars - 2)
+    if numvars == 2:
+        offset = 1
+    else:
+        offset = 2
+    (figsize, _, _, _, _, markersize) = _scale_fig_size(
+        figsize, textsize, numvars - offset, numvars - offset
+    )
 
     point_estimate_marker_kwargs.setdefault("line_width", markersize)
     point_estimate_kwargs.setdefault("line_color", "orange")
@@ -147,22 +153,22 @@ def plot_pair(
         return width, height
 
     if marginals:
-        var = 0
+        marginals_offset = 0
     else:
-        var = 1
+        marginals_offset = 1
 
     if ax is None:
         ax = []
         backend_kwargs.setdefault("width", int(figsize[0] / (numvars - 1) * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] / (numvars - 1) * dpi))
-        for row in range(numvars - var):
+        for row in range(numvars - marginals_offset):
             row_ax = []
             var1 = (
-                flat_var_names[row + var]
+                flat_var_names[row + marginals_offset]
                 if tmp_flat_var_names is None
-                else tmp_flat_var_names[row + var]
+                else tmp_flat_var_names[row + marginals_offset]
             )
-            for n, col in enumerate(range(numvars - var)):
+            for col in range(numvars - marginals_offset):
                 var2 = (
                     flat_var_names[col] if tmp_flat_var_names is None else tmp_flat_var_names[col]
                 )
@@ -179,7 +185,7 @@ def plot_pair(
                     row_ax.append(None)
                 else:
                     jointplot = row == col and numvars == 2 and marginals
-                    rotate = n == 1
+                    rotate = col == 1
                     width, height = get_width_and_height(jointplot, rotate)
                     if jointplot:
                         ax_ = bkp.figure(width=width, height=height, tooltips=tooltips)
@@ -189,19 +195,19 @@ def plot_pair(
             ax.append(row_ax)
         ax = np.array(ax)
     else:
-        assert ax.shape == (numvars - var, numvars - var)
+        assert ax.shape == (numvars - marginals_offset, numvars - marginals_offset)
 
     # pylint: disable=too-many-nested-blocks
-    for i in range(0, numvars - var):
+    for i in range(0, numvars - marginals_offset):
 
         var1 = flat_var_names[i] if tmp_flat_var_names is None else tmp_flat_var_names[i]
 
-        for j in range(0, numvars - var):
+        for j in range(0, numvars - marginals_offset):
 
             var2 = (
-                flat_var_names[j + var]
+                flat_var_names[j + marginals_offset]
                 if tmp_flat_var_names is None
-                else tmp_flat_var_names[j + var]
+                else tmp_flat_var_names[j + marginals_offset]
             )
 
             if j == i and marginals:
@@ -217,9 +223,9 @@ def plot_pair(
                 )
 
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + var]
+                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
 
-            elif j + var > i:
+            elif j + marginals_offset > i:
 
                 if "scatter" in kind:
                     if divergences:
@@ -229,7 +235,7 @@ def plot_pair(
 
                 if "kde" in kind:
                     var1_kde = infdata_group[i]
-                    var2_kde = infdata_group[j + var]
+                    var2_kde = infdata_group[j + marginals_offset]
                     plot_kde(
                         var1_kde,
                         var2_kde,
@@ -242,7 +248,7 @@ def plot_pair(
 
                 if "hexbin" in kind:
                     var1_hexbin = infdata_group[i]
-                    var2_hexbin = infdata_group[j + var]
+                    var2_hexbin = infdata_group[j + marginals_offset]
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(
                         var1_hexbin, var2_hexbin, **hexbin_kwargs,
@@ -289,12 +295,12 @@ def plot_pair(
                             ax[-1, -1].add_layout(ax_pe_hline)
 
                 if reference_values:
-                    x = reference_values_copy[flat_var_names[j + var]]
+                    x = reference_values_copy[flat_var_names[j + marginals_offset]]
                     y = reference_values_copy[flat_var_names[i]]
                     if x and y:
                         ax[j, i].circle(y, x, **reference_values_kwargs)
                 ax[j, i].xaxis.axis_label = flat_var_names[i]
-                ax[j, i].yaxis.axis_label = flat_var_names[j + var]
+                ax[j, i].yaxis.axis_label = flat_var_names[j + marginals_offset]
 
     show_layout(ax, show)
 
