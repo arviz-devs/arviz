@@ -1063,7 +1063,7 @@ def summary(
            ...: )
 
     """
-    if hpd_interval:
+    if credible_interval:
         hpd_interval = credible_interval_warning(hpd_interval, hpd_interval)
 
     extra_args = {}  # type: Dict[str, Any]
