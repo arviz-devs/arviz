@@ -345,12 +345,12 @@ class PlotHandler:
 
         return ax
 
-    def forestplot(self, credible_interval, quartiles, linewidth, markersize, ax, rope):
+    def forestplot(self, hpd_interval, quartiles, linewidth, markersize, ax, rope):
         """Draw forestplot for each plotter.
 
         Parameters
         ----------
-        credible_interval : float
+        hpd_interval : float
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
@@ -394,14 +394,14 @@ class PlotHandler:
                 "iterable of length 2"
             )
         # Quantiles to be calculated
-        endpoint = 100 * (1 - credible_interval) / 2
+        endpoint = 100 * (1 - hpd_interval) / 2
         if quartiles:
             qlist = [endpoint, 25, 50, 75, 100 - endpoint]
         else:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, hpd_interval):
                 if isinstance(rope, dict):
                     self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
@@ -417,7 +417,7 @@ class PlotHandler:
                     x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
                 )
         _title = Title()
-        _title.text = "{:.1%} Credible Interval".format(credible_interval)
+        _title.text = "{:.1%} Credible Interval".format(hpd_interval)
         ax.title = _title
 
         return ax
