@@ -1002,7 +1002,7 @@ def summary(
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
-    hpd_interval: float, optional
+    credible_interval: float, optional
         deprecated: Please see hpd_interval
 
     Returns
