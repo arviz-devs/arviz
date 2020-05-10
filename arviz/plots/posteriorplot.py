@@ -66,8 +66,6 @@ def plot_posterior(
     hpd_interval: float, optional
         Plots highest posterior density interval for chosen percentage of density.
         Use 'hide' to hide the credible interval. Defaults to 0.94.
-    hpd_interval: float or str, optional
-        Credible intervals. Defaults to 0.94. Use 'hide' to hide the hpd interval
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
