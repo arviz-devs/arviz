@@ -417,7 +417,7 @@ class PlotHandler:
                     x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
                 )
         _title = Title()
-        _title.text = "{:.1%} Credible Interval".format(hpd_interval)
+        _title.text = "{:.1%} HPD Interval".format(hpd_interval)
         ax.title = _title
 
         return ax
