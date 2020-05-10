@@ -18,6 +18,7 @@
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
+* `hpd_interval` will not plot hpd if argument `hide` is passed. Previously `credible_interval` would omit HPD if `None` was passed  (#1176)
 
 ### Maintenance and fixes
 * Changed `diagonal` argument for `marginals` and fixed `point_estimate_marker_kwargs` in `plot_pair` (#1167)
@@ -35,7 +36,7 @@
 * plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
-* `credible_interval` argument replaced by `hpd_interval`throughout with exception of `plot_loo_pit`
+* `credible_interval` argument replaced by `hpd_interval`throughout with exception of `plot_loo_pit` (#1176)
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
