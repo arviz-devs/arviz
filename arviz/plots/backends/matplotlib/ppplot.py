@@ -1,4 +1,4 @@
-"""Matplolib Prior Posterior plot."""
+"""Matplotlib Density Comparision plot."""
 import matplotlib.pyplot as plt
 import numpy as np
 

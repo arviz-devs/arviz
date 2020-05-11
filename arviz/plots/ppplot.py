@@ -1,10 +1,10 @@
-"""Posterior-Prior plot."""
-import warnings
+"""Density Comparision plot."""
 
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
     get_plotting_function,
+    vectorized_to_hex,
 )
 from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
@@ -146,15 +146,21 @@ def plot_pp(
     )
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"].setdefault("color", "C0")
+    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        posterior_kwargs["plot_kwargs"].get("color", "C0")
+    )
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"].setdefault("color", "C1")
+    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        posterior_kwargs["plot_kwargs"].get("color", "C1")
+    )
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"].setdefault("color", "C2")
+    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        posterior_kwargs["plot_kwargs"].get("color", "C2")
+    )
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
 
     ppplot_kwargs = dict(
