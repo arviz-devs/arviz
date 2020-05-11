@@ -19,8 +19,8 @@
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 ### Maintenance and fixes
+* Fixed `plot_pair` functionality for two variables with bokeh backend (#1179)
 * Changed `diagonal` argument for `marginals` and fixed `point_estimate_marker_kwargs` in `plot_pair` (#1167)
 * Fixed behaviour of `credible_interval=None` in `plot_posterior` (#1115)
 * Fixed hist kind of `plot_dist` with multidimensional input (#1115)
