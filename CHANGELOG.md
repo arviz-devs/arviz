@@ -5,7 +5,6 @@
 ### New features
 * Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
 * Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 * Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
 * Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 * Allow xarray.Dataarray input for plots.(#1120)
@@ -19,7 +18,6 @@
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 
-* Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds #1079
 ### Maintenance and fixes
 * Fixed `plot_pair` functionality for two variables with bokeh backend (#1179)
 * Changed `diagonal` argument for `marginals` and fixed `point_estimate_marker_kwargs` in `plot_pair` (#1167)
