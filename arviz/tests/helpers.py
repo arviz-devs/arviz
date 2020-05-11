@@ -61,7 +61,9 @@ def create_model(seed=10):
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
         "max_depth": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, data["J"]),
     }
     prior = {
         "mu": np.random.randn(nchains, ndraws) / 2,
@@ -78,6 +80,7 @@ def create_model(seed=10):
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
@@ -109,7 +112,9 @@ def create_multidimensional_model(seed=10):
     sample_stats = {
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
     }
     prior = {
         "mu": np.random.randn(nchains, ndraws) / 2,
@@ -126,6 +131,7 @@ def create_multidimensional_model(seed=10):
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
