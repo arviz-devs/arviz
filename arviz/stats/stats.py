@@ -574,8 +574,8 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
         Any object that can be converted to an az.InferenceData object. Refer to documentation of
         az.convert_to_inference_data for details
     pointwise: bool, optional
-        If True the pointwise predictive accuracy will be returned. Defaults to ``stats.ic_pointwise``
-        rcParam.
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
     var_name : str, optional
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
@@ -1324,8 +1324,8 @@ def waic(data, pointwise=None, var_name=None, scale=None):
         Any object that can be converted to an az.InferenceData object. Refer to documentation of
         ``az.convert_to_inference_data`` for details
     pointwise: bool
-        If True the pointwise predictive accuracy will be returned. Defaults to ``stats.ic_pointwise``
-        rcParam.
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
     var_name : str, optional
         The name of the variable in log_likelihood groups storing the pointwise log
         likelihood data to use for loo computation.
