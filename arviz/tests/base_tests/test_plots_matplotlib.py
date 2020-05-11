@@ -1185,7 +1185,7 @@ def test_plot_mcse_no_divergences(models):
             "prior_kwargs": {"plot_kwargs": {"color": "r"}},
             "posterior_kwargs": {"plot_kwargs": {"color": "b"}},
         },
-        {"var_names": ["theta"], "kind": "latent"},
+        {"var_names": ["y"], "kind": "observed"},
     ],
 )
 def test_plot_pp(models, kwargs):
