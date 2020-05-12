@@ -11,6 +11,7 @@ from .plot_utils import (
     format_coords_as_labels,
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
+    vectorized_to_hex,
 )
 from ..stats import ELPDData
 from ..rcparams import rcParams
@@ -138,6 +139,7 @@ def plot_khat(
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
     hlines_kwargs.setdefault("color", "C1")
+    hlines_kwargs["color"] = vectorized_to_hex(hlines_kwargs["color"])
 
     if coords is None:
         coords = {}
@@ -200,6 +202,7 @@ def plot_khat(
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
+    rgba_c = vectorized_to_hex(rgba_c)
 
     plot_khat_kwargs = dict(
         hover_label=hover_label,
