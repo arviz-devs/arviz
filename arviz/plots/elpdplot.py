@@ -34,7 +34,7 @@ def plot_elpd(
     show=None,
 ):
     """
-    Plot pointwise elpd differences between two or more models
+    Plot pointwise elpd differences between two or more models.
 
     Parameters
     ----------

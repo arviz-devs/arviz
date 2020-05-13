@@ -528,11 +528,12 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
 
 
 def loo(data, pointwise=False, reff=None, scale=None):
-    """Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
-    importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
+    """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
-    Also calculates LOO's standard error and the effective number of parameters.
-    Read more theory here https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1507.02646
+    Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
+    importance sampling leave-one-out cross-validation (PSIS-LOO-CV). Also calculates LOO's
+    standard error and the effective number of parameters. Read more theory here
+    https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1507.02646
 
     Parameters
     ----------
@@ -1267,10 +1268,10 @@ def summary(
 
 
 def waic(data, pointwise=False, scale=None):
-    """Estimates the expected log pointwise predictive density (elpd) using the widely applicable
-    information criterion.
+    """Compute the widely applicable information criterion.
 
-    Also calculates the WAIC's standard error and the effective number of parameters.
+    Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
+    WAIC's standard error and the effective number of parameters.
     Read more theory here https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1004.2316
 
     Parameters
