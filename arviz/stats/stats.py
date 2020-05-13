@@ -528,36 +528,37 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
 
 
 def loo(data, pointwise=False, reff=None, scale=None):
-    """Pareto-smoothed importance sampling leave-one-out cross-validation.
+    """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
-    Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
-    following Vehtari et al. (2017). Cross-validation is computed using Pareto-smoothed
-    importance sampling (PSIS).
+    Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
+    importance sampling leave-one-out cross-validation (PSIS-LOO-CV). Also calculates LOO's
+    standard error and the effective number of parameters. Read more theory here
+    https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1507.02646
 
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation
-        of az.convert_to_inference_data for details
+        Any object that can be converted to an az.InferenceData object. Refer to documentation of
+        az.convert_to_inference_data for details
     pointwise: bool, optional
-        if True the pointwise predictive accuracy will be returned. Defaults to False
+        If True the pointwise predictive accuracy will be returned. Defaults to False
     reff: float, optional
-        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
-        the number of actual samples. Computed from trace by default.
+        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
+        of actual samples. Computed from trace by default.
     scale: str
         Output scale for loo. Available options are:
 
-        - `log` : (default) log-score (after Vehtari et al. (2017))
+        - `log` : (default) log-score
         - `negative_log` : -1 * log-score
         - `deviance` : -2 * log-score
 
-        A higher log-score (or a lower deviance) indicates a model with better predictive
-        accuracy.
+        A higher log-score (or a lower deviance or negative log_score) indicates a model with
+        better predictive accuracy.
 
     Returns
     -------
-    pandas.Series with the following rows:
-    loo: approximated Leave-one-out cross-validation
+    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    loo: approximated expected log pointwise predictive density (elpd)
     loo_se: standard error of loo
     p_loo: effective number of parameters
     shape_warn: bool
@@ -567,12 +568,11 @@ def loo(data, pointwise=False, reff=None, scale=None):
     pareto_k: array of Pareto shape values, only if pointwise True
     loo_scale: scale of the loo results
 
-        The returned object has a custom print method that overrides pd.Series method. It is
-        specific to expected log pointwise predictive density (elpd) information criteria.
+        The returned object has a custom print method that overrides pd.Series method.
 
     Examples
     --------
-    Calculate the LOO-CV of a model:
+    Calculate LOO of a model:
 
     .. ipython::
 
@@ -580,14 +580,12 @@ def loo(data, pointwise=False, reff=None, scale=None):
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.loo(data)
 
-    The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``deviance_loo`` stands for `deviance` scale,
-    the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    Calculate LOO of a model and return the pointwise values:
 
     .. ipython::
 
-        In [2]: az.loo(data, pointwise=True, scale="log")
-
+        In [2]: data_loo = az.loo(data, pointwise=True)
+           ...: data_loo.loo_i
     """
     inference_data = convert_to_inference_data(data)
     log_likelihood = _get_log_likelihood(inference_data)
@@ -1270,21 +1268,19 @@ def summary(
 
 
 def waic(data, pointwise=False, scale=None):
-    """Calculate the widely available information criterion.
+    """Compute the widely applicable information criterion.
 
-    Also calculates the WAIC's standard error and the effective number of
-    parameters of the samples in trace from model. Read more theory here - in
-    a paper by some of the leading authorities on model selection
-    <dx.doi.org/10.1111/1467-9868.00353>
+    Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
+    WAIC's standard error and the effective number of parameters.
+    Read more theory here https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1004.2316
 
     Parameters
     ----------
     data: obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_inference_data for details
+        Any object that can be converted to an az.InferenceData object. Refer to documentation of
+        az.convert_to_inference_data for details
     pointwise: bool
-        if True the pointwise predictive accuracy will be returned.
-        Default False
+        if True the pointwise predictive accuracy will be returned. Defaults to False
     scale: str
         Output scale for WAIC. Available options are:
 
@@ -1292,37 +1288,38 @@ def waic(data, pointwise=False, scale=None):
         - `negative_log` : -1 * log-score
         - `deviance` : -2 * log-score
 
-        A higher log-score (or a lower deviance) indicates a model with better predictive
-        accuracy.
+        A higher log-score (or a lower deviance or negative log_score) indicates a model with
+        better predictive accuracy.
 
     Returns
     -------
-    Series with the following rows:
-    waic: widely available information criterion
+    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    waic: approximated expected log pointwise predictive density (elpd)
     waic_se: standard error of waic
     p_waic: effective number parameters
     var_warn: bool
-        True if posterior variance of the log predictive
-        densities exceeds 0.4
-    waic_i: and array of the pointwise predictive accuracy, only if pointwise True
-    waic_scale: scale of the waic results
+        True if posterior variance of the log predictive densities exceeds 0.4
+    waic_i: xarray.DataArray with the pointwise predictive accuracy, only if pointwise=True
+    waic_scale: scale of the reported waic results
 
-        The returned object has a custom print method that overrides pd.Series method. It is
-        specific to expected log pointwise predictive density (elpd) information criteria.
+        The returned object has a custom print method that overrides pd.Series method.
 
     Examples
     --------
-    Calculate the WAIC of a model:
+    Calculate WAIC of a model:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: az.waic(data, pointwise=True)
+           ...: az.waic(data)
 
-    The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``deviance_loo`` stands for `deviance` scale,
-    the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    Calculate WAIC of a model and return the pointwise values:
+
+    .. ipython::
+
+        In [2]: data_waic = az.waic(data, pointwise=True)
+           ...: data_waic.waic_i
     """
     inference_data = convert_to_inference_data(data)
     log_likelihood = _get_log_likelihood(inference_data)
