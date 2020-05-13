@@ -34,13 +34,13 @@ def plot_elpd(
     show=None,
 ):
     """
-    Plot a scatter or hexbin matrix of the sampled parameters.
+    Plot pointwise elpd differences between two or more models
 
     Parameters
     ----------
     compare_dict : mapping, str -> ELPDData or InferenceData
-        A dictionary mapping the model name to the object containing its inference data or
-        the result of `loo`/`waic` functions.
+        A dictionary mapping the model name to the object containing inference data or the result
+        of `loo`/`waic` functions.
         Refer to az.convert_to_inference_data for details on possible dict items
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will have the same color,
@@ -60,12 +60,10 @@ def plot_elpd(
     threshold : float
         If some elpd difference is larger than `threshold * elpd.std()`, show its label. If
         `None`, no observations will be highlighted.
-    ax: axes, optional
-        Matplotlib axes or bokeh figures.
     ic : str, optional
         Information Criterion (PSIS-LOO `loo`, WAIC `waic`) used to compare models. Defaults to
-        ``rcParams["stats.information_criterion"]``. Only taken
-        into account when input is InferenceData.
+        ``rcParams["stats.information_criterion"]``.
+        Only taken into account when input is InferenceData.
     scale : str, optional
         scale argument passed to az.loo or az.waic, see their docs for details. Only taken
         into account when input is InferenceData.
