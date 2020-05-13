@@ -218,13 +218,7 @@ class InferenceData:
         return concat(self, other, copy=True, inplace=False)
 
     def sel(
-        self,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        chain_prior=None,
-        warmup=None,
-        **kwargs,
+        self, groups=None, filter_groups=None, inplace=False, chain_prior=None, **kwargs,
     ):
         """Perform an xarray selection on all groups.
 
@@ -246,8 +240,6 @@ class InferenceData:
         chain_prior: bool, optional, deprecated
             If ``False``, do not select prior related groups using ``chain`` dim.
             Otherwise, use selection on ``chain`` if present. Default=False
-        warmup: bool, optional, deprecated
-            If ``False``, do not select warmup groups. Default=False
         **kwargs: mapping
             It must be accepted by Dataset.sel().
 
@@ -289,16 +281,7 @@ class InferenceData:
             )
         else:
             chain_prior = False
-        if warmup is not None:
-            warnings.warn(
-                "warmup has been deprecated. Use groups argument and "
-                "rcParams['data.metagroups'] instead.",
-                DeprecationWarning,
-            )
         groups = self._group_names(groups, filter_groups)
-        if warmup:
-            extra_groups = self._group_names("warmup", filter_groups="like")
-            groups.extend([group for group in extra_groups if group not in groups])
 
         out = self if inplace else deepcopy(self)
         for group in groups:
@@ -334,7 +317,7 @@ class InferenceData:
         """
         all_groups = self._groups_all
         if groups is None:
-            groups = all_groups
+            return all_groups
         if isinstance(groups, str):
             groups = [groups]
         sel_groups = []
@@ -342,8 +325,8 @@ class InferenceData:
         for group in groups:
             if group[0] == "~":
                 sel_groups.extend(
-                    [f"~{item}" for item in metagroups[group] if item in all_groups]
-                    if group in metagroups
+                    [f"~{item}" for item in metagroups[group[1:]] if item in all_groups]
+                    if group[1:] in metagroups
                     else [group]
                 )
             else:
@@ -404,8 +387,6 @@ class InferenceData:
 
         out = self if inplace else deepcopy(self)
         for group in groups:
-            if group not in self._groups_all:
-                continue
             dataset = getattr(self, group)
             dataset = fun(dataset, *args, **kwargs)
             setattr(out, group, dataset)
@@ -470,8 +451,6 @@ class InferenceData:
 
         out = self if inplace else deepcopy(self)
         for group in groups:
-            if group not in self._groups_all:
-                continue
             dataset = getattr(self, group)
             dataset = method(dataset, *args, **kwargs)
             setattr(out, group, dataset)

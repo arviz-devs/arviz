@@ -18,7 +18,7 @@ def _var_names(var_names, data, filter_vars=None):
     Parameters
     ----------
     var_names: str, list, or None
-    data: xarray.Dataset
+    data : xarray.Dataset
         Posterior data in an xarray
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
@@ -64,11 +64,11 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
 
     Parameters
     ----------
-    subset: str, list, or None
-    whole_list: list
+    subset : str, list, or None
+    whole_list : list
         List from which to select a subset according to subset elements and
         filter_items value.
-    filter_items: {None, "like", "regex"}, optional
+    filter_items : {None, "like", "regex"}, optional
         If `None` (default), interpret `subset` as the exact elements in `whole_list`
         names. If "like", interpret `subset` as substrings of the elements in
         `whole_list`. If "regex", interpret `subset` as regular expressions to match
@@ -76,7 +76,9 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
 
     Returns
     -------
-    subset: list or None
+    list or None
+        A subset of ``whole_list`` fulfilling the requests imposed by ``subset``
+        and ``filter_items``.
     """
     if subset is not None:
 
