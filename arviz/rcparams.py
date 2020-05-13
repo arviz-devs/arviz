@@ -482,9 +482,11 @@ def read_rcfile(fname):
         return config
 
 
-def rc_params():
+def rc_params(ignore_files=False):
     """Read and validate arvizrc file."""
-    fname = get_arviz_rcfile()
+    fname = None
+    if not ignore_files:
+        fname = get_arviz_rcfile()
     defaults = RcParams([(key, default) for key, (default, _) in defaultParams.items()])
     if fname is not None:
         file_defaults = read_rcfile(fname)

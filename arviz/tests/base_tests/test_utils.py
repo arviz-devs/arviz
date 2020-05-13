@@ -7,7 +7,15 @@ import numpy as np
 import pytest
 
 from arviz.data.base import dict_to_dataset
-from ...utils import _var_names, _stack, one_de, two_de, expand_dims, flatten_inference_data_to_dict, _subset_list
+from ...utils import (
+    _var_names,
+    _stack,
+    one_de,
+    two_de,
+    expand_dims,
+    flatten_inference_data_to_dict,
+    _subset_list,
+)
 from ...data import load_arviz_data, from_dict
 
 
