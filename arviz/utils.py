@@ -99,6 +99,7 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
             item[1:] for item in subset if item.startswith("~") and item not in whole_list
         ]
         filter_items = str(filter_items).lower()
+        not_found = []
 
         if excluded_items:
             if filter_items in ("like", "regex"):
@@ -111,7 +112,14 @@ def _subset_list(subset, whole_list, filter_items=None, warn=True):
                         real_items = [
                             real_item for real_item in whole_list if re.search(pattern, real_item)
                         ]
+                    if not real_items:
+                        not_found.append(pattern)
                     excluded_items.extend(real_items)
+            not_found.extend([item for item in excluded_items if item not in whole_list])
+            if not_found:
+                warnings.warn(
+                    f"Items starting with ~: {not_found} have not been found and will be ignored"
+                )
             subset = [item for item in whole_list if item not in excluded_items]
 
         else:
