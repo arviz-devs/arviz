@@ -66,7 +66,8 @@ def plot_kde(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
-        Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot` or :meth:`bokeh:bokeh.plotting.figure.Figure.line` for a description of accepted values.
+        Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
+        or :meth:`bokeh:bokeh.plotting.figure.Figure.line` for a description of accepted values.
     fill_kwargs : dict
         Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
         Ignored for 2D KDE
