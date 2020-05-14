@@ -1,4 +1,4 @@
-"""Density Comparision plot."""
+"""Density Comparison plot."""
 
 from .plot_utils import (
     xarray_var_iter,
@@ -30,7 +30,9 @@ def plot_pp(
     """
     Plots that compare fitted and unfitted distributions.
 
-    The resulting plots will show the compared distributions (as KDEs) both on separate axes (particularly useful when one of them is substantially tighter than another), and plotted together, so three plots per distribution
+    The resulting plots will show the compared distributions both on
+    separate axes (particularly useful when one of them is substantially tighter
+    than another), and plotted together, so three plots per distribution
 
     Parameters
     ----------
@@ -57,13 +59,15 @@ def plot_pp(
     legend : bool
         Add legend to figure. By default True.
     ax: axes, optional
-        Matplotlib axes: The ax argument should have shape (nvars, 3), where the last column is for the combined before/after plots and columns 0 and 1 are for the before and after plots, respectively.
+        Matplotlib axes: The ax argument should have shape (nvars, 3), where the
+        last column is for the combined before/after plots and columns 0 and 1 are
+        for the before and after plots, respectively.
     prior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` for prior/predictive groups.
+        Additional keywords passed to `arviz.plot_dist` for prior/predictive groups.
     posterior_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` for posterior/predictive groups.
+        Additional keywords passed to `arviz.plot_dist` for posterior/predictive groups.
     observed_kwargs : dicts, optional
-        Additional keywords passed to `arviz.plot_kde` for observed_data group.
+        Additional keywords passed to `arviz.plot_dist` for observed_data group.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -74,7 +78,8 @@ def plot_pp(
 
     Returns
     -------
-    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3) where the last column is the combined plot and the first columns are the single plots.
+    axes : a numpy 2d array of matplotlib axes. Returned object will have shape (nvars, 3),
+    where the last column is the combined plot and the first columns are the single plots.
 
     Examples
     --------
@@ -146,22 +151,22 @@ def plot_pp(
     )
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        posterior_kwargs["plot_kwargs"].get("color", "C0")
-    )
+    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(posterior_kwargs["plot_kwargs"].get("color", "C0"))
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
+    posterior_kwargs.setdefault("hist_kwargs", dict())
+    posterior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        posterior_kwargs["plot_kwargs"].get("color", "C1")
-    )
+    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(prior_kwargs["plot_kwargs"].get("color", "C1"))
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
+    prior_kwargs.setdefault("hist_kwargs", dict())
+    prior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        posterior_kwargs["plot_kwargs"].get("color", "C2")
-    )
+    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(observed_kwargs["plot_kwargs"].get("color", "C2"))
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
+    observed_kwargs.setdefault("hist_kwargs", dict())
+    observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     ppplot_kwargs = dict(
         ax=ax,

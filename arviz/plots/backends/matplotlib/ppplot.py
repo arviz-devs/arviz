@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ...kdeplot import plot_kde
+from ...distplot import plot_dist
 from ...plot_utils import make_label
 from . import backend_kwarg_defaults
 
@@ -22,7 +22,6 @@ def plot_pp(
     backend_kwargs,
     show,
 ):
-    """Matplotlib pp plot."""
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
@@ -45,20 +44,14 @@ def plot_pp(
 
     for idx, plotter in enumerate(pp_plotters):
         group = groups[idx]
-        kwargs = (
-            prior_kwargs
-            if group.startswith("prior")
-            else posterior_kwargs
-            if group.startswith("posterior")
-            else observed_kwargs
-        )
+        kwargs = prior_kwargs if group.startswith("prior") else posterior_kwargs if group.startswith("posterior") else observed_kwargs
         for idx2, (var, selection, data,) in enumerate(plotter):
             label = make_label(var, selection)
             label = f"{group} {label}"
-            plot_kde(
+            plot_dist(
                 data, label=label if legend else None, ax=axes[idx2, idx], **kwargs,
             )
-            plot_kde(
+            plot_dist(
                 data, label=label if legend else None, ax=axes[idx2, -1], **kwargs,
             )
 
