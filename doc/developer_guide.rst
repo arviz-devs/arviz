@@ -60,11 +60,12 @@ Reference external libraries
 """"""""""""""""""""""""""""
 
 Sphinx is configured to ease referencing libraries ArviZ relies heavily on by
-using `intersphinx <https://docs.readthedocs.io/en/stable/guides/intersphinx.html>`_
-(see guidance on the reference about how to link to objects from external libraries).
-See ``intersphinx_mapping`` value in ``conf.py`` for the complete and up to
+using `intersphinx <https://docs.readthedocs.io/en/stable/guides/intersphinx.html>`_.
+See guidance on the reference about how to link to objects from external
+libraries and the value of ``intersphinx_mapping`` in ``conf.py`` for the complete and up to
 date list of libraries that can be referenced. Note that the ``:key:`` before
-the reference must match the kind of object that is being referenced. For
+the reference must match the kind of object that is being referenced, it
+generally will not be ``:ref:`` nor ``:doc:``. For
 example, for functions ``:func:`` has to be used and for class methods
 ``:meth:``. The complete list of keys can be found `here <https://github.com/sphinx-doc/sphinx/blob/685e3fdb49c42b464e09ec955e1033e2a8729fff/sphinx/domains/python.py#L845-L881>`_.
 
@@ -80,6 +81,9 @@ is an example on getting a reference from matplotlib docs::
   :py:method:`matplotlib.axes.Axes.plot_date`
   :std:doc:`api/_as_gen/matplotlib.axes.Axes.plot`
   :std:doc:`api/_as_gen/matplotlib.axes.Axes.plot_date`
+
+We can therefore link to matplotlib docs on ``Axes.plot`` from any docstring
+using ``:meth:`matplotlib.axes.Axes.plot```.
 
 Referencing ArviZ objects
 """""""""""""""""""""""""
