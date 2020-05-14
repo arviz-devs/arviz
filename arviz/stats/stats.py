@@ -135,6 +135,11 @@ def compare(
 
         In [1]: az.compare(compare_dict, ic="loo", method="stacking", scale="log")
 
+    See Also
+    --------
+    loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
+    waic : Compute the widely applicable information criterion.
+
     """
     names = list(dataset_dict.keys())
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
@@ -349,16 +354,16 @@ def hpd(
     skipna: bool
         If true ignores nan values when computing the hpd interval. Defaults to false.
     group: str, optional
-         Specifies which InferenceData group should be used to calculate hpd.
-         Defaults to 'posterior'
+        Specifies which InferenceData group should be used to calculate hpd.
+        Defaults to 'posterior'
     var_names: list, optional
         Names of variables to include in the hpd report. Prefix the variables by `~`
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
         (see `az.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
-         interpret var_names as substrings of the real variables names. If "regex",
-         interpret var_names as regular expressions on the real variables names. A la
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: mapping, optional
         Specifies the subset over to calculate hpd.

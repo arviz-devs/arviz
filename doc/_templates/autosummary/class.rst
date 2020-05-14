@@ -1,3 +1,5 @@
+.. _{{ objname }}:
+
 {{ fullname | escape | underline}}
 
 .. currentmodule:: {{ module }}
@@ -10,10 +12,10 @@
    .. rubric:: Methods
 
    .. autosummary::
+      :toctree:
+
    {% for item in methods %}
-      {% if item != "__init__" %}
-         {{ item }}
-      {% endif %}
+      {{ objname }}.{{ item }}
    {%- endfor %}
    {% endif %}
    {% endblock %}

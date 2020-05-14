@@ -224,7 +224,7 @@ class InferenceData:
         One example could be performing a burn in cut on the InferenceData object
         or discarding a chain. The selection is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted.
+        omitted. See :meth:`xarray.Dataset.sel <xarray:xarray.Dataset.sel>`
 
         Parameters
         ----------

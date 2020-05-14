@@ -162,9 +162,10 @@ def plot_kde(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_kde(mu_posterior, values2=tau_posterior,
-        ...             contour_kwargs={"levels":3}
-        ...             contourf_kwargs={"levels":3};
+        >>> az.plot_kde(
+        ...     mu_posterior, values2=tau_posterior,
+        ...     contour_kwargs={"levels":3}, contourf_kwargs={"levels":3}
+        ... );
 
     Plot 2d smooth KDE
 

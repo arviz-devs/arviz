@@ -446,7 +446,8 @@ def from_pymc3(
     Parameters
     ----------
     trace : pymc3.MultiTrace, optional
-        Trace generated from MCMC sampling.
+        Trace generated from MCMC sampling. Output of
+        :py:func:`pymc3:pymc3.sampling.sample`.
     prior : dict, optional
         Dictionary with the variable names as keys, and values numpy arrays
         containing prior and prior predictive samples.
