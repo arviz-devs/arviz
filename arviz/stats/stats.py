@@ -327,7 +327,11 @@ def hpd(
             max_modes=10,
             **kwargs,
     ):
+    """Pending deprecation. Please refer to hdi"""
 
+    warnings.warn(
+        ("hpd will be deprecated " "Please replace hdi"),
+    )
     return hdi(
         ary,
         hdi_prob=None,
