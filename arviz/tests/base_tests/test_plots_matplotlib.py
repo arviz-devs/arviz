@@ -93,12 +93,12 @@ def fig_ax():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hdi_prob": 0.94},
+        {"hdi_prob": 1},
         {"outline": True},
         {"colors": ["g", "b", "r", "y"]},
         {"colors": "k"},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
         {"transform": lambda x: x + 1},
     ],
@@ -131,7 +131,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2)
+        plot_density(obj, hdi_prob=2)
 
 
 @pytest.mark.parametrize(
@@ -720,6 +720,7 @@ def test_plot_rank(models, kwargs):
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
+        {"hdi_prob": "hide"},
         {"point_estimate": None},
         {"ref_val": 0},
         {"ref_val": None},

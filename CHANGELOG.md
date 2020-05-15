@@ -17,6 +17,8 @@
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
+* `hdi_prob` will not plot hdi if argument `hide` is passed. Previously `credible_interval` would omit HPD if `None` was passed  (#1176)
+* `stats.hdp` is pending deprecation. Replaced by `stats.hdi`
 
 ### Maintenance and fixes
 * Fixed `plot_pair` functionality for two variables with bokeh backend (#1179)
@@ -35,6 +37,7 @@
 * plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
+* `credible_interval` argument replaced by `hdi_prob`throughout with exception of `plot_loo_pit` (#1176)
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)

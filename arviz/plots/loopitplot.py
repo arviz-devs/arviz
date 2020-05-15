@@ -173,7 +173,7 @@ def plot_loo_pit(
     x_vals = None
 
     if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+        credible_interval = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")

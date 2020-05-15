@@ -13,7 +13,7 @@ from .plot_utils import (
     get_plotting_function,
 )
 from ..rcparams import rcParams
-from ..utils import _var_names
+from ..utils import _var_names, credible_interval_warning
 
 
 # pylint:disable-msg=too-many-function-args
@@ -23,11 +23,11 @@ def plot_density(
     data_labels=None,
     var_names=None,
     transform=None,
-    credible_interval=None,
+    hdi_prob=None,
     point_estimate="auto",
     colors="cycle",
     outline=True,
-    hpd_markers="",
+    hdi_markers="",
     shade=0.0,
     bw=4.5,
     figsize=None,
@@ -36,10 +36,11 @@ def plot_density(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
-    Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
+    Plots are truncated at their 100*(1-alpha)% hpd intervals. Plots are grouped per variable
     and colors assigned to models.
 
     Parameters
@@ -61,8 +62,8 @@ def plot_density(
         all the variables being plotted.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
-    credible_interval : float
-        Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
+    hdi_prob : float
+        hpd interval. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
@@ -73,7 +74,7 @@ def plot_density(
         models. Defaults to `cycle`.
     outline : bool
         Use a line to draw KDEs and histograms. Default to True
-    hpd_markers : str
+    hdi_markers : str
         A valid `matplotlib.markers` like 'v', used to indicate the limits of the hpd interval.
         Defaults to empty string (no marker).
     shade : Optional[float]
@@ -98,7 +99,8 @@ def plot_density(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
-
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
     Returns
     -------
     axes : matplotlib axes or bokeh figures
@@ -130,12 +132,12 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
 
-    Specify credible interval
+    Specify hpd interval
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_density([centered, non_centered], var_names=["mu"], credible_interval=.5)
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], hdi_prob=.5)
 
     Shade plots and/or remove outlines
 
@@ -151,6 +153,9 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
+    if credible_interval:
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
@@ -183,11 +188,11 @@ def plot_density(
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -238,9 +243,9 @@ def plot_density(
         xt_labelsize=xt_labelsize,
         linewidth=linewidth,
         markersize=markersize,
-        credible_interval=credible_interval,
+        hdi_prob=hdi_prob,
         point_estimate=point_estimate,
-        hpd_markers=hpd_markers,
+        hdi_markers=hdi_markers,
         outline=outline,
         shade=shade,
         n_data=n_data,

@@ -8,7 +8,7 @@ from .plot_utils import (
     get_plotting_function,
     matplotlib_kwarg_dealiaser,
 )
-from ..utils import _var_names
+from ..utils import _var_names, credible_interval_warning
 from ..rcparams import rcParams
 
 
@@ -19,7 +19,7 @@ def plot_violin(
     transform=None,
     quartiles=True,
     rug=False,
-    credible_interval=None,
+    hdi_prob=None,
     shade=0.35,
     bw=4.5,
     sharex=True,
@@ -32,6 +32,7 @@ def plot_violin(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None,
 ):
     """Plot posterior of traces as violin plot.
 
@@ -55,12 +56,12 @@ def plot_violin(
     transform: callable
         Function to transform data (defaults to None i.e. the identity function)
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the credible_interval*100%
+        Flag for plotting the interquartile range, in addition to the hdi_prob*100%
         intervals. Defaults to True
     rug: bool
         If True adds a jittered rugplot. Defaults to False.
-    credible_interval: float, optional
-        Credible intervals. Defaults to 0.94.
+    hdi_prob: float, optional
+        Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
@@ -92,6 +93,8 @@ def plot_violin(
         check the plotting method of the backend.
     show: bool, optional
         Call backend show function.
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -116,6 +119,9 @@ def plot_violin(
         >>> az.plot_violin(data, var_names="tau", transform=np.log)
 
     """
+    if credible_interval:
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+
     data = convert_to_dataset(data, group="posterior")
     if transform is not None:
         data = transform(data)
@@ -135,10 +141,10 @@ def plot_violin(
 
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
+        if not 1 >= hdi_prob > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
 
     violinplot_kwargs = dict(
@@ -154,7 +160,7 @@ def plot_violin(
         rug=rug,
         rug_kwargs=rug_kwargs,
         bw=bw,
-        credible_interval=credible_interval,
+        hdi_prob=hdi_prob,
         linewidth=linewidth,
         ax_labelsize=ax_labelsize,
         xt_labelsize=xt_labelsize,

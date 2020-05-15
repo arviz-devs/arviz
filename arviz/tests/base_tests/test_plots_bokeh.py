@@ -76,10 +76,10 @@ def continuous_model():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hdi_prob": 0.94},
+        {"hdi_prob": 1},
         {"outline": True},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
     ],
 )
@@ -117,7 +117,7 @@ def test_plot_density_bad_kwargs(models):
         )
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2, backend="bokeh", show=False)
+        plot_density(obj, hdi_prob=2, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -895,6 +895,7 @@ def test_plot_ppc_ax(models, kind):
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
         {"point_estimate": None},
+        {"hdi_prob": "hide"},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},

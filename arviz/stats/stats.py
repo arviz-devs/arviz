@@ -24,7 +24,7 @@ from .stats_utils import (
     get_log_likelihood as _get_log_likelihood,
 )
 from ..numeric_utils import _fast_kde, histogram, get_bins
-from ..utils import _var_names, Numba, _numba_var, get_coords
+from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
 from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ _log = logging.getLogger(__name__)
 __all__ = [
     "apply_test_function",
     "compare",
+    "hdi",
     "hpd",
     "loo",
     "loo_pit",
@@ -314,8 +315,40 @@ def _ic_matrix(ics, ic_i):
 
 
 def hpd(
+    # pylint: disable=unused-argument
     ary,
-    credible_interval=None,
+    hdi_prob=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    group="posterior",
+    var_names=None,
+    filter_vars=None,
+    coords=None,
+    max_modes=10,
+    **kwargs,
+):
+    """Pending deprecation. Please refer to hdi."""
+    # pylint: enable=unused-argument
+    warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
+    return hdi(
+        ary,
+        hdi_prob=None,
+        circular=False,
+        multimodal=False,
+        skipna=False,
+        group="posterior",
+        var_names=None,
+        filter_vars=None,
+        coords=None,
+        max_modes=10,
+        **kwargs,
+    )
+
+
+def hdi(
+    ary,
+    hdi_prob=None,
     circular=False,
     multimodal=False,
     skipna=False,
@@ -327,9 +360,9 @@ def hpd(
     **kwargs,
 ):
     """
-    Calculate highest posterior density (HPD) of array for given credible_interval.
+    Calculate highest density interval (HDI) of array for given percentage.
 
-    The HPD is the minimum width Bayesian credible interval (BCI).
+    The HDI is the minimum width Bayesian credible interval (BCI).
 
     Parameters
     ----------
@@ -337,22 +370,22 @@ def hpd(
         object containing posterior samples.
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
-    credible_interval: float, optional
-        Credible interval to compute. Defaults to 0.94.
+    hdi_prob: float, optional
+        HDI prob for which interval will be computed. Defaults to 0.94.
     circular: bool, optional
-        Whether to compute the hpd taking into account `x` is a circular variable
+        Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
     multimodal: bool
-        If true it may compute more than one hpd interval if the distribution is multimodal and the
+        If true it may compute more than one hdi interval if the distribution is multimodal and the
         modes are well separated.
     skipna: bool
-        If true ignores nan values when computing the hpd interval. Defaults to false.
+        If true ignores nan values when computing the hdi interval. Defaults to false.
     group: str, optional
          Specifies which InferenceData group should be used to calculate hpd.
          Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hpd report. Prefix the variables by `~`
+        Names of variables to include in the hdi report. Prefix the variables by `~`
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
         (see `az.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
@@ -361,7 +394,7 @@ def hpd(
          interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: mapping, optional
-        Specifies the subset over to calculate hpd.
+        Specifies the subset over to calculate hdi.
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
     kwargs: dict, optional
@@ -375,67 +408,67 @@ def hpd(
 
     Examples
     --------
-    Calculate the hpd of a Normal random variable:
+    Calculate the hdi of a Normal random variable:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: import numpy as np
            ...: data = np.random.normal(size=2000)
-           ...: az.hpd(data, credible_interval=.68)
+           ...: az.hdi(data, hdi_prob=.68)
 
-    Calculate the hpd of a dataset:
+    Calculate the hdi of a dataset:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data('centered_eight')
-           ...: az.hpd(data)
+           ...: az.hdi(data)
 
-    We can also calculate the hpd of some of the variables of dataset:
+    We can also calculate the hdi of some of the variables of dataset:
 
     .. ipython::
 
-        In [1]: az.hpd(data, var_names=["mu", "theta"])
+        In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    If we want to calculate the hpd over specified dimension of dataset,
+    If we want to calculate the hdi over specified dimension of dataset,
     we can pass `input_core_dims` by kwargs:
 
     .. ipython::
 
-        In [1]: az.hpd(data, input_core_dims = [["chain"]])
+        In [1]: az.hdi(data, input_core_dims = [["chain"]])
 
-    We can also calculate the hpd over a particular selection over all groups:
+    We can also calculate the hdi over a particular selection over all groups:
 
     .. ipython::
 
-        In [1]: az.hpd(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
+        In [1]: az.hdi(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
 
     """
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     func_kwargs = {
-        "credible_interval": credible_interval,
+        "hdi_prob": hdi_prob,
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
+    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
     if not multimodal:
         func_kwargs["circular"] = circular
     else:
         func_kwargs["max_modes"] = max_modes
 
-    func = _hpd_multimodal if multimodal else _hpd
+    func = _hdi_multimodal if multimodal else _hdi
 
     isarray = isinstance(ary, np.ndarray)
     if isarray and ary.ndim <= 1:
         func_kwargs.pop("out_shape")
-        hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
-        return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
+        hdi_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
+        return hdi_data[~np.isnan(hdi_data).all(axis=1), :] if multimodal else hdi_data
 
     if isarray and ary.ndim == 2:
         kwargs.setdefault("input_core_dims", [["chain"]])
@@ -446,13 +479,13 @@ def hpd(
     var_names = _var_names(var_names, ary, filter_vars)
     ary = ary[var_names] if var_names else ary
 
-    hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
-    hpd_data = hpd_data.dropna("mode", how="all") if multimodal else hpd_data
-    return hpd_data.x.values if isarray else hpd_data
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
+    return hdi_data.x.values if isarray else hdi_data
 
 
-def _hpd(ary, credible_interval, circular, skipna):
-    """Compute hpd over the flattened array."""
+def _hdi(ary, hdi_prob, circular, skipna):
+    """Compute hpi over the flattened array."""
     ary = ary.flatten()
     if skipna:
         nans = np.isnan(ary)
@@ -466,7 +499,7 @@ def _hpd(ary, credible_interval, circular, skipna):
         ary = np.arctan2(np.sin(ary), np.cos(ary))
 
     ary = np.sort(ary)
-    interval_idx_inc = int(np.floor(credible_interval * n))
+    interval_idx_inc = int(np.floor(hdi_prob * n))
     n_intervals = n - interval_idx_inc
     interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
@@ -483,13 +516,13 @@ def _hpd(ary, credible_interval, circular, skipna):
         hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
-    hpd_intervals = np.array([hdi_min, hdi_max])
+    hdi_interval = np.array([hdi_min, hdi_max])
 
-    return hpd_intervals
+    return hdi_interval
 
 
-def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
-    """Compute hpd if the distribution is multimodal."""
+def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
+    """Compute hdi if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
         ary = ary[~np.isnan(ary)]
@@ -507,12 +540,12 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
     density *= dx
 
     idx = np.argsort(-density)
-    intervals = bins[idx][density[idx].cumsum() <= credible_interval]
+    intervals = bins[idx][density[idx].cumsum() <= hdi_prob]
     intervals.sort()
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    hpd_intervals = np.full((max_modes, 2), np.nan)
+    hdi_intervals = np.full((max_modes, 2), np.nan)
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
@@ -520,11 +553,11 @@ def _hpd_multimodal(ary, credible_interval, skipna, max_modes):
             )
             break
         if interval.size == 0:
-            hpd_intervals[i] = np.asarray([bins[0], bins[0]])
+            hdi_intervals[i] = np.asarray([bins[0], bins[0]])
         else:
-            hpd_intervals[i] = np.asarray([interval[0], interval[-1]])
+            hdi_intervals[i] = np.asarray([interval[0], interval[-1]])
 
-    return np.array(hpd_intervals)
+    return np.array(hdi_intervals)
 
 
 def loo(data, pointwise=False, reff=None, scale=None):
@@ -940,12 +973,13 @@ def summary(
     include_circ=None,
     stat_funcs=None,
     extend=True,
-    credible_interval=None,
+    hdi_prob=None,
     order="C",
     index_origin=None,
     skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
+    credible_interval=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
@@ -966,7 +1000,7 @@ def summary(
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
-        Whether to include the `stats`: `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the `diagnostics`:
+        Whether to include the `stats`: `mean`, `sd`, `hdi_3%`, `hdi_97%`, or the `diagnostics`:
         `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
         them.
     round_to: int
@@ -984,8 +1018,8 @@ def summary(
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
-    credible_interval: float, optional
-        Credible interval to plot. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
+    hdi_prob: float, optional
+        hdi interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
@@ -999,13 +1033,15 @@ def summary(
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
 
     Returns
     -------
     pandas.DataFrame or xarray.Dataset
         Return type dicated by `fmt` argument.
         Return value will contain summary statistics for each variable. Default statistics are:
-        `mean`, `sd`, `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
+        `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
@@ -1058,6 +1094,9 @@ def summary(
            ...: )
 
     """
+    if credible_interval:
+        hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
+
     extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
         extra_args["coords"] = coords
@@ -1065,11 +1104,11 @@ def summary(
         extra_args["dims"] = dims
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior, filter_vars)
     posterior = posterior if var_names is None else posterior[var_names]
@@ -1084,7 +1123,7 @@ def summary(
             "Invalid order: '{}'. Unpacking options are: {}".format(order, unpack_order_group)
         )
 
-    alpha = 1 - credible_interval
+    alpha = 1 - hdi_prob
 
     extra_metrics = []
     extra_metric_names = []
@@ -1112,10 +1151,10 @@ def summary(
 
         sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hpd_lower, hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
+        hdi_lower, hdi_higher = xr.apply_ufunc(
+            _make_ufunc(hdi, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, multimodal=False, skipna=skipna),
+            kwargs=dict(hdi_prob=hdi_prob, multimodal=False, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
@@ -1150,10 +1189,10 @@ def summary(
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
+        circ_hdi_lower, circ_hdi_higher = xr.apply_ufunc(
+            _make_ufunc(hdi, n_output=2),
             posterior,
-            kwargs=dict(credible_interval=credible_interval, circular=True, skipna=skipna),
+            kwargs=dict(hdi_prob=hdi_prob, circular=True, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
@@ -1173,8 +1212,8 @@ def summary(
         metrics_names_ = (
             "mean",
             "sd",
-            "hpd_{:g}%".format(100 * alpha / 2),
-            "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+            "hdi_{:g}%".format(100 * alpha / 2),
+            "hdi_{:g}%".format(100 * (1 - alpha / 2)),
             "mcse_mean",
             "mcse_sd",
             "ess_mean",
@@ -1187,8 +1226,8 @@ def summary(
             metrics_ = (
                 mean,
                 sd,
-                hpd_lower,
-                hpd_higher,
+                hdi_lower,
+                hdi_higher,
                 mcse_mean,
                 mcse_sd,
                 ess_mean,
@@ -1198,7 +1237,7 @@ def summary(
                 r_hat,
             )
         elif kind == "stats":
-            metrics_ = (mean, sd, hpd_lower, hpd_higher)
+            metrics_ = (mean, sd, hdi_lower, hdi_higher)
             metrics_names_ = metrics_names_[:4]
         elif kind == "diagnostics":
             metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
@@ -1206,13 +1245,13 @@ def summary(
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
     if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
+        metrics.extend((circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse))
         metric_names.extend(
             (
                 "circular_mean",
                 "circular_sd",
-                "circular_hpd_{:g}%".format(100 * alpha / 2),
-                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "circular_hdi_{:g}%".format(100 * alpha / 2),
+                "circular_hdi_{:g}%".format(100 * (1 - alpha / 2)),
                 "circular_mcse",
             )
         )

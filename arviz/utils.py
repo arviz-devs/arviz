@@ -601,3 +601,22 @@ def get_coords(data, coords):
         except KeyError as err:
             raise KeyError("Error in data[{}]: {}".format(idx, err))
     return data_subset
+
+
+def credible_interval_warning(credible_interval, hdi_prob):
+    """Replace credible_interval with hdi_prob and to warns of be deprecation."""
+    warnings.warn(
+        ("Keyword argument credible_interval has been deprecated " "Please replace with hdi_prob"),
+    )
+
+    if isinstance(credible_interval, str) and credible_interval == "auto":
+        raise Exception("Argument value 'auto' has been renamed to 'hide'")
+
+    if hdi_prob:
+        raise Exception(
+            "Both 'credible_interval' and 'hdi_prob' are in "
+            "keyword arguments. Please remove 'credible_interval'"
+        )
+
+    hdi_prob = credible_interval
+    return hdi_prob
