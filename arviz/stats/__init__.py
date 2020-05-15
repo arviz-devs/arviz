@@ -11,6 +11,7 @@ __all__ = [
     "bfmi",
     "compare",
     "hdi",
+    "hpd",
     "loo",
     "loo_pit",
     "psislw",

@@ -33,6 +33,7 @@ __all__ = [
     "apply_test_function",
     "compare",
     "hdi",
+    "hpd",
     "loo",
     "loo_pit",
     "psislw",
@@ -313,9 +314,38 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
+def hpd(
+            ary,
+            hdi_prob=None,
+            circular=False,
+            multimodal=False,
+            skipna=False,
+            group="posterior",
+            var_names=None,
+            filter_vars=None,
+            coords=None,
+            max_modes=10,
+            **kwargs,
+    ):
+
+    return hdi(
+        ary,
+        hdi_prob=None,
+        circular=False,
+        multimodal=False,
+        skipna=False,
+        group="posterior",
+        var_names=None,
+        filter_vars=None,
+        coords=None,
+        max_modes=10,
+        **kwargs,
+    )
+
+
 def hdi(
-    ary,
-    hdi_prob=None,
+        ary,
+        hdi_prob=None,
     circular=False,
     multimodal=False,
     skipna=False,
