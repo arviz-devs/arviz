@@ -27,7 +27,7 @@ def plot_density(
     point_estimate="auto",
     colors="cycle",
     outline=True,
-    hpd_markers="",
+    hdi_markers="",
     shade=0.0,
     bw=4.5,
     figsize=None,
@@ -74,7 +74,7 @@ def plot_density(
         models. Defaults to `cycle`.
     outline : bool
         Use a line to draw KDEs and histograms. Default to True
-    hpd_markers : str
+    hdi_markers : str
         A valid `matplotlib.markers` like 'v', used to indicate the limits of the hpd interval.
         Defaults to empty string (no marker).
     shade : Optional[float]
@@ -245,7 +245,7 @@ def plot_density(
         markersize=markersize,
         hdi_prob=hdi_prob,
         point_estimate=point_estimate,
-        hpd_markers=hpd_markers,
+        hdi_markers=hdi_markers,
         outline=outline,
         shade=shade,
         n_data=n_data,
