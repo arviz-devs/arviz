@@ -79,7 +79,7 @@ def continuous_model():
         {"hdi_prob": 0.94},
         {"hdi_prob": 1},
         {"outline": True},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
     ],
 )

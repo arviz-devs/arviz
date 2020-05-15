@@ -98,7 +98,7 @@ def fig_ax():
         {"outline": True},
         {"colors": ["g", "b", "r", "y"]},
         {"colors": "k"},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
         {"transform": lambda x: x + 1},
     ],
