@@ -315,23 +315,21 @@ def _ic_matrix(ics, ic_i):
 
 
 def hpd(
-            ary,
-            hdi_prob=None,
-            circular=False,
-            multimodal=False,
-            skipna=False,
-            group="posterior",
-            var_names=None,
-            filter_vars=None,
-            coords=None,
-            max_modes=10,
-            **kwargs,
-    ):
+    ary,
+    hdi_prob=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    group="posterior",
+    var_names=None,
+    filter_vars=None,
+    coords=None,
+    max_modes=10,
+    **kwargs,
+):
     """Pending deprecation. Please refer to hdi"""
 
-    warnings.warn(
-        ("hpd will be deprecated " "Please replace hdi"),
-    )
+    warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
     return hdi(
         ary,
         hdi_prob=None,
@@ -348,8 +346,8 @@ def hpd(
 
 
 def hdi(
-        ary,
-        hdi_prob=None,
+    ary,
+    hdi_prob=None,
     circular=False,
     multimodal=False,
     skipna=False,
