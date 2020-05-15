@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ...plot_utils import make_label, _create_axes_grid
 
@@ -58,7 +58,7 @@ def plot_violin(
             ax_.plot(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
-        hdi_probs = hpd(val, hdi_prob, multimodal=False)
+        hdi_probs = hdi(val, hdi_prob, multimodal=False)
 
         if quartiles:
             ax_.plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")

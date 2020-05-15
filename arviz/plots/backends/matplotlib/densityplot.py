@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
@@ -133,7 +133,7 @@ def _d_helper(
     """
     if vec.dtype.kind == "f":
         if hdi_prob != 1:
-            hpd_ = hpd(vec, hdi_prob, multimodal=False)
+            hpd_ = hdi(vec, hdi_prob, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
@@ -153,7 +153,7 @@ def _d_helper(
             ax.fill_between(x, density, color=color, alpha=shade)
 
     else:
-        xmin, xmax = hpd(vec, hdi_prob, multimodal=False)
+        xmin, xmax = hdi(vec, hdi_prob, multimodal=False)
         bins = get_bins(vec)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype="step", align="left")

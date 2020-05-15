@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
@@ -198,7 +198,7 @@ def _plot_posterior_op(
     def display_hpd():
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hdi_probs = hpd(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
+        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
 
         for hpdi in np.atleast_2d(hdi_probs):
             ax.plot(

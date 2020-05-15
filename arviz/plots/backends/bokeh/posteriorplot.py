@@ -15,7 +15,7 @@ from ...plot_utils import (
     round_num,
     calculate_point_estimate,
 )
-from ....stats import hpd
+from ....stats import hdi
 from ....numeric_utils import get_bins
 
 
@@ -198,7 +198,7 @@ def _plot_posterior_op(
     def display_hpd(max_data):
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hdi_probs = hpd(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
+        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
 
         for hpdi in np.atleast_2d(hdi_probs):
             ax.line(

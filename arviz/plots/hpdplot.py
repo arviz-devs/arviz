@@ -100,7 +100,7 @@ def plot_hpd(
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    hpd_ = hpd(y, hdi_prob=hdi_prob, circular=circular, multimodal=False)
+    hdi_ = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:
@@ -109,12 +109,12 @@ def plot_hpd(
         smooth_kwargs.setdefault("polyorder", 2)
         x_data = np.linspace(x.min(), x.max(), 200)
         x_data[0] = (x_data[0] + x_data[1]) / 2
-        hpd_interp = griddata(x, hpd_, x_data)
+        hpd_interp = griddata(x, hdi_, x_data)
         y_data = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
     else:
         idx = np.argsort(x)
         x_data = x[idx]
-        y_data = hpd_[idx]
+        y_data = hdi_[idx]
 
     hpdplot_kwargs = dict(
         ax=ax,

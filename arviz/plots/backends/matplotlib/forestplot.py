@@ -7,7 +7,7 @@ from matplotlib.colors import to_rgba
 import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
@@ -491,7 +491,7 @@ class VarHandler:
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), hdi_prob, multimodal=False)
+            ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):
