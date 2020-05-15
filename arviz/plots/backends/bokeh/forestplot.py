@@ -14,7 +14,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
-from ....stats import hpd
+from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ....utils import conditional_jit
@@ -548,7 +548,7 @@ class VarHandler:
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), hdi_prob, multimodal=False)
+            ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):
