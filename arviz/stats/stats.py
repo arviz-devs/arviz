@@ -315,6 +315,7 @@ def _ic_matrix(ics, ic_i):
 
 
 def hpd(
+    # pylint: disable=unused-argument
     ary,
     hdi_prob=None,
     circular=False,
@@ -329,6 +330,7 @@ def hpd(
 ):
     """Pending deprecation. Please refer to hdi"""
 
+    # pylint: enable=unused-argument
     warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
     return hdi(
         ary,
