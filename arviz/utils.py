@@ -606,10 +606,7 @@ def get_coords(data, coords):
 def credible_interval_warning(credible_interval, hdi_prob):
     """Replace credible_interval with hdi_prob and to warns of be deprecation."""
     warnings.warn(
-        (
-            "Keyword argument credible_interval has been deprecated "
-            "Please replace with hdi_prob"
-        ),
+        ("Keyword argument credible_interval has been deprecated " "Please replace with hdi_prob"),
     )
 
     if isinstance(credible_interval, str) and credible_interval == "auto":
