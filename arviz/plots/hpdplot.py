@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
-from ..stats import hpd
+from ..stats import hdi
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 from ..utils import credible_interval_warning
@@ -26,7 +26,7 @@ def plot_hpd(
     credible_interval=None,
 ):
     r"""
-    Plot hpd intervals for regression data.
+    Plot hdi intervals for regression data.
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def plot_hpd(
     y : array-like
         values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
     hdi_prob : float, optional
-        HPD interval to plot. Defaults to 0.94.
+        HDI interval to plot. Defaults to 0.94.
     color : str
         Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
     circular : bool, optional

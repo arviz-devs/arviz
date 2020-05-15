@@ -10,7 +10,7 @@ __all__ = [
     "apply_test_function",
     "bfmi",
     "compare",
-    "hpd",
+    "hdi",
     "loo",
     "loo_pit",
     "psislw",

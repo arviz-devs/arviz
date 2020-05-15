@@ -13,7 +13,7 @@ from ...stats import (
     apply_test_function,
     compare,
     ess,
-    hpd,
+    hdi,
     loo,
     loo_pit,
     psislw,
@@ -39,83 +39,83 @@ def non_centered_eight():
     return non_centered_eight
 
 
-def test_hpd():
+def test_hdp():
     normal_sample = np.random.randn(5000000)
-    interval = hpd(normal_sample)
+    interval = hdi(normal_sample)
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
-def test_hpd_2darray():
+def test_hdp_2darray():
     normal_sample = np.random.randn(12000, 5)
-    result = hpd(normal_sample)
+    result = hdi(normal_sample)
     assert result.shape == (5, 2)
 
 
-def test_hpd_multidimension():
+def test_hdi_multidimension():
     normal_sample = np.random.randn(12000, 10, 3)
-    result = hpd(normal_sample)
+    result = hdi(normal_sample)
     assert result.shape == (3, 2)
 
 
-def test_hpd_idata(centered_eight):
+def test_hdi_idata(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data)
+    result = hdi(data)
     assert isinstance(result, Dataset)
-    assert result.dims == {"school": 8, "hpd": 2}
+    assert dict(result.dims) == {"school": 8, "hpd": 2}
 
-    result = hpd(data, input_core_dims=[["chain"]])
+    result = hdi(data, input_core_dims=[["chain"]])
     assert isinstance(result, Dataset)
     assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
 
 
-def test_hpd_idata_varnames(centered_eight):
+def test_hdi_idata_varnames(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, var_names=["mu", "theta"])
+    result = hdi(data, var_names=["mu", "theta"])
     assert isinstance(result, Dataset)
     assert result.dims == {"hpd": 2, "school": 8}
     assert list(result.data_vars.keys()) == ["mu", "theta"]
 
 
-def test_hpd_idata_group(centered_eight):
-    result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
-    result_prior = hpd(centered_eight, group="prior", var_names="mu")
+def test_hdi_idata_group(centered_eight):
+    result_posterior = hdi(centered_eight, group="posterior", var_names="mu")
+    result_prior = hdi(centered_eight, group="prior", var_names="mu")
     assert result_prior.dims == {"hpd": 2}
     range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
     range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
     assert range_posterior < range_prior
 
 
-def test_hpd_coords(centered_eight):
+def test_hdi_coords(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
+    result = hdi(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
     assert_array_equal(result.coords["chain"], [0, 1, 3])
 
 
-def test_hpd_multimodal():
+def test_hdi_multimodal():
     normal_sample = np.concatenate(
         (np.random.normal(-4, 1, 2500000), np.random.normal(2, 0.5, 2500000))
     )
-    intervals = hpd(normal_sample, multimodal=True)
+    intervals = hdi(normal_sample, multimodal=True)
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
 
-def test_hpd_circular():
+def test_hdi_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
-    interval = hpd(normal_sample, circular=True)
+    interval = hdi(normal_sample, circular=True)
     assert_array_almost_equal(interval, [0.6, -0.6], 1)
 
 
-def test_hpd_bad_ci():
+def test_hdi_bad_ci():
     normal_sample = np.random.randn(10)
     with pytest.raises(ValueError):
-        hpd(normal_sample, hpd_interval=2)
+        hdi(normal_sample, hdi_prob=2)
 
 
-def test_hpd_skipna():
+def test_hdi_skipna():
     normal_sample = np.random.randn(500)
-    interval = hpd(normal_sample[10:])
+    interval = hdi(normal_sample[10:])
     normal_sample[:10] = np.nan
-    interval_ = hpd(normal_sample, skipna=True)
+    interval_ = hdi(normal_sample, skipna=True)
     assert_array_almost_equal(interval, interval_)
 
 

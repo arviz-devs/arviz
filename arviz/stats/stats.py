@@ -32,7 +32,7 @@ _log = logging.getLogger(__name__)
 __all__ = [
     "apply_test_function",
     "compare",
-    "hpd",
+    "hdi",
     "loo",
     "loo_pit",
     "psislw",
@@ -313,7 +313,7 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(
+def hdi(
     ary,
     hdi_prob=None,
     circular=False,
@@ -327,9 +327,9 @@ def hpd(
     **kwargs,
 ):
     """
-    Calculate highest posterior density (HPD) of array for given percentage.
+    Calculate highest density interval (HDI) of array for given percentage.
 
-    The HPD is the minimum width Bayesian credible interval (BCI).
+    The HDI is the minimum width Bayesian credible interval (BCI).
 
     Parameters
     ----------
@@ -338,7 +338,7 @@ def hpd(
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
     hdi_prob: float, optional
-        HPD interval to compute. Defaults to 0.94.
+        HDI prob for which interval will be computed. Defaults to 0.94.
     circular: bool, optional
         Whether to compute the hpd taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
@@ -429,7 +429,7 @@ def hpd(
     else:
         func_kwargs["max_modes"] = max_modes
 
-    func = _hpd_multimodal if multimodal else _hpd
+    func = _hdi_multimodal if multimodal else _hdi
 
     isarray = isinstance(ary, np.ndarray)
     if isarray and ary.ndim <= 1:
@@ -451,8 +451,8 @@ def hpd(
     return hpd_data.x.values if isarray else hpd_data
 
 
-def _hpd(ary, hdi_prob, circular, skipna):
-    """Compute hpd over the flattened array."""
+def _hdi(ary, hdi_prob, circular, skipna):
+    """Compute hpi over the flattened array."""
     ary = ary.flatten()
     if skipna:
         nans = np.isnan(ary)
@@ -488,7 +488,7 @@ def _hpd(ary, hdi_prob, circular, skipna):
     return hdi_interval
 
 
-def _hpd_multimodal(ary, hdi_prob, skipna, max_modes):
+def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     """Compute hpd if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
@@ -1121,7 +1121,7 @@ def summary(
         sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
         hpd_lower, hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
+            _make_ufunc(hdi, n_output=2),
             posterior,
             kwargs=dict(hdi_prob=hdi_prob, multimodal=False, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
@@ -1159,7 +1159,7 @@ def summary(
         )
 
         circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
+            _make_ufunc(hdi, n_output=2),
             posterior,
             kwargs=dict(hdi_prob=hdi_prob, circular=True, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
@@ -1219,8 +1219,8 @@ def summary(
             (
                 "circular_mean",
                 "circular_sd",
-                "circular_hpd_{:g}%".format(100 * alpha / 2),
-                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
+                "circular_hdi_{:g}%".format(100 * alpha / 2),
+                "circular_hdi_{:g}%".format(100 * (1 - alpha / 2)),
                 "circular_mcse",
             )
         )
