@@ -113,7 +113,7 @@ def plot_ess(
     --------
     Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
     that there are enough samples for all the explored regions of parameter space. Checking
-    local and quantile ESS is particularly relevant when working with hpd intervals as
+    local and quantile ESS is particularly relevant when working with hdi intervals as
     opposed to ESS bulk, which is relevant for point estimates.
 
     .. plot::

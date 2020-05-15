@@ -29,7 +29,7 @@ def plot_density(
     markersize,
     hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     data_labels,
@@ -84,7 +84,7 @@ def plot_density(
                 markersize,
                 hdi_prob,
                 point_estimate,
-                hpd_markers,
+                hdi_markers,
                 outline,
                 shade,
                 axis_map[label],
@@ -111,7 +111,7 @@ def _d_helper(
     markersize,
     hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     ax,
@@ -122,8 +122,8 @@ def _d_helper(
 
     if vec.dtype.kind == "f":
         if hdi_prob != 1:
-            hpd_ = hdi(vec, hdi_prob, multimodal=False)
-            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+            hdi_ = hdi(vec, hdi_prob, multimodal=False)
+            new_vec = vec[(vec >= hdi_[0]) & (vec <= hdi_[1])]
         else:
             new_vec = vec
 
@@ -207,7 +207,7 @@ def _d_helper(
                 )
             )
 
-    if hpd_markers:
+    if hdi_markers:
         plotted.append(ax.diamond(xmin, 0, line_color="black", fill_color=color, size=markersize))
         plotted.append(ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize))
 

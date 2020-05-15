@@ -374,19 +374,19 @@ def hdi(
     hdi_prob: float, optional
         HDI prob for which interval will be computed. Defaults to 0.94.
     circular: bool, optional
-        Whether to compute the hpd taking into account `x` is a circular variable
+        Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
     multimodal: bool
-        If true it may compute more than one hpd interval if the distribution is multimodal and the
+        If true it may compute more than one hdi interval if the distribution is multimodal and the
         modes are well separated.
     skipna: bool
-        If true ignores nan values when computing the hpd interval. Defaults to false.
+        If true ignores nan values when computing the hdi interval. Defaults to false.
     group: str, optional
          Specifies which InferenceData group should be used to calculate hpd.
          Defaults to 'posterior'
     var_names: list, optional
-        Names of variables to include in the hpd report. Prefix the variables by `~`
+        Names of variables to include in the hdi report. Prefix the variables by `~`
         when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
         (see `az.summary` for more details).
     filter_vars: {None, "like", "regex"}, optional, default=None
@@ -395,7 +395,7 @@ def hdi(
          interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
     coords: mapping, optional
-        Specifies the subset over to calculate hpd.
+        Specifies the subset over to calculate hdi.
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
     kwargs: dict, optional
@@ -409,41 +409,41 @@ def hdi(
 
     Examples
     --------
-    Calculate the hpd of a Normal random variable:
+    Calculate the hdi of a Normal random variable:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: import numpy as np
            ...: data = np.random.normal(size=2000)
-           ...: az.hpd(data, hdi_prob=.68)
+           ...: az.hdi(data, hdi_prob=.68)
 
-    Calculate the hpd of a dataset:
+    Calculate the hdi of a dataset:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data('centered_eight')
-           ...: az.hpd(data)
+           ...: az.hdi(data)
 
-    We can also calculate the hpd of some of the variables of dataset:
+    We can also calculate the hdi of some of the variables of dataset:
 
     .. ipython::
 
-        In [1]: az.hpd(data, var_names=["mu", "theta"])
+        In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    If we want to calculate the hpd over specified dimension of dataset,
+    If we want to calculate the hdi over specified dimension of dataset,
     we can pass `input_core_dims` by kwargs:
 
     .. ipython::
 
-        In [1]: az.hpd(data, input_core_dims = [["chain"]])
+        In [1]: az.hdi(data, input_core_dims = [["chain"]])
 
-    We can also calculate the hpd over a particular selection over all groups:
+    We can also calculate the hdi over a particular selection over all groups:
 
     .. ipython::
 
-        In [1]: az.hpd(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
+        In [1]: az.hdi(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
 
     """
     if hdi_prob is None:
@@ -457,7 +457,7 @@ def hdi(
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
-    kwargs.setdefault("output_core_dims", [["hpd", "mode"] if multimodal else ["hpd"]])
+    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
     if not multimodal:
         func_kwargs["circular"] = circular
     else:
@@ -468,8 +468,8 @@ def hdi(
     isarray = isinstance(ary, np.ndarray)
     if isarray and ary.ndim <= 1:
         func_kwargs.pop("out_shape")
-        hpd_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
-        return hpd_data[~np.isnan(hpd_data).all(axis=1), :] if multimodal else hpd_data
+        hdi_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
+        return hdi_data[~np.isnan(hdi_data).all(axis=1), :] if multimodal else hdi_data
 
     if isarray and ary.ndim == 2:
         kwargs.setdefault("input_core_dims", [["chain"]])
@@ -480,9 +480,9 @@ def hdi(
     var_names = _var_names(var_names, ary, filter_vars)
     ary = ary[var_names] if var_names else ary
 
-    hpd_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
-    hpd_data = hpd_data.dropna("mode", how="all") if multimodal else hpd_data
-    return hpd_data.x.values if isarray else hpd_data
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
+    return hdi_data.x.values if isarray else hdi_data
 
 
 def _hdi(ary, hdi_prob, circular, skipna):
@@ -523,7 +523,7 @@ def _hdi(ary, hdi_prob, circular, skipna):
 
 
 def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
-    """Compute hpd if the distribution is multimodal."""
+    """Compute hdi if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
         ary = ary[~np.isnan(ary)]
@@ -546,7 +546,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
 
-    hpd_intervals = np.full((max_modes, 2), np.nan)
+    hdi_intervals = np.full((max_modes, 2), np.nan)
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
@@ -554,11 +554,11 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
             )
             break
         if interval.size == 0:
-            hpd_intervals[i] = np.asarray([bins[0], bins[0]])
+            hdi_intervals[i] = np.asarray([bins[0], bins[0]])
         else:
-            hpd_intervals[i] = np.asarray([interval[0], interval[-1]])
+            hdi_intervals[i] = np.asarray([interval[0], interval[-1]])
 
-    return np.array(hpd_intervals)
+    return np.array(hdi_intervals)
 
 
 def loo(data, pointwise=False, reff=None, scale=None):
@@ -1003,7 +1003,7 @@ def summary(
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
-        Whether to include the `stats`: `mean`, `sd`, `hpd_3%`, `hpd_97%`, or the `diagnostics`:
+        Whether to include the `stats`: `mean`, `sd`, `hdi_3%`, `hdi_97%`, or the `diagnostics`:
         `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
         them.
     round_to: int
@@ -1022,7 +1022,7 @@ def summary(
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     hdi_prob: float, optional
-        hpd interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
+        hdi interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
@@ -1044,7 +1044,7 @@ def summary(
     pandas.DataFrame or xarray.Dataset
         Return type dicated by `fmt` argument.
         Return value will contain summary statistics for each variable. Default statistics are:
-        `mean`, `sd`, `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
+        `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
@@ -1154,7 +1154,7 @@ def summary(
 
         sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hpd_lower, hpd_higher = xr.apply_ufunc(
+        hdi_lower, hdi_higher = xr.apply_ufunc(
             _make_ufunc(hdi, n_output=2),
             posterior,
             kwargs=dict(hdi_prob=hdi_prob, multimodal=False, skipna=skipna),
@@ -1192,7 +1192,7 @@ def summary(
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
+        circ_hdi_lower, circ_hdi_higher = xr.apply_ufunc(
             _make_ufunc(hdi, n_output=2),
             posterior,
             kwargs=dict(hdi_prob=hdi_prob, circular=True, skipna=skipna),
@@ -1215,8 +1215,8 @@ def summary(
         metrics_names_ = (
             "mean",
             "sd",
-            "hpd_{:g}%".format(100 * alpha / 2),
-            "hpd_{:g}%".format(100 * (1 - alpha / 2)),
+            "hdi_{:g}%".format(100 * alpha / 2),
+            "hdi_{:g}%".format(100 * (1 - alpha / 2)),
             "mcse_mean",
             "mcse_sd",
             "ess_mean",
@@ -1229,8 +1229,8 @@ def summary(
             metrics_ = (
                 mean,
                 sd,
-                hpd_lower,
-                hpd_higher,
+                hdi_lower,
+                hdi_higher,
                 mcse_mean,
                 mcse_sd,
                 ess_mean,
@@ -1240,7 +1240,7 @@ def summary(
                 r_hat,
             )
         elif kind == "stats":
-            metrics_ = (mean, sd, hpd_lower, hpd_higher)
+            metrics_ = (mean, sd, hdi_lower, hdi_higher)
             metrics_names_ = metrics_names_[:4]
         elif kind == "diagnostics":
             metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
@@ -1248,7 +1248,7 @@ def summary(
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
     if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
+        metrics.extend((circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse))
         metric_names.extend(
             (
                 "circular_mean",

@@ -28,7 +28,7 @@ def plot_density(
     markersize,
     hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     n_data,
@@ -66,7 +66,7 @@ def plot_density(
                 markersize,
                 hdi_prob,
                 point_estimate,
-                hpd_markers,
+                hdi_markers,
                 outline,
                 shade,
                 axis_map[label],
@@ -94,7 +94,7 @@ def _d_helper(
     markersize,
     hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     ax,
@@ -122,7 +122,7 @@ def _d_helper(
     markersize : float
         Size of markers
     hdi_prob : float
-        HPD intervals. Defaults to 0.94
+        hdi intervals. Defaults to 0.94
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
@@ -133,8 +133,8 @@ def _d_helper(
     """
     if vec.dtype.kind == "f":
         if hdi_prob != 1:
-            hpd_ = hdi(vec, hdi_prob, multimodal=False)
-            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+            hdi_ = hdi(vec, hdi_prob, multimodal=False)
+            new_vec = vec[(vec >= hdi_[0]) & (vec <= hdi_[1])]
         else:
             new_vec = vec
 
@@ -160,9 +160,9 @@ def _d_helper(
         if shade:
             ax.hist(vec, bins=bins, color=color, alpha=shade)
 
-    if hpd_markers:
-        ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
-        ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
+    if hdi_markers:
+        ax.plot(xmin, 0, hdi_markers, color=color, markeredgecolor="k", markersize=markersize)
+        ax.plot(xmax, 0, hdi_markers, color=color, markeredgecolor="k", markersize=markersize)
 
     if point_estimate is not None:
         est = calculate_point_estimate(point_estimate, vec, bw)
