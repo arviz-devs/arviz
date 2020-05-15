@@ -23,7 +23,7 @@ def plot_density(
     data_labels=None,
     var_names=None,
     transform=None,
-    hpd_interval=None,
+    hdi_prob=None,
     point_estimate="auto",
     colors="cycle",
     outline=True,
@@ -62,7 +62,7 @@ def plot_density(
         all the variables being plotted.
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
-    hpd_interval : float
+    hdi_prob : float
         hpd interval. Should be in the interval (0, 1]. Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
@@ -100,7 +100,7 @@ def plot_density(
     show : bool, optional
         Call backend show function.
     credible_interval: float, optional
-        deprecated: Please see hpd_interval
+        deprecated: Please see hdi_prob
     Returns
     -------
     axes : matplotlib axes or bokeh figures
@@ -137,7 +137,7 @@ def plot_density(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_density([centered, non_centered], var_names=["mu"], hpd_interval=.5)
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], hdi_prob=.5)
 
     Shade plots and/or remove outlines
 
@@ -154,7 +154,7 @@ def plot_density(
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
 
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
@@ -188,11 +188,11 @@ def plot_density(
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -243,7 +243,7 @@ def plot_density(
         xt_labelsize=xt_labelsize,
         linewidth=linewidth,
         markersize=markersize,
-        hpd_interval=hpd_interval,
+        hdi_prob=hdi_prob,
         point_estimate=point_estimate,
         hpd_markers=hpd_markers,
         outline=outline,

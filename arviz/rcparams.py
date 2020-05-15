@@ -240,7 +240,7 @@ defaultParams = {  # pylint: disable=invalid-name
     ),
     "plot.matplotlib.constrained_layout": (True, _validate_boolean),
     "plot.matplotlib.show": (False, _validate_boolean),
-    "stats.hpd_interval": (0.94, _validate_probability),
+    "stats.hdi_prob": (0.94, _validate_probability),
     "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
     "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
 }

@@ -12,7 +12,7 @@ from ..utils import credible_interval_warning
 def plot_hpd(
     x,
     y,
-    hpd_interval=None,
+    hdi_prob=None,
     color="C1",
     circular=False,
     smooth=True,
@@ -34,7 +34,7 @@ def plot_hpd(
         Values to plot
     y : array-like
         values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
-    hpd_interval : float, optional
+    hdi_prob : float, optional
         HPD interval to plot. Defaults to 0.94.
     color : str
         Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
@@ -62,14 +62,14 @@ def plot_hpd(
     show : bool, optional
         Call backend show function.
     credible_interval: float, optional
-        deprecated: Please see hpd_interval
+        deprecated: Please see hdi_prob
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
@@ -94,13 +94,13 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    hpd_ = hpd(y, hpd_interval=hpd_interval, circular=circular, multimodal=False)
+    hpd_ = hpd(y, hdi_prob=hdi_prob, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:

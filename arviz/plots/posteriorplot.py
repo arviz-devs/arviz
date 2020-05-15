@@ -22,7 +22,7 @@ def plot_posterior(
     coords=None,
     figsize=None,
     textsize=None,
-    hpd_interval=None,
+    hdi_prob=None,
     multimodal=False,
     round_to: Optional[int] = None,
     point_estimate="auto",
@@ -63,7 +63,7 @@ def plot_posterior(
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    hpd_interval: float, optional
+    hdi_prob: float, optional
         Plots highest posterior density interval for chosen percentage of density.
         Use 'hide' to hide the HPD interval. Defaults to 0.94.
     multimodal: bool
@@ -105,7 +105,7 @@ def plot_posterior(
     show: bool, optional
         Call backend show function.
     credible_interval: float or str, optional
-        deprecated: Please see hpd_interval
+        deprecated: Please see hdi_prob
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
@@ -189,10 +189,10 @@ def plot_posterior(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_posterior(data, var_names=['mu'], hpd_interval=.75)
+        >>> az.plot_posterior(data, var_names=['mu'], hdi_prob=.75)
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
 
     data = convert_to_dataset(data, group=group)
     if transform is not None:
@@ -202,11 +202,11 @@ def plot_posterior(
     if coords is None:
         coords = {}
 
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
-    elif hpd_interval not in (None, "hide"):
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
+    elif hdi_prob not in (None, "hide"):
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]
@@ -241,7 +241,7 @@ def plot_posterior(
         kind=kind,
         point_estimate=point_estimate,
         round_to=round_to,
-        hpd_interval=hpd_interval,
+        hdi_prob=hdi_prob,
         multimodal=multimodal,
         ref_val=ref_val,
         rope=rope,

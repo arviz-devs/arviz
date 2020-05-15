@@ -315,7 +315,7 @@ def _ic_matrix(ics, ic_i):
 
 def hpd(
     ary,
-    hpd_interval=None,
+    hdi_prob=None,
     circular=False,
     multimodal=False,
     skipna=False,
@@ -337,7 +337,7 @@ def hpd(
         object containing posterior samples.
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
-    hpd_interval: float, optional
+    hdi_prob: float, optional
         HPD interval to compute. Defaults to 0.94.
     circular: bool, optional
         Whether to compute the hpd taking into account `x` is a circular variable
@@ -382,7 +382,7 @@ def hpd(
         In [1]: import arviz as az
            ...: import numpy as np
            ...: data = np.random.normal(size=2000)
-           ...: az.hpd(data, hpd_interval=.68)
+           ...: az.hpd(data, hdi_prob=.68)
 
     Calculate the hpd of a dataset:
 
@@ -412,14 +412,14 @@ def hpd(
         In [1]: az.hpd(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
 
     """
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     func_kwargs = {
-        "hpd_interval": hpd_interval,
+        "hdi_prob": hdi_prob,
         "skipna": skipna,
         "out_shape": (max_modes, 2) if multimodal else (2,),
     }
@@ -451,7 +451,7 @@ def hpd(
     return hpd_data.x.values if isarray else hpd_data
 
 
-def _hpd(ary, hpd_interval, circular, skipna):
+def _hpd(ary, hdi_prob, circular, skipna):
     """Compute hpd over the flattened array."""
     ary = ary.flatten()
     if skipna:
@@ -466,7 +466,7 @@ def _hpd(ary, hpd_interval, circular, skipna):
         ary = np.arctan2(np.sin(ary), np.cos(ary))
 
     ary = np.sort(ary)
-    interval_idx_inc = int(np.floor(hpd_interval * n))
+    interval_idx_inc = int(np.floor(hdi_prob * n))
     n_intervals = n - interval_idx_inc
     interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
 
@@ -483,12 +483,12 @@ def _hpd(ary, hpd_interval, circular, skipna):
         hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
         hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
 
-    hpd_intervals = np.array([hdi_min, hdi_max])
+    hdi_interval = np.array([hdi_min, hdi_max])
 
-    return hpd_intervals
+    return hdi_interval
 
 
-def _hpd_multimodal(ary, hpd_interval, skipna, max_modes):
+def _hpd_multimodal(ary, hdi_prob, skipna, max_modes):
     """Compute hpd if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
@@ -507,7 +507,7 @@ def _hpd_multimodal(ary, hpd_interval, skipna, max_modes):
     density *= dx
 
     idx = np.argsort(-density)
-    intervals = bins[idx][density[idx].cumsum() <= hpd_interval]
+    intervals = bins[idx][density[idx].cumsum() <= hdi_prob]
     intervals.sort()
 
     intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
@@ -942,7 +942,7 @@ def summary(
     include_circ=None,
     stat_funcs=None,
     extend=True,
-    hpd_interval=None,
+    hdi_prob=None,
     order="C",
     index_origin=None,
     skipna=False,
@@ -987,7 +987,7 @@ def summary(
     extend: boolean
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
-    hpd_interval: float, optional
+    hdi_prob: float, optional
         hpd interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order: {"C", "F"}
@@ -1003,7 +1003,7 @@ def summary(
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
     credible_interval: float, optional
-        deprecated: Please see hpd_interval
+        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -1064,7 +1064,7 @@ def summary(
 
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(hpd_interval, hpd_interval)
+        hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
 
     extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
@@ -1073,11 +1073,11 @@ def summary(
         extra_args["dims"] = dims
     if index_origin is None:
         index_origin = rcParams["data.index_origin"]
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, posterior, filter_vars)
     posterior = posterior if var_names is None else posterior[var_names]
@@ -1092,7 +1092,7 @@ def summary(
             "Invalid order: '{}'. Unpacking options are: {}".format(order, unpack_order_group)
         )
 
-    alpha = 1 - hpd_interval
+    alpha = 1 - hdi_prob
 
     extra_metrics = []
     extra_metric_names = []
@@ -1123,7 +1123,7 @@ def summary(
         hpd_lower, hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(hpd_interval=hpd_interval, multimodal=False, skipna=skipna),
+            kwargs=dict(hdi_prob=hdi_prob, multimodal=False, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )
@@ -1161,7 +1161,7 @@ def summary(
         circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
             _make_ufunc(hpd, n_output=2),
             posterior,
-            kwargs=dict(hpd_interval=hpd_interval, circular=True, skipna=skipna),
+            kwargs=dict(hdi_prob=hdi_prob, circular=True, skipna=skipna),
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(2)),
         )

@@ -603,23 +603,23 @@ def get_coords(data, coords):
     return data_subset
 
 
-def credible_interval_warning(credible_interval, hpd_interval):
-    """Replace credible_interval with hpd_interval and to warns of be deprecation."""
+def credible_interval_warning(credible_interval, hdi_prob):
+    """Replace credible_interval with hdi_prob and to warns of be deprecation."""
     warnings.warn(
         (
             "Keyword argument credible_interval has been deprecated "
-            "Please replace with hpd_interval"
+            "Please replace with hdi_prob"
         ),
     )
 
     if isinstance(credible_interval, str) and credible_interval == "auto":
         raise Exception("Argument value 'auto' has been renamed to 'hide'")
 
-    if hpd_interval:
+    if hdi_prob:
         raise Exception(
-            "Both 'credible_interval' and 'hpd_interval' are in "
+            "Both 'credible_interval' and 'hdi_prob' are in "
             "keyword arguments. Please remove 'credible_interval'"
         )
 
-    hpd_interval = credible_interval
-    return hpd_interval
+    hdi_prob = credible_interval
+    return hdi_prob

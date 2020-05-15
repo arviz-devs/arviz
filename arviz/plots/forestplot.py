@@ -15,7 +15,7 @@ def plot_forest(
     transform=None,
     coords=None,
     combined=False,
-    hpd_interval=None,
+    hdi_prob=None,
     rope=None,
     quartiles=True,
     ess=False,
@@ -38,7 +38,7 @@ def plot_forest(
 ):
     """Forest plot to compare hpd intervals from a number of distributions.
 
-    Generates a forest plot of 100*(hpd_interval)% hpd intervals from
+    Generates a forest plot of 100*(hdi_prob)% hpd intervals from
     a trace or list of traces.
 
     Parameters
@@ -67,14 +67,14 @@ def plot_forest(
     combined: bool
         Flag for combining multiple chains into a single chain. If False (default),
         chains will be plotted separately.
-    hpd_interval: float, optional
+    hdi_prob: float, optional
         Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
     rope: tuple or dictionary of tuples
         Lower and upper values of the Region Of Practical Equivalence. If a list with one
         interval only is provided, the ROPE will be displayed across the y-axis. If more than one
         interval is provided the length of the list should match the number of variables.
     quartiles: bool, optional
-        Flag for plotting the interquartile range, in addition to the hpd_interval intervals.
+        Flag for plotting the interquartile range, in addition to the hdi_prob intervals.
         Defaults to True
     r_hat: bool, optional
         Flag for plotting Split R-hat statistics. Requires 2 or more chains. Defaults to False
@@ -117,7 +117,7 @@ def plot_forest(
     show: bool, optional
         Call backend show function.
     credible_interval: float, optional
-        deprecated: Please see hpd_interval
+        deprecated: Please see hdi_prob
 
     Returns
     -------
@@ -156,7 +156,7 @@ def plot_forest(
         >>> axes[0].set_title('Estimated theta for 8 schools model')
     """
     if credible_interval:
-        hpd_interval = credible_interval_warning(credible_interval, hpd_interval)
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
 
     if not isinstance(data, (list, tuple)):
         data = [data]
@@ -183,11 +183,11 @@ def plot_forest(
         ncols += 1
         width_ratios.append(1)
 
-    if hpd_interval is None:
-        hpd_interval = rcParams["stats.hpd_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= hpd_interval > 0:
-            raise ValueError("The value of hpd_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     plot_forest_kwargs = dict(
         ax=ax,
@@ -202,7 +202,7 @@ def plot_forest(
         markersize=markersize,
         kind=kind,
         ncols=ncols,
-        hpd_interval=hpd_interval,
+        hdi_prob=hdi_prob,
         quartiles=quartiles,
         rope=rope,
         ridgeplot_overlap=ridgeplot_overlap,

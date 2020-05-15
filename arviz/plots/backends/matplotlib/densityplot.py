@@ -26,7 +26,7 @@ def plot_density(
     xt_labelsize,
     linewidth,
     markersize,
-    hpd_interval,
+    hdi_prob,
     point_estimate,
     hpd_markers,
     outline,
@@ -64,7 +64,7 @@ def plot_density(
                 xt_labelsize,
                 linewidth,
                 markersize,
-                hpd_interval,
+                hdi_prob,
                 point_estimate,
                 hpd_markers,
                 outline,
@@ -92,7 +92,7 @@ def _d_helper(
     xt_labelsize,
     linewidth,
     markersize,
-    hpd_interval,
+    hdi_prob,
     point_estimate,
     hpd_markers,
     outline,
@@ -121,7 +121,7 @@ def _d_helper(
         Thickness of lines
     markersize : float
         Size of markers
-    hpd_interval : float
+    hdi_prob : float
         HPD intervals. Defaults to 0.94
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
@@ -132,14 +132,14 @@ def _d_helper(
     ax : matplotlib axes
     """
     if vec.dtype.kind == "f":
-        if hpd_interval != 1:
-            hpd_ = hpd(vec, hpd_interval, multimodal=False)
+        if hdi_prob != 1:
+            hpd_ = hpd(vec, hdi_prob, multimodal=False)
             new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
         else:
             new_vec = vec
 
         density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= hpd_interval
+        density *= hdi_prob
         x = np.linspace(xmin, xmax, len(density))
         ymin = density[0]
         ymax = density[-1]
@@ -153,7 +153,7 @@ def _d_helper(
             ax.fill_between(x, density, color=color, alpha=shade)
 
     else:
-        xmin, xmax = hpd(vec, hpd_interval, multimodal=False)
+        xmin, xmax = hpd(vec, hdi_prob, multimodal=False)
         bins = get_bins(vec)
         if outline:
             ax.hist(vec, bins=bins, color=color, histtype="step", align="left")
