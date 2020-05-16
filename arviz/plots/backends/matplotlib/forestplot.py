@@ -523,7 +523,7 @@ class VarHandler:
             if kind == "hist":
                 bins = get_bins(values)
                 _, density, x = histogram(values, bins=bins)
-                density_q = density
+                density_q = density.cumsum() / density.sum()
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)
