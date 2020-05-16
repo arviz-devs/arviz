@@ -560,7 +560,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     return np.array(hdi_intervals)
 
 
-def loo(data, pointwise=False, reff=None, scale=None):
+def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
@@ -574,7 +574,11 @@ def loo(data, pointwise=False, reff=None, scale=None):
         Any object that can be converted to an az.InferenceData object. Refer to documentation of
         az.convert_to_inference_data for details
     pointwise: bool, optional
-        If True the pointwise predictive accuracy will be returned. Defaults to False
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
+    var_name : str, optional
+        The name of the variable in log_likelihood groups storing the pointwise log
+        likelihood data to use for loo computation.
     reff: float, optional
         Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
         of actual samples. Computed from trace by default.
@@ -621,7 +625,8 @@ def loo(data, pointwise=False, reff=None, scale=None):
            ...: data_loo.loo_i
     """
     inference_data = convert_to_inference_data(data)
-    log_likelihood = _get_log_likelihood(inference_data)
+    log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
+    pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
@@ -1306,7 +1311,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=False, scale=None):
+def waic(data, pointwise=None, var_name=None, scale=None):
     """Compute the widely applicable information criterion.
 
     Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
@@ -1317,9 +1322,13 @@ def waic(data, pointwise=False, scale=None):
     ----------
     data: obj
         Any object that can be converted to an az.InferenceData object. Refer to documentation of
-        az.convert_to_inference_data for details
+        ``az.convert_to_inference_data`` for details
     pointwise: bool
-        if True the pointwise predictive accuracy will be returned. Defaults to False
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
+    var_name : str, optional
+        The name of the variable in log_likelihood groups storing the pointwise log
+        likelihood data to use for waic computation.
     scale: str
         Output scale for WAIC. Available options are:
 
@@ -1361,8 +1370,9 @@ def waic(data, pointwise=False, scale=None):
            ...: data_waic.waic_i
     """
     inference_data = convert_to_inference_data(data)
-    log_likelihood = _get_log_likelihood(inference_data)
+    log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
+    pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
     if scale == "deviance":
         scale_value = -2

@@ -42,4 +42,5 @@ plot.matplotlib.show         : false       # call plt.show. One of "true", "fals
 # rcParams related with statistical and diagnostic functions
 stats.hdi_prob      : 0.94
 stats.information_criterion  : loo       # One of "loo", "waic"
+stats.ic_pointwise           : false     # One of "true", "false"
 stats.ic_scale               : log       # One of "deviance", "log", "negative_log"

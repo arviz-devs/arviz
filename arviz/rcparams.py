@@ -242,6 +242,7 @@ defaultParams = {  # pylint: disable=invalid-name
     "plot.matplotlib.show": (False, _validate_boolean),
     "stats.hdi_prob": (0.94, _validate_probability),
     "stats.information_criterion": ("loo", _make_validate_choice({"waic", "loo"})),
+    "stats.ic_pointwise": (False, _validate_boolean),
     "stats.ic_scale": ("log", _make_validate_choice({"deviance", "log", "negative_log"})),
 }
 
