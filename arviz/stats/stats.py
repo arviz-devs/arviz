@@ -1328,7 +1328,7 @@ def waic(data, pointwise=None, var_name=None, scale=None):
         ``stats.ic_pointwise`` rcParam.
     var_name : str, optional
         The name of the variable in log_likelihood groups storing the pointwise log
-        likelihood data to use for loo computation.
+        likelihood data to use for waic computation.
     scale: str
         Output scale for WAIC. Available options are:
 

@@ -19,6 +19,9 @@
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 * `hdi_prob` will not plot hdi if argument `hide` is passed. Previously `credible_interval` would omit HPD if `None` was passed  (#1176)
 * `stats.hdp` is pending deprecation. Replaced by `stats.hdi`
+* Add `stats.ic_pointwise` rcParam (#1173)
+* Add `var_name` argument to information criterion calculation: `compare`,
+  `loo` and `waic` (#1173)
 
 ### Maintenance and fixes
 * Fixed `plot_pair` functionality for two variables with bokeh backend (#1179)
