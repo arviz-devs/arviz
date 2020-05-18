@@ -417,7 +417,7 @@ class PlotHandler:
                     x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
                 )
         _title = Title()
-        _title.text = "{:.1%} hdi Interval".format(hdi_prob)
+        _title.text = "{:.1%} hdi".format(hdi_prob)
         ax.title = _title
 
         return ax

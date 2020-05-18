@@ -387,7 +387,7 @@ def hdi(
     skipna: bool
         If true ignores nan values when computing the hdi interval. Defaults to false.
     group: str, optional
-        Specifies which InferenceData group should be used to calculate hpd.
+        Specifies which InferenceData group should be used to calculate hdi.
         Defaults to 'posterior'
     var_names: list, optional
         Names of variables to include in the hdi report. Prefix the variables by `~`

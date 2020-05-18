@@ -64,8 +64,8 @@ def plot_posterior(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
     hdi_prob: float, optional
-        Plots highest posterior density interval for chosen percentage of density.
-        Use 'hide' to hide the HPD interval. Defaults to 0.94.
+        Plots highest density interval for chosen percentage of density.
+        Use 'hide' to hide the highest density interval. Defaults to 0.94.
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
@@ -184,7 +184,7 @@ def plot_posterior(
 
         >>> az.plot_posterior(data, var_names=['mu'], kind='hist')
 
-    Change size of HPD interval
+    Change size of highest density interval
 
     .. plot::
         :context: close-figs

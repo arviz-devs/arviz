@@ -122,7 +122,7 @@ def _d_helper(
     markersize : float
         Size of markers
     hdi_prob : float
-        hdi intervals. Defaults to 0.94
+        Probability for the highest density interval. Defaults to 0.94
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.

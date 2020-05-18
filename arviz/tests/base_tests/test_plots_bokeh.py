@@ -25,7 +25,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_energy,
     plot_ess,
     plot_forest,
-    plot_hpd,
+    plot_hdi,
     plot_joint,
     plot_kde,
     plot_khat,
@@ -488,8 +488,8 @@ def test_plot_forest_bad(models, model_fits):
         {"smooth": False},
     ],
 )
-def test_plot_hpd(models, data, kwargs):
-    axis = plot_hpd(
+def test_plot_hdi(models, data, kwargs):
+    axis = plot_hdi(
         data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
     )
     assert axis
@@ -602,9 +602,9 @@ def test_plot_khat_bad_input(models):
     [
         {},
         {"n_unif": 50},
-        {"use_hpd": True, "color": "gray"},
-        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"alpha": 0.9}},
-        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"use_hdi": True, "color": "gray"},
+        {"use_hdi": True, "credible_interval": 0.68, "plot_kwargs": {"alpha": 0.9}},
+        {"use_hdi": True, "hdi_kwargs": {"smooth": False}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
         {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color": "red"}},
@@ -616,10 +616,10 @@ def test_plot_loo_pit(models, kwargs):
 
 
 def test_plot_loo_pit_incompatible_args(models):
-    """Test error when both ecdf and use_hpd are True."""
+    """Test error when both ecdf and use_hdi are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(
-            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False
+            idata=models.model_1, y="y", ecdf=True, use_hdi=True, backend="bokeh", show=False
         )
 
 

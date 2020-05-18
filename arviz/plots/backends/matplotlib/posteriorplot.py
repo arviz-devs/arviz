@@ -195,37 +195,37 @@ def _plot_posterior_op(
             horizontalalignment="center",
         )
 
-    def display_hpd():
+    def display_hdi():
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
         hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
 
-        for hpdi in np.atleast_2d(hdi_probs):
+        for hdi_i in np.atleast_2d(hdi_probs):
             ax.plot(
-                hpdi,
+                hdi_i,
                 (plot_height * 0.02, plot_height * 0.02),
                 lw=linewidth * 2,
                 color="k",
                 solid_capstyle="butt",
             )
             ax.text(
-                hpdi[0],
+                hdi_i[0],
                 plot_height * 0.07,
-                round_num(hpdi[0], round_to),
+                round_num(hdi_i[0], round_to),
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
             ax.text(
-                hpdi[1],
+                hdi_i[1],
                 plot_height * 0.07,
-                round_num(hpdi[1], round_to),
+                round_num(hdi_i[1], round_to),
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
             ax.text(
-                (hpdi[0] + hpdi[1]) / 2,
+                (hdi_i[0] + hdi_i[1]) / 2,
                 plot_height * 0.3,
-                format_as_percent(hdi_prob) + " HPD",
+                format_as_percent(hdi_prob) + " HDI",
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
@@ -270,7 +270,7 @@ def _plot_posterior_op(
 
     format_axes()
     if hdi_prob != "hide":
-        display_hpd()
+        display_hdi()
     display_point_estimate()
     display_ref_val()
     display_rope()

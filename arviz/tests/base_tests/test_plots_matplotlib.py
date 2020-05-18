@@ -34,7 +34,7 @@ from ...plots import (
     plot_compare,
     plot_kde,
     plot_khat,
-    plot_hpd,
+    plot_hdi,
     plot_dist,
     plot_rank,
     plot_elpd,
@@ -805,8 +805,8 @@ def test_plot_compare_no_ic(models):
         {"smooth": False},
     ],
 )
-def test_plot_hpd(models, data, kwargs):
-    plot_hpd(data["y"], models.model_1.posterior["theta"], **kwargs)
+def test_plot_hdi(models, data, kwargs):
+    plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
@@ -1076,9 +1076,9 @@ def test_plot_ess_no_divergences(models):
     [
         {},
         {"n_unif": 50, "legend": False},
-        {"use_hpd": True, "color": "gray"},
-        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"ls": "--"}},
-        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"use_hdi": True, "color": "gray"},
+        {"use_hdi": True, "credible_interval": 0.68, "plot_kwargs": {"ls": "--"}},
+        {"use_hdi": True, "hdi_kwargs": {"smooth": False}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"ls": "--"}},
         {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"hatch": "/"}},
@@ -1090,9 +1090,9 @@ def test_plot_loo_pit(models, kwargs):
 
 
 def test_plot_loo_pit_incompatible_args(models):
-    """Test error when both ecdf and use_hpd are True."""
+    """Test error when both ecdf and use_hdi are True."""
     with pytest.raises(ValueError, match="incompatible"):
-        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hdi=True)
 
 
 @pytest.mark.parametrize(
