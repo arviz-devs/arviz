@@ -242,6 +242,11 @@ def test_plot_forest_single_value():
     assert axes.shape
 
 
+def test_plot_forest_ridge_discrete(discrete_model):
+    axes = plot_forest(discrete_model, kind="ridgeplot")
+    assert axes.shape
+
+
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
 def test_plot_forest_bad(models, model_fits):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
