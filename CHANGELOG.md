@@ -36,6 +36,7 @@
 * Fixed bug in `plot_posterior` with rcParam "plot.matplotlib.show" = True (#1151)
 * Set `fill_last` argument of `plot_kde` to False by default (#1158)
 * plot_ppc animation: improve docs and error handling (#1162)
+* Fix import error when wrapped function docstring is empty (#1192)
 
 ### Deprecation
 * `hpd` function deprecated in favor of `hdi`. `credible_interval` argument replaced by `hdi_prob`throughout with exception of `plot_loo_pit` (#1176)
