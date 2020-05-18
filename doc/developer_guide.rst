@@ -90,6 +90,8 @@ Referencing ArviZ objects
 
 The same can be done to refer to ArviZ functions, in which case,
 ``:func:`arviz.loo``` is enough, there is no need to use ``intersphinx``.
+Moreover, using ``:func:`~arviz.loo``` will only show ``loo`` as link text
+due to the preceding ``~``.
 
 In addition, the `See also` docstring section is also available. Sphinx will
 automatically add links to other ArviZ objects listed in the `See also`

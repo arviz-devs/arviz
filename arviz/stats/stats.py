@@ -333,7 +333,7 @@ def hpd(
     max_modes=10,
     **kwargs,
 ):
-    """Pending deprecation. Please refer to hdi."""
+    """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
     # pylint: enable=unused-argument
     warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
     return hdi(
