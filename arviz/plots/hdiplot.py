@@ -138,6 +138,6 @@ def plot_hdi(
     return ax
 
 
-def plot_hpd(*args, **kwargs):
+def plot_hpd(*args, **kwargs):  # noqa: D103
     warnings.warn("plot_hdi has been deprecated, please use plot_hdi", DeprecationWarning)
     return plot_hdi(*args, **kwargs)
