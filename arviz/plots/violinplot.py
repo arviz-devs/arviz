@@ -72,8 +72,8 @@ def plot_violin(
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
-        Text size of the point_estimates, axis ticks, and HPD. If None it will be autoscaled
-        based on figsize.
+        Text size of the point_estimates, axis ticks, and highest density interval. If None it will
+        be autoscaled based on figsize.
     sharex: bool
         Defaults to True, violinplots share a common x-axis scale.
     sharey: bool

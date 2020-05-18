@@ -21,7 +21,7 @@ Plots
     plot_energy
     plot_ess
     plot_forest
-    plot_hpd
+    plot_hdi
     plot_joint
     plot_kde
     plot_khat
@@ -45,7 +45,7 @@ Stats
 
     apply_test_function
     compare
-    hpd
+    hdi
     loo
     loo_pit
     psislw

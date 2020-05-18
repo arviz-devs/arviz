@@ -40,8 +40,8 @@ def plot_density(
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
-    Plots are truncated at their 100*(1-alpha)% hpd intervals. Plots are grouped per variable
-    and colors assigned to models.
+    Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
+    variable and colors assigned to models.
 
     Parameters
     ----------
@@ -63,7 +63,8 @@ def plot_density(
     transform : callable
         Function to transform data (defaults to None i.e. the identity function)
     hdi_prob : float
-        hpd interval. Should be in the interval (0, 1]. Defaults to 0.94.
+        Probability for the highest density interval. Should be in the interval (0, 1].
+        Defaults to 0.94.
     point_estimate : Optional[str]
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
@@ -75,8 +76,8 @@ def plot_density(
     outline : bool
         Use a line to draw KDEs and histograms. Default to True
     hdi_markers : str
-        A valid `matplotlib.markers` like 'v', used to indicate the limits of the hpd interval.
-        Defaults to empty string (no marker).
+        A valid `matplotlib.markers` like 'v', used to indicate the limits of the highest density
+        interval. Defaults to empty string (no marker).
     shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
@@ -132,7 +133,7 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
 
-    Specify hpd interval
+    Specify highest density interval
 
     .. plot::
         :context: close-figs
