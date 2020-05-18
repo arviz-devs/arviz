@@ -86,14 +86,9 @@ Data
 ----
 
 .. autosummary::
-   :toctree: generated/
-   :template: class_members.rst
-
-   InferenceData
-
-.. autosummary::
     :toctree: generated/
 
+    InferenceData
     convert_to_inference_data
     load_arviz_data
     to_netcdf
@@ -115,7 +110,7 @@ Utils
 
 .. autosummary::
       :toctree: generated/
-      :template: class.rst
+      :template: class_no_members.rst
 
       Numba
       interactive_backend
@@ -125,7 +120,7 @@ rcParams
 
 .. autosummary::
    :toctree: generated/
-   :template: class.rst
+   :template: class_no_members.rst
 
    rc_context
 
@@ -137,7 +132,6 @@ Experimental feature
 
 .. autosummary::
     :toctree: generated/
-    :template: class_members.rst
 
     SamplingWrapper
     PyStanSamplingWrapper

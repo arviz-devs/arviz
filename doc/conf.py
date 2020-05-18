@@ -21,8 +21,13 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from recommonmark.parser import CommonMarkParser
 import sphinx_bootstrap_theme
 import arviz
+
+class CustomCommonMarkParser(CommonMarkParser):
+    def visit_document(self, node):
+        pass
 
 arviz.rcParams["data.load"] = "eager"
 
@@ -54,7 +59,6 @@ extensions = [
     "bokeh.sphinxext.bokeh_plot",
     "numpydoc",
     "nbsphinx",
-    "m2r",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
@@ -181,7 +185,9 @@ html_favicon = "_static/favicon.ico"
 
 
 def setup(app):
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
+    app.add_source_suffix('.md', 'markdown')
+    app.add_source_parser(CustomCommonMarkParser)
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -253,5 +259,10 @@ epub_copyright = copyright
 epub_exclude_files = ["search.html"]
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-# intersphinx_mapping = {'https://docs.python.org/': None}
+# Example configuration for intersphinx
+intersphinx_mapping = {
+    "xarray": ("http://xarray.pydata.org/en/stable/", None),
+    "pymc3": ("https://docs.pymc.io/", None),
+    "mpl": ("https://matplotlib.org/", None),
+    "bokeh": ("https://docs.bokeh.org/en/latest/", None),
+}

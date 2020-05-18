@@ -442,11 +442,14 @@ def from_pymc3(
 
     All three of them are optional arguments, but at least one of ``trace``,
     ``prior`` and ``posterior_predictive`` must be present.
+    For a usage example read the
+    :doc:`Cookbook section on from_pymc3 </notebooks/InferenceDataCookbook>`
 
     Parameters
     ----------
     trace : pymc3.MultiTrace, optional
-        Trace generated from MCMC sampling.
+        Trace generated from MCMC sampling. Output of
+        :py:func:`pymc3:pymc3.sampling.sample`.
     prior : dict, optional
         Dictionary with the variable names as keys, and values numpy arrays
         containing prior and prior predictive samples.

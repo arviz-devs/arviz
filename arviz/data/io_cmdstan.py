@@ -791,6 +791,9 @@ def from_cmdstan(
 ) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_cmdstan </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : str or list of str, optional

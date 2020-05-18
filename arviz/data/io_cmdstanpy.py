@@ -347,6 +347,9 @@ def from_cmdstanpy(
 ):
     """Convert CmdStanPy data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_cmdstanpy </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : CmdStanMCMC object

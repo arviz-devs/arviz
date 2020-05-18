@@ -46,6 +46,9 @@
 * Add new examples for `plot_pair` (#1110)
 * Add examples for `psislw` and `r2_score` (#1129)
 * Add more examples on 2D kde customization (#1158)
+* Make docs compatible with sphinx3 and configure `intersphinx` for better
+  references (#1184)
+* Extend the developer guide and add it to the website (#1184)
 
 ## v0.7.0 (2020 Mar 2)
 
