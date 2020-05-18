@@ -243,9 +243,12 @@ class PlotHandler:
             Width of line on border of ridges
         alpha : float
             Transparency of ridges
-        kind : string
+        ridgeplot_kind : string
             By default ("auto") continuous variables are plotted using KDEs and discrete ones using
             histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        ridgeplot_quantiles: list
+            Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+            Defaults to None.
         ax : Axes
             Axes to draw on
         """
@@ -511,6 +514,7 @@ class VarHandler:
             if kind == "hist":
                 bins = get_bins(values)
                 _, density, x = histogram(values, bins=bins)
+                density_q = density.cumsum() / density.sum()
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)
