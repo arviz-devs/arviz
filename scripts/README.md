@@ -1,15 +1,19 @@
 # Scripts
 Various scripts that help with ArviZ maintenance
 
-#### container.ps1
-???
-
 #### container.sh
 Script that helps with building docker image, and running jupyter lab,
 jupyter notebooks, building docs, or getting a shell or testing
 
+#### container.ps1
+Same as container.sh
+
+Example:
+
+`powershell -File container.ps1 --lab`
+
 #### create_testenv.sh
-Script that helps install arviz on whatever computer is being used 
+Script that helps install ArviZ on whatever computer is being used
 
 #### lint.sh
 Run all linters to check for code quality deviations
