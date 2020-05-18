@@ -38,7 +38,8 @@
 * plot_ppc animation: improve docs and error handling (#1162)
 
 ### Deprecation
-* `credible_interval` argument replaced by `hdi_prob`throughout with exception of `plot_loo_pit` (#1176)
+* `hpd` function deprecated in favor of `hdi`. `credible_interval` argument replaced by `hdi_prob`throughout with exception of `plot_loo_pit` (#1176)
+* `plot_hpd` function deprecated in favor of `plot_hdi`. (#1190)
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
