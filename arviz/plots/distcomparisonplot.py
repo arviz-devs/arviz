@@ -120,7 +120,7 @@ def plot_dist_comparison(
         try:
             datasets.append(getattr(data, group))
             groups.append(group)
-        except:
+        except:  # pylint: disable=bare-except
             pass
 
     if var_names is None:
@@ -146,24 +146,28 @@ def plot_dist_comparison(
     nvars = len(dc_plotters[0])
     ngroups = len(groups)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, 2 * nvars, ngroups
-    )
+    (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, 2 * nvars, ngroups)
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(posterior_kwargs["plot_kwargs"].get("color", "C0"))
+    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        posterior_kwargs["plot_kwargs"].get("color", "C0")
+    )
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     posterior_kwargs.setdefault("hist_kwargs", dict())
     posterior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(prior_kwargs["plot_kwargs"].get("color", "C1"))
+    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        prior_kwargs["plot_kwargs"].get("color", "C1")
+    )
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     prior_kwargs.setdefault("hist_kwargs", dict())
     prior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(observed_kwargs["plot_kwargs"].get("color", "C2"))
+    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
+        observed_kwargs["plot_kwargs"].get("color", "C2")
+    )
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     observed_kwargs.setdefault("hist_kwargs", dict())
     observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)

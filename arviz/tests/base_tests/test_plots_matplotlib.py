@@ -1198,7 +1198,7 @@ def test_plot_pp_different_vars():
     data = from_dict(
         posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
     )
-    with pytest.raises(TypeError):
-        plot_dist_comparison(data, vars="x")
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x")
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
