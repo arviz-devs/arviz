@@ -10,7 +10,7 @@ from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
 
 
-def plot_pp(
+def plot_dist_comparison(
     data,
     kind="latent",
     figsize=None,
@@ -90,7 +90,7 @@ def plot_pp(
 
         >>> import arviz as az
         >>> data = az.load_arviz_data('radon')
-        >>> az.plot_pp(data, var_names=["defs"], coords={"team" : ["Italy"]})
+        >>> az.plot_dist_comparison(data, var_names=["defs"], coords={"team" : ["Italy"]})
 
     """
 
@@ -138,12 +138,12 @@ def plot_pp(
         datasets = [transform(dataset) for dataset in datasets]
 
     datasets = get_coords(datasets, coords)
-    pp_plotters = [
+    dc_plotters = [
         list(xarray_var_iter(data, var_names=var, combined=True))
         for data, var in zip(datasets, var_names)
     ]
 
-    nvars = len(pp_plotters[0])
+    nvars = len(dc_plotters[0])
     ngroups = len(groups)
 
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
@@ -168,12 +168,12 @@ def plot_pp(
     observed_kwargs.setdefault("hist_kwargs", dict())
     observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
-    ppplot_kwargs = dict(
+    distcomparisonplot_kwargs = dict(
         ax=ax,
         nvars=nvars,
         ngroups=ngroups,
         figsize=figsize,
-        pp_plotters=pp_plotters,
+        dc_plotters=dc_plotters,
         legend=legend,
         groups=groups,
         prior_kwargs=prior_kwargs,
@@ -188,6 +188,6 @@ def plot_pp(
     backend = backend.lower()
 
     # TODO: Add backend kwargs
-    plot = get_plotting_function("plot_pp", "ppplot", backend)
-    axes = plot(**ppplot_kwargs)
+    plot = get_plotting_function("plot_dist_comparison", "distcomparisonplot", backend)
+    axes = plot(**distcomparisonplot_kwargs)
     return axes

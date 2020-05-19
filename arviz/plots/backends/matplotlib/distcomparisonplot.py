@@ -1,4 +1,4 @@
-"""Matplotlib Density Comparision plot."""
+"""Matplotlib Density Comparison plot."""
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,12 +8,12 @@ from ...plot_utils import make_label
 from . import backend_kwarg_defaults
 
 
-def plot_pp(
+def plot_dist_comparison(
     ax,
     nvars,
     ngroups,
     figsize,
-    pp_plotters,
+    dc_plotters,
     legend,
     groups,
     prior_kwargs,
@@ -42,7 +42,7 @@ def plot_pp(
                 )
             )
 
-    for idx, plotter in enumerate(pp_plotters):
+    for idx, plotter in enumerate(dc_plotters):
         group = groups[idx]
         kwargs = prior_kwargs if group.startswith("prior") else posterior_kwargs if group.startswith("posterior") else observed_kwargs
         for idx2, (var, selection, data,) in enumerate(plotter):

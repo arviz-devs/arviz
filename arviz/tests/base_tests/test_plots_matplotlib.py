@@ -29,7 +29,7 @@ from ...plots import (
     plot_parallel,
     plot_pair,
     plot_joint,
-    plot_pp,
+    plot_dist_comparison,
     plot_ppc,
     plot_violin,
     plot_compare,
@@ -1190,7 +1190,7 @@ def test_plot_mcse_no_divergences(models):
 )
 def test_plot_pp(models, kwargs):
     idata = models.model_1
-    ax = plot_pp(idata, **kwargs)
+    ax = plot_dist_comparison(idata, **kwargs)
     assert np.all(ax)
 
 
@@ -1199,6 +1199,6 @@ def test_plot_pp_different_vars():
         posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
     )
     with pytest.raises(TypeError):
-        plot_pp(data, vars="x")
-    ax = plot_pp(data, var_names=[["x_hat"], ["x"]])
+        plot_dist_comparison(data, vars="x")
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
