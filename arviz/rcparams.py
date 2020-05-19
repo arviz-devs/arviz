@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import re
 import pprint
+import warnings
 import logging
 import locale
 from collections.abc import MutableMapping
@@ -165,6 +166,24 @@ def _validate_bokeh_marker(value):
     return value
 
 
+def _validate_dict_of_lists(values):
+    if isinstance(values, dict):
+        return {key: tuple(item) for key, item in values.items()}
+    else:
+        validated_dict = {}
+        for value in values:
+            tup = value.split(":", 1)
+            if len(tup) != 2:
+                raise ValueError(f"Could not interpret '{value}' as key: list or str")
+            key, vals = tup
+            key = key.strip(' "')
+            vals = [val.strip(' "') for val in vals.strip(" [],").split(",")]
+            if key in validated_dict:
+                warnings.warn(f"Repeated key {key} when validating dict of lists")
+            validated_dict[key] = tuple(vals)
+        return validated_dict
+
+
 def make_iterable_validator(scalar_validator, length=None, allow_none=False, allow_auto=False):
     """Validate value is an iterable datatype."""
     # based on matplotlib's _listify_validator function
@@ -190,10 +209,22 @@ _validate_bokeh_bounds = make_iterable_validator(  # pylint: disable=invalid-nam
     _validate_float_or_none, length=2, allow_none=True, allow_auto=True
 )
 
+METAGROUPS = {
+    "posterior_groups": ["posterior", "posterior_predictive", "sample_stats", "log_likelihood"],
+    "prior_groups": ["prior", "prior_predictive", "sample_stats_prior"],
+    "posterior_groups_warmup": [
+        "_warmup_posterior",
+        "_warmup_posterior_predictive",
+        "_warmup_sample_stats",
+    ],
+    "latent_vars": ["posterior", "prior"],
+    "observed_vars": ["posterior_predictive", "observed_data", "prior_predictive"],
+}
 
 defaultParams = {  # pylint: disable=invalid-name
     "data.http_protocol": ("https", _make_validate_choice({"https", "http"})),
     "data.load": ("lazy", _make_validate_choice({"lazy", "eager"})),
+    "data.metagroups": (METAGROUPS, _validate_dict_of_lists),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "data.save_warmup": (False, _validate_boolean),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
@@ -407,20 +438,33 @@ def read_rcfile(fname):
     config = RcParams()
     with open(fname, "r") as rcfile:
         try:
+            multiline = False
             for line_no, line in enumerate(rcfile, 1):
                 strippedline = line.split("#", 1)[0].strip()
                 if not strippedline:
                     continue
-                tup = strippedline.split(":", 1)
-                if len(tup) != 2:
-                    error_details = _error_details_fmt % (line_no, line, fname)
-                    _log.warning("Illegal %s", error_details)
-                    continue
-                key, val = tup
-                key = key.strip()
-                val = val.strip()
-                if key in config:
-                    _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
+                if multiline:
+                    if strippedline == "}":
+                        multiline = False
+                        val = aux_val
+                    else:
+                        aux_val.append(strippedline)
+                        continue
+                else:
+                    tup = strippedline.split(":", 1)
+                    if len(tup) != 2:
+                        error_details = _error_details_fmt % (line_no, line, fname)
+                        _log.warning("Illegal %s", error_details)
+                        continue
+                    key, val = tup
+                    key = key.strip()
+                    val = val.strip()
+                    if key in config:
+                        _log.warning("Duplicate key in file %r line #%d.", fname, line_no)
+                    if key in {"data.metagroups"}:
+                        aux_val = []
+                        multiline = True
+                        continue
                 try:
                     config[key] = val
                 except ValueError as verr:
@@ -439,9 +483,11 @@ def read_rcfile(fname):
         return config
 
 
-def rc_params():
+def rc_params(ignore_files=False):
     """Read and validate arvizrc file."""
-    fname = get_arviz_rcfile()
+    fname = None
+    if not ignore_files:
+        fname = get_arviz_rcfile()
     defaults = RcParams([(key, default) for key, (default, _) in defaultParams.items()])
     if fname is not None:
         file_defaults = read_rcfile(fname)

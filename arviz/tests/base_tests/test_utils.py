@@ -7,7 +7,15 @@ import numpy as np
 import pytest
 
 from arviz.data.base import dict_to_dataset
-from ...utils import _var_names, _stack, one_de, two_de, expand_dims, flatten_inference_data_to_dict
+from ...utils import (
+    _var_names,
+    _stack,
+    one_de,
+    two_de,
+    expand_dims,
+    flatten_inference_data_to_dict,
+    _subset_list,
+)
 from ...data import load_arviz_data, from_dict
 
 
@@ -91,6 +99,13 @@ def test_var_names_filter(var_args):
     )
     var_names, expected, filter_vars = var_args
     assert _var_names(var_names, data, filter_vars) == expected
+
+
+def test_subset_list_negation_not_found():
+    """Check there is a warning if negation pattern is ignored"""
+    names = ["mu", "theta"]
+    with pytest.warns(UserWarning, match=".+not.+found.+"):
+        assert _subset_list("~tau", names) == names
 
 
 @pytest.fixture(scope="function")

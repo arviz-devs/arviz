@@ -21,7 +21,7 @@ from arviz import (
     clear_data_home,
     InferenceData,
 )
-from ...data.base import generate_dims_coords, make_attrs
+from ...data.base import generate_dims_coords, make_attrs, dict_to_dataset
 from ...data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
@@ -156,18 +156,6 @@ def test_make_attrs():
     attrs = make_attrs(attrs=extra_attrs)
     assert "key" in attrs
     assert attrs["key"] == "Value"
-
-
-def test_addition():
-    idata1 = from_dict(
-        posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
-    )
-    idata2 = from_dict(prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)})
-    new_idata = idata1 + idata2
-    assert new_idata is not None
-    test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
-    fails = check_multiple_attrs(test_dict, new_idata)
-    assert not fails
 
 
 @pytest.mark.parametrize("copy", [True, False])
@@ -319,92 +307,154 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c2
 
 
-@pytest.mark.parametrize("inplace", [True, False])
-def test_sel_method(inplace):
-    data = np.random.normal(size=(4, 500, 8))
-    idata = from_dict(
-        posterior={"a": data[..., 0], "b": data},
-        sample_stats={"a": data[..., 0], "b": data},
-        observed_data={"b": data[0, 0, :]},
-        posterior_predictive={"a": data[..., 0], "b": data},
-    )
-    original_groups = getattr(idata, "_groups")
-    ndraws = idata.posterior.draw.values.size
-    kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
-    if inplace:
-        idata.sel(inplace=inplace, **kwargs)
-    else:
-        idata2 = idata.sel(inplace=inplace, **kwargs)
-        assert idata2 is not idata
-        idata = idata2
-    groups = getattr(idata, "_groups")
-    assert np.all(np.isin(groups, original_groups))
-    for group in groups:
-        dataset = getattr(idata, group)
-        assert "b_dim_0" in dataset.dims
-        assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
-        if group != "observed_data":
-            assert np.all(np.isin(["chain", "draw"], dataset.dims))
-            assert np.all(dataset.chain.values == np.arange(0, 4, 2))
-            assert np.all(dataset.draw.values == np.arange(200, ndraws))
+class TestInferenceData:
+    def test_addition(self):
+        idata1 = from_dict(
+            posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
+        )
+        idata2 = from_dict(
+            prior={"C": np.random.randn(2, 10, 2), "D": np.random.randn(2, 10, 5, 2)}
+        )
+        new_idata = idata1 + idata2
+        assert new_idata is not None
+        test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
+        fails = check_multiple_attrs(test_dict, new_idata)
+        assert not fails
 
-
-def test_sel_method_chain_prior():
-    idata = load_arviz_data("centered_eight")
-    original_groups = getattr(idata, "_groups")
-    idata_subset = idata.sel(inplace=False, chain_prior=False, chain=[0, 1, 3])
-    groups = getattr(idata_subset, "_groups")
-    assert np.all(np.isin(groups, original_groups))
-    for group in groups:
-        dataset_subset = getattr(idata_subset, group)
-        dataset = getattr(idata, group)
-        if "chain" in dataset.dims:
-            assert "chain" in dataset_subset.dims
-            if "prior" not in group:
-                assert np.all(dataset_subset.chain.values == np.array([0, 1, 3]))
+    @pytest.mark.parametrize("inplace", [True, False])
+    def test_sel(self, inplace):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        original_groups = getattr(idata, "_groups")
+        ndraws = idata.posterior.draw.values.size
+        kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
+        if inplace:
+            idata.sel(inplace=inplace, **kwargs)
         else:
-            assert "chain" not in dataset_subset.dims
-    with pytest.raises(KeyError):
-        idata.sel(inplace=False, chain_prior=True, chain=[0, 1, 3])
+            idata2 = idata.sel(inplace=inplace, **kwargs)
+            assert idata2 is not idata
+            idata = idata2
+        groups = getattr(idata, "_groups")
+        assert np.all(np.isin(groups, original_groups))
+        for group in groups:
+            dataset = getattr(idata, group)
+            assert "b_dim_0" in dataset.dims
+            assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
+            if group != "observed_data":
+                assert np.all(np.isin(["chain", "draw"], dataset.dims))
+                assert np.all(dataset.chain.values == np.arange(0, 4, 2))
+                assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
+    def test_sel_chain_prior(self):
+        idata = load_arviz_data("centered_eight")
+        original_groups = getattr(idata, "_groups")
+        idata_subset = idata.sel(inplace=False, chain_prior=False, chain=[0, 1, 3])
+        groups = getattr(idata_subset, "_groups")
+        assert np.all(np.isin(groups, original_groups))
+        for group in groups:
+            dataset_subset = getattr(idata_subset, group)
+            dataset = getattr(idata, group)
+            if "chain" in dataset.dims:
+                assert "chain" in dataset_subset.dims
+                if "prior" not in group:
+                    assert np.all(dataset_subset.chain.values == np.array([0, 1, 3]))
+            else:
+                assert "chain" not in dataset_subset.dims
+        with pytest.raises(KeyError):
+            idata.sel(inplace=False, chain_prior=True, chain=[0, 1, 3])
 
-@pytest.mark.parametrize("use", ("del", "delattr"))
-def test_del_method(use):
-    # create inference data object
-    data = np.random.normal(size=(4, 500, 8))
-    idata = from_dict(
-        posterior={"a": data[..., 0], "b": data},
-        sample_stats={"a": data[..., 0], "b": data},
-        observed_data={"b": data[0, 0, :]},
-        posterior_predictive={"a": data[..., 0], "b": data},
+    @pytest.mark.parametrize("use", ("del", "delattr"))
+    def test_del(self, use):
+        # create inference data object
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+
+        # assert inference data object has all attributes
+        test_dict = {
+            "posterior": ("a", "b"),
+            "sample_stats": ("a", "b"),
+            "observed_data": ["b"],
+            "posterior_predictive": ("a", "b"),
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        # assert _groups attribute contains all groups
+        groups = getattr(idata, "_groups")
+        assert all([group in groups for group in test_dict])
+
+        # Use del method
+        if use == "del":
+            del idata.sample_stats
+        else:
+            delattr(idata, "sample_stats")
+
+        # assert attribute has been removed
+        test_dict.pop("sample_stats")
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert not hasattr(idata, "sample_stats")
+        # assert _groups attribute has been updated
+        assert "sample_stats" not in getattr(idata, "_groups")
+
+    @pytest.mark.parametrize(
+        "args_res",
+        (
+            ([("posterior", "sample_stats")], ("posterior", "sample_stats")),
+            (["posterior", "like"], ("posterior", "warmup_posterior", "posterior_predictive")),
+            (["^posterior", "regex"], ("posterior", "posterior_predictive")),
+            (
+                [("~^warmup", "~^obs"), "regex"],
+                ("posterior", "sample_stats", "posterior_predictive"),
+            ),
+            (
+                ["~observed_vars"],
+                ("posterior", "sample_stats", "warmup_posterior", "warmup_sample_stats"),
+            ),
+        ),
     )
+    def test_group_names(self, args_res):
+        args, result = args_res
+        ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
+        idata = InferenceData(
+            posterior=(ds, ds), sample_stats=(ds, ds), observed_data=ds, posterior_predictive=ds,
+        )
+        group_names = idata._group_names(*args)  # pylint: disable=protected-access
+        assert np.all([name in result for name in group_names])
 
-    # assert inference data object has all attributes
-    test_dict = {
-        "posterior": ("a", "b"),
-        "sample_stats": ("a", "b"),
-        "observed_data": ["b"],
-        "posterior_predictive": ("a", "b"),
-    }
-    fails = check_multiple_attrs(test_dict, idata)
-    assert not fails
-    # assert _groups attribute contains all groups
-    groups = getattr(idata, "_groups")
-    assert all([group in groups for group in test_dict])
-
-    # Use del method
-    if use == "del":
-        del idata.sample_stats
-    else:
-        delattr(idata, "sample_stats")
-
-    # assert attribute has been removed
-    test_dict.pop("sample_stats")
-    fails = check_multiple_attrs(test_dict, idata)
-    assert not fails
-    assert not hasattr(idata, "sample_stats")
-    # assert _groups attribute has been updated
-    assert "sample_stats" not in getattr(idata, "_groups")
+    @pytest.mark.parametrize("use", (None, "args", "kwargs"))
+    def test_map(self, use):
+        idata = load_arviz_data("centered_eight")
+        args = []
+        kwargs = {}
+        if use is None:
+            fun = lambda x: x + 3
+        elif use == "args":
+            fun = lambda x, a: x + a
+            args = [3]
+        else:
+            fun = lambda x, a: x + a
+            kwargs = {"a": 3}
+        groups = ("observed_data", "posterior_predictive")
+        idata_map = idata.map(fun, groups, args=args, **kwargs)
+        groups_map = idata_map._groups  # pylint: disable=protected-access
+        assert groups_map == idata._groups  # pylint: disable=protected-access
+        assert np.allclose(
+            idata_map.observed_data.obs, fun(idata.observed_data.obs, *args, **kwargs)
+        )
+        assert np.allclose(
+            idata_map.posterior_predictive.obs, fun(idata.posterior_predictive.obs, *args, **kwargs)
+        )
+        assert np.allclose(idata_map.posterior.mu, idata.posterior.mu)
 
 
 class TestNumpyToDataArray:
