@@ -28,7 +28,6 @@ def plot_dist_comparison(
     show=None,
 ):
     """Plot that compare fitted and unfitted distributions.
-
     The resulting plots will show the compared distributions both on
     separate axes (particularly useful when one of them is substantially tighter
     than another), and plotted together, so three plots per distribution
