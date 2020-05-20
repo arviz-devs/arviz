@@ -27,8 +27,7 @@ def plot_dist_comparison(
     backend_kwargs=None,
     show=None,
 ):
-    """
-    Plots that compare fitted and unfitted distributions.
+    """Plot that compare fitted and unfitted distributions.
 
     The resulting plots will show the compared distributions both on
     separate axes (particularly useful when one of them is substantially tighter
