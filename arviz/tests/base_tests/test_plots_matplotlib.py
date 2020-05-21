@@ -101,12 +101,16 @@ def fig_ax():
         {"hdi_markers": ["v"]},
         {"shade": 1},
         {"transform": lambda x: x + 1},
+        {"ax": plt.subplots(6, 3)[1]},
     ],
 )
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
-    assert axes.shape[0] >= 18
+    if "ax" in kwargs:
+        assert axes.shape == (6, 3)
+    else:
+        assert axes.shape[0] >= 18
 
 
 def test_plot_density_discrete(discrete_model):

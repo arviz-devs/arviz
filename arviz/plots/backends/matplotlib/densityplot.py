@@ -74,8 +74,8 @@ def plot_density(
 
     if n_data > 1:
         for m_idx, label in enumerate(data_labels):
-            ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax[0].legend(fontsize=xt_labelsize)
+            ax.item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
+        ax.item(0).legend(fontsize=xt_labelsize)
 
     if backend_show(show):
         plt.show()
