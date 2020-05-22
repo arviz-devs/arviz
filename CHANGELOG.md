@@ -3,6 +3,16 @@
 ## v0.x.x Unreleased
 
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.8.0 (2020 May 23)
+
+### New features
 * Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
 * Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
 * Allow xarray.Dataarray input for plots.(#1120)
@@ -16,7 +26,6 @@
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
 * `hdi_prob` will not plot hdi if argument `hide` is passed. Previously `credible_interval` would omit HPD if `None` was passed  (#1176)
-* `stats.hdp` is pending deprecation. Replaced by `stats.hdi`
 * Add `stats.ic_pointwise` rcParam (#1173)
 * Add `var_name` argument to information criterion calculation: `compare`,
   `loo` and `waic` (#1173)
