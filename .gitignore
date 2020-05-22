@@ -71,3 +71,7 @@ saved_animations/
 
 # Stan file
 doc/notebooks/*.stan
+
+# eight-schools files
+doc/notebooks/eight_school*
+doc/notebooks/sample_data/
