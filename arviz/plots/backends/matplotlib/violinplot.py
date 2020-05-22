@@ -4,8 +4,9 @@ import numpy as np
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
+from ....sel_utils import make_label
 
 
 def plot_violin(

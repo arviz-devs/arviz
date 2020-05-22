@@ -6,8 +6,9 @@ import numpy as np
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
+from ....sel_utils import make_label
 
 
 def plot_density(

@@ -10,12 +10,13 @@ from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
+from ....sel_utils import make_label, xarray_var_iter
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
 from ....utils import conditional_jit
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 

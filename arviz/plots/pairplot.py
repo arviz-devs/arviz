@@ -5,14 +5,10 @@ from typing import List, Optional, Union
 import numpy as np
 
 from ..data import convert_to_dataset
+from ..sel_utils import xarray_to_ndarray, xarray_var_iter, make_label
+from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import (
-    get_plotting_function,
-    xarray_to_ndarray,
-    xarray_var_iter,
-    make_label,
-)
 
 
 def plot_pair(

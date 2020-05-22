@@ -10,9 +10,10 @@ import matplotlib.ticker as mticker
 
 from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, format_coords_as_labels, make_label
+from ...plot_utils import _scale_fig_size, format_coords_as_labels
 from ...rankplot import plot_rank
 from . import backend_kwarg_defaults, backend_show, dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
+from ....sel_utils import make_label
 
 
 def plot_trace(

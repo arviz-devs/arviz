@@ -4,8 +4,9 @@ import numpy as np
 
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, matplotlib_kwarg_dealiaser
+from ....sel_utils import make_label
 
 
 def plot_joint(

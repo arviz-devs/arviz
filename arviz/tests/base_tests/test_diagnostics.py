@@ -8,9 +8,9 @@ import pytest
 from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
-from ...plots.plot_utils import xarray_var_iter
 from ...rcparams import rc_context, rcParams
 from ...stats import bfmi, ess, mcse, rhat
+from ...sel_utils import xarray_var_iter
 from ...stats.diagnostics import (
     _ess,
     _ess_quantile,

@@ -10,10 +10,11 @@ from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
 from bokeh.models.annotations import Title
 
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from ...rankplot import plot_rank
 from .. import show_layout
 from . import backend_kwarg_defaults, dealiase_sel_kwargs
+from ....sel_utils import xarray_var_iter, make_label
 
 
 def plot_trace(

@@ -12,11 +12,11 @@ from ...plot_utils import (
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
-    make_label,
     round_num,
 )
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
+from ....sel_utils import make_label
 
 
 def plot_posterior(

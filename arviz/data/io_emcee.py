@@ -85,6 +85,7 @@ def _verify_names(sampler, var_names, arg_names, slices):
     return var_names, arg_names, slices
 
 
+# pylint: disable=too-many-instance-attributes
 class EmceeConverter:
     """Encapsulate emcee specific logic."""
 
@@ -97,6 +98,7 @@ class EmceeConverter:
         arg_groups=None,
         blob_names=None,
         blob_groups=None,
+        index_origin=None,
         coords=None,
         dims=None,
     ):
@@ -108,6 +110,7 @@ class EmceeConverter:
         self.arg_groups = arg_groups
         self.blob_names = blob_names
         self.blob_groups = blob_groups
+        self.index_origin = index_origin
         self.coords = coords
         self.dims = dims
         import emcee
@@ -124,7 +127,13 @@ class EmceeConverter:
                 if hasattr(self.sampler, "get_chain")
                 else self.sampler.chain[(..., idx)]
             )
-        return dict_to_dataset(data, library=self.emcee, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(
+            data,
+            library=self.emcee,
+            coords=self.coords,
+            dims=self.dims,
+            index_origin=self.index_origin,
+        )
 
     def args_to_xarray(self):
         """Convert emcee args to observed and constant_data xarray Datasets."""
@@ -157,7 +166,11 @@ class EmceeConverter:
             )
             arg_dims = dims.get(arg_name)
             arg_dims, coords = generate_dims_coords(
-                arg_array.shape, arg_name, dims=arg_dims, coords=self.coords
+                arg_array.shape,
+                arg_name,
+                dims=arg_dims,
+                coords=self.coords,
+                index_origin=self.index_origin,
             )
             # filter coords based on the dims
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in arg_dims}
@@ -227,7 +240,11 @@ class EmceeConverter:
         )
         for key, values in blob_dict.items():
             blob_dict[key] = dict_to_dataset(
-                values, library=self.emcee, coords=self.coords, dims=self.dims
+                values,
+                library=self.emcee,
+                coords=self.coords,
+                dims=self.dims,
+                index_origin=self.index_origin,
             )
         return blob_dict
 
@@ -248,6 +265,7 @@ def from_emcee(
     arg_groups=None,
     blob_names=None,
     blob_groups=None,
+    index_origin=None,
     coords=None,
     dims=None,
 ):
@@ -461,6 +479,7 @@ def from_emcee(
         arg_groups=arg_groups,
         blob_names=blob_names,
         blob_groups=blob_groups,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
     ).to_inference_data()

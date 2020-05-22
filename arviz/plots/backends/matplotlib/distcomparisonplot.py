@@ -2,8 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ....sel_utils import make_label
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show
 
 

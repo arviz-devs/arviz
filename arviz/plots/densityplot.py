@@ -2,9 +2,13 @@
 import warnings
 
 from ..data import convert_to_dataset
+from ..sel_utils import (
+    make_label,
+    xarray_var_iter,
+)
 from ..rcparams import rcParams
 from ..utils import _var_names
-from .plot_utils import default_grid, get_plotting_function, make_label, xarray_var_iter
+from .plot_utils import default_grid, get_plotting_function
 
 
 # pylint:disable-msg=too-many-function-args

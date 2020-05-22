@@ -1,5 +1,4 @@
 # pylint: disable=redefined-outer-name
-import importlib
 import os
 import shutil
 from collections.abc import MutableMapping
@@ -16,14 +15,10 @@ from ..helpers import (  # pylint: disable=unused-import
     draws,
     eight_schools_params,
     running_on_ci,
+    importorskip,
 )
 
-pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    importlib.util.find_spec("zarr") is None and not running_on_ci(),
-    reason="test requires zarr which is not installed",
-)
-
-import zarr  # pylint: disable=wrong-import-position, wrong-import-order
+zarr = importorskip("zarr")  # pylint: disable=invalid-name
 
 
 class TestDataZarr:

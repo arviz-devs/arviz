@@ -5,9 +5,10 @@ from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
-from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
+from ...plot_utils import _scale_fig_size
+from ....sel_utils import make_label
 
 
 def plot_ess(

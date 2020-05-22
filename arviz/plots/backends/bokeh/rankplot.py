@@ -6,9 +6,10 @@ from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
 from ....stats.density_utils import histogram
-from ...plot_utils import _scale_fig_size, make_label, compute_ranks
+from ...plot_utils import _scale_fig_size, compute_ranks
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
+from ....sel_utils import make_label
 
 
 def plot_rank(

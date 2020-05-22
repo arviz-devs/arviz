@@ -3,10 +3,11 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
+from ..sel_utils import xarray_to_ndarray
 from ..rcparams import rcParams
 from ..stats.stats_utils import stats_variance_2d as svar
 from ..utils import _numba_var, _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_to_ndarray
+from .plot_utils import get_plotting_function
 
 
 def plot_parallel(

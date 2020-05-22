@@ -8,8 +8,9 @@ from matplotlib import animation, get_backend
 
 from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
+from ....sel_utils import make_label
 
 _log = logging.getLogger(__name__)
 

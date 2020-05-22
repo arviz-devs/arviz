@@ -5,11 +5,11 @@ from scipy import stats
 
 from ....stats.density_utils import kde
 from ....stats.stats_utils import smooth_data
+from ....sel_utils import make_label
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
     is_valid_quantile,
-    make_label,
     sample_reference_distribution,
 )
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser

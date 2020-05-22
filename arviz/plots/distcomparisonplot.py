@@ -1,7 +1,8 @@
 """Density Comparison plot."""
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_var_iter
+from .plot_utils import get_plotting_function
+from ..sel_utils import xarray_var_iter
 
 
 def plot_dist_comparison(

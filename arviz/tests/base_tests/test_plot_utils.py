@@ -14,10 +14,10 @@ from ...plots.plot_utils import (
     make_2d,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
-    xarray_to_ndarray,
-    xarray_var_iter,
     compute_ranks,
 )
+from ...sel_utils import xarray_var_iter, xarray_to_ndarray
+
 from ...rcparams import rc_context
 from ...stats.density_utils import get_bins
 from ...utils import get_coords

@@ -4,8 +4,9 @@ from bokeh.models import DataRange1d, BoxAnnotation
 from bokeh.models.annotations import Title
 
 
+from ....sel_utils import make_label
 from ....stats import autocorr
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 

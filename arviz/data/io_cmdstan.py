@@ -7,11 +7,10 @@ from glob import glob
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-import xarray as xr
 
 from .. import utils
 from ..rcparams import rcParams
-from .base import CoordSpec, DimSpec, dict_to_dataset, generate_dims_coords, requires
+from .base import CoordSpec, DimSpec, dict_to_dataset, requires
 from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
@@ -51,6 +50,7 @@ class CmdStanConverter:
         predictions_constant_data=None,
         predictions_constant_data_var=None,
         log_likelihood=None,
+        index_origin=None,
         coords=None,
         dims=None,
         disable_glob=False,
@@ -80,6 +80,7 @@ class CmdStanConverter:
         self.attrs_prior = None
 
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
+        self.index_origin = index_origin
 
         if dtypes is None:
             self.dtypes = {}
@@ -200,8 +201,20 @@ class CmdStanConverter:
         data = _unpack_ndarrays(self.posterior[0], valid_cols, self.dtypes)
         data_warmup = _unpack_ndarrays(self.posterior[1], valid_cols, self.dtypes)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("posterior")
@@ -231,12 +244,14 @@ class CmdStanConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs={item: key for key, item in rename_dict.items()},
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
                 coords=self.coords,
                 dims=self.dims,
                 attrs={item: key for key, item in rename_dict.items()},
+                index_origin=self.index_origin,
             ),
         )
 
@@ -284,8 +299,20 @@ class CmdStanConverter:
 
             attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("posterior")
@@ -330,8 +357,20 @@ class CmdStanConverter:
 
             attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("posterior")
@@ -377,10 +416,10 @@ class CmdStanConverter:
             attrs = None
         return (
             dict_to_dataset(
-                data, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
+                data, coords=self.coords, dims=self.dims, attrs=attrs, index_origin=self.index_origin, skip_event_dims=True
             ),
             dict_to_dataset(
-                data_warmup, coords=self.coords, dims=self.dims, attrs=attrs, skip_event_dims=True
+                data_warmup, coords=self.coords, dims=self.dims, attrs=attrs, index_origin=self.index_origin, skip_event_dims=True
             ),
         )
 
@@ -410,9 +449,19 @@ class CmdStanConverter:
         data = _unpack_ndarrays(self.prior[0], valid_cols, self.dtypes)
         data_warmup = _unpack_ndarrays(self.prior[1], valid_cols, self.dtypes)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
             dict_to_dataset(
-                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs_prior,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs_prior,
+                index_origin=self.index_origin,
             ),
         )
 
@@ -443,12 +492,14 @@ class CmdStanConverter:
                 coords=self.coords,
                 dims=self.dims,
                 attrs={item: key for key, item in rename_dict.items()},
+                index_origin=self.index_origin,
             ),
             dict_to_dataset(
                 data_warmup,
                 coords=self.coords,
                 dims=self.dims,
                 attrs={item: key for key, item in rename_dict.items()},
+                index_origin=self.index_origin,
             ),
         )
 
@@ -491,8 +542,20 @@ class CmdStanConverter:
             data_warmup = _unpack_ndarrays(self.prior[1], columns, self.dtypes)
             attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(
+                data,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=attrs,
+                index_origin=self.index_origin,
+            ),
         )
 
     @requires("observed_data")
@@ -506,13 +569,14 @@ class CmdStanConverter:
         for key, vals in observed_data_raw.items():
             if variables is not None and key not in variables:
                 continue
-            vals = utils.one_de(vals)
-            val_dims = self.dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=observed_data)
+            observed_data[key] = utils.one_de(vals)
+        return dict_to_dataset(
+            observed_data,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
@@ -525,13 +589,14 @@ class CmdStanConverter:
         for key, vals in constant_data_raw.items():
             if variables is not None and key not in variables:
                 continue
-            vals = utils.one_de(vals)
-            val_dims = self.dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=constant_data)
+            constant_data[key] = utils.one_de(vals)
+        return dict_to_dataset(
+            constant_data,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     @requires("predictions_constant_data")
     def predictions_constant_data_to_xarray(self):
@@ -545,12 +610,14 @@ class CmdStanConverter:
             if variables is not None and key not in variables:
                 continue
             vals = utils.one_de(vals)
-            val_dims = self.dims.get(key)
-            val_dims, coords = generate_dims_coords(
-                vals.shape, key, dims=val_dims, coords=self.coords
-            )
-            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=predictions_constant_data)
+            predictions_constant_data[key] = utils.one_de(vals)
+        return dict_to_dataset(
+            predictions_constant_data,
+            coords=self.coords,
+            dims=self.dims,
+            default_dims=[],
+            index_origin=self.index_origin,
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
@@ -821,6 +888,7 @@ def from_cmdstan(
     predictions_constant_data: Optional[str] = None,
     predictions_constant_data_var: Optional[Union[str, List[str]]] = None,
     log_likelihood: Optional[Union[str, List[str]]] = None,
+    index_origin: Optional[int] = None,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     disable_glob: Optional[bool] = False,
@@ -862,6 +930,9 @@ def from_cmdstan(
         If not defined, all data variables are imported.
     log_likelihood : str or list of str, optional
         Pointwise log_likelihood for the data.
+    index_origin : int, optional
+        Starting value of integer coordinate values. Defaults to the value in rcParam
+        ``data.index_origin``.
     coords : dict of {str: array_like}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
@@ -893,6 +964,7 @@ def from_cmdstan(
         predictions_constant_data=predictions_constant_data,
         predictions_constant_data_var=predictions_constant_data_var,
         log_likelihood=log_likelihood,
+        index_origin=index_origin,
         coords=coords,
         dims=dims,
         disable_glob=disable_glob,

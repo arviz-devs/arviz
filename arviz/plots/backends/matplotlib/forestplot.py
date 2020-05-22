@@ -9,8 +9,9 @@ from matplotlib.colors import to_rgba
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
+from ....sel_utils import xarray_var_iter, make_label
 from ....utils import conditional_jit
-from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show
 
 

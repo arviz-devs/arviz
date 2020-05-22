@@ -4,9 +4,10 @@ from numbers import Integral
 
 import numpy as np
 
+from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 _log = logging.getLogger(__name__)
 

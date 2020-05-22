@@ -4,10 +4,11 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
+from ..sel_utils import xarray_var_iter
 from ..rcparams import rcParams
 from ..stats.density_utils import _sturges_formula
 from ..utils import _var_names
-from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function
 
 
 def plot_rank(
