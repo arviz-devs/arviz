@@ -105,7 +105,13 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                     "tuning_steps": trace.report.n_tune,
                 }
             else:
-                self.nchains = len(trace)
+                self.ndraws = len(trace)
+                if self.save_warmup:
+                    warnings.warn(
+                        "Warmup samples will be stored in posterior group and will not be"
+                        " excluded from stats and diagnostics. Please consider using PyMC3>=3.9",
+                        UserWarning,
+                    )
         else:
             self.nchains = self.ndraws = 0
 
