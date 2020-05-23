@@ -5,6 +5,7 @@
 ### New features
 
 ### Maintenance and fixes
+* fix bug in `from_pymc3` when used with PyMC3<3.9 (#1203)
 
 ### Deprecation
 
