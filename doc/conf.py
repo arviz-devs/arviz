@@ -19,6 +19,7 @@
 #
 import os
 import sys
+import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from recommonmark.parser import CommonMarkParser
@@ -98,9 +99,12 @@ author = "ArviZ devs"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
-# The short X.Y version.
-version = arviz.__version__
+branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
+if branch_name == "master":
+    version = "dev"
+else:
+    # The short X.Y version.
+    version = arviz.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
