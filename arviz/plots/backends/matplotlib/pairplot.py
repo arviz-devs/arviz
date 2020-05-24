@@ -226,18 +226,13 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            fig, ax = plt.subplots(
-                vars_to_plot,
-                vars_to_plot,
-                figsize=figsize,
-                **backend_kwargs,
-            )
+            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, figsize=figsize, **backend_kwargs,)
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = infdata_group[i]
 
             for j in range(0, vars_to_plot):
-                var2 = infdata_group[j+not_marginals]
+                var2 = infdata_group[j + not_marginals]
                 if i > j:
                     if ax[j, i].get_figure() is not None:
                         ax[j, i].remove()
@@ -294,7 +289,7 @@ def plot_pair(
 
                     if reference_values:
                         x_name = flat_var_names[i]
-                        y_name = flat_var_names[j+not_marginals]
+                        y_name = flat_var_names[j + not_marginals]
                         if x_name and y_name not in difference:
                             ax[j, i].plot(
                                 reference_values_copy[x_name],
@@ -312,7 +307,9 @@ def plot_pair(
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j+not_marginals]), fontsize=ax_labelsize, wrap=True
+                        "{}".format(flat_var_names[j + not_marginals]),
+                        fontsize=ax_labelsize,
+                        wrap=True,
                     )
                 ax[j, i].tick_params(labelsize=xt_labelsize)
 

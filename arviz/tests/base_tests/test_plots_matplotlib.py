@@ -477,6 +477,7 @@ def test_plot_pair_overlaid(models, kwargs):
     assert ax is ax2
     assert ax.shape
 
+
 @pytest.mark.parametrize("marginals", [True, False])
 def test_plot_pair_shapes(marginals):
     rng = np.random.default_rng()
