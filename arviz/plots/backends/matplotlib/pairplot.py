@@ -207,8 +207,6 @@ def plot_pair(
             else rcParams["plot.max_subplots"]
         )
         cols_to_plot = np.sum(np.arange(num_subplot_cols).cumsum() <= max_plots)
-        print(marginals)
-        print(cols_to_plot)
         if cols_to_plot < num_subplot_cols:
             warnings.warn(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
