@@ -206,7 +206,7 @@ def plot_pair(
             if rcParams["plot.max_subplots"] is None
             else rcParams["plot.max_subplots"]
         )
-        cols_to_plot = np.sum(np.arange(1, num_subplot_cols+1).cumsum() <= max_plots)
+        cols_to_plot = np.sum(np.arange(1, num_subplot_cols + 1).cumsum() <= max_plots)
         if cols_to_plot < num_subplot_cols:
             vars_to_plot = cols_to_plot
             warnings.warn(
