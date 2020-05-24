@@ -401,7 +401,7 @@ class TestDataPyMC3:
 
     @pytest.mark.skipif(
         packaging.version.parse(pm.__version__) < packaging.version.parse("3.9"),
-        reason="requires pyro 3.9 or higher",
+        reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
     def test_save_warmup(self, save_warmup):

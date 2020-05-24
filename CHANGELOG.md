@@ -5,11 +5,22 @@
 ### New features
 
 ### Maintenance and fixes
-* fix bug in `from_pymc3` when used with PyMC3<3.9 (#1203)
 
 ### Deprecation
 
 ### Documentation
+
+## v0.8.1 (2020 May 24)
+
+### Maintenance and fixes
+* Fixed bug in `from_pymc3` when used with PyMC3<3.9 (#1203)
+* Fixed enforcement of rcParam `plot.max_subplots` in `plot_trace` and
+  `plot_pair` (#1205)
+* Removed extra subplot row and column in in `plot_pair` with `marginal=True` (#1205)
+* Added latest PyMC3 release to CI in addition to using GitHub master (#1207)
+
+### Documentation
+* Use `dev` as version indicator in online documentation (#1204)
 
 ## v0.8.0 (2020 May 23)
 
