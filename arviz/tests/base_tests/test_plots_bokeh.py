@@ -149,7 +149,7 @@ def test_plot_trace_discrete(discrete_model):
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
-        with rc_context(rc={"plot.max_subplots": 1}):
+        with rc_context(rc={"plot.max_subplots": 2}):
             axes = plot_trace(models.model_1, backend="bokeh", show=False)
     assert axes.shape
 
