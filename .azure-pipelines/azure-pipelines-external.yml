@@ -10,18 +10,18 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_37_Latest_PyMC3_gh:
+      Python_37_Latest:
         python.version: 3.7
         pystan.version: "latest"
-        pymc3.version: "github"
+        pymc3.version: "latest"
         pyro.version: "latest"
         pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
-      Python_37_PyStan_3_Pyro_1_Emcee_2_TF_1:
+      Python_37_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
         python.version: 3.7
         pystan.version: "preview"
-        pymc3.version: "latest"
+        pymc3.version: "github"
         pyro.version: 1.2
         pytorch.version: 1.4
         emcee.version: 2
@@ -46,9 +46,9 @@ jobs:
       python -m pip install --upgrade pip
 
       if [ "$(pytorch.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
       else
-          python -m pip --no-cache-dir install torch=="$(pytorch.version)" torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
       fi
 
       if [ "$(pystan.version)" = "latest" ]; then
@@ -59,7 +59,7 @@ jobs:
               python -m pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
               python -m pip --no-cache-dir install --pre pystan
           else
-              python -m pip --no-cache-dir install pystan==${pystan.version}
+              python -m pip --no-cache-dir install pystan=="${pystan.version}"
           fi
       fi
 
