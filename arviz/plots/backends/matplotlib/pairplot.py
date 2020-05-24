@@ -216,7 +216,7 @@ def plot_pair(
                 "{side}x{side} grid".format(max_plots=max_plots, side=cols_to_plot),
                 UserWarning,
             )
-            numvars = cols_to_plot - 1
+            numvars = cols_to_plot - marginals
         vars_to_plot = numvars - not_marginals
 
         (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
