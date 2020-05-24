@@ -17,6 +17,7 @@
 * Fixed enforcement of rcParam `plot.max_subplots` in `plot_trace` and
   `plot_pair` (#1205)
 * Removed extra subplot row and column in in `plot_pair` with `marginal=True` (#1205)
+* Added latest PyMC3 release to CI in addition to using GitHub master (#1207)
 
 ### Documentation
 * Use `dev` as version indicator in online documentation (#1204)
