@@ -206,16 +206,17 @@ def plot_pair(
             if rcParams["plot.max_subplots"] is None
             else rcParams["plot.max_subplots"]
         )
-        cols_to_plot = np.sum(np.arange(num_subplot_cols).cumsum() <= max_plots)
+        cols_to_plot = np.sum(np.arange(1, num_subplot_cols+1).cumsum() <= max_plots)
         if cols_to_plot < num_subplot_cols:
+            vars_to_plot = cols_to_plot
             warnings.warn(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
                 "of resulting pair plots with these variables, generating only a "
-                "{side}x{side} grid".format(max_plots=max_plots, side=cols_to_plot),
+                "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
                 UserWarning,
             )
-            numvars = cols_to_plot - marginals
-        vars_to_plot = numvars - not_marginals
+        else:
+            vars_to_plot = numvars - not_marginals
 
         (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, vars_to_plot, vars_to_plot

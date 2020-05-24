@@ -479,11 +479,17 @@ def test_plot_pair_overlaid(models, kwargs):
 
 
 @pytest.mark.parametrize("marginals", [True, False])
-def test_plot_pair_shapes(marginals):
+@pytest.mark.parametrize("max_subplots", [True, False])
+def test_plot_pair_shapes(marginals, max_subplots):
     rng = np.random.default_rng()
-    idata = from_dict({"a": rng.standard_normal((4, 500, 3))})
-    ax = plot_pair(idata, marginals=marginals)
-    side = 2 + marginals
+    idata = from_dict({"a": rng.standard_normal((4, 500, 5))})
+    if max_subplots:
+        with rc_context({"plot.max_subplots": 6}):
+            with pytest.warns(UserWarning, match="3x3 grid"):
+                ax = plot_pair(idata, marginals=marginals)
+    else:
+        ax = plot_pair(idata, marginals=marginals)
+    side = 3 if max_subplots else (4 + marginals)
     assert ax.shape == (side, side)
 
 
