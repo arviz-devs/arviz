@@ -188,9 +188,9 @@ def test_plot_trace_discrete(discrete_model):
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
-        with rc_context(rc={"plot.max_subplots": 1}):
+        with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_trace(models.model_1)
-    assert axes.shape
+    assert axes.shape == (3, 2)
 
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
@@ -476,6 +476,14 @@ def test_plot_pair_overlaid(models, kwargs):
     ax2 = plot_pair(models.model_2, ax=ax, **kwargs)
     assert ax is ax2
     assert ax.shape
+
+@pytest.mark.parametrize("marginals", [True, False])
+def test_plot_pair_shapes(marginals):
+    rng = np.random.default_rng()
+    idata = from_dict({"a": rng.standard_normal((4, 500, 3))})
+    ax = plot_pair(idata, marginals=marginals)
+    side = 2 + marginals
+    assert ax.shape == (side, side)
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])

@@ -199,49 +199,58 @@ def plot_pair(
         ax.tick_params(labelsize=xt_labelsize)
 
     else:
+        not_marginals = int(not marginals)
+        num_subplot_cols = numvars - not_marginals
         max_plots = (
-            numvars ** 2 if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
+            num_subplot_cols ** 2
+            if rcParams["plot.max_subplots"] is None
+            else rcParams["plot.max_subplots"]
         )
-        vars_to_plot = np.sum(np.arange(numvars).cumsum() < max_plots)
-        if vars_to_plot < numvars:
+        cols_to_plot = np.sum(np.arange(num_subplot_cols).cumsum() <= max_plots)
+        print(marginals)
+        print(cols_to_plot)
+        if cols_to_plot < num_subplot_cols:
             warnings.warn(
                 "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
                 "of resulting pair plots with these variables, generating only a "
-                "{side}x{side} grid".format(max_plots=max_plots, side=vars_to_plot),
+                "{side}x{side} grid".format(max_plots=max_plots, side=cols_to_plot),
                 UserWarning,
             )
-            numvars = vars_to_plot
+            numvars = cols_to_plot - 1
+        vars_to_plot = numvars - not_marginals
 
         (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
-            figsize, textsize, numvars - 2, numvars - 2
+            figsize, textsize, vars_to_plot, vars_to_plot
         )
 
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            fig, ax = plt.subplots(numvars, numvars, figsize=figsize, **backend_kwargs)
+            fig, ax = plt.subplots(
+                vars_to_plot,
+                vars_to_plot,
+                figsize=figsize,
+                **backend_kwargs,
+            )
         hexbin_values = []
-        for i in range(0, numvars):
+        for i in range(0, vars_to_plot):
             var1 = infdata_group[i]
 
-            for j in range(0, numvars):
-                var2 = infdata_group[j]
+            for j in range(0, vars_to_plot):
+                var2 = infdata_group[j+not_marginals]
                 if i > j:
                     if ax[j, i].get_figure() is not None:
                         ax[j, i].remove()
                     continue
 
-                elif i == j:
-                    if marginals:
-                        loc = "right"
-                        plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
-                    else:
-                        loc = "left"
-                        if ax[j, i].get_figure() is not None:
-                            ax[j, i].remove()
-                        continue
+                elif i == j and marginals:
+                    loc = "right"
+                    plot_dist(var1, ax=ax[i, j], **marginal_kwargs)
 
                 else:
+                    if i == j:
+                        loc = "left"
+
                     if "scatter" in kind:
                         ax[j, i].plot(var1, var2, **scatter_kwargs)
 
@@ -285,7 +294,7 @@ def plot_pair(
 
                     if reference_values:
                         x_name = flat_var_names[i]
-                        y_name = flat_var_names[j]
+                        y_name = flat_var_names[j+not_marginals]
                         if x_name and y_name not in difference:
                             ax[j, i].plot(
                                 reference_values_copy[x_name],
@@ -293,7 +302,7 @@ def plot_pair(
                                 **reference_values_kwargs,
                             )
 
-                if j != numvars - 1:
+                if j != vars_to_plot - 1:
                     ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_xlabel(
@@ -303,7 +312,7 @@ def plot_pair(
                     ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
                 else:
                     ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j]), fontsize=ax_labelsize, wrap=True
+                        "{}".format(flat_var_names[j+not_marginals]), fontsize=ax_labelsize, wrap=True
                     )
                 ax[j, i].tick_params(labelsize=xt_labelsize)
 
