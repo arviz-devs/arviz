@@ -13,14 +13,16 @@ jobs:
       Python_37_Latest:
         python.version: 3.7
         pystan.version: "latest"
+        pymc3.version: "github"
         pyro.version: "latest"
         emcee.version: "latest"
         name: "External latest"
       Python_37_PyStan_3_Pyro_1_Emcee_2_TF_1:
         python.version: 3.7
         pystan.version: "preview"
-        pyro.version: 1.0.0
-        pytorch.version: 1.3.0
+        pymc3.version: "latest"
+        pyro.version: 1.2
+        pytorch.version: 1.4
         emcee.version: 2
         tensorflow.version: 1
         name: "External special"
@@ -78,10 +80,10 @@ jobs:
           python -m pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
       fi
 
-      if [ "$(pymc3.version)" = "latest" ]; then
+      if [ "$(pymc3.version)" = "github" ]; then
           python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
       else
-          python -m pip --no-cache-dir install pymc3==${pymc3.version}
+          python -m pip --no-cache-dir install pymc3
       fi
 
       python -m pip install --no-cache-dir -r requirements-external.txt
