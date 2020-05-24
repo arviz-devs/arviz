@@ -10,11 +10,12 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_37_Latest:
+      Python_37_Latest_PyMC3_gh:
         python.version: 3.7
         pystan.version: "latest"
         pymc3.version: "github"
         pyro.version: "latest"
+        pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
       Python_37_PyStan_3_Pyro_1_Emcee_2_TF_1:
@@ -47,7 +48,7 @@ jobs:
       if [ "$(pytorch.version)" = "latest" ]; then
           python -m pip --no-cache-dir install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
       else
-          python -m pip --no-cache-dir install torch==${pytorch.version} torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          python -m pip --no-cache-dir install torch==$pytorch.version torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
       fi
 
       if [ "$(pystan.version)" = "latest" ]; then
@@ -65,7 +66,7 @@ jobs:
       if [ "$(pyro.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pyro-ppl
       else
-          python -m pip --no-cache-dir install pyro-ppl==${pyro.version}
+          python -m pip --no-cache-dir install pyro-ppl==$pyro.version
       fi
 
       if [ "$(emcee.version)" = "latest" ]; then

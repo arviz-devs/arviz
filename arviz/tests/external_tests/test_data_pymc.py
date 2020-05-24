@@ -1,6 +1,7 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from sys import version_info
 from typing import Dict, Tuple
+import packaging
 
 import numpy as np
 import pytest
@@ -398,6 +399,10 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+    @pytest.mark.skipif(
+        packaging.version.parse(pm.__version__) < packaging.version.parse("3.9"),
+        reason="requires pyro 3.9 or higher",
+    )
     @pytest.mark.parametrize("save_warmup", [False, True])
     def test_save_warmup(self, save_warmup):
         with pm.Model():
