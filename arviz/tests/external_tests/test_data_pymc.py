@@ -400,7 +400,7 @@ class TestDataPyMC3:
         assert not fails
 
     @pytest.mark.skipif(
-        packaging.version.parse(pm.__version__) < packaging.version.parse("3.9"),
+        not hasattr(pm.backends.base.SamplerReport, 'n_draws'),
         reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
@@ -435,7 +435,11 @@ class TestDataPyMC3:
             assert idata.warmup_posterior.dims["chain"] == 2
             assert idata.warmup_posterior.dims["draw"] == 100
 
-    def test_save_warmup_issue_1208(self):
+    @pytest.mark.skipif(
+        hasattr(pm.backends.base.SamplerReport, 'n_draws'),
+        reason="requires pymc3 3.8 or lower",
+    )
+    def test_save_warmup_issue_1208_before_3_9(self):
         with pm.Model():
             pm.Uniform("u1")
             pm.Normal("n1")
@@ -448,14 +452,40 @@ class TestDataPyMC3:
                 discard_tuned_samples=False,
             )
             assert isinstance(trace, pm.backends.base.MultiTrace)
+            assert len(trace) == 300
+
+            # <=3.8 did not track n_draws in the sampler report,
+            # making from_pymc3 fall back to len(trace) and triggering a warning
+            with pytest.warns(UserWarning):
+                idata = from_pymc3(trace, save_warmup=True)
+            assert idata.posterior.dims["draw"] == 300
+            assert idata.posterior.dims["chain"] == 2
+
+    @pytest.mark.skipif(
+        not hasattr(pm.backends.base.SamplerReport, 'n_draws'),
+        reason="requires pymc3 3.9 or higher",
+    )
+    def test_save_warmup_issue_1208_after_3_9(self):
+        with pm.Model():
+            pm.Uniform("u1")
+            pm.Normal("n1")
+            trace = pm.sample(
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
+                step=pm.Metropolis(),
+                discard_tuned_samples=False,
+            )
+            assert isinstance(trace, pm.backends.base.MultiTrace)
+            assert len(trace) == 300
+
+            # from original trace, warmup draws should be separated out
             idata = from_pymc3(trace, save_warmup=True)
             assert idata.posterior.dims["chain"] == 2
-            if pm.__version__ <= '3.8':
-                # <=3.8 did not track n_draws in the sampler report
-                assert idata.posterior.dims["draw"] == 300
-            else:
-                assert idata.posterior.dims["draw"] == 200
-            # test with manually sliced trace
+            assert idata.posterior.dims["draw"] == 200
+
+            # manually sliced trace triggers the same warning as <=3.8
             with pytest.warns(UserWarning):
                 idata = from_pymc3(trace[-30:], save_warmup=True)
             assert idata.posterior.dims["chain"] == 2
