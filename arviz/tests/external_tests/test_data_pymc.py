@@ -434,3 +434,29 @@ class TestDataPyMC3:
         if save_warmup:
             assert idata.warmup_posterior.dims["chain"] == 2
             assert idata.warmup_posterior.dims["draw"] == 100
+
+    def test_save_warmup_issue_1208(self):
+        with pm.Model():
+            pm.Uniform("u1")
+            pm.Normal("n1")
+            trace = pm.sample(
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
+                step=pm.Metropolis(),
+                discard_tuned_samples=False,
+            )
+            assert isinstance(trace, pm.backends.base.MultiTrace)
+            idata = from_pymc3(trace, save_warmup=True)
+            assert idata.posterior.dims["chain"] == 2
+            if pm.__version__ <= '3.8':
+                # <=3.8 did not track n_draws in the sampler report
+                assert idata.posterior.dims["draw"] == 300
+            else:
+                assert idata.posterior.dims["draw"] == 200
+            # test with manually sliced trace
+            with pytest.warns(UserWarning):
+                idata = from_pymc3(trace[-30:], save_warmup=True)
+            assert idata.posterior.dims["chain"] == 2
+            assert idata.posterior.dims["draw"] == 30
