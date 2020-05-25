@@ -401,7 +401,7 @@ class TestDataPyMC3:
 
 class TestPyMC3WarmupHandling:
     @pytest.mark.skipif(
-        not hasattr(pm.backends.base.SamplerReport, 'n_draws'),
+        not hasattr(pm.backends.base.SamplerReport, "n_draws"),
         reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
@@ -437,8 +437,7 @@ class TestPyMC3WarmupHandling:
             assert idata.warmup_posterior.dims["draw"] == 100
 
     @pytest.mark.skipif(
-        hasattr(pm.backends.base.SamplerReport, 'n_draws'),
-        reason="requires pymc3 3.8 or lower",
+        hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
     )
     def test_save_warmup_issue_1208_before_3_9(self):
         with pm.Model():
@@ -463,7 +462,7 @@ class TestPyMC3WarmupHandling:
             assert idata.posterior.dims["chain"] == 2
 
     @pytest.mark.skipif(
-        not hasattr(pm.backends.base.SamplerReport, 'n_draws'),
+        not hasattr(pm.backends.base.SamplerReport, "n_draws"),
         reason="requires pymc3 3.9 or higher",
     )
     def test_save_warmup_issue_1208_after_3_9(self):
