@@ -456,7 +456,7 @@ class TestPyMC3WarmupHandling:
 
             # <=3.8 did not track n_draws in the sampler report,
             # making from_pymc3 fall back to len(trace) and triggering a warning
-            with pytest.warns(UserWarning):
+            with pytest.warns(UserWarning, match="Warmup samples"):
                 idata = from_pymc3(trace, save_warmup=True)
             assert idata.posterior.dims["draw"] == 300
             assert idata.posterior.dims["chain"] == 2
@@ -486,7 +486,7 @@ class TestPyMC3WarmupHandling:
             assert idata.posterior.dims["draw"] == 200
 
             # manually sliced trace triggers the same warning as <=3.8
-            with pytest.warns(UserWarning):
+            with pytest.warns(UserWarning, match="Warmup samples"):
                 idata = from_pymc3(trace[-30:], save_warmup=True)
             assert idata.posterior.dims["chain"] == 2
             assert idata.posterior.dims["draw"] == 30
