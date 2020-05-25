@@ -1,7 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from sys import version_info
 from typing import Dict, Tuple
-import packaging
 
 import numpy as np
 import pytest
@@ -399,6 +398,8 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+
+class TestPyMC3WarmupHandling:
     @pytest.mark.skipif(
         not hasattr(pm.backends.base.SamplerReport, 'n_draws'),
         reason="requires pymc3 3.9 or higher",
