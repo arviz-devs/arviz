@@ -1,7 +1,6 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 from sys import version_info
 from typing import Dict, Tuple
-import packaging
 
 import numpy as np
 import pytest
@@ -399,8 +398,10 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+
+class TestPyMC3WarmupHandling:
     @pytest.mark.skipif(
-        packaging.version.parse(pm.__version__) < packaging.version.parse("3.9"),
+        not hasattr(pm.backends.base.SamplerReport, "n_draws"),
         reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
@@ -434,3 +435,58 @@ class TestDataPyMC3:
         if save_warmup:
             assert idata.warmup_posterior.dims["chain"] == 2
             assert idata.warmup_posterior.dims["draw"] == 100
+
+    @pytest.mark.skipif(
+        hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
+    )
+    def test_save_warmup_issue_1208_before_3_9(self):
+        with pm.Model():
+            pm.Uniform("u1")
+            pm.Normal("n1")
+            trace = pm.sample(
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
+                step=pm.Metropolis(),
+                discard_tuned_samples=False,
+            )
+            assert isinstance(trace, pm.backends.base.MultiTrace)
+            assert len(trace) == 300
+
+            # <=3.8 did not track n_draws in the sampler report,
+            # making from_pymc3 fall back to len(trace) and triggering a warning
+            with pytest.warns(UserWarning, match="Warmup samples"):
+                idata = from_pymc3(trace, save_warmup=True)
+            assert idata.posterior.dims["draw"] == 300
+            assert idata.posterior.dims["chain"] == 2
+
+    @pytest.mark.skipif(
+        not hasattr(pm.backends.base.SamplerReport, "n_draws"),
+        reason="requires pymc3 3.9 or higher",
+    )
+    def test_save_warmup_issue_1208_after_3_9(self):
+        with pm.Model():
+            pm.Uniform("u1")
+            pm.Normal("n1")
+            trace = pm.sample(
+                tune=100,
+                draws=200,
+                chains=2,
+                cores=1,
+                step=pm.Metropolis(),
+                discard_tuned_samples=False,
+            )
+            assert isinstance(trace, pm.backends.base.MultiTrace)
+            assert len(trace) == 300
+
+            # from original trace, warmup draws should be separated out
+            idata = from_pymc3(trace, save_warmup=True)
+            assert idata.posterior.dims["chain"] == 2
+            assert idata.posterior.dims["draw"] == 200
+
+            # manually sliced trace triggers the same warning as <=3.8
+            with pytest.warns(UserWarning, match="Warmup samples"):
+                idata = from_pymc3(trace[-30:], save_warmup=True)
+            assert idata.posterior.dims["chain"] == 2
+            assert idata.posterior.dims["draw"] == 30

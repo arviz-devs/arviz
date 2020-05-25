@@ -98,7 +98,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                     0
                 ].model
             self.nchains = trace.nchains if hasattr(trace, "nchains") else 1
-            if hasattr(trace.report, "n_tune"):
+            if hasattr(trace.report, "n_draws") and trace.report.n_draws is not None:
                 self.ndraws = trace.report.n_draws
                 self.attrs = {
                     "sampling_time": trace.report.t_sampling,
@@ -109,7 +109,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 if self.save_warmup:
                     warnings.warn(
                         "Warmup samples will be stored in posterior group and will not be"
-                        " excluded from stats and diagnostics. Please consider using PyMC3>=3.9",
+                        " excluded from stats and diagnostics."
+                        " Please consider using PyMC3>=3.9 and do not slice the trace manually.",
                         UserWarning,
                     )
         else:
