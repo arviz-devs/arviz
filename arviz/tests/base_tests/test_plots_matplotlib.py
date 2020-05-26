@@ -1188,13 +1188,13 @@ def test_plot_mcse_no_divergences(models):
         {"var_names": ["y"], "kind": "observed"},
     ],
 )
-def test_plot_pp(models, kwargs):
+def test_plot_dist_comparison(models, kwargs):
     idata = models.model_1
     ax = plot_dist_comparison(idata, **kwargs)
     assert np.all(ax)
 
 
-def test_plot_pp_different_vars():
+def test_plot_dist_comparison_different_vars():
     data = from_dict(
         posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
     )
