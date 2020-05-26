@@ -422,7 +422,7 @@ class TestPyMC3WarmupHandling:
             assert isinstance(trace, pm.backends.base.MultiTrace)
             idata = from_pymc3(trace, save_warmup=save_warmup)
         warmup_prefix = "" if save_warmup and (tune > 0) else "~"
-        post_prefix = "" if draws > 0 and (tune > 0) else "~"
+        post_prefix = "" if draws > 0 else "~"
         test_dict = {
             f"{post_prefix}posterior": ["u1", "n1"],
             f"{post_prefix}sample_stats": ["~tune", "accept"],
