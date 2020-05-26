@@ -405,14 +405,16 @@ class TestPyMC3WarmupHandling:
         reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
-    def test_save_warmup(self, save_warmup):
+    @pytest.mark.parametrize("chains", [1, 2])
+    @pytest.mark.parametrize("tune,draws", [(0, 200), (100, 200), (100, 0)])
+    def test_save_warmup(self, save_warmup, chains, tune, draws):
         with pm.Model():
             pm.Uniform("u1")
             pm.Normal("n1")
             trace = pm.sample(
-                tune=100,
-                draws=200,
-                chains=2,
+                tune=tune,
+                draws=draws,
+                chains=chains,
                 cores=1,
                 step=pm.Metropolis(),
                 discard_tuned_samples=False,
@@ -430,11 +432,14 @@ class TestPyMC3WarmupHandling:
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert idata.posterior.dims["chain"] == 2
-        assert idata.posterior.dims["draw"] == 200
+        assert idata.posterior.dims["chain"] == chains
+        assert idata.posterior.dims["draw"] == draws
         if save_warmup:
-            assert idata.warmup_posterior.dims["chain"] == 2
-            assert idata.warmup_posterior.dims["draw"] == 100
+            assert len(idata._groups_warmup) > 0
+            assert idata.warmup_posterior.dims["chain"] == chains
+            assert idata.warmup_posterior.dims["draw"] == tune
+        else:
+            assert len(idata._groups_warmup) == 0
 
     @pytest.mark.skipif(
         hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
