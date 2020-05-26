@@ -211,10 +211,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             n_tune = len(self.trace) - self.ndraws
             if self.save_warmup:
                 data_warmup[var_name] = np.array(
-                    self.trace[: n_tune].get_values(var_name, combine=False, squeeze=False)
+                    self.trace[:n_tune].get_values(var_name, combine=False, squeeze=False)
                 )
             data[var_name] = np.array(
-                self.trace[n_tune :].get_values(var_name, combine=False, squeeze=False)
+                self.trace[n_tune:].get_values(var_name, combine=False, squeeze=False)
             )
         return (
             dict_to_dataset(
