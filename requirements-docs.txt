@@ -5,6 +5,7 @@ numpydoc
 pydocstyle
 Sphinx>=1.8.3
 sphinx-bootstrap-theme
+pydata_sphinx_theme
 sphinx-gallery
 selenium
 recommonmark
