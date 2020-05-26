@@ -113,6 +113,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                         " Please consider using PyMC3>=3.9 and do not slice the trace manually.",
                         UserWarning,
                     )
+            self.ntune = len(self.trace) - self.ndraws
         else:
             self.nchains = self.ndraws = 0
 
@@ -208,13 +209,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         data = {}
         data_warmup = {}
         for var_name in var_names:
-            n_tune = len(self.trace) - self.ndraws
             if self.save_warmup:
                 data_warmup[var_name] = np.array(
-                    self.trace[:n_tune].get_values(var_name, combine=False, squeeze=False)
+                    self.trace[: self.ntune].get_values(var_name, combine=False, squeeze=False)
                 )
             data[var_name] = np.array(
-                self.trace[n_tune:].get_values(var_name, combine=False, squeeze=False)
+                self.trace[self.ntune :].get_values(var_name, combine=False, squeeze=False)
             )
         return (
             dict_to_dataset(
@@ -242,9 +242,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 continue
             if self.save_warmup:
                 data_warmup[name] = np.array(
-                    self.trace[: -self.ndraws].get_sampler_stats(stat, combine=False)
+                    self.trace[: self.ntune].get_sampler_stats(stat, combine=False)
                 )
-            data[name] = np.array(self.trace[-self.ndraws :].get_sampler_stats(stat, combine=False))
+            data[name] = np.array(self.trace[self.ntune :].get_sampler_stats(stat, combine=False))
 
         return (
             dict_to_dataset(
@@ -262,7 +262,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         if self.predictions or not self.log_likelihood:
             return None
         try:
-            data = self._extract_log_likelihood(self.trace[-self.ndraws :])
+            data = self._extract_log_likelihood(self.trace[self.ntune :])
         except TypeError:
             warnings.warn(
                 """Could not compute log_likelihood, it will be omitted.
@@ -271,7 +271,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             return None
         data_warmup = {}
         if self.save_warmup:
-            data_warmup = self._extract_log_likelihood(self.trace[: -self.ndraws])
+            data_warmup = self._extract_log_likelihood(self.trace[self.ntune:])
         return (
             dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords),
             dict_to_dataset(data_warmup, library=self.pymc3, dims=self.dims, coords=self.coords),
