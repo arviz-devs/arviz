@@ -406,7 +406,7 @@ class TestPyMC3WarmupHandling:
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
     @pytest.mark.parametrize("chains", [1, 2])
-    @pytest.mark.parametrize("tune,draws", [(0, 200), (100, 200), (100, 0)])
+    @pytest.mark.parametrize("tune,draws", [(0, 50), (10, 40), (30, 0)])
     def test_save_warmup(self, save_warmup, chains, tune, draws):
         with pm.Model():
             pm.Uniform("u1")
