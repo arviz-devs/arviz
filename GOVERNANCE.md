@@ -23,7 +23,7 @@ reviewing and discussing GitHub Pull Requests and Issues and participating in
 open and public Project discussions on GitHub, Slack, and Gitter chat rooms. The foundation of Project participation is openness
 and transparency.
 
-There have many Contributors to the Project, whose contributions are listed in the logs of other repositories of the ArviZ and projects.
+There have been many Contributors to the Project, whose contributions are listed in the logs of other repositories of the ArviZ and projects.
 
 The Project Community consists of all Contributors and Users of the Project.
 Contributors work on behalf of and are responsible to the larger Project
