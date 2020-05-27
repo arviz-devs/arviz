@@ -58,6 +58,14 @@ will consist of a Random Variables Council. We view this governance model as
 the formalization of what we are already doing, rather than a change in
 direction.
 
+
+Community Architecture
+-----------------------
+
+* N Person steering council (Must be odd, will be decided in first election)
+* Core Contributors 
+* General Contributors
+
 Random Variable Council
 -----------------------
 The Project will have a Steering Council that consists of Project Contributors
@@ -75,61 +83,16 @@ their contributions and their expert knowledge of the Project Software and
 Services that Council Members will provide useful guidance, both technical and
 in terms of project direction, to potentially less experienced contributors.
 
-The Random Variables Council and its Members play a special role in certain situations.
-In particular, the Council may:
+Council Members will have the responsibility of
+* Removing members if they are in violation of the Code of Conduct
+* Make decisions when regular community discussion doesn’t produce consensus on an issue in a reasonable time frame.
+* Make decisions about strategic collaborations with other organizations or individuals.
+* Make decisions about the overall scope, vision and direction of the project.
 
--   Make decisions about the overall scope, vision and direction of the
-    project.
--   Make decisions about strategic collaborations with other organizations or
-    individuals.
--   Make decisions about specific technical issues, features, bugs and pull
-    requests. They are the primary mechanism of guiding the code review process
-    and merging pull requests.
--   Make decisions about the Services that are run by The Project and manage
-    those Services for the benefit of the Project and Community.
--   Make decisions when regular community discussion doesn’t produce consensus
-    on an issue in a reasonable time frame.
+Note that each individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
 
-Currently there is no council. ArviZ will be holding its first election
-in the coming weeks and this document will be updated.
+ArviZ will be holding its first election to determine its initial council in the coming weeks and this document will be updated.
 
-### Council membership
-
-To become eligible for being a Steering Council Member an individual must be a
-Project Contributor who has produced contributions that are substantial in
-quality and quantity, and sustained over at least one year. Potential Council
-Members are nominated by existing Council members and voted upon by the
-existing Council after asking if the potential Member is interested and willing
-to serve in that capacity. The Council will be initially formed from the set of
-existing Core Developers who, as of late 2014, have been significantly active
-over the last year.
-
-When considering potential Members, the Council will look at candidates with a
-comprehensive view of their contributions. This will include but is not limited
-to code, code review, infrastructure work, mailing list and chat participation,
-community help/building, education and outreach, design work, etc. We are
-deliberately not setting arbitrary quantitative metrics (like “100 commits in
-this repo”) to avoid encouraging behavior that plays to the metrics rather than
-the project’s overall well-being. We want to encourage a diverse array of
-backgrounds, viewpoints and talents in our team, which is why we explicitly do
-not define code as the sole metric on which council membership will be
-evaluated.
-
-If a Council member becomes inactive in the project for a period of one year,
-they will be considered for removal from the Council. Before removal, inactive
-Member will be approached by the BDFL to see if they plan on returning to
-active participation. If not they will be removed immediately upon a Council
-vote. If they plan on returning to active participation soon, they will be
-given a grace period of one year. If they don’t return to active participation
-within that time period they will be removed by vote of the Council without
-further grace period. All former Council members can be considered for
-membership again at any time in the future, like any other Project Contributor.
- Retired Council members will be listed on the project website, acknowledging
-the period during which they were active in the Council.
-
-The Council reserves the right to eject current Members, other than the BDFL,
-if they are deemed to be actively harmful to the project’s well-being, and
-attempts at communication and conflict resolution have failed.
 
 ### Conflict of interest
 
@@ -146,9 +109,72 @@ interests include, but are not limited to:
 All members of the Council shall disclose to the rest of the
 Council any conflict of interest they may have. Members with a conflict of
 interest in a particular issue may participate in Council discussions on that
-issue, but must recuse themselves from voting on the issue. If the BDFL has
-recused him/herself for a particular decision, they will appoint a substitute
-BDFL for that decision.
+issue, but must recuse themselves from voting on the issue. 
+
+### Core Contributor responsibilities
+* Enforce code of conduct
+* Maintain a check against Council actions
+
+### Council Selection Process
+
+#### Eligibility
+* Must be core contributor for at least one year
+
+#### Nominations
+* Nominations are taken over a public github issue ticket over the course of 2 weeks.
+* Only Core Contributors may nominate folks
+* Self Nominations are allowed
+* At the conclusion of the 2 weeks, the list of nominations is posted on the ticket and this ticket is closed.
+
+#### Length of Tenure
+Council members term limits are 4 years, after which point their seat will come up for reelection.
+
+#### Election Process
+
+* Voting occurs over 2 weeks, at the conclusion of the nominations. Voting is blind and mediated by either an application or a third party like Numfocus.
+Each voter can vote zero or more times, once per each candidate. As this is not about ranking but about capabilities, voters vote on a yes/no basis per candidate -- “would I trust this person to lead ArviZ?”.
+* In the event of a tie there will be a runoff election for the tied candidates. To avoid further ties and discriminate more among the tied candidates, this vote will be held by Majority Judgment: for each candidate, voters judge their suitability for office as either Excellent, Very Good, Good, Acceptable, Poor, or Reject. Multiple candidates may be given the same grade by a voter. The candidate with the highest median grade is the winner.
+* If more than one candidate has the same highest median-grade, the MJ winner is discovered by removing (one-by-one) any grades equal in value to the shared median grade from each tied candidate's total. This is repeated until only one of the previously tied candidates is currently found to have the highest median-grade.
+* In the ties are still present after this second round, the winner will be chosen at random. Each person tied will pick a number between 0 and 100, and a random integer will be generated from random.org. The person with the closet circular distance will be selected.
+* At the conclusion of voting, all the results will be posted.
+* The decision about who can vote after the first election is deferred to the council. See below for details
+* Length of Tenure and reverification
+* Each year on April 7th council members will be asked to restate their commitment to being on the council
+* Attempts should be made to reach every council member over at least 2 communication media. For example: email, slack, phone, or github.
+* If a council member does not restate their commitment their seat will be vacated.
+* Inactivity can be determined by lack of substantial contribution, including votes on council, code or discussion contributions, contributions in the community or otherwise.
+* In the event of a vacancy in the council, an election will be held to fill the position.
+
+#### Vote of No Confidence
+* In exceptional circumstances, council members as well as core contributors may remove a sitting council member via a vote of no confidence. Core contributors can also call for a vote to remove the entire council -- in which case, only Core contributors vote.
+* A no-confidence vote is triggered when a core team member (i.e Council member or Core contributor) calls for one publicly on an appropriate project communication channel, and two other core team members second the proposal. The initial call for a no-confidence vote must specify which type is intended -- whether it is targeting a single member or the council as a whole.
+* The vote lasts for two weeks, and the people taking part in it vary:
+* If this is a single-member vote called by Core contributors, both Council members and Core contributors vote, and the vote is deemed successful if at least two thirds of voters express a lack of confidence.
+* If this is a whole-council vote, then it was necessarily called by Core contributors (since Council members can’t remove the whole Council) and only Core contributors vote. The vote is deemed successful if at least two thirds of voters express a lack of confidence.
+* If this is a single-member vote called by Council Members, only Council Members vote, and the vote is deemed successful if at least half the voters express a lack of confidence. Council Members also have the possibility to call for the whole core team to vote (i.e Council members and Core contributors), although this is not the default option. The threshold for successful vote is also at 50% of voters for this option.
+* If a single-member vote succeeds, then that member is removed from the council and the resulting vacancy can be handled in the usual way. If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
+
+#### Ejecting core contributors
+* Core contributors can be ejected through a simple majority vote.
+* Upon ejecting a core contributor the council must publish an issue ticket, or public document detailing the
+  * Violations
+  * Evidence if available
+  * Remediation plan (if necessary)
+  * Signatures majority of council members to validate correctness and accuracy
+* Core contributors can also voluntarily leave the project by notifying the community through a public means or by notifying the entire council.
+
+
+#### One time Decisions
+* The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
+
+
+#### Voting criteria for future elections
+Voting for first election is restricted to establish stable governance, and to defer major decision to elected leaders
+* For the first election only the folks in Slack can vote (excluding GSOC students)
+* In the first year, the council must determine voting eligibility for future elections between two criteria:
+  * Those with commit bits
+  * The contributing community at large
+
 
 ### Private communications of the Council
 
