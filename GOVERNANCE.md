@@ -10,7 +10,7 @@ develop open source software and deploy open and public websites and services
 for reproducible, exploratory and interactive computing. The Software developed
 by The Project is released under the Apache 2 open source license,
 developed openly and hosted in public GitHub repositories under the
-[GitHub organization](https://github.com/arviz-devs/arviz). Examples of
+[GitHub organization](https://github.com/arviz-devs). Examples of
 Project Software include the ArviZ code and the Documentation, etc. The Services run by the
 Project consist of public websites and web-services that are hosted
 at [https://arviz-devs.github.io/arviz/](https://arviz-devs.github.io/arviz/) 
@@ -63,8 +63,12 @@ Community Architecture
 -----------------------
 
 * N Person steering council (Must be odd, will be decided in first election)
-* Core Contributors 
+* Core Contributors (of which Councilm members are also a part of)
 * General Contributors
+
+Anyone working with ArviZ has the responsibility to personally uphold
+the Code of Conduct. Core Contributors have the additional responsibility
+of _enforcing_ the Code of Conduct to maintain a safe community.
 
 
 Random Variables Council
