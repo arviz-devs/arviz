@@ -163,9 +163,9 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
   * Signatures majority of council members to validate correctness and accuracy
 * Core contributors can also voluntarily leave the project by notifying the community through a public means or by notifying the entire council.
 
-
 #### One time Decisions
 * The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
+  * At the conclusion of the vote this section should be removed
 
 
 #### Voting criteria for future elections
@@ -174,7 +174,6 @@ Voting for first election is restricted to establish stable governance, and to d
 * In the first year, the council must determine voting eligibility for future elections between two criteria:
   * Those with commit bits
   * The contributing community at large
-
 
 ### Private communications of the Council
 
