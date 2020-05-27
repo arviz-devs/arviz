@@ -169,10 +169,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         -------
         trace_posterior: pymc3.MultiTrace or None
             The slice of the trace corresponding to the posterior. If the posterior
-            trace is empty, None would is returned
+            trace is empty, None is returned
         trace_warmup: pymc3.MultiTrace or None
             The slice of the trace corresponding to the warmup. If the warmup trace is
-            empty or ``save_warmup=False``, None would is returned
+            empty or ``save_warmup=False``, None is returned
         """
         trace_posterior = None
         trace_warmup = None
