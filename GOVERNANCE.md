@@ -165,7 +165,7 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * If a single-member vote succeeds, then that member is removed from the council and the resulting vacancy can be handled in the usual way. If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
 
 #### Ejecting core contributors
-* Core contributors can be ejected through a simple majority vote.
+* Core contributors can be ejected through a simple majority vote by the council
 * Upon ejecting a core contributor the council must publish an issue ticket, or public document detailing the
   * Violations
   * Evidence if available
