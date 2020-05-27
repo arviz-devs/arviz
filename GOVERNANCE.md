@@ -110,7 +110,7 @@ information that should not be posted to the public internet.
 
 ### Conflict of interest
 
-It is expected that and Council Members will be employed at a wide
+It is expected that Council Members will be employed at a wide
 range of companies, universities and non-profit organizations. Because of this,
 it is possible that Members will have conflict of interests. Such conflict of
 interests include, but are not limited to:
