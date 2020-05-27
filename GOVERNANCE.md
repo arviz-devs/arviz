@@ -136,8 +136,6 @@ issue, but must recuse themselves from voting on the issue.
 * Self Nominations are allowed
 * At the conclusion of the 2 weeks, the list of nominations is posted on the ticket and this ticket is closed.
 
-#### Length of Tenure
-Council members term limits are 4 years, after which point their seat will come up for reelection.
 
 #### Election Process
 
@@ -148,7 +146,9 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * If ties are still present after this second round, the winner will be chosen at random. Each person tied will pick a number between 0 and 100, and a random integer will be generated from random.org. The person with the closet circular distance will be selected.
 * At the conclusion of voting, all the results will be posted.
 * The decision about who can vote after the first election is deferred to the council. See below for details
-* Length of Tenure and reverification
+
+#### Length of Tenure and Reverification
+* Council members term limits are 4 years, after which point their seat will come up for reelection.
 * Each year on April 7th council members will be asked to restate their commitment to being on the council
 * Attempts should be made to reach every council member over at least 2 communication media. For example: email, slack, phone, or github.
 * If a council member does not restate their commitment their seat will be vacated.
