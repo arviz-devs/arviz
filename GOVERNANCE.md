@@ -66,8 +66,9 @@ Community Architecture
 * Core Contributors 
 * General Contributors
 
-Random Variable Council
------------------------
+
+Random Variables Council
+------------------------
 The Project will have a Steering Council that consists of Project Contributors
 who have produced contributions that are substantial in quality and quantity,
 and sustained over at least one year. The overall role of the Council is to
@@ -84,7 +85,7 @@ Services that Council Members will provide useful guidance, both technical and
 in terms of project direction, to potentially less experienced contributors.
 
 Council Members will have the responsibility of
-* Removing members if they are in violation of the Code of Conduct
+* Removing members, including Council Members, if they are in violation of the Code of Conduct
 * Make decisions when regular community discussion doesn’t produce consensus on an issue in a reasonable time frame.
 * Make decisions about strategic collaborations with other organizations or individuals.
 * Make decisions about the overall scope, vision and direction of the project.
@@ -93,6 +94,15 @@ Note that each individual council member does not have the power to unilaterally
 
 ArviZ will be holding its first election to determine its initial council in the coming weeks and this document will be updated.
 
+### Private communications of the Council
+
+Unless specifically required, all Council discussions and activities will be
+public and done in collaboration and discussion with the Project Contributors
+and Community. The Council will have a private mailing list that will be used
+sparingly and only when a specific matter requires privacy. When private
+communications and decisions are needed, the Council will do its best to
+summarize those to the Community after eliding personal/private/sensitive
+information that should not be posted to the public internet.
 
 ### Conflict of interest
 
@@ -110,10 +120,6 @@ All members of the Council shall disclose to the rest of the
 Council any conflict of interest they may have. Members with a conflict of
 interest in a particular issue may participate in Council discussions on that
 issue, but must recuse themselves from voting on the issue. 
-
-### Core Contributor responsibilities
-* Enforce code of conduct
-* Maintain a check against Council actions
 
 ### Council Selection Process
 
@@ -175,13 +181,9 @@ Voting for first election is restricted to establish stable governance, and to d
   * Those with commit bits
   * The contributing community at large
 
-### Private communications of the Council
 
-Unless specifically required, all Council discussions and activities will be
-public and done in collaboration and discussion with the Project Contributors
-and Community. The Council will have a private mailing list that will be used
-sparingly and only when a specific matter requires privacy. When private
-communications and decisions are needed, the Council will do its best to
-summarize those to the Community after eliding personal/private/sensitive
-information that should not be posted to the public internet.
+
+### Core Contributor responsibilities
+* Enforce code of conduct
+* Maintain a check against Council 
 
