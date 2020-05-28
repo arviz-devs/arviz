@@ -10,6 +10,15 @@
 
 ### Documentation
 
+## v0.8.3 (2020 May 28)
+### Maintenance and fixes
+* Restructured internals of `from_pymc3` to handle old pymc3 releases and
+  sliced traces and to provide useful warnings (#1211)
+
+## v0.8.2 (2020 May 25)
+### Maintenance and fixes
+* Fixed bug in `from_pymc3` for sliced `pymc3.MultiTrace` input (#1209)
+
 ## v0.8.1 (2020 May 24)
 
 ### Maintenance and fixes
