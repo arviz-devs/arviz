@@ -257,7 +257,7 @@ class TestDataPyMC3:
         }
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
-        assert "f" == inference_data.observed_data.value.dtype.kind
+        assert inference_data.observed_data.value.dtype.kind == "f"
 
     def test_multiobservedrv_to_observed_data(self):
         # fake regression data, with weights (W)
@@ -290,7 +290,7 @@ class TestDataPyMC3:
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert "f" == idata.observed_data.y.dtype.kind
+        assert idata.observed_data.y.dtype.kind == "f"
 
     def test_single_observation(self):
         with pm.Model():
