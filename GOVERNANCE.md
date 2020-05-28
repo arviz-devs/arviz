@@ -49,7 +49,7 @@ Traditionally, project leadership was unstructured but primarily driven
 by a subset of Core Contributors whose active and consistent
 contributions have been recognized by their receiving “commit rights” to the
 Project GitHub repositories. In general all Project decisions are made through
-consensus among the Core Developers with input from the Community. 
+consensus among the Core Contributors with input from the Community. 
 
 While this approach has served us well, as the Project grows and faces more
 legal and financial decisions and interacts with other institutions, we see a
@@ -63,7 +63,7 @@ Community Architecture
 -----------------------
 
 * N Person steering council (Must be odd, will be decided in first election)
-* Core Contributors (of which Councilm members are also a part of)
+* Core Contributors (of which Council members are also a part of)
 * General Contributors
 
 Anyone working with ArviZ has the responsibility to personally uphold
@@ -177,7 +177,6 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
   * At the conclusion of the vote this section should be removed
 
-
 #### Voting criteria for future elections
 Voting for first election is restricted to establish stable governance, and to defer major decision to elected leaders
 * For the first election only the folks in Slack can vote (excluding GSOC students)
@@ -185,6 +184,8 @@ Voting for first election is restricted to establish stable governance, and to d
   * Those with commit bits
   * The contributing community at large
 
+
+## Core contributors
 
 
 ### Core Contributor responsibilities
