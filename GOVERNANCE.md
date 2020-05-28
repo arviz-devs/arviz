@@ -164,7 +164,7 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * If this is a single-member vote called by Council Members, only Council Members vote, and the vote is deemed successful if at least half the voters express a lack of confidence. Council Members also have the possibility to call for the whole core team to vote (i.e Council members and Core contributors), although this is not the default option. The threshold for successful vote is also at 50% of voters for this option.
 * If a single-member vote succeeds, then that member is removed from the council and the resulting vacancy can be handled in the usual way. If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
 
-#### Ejecting core contributors
+#### Ejecting Core Contributors
 * Core contributors can be ejected through a simple majority vote by the council
 * Upon ejecting a core contributor the council must publish an issue ticket, or public document detailing the
   * Violations
@@ -173,22 +173,30 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
   * Signatures majority of council members to validate correctness and accuracy
 * Core contributors can also voluntarily leave the project by notifying the community through a public means or by notifying the entire council.
 
-#### One time Decisions
+#### One Time Decisions
 * The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
   * At the conclusion of the vote this section should be removed
 
-#### Voting criteria for future elections
+#### Voting Criteria For Future Elections
 Voting for first election is restricted to establish stable governance, and to defer major decision to elected leaders
 * For the first election only the folks in Slack can vote (excluding GSOC students)
 * In the first year, the council must determine voting eligibility for future elections between two criteria:
   * Those with commit bits
   * The contributing community at large
 
+### Core Contributors
+Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
+These can be, but are not limited to, code contributions, community contributions, tutorial 
+development etc. 
 
-## Core contributors
+#### Core Contributor Nominations and Confirmation Process
+Current Core Contributors can nominate candidates for consideration by the council. The council
+can make the determination for acceptance with a process of their choosing.
 
+#### Current Core Contributors
+* Will be updated with Core Contributor list during first election
 
-### Core Contributor responsibilities
+#### Core Contributor Responsibilities
 * Enforce code of conduct
 * Maintain a check against Council 
 
