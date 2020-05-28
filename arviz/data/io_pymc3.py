@@ -162,7 +162,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 observations[obs.name] = obs.observations
             elif hasattr(obs, "data"):
                 for key, val in obs.data.items():
-                    multi_observations[key] = val
+                    multi_observations[key] = val.eval() if hasattr(val, "eval") else val
         return observations, multi_observations
 
     def split_trace(self) -> Tuple[Union[None, MultiTrace], Union[None, MultiTrace]]:
