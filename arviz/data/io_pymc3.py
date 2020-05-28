@@ -1,7 +1,7 @@
 """PyMC3-specific conversion code."""
 import logging
 import warnings
-from typing import Dict, List, Any, Optional, Iterable, Union, TYPE_CHECKING
+from typing import Dict, List, Any, Optional, Iterable, Union, TYPE_CHECKING, Tuple
 from types import ModuleType
 
 import numpy as np
@@ -113,6 +113,8 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                         " Please consider using PyMC3>=3.9 and do not slice the trace manually.",
                         UserWarning,
                     )
+            self.ntune = len(self.trace) - self.ndraws
+            self.posterior_trace, self.warmup_trace = self.split_trace()
         else:
             self.nchains = self.ndraws = 0
 
@@ -159,6 +161,26 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             assert self.model is not None
             return {obs.name: obs.observations for obs in self.model.observed_RVs}
         return None
+
+    def split_trace(self) -> Tuple[Union[None, MultiTrace], Union[None, MultiTrace]]:
+        """Split MultiTrace object into posterior and warmup.
+
+        Returns
+        -------
+        trace_posterior: pymc3.MultiTrace or None
+            The slice of the trace corresponding to the posterior. If the posterior
+            trace is empty, None is returned
+        trace_warmup: pymc3.MultiTrace or None
+            The slice of the trace corresponding to the warmup. If the warmup trace is
+            empty or ``save_warmup=False``, None is returned
+        """
+        trace_posterior = None
+        trace_warmup = None
+        if self.save_warmup and self.ntune > 0:
+            trace_warmup = self.trace[: self.ntune]
+        if self.ndraws > 0:
+            trace_posterior = self.trace[self.ntune :]
+        return trace_posterior, trace_warmup
 
     def log_likelihood_vals_point(self, point, var, log_like_fun):
         """Compute log likelihood for each observed point."""
@@ -208,13 +230,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         data = {}
         data_warmup = {}
         for var_name in var_names:
-            if self.save_warmup:
+            if self.warmup_trace:
                 data_warmup[var_name] = np.array(
-                    self.trace[: -self.ndraws].get_values(var_name, combine=False, squeeze=False)
+                    self.warmup_trace.get_values(var_name, combine=False, squeeze=False)
                 )
-            data[var_name] = np.array(
-                self.trace[-self.ndraws :].get_values(var_name, combine=False, squeeze=False)
-            )
+            if self.posterior_trace:
+                data[var_name] = np.array(
+                    self.posterior_trace.get_values(var_name, combine=False, squeeze=False)
+                )
         return (
             dict_to_dataset(
                 data, library=self.pymc3, coords=self.coords, dims=self.dims, attrs=self.attrs
@@ -239,11 +262,12 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             name = rename_key.get(stat, stat)
             if name == "tune":
                 continue
-            if self.save_warmup:
+            if self.warmup_trace:
                 data_warmup[name] = np.array(
-                    self.trace[: -self.ndraws].get_sampler_stats(stat, combine=False)
+                    self.warmup_trace.get_sampler_stats(stat, combine=False)
                 )
-            data[name] = np.array(self.trace[-self.ndraws :].get_sampler_stats(stat, combine=False))
+            if self.posterior_trace:
+                data[name] = np.array(self.posterior_trace.get_sampler_stats(stat, combine=False))
 
         return (
             dict_to_dataset(
@@ -260,17 +284,22 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Extract log likelihood and log_p data from PyMC3 trace."""
         if self.predictions or not self.log_likelihood:
             return None
-        try:
-            data = self._extract_log_likelihood(self.trace[-self.ndraws :])
-        except TypeError:
-            warnings.warn(
-                """Could not compute log_likelihood, it will be omitted.
-                Check your model object or set log_likelihood=False"""
-            )
-            return None
         data_warmup = {}
-        if self.save_warmup:
-            data_warmup = self._extract_log_likelihood(self.trace[: -self.ndraws])
+        data = {}
+        warn_msg = (
+            "Could not compute log_likelihood, it will be omitted. "
+            "Check your model object or set log_likelihood=False"
+        )
+        if self.posterior_trace:
+            try:
+                data = self._extract_log_likelihood(self.posterior_trace)
+            except TypeError:
+                warnings.warn(warn_msg)
+        if self.warmup_trace:
+            try:
+                data_warmup = self._extract_log_likelihood(self.warmup_trace)
+            except TypeError:
+                warnings.warn(warn_msg)
         return (
             dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords),
             dict_to_dataset(data_warmup, library=self.pymc3, dims=self.dims, coords=self.coords),

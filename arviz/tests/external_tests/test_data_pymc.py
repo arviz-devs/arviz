@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access
 from sys import version_info
 from typing import Dict, Tuple
 
@@ -405,36 +405,40 @@ class TestPyMC3WarmupHandling:
         reason="requires pymc3 3.9 or higher",
     )
     @pytest.mark.parametrize("save_warmup", [False, True])
-    def test_save_warmup(self, save_warmup):
+    @pytest.mark.parametrize("chains", [1, 2])
+    @pytest.mark.parametrize("tune,draws", [(0, 50), (10, 40), (30, 0)])
+    def test_save_warmup(self, save_warmup, chains, tune, draws):
         with pm.Model():
             pm.Uniform("u1")
             pm.Normal("n1")
             trace = pm.sample(
-                tune=100,
-                draws=200,
-                chains=2,
+                tune=tune,
+                draws=draws,
+                chains=chains,
                 cores=1,
                 step=pm.Metropolis(),
                 discard_tuned_samples=False,
             )
             assert isinstance(trace, pm.backends.base.MultiTrace)
             idata = from_pymc3(trace, save_warmup=save_warmup)
-        prefix = "" if save_warmup else "~"
+        warmup_prefix = "" if save_warmup and (tune > 0) else "~"
+        post_prefix = "" if draws > 0 else "~"
         test_dict = {
-            "posterior": ["u1", "n1"],
-            "sample_stats": ["~tune", "accept"],
-            f"{prefix}warmup_posterior": ["u1", "n1"],
-            f"{prefix}warmup_sample_stats": ["~tune"],
+            f"{post_prefix}posterior": ["u1", "n1"],
+            f"{post_prefix}sample_stats": ["~tune", "accept"],
+            f"{warmup_prefix}warmup_posterior": ["u1", "n1"],
+            f"{warmup_prefix}warmup_sample_stats": ["~tune"],
             "~warmup_log_likelihood": [],
             "~log_likelihood": [],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert idata.posterior.dims["chain"] == 2
-        assert idata.posterior.dims["draw"] == 200
-        if save_warmup:
-            assert idata.warmup_posterior.dims["chain"] == 2
-            assert idata.warmup_posterior.dims["draw"] == 100
+        if hasattr(idata, "posterior"):
+            assert idata.posterior.dims["chain"] == chains
+            assert idata.posterior.dims["draw"] == draws
+        if hasattr(idata, "warmup_posterior"):
+            assert idata.warmup_posterior.dims["chain"] == chains
+            assert idata.warmup_posterior.dims["draw"] == tune
 
     @pytest.mark.skipif(
         hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
@@ -458,8 +462,16 @@ class TestPyMC3WarmupHandling:
             # making from_pymc3 fall back to len(trace) and triggering a warning
             with pytest.warns(UserWarning, match="Warmup samples"):
                 idata = from_pymc3(trace, save_warmup=True)
-            assert idata.posterior.dims["draw"] == 300
-            assert idata.posterior.dims["chain"] == 2
+        test_dict = {
+            "posterior": ["u1", "n1"],
+            "sample_stats": ["~tune", "accept"],
+            "~warmup_posterior": [],
+            "~warmup_sample_stats": [],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert idata.posterior.dims["draw"] == 300
+        assert idata.posterior.dims["chain"] == 2
 
     @pytest.mark.skipif(
         not hasattr(pm.backends.base.SamplerReport, "n_draws"),
@@ -482,11 +494,27 @@ class TestPyMC3WarmupHandling:
 
             # from original trace, warmup draws should be separated out
             idata = from_pymc3(trace, save_warmup=True)
+            test_dict = {
+                "posterior": ["u1", "n1"],
+                "sample_stats": ["~tune", "accept"],
+                "warmup_posterior": ["u1", "n1"],
+                "warmup_sample_stats": ["~tune", "accept"],
+            }
+            fails = check_multiple_attrs(test_dict, idata)
+            assert not fails
             assert idata.posterior.dims["chain"] == 2
             assert idata.posterior.dims["draw"] == 200
 
             # manually sliced trace triggers the same warning as <=3.8
             with pytest.warns(UserWarning, match="Warmup samples"):
                 idata = from_pymc3(trace[-30:], save_warmup=True)
+            test_dict = {
+                "posterior": ["u1", "n1"],
+                "sample_stats": ["~tune", "accept"],
+                "~warmup_posterior": [],
+                "~warmup_sample_stats": [],
+            }
+            fails = check_multiple_attrs(test_dict, idata)
+            assert not fails
             assert idata.posterior.dims["chain"] == 2
             assert idata.posterior.dims["draw"] == 30
