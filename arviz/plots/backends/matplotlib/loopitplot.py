@@ -66,6 +66,7 @@ def plot_loo_pit(
             ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)
         ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
         ax.set_xlim(0, 1)
+        ax.set_ylim(0, None)
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
         if not (use_hdi or (ecdf and ecdf_fill)):
