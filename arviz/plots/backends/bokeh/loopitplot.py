@@ -1,10 +1,10 @@
 """Bokeh loopitplot."""
 import bokeh.plotting as bkp
+from bokeh.models import BoxAnnotation
 import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...hdiplot import plot_hdi
 from ...kdeplot import _fast_kde
 
 
@@ -21,8 +21,8 @@ def plot_loo_pit(
     ecdf_fill,
     use_hdi,
     x_vals,
-    unif_densities,
     hdi_kwargs,
+    hdi_odds,
     n_unif,
     unif,
     plot_unif_kwargs,
@@ -43,7 +43,7 @@ def plot_loo_pit(
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(**backend_kwargs)
+        ax = bkp.figure(x_range=(0, 1), **backend_kwargs)
 
     if ecdf:
         if plot_kwargs.get("drawstyle") == "steps-mid":
@@ -115,20 +115,21 @@ def plot_loo_pit(
                 )
     else:
         if use_hdi:
-            plot_hdi(
-                x_vals,
-                unif_densities,
-                backend="bokeh",
-                ax=ax,
-                backend_kwargs={},
-                show=False,
-                **hdi_kwargs
+            ax.add_layout(
+                BoxAnnotation(
+                    bottom=hdi_odds[1],
+                    top=hdi_odds[0],
+                    fill_alpha=hdi_kwargs.pop("alpha"),
+                    fill_color=hdi_kwargs.pop("color"),
+                    **hdi_kwargs
+                )
             )
         else:
             for idx in range(n_unif):
-                unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
+                unif_density, xmin, xmax = _fast_kde(unif[idx, :])
+                x_s = np.linspace(xmin, xmax, len(unif_density))
                 ax.line(
-                    x_vals,
+                    x_s,
                     unif_density,
                     line_color=plot_unif_kwargs.get("color", "black"),
                     line_alpha=plot_unif_kwargs.get("alpha", 0.1),
