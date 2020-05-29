@@ -211,7 +211,7 @@ def plot_loo_pit(
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
         x_vals = np.linspace(xmin, xmax, len(loo_pit_kde))
         if use_hdi:
-            n_obs = len(loo_pit_kde)
+            n_obs = loo_pit.size
             hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - credible_interval) / 2)
             hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
             if hdi_kwargs is None:

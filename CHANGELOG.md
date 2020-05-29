@@ -11,9 +11,13 @@
 ### Documentation
 
 ## v0.8.3 (2020 May 28)
+### New features
+* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215) 
+
 ### Maintenance and fixes
 * Restructured internals of `from_pymc3` to handle old pymc3 releases and
   sliced traces and to provide useful warnings (#1211)
+
 
 ## v0.8.2 (2020 May 25)
 ### Maintenance and fixes
