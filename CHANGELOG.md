@@ -5,6 +5,8 @@
 ### New features
 
 ### Maintenance and fixes
+* Include data from `MultiObservedRV` to `observed_data` when using
+  `from_pymc3` (#1098)
 
 ### Deprecation
 
