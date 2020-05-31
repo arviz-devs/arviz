@@ -13,7 +13,7 @@ developed openly and hosted in public GitHub repositories under the
 [GitHub organization](https://github.com/arviz-devs). Examples of
 Project Software include the ArviZ code and the Documentation, etc. The Services run by the
 Project consist of public websites and web-services that are hosted
-at [https://arviz-devs.github.io/arviz/](https://arviz-devs.github.io/arviz/) 
+at [https://arviz-devs.github.io/arviz/](https://arviz-devs.github.io/arviz/)
 The Project is developed by a team of distributed developers, called
 Contributors. Contributors are individuals who have contributed code,
 documentation, designs or other work to one or more Project repositories.
@@ -23,7 +23,8 @@ reviewing and discussing GitHub Pull Requests and Issues and participating in
 open and public Project discussions on GitHub, Slack, and Gitter chat rooms. The foundation of Project participation is openness
 and transparency.
 
-There have been many Contributors to the Project, whose contributions are listed in the logs of other repositories of the ArviZ and projects.
+There have been many Contributors to the Project, whose contributions are listed in the
+logs of any of the repositories under the ArviZ-devs organization.
 
 The Project Community consists of all Contributors and Users of the Project.
 Contributors work on behalf of and are responsible to the larger Project
@@ -49,7 +50,7 @@ Traditionally, project leadership was unstructured but primarily driven
 by a subset of Core Contributors whose active and consistent
 contributions have been recognized by their receiving “commit rights” to the
 Project GitHub repositories. In general all Project decisions are made through
-consensus among the Core Contributors with input from the Community. 
+consensus among the Core Contributors with input from the Community.
 
 While this approach has served us well, as the Project grows and faces more
 legal and financial decisions and interacts with other institutions, we see a
@@ -73,7 +74,7 @@ of _enforcing_ the Code of Conduct to maintain a safe community.
 
 Random Variables Council
 ------------------------
-The Project will have a Steering Council that consists of Project Contributors
+The Project will have a Steering Council that consists of Core Contributors
 who have produced contributions that are substantial in quality and quantity,
 and sustained over at least one year. The overall role of the Council is to
 ensure, taking input from the Community, the
@@ -123,7 +124,7 @@ interests include, but are not limited to:
 All members of the Council shall disclose to the rest of the
 Council any conflict of interest they may have. Members with a conflict of
 interest in a particular issue may participate in Council discussions on that
-issue, but must recuse themselves from voting on the issue. 
+issue, but must recuse themselves from voting on the issue.
 
 ### Council Selection Process
 
@@ -156,13 +157,14 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * In the event of a vacancy in the council, an election will be held to fill the position.
 
 #### Vote of No Confidence
-* In exceptional circumstances, council members as well as core contributors may remove a sitting council member via a vote of no confidence. Core contributors can also call for a vote to remove the entire council -- in which case, only Core contributors vote.
+* In exceptional circumstances, council members as well as core contributors may remove a sitting council member via a vote of no confidence. Core contributors can also call for a vote to remove the entire council -- in which case, Council Members do not vote.
 * A no-confidence vote is triggered when a core team member (i.e Council member or Core contributor) calls for one publicly on an appropriate project communication channel, and two other core team members second the proposal. The initial call for a no-confidence vote must specify which type is intended -- whether it is targeting a single member or the council as a whole.
 * The vote lasts for two weeks, and the people taking part in it vary:
-* If this is a single-member vote called by Core contributors, both Council members and Core contributors vote, and the vote is deemed successful if at least two thirds of voters express a lack of confidence.
-* If this is a whole-council vote, then it was necessarily called by Core contributors (since Council members can’t remove the whole Council) and only Core contributors vote. The vote is deemed successful if at least two thirds of voters express a lack of confidence.
-* If this is a single-member vote called by Council Members, only Council Members vote, and the vote is deemed successful if at least half the voters express a lack of confidence. Council Members also have the possibility to call for the whole core team to vote (i.e Council members and Core contributors), although this is not the default option. The threshold for successful vote is also at 50% of voters for this option.
-* If a single-member vote succeeds, then that member is removed from the council and the resulting vacancy can be handled in the usual way. If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
+  * If this is a single-member vote called by Core contributors, both Council members and Core contributors vote, and the vote is deemed successful if at least two thirds of voters express a lack of confidence.
+  * If this is a whole-council vote, then it was necessarily called by Core contributors (since Council members can’t remove the whole Council) and only Core contributors vote. The vote is deemed successful if at least two thirds of voters express a lack of confidence.
+  * If this is a single-member vote called by Council Members, only Council Members vote, and the vote is deemed successful if at least half the voters express a lack of confidence. Council Members also have the possibility to call for the whole core team to vote (i.e Council members and Core contributors), although this is not the default option. The threshold for successful vote is also at 50% of voters for this option.
+* If a single-member vote succeeds, then that member is removed from the council and the resulting vacancy can be handled in the usual way.
+* If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
 
 #### Ejecting Core Contributors
 * Core contributors can be ejected through a simple majority vote by the council
@@ -173,7 +175,7 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
   * Signatures majority of council members to validate correctness and accuracy
 * Core contributors can also voluntarily leave the project by notifying the community through a public means or by notifying the entire council.
 
-#### One Time Decisions
+### One Time Decisions
 * The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
   * At the conclusion of the vote this section should be removed
 
@@ -186,8 +188,8 @@ Voting for first election is restricted to establish stable governance, and to d
 
 ### Core Contributors
 Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
-These can be, but are not limited to, code contributions, community contributions, tutorial 
-development etc. 
+These can be, but are not limited to, code contributions, community contributions, tutorial
+development etc.
 
 #### Core Contributor Nominations and Confirmation Process
 Current Core Contributors can nominate candidates for consideration by the council. The council
@@ -198,5 +200,5 @@ can make the determination for acceptance with a process of their choosing.
 
 #### Core Contributor Responsibilities
 * Enforce code of conduct
-* Maintain a check against Council 
+* Maintain a check against Council
 
