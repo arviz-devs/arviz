@@ -28,7 +28,7 @@ with exception of email
    * Without an acknowledgement, they will not be a candidate in the election.
    * A nomination can be explicitly declined as well in a comment, if that individual
    feels they will not be able serve as a Council Member for any reason
-4. At the end week all nominations will be compiled in last comment
+4. At the end of the week, all nominations will be compiled in last comment.
 
 
 ### First Round Election for Council and Council size (1 week)
