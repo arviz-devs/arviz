@@ -9,7 +9,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
-from ..utils import _subset_list, html_templates
+from ..utils import _subset_list, HTML_Template
 from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
@@ -125,7 +125,7 @@ class InferenceData:
                     self._groups_warmup.append(key)
 
     def __repr__(self):
-        """Make string representation of object."""
+        """Make string representation of InferenceData object."""
         msg = "Inference data with groups:\n\t> {options}".format(
             options="\n\t> ".join(self._groups)
         )
@@ -134,16 +134,22 @@ class InferenceData:
         return msg
 
     def _repr_html_(self):
-        """Make html representation of object"""
+        """Make html representation of InferenceData object"""
+        from xarray.core.options import OPTIONS
+
+        display_style = OPTIONS["display_style"]
         xr.set_options(display_style="html")
-        html_template, element_template, css_template = html_templates(self)
-        template, elements = "", ""
-        for data_group in self._groups:
-            func = getattr(self, data_group)
-            elements += element_template.format(data_group, func._repr_html_())
-        template += html_template.format(elements)
-        template += css_template
-        return template
+        elements = "".join(
+            [
+                HTML_Template.element_template.format(group, getattr(self, group)._repr_html_())
+                for group in self._groups_all
+            ]
+        )
+        formatted_html_template = HTML_Template.html_template.format(elements)
+        css_template = HTML_Template.css_template
+        html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+        xr.set_options(display_style=display_style)
+        return html_repr
 
     def __delattr__(self, group):
         """Delete a group from the InferenceData object."""

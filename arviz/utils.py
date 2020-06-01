@@ -667,7 +667,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
     return hdi_prob
 
 
-def html_templates():
+class HTML_Template:
     html_template = """
             <div>
               <div class='xr-header'>
@@ -679,8 +679,8 @@ def html_templates():
     element_template = """
             <ul class="xr-sections">
             <li class = "xr-section-item">
-                  <input id="xr-dataset-coord_{0}" class="xr-section-summary-in" type="checkbox">
-                  <label for="xr-dataset-coord_{0}" class = "xr-section-summary">{0}</label>
+                  <input id="idata_{0}" class="xr-section-summary-in" type="checkbox">
+                  <label for="idata_{0}" class = "xr-section-summary">{0}</label>
                   <div class="xr-section-inline-details"></div>
                   <div class="xr-section-details">
                       <ul id="xr-dataset-coord-list" class="xr-var-list">
@@ -696,4 +696,3 @@ def html_templates():
         + ".xr-wrap{width:700px!important;}"
         + "</style>"
     )
-    return html_template, element_template, css_template
