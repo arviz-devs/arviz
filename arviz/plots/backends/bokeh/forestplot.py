@@ -14,7 +14,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
-from ....stats import hpd
+from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ....utils import conditional_jit
@@ -40,7 +40,7 @@ def plot_forest(
     markersize,
     kind,
     ncols,
-    credible_interval,
+    hdi_prob,
     quartiles,
     rope,
     ridgeplot_overlap,
@@ -115,7 +115,7 @@ def plot_forest(
 
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval, quartiles, linewidth, markersize, axes[0, 0], rope,
+            hdi_prob, quartiles, linewidth, markersize, axes[0, 0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -345,12 +345,12 @@ class PlotHandler:
 
         return ax
 
-    def forestplot(self, credible_interval, quartiles, linewidth, markersize, ax, rope):
+    def forestplot(self, hdi_prob, quartiles, linewidth, markersize, ax, rope):
         """Draw forestplot for each plotter.
 
         Parameters
         ----------
-        credible_interval : float
+        hdi_prob : float
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
@@ -394,14 +394,14 @@ class PlotHandler:
                 "iterable of length 2"
             )
         # Quantiles to be calculated
-        endpoint = 100 * (1 - credible_interval) / 2
+        endpoint = 100 * (1 - hdi_prob) / 2
         if quartiles:
             qlist = [endpoint, 25, 50, 75, 100 - endpoint]
         else:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, hdi_prob):
                 if isinstance(rope, dict):
                     self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
@@ -417,7 +417,7 @@ class PlotHandler:
                     x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
                 )
         _title = Title()
-        _title.text = "{:.1%} Credible Interval".format(credible_interval)
+        _title.text = "{:.1%} hdi".format(hdi_prob)
         ax.title = _title
 
         return ax
@@ -544,11 +544,11 @@ class VarHandler:
             colors.append(data[0][2])  # the colors are all the same
         return labels, ticks, vals, colors
 
-    def treeplot(self, qlist, credible_interval):
+    def treeplot(self, qlist, hdi_prob):
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval, multimodal=False)
+            ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):

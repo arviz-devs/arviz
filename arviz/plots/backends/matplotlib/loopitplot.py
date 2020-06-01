@@ -4,7 +4,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
 from ....numeric_utils import _fast_kde
-from ...hpdplot import plot_hpd
+from ...hdiplot import plot_hdi
 
 
 def plot_loo_pit(
@@ -18,10 +18,10 @@ def plot_loo_pit(
     p025,
     fill_kwargs,
     ecdf_fill,
-    use_hpd,
+    use_hdi,
     x_vals,
     unif_densities,
-    hpd_kwargs,
+    hdi_kwargs,
     n_unif,
     unif,
     plot_unif_kwargs,
@@ -54,8 +54,8 @@ def plot_loo_pit(
         else:
             ax.plot(unif_ecdf, p975 - unif_ecdf, unif_ecdf, p025 - unif_ecdf, **plot_unif_kwargs)
     else:
-        if use_hpd:
-            plot_hpd(x_vals, unif_densities, **hpd_kwargs)
+        if use_hdi:
+            plot_hdi(x_vals, unif_densities, **hdi_kwargs)
         else:
             for idx in range(n_unif):
                 unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
@@ -64,7 +64,7 @@ def plot_loo_pit(
 
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
-        if not (use_hpd or (ecdf and ecdf_fill)):
+        if not (use_hdi or (ecdf and ecdf_fill)):
             label = "{:.3g}% credible interval".format(credible_interval) if ecdf else "Uniform"
             ax.plot([], label=label, **plot_unif_kwargs)
         ax.legend()

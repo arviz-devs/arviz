@@ -283,6 +283,9 @@ def from_pyro(
 ):
     """Convert Pyro data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_pyro </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : pyro.infer.MCMC

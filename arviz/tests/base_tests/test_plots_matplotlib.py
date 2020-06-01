@@ -34,7 +34,7 @@ from ...plots import (
     plot_compare,
     plot_kde,
     plot_khat,
-    plot_hpd,
+    plot_hdi,
     plot_dist,
     plot_rank,
     plot_elpd,
@@ -93,20 +93,24 @@ def fig_ax():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hdi_prob": 0.94},
+        {"hdi_prob": 1},
         {"outline": True},
         {"colors": ["g", "b", "r", "y"]},
         {"colors": "k"},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
         {"transform": lambda x: x + 1},
+        {"ax": plt.subplots(6, 3)[1]},
     ],
 )
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
-    assert axes.shape[0] >= 18
+    if "ax" in kwargs:
+        assert axes.shape == (6, 3)
+    else:
+        assert axes.shape[0] >= 18
 
 
 def test_plot_density_discrete(discrete_model):
@@ -131,7 +135,7 @@ def test_plot_density_bad_kwargs(models):
         plot_density(obj, data_labels=["bad_value_{}".format(i) for i in range(len(obj) + 10)])
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2)
+        plot_density(obj, hdi_prob=2)
 
 
 @pytest.mark.parametrize(
@@ -184,9 +188,9 @@ def test_plot_trace_discrete(discrete_model):
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
-        with rc_context(rc={"plot.max_subplots": 1}):
+        with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_trace(models.model_1)
-    assert axes.shape
+    assert axes.shape == (3, 2)
 
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
@@ -239,6 +243,11 @@ def test_plot_forest_rope_exception():
 
 def test_plot_forest_single_value():
     axes = plot_forest({"x": [1]})
+    assert axes.shape
+
+
+def test_plot_forest_ridge_discrete(discrete_model):
+    axes = plot_forest(discrete_model, kind="ridgeplot")
     assert axes.shape
 
 
@@ -467,6 +476,21 @@ def test_plot_pair_overlaid(models, kwargs):
     ax2 = plot_pair(models.model_2, ax=ax, **kwargs)
     assert ax is ax2
     assert ax.shape
+
+
+@pytest.mark.parametrize("marginals", [True, False])
+@pytest.mark.parametrize("max_subplots", [True, False])
+def test_plot_pair_shapes(marginals, max_subplots):
+    rng = np.random.default_rng()
+    idata = from_dict({"a": rng.standard_normal((4, 500, 5))})
+    if max_subplots:
+        with rc_context({"plot.max_subplots": 6}):
+            with pytest.warns(UserWarning, match="3x3 grid"):
+                ax = plot_pair(idata, marginals=marginals)
+    else:
+        ax = plot_pair(idata, marginals=marginals)
+    side = 3 if max_subplots else (4 + marginals)
+    assert ax.shape == (side, side)
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
@@ -720,6 +744,7 @@ def test_plot_rank(models, kwargs):
         {"rope": {"mu": [{"rope": (-2, 2)}], "theta": [{"school": "Choate", "rope": (2, 4)}]}},
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
+        {"hdi_prob": "hide"},
         {"point_estimate": None},
         {"ref_val": 0},
         {"ref_val": None},
@@ -804,8 +829,8 @@ def test_plot_compare_no_ic(models):
         {"smooth": False},
     ],
 )
-def test_plot_hpd(models, data, kwargs):
-    plot_hpd(data["y"], models.model_1.posterior["theta"], **kwargs)
+def test_plot_hdi(models, data, kwargs):
+    plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
@@ -1075,9 +1100,9 @@ def test_plot_ess_no_divergences(models):
     [
         {},
         {"n_unif": 50, "legend": False},
-        {"use_hpd": True, "color": "gray"},
-        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"ls": "--"}},
-        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"use_hdi": True, "color": "gray"},
+        {"use_hdi": True, "credible_interval": 0.68, "plot_kwargs": {"ls": "--"}},
+        {"use_hdi": True, "hdi_kwargs": {"smooth": False}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"ls": "--"}},
         {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"hatch": "/"}},
@@ -1089,9 +1114,9 @@ def test_plot_loo_pit(models, kwargs):
 
 
 def test_plot_loo_pit_incompatible_args(models):
-    """Test error when both ecdf and use_hpd are True."""
+    """Test error when both ecdf and use_hdi are True."""
     with pytest.raises(ValueError, match="incompatible"):
-        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hpd=True)
+        plot_loo_pit(idata=models.model_1, y="y", ecdf=True, use_hdi=True)
 
 
 @pytest.mark.parametrize(

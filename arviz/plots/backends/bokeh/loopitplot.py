@@ -4,7 +4,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...hpdplot import plot_hpd
+from ...hdiplot import plot_hdi
 from ...kdeplot import _fast_kde
 
 
@@ -19,10 +19,10 @@ def plot_loo_pit(
     p025,
     fill_kwargs,
     ecdf_fill,
-    use_hpd,
+    use_hdi,
     x_vals,
     unif_densities,
-    hpd_kwargs,
+    hdi_kwargs,
     n_unif,
     unif,
     plot_unif_kwargs,
@@ -114,15 +114,15 @@ def plot_loo_pit(
                     line_width=plot_unif_kwargs.get("linewidth", 1.0),
                 )
     else:
-        if use_hpd:
-            plot_hpd(
+        if use_hdi:
+            plot_hdi(
                 x_vals,
                 unif_densities,
                 backend="bokeh",
                 ax=ax,
                 backend_kwargs={},
                 show=False,
-                **hpd_kwargs
+                **hdi_kwargs
             )
         else:
             for idx in range(n_unif):

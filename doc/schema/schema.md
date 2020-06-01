@@ -118,5 +118,5 @@ Parameters of the sampling algorithm and sampling backend to be used for analysi
 ## Examples
 In order to clarify the definitions above, an example of `InferenceData` generation for a 1D linear regression is available in several programming languages and probabilistic programming frameworks. This particular inference task has been chosen because it is widely well known while still being useful and it also allows to populate all the fields in the `InferenceData` object.
 * Python
-  - [PyMC3 example](PyMC3_schema_example.ipynb)
-  - [PyStan example](PyStan_schema_example.ipynb)
+  - [PyMC3 example](PyMC3_schema_example)
+  - [PyStan example](PyStan_schema_example)

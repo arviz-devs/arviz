@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
@@ -29,7 +29,7 @@ def plot_posterior(
     kind,
     point_estimate,
     round_to,
-    credible_interval,
+    hdi_prob,
     multimodal,
     ref_val,
     rope,
@@ -63,7 +63,7 @@ def plot_posterior(
             kind=kind,
             point_estimate=point_estimate,
             round_to=round_to,
-            credible_interval=credible_interval,
+            hdi_prob=hdi_prob,
             multimodal=multimodal,
             ref_val=ref_val,
             rope=rope,
@@ -91,7 +91,7 @@ def _plot_posterior_op(
     bins,
     kind,
     point_estimate,
-    credible_interval,
+    hdi_prob,
     multimodal,
     ref_val,
     rope,
@@ -195,39 +195,37 @@ def _plot_posterior_op(
             horizontalalignment="center",
         )
 
-    def display_hpd():
+    def display_hdi():
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hpd_intervals = hpd(
-            values, credible_interval=credible_interval, multimodal=multimodal
-        )  # type: np.ndarray
+        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
 
-        for hpdi in np.atleast_2d(hpd_intervals):
+        for hdi_i in np.atleast_2d(hdi_probs):
             ax.plot(
-                hpdi,
+                hdi_i,
                 (plot_height * 0.02, plot_height * 0.02),
                 lw=linewidth * 2,
                 color="k",
                 solid_capstyle="butt",
             )
             ax.text(
-                hpdi[0],
+                hdi_i[0],
                 plot_height * 0.07,
-                round_num(hpdi[0], round_to),
+                round_num(hdi_i[0], round_to),
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
             ax.text(
-                hpdi[1],
+                hdi_i[1],
                 plot_height * 0.07,
-                round_num(hpdi[1], round_to),
+                round_num(hdi_i[1], round_to),
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
             ax.text(
-                (hpdi[0] + hpdi[1]) / 2,
+                (hdi_i[0] + hdi_i[1]) / 2,
                 plot_height * 0.3,
-                format_as_percent(credible_interval) + " HPD",
+                format_as_percent(hdi_prob) + " HDI",
                 size=ax_labelsize,
                 horizontalalignment="center",
             )
@@ -271,8 +269,8 @@ def _plot_posterior_op(
     plot_height = ax.get_ylim()[1]
 
     format_axes()
-    if credible_interval is not None:
-        display_hpd()
+    if hdi_prob != "hide":
+        display_hdi()
     display_point_estimate()
     display_ref_val()
     display_rope()

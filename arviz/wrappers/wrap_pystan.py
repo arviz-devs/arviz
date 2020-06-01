@@ -7,7 +7,7 @@ from ..data import from_pystan
 class PyStanSamplingWrapper(SamplingWrapper):
     """PyStan sampling wrapper base class.
 
-    See the documentation on  :ref:`wrappers_api` for a more detailed
+    See the documentation on  :class:`~arviz.SamplingWrapper` for a more detailed
     description. An example of ``PyStanSamplingWrapper`` usage can be found
     in the :doc:`pystan_refitting <../notebooks/pystan_refitting>`.
 

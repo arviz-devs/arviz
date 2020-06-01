@@ -15,7 +15,7 @@ from ...plot_utils import (
     round_num,
     calculate_point_estimate,
 )
-from ....stats import hpd
+from ....stats import hdi
 from ....numeric_utils import get_bins
 
 
@@ -31,7 +31,7 @@ def plot_posterior(
     kind,
     point_estimate,
     round_to,
-    credible_interval,
+    hdi_prob,
     multimodal,
     ref_val,
     rope,
@@ -75,7 +75,7 @@ def plot_posterior(
             kind=kind,
             point_estimate=point_estimate,
             round_to=round_to,
-            credible_interval=credible_interval,
+            hdi_prob=hdi_prob,
             multimodal=multimodal,
             ref_val=ref_val,
             rope=rope,
@@ -103,7 +103,7 @@ def _plot_posterior_op(
     bins,
     kind,
     point_estimate,
-    credible_interval,
+    hdi_prob,
     multimodal,
     ref_val,
     rope,
@@ -195,26 +195,24 @@ def _plot_posterior_op(
 
         ax.text(x=[point_value], y=[max_data * 0.8], text=[point_text], text_align="center")
 
-    def display_hpd(max_data):
+    def display_hdi(max_data):
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hpd_intervals = hpd(
-            values, credible_interval=credible_interval, multimodal=multimodal
-        )  # type: np.ndarray
+        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
 
-        for hpdi in np.atleast_2d(hpd_intervals):
+        for hdi_i in np.atleast_2d(hdi_probs):
             ax.line(
-                hpdi,
+                hdi_i,
                 (max_data * 0.02, max_data * 0.02),
                 line_width=linewidth * 2,
                 line_color="black",
             )
 
             ax.text(
-                x=list(hpdi) + [(hpdi[0] + hpdi[1]) / 2],
+                x=list(hdi_i) + [(hdi_i[0] + hdi_i[1]) / 2],
                 y=[max_data * 0.07, max_data * 0.07, max_data * 0.3],
-                text=list(map(str, map(lambda x: round_num(x, round_to), hpdi)))
-                + [format_as_percent(credible_interval) + " HPD"],
+                text=list(map(str, map(lambda x: round_num(x, round_to), hdi_i)))
+                + [format_as_percent(hdi_prob) + " HDI"],
                 text_align="center",
             )
 
@@ -255,8 +253,8 @@ def _plot_posterior_op(
 
     format_axes()
     max_data = hist.max()
-    if credible_interval is not None:
-        display_hpd(max_data)
+    if hdi_prob != "hide":
+        display_hdi(max_data)
     display_point_estimate(max_data)
     display_ref_val(max_data)
     display_rope(max_data)

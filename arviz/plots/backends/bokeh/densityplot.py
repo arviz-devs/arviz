@@ -11,7 +11,7 @@ from ...plot_utils import (
     _create_axes_grid,
     calculate_point_estimate,
 )
-from ....stats import hpd
+from ....stats import hdi
 from ....numeric_utils import _fast_kde, histogram, get_bins
 
 
@@ -27,9 +27,9 @@ def plot_density(
     cols,
     line_width,
     markersize,
-    credible_interval,
+    hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     data_labels,
@@ -82,9 +82,9 @@ def plot_density(
                 bw,
                 line_width,
                 markersize,
-                credible_interval,
+                hdi_prob,
                 point_estimate,
-                hpd_markers,
+                hdi_markers,
                 outline,
                 shade,
                 axis_map[label],
@@ -109,9 +109,9 @@ def _d_helper(
     bw,
     line_width,
     markersize,
-    credible_interval,
+    hdi_prob,
     point_estimate,
-    hpd_markers,
+    hdi_markers,
     outline,
     shade,
     ax,
@@ -121,14 +121,14 @@ def _d_helper(
     plotted = []
 
     if vec.dtype.kind == "f":
-        if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval, multimodal=False)
-            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
+        if hdi_prob != 1:
+            hdi_ = hdi(vec, hdi_prob, multimodal=False)
+            new_vec = vec[(vec >= hdi_[0]) & (vec <= hdi_[1])]
         else:
             new_vec = vec
 
         density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= credible_interval
+        density *= hdi_prob
         x = np.linspace(xmin, xmax, len(density))
         ymin = density[0]
         ymax = density[-1]
@@ -172,7 +172,7 @@ def _d_helper(
             )
 
     else:
-        xmin, xmax = hpd(vec, credible_interval, multimodal=False)
+        xmin, xmax = hdi(vec, hdi_prob, multimodal=False)
         bins = get_bins(vec)
 
         _, hist, edges = histogram(vec, bins=bins)
@@ -207,7 +207,7 @@ def _d_helper(
                 )
             )
 
-    if hpd_markers:
+    if hdi_markers:
         plotted.append(ax.diamond(xmin, 0, line_color="black", fill_color=color, size=markersize))
         plotted.append(ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize))
 

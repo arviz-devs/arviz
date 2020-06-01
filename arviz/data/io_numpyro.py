@@ -301,6 +301,9 @@ def from_numpyro(
 ):
     """Convert NumPyro data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_numpyro </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : numpyro.mcmc.MCMC

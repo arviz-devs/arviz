@@ -1,16 +1,16 @@
-"""Matplotlib hpdplot."""
+"""Matplotlib hdiplot."""
 import warnings
 import matplotlib.pyplot as plt
 
 from . import backend_show
 
 
-def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
-    """Matplotlib hpd plot."""
+def plot_hdi(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
+    """Matplotlib hdi plot."""
     if backend_kwargs is not None:
         warnings.warn(
             (
-                "Argument backend_kwargs has not effect in matplotlib.plot_hpd"
+                "Argument backend_kwargs has not effect in matplotlib.plot_hdi"
                 "Supplied value won't be used"
             )
         )

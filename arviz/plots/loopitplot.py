@@ -22,7 +22,7 @@ def plot_loo_pit(
     ecdf=False,
     ecdf_fill=True,
     n_unif=100,
-    use_hpd=False,
+    use_hdi=False,
     credible_interval=None,
     figsize=None,
     textsize=None,
@@ -31,7 +31,7 @@ def plot_loo_pit(
     ax=None,
     plot_kwargs=None,
     plot_unif_kwargs=None,
-    hpd_kwargs=None,
+    hdi_kwargs=None,
     fill_kwargs=None,
     backend=None,
     backend_kwargs=None,
@@ -64,10 +64,10 @@ def plot_loo_pit(
         border lines.
     n_unif : int, optional
         Number of datasets to simulate and overlay from the uniform distribution.
-    use_hpd : bool, optional
-        Use plot_hpd to fill between hpd values instead of overlaying the uniform distributions.
+    use_hdi : bool, optional
+        Use plot_hdi to fill between hdi values instead of overlaying the uniform distributions.
     credible_interval : float, optional
-        Credible interval of the hpd or of the ECDF theoretical credible interval
+        Credible interval of the hdi or of the ECDF theoretical credible interval
     figsize : figure size tuple, optional
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
@@ -85,8 +85,8 @@ def plot_loo_pit(
     plot_unif_kwargs : dict, optional
         Additional keywords passed to ax.plot for overlaid uniform distributions or
         for beta credible interval lines if ``ecdf=True``
-    hpd_kwargs : dict, optional
-        Additional keywords passed to az.plot_hpd
+    hdi_kwargs : dict, optional
+        Additional keywords passed to az.plot_hdi
     fill_kwargs : dict, optional
         Additional kwargs passed to ax.fill_between
     backend: str, optional
@@ -119,7 +119,7 @@ def plot_loo_pit(
         >>> idata = az.load_arviz_data("centered_eight")
         >>> az.plot_loo_pit(idata=idata, y="obs")
 
-    Fill the area containing the 94% credible interval of the difference between uniform
+    Fill the area containing the 94% highest density interval of the difference between uniform
     variables empirical CDF and the real uniform CDF. A LOO-PIT ECDF clearly outside of these
     theoretical boundaries indicates that the observations and the posterior predictive
     samples do not follow the same distribution.
@@ -130,8 +130,8 @@ def plot_loo_pit(
         >>> az.plot_loo_pit(idata=idata, y="obs", ecdf=True)
 
     """
-    if ecdf and use_hpd:
-        raise ValueError("use_hpd is incompatible with ecdf plot")
+    if ecdf and use_hdi:
+        raise ValueError("use_hdi is incompatible with ecdf plot")
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
 
@@ -173,7 +173,7 @@ def plot_loo_pit(
     x_vals = None
 
     if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+        credible_interval = rcParams["stats.hdi_prob"]
     else:
         if not 1 >= credible_interval > 0:
             raise ValueError("The value of credible_interval should be in the interval (0, 1]")
@@ -210,14 +210,14 @@ def plot_loo_pit(
 
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
         x_vals = np.linspace(0, 1, len(loo_pit_kde))
-        if use_hpd:
-            if hpd_kwargs is None:
-                hpd_kwargs = {}
-            hpd_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
-            hpd_fill_kwargs = hpd_kwargs.pop("fill_kwargs", {})
-            hpd_fill_kwargs.setdefault("label", "Uniform HPD")
-            hpd_kwargs["fill_kwargs"] = hpd_fill_kwargs
-            hpd_kwargs["credible_interval"] = credible_interval
+        if use_hdi:
+            if hdi_kwargs is None:
+                hdi_kwargs = {}
+            hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+            hdi_fill_kwargs = hdi_kwargs.pop("fill_kwargs", {})
+            hdi_fill_kwargs.setdefault("label", "Uniform hdi")
+            hdi_kwargs["fill_kwargs"] = hdi_fill_kwargs
+            hdi_kwargs["credible_interval"] = credible_interval
 
             unif_densities = np.empty((n_unif, len(loo_pit_kde)))
 
@@ -232,10 +232,10 @@ def plot_loo_pit(
         p025=p025,
         fill_kwargs=fill_kwargs,
         ecdf_fill=ecdf_fill,
-        use_hpd=use_hpd,
+        use_hdi=use_hdi,
         x_vals=x_vals,
         unif_densities=unif_densities,
-        hpd_kwargs=hpd_kwargs,
+        hdi_kwargs=hdi_kwargs,
         n_unif=n_unif,
         unif=unif,
         plot_unif_kwargs=plot_unif_kwargs,
@@ -255,12 +255,12 @@ def plot_loo_pit(
     if backend == "bokeh":
 
         if (
-            loo_pit_kwargs["hpd_kwargs"] is not None
-            and "fill_kwargs" in loo_pit_kwargs["hpd_kwargs"]
-            and loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"] is not None
-            and "label" in loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"]
+            loo_pit_kwargs["hdi_kwargs"] is not None
+            and "fill_kwargs" in loo_pit_kwargs["hdi_kwargs"]
+            and loo_pit_kwargs["hdi_kwargs"]["fill_kwargs"] is not None
+            and "label" in loo_pit_kwargs["hdi_kwargs"]["fill_kwargs"]
         ):
-            loo_pit_kwargs["hpd_kwargs"]["fill_kwargs"].pop("label")
+            loo_pit_kwargs["hdi_kwargs"]["fill_kwargs"].pop("label")
         loo_pit_kwargs.pop("legend")
         loo_pit_kwargs.pop("xt_labelsize")
         loo_pit_kwargs.pop("credible_interval")

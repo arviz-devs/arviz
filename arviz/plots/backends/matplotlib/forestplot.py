@@ -7,7 +7,7 @@ from matplotlib.colors import to_rgba
 import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
@@ -34,7 +34,7 @@ def plot_forest(
     markersize,
     kind,
     ncols,
-    credible_interval,
+    hdi_prob,
     quartiles,
     rope,
     ridgeplot_overlap,
@@ -91,14 +91,7 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            credible_interval,
-            quartiles,
-            xt_labelsize,
-            titlesize,
-            linewidth,
-            markersize,
-            axes[0],
-            rope,
+            hdi_prob, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -250,9 +243,12 @@ class PlotHandler:
             Width of line on border of ridges
         alpha : float
             Transparency of ridges
-        kind : string
+        ridgeplot_kind : string
             By default ("auto") continuous variables are plotted using KDEs and discrete ones using
             histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        ridgeplot_quantiles: list
+            Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
+            Defaults to None.
         ax : Axes
             Axes to draw on
         """
@@ -297,13 +293,13 @@ class PlotHandler:
         return ax
 
     def forestplot(
-        self, credible_interval, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
+        self, hdi_prob, quartiles, xt_labelsize, titlesize, linewidth, markersize, ax, rope
     ):
         """Draw forestplot for each plotter.
 
         Parameters
         ----------
-        credible_interval : float
+        hdi_prob : float
             How wide each line should be
         quartiles : bool
             Whether to mark quartiles
@@ -319,14 +315,14 @@ class PlotHandler:
             Axes to draw on
         """
         # Quantiles to be calculated
-        endpoint = 100 * (1 - credible_interval) / 2
+        endpoint = 100 * (1 - hdi_prob) / 2
         if quartiles:
             qlist = [endpoint, 25, 50, 75, 100 - endpoint]
         else:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, credible_interval):
+            for y, rope_var, values, color in plotter.treeplot(qlist, hdi_prob):
                 if isinstance(rope, dict):
                     self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
 
@@ -345,9 +341,7 @@ class PlotHandler:
                     color=color,
                 )
         ax.tick_params(labelsize=xt_labelsize)
-        ax.set_title(
-            "{:.1%} Credible Interval".format(credible_interval), fontsize=titlesize, wrap=True
-        )
+        ax.set_title("{:.1%} hdi".format(hdi_prob), fontsize=titlesize, wrap=True)
         if rope is None or isinstance(rope, dict):
             return
         elif len(rope) == 2:
@@ -496,11 +490,11 @@ class VarHandler:
             colors.append(data[0][2])  # the colors are all the same
         return labels, ticks, vals, colors
 
-    def treeplot(self, qlist, credible_interval):
+    def treeplot(self, qlist, hdi_prob):
         """Get data for each treeplot for the variable."""
         for y, _, label, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
-            ntiles[0], ntiles[-1] = hpd(values.flatten(), credible_interval, multimodal=False)
+            ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
     def ridgeplot(self, mult, ridgeplot_kind):
@@ -520,6 +514,7 @@ class VarHandler:
             if kind == "hist":
                 bins = get_bins(values)
                 _, density, x = histogram(values, bins=bins)
+                density_q = density.cumsum() / density.sum()
                 x = x[:-1]
             elif kind == "density":
                 density, lower, upper = _fast_kde(values)

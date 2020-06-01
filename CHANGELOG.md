@@ -3,10 +3,39 @@
 ## v0.x.x Unreleased
 
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.8.3 (2020 May 28)
+### Maintenance and fixes
+* Restructured internals of `from_pymc3` to handle old pymc3 releases and
+  sliced traces and to provide useful warnings (#1211)
+
+## v0.8.2 (2020 May 25)
+### Maintenance and fixes
+* Fixed bug in `from_pymc3` for sliced `pymc3.MultiTrace` input (#1209)
+
+## v0.8.1 (2020 May 24)
+
+### Maintenance and fixes
+* Fixed bug in `from_pymc3` when used with PyMC3<3.9 (#1203)
+* Fixed enforcement of rcParam `plot.max_subplots` in `plot_trace` and
+  `plot_pair` (#1205)
+* Removed extra subplot row and column in in `plot_pair` with `marginal=True` (#1205)
+* Added latest PyMC3 release to CI in addition to using GitHub master (#1207)
+
+### Documentation
+* Use `dev` as version indicator in online documentation (#1204)
+
+## v0.8.0 (2020 May 23)
+
+### New features
 * Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
 * Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
-* Add out-of-sample groups (`predictions` and `predictions_constant_data`) and `constant_data` group to pyro translation #1090
-* Add `num_chains` and `pred_dims` arguments to io_pyro #1090
 * Allow xarray.Dataarray input for plots.(#1120)
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
@@ -17,6 +46,10 @@
 * Integrate jointplot into pairplot, add point-estimate and overlay of plot kinds (#1079)
 * New grayscale style. This also add two new cmaps `cet_grey_r` and `cet_grey_r`. These are perceptually uniform gray scale cmaps from colorcet (linear_grey_10_95_c0) (#1164)
 * Add warmup groups to InferenceData objects, initial support for PyStan (#1126) and PyMC3 (#1171)
+* `hdi_prob` will not plot hdi if argument `hide` is passed. Previously `credible_interval` would omit HPD if `None` was passed  (#1176)
+* Add `stats.ic_pointwise` rcParam (#1173)
+* Add `var_name` argument to information criterion calculation: `compare`,
+  `loo` and `waic` (#1173)
 
 ### Maintenance and fixes
 * Fixed `plot_pair` functionality for two variables with bokeh backend (#1179)
@@ -33,8 +66,12 @@
 * Fixed bug in `plot_posterior` with rcParam "plot.matplotlib.show" = True (#1151)
 * Set `fill_last` argument of `plot_kde` to False by default (#1158)
 * plot_ppc animation: improve docs and error handling (#1162)
+* Fix import error when wrapped function docstring is empty (#1192)
+* Fix passing axes to plot_density with several datasets ([#1198](https://github.com/arviz-devs/arviz/pull/1198))
 
 ### Deprecation
+* `hpd` function deprecated in favor of `hdi`. `credible_interval` argument replaced by `hdi_prob`throughout with exception of `plot_loo_pit` (#1176)
+* `plot_hpd` function deprecated in favor of `plot_hdi`. (#1190)
 
 ### Documentation
 * Add classifier to `setup.py` including Matplotlib framework (#1133)
@@ -42,6 +79,9 @@
 * Add new examples for `plot_pair` (#1110)
 * Add examples for `psislw` and `r2_score` (#1129)
 * Add more examples on 2D kde customization (#1158)
+* Make docs compatible with sphinx3 and configure `intersphinx` for better
+  references (#1184)
+* Extend the developer guide and add it to the website (#1184)
 
 ## v0.7.0 (2020 Mar 2)
 

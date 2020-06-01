@@ -735,6 +735,9 @@ def from_pystan(
 ):
     """Convert PyStan data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_pystan </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : StanFit4Model or stan.fit.Fit

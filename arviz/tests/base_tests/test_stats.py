@@ -13,7 +13,7 @@ from ...stats import (
     apply_test_function,
     compare,
     ess,
-    hpd,
+    hdi,
     loo,
     loo_pit,
     psislw,
@@ -22,6 +22,7 @@ from ...stats import (
     waic,
 )
 from ...stats.stats import _gpinv
+from ...stats.stats_utils import get_log_likelihood
 from ..helpers import check_multiple_attrs, multidim_models  # pylint: disable=unused-import
 
 rcParams["data.load"] = "eager"
@@ -39,83 +40,83 @@ def non_centered_eight():
     return non_centered_eight
 
 
-def test_hpd():
+def test_hdp():
     normal_sample = np.random.randn(5000000)
-    interval = hpd(normal_sample)
+    interval = hdi(normal_sample)
     assert_array_almost_equal(interval, [-1.88, 1.88], 2)
 
 
-def test_hpd_2darray():
+def test_hdp_2darray():
     normal_sample = np.random.randn(12000, 5)
-    result = hpd(normal_sample)
+    result = hdi(normal_sample)
     assert result.shape == (5, 2)
 
 
-def test_hpd_multidimension():
+def test_hdi_multidimension():
     normal_sample = np.random.randn(12000, 10, 3)
-    result = hpd(normal_sample)
+    result = hdi(normal_sample)
     assert result.shape == (3, 2)
 
 
-def test_hpd_idata(centered_eight):
+def test_hdi_idata(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data)
+    result = hdi(data)
     assert isinstance(result, Dataset)
-    assert result.dims == {"school": 8, "hpd": 2}
+    assert dict(result.dims) == {"school": 8, "hdi": 2}
 
-    result = hpd(data, input_core_dims=[["chain"]])
+    result = hdi(data, input_core_dims=[["chain"]])
     assert isinstance(result, Dataset)
-    assert result.dims == {"draw": 500, "hpd": 2, "school": 8}
+    assert result.dims == {"draw": 500, "hdi": 2, "school": 8}
 
 
-def test_hpd_idata_varnames(centered_eight):
+def test_hdi_idata_varnames(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, var_names=["mu", "theta"])
+    result = hdi(data, var_names=["mu", "theta"])
     assert isinstance(result, Dataset)
-    assert result.dims == {"hpd": 2, "school": 8}
+    assert result.dims == {"hdi": 2, "school": 8}
     assert list(result.data_vars.keys()) == ["mu", "theta"]
 
 
-def test_hpd_idata_group(centered_eight):
-    result_posterior = hpd(centered_eight, group="posterior", var_names="mu")
-    result_prior = hpd(centered_eight, group="prior", var_names="mu")
-    assert result_prior.dims == {"hpd": 2}
+def test_hdi_idata_group(centered_eight):
+    result_posterior = hdi(centered_eight, group="posterior", var_names="mu")
+    result_prior = hdi(centered_eight, group="prior", var_names="mu")
+    assert result_prior.dims == {"hdi": 2}
     range_posterior = result_posterior.mu.values[1] - result_posterior.mu.values[0]
     range_prior = result_prior.mu.values[1] - result_prior.mu.values[0]
     assert range_posterior < range_prior
 
 
-def test_hpd_coords(centered_eight):
+def test_hdi_coords(centered_eight):
     data = centered_eight.posterior
-    result = hpd(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
+    result = hdi(data, coords={"chain": [0, 1, 3]}, input_core_dims=[["draw"]])
     assert_array_equal(result.coords["chain"], [0, 1, 3])
 
 
-def test_hpd_multimodal():
+def test_hdi_multimodal():
     normal_sample = np.concatenate(
         (np.random.normal(-4, 1, 2500000), np.random.normal(2, 0.5, 2500000))
     )
-    intervals = hpd(normal_sample, multimodal=True)
+    intervals = hdi(normal_sample, multimodal=True)
     assert_array_almost_equal(intervals, [[-5.8, -2.2], [0.9, 3.1]], 1)
 
 
-def test_hpd_circular():
+def test_hdi_circular():
     normal_sample = np.random.vonmises(np.pi, 1, 5000000)
-    interval = hpd(normal_sample, circular=True)
+    interval = hdi(normal_sample, circular=True)
     assert_array_almost_equal(interval, [0.6, -0.6], 1)
 
 
-def test_hpd_bad_ci():
+def test_hdi_bad_ci():
     normal_sample = np.random.randn(10)
     with pytest.raises(ValueError):
-        hpd(normal_sample, credible_interval=2)
+        hdi(normal_sample, hdi_prob=2)
 
 
-def test_hpd_skipna():
+def test_hdi_skipna():
     normal_sample = np.random.randn(500)
-    interval = hpd(normal_sample[10:])
+    interval = hdi(normal_sample[10:])
     normal_sample[:10] = np.nan
-    interval_ = hpd(normal_sample, skipna=True)
+    interval_ = hdi(normal_sample, skipna=True)
     assert_array_almost_equal(interval, interval_)
 
 
@@ -201,8 +202,8 @@ def test_summary_var_names(centered_eight, var_names_expected):
 METRICS_NAMES = [
     "mean",
     "sd",
-    "hpd_3%",
-    "hpd_97%",
+    "hdi_3%",
+    "hdi_97%",
     "mcse_mean",
     "mcse_sd",
     "ess_mean",
@@ -433,7 +434,7 @@ def test_loo_print(centered_eight, scale):
 
 def test_psislw(centered_eight):
     pareto_k = loo(centered_eight, pointwise=True, reff=0.7)["pareto_k"]
-    log_likelihood = centered_eight.sample_stats.log_likelihood  # pylint: disable=no-member
+    log_likelihood = get_log_likelihood(centered_eight)
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     assert_allclose(pareto_k, psislw(-log_likelihood, 0.7)[1])
 
@@ -493,7 +494,7 @@ def test_loo_pit(centered_eight, args):
     log_weights = args.get("log_weights", None)
     y_arr = centered_eight.observed_data.obs
     y_hat_arr = centered_eight.posterior_predictive.obs.stack(sample=("chain", "draw"))
-    log_like = centered_eight.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+    log_like = get_log_likelihood(centered_eight).stack(sample=("chain", "draw"))
     n_samples = len(log_like.sample)
     ess_p = ess(centered_eight.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
@@ -533,7 +534,7 @@ def test_loo_pit_multidim(multidim_models, args):
     idata = multidim_models.model_1
     y_arr = idata.observed_data.y
     y_hat_arr = idata.posterior_predictive.y.stack(sample=("chain", "draw"))
-    log_like = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+    log_like = get_log_likelihood(idata).stack(sample=("chain", "draw"))
     n_samples = len(log_like.sample)
     ess_p = ess(idata.posterior, method="mean")
     reff = np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples

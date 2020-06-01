@@ -95,6 +95,7 @@ Here is the citation in BibTeX format
     InferenceData schema<schema/schema>
     api
     usage
+    developer_guide
     about
 
 
