@@ -14,7 +14,7 @@ for the following outcomes
 
 ## Process Details
 ### Identification of Core Contributors (1 week)
-1. Google Form will be created to get core contributor names and emails
+1. A Google Form will be created to get core contributor names and emails
     * Emails are needed for Elections steps so NumFOCUS can mail and track votes
     * The Google Form is moderated by Ravin
 2. At conclusion of week Ravin will update PR with all names and make the form's responses public,
