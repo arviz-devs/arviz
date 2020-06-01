@@ -9,7 +9,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
-from ..utils import _subset_list
+from ..utils import _subset_list, html_templates
 from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
@@ -132,6 +132,18 @@ class InferenceData:
         if self._groups_warmup:
             msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
         return msg
+
+    def _repr_html_(self):
+        """Make html representation of object"""
+        xr.set_options(display_style="html")
+        html_template, element_template, css_template = html_templates(self)
+        template, elements = "", ""
+        for data_group in self._groups:
+            func = getattr(self, data_group)
+            elements += element_template.format(data_group, func._repr_html_())
+        template += html_template.format(elements)
+        template += css_template
+        return template
 
     def __delattr__(self, group):
         """Delete a group from the InferenceData object."""
