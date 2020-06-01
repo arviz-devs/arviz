@@ -155,6 +155,7 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * If a council member does not restate their commitment their seat will be vacated.
 * Inactivity can be determined by lack of substantial contribution, including votes on council, code or discussion contributions, contributions in the community or otherwise.
 * In the event of a vacancy in the council, an election will be held to fill the position.
+* There is no limit on the number of terms a Council Member can serve
 
 #### Vote of No Confidence
 * In exceptional circumstances, council members as well as core contributors may remove a sitting council member via a vote of no confidence. Core contributors can also call for a vote to remove the entire council -- in which case, Council Members do not vote.
