@@ -9,7 +9,7 @@ for the following outcomes
 * Nominations for Council Candidates 
 * Council Elections. Particularly
   * Size of Council
-  * Inaugral Arviz Council
+  * Inaugural ArviZ Council
 
 
 ## Process Details
