@@ -27,7 +27,7 @@ with exception of email
 3. Core Contributor must accept acknowledgement with thumbs up on nomination
    * Without an acknowledgement, they will not be a candidate in the election.
    * A nomination can be explicitly declined as well in a comment, if that individual
-   feels they will not be able serve as a Council Member for any reason
+   feels they will not be able to serve as a Council Member for any reason.
 4. At the end of the week, all nominations will be compiled in last comment.
 
 
