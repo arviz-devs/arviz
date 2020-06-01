@@ -41,7 +41,7 @@ a Google Form owned by NumFOCUS. The tallying will be performed in accordance wi
    
  
 ### Tie Votes (1 week)
-In the event of a tie there will be a run off election. 
+In the event of a tie there will be a run-off election. 
 The tallying will be performed in accordance with `GOVERNANCE.md`
 
 1. NumFOCUS will email all registered voters a ballot for a vote on tied candidates
