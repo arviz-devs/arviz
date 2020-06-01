@@ -666,6 +666,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
     hdi_prob = credible_interval
     return hdi_prob
 
+
 def html_templates():
     html_template = """
             <div>
@@ -675,7 +676,7 @@ def html_templates():
               {}
             </div>
             """
-    element_template = '''
+    element_template = """
             <ul class="xr-sections">
             <li class = "xr-section-item">
                   <input id="xr-dataset-coord_{0}" class="xr-section-summary-in" type="checkbox">
@@ -688,6 +689,11 @@ def html_templates():
                   </div>
             </li>
             </ul>
-            '''
-    css_template = "<style>" + xr.core.formatting_html.CSS_STYLE + ".xr-wrap{width:700px!important;}" + "</style>"
+            """
+    css_template = (
+        "<style>"
+        + xr.core.formatting_html.CSS_STYLE
+        + ".xr-wrap{width:700px!important;}"
+        + "</style>"
+    )
     return html_template, element_template, css_template
