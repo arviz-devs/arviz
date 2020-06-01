@@ -102,7 +102,7 @@ ArviZ will be holding its first election to determine its initial council in the
 
 Unless specifically required, all Council discussions and activities will be
 between public (Github, gitter), and partially public channels (Slack)
-and done in collaboration and discussion with the Project Contributors
+and done in collaboration and discussion with the Core Contributors
 and Community. The Council will have a private channel that will be used
 sparingly and only when a specific matter requires privacy. When private
 communications and decisions are needed, the Council will do its best to
