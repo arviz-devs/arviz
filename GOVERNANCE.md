@@ -33,8 +33,7 @@ low as possible.
 
 The Project is formally affiliated with the 501c3 NumFOCUS Foundation
 ([http://numfocus.org](http://numfocus.org)),  NumFOCUS is the
-only legal entity that has a formal relationship with the project (see
-Institutional Partners section below).
+only legal entity that has a formal relationship with the project.
 
 ### Governance
 
