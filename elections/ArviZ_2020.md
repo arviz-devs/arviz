@@ -33,7 +33,7 @@ with exception of email
 
 ### First Round Election for Council and Council size (1 week)
 The first election will be for council and council size. Elections will take place over 
-a Google Forums owned by NumFOCUS. The tallying will be performed in accordance with `GOVERNANCE.md`
+a Google Form owned by NumFOCUS. The tallying will be performed in accordance with `GOVERNANCE.md`
 
 1. NumFOCUS will email all registered voters a ballot for a vote on
     * Council Size
