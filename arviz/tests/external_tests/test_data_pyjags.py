@@ -3,12 +3,12 @@ import pytest
 import typing as tp
 
 import arviz as az
-from arviz.data.io_pyjags import \
-    _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary, \
-    _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary, \
-    _convert_pyjags_samples_dict_to_arviz_inference_data, \
-    _extract_samples_dictionary_from_arviz_inference_data, \
+from arviz.data.io_pyjags import (
+    _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary,
+    _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary,
+    _extract_samples_dictionary_from_arviz_inference_data,
     from_pyjags
+)
 
 
 @pytest.fixture()
