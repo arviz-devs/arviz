@@ -6,6 +6,9 @@
 
 ### Maintenance and fixes
 
+* Added a note on `plot_pair` when trying to use `plot_kde` on `InferenceData`
+    objects.
+
 ### Deprecation
 
 ### Documentation

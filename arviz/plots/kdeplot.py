@@ -182,7 +182,10 @@ def plot_kde(
             "or plot_pair instead of plot_kde"
         )
     if isinstance(values, InferenceData):
-        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
+        raise ValueError(
+            " Inference Data object detected. Use plot_posterior "
+            "or plot_pair instead of plot_kde"
+        )
 
     if values2 is None:
         density, lower, upper = _fast_kde(values, cumulative, bw)
