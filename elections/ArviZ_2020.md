@@ -25,7 +25,7 @@ with exception of email
 1. A github issue labeled *Arviz 2020 Council Elections* will be opened for nominations
 2. Anyone can nominate a core contributor (including general public)
 3. Core Contributor must accept acknowledgement with thumbs up on nomination
-   * Without an acknowledgement they will not be a candidate ni the election
+   * Without an acknowledgement, they will not be a candidate in the election.
    * A nomination can be explicitly declined as well in a comment, if that individual
    feels they will not be able serve as a Council Member for any reason
 4. At the end week all nominations will be compiled in last comment
