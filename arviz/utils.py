@@ -667,7 +667,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
     return hdi_prob
 
 
-class HTML_Template:
+class html_template:
     html_template = """
             <div>
               <div class='xr-header'>

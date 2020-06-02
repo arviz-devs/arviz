@@ -9,7 +9,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 
-from ..utils import _subset_list, HTML_Template
+from ..utils import _subset_list, html_template
 from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
@@ -141,12 +141,12 @@ class InferenceData:
         xr.set_options(display_style="html")
         elements = "".join(
             [
-                HTML_Template.element_template.format(group, getattr(self, group)._repr_html_())
+                html_template.element_template.format(group, getattr(self, group)._repr_html_()) # pylint: disable=protected-access
                 for group in self._groups_all
             ]
         )
-        formatted_html_template = HTML_Template.html_template.format(elements)
-        css_template = HTML_Template.css_template
+        formatted_html_template = html_template.html_template.format(elements) # pylint: disable=possibly-unused-variable
+        css_template = html_template.css_template # pylint: disable=possibly-unused-variable
         html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
         xr.set_options(display_style=display_style)
         return html_repr
