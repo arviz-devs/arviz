@@ -1,6 +1,7 @@
 # Change Log
 
 ## v0.x.x Unreleased
+* Added support for PyJAGS via the function 'from_pyjags' in the module arviz.data.io_pyjags. Unit tests have been added in arviz.tests.external_tests.test_data_pyjags. A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. 
 
 ### New features
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215) 
