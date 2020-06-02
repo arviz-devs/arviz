@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 from datetime import datetime
 import warnings
+from html import escape
 
 import netCDF4 as nc
 import numpy as np
@@ -134,21 +135,27 @@ class InferenceData:
         return msg
 
     def _repr_html_(self):
-        """Make html representation of InferenceData object"""
+        """Make html representation of InferenceData object."""
         from xarray.core.options import OPTIONS
 
         display_style = OPTIONS["display_style"]
-        xr.set_options(display_style="html")
-        elements = "".join(
-            [
-                HtmlTemplate.element_template.format(group, getattr(self, group)._repr_html_()) # pylint: disable=protected-access
-                for group in self._groups_all
-            ]
-        )
-        formatted_html_template = HtmlTemplate.html_template.format(elements) # pylint: disable=possibly-unused-variable
-        css_template = HtmlTemplate.css_template # pylint: disable=possibly-unused-variable
-        html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
-        xr.set_options(display_style=display_style)
+        if display_style == "text":
+            html_repr = f"<pre>{escape(repr(self))}</pre>"
+        else:
+            elements = "".join(
+                [
+                    HtmlTemplate.element_template.format(
+                        group,
+                        getattr(self, group)._repr_html_(),  # pylint: disable=protected-access
+                    )
+                    for group in self._groups_all
+                ]
+            )
+            formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                elements
+            )
+            css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
+            html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
         return html_repr
 
     def __delattr__(self, group):
