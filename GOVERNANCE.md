@@ -140,7 +140,7 @@ issue, but must recuse themselves from voting on the issue.
 
 #### Election Process
 
-* Voting occurs over 2 weeks, at the conclusion of the nominations. Voting is blind and mediated by either an application or a third party like Numfocus.
+* Voting occurs over a period of at least 1 week, at the conclusion of the nominations. Voting is blind and mediated by either an application or a third party like Numfocus.
 Each voter can vote zero or more times, once per each candidate. As this is not about ranking but about capabilities, voters vote on a yes/no basis per candidate -- “would I trust this person to lead ArviZ?”.
 * In the event of a tie there will be a runoff election for the tied candidates. To avoid further ties and discriminate more among the tied candidates, this vote will be held by [Majority Judgment](https://en.wikipedia.org/wiki/Majority_judgment): for each candidate, voters judge their suitability for office as either Excellent, Very Good, Good, Acceptable, Poor, or Reject. Multiple candidates may be given the same grade by a voter. The candidate with the highest median grade is the winner.
 * If more than one candidate has the same highest median-grade, the MJ winner is discovered by removing (one-by-one) any grades equal in value to the shared median grade from each tied candidate's total. This is repeated until only one of the previously tied candidates is currently found to have the highest median-grade.
