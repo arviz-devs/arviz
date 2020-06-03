@@ -124,9 +124,6 @@ def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
             number_of_chains, chain_length = chains.shape
             chains = chains.reshape((number_of_chains, chain_length, 1))
 
-        number_of_chains, chain_length, parameter_dimension \
-            = chains.shape
-
         parameter_name_to_samples_map[parameter_name] = \
             np.swapaxes(chains, 0, 2)
 
