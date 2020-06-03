@@ -1,6 +1,7 @@
-import arviz as az
-import numpy as np
 import typing as tp
+import numpy as np
+
+import arviz as az
 
 
 def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
@@ -30,14 +31,13 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
     parameter_name_to_samples_map = {}
 
     for parameter_name, chains in samples.items():
-        parameter_dimension, chain_length, number_of_chains = chains.shape
+        parameter_dimension, _, _ = chains.shape
         if parameter_dimension == 1:
             parameter_name_to_samples_map[parameter_name] = \
                 chains[0, :, :].transpose()
         else:
-            for i in range(parameter_dimension):
-                parameter_name_to_samples_map[parameter_name] = \
-                    np.swapaxes(chains, 0, 2)
+            parameter_name_to_samples_map[parameter_name] = \
+                np.swapaxes(chains, 0, 2)
 
     return parameter_name_to_samples_map
 
