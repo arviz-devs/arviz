@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 import typing as tp
 import numpy as np
 import pytest
