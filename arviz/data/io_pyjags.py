@@ -2,13 +2,12 @@ from collections import OrderedDict
 from collections.abc import Sequence
 import typing as tp
 
+from arviz.data.inference_data import InferenceData
 import numpy as np
 import xarray
 
 from .base import requires, dict_to_dataset
 from ..rcparams import rcParams
-
-from arviz.data.inference_data import InferenceData
 
 
 class PyJAGSConverter:
@@ -324,5 +323,3 @@ def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
                             save_warmup=save_warmup,
                             warmup_iterations=warmup_iterations)
             .to_inference_data())
-
-    # return _convert_pyjags_samples_to_arviz_inference_data_object(posterior=posterior)
