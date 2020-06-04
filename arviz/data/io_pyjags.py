@@ -1,3 +1,4 @@
+"""Convert PyJAGS sample dictionaries to ArviZ inference data objects."""
 from collections import OrderedDict
 from collections.abc import Sequence
 import typing as tp
