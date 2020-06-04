@@ -1,4 +1,5 @@
-from collections import OrderedDict, Sequence
+from collections import OrderedDict
+from collections.abc import Sequence
 import typing as tp
 
 import numpy as np
