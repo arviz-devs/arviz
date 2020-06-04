@@ -55,10 +55,7 @@ class PyJAGSConverter:
                 data, library=self.pyjags, coords=self.coords, dims=self.dims
             ),
             dict_to_dataset(
-                data_warmup,
-                library=self.pyjags,
-                coords=self.coords,
-                dims=self.dims,
+                data_warmup, library=self.pyjags, coords=self.coords, dims=self.dims,
             ),
         )
 
@@ -77,10 +74,7 @@ class PyJAGSConverter:
         # obs_const_dict = self.observed_and_constant_data_to_xarray()
         # predictions_const_data = self.predictions_constant_data_to_xarray()
         return InferenceData(
-            **{
-                "posterior": self.posterior_to_xarray(),
-                "prior": self.prior_to_xarray(),
-            }
+            **{"posterior": self.posterior_to_xarray(), "prior": self.prior_to_xarray()}
         )
 
 
@@ -219,13 +213,9 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
         if variable_name in variable_names:
             parameter_dimension, _, _ = chains.shape
             if parameter_dimension == 1:
-                variable_name_to_samples_map[variable_name] = chains[
-                    0, :, :
-                ].transpose()
+                variable_name_to_samples_map[variable_name] = chains[0, :, :].transpose()
             else:
-                variable_name_to_samples_map[variable_name] = np.swapaxes(
-                    chains, 0, 2
-                )
+                variable_name_to_samples_map[variable_name] = np.swapaxes(chains, 0, 2)
 
     return variable_name_to_samples_map
 
