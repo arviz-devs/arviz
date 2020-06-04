@@ -117,7 +117,7 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
         warmup_samples, actual_samples = \
             _split_pyjags_samples_in_warmup_and_actual_samples(
                 pyjags_samples=pyjags_samples,
-                warmup_iterations=0,
+                warmup_iterations=warmup_iterations,
                 variable_names=variables)
 
         data = \
