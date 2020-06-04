@@ -4,7 +4,6 @@ import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
 from ....numeric_utils import _fast_kde
-from ...hdiplot import plot_hdi
 
 
 def plot_loo_pit(
@@ -20,8 +19,8 @@ def plot_loo_pit(
     ecdf_fill,
     use_hdi,
     x_vals,
-    unif_densities,
     hdi_kwargs,
+    hdi_odds,
     n_unif,
     unif,
     plot_unif_kwargs,
@@ -54,14 +53,20 @@ def plot_loo_pit(
         else:
             ax.plot(unif_ecdf, p975 - unif_ecdf, unif_ecdf, p025 - unif_ecdf, **plot_unif_kwargs)
     else:
+        x_ss = np.empty((n_unif, len(loo_pit_kde)))
+        u_dens = np.empty((n_unif, len(loo_pit_kde)))
         if use_hdi:
-            plot_hdi(x_vals, unif_densities, **hdi_kwargs)
+            ax.axhspan(*hdi_odds, **hdi_kwargs)
         else:
             for idx in range(n_unif):
-                unif_density, _, _ = _fast_kde(unif[idx, :], xmin=0, xmax=1)
-                ax.plot(x_vals, unif_density, **plot_unif_kwargs)
+                unif_density, xmin, xmax = _fast_kde(unif[idx, :])
+                x_s = np.linspace(xmin, xmax, len(unif_density))
+                x_ss[idx] = x_s
+                u_dens[idx] = unif_density
+            ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)
         ax.plot(x_vals, loo_pit_kde, **plot_kwargs)
-
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, None)
     ax.tick_params(labelsize=xt_labelsize)
     if legend:
         if not (use_hdi or (ecdf and ecdf_fill)):
