@@ -2,9 +2,10 @@ from collections import OrderedDict
 from collections.abc import Sequence
 import typing as tp
 
-from arviz.data.inference_data import InferenceData
 import numpy as np
 import xarray
+
+from arviz.data.inference_data import InferenceData
 
 from .base import requires, dict_to_dataset
 from ..rcparams import rcParams
