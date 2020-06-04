@@ -84,10 +84,11 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
               warmup_iterations: int = 0) \
         -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
     """
+    Convert PyJAGS samples dictionary to ArviZ format and split warmup samples.
 
     Parameters
     ----------
-    pyjags_samples: a didctionary mapping variable names to NumPy arrays of MCMC
+    pyjags_samples: a dictionary mapping variable names to NumPy arrays of MCMC
                     chains of samples with shape
                     (parameter_dimension, chain_length, number_of_chains)
 
@@ -97,7 +98,7 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
 
     Returns
     -------
-
+    A tuple of two samples dictionaries in ArviZ format
     """
     data_warmup = OrderedDict()
 
@@ -112,9 +113,9 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
     variables = tuple(variables)
 
     if warmup_iterations > 0:
-        warmup_samples, actual_samples =\
+        warmup_samples, actual_samples = \
             _split_pyjags_samples_in_warmup_and_actual_samples(
-                samples=pyjags_samples,
+                pyjags_samples=pyjags_samples,
                 warmup_iterations=0,
                 variable_names=variables)
 
@@ -138,19 +139,35 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
 
 
 def _split_pyjags_samples_in_warmup_and_actual_samples(
-        samples: tp.Dict[str, np.ndarray],
+        pyjags_samples: tp.Dict[str, np.ndarray],
         warmup_iterations: int,
         variable_names: tp.Optional[tp.Tuple[str, ...]] = None) \
         -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
+    """
+    Split a PyJAGS samples dictionary into actual samples and warmup samples.
+
+    Parameters
+    ----------
+    pyjags_samples: a dictionary mapping variable names to NumPy arrays of MCMC
+                    chains of samples with shape
+                    (parameter_dimension, chain_length, number_of_chains)
+
+    warmup_iterations: the number of draws to be split off for warmum
+    variable_names: the variables in the dictionary to use; if None use all
+
+    Returns
+    -------
+    A tuple of two pyjags samples dictionaries in PyJAGS format
+    """
     if variable_names is None:
-        variable_names = tuple(samples.keys())
+        variable_names = tuple(pyjags_samples.keys())
 
     assert isinstance(variable_names, tuple)
 
     warmup_samples: tp.Dict[str, np.ndarray] = {}
     actual_samples: tp.Dict[str, np.ndarray] = {}
 
-    for variable_name, chains in samples.items():
+    for variable_name, chains in pyjags_samples.items():
         if variable_name in variable_names:
             warmup_samples[variable_name] = chains[:, :warmup_iterations, :]
             actual_samples[variable_name] = chains[:, warmup_iterations:, :]
@@ -202,29 +219,6 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
                     np.swapaxes(chains, 0, 2)
 
     return variable_name_to_samples_map
-
-
-# def _construct_xarray_dataset_from_pyjags_samples(
-#         samples: tp.Dict[str, np.ndarray]) -> xarray.Dataset:
-#     arviz_dict = \
-#         _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(samples)
-#
-#     return az.data.base.dict_to_dataset(data=arviz_dict)
-
-
-# def _convert_pyjags_samples_to_arviz_inference_data_object(
-#         posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
-#         prior: tp.Optional[tp.Dict[str, np.ndarray]] = None) \
-#         -> InferenceData:
-#     groups = {}
-#     if posterior is not None:
-#         groups["posterior"] = \
-#             _construct_xarray_dataset_from_pyjags_samples(posterior)
-#     if prior is not None:
-#         groups["prior"] = \
-#             _construct_xarray_dataset_from_pyjags_samples(prior)
-#
-#     return InferenceData(**groups)
 
 
 def _extract_samples_dictionary_from_arviz_inference_data(idata) \
@@ -294,6 +288,8 @@ def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
 
 def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
                 prior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
+                coords=None,
+                dims=None,
                 save_warmup=None,
                 warmup_iterations: int = 0) -> InferenceData:
     """
@@ -321,6 +317,8 @@ def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
     """
     return (PyJAGSConverter(posterior=posterior,
                             prior=prior,
+                            dims=dims,
+                            coords=coords,
                             save_warmup=save_warmup,
                             warmup_iterations=warmup_iterations)
             .to_inference_data())
