@@ -213,6 +213,36 @@ class InferenceData:
             empty_netcdf_file.close()
         return filename
 
+    def to_dict(self, groups=None, data=True):
+        """Convert InferenceData to a dictionary following xarray naming
+        conventions.
+
+        Parameters
+        ----------
+        groups : list, optional
+            Write only these groups to netcdf file.
+        data : bool, optional
+            decide whether to include the actual data in thr dictionary.
+            If False, returns just the schema
+
+        Returns
+        -------
+        dict
+            A dictionary containing all groups of InferenceData object.
+            When `data=False` return just the schema.
+        """
+        ret = {}
+        if self._groups_all:  # check's whether a group is present or not.
+            if groups is None:
+                groups = self._groups_all
+            else:
+                groups = [group for group in self._groups_all if group in groups]
+
+            for group in groups:
+                ds = getattr(self, group)
+                ret[group] = ds.to_dict(data=data)
+        return ret
+
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
