@@ -458,7 +458,7 @@ class TestInferenceData:
 
     def test_repr_html(self):
         idata = load_arviz_data("centered_eight")
-        html = idata._repr_html_()
+        html = idata._repr_html_() # pylint: disable=protected-access
 
         assert html is not None
         assert '<div' in html
