@@ -4,9 +4,7 @@ import typing as tp
 import numpy as np
 import xarray
 
-import arviz as az
-
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
+from .base import requires, dict_to_dataset
 from ..rcparams import rcParams
 
 from arviz.data.inference_data import InferenceData
@@ -36,7 +34,7 @@ class PyJAGSConverter:
         try:
             import pyjags  # pylint: disable=import-error
             self.pyjags = pyjags
-        except:
+        except Exception as e:
             self.pyjags = None
 
     def _pyjags_samples_to_xarray(self,
@@ -295,7 +293,7 @@ def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
 
 def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
                 prior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
-                save_warmup = None,
+                save_warmup=None,
                 warmup_iterations: int = 0) -> InferenceData:
     """
     Convert PyJAGS posterior samples to an ArviZ inference data object.
