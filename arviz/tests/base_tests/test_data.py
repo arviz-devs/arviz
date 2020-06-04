@@ -456,6 +456,13 @@ class TestInferenceData:
         )
         assert np.allclose(idata_map.posterior.mu, idata.posterior.mu)
 
+    def test_repr_html(self):
+        idata = load_arviz_data("centered_eight")
+        html = idata._repr_html_()
+
+        assert html is not None
+        assert '<div' in html
+
 
 class TestNumpyToDataArray:
     def test_1d_dataset(self):
