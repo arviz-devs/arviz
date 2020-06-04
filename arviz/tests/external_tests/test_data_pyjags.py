@@ -80,9 +80,7 @@ def pyjags_samples_dict() -> tp.Dict[str, np.ndarray]:
 def arviz_samples_dict_from_pyjags_samples_dict(
     pyjags_samples_dict: tp.Dict[str, np.ndarray]
 ) -> tp.Dict[str, np.ndarray]:
-    return _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-        pyjags_samples_dict
-    )
+    return _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(pyjags_samples_dict)
 
 
 @pytest.fixture()
@@ -109,14 +107,12 @@ def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
     pyjags_samples_dict: tp.Dict[str, np.ndarray],
     arviz_samples_dict_from_pyjags_samples_dict: tp.Dict[str, np.ndarray],
 ):
-    pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict = \
-        _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
+    pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict = _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
         arviz_samples_dict_from_pyjags_samples_dict
     )
 
     assert verify_equality_of_numpy_values_dictionaries(
-        pyjags_samples_dict,
-        pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict,
+        pyjags_samples_dict, pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict,
     )
 
 
@@ -124,8 +120,7 @@ def test_extract_samples_dictionary_from_arviz_inference_data(
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
     arviz_samples_dict_from_pyjags_samples_dict: tp.Dict[str, np.ndarray],
 ):
-    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = \
-        _extract_samples_dictionary_from_arviz_inference_data(
+    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
         arviz_inference_data_from_pyjags_samples_dict
     )
 
@@ -139,13 +134,11 @@ def test_from_pyjags(
     pyjags_samples_dict: tp.Dict[str, np.ndarray],
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
 ):
-    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = \
-        _extract_samples_dictionary_from_arviz_inference_data(
+    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
         arviz_inference_data_from_pyjags_samples_dict
     )
 
-    pyjags_samples_dict_from_arviz_inference_data = \
-        _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
+    pyjags_samples_dict_from_arviz_inference_data = _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
         arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict
     )
 

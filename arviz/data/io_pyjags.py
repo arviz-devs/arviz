@@ -29,9 +29,7 @@ class PyJAGSConverter:
         self.prior = prior
         self.coords = coords
         self.dims = dims
-        self.save_warmup = (
-            rcParams["data.save_warmup"] if save_warmup is None else save_warmup
-        )
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.warmup_iterations = warmup_iterations
 
         try:
@@ -51,12 +49,8 @@ class PyJAGSConverter:
         )
 
         return (
-            dict_to_dataset(
-                data, library=self.pyjags, coords=self.coords, dims=self.dims
-            ),
-            dict_to_dataset(
-                data_warmup, library=self.pyjags, coords=self.coords, dims=self.dims,
-            ),
+            dict_to_dataset(data, library=self.pyjags, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, library=self.pyjags, coords=self.coords, dims=self.dims,),
         )
 
     @requires("posterior")
@@ -114,10 +108,7 @@ def get_draws(
     variables = tuple(variables)
 
     if warmup_iterations > 0:
-        (
-            warmup_samples,
-            actual_samples,
-        ) = _split_pyjags_samples_in_warmup_and_actual_samples(
+        (warmup_samples, actual_samples,) = _split_pyjags_samples_in_warmup_and_actual_samples(
             pyjags_samples=pyjags_samples,
             warmup_iterations=warmup_iterations,
             variable_names=variables,
@@ -177,8 +168,7 @@ def _split_pyjags_samples_in_warmup_and_actual_samples(
 
 
 def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-    samples: tp.Dict[str, np.ndarray],
-    variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
+    samples: tp.Dict[str, np.ndarray], variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
 ) -> tp.Dict[str, np.ndarray]:
     """
     Convert a PyJAGS dictionary to an ArviZ dictionary.
@@ -220,9 +210,7 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
     return variable_name_to_samples_map
 
 
-def _extract_samples_dictionary_from_arviz_inference_data(
-    idata,
-) -> tp.Dict[str, np.ndarray]:
+def _extract_samples_dictionary_from_arviz_inference_data(idata,) -> tp.Dict[str, np.ndarray]:
     """
     Extract the samples dictionary from an ArviZ inference data object.
 
