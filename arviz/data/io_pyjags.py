@@ -29,32 +29,37 @@ class PyJAGSConverter:
         self.prior = prior
         self.coords = coords
         self.dims = dims
-        self.save_warmup = \
+        self.save_warmup = (
             rcParams["data.save_warmup"] if save_warmup is None else save_warmup
+        )
         self.warmup_iterations = warmup_iterations
 
         try:
             import pyjags  # pylint: disable=import-error
+
             self.pyjags = pyjags
         except ModuleNotFoundError:
             self.pyjags = None
 
-    def _pyjags_samples_to_xarray(self,
-                                  pyjags_samples: tp.Dict[str, np.ndarray]) \
-            -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
-        data, data_warmup = get_draws(pyjags_samples=pyjags_samples,
-                                      warmup_iterations=self.warmup_iterations,
-                                      warmup=self.save_warmup)
+    def _pyjags_samples_to_xarray(
+        self, pyjags_samples: tp.Dict[str, np.ndarray]
+    ) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
+        data, data_warmup = get_draws(
+            pyjags_samples=pyjags_samples,
+            warmup_iterations=self.warmup_iterations,
+            warmup=self.save_warmup,
+        )
 
         return (
-            dict_to_dataset(data,
-                            library=self.pyjags,
-                            coords=self.coords,
-                            dims=self.dims),
-            dict_to_dataset(data_warmup,
-                            library=self.pyjags,
-                            coords=self.coords,
-                            dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pyjags, coords=self.coords, dims=self.dims
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pyjags,
+                coords=self.coords,
+                dims=self.dims,
+            ),
         )
 
     @requires("posterior")
@@ -79,11 +84,12 @@ class PyJAGSConverter:
         )
 
 
-def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
-              variables: tp.Optional[tp.Union[str, tp.Iterable[str]]] = None,
-              warmup: bool = False,
-              warmup_iterations: int = 0) \
-        -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
+def get_draws(
+    pyjags_samples: tp.Dict[str, np.ndarray],
+    variables: tp.Optional[tp.Union[str, tp.Iterable[str]]] = None,
+    warmup: bool = False,
+    warmup_iterations: int = 0,
+) -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
     """
     Convert PyJAGS samples dictionary to ArviZ format and split warmup samples.
 
@@ -109,41 +115,41 @@ def get_draws(pyjags_samples: tp.Dict[str, np.ndarray],
         variables = [variables]
 
     if not isinstance(variables, Sequence):
-        raise TypeError('variables must be of type Sequence or str')
+        raise TypeError("variables must be of type Sequence or str")
 
     variables = tuple(variables)
 
     if warmup_iterations > 0:
-        warmup_samples, actual_samples = \
-            _split_pyjags_samples_in_warmup_and_actual_samples(
-                pyjags_samples=pyjags_samples,
-                warmup_iterations=warmup_iterations,
-                variable_names=variables)
+        (
+            warmup_samples,
+            actual_samples,
+        ) = _split_pyjags_samples_in_warmup_and_actual_samples(
+            pyjags_samples=pyjags_samples,
+            warmup_iterations=warmup_iterations,
+            variable_names=variables,
+        )
 
-        data = \
-            _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-                samples=actual_samples,
-                variable_names=variables)
+        data = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+            samples=actual_samples, variable_names=variables
+        )
 
         if warmup:
-            data_warmup = \
-                _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-                    samples=warmup_samples,
-                    variable_names=variables)
+            data_warmup = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+                samples=warmup_samples, variable_names=variables
+            )
     else:
-        data = \
-            _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-                samples=pyjags_samples,
-                variable_names=variables)
+        data = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+            samples=pyjags_samples, variable_names=variables
+        )
 
     return data, data_warmup
 
 
 def _split_pyjags_samples_in_warmup_and_actual_samples(
-        pyjags_samples: tp.Dict[str, np.ndarray],
-        warmup_iterations: int,
-        variable_names: tp.Optional[tp.Tuple[str, ...]] = None) \
-        -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
+    pyjags_samples: tp.Dict[str, np.ndarray],
+    warmup_iterations: int,
+    variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
+) -> tp.Tuple[tp.Dict[str, np.ndarray], tp.Dict[str, np.ndarray]]:
     """
     Split a PyJAGS samples dictionary into actual samples and warmup samples.
 
@@ -177,9 +183,9 @@ def _split_pyjags_samples_in_warmup_and_actual_samples(
 
 
 def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-        samples: tp.Dict[str, np.ndarray],
-        variable_names: tp.Optional[tp.Tuple[str, ...]] = None) \
-        -> tp.Dict[str, np.ndarray]:
+    samples: tp.Dict[str, np.ndarray],
+    variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
+) -> tp.Dict[str, np.ndarray]:
     """
     Convert a PyJAGS dictionary to an ArviZ dictionary.
 
@@ -213,17 +219,20 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
         if variable_name in variable_names:
             parameter_dimension, _, _ = chains.shape
             if parameter_dimension == 1:
-                variable_name_to_samples_map[variable_name] = \
-                    chains[0, :, :].transpose()
+                variable_name_to_samples_map[variable_name] = chains[
+                    0, :, :
+                ].transpose()
             else:
-                variable_name_to_samples_map[variable_name] = \
-                    np.swapaxes(chains, 0, 2)
+                variable_name_to_samples_map[variable_name] = np.swapaxes(
+                    chains, 0, 2
+                )
 
     return variable_name_to_samples_map
 
 
-def _extract_samples_dictionary_from_arviz_inference_data(idata) \
-        -> tp.Dict[str, np.ndarray]:
+def _extract_samples_dictionary_from_arviz_inference_data(
+    idata,
+) -> tp.Dict[str, np.ndarray]:
     """
     Extract the samples dictionary from an ArviZ inference data object.
 
@@ -243,15 +252,15 @@ def _extract_samples_dictionary_from_arviz_inference_data(idata) \
     """
     variable_name_to_samples_map = {}
 
-    for key, value in idata.posterior.to_dict()['data_vars'].items():
-        variable_name_to_samples_map[key] = np.array(value['data'])
+    for key, value in idata.posterior.to_dict()["data_vars"].items():
+        variable_name_to_samples_map[key] = np.array(value["data"])
 
     return variable_name_to_samples_map
 
 
 def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
-        samples: tp.Dict[str, np.ndarray]) \
-        -> tp.Dict[str, np.ndarray]:
+    samples: tp.Dict[str, np.ndarray]
+) -> tp.Dict[str, np.ndarray]:
     """
     Convert and ArviZ dictionary to a PyJAGS dictionary.
 
@@ -281,18 +290,19 @@ def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
             number_of_chains, chain_length = chains.shape
             chains = chains.reshape((number_of_chains, chain_length, 1))
 
-        variable_name_to_samples_map[variable_name] = \
-            np.swapaxes(chains, 0, 2)
+        variable_name_to_samples_map[variable_name] = np.swapaxes(chains, 0, 2)
 
     return variable_name_to_samples_map
 
 
-def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
-                prior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
-                coords=None,
-                dims=None,
-                save_warmup=None,
-                warmup_iterations: int = 0) -> InferenceData:
+def from_pyjags(
+    posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
+    prior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
+    coords=None,
+    dims=None,
+    save_warmup=None,
+    warmup_iterations: int = 0,
+) -> InferenceData:
     """
     Convert PyJAGS posterior samples to an ArviZ inference data object.
 
@@ -309,6 +319,12 @@ def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
            prior samples with shape
            (parameter_dimension, chain_length, number_of_chains)
 
+    coords: dict[str, iterable]
+            A dictionary containing the values that are used as index. The key
+            is the name of the dimension, the values are the index values.
+    dims: dict[str, List(str)]
+          A mapping from variables to a list of coordinate names for the variable.
+
     save_warmup: whether or not to return warmup draws if any
     warmup_iterations: how many iterations are for warmup
 
@@ -316,10 +332,11 @@ def from_pyjags(posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
     -------
     An Arviz inference data object
     """
-    return (PyJAGSConverter(posterior=posterior,
-                            prior=prior,
-                            dims=dims,
-                            coords=coords,
-                            save_warmup=save_warmup,
-                            warmup_iterations=warmup_iterations)
-            .to_inference_data())
+    return PyJAGSConverter(
+        posterior=posterior,
+        prior=prior,
+        dims=dims,
+        coords=coords,
+        save_warmup=save_warmup,
+        warmup_iterations=warmup_iterations,
+    ).to_inference_data()
