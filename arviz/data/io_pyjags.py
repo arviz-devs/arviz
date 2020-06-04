@@ -33,9 +33,11 @@ class PyJAGSConverter:
             rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.warmup_iterations = warmup_iterations
 
-        import pyjags  # pylint: disable=import-error
-
-        self.pyjags = pyjags
+        try:
+            import pyjags  # pylint: disable=import-error
+            self.pyjags = pyjags
+        except:
+            self.pyjags = None
 
     def _pyjags_samples_to_xarray(self,
                                   pyjags_samples: tp.Dict[str, np.ndarray]) \
@@ -45,7 +47,8 @@ class PyJAGSConverter:
                                       warmup=self.save_warmup)
 
         return (
-            dict_to_dataset(data, library=self.pyjags,
+            dict_to_dataset(data,
+                            library=self.pyjags,
                             coords=self.coords,
                             dims=self.dims),
             dict_to_dataset(data_warmup,
