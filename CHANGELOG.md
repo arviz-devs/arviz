@@ -13,6 +13,7 @@
 ### Deprecation
 
 ### Documentation
+* Fixed inconsistent capitalization in plot_hdi docstring (#1221)
 
 ## v0.8.3 (2020 May 28)
 ### Maintenance and fixes
