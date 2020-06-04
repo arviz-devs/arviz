@@ -668,7 +668,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
 
 
 class HtmlTemplate:
-    """Contains html templates for InferenceData repr."""
+    """Contains html templates."""
 
     html_template = """
             <div>
@@ -682,12 +682,12 @@ class HtmlTemplate:
             """
     element_template = """
             <li class = "xr-section-item">
-                  <input id="idata_{group}" class="xr-section-summary-in" type="checkbox">
-                  <label for="idata_{group}" class = "xr-section-summary">{group}</label>
+                  <input id="idata_{0}" class="xr-section-summary-in" type="checkbox">
+                  <label for="idata_{0}" class = "xr-section-summary">{0}</label>
                   <div class="xr-section-inline-details"></div>
                   <div class="xr-section-details">
                       <ul id="xr-dataset-coord-list" class="xr-var-list">
-                          <div style="padding-left:2rem;">{xr_data}<br></div>
+                          <div style="padding-left:2rem;">{1}<br></div>
                       </ul>
                   </div>
             </li>

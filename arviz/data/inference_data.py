@@ -9,7 +9,6 @@ from html import escape
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-from xarray.core.options import OPTIONS
 
 from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
@@ -137,6 +136,8 @@ class InferenceData:
 
     def _repr_html_(self):
         """Make html representation of InferenceData object."""
+        from xarray.core.options import OPTIONS
+
         display_style = OPTIONS["display_style"]
         if display_style == "text":
             html_repr = f"<pre>{escape(repr(self))}</pre>"
@@ -144,8 +145,8 @@ class InferenceData:
             elements = "".join(
                 [
                     HtmlTemplate.element_template.format(
-                        group=group,
-                        xr_data=getattr(self, group)._repr_html_(),  # pylint: disable=protected-access
+                        group,
+                        getattr(self, group)._repr_html_(),  # pylint: disable=protected-access
                     )
                     for group in self._groups_all
                 ]
