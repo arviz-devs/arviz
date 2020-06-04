@@ -35,7 +35,7 @@ class PyJAGSConverter:
         try:
             import pyjags  # pylint: disable=import-error
             self.pyjags = pyjags
-        except Exception as e:
+        except Exception:
             self.pyjags = None
 
     def _pyjags_samples_to_xarray(self,
