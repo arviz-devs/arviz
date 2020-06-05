@@ -8,7 +8,7 @@ import arviz as az
 
 from arviz.data.io_pyjags import (
     _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary,
-    _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary,
+    _convert_arviz_sdict_to_pyjags_dict,
     _extract_samples_dictionary_from_arviz_inference_data,
     from_pyjags,
 )
@@ -107,12 +107,12 @@ def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
     pyjags_samples_dict: tp.Mapping[str, np.ndarray],
     arviz_samples_dict_from_pyjags_samples_dict: tp.Mapping[str, np.ndarray],
 ):
-    pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict = _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
+    pyjags_dict_from_arviz_dict_from_pyjags_dict = _convert_arviz_sdict_to_pyjags_dict(
         arviz_samples_dict_from_pyjags_samples_dict
     )
 
     assert verify_equality_of_numpy_values_dictionaries(
-        pyjags_samples_dict, pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict,
+        pyjags_samples_dict, pyjags_dict_from_arviz_dict_from_pyjags_dict,
     )
 
 
@@ -120,13 +120,12 @@ def test_extract_samples_dictionary_from_arviz_inference_data(
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
     arviz_samples_dict_from_pyjags_samples_dict: tp.Mapping[str, np.ndarray],
 ):
-    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
+    arviz_dict_from_idata_from_pyjags_dict = _extract_samples_dictionary_from_arviz_inference_data(
         arviz_inference_data_from_pyjags_samples_dict
     )
 
     assert verify_equality_of_numpy_values_dictionaries(
-        arviz_samples_dict_from_pyjags_samples_dict,
-        arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict,
+        arviz_samples_dict_from_pyjags_samples_dict, arviz_dict_from_idata_from_pyjags_dict,
     )
 
 
@@ -134,14 +133,14 @@ def test_from_pyjags(
     pyjags_samples_dict: tp.Mapping[str, np.ndarray],
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
 ):
-    arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
+    arviz_dict_from_idata_from_pyjags_dict = _extract_samples_dictionary_from_arviz_inference_data(
         arviz_inference_data_from_pyjags_samples_dict
     )
 
-    pyjags_samples_dict_from_arviz_inference_data = _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
-        arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict
+    pyjags_dict_from_arviz_idata = _convert_arviz_sdict_to_pyjags_dict(
+        arviz_dict_from_idata_from_pyjags_dict
     )
 
     assert verify_equality_of_numpy_values_dictionaries(
-        pyjags_samples_dict, pyjags_samples_dict_from_arviz_inference_data
+        pyjags_samples_dict, pyjags_dict_from_arviz_idata
     )

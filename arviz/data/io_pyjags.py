@@ -236,7 +236,7 @@ def _extract_samples_dictionary_from_arviz_inference_data(idata,) -> tp.Mapping[
     return variable_name_to_samples_map
 
 
-def _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
+def _convert_arviz_sdict_to_pyjags_dict(
     samples: tp.Mapping[str, np.ndarray]
 ) -> tp.Mapping[str, np.ndarray]:
     """
