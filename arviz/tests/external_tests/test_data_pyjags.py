@@ -15,7 +15,7 @@ from arviz.data.io_pyjags import (
 
 
 @pytest.fixture()
-def pyjags_samples_dict() -> tp.Dict[str, np.ndarray]:
+def pyjags_samples_dict() -> tp.Mapping[str, np.ndarray]:
     return {
         "b": np.array(
             [
@@ -78,20 +78,20 @@ def pyjags_samples_dict() -> tp.Dict[str, np.ndarray]:
 
 @pytest.fixture()
 def arviz_samples_dict_from_pyjags_samples_dict(
-    pyjags_samples_dict: tp.Dict[str, np.ndarray]
-) -> tp.Dict[str, np.ndarray]:
+    pyjags_samples_dict: tp.Mapping[str, np.ndarray]
+) -> tp.Mapping[str, np.ndarray]:
     return _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(pyjags_samples_dict)
 
 
 @pytest.fixture()
 def arviz_inference_data_from_pyjags_samples_dict(
-    pyjags_samples_dict: tp.Dict[str, np.ndarray]
+    pyjags_samples_dict: tp.Mapping[str, np.ndarray]
 ) -> az.InferenceData:
     return from_pyjags(pyjags_samples_dict)
 
 
 def verify_equality_of_numpy_values_dictionaries(
-    dict_1: tp.Dict[tp.Any, np.ndarray], dict_2: tp.Dict[tp.Any, np.ndarray]
+    dict_1: tp.Mapping[tp.Any, np.ndarray], dict_2: tp.Mapping[tp.Any, np.ndarray]
 ) -> bool:
     if dict_1.keys() != dict_2.keys():
         return False
@@ -104,8 +104,8 @@ def verify_equality_of_numpy_values_dictionaries(
 
 
 def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
-    pyjags_samples_dict: tp.Dict[str, np.ndarray],
-    arviz_samples_dict_from_pyjags_samples_dict: tp.Dict[str, np.ndarray],
+    pyjags_samples_dict: tp.Mapping[str, np.ndarray],
+    arviz_samples_dict_from_pyjags_samples_dict: tp.Mapping[str, np.ndarray],
 ):
     pyjags_samples_dict_from_arviz_samples_dict_from_pyjags_samples_dict = _convert_arviz_samples_dictionary_to_pyjags_samples_dictionary(
         arviz_samples_dict_from_pyjags_samples_dict
@@ -118,7 +118,7 @@ def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
 
 def test_extract_samples_dictionary_from_arviz_inference_data(
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
-    arviz_samples_dict_from_pyjags_samples_dict: tp.Dict[str, np.ndarray],
+    arviz_samples_dict_from_pyjags_samples_dict: tp.Mapping[str, np.ndarray],
 ):
     arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
         arviz_inference_data_from_pyjags_samples_dict
@@ -131,7 +131,7 @@ def test_extract_samples_dictionary_from_arviz_inference_data(
 
 
 def test_from_pyjags(
-    pyjags_samples_dict: tp.Dict[str, np.ndarray],
+    pyjags_samples_dict: tp.Mapping[str, np.ndarray],
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
 ):
     arviz_samples_dict_from_arviz_inference_data_from_pyjags_samples_dict = _extract_samples_dictionary_from_arviz_inference_data(
