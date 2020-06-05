@@ -33,13 +33,13 @@ def plot_hdi(
     Parameters
     ----------
     x : array-like
-        Values to plot
+        Values to plot.
     y : array-like
-        values from which to compute the hdi. Assumed shape (chain, draw, \*shape).
+        Values from which to compute the hdi. Assumed shape (chain, draw, \*shape).
     hdi_prob : float, optional
         Probability for the highest density interval. Defaults to 0.94.
     color : str
-        Color used for the limits of the hdi and fill. Should be a valid matplotlib color
+        Color used for the limits of the hdi and fill. Should be a valid matplotlib color.
     circular : bool, optional
         Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
@@ -49,11 +49,11 @@ def plot_hdi(
         Defaults to True.
     smooth_kwargs : dict, optional
         Additional keywords modifying the Savitzky-Golay filter. See Scipy's documentation for
-        details
+        details.
     fill_kwargs : dict
         Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
     plot_kwargs : dict
-        Keywords passed to hdi limits
+        Keywords passed to hdi limits.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional
@@ -64,7 +64,7 @@ def plot_hdi(
     show : bool, optional
         Call backend show function.
     credible_interval: float, optional
-        deprecated: Please see hdi_prob
+        Deprecated: Please see hdi_prob
 
     Returns
     -------
