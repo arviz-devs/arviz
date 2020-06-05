@@ -32,11 +32,9 @@ class PyJAGSConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.warmup_iterations = warmup_iterations
 
-        # try:
-        import pyjags  # pylint: disable=import-error
+        import pyjags
+
         self.pyjags = pyjags
-        # except ModuleNotFoundError:
-        #     self.pyjags = None
 
     def _pyjags_samples_to_xarray(
         self, pyjags_samples: tp.Mapping[str, np.ndarray]
@@ -148,8 +146,6 @@ def _split_pyjags_dict_in_warmup_and_actual_samples(
     """
     if variable_names is None:
         variable_names = tuple(pyjags_samples.keys())
-
-    # assert isinstance(variable_names, tuple)
 
     warmup_samples: tp.Dict[str, np.ndarray] = {}
     actual_samples: tp.Dict[str, np.ndarray] = {}
