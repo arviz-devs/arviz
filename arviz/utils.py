@@ -668,6 +668,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
 
 
 class HtmlTemplate:
+    """Contains html templates for InferenceData repr."""
     html_template = """
             <div>
               <div class='xr-header'>

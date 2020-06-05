@@ -134,7 +134,7 @@ class InferenceData:
         return msg
 
     def _repr_html_(self):
-        """Make html representation of InferenceData object"""
+        """Make html representation of InferenceData object."""
         from xarray.core.options import OPTIONS
 
         display_style = OPTIONS["display_style"]
