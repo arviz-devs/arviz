@@ -14,7 +14,7 @@
 ### Deprecation
 
 ### Documentation
-* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS.
+* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
 * Fixed inconsistent capitalization in `plot_hdi` docstring (#1221)
 
 ## v0.8.3 (2020 May 28)
