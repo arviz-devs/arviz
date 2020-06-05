@@ -114,18 +114,14 @@ def get_draws(
             variable_names=variables,
         )
 
-        data = _convert_pyjags_dict_to_arviz_dict(
-            samples=actual_samples, variable_names=variables
-        )
+        data = _convert_pyjags_dict_to_arviz_dict(samples=actual_samples, variable_names=variables)
 
         if warmup:
             data_warmup = _convert_pyjags_dict_to_arviz_dict(
                 samples=warmup_samples, variable_names=variables
             )
     else:
-        data = _convert_pyjags_dict_to_arviz_dict(
-            samples=pyjags_samples, variable_names=variables
-        )
+        data = _convert_pyjags_dict_to_arviz_dict(samples=pyjags_samples, variable_names=variables)
 
     return data, data_warmup
 
@@ -210,7 +206,7 @@ def _convert_pyjags_dict_to_arviz_dict(
     return variable_name_to_samples_map
 
 
-def _extract_arviz_dict_from_inference_data(idata, ) -> tp.Mapping[str, np.ndarray]:
+def _extract_arviz_dict_from_inference_data(idata,) -> tp.Mapping[str, np.ndarray]:
     """
     Extract the samples dictionary from an ArviZ inference data object.
 
