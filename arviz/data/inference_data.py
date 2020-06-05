@@ -141,12 +141,16 @@ class InferenceData:
         xr.set_options(display_style="html")
         elements = "".join(
             [
-                HtmlTemplate.element_template.format(group, getattr(self, group)._repr_html_()) # pylint: disable=protected-access
+                HtmlTemplate.element_template.format(
+                    group, getattr(self, group)._repr_html_()
+                )  # pylint: disable=protected-access
                 for group in self._groups_all
             ]
         )
-        formatted_html_template = HtmlTemplate.html_template.format(elements) # pylint: disable=possibly-unused-variable
-        css_template = HtmlTemplate.css_template # pylint: disable=possibly-unused-variable
+        formatted_html_template = HtmlTemplate.html_template.format(
+            elements
+        )  # pylint: disable=possibly-unused-variable
+        css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
         html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
         xr.set_options(display_style=display_style)
         return html_repr
