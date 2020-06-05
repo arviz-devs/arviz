@@ -32,12 +32,11 @@ class PyJAGSConverter:
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
         self.warmup_iterations = warmup_iterations
 
-        try:
-            import pyjags  # pylint: disable=import-error
-
-            self.pyjags = pyjags
-        except ModuleNotFoundError:
-            self.pyjags = None
+        # try:
+        import pyjags  # pylint: disable=import-error
+        self.pyjags = pyjags
+        # except ModuleNotFoundError:
+        #     self.pyjags = None
 
     def _pyjags_samples_to_xarray(
         self, pyjags_samples: tp.Mapping[str, np.ndarray]
@@ -192,8 +191,6 @@ def _convert_pyjags_dict_to_arviz_dict(
 
     if variable_names is None:
         variable_names = tuple(samples.keys())
-
-    assert isinstance(variable_names, tuple)
 
     for variable_name, chains in samples.items():
         if variable_name in variable_names:
