@@ -8,7 +8,7 @@ import arviz as az
 
 from arviz.data.io_pyjags import (
     _convert_pyjags_dict_to_arviz_dict,
-    _convert_arviz_sdict_to_pyjags_dict,
+    _convert_arviz_dict_to_pyjags_dict,
     _extract_arviz_dict_from_inference_data,
     from_pyjags,
 )
@@ -98,7 +98,7 @@ def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
         pyjags_samples_dict
     )
 
-    pyjags_dict_from_arviz_dict_from_pyjags_dict = _convert_arviz_sdict_to_pyjags_dict(
+    pyjags_dict_from_arviz_dict_from_pyjags_dict = _convert_arviz_dict_to_pyjags_dict(
         arviz_samples_dict_from_pyjags_samples_dict
     )
 
@@ -130,7 +130,7 @@ def test_roundtrip_from_pyjags_via_arviz_to_pyjags(
         arviz_inference_data_from_pyjags_samples_dict
     )
 
-    pyjags_dict_from_arviz_idata = _convert_arviz_sdict_to_pyjags_dict(
+    pyjags_dict_from_arviz_idata = _convert_arviz_dict_to_pyjags_dict(
         arviz_dict_from_idata_from_pyjags_dict
     )
 
