@@ -1,4 +1,5 @@
 emcee
+pyjags
 pymc3 @ git+https://github.com/pymc-devs/pymc3
 pystan
 cmdstanpy
