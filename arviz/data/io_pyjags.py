@@ -108,29 +108,29 @@ def get_draws(
     variables = tuple(variables)
 
     if warmup_iterations > 0:
-        (warmup_samples, actual_samples,) = _split_pyjags_samples_in_warmup_and_actual_samples(
+        (warmup_samples, actual_samples,) = _split_pyjags_dict_in_warmup_and_actual_samples(
             pyjags_samples=pyjags_samples,
             warmup_iterations=warmup_iterations,
             variable_names=variables,
         )
 
-        data = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+        data = _convert_pyjags_dict_to_arviz_dict(
             samples=actual_samples, variable_names=variables
         )
 
         if warmup:
-            data_warmup = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+            data_warmup = _convert_pyjags_dict_to_arviz_dict(
                 samples=warmup_samples, variable_names=variables
             )
     else:
-        data = _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+        data = _convert_pyjags_dict_to_arviz_dict(
             samples=pyjags_samples, variable_names=variables
         )
 
     return data, data_warmup
 
 
-def _split_pyjags_samples_in_warmup_and_actual_samples(
+def _split_pyjags_dict_in_warmup_and_actual_samples(
     pyjags_samples: tp.Mapping[str, np.ndarray],
     warmup_iterations: int,
     variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
@@ -167,7 +167,7 @@ def _split_pyjags_samples_in_warmup_and_actual_samples(
     return warmup_samples, actual_samples
 
 
-def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
+def _convert_pyjags_dict_to_arviz_dict(
     samples: tp.Mapping[str, np.ndarray], variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
 ) -> tp.Mapping[str, np.ndarray]:
     """
@@ -210,7 +210,7 @@ def _convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(
     return variable_name_to_samples_map
 
 
-def _extract_samples_dictionary_from_arviz_inference_data(idata,) -> tp.Mapping[str, np.ndarray]:
+def _extract_arviz_dict_from_inference_data(idata, ) -> tp.Mapping[str, np.ndarray]:
     """
     Extract the samples dictionary from an ArviZ inference data object.
 
