@@ -1,6 +1,6 @@
 """Convert PyJAGS sample dictionaries to ArviZ inference data objects."""
 from collections import OrderedDict
-from collections.abc import Sequence
+from collections.abc import Iterable
 import typing as tp
 
 import numpy as np
@@ -101,7 +101,7 @@ def get_draws(
     elif isinstance(variables, str):
         variables = [variables]
 
-    if not isinstance(variables, Sequence):
+    if not isinstance(variables, Iterable):
         raise TypeError("variables must be of type Sequence or str")
 
     variables = tuple(variables)
@@ -149,7 +149,7 @@ def _split_pyjags_dict_in_warmup_and_actual_samples(
     if variable_names is None:
         variable_names = tuple(pyjags_samples.keys())
 
-    assert isinstance(variable_names, tuple)
+    # assert isinstance(variable_names, tuple)
 
     warmup_samples: tp.Dict[str, np.ndarray] = {}
     actual_samples: tp.Dict[str, np.ndarray] = {}
