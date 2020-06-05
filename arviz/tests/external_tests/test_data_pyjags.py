@@ -129,7 +129,7 @@ def test_extract_samples_dictionary_from_arviz_inference_data(
     )
 
 
-def test_from_pyjags(
+def test_roundtrip_from_pyjags_via_arviz_to_pyjags(
     pyjags_samples_dict: tp.Mapping[str, np.ndarray],
     arviz_inference_data_from_pyjags_samples_dict: az.InferenceData,
 ):
