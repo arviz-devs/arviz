@@ -13,6 +13,7 @@ from arviz.tests.helpers import check_multiple_attrs
 
 
 pyjags_posterior_dict = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
+pyjags_prior_dict = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 
 
 def verify_equality_of_numpy_values_dictionaries(
@@ -72,14 +73,28 @@ def test_roundtrip_from_pyjags_via_arviz_to_pyjags():
     )
 
 
+@pytest.mark.parametrize("posterior", [None, pyjags_posterior_dict])
+@pytest.mark.parametrize("prior", [None, pyjags_prior_dict])
+@pytest.mark.parametrize("save_warmup", [True, False, None])
 @pytest.mark.parametrize("warmup_iterations", [0, 5])
-def test_inference_data_attrs(warmup_iterations: int):
+def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: int):
     arviz_inference_data_from_pyjags_samples_dict = from_pyjags(
-        pyjags_posterior_dict, warmup_iterations=warmup_iterations
+        posterior=pyjags_posterior_dict,
+        prior=pyjags_prior_dict,
+        save_warmup=save_warmup,
+        warmup_iterations=warmup_iterations
     )
-    test_dict = {
-        "posterior": ["b", "int"],
-    }
+    test_dict = {}
+    if posterior is not None:
+        test_dict["posterior"] = ["b", "int"]
+
+    if posterior is not None:
+        test_dict["prior"] = ["b", "int"]
+
+    # test_dict = {
+    #     "posterior": ["b", "int"],
+    #     "prior": ["b", "int"],
+    # }
 
     fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
     assert not fails
