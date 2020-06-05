@@ -104,6 +104,7 @@ Data
     from_numpyro
     from_pystan
     from_tfp
+    from pyjags
     concat
 
 Utils
