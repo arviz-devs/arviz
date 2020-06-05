@@ -144,3 +144,14 @@ def test_roundtrip_from_pyjags_via_arviz_to_pyjags(
     assert verify_equality_of_numpy_values_dictionaries(
         pyjags_samples_dict, pyjags_dict_from_arviz_idata
     )
+
+
+def test_inference_data_attrs(arviz_inference_data_from_pyjags_samples_dict: az.InferenceData):
+    test_dict = {
+        "posterior": ["b", "int"],
+    }
+
+    from arviz.tests.helpers import check_multiple_attrs
+
+    fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
+    assert not fails
