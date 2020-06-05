@@ -43,6 +43,8 @@ jobs:
     displayName: 'Debug information'
 
   - script: |
+      apt-get update
+      apt-get install jags
       python -m pip install --upgrade pip
 
       if [ "$(pytorch.version)" = "latest" ]; then
