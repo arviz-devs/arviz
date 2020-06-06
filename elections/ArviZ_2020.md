@@ -4,13 +4,15 @@
 This is the first election cycle for ArviZ. During this cycle we are aiming
 for the following outcomes
 
-* Ratification of Governance.MD
+* Ratification of GOVERNANCE.md
 * Identification and listing of Core Contributors
-* Nominations for Council Candidates 
+* Nominations for Council Candidates
 * Council Elections. Particularly
   * Size of Council
   * Inaugural ArviZ Council
 
+This being the first election means that the process will have more steps than
+the ones listed in GOVERNANCE.md.
 
 ## Process Details
 ### Identification of Core Contributors (1 week)
@@ -23,7 +25,7 @@ with exception of email
 
 ### Nominations for Council (1 week)
 1. A github issue labeled *Arviz 2020 Council Elections* will be opened for nominations
-2. Anyone can nominate a core contributor (including general public)
+2. Core contributors can nominate themselves or other core contributors.
 3. Core Contributor must accept acknowledgement with thumbs up on nomination
    * Without an acknowledgement, they will not be a candidate in the election.
    * A nomination can be explicitly declined as well in a comment, if that individual
@@ -32,16 +34,16 @@ with exception of email
 
 
 ### First Round Election for Council and Council size (1 week)
-The first election will be for council and council size. Elections will take place over 
+The first election will be for council and council size. Elections will take place over
 a Google Form owned by NumFOCUS. The tallying will be performed in accordance with `GOVERNANCE.md`
 
 1. NumFOCUS will email all registered voters a ballot for a vote on
     * Council Size
     * Council Members
-   
- 
+
+
 ### Tie Votes (1 week)
-In the event of a tie there will be a run-off election. 
+In the event of a tie there will be a run-off election.
 The tallying will be performed in accordance with `GOVERNANCE.md`
 
 1. NumFOCUS will email all registered voters a ballot for a vote on tied candidates
