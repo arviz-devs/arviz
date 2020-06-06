@@ -14,33 +14,36 @@ for the following outcomes
 This being the first election means that the process will have more steps than
 the ones listed in GOVERNANCE.md.
 
+The moderators for these tasks live in the PST and CST timezone so the dates are reflective of their localities.
+
 ## Process Details
-### Identification of Core Contributors (1 week)
-1. A Google Form will be created to get core contributor names and emails
+### Identification of Core Contributors (June 7th)
+1. A Google Form will be shared over Slack to get core contributor names, emails, and optionally Github username.
     * Emails are needed for Elections steps so NumFOCUS can mail and track votes
-    * The Google Form is moderated by Ravin
-2. At conclusion of week Ravin will update PR with all names and make the form's responses public,
-with exception of email
+    * The Google Form is moderated by Ravin (@canyon289)
+2. On June 11th at 8 PST Ravin will open a Pull Request with all names and make the form's responses public, with exception of email
+3. The pull request will stay open 24 hours at a minimum. If there is no dissent the pull request will be merged. If there is discussion the timeline below will be shifted.
 
-
-### Nominations for Council (1 week)
+### Nominations for Council (June 14th)
 1. A github issue labeled *Arviz 2020 Council Elections* will be opened for nominations
 2. Core contributors can nominate themselves or other core contributors.
 3. Core Contributor must accept acknowledgement with thumbs up on nomination
    * Without an acknowledgement, they will not be a candidate in the election.
    * A nomination can be explicitly declined as well in a comment, if that individual
    feels they will not be able to serve as a Council Member for any reason.
-4. At the end of the week, all nominations will be compiled in last comment.
+4. Nominations end at June 20th anywhere on Earth. On June 21st nominations will be compiled in the last comment and the issue will be closed.
 
 
-### First Round Election for Council and Council size (1 week)
+### First Round Election for Council and Council size (Week of June 21)
 The first election will be for council and council size. Elections will take place over
 a Google Form owned by NumFOCUS. The tallying will be performed in accordance with `GOVERNANCE.md`
+
+The election period will be exactly 7 days from when NumFOCUS email timestamp for the Google Form.
 
 1. NumFOCUS will email all registered voters a ballot for a vote on
     * Council Size
     * Council Members
-
+2. At conclusion of election period NumFOCUS will remove the voters identifying information and share the results (most likely in Google Sheets)
 
 ### Tie Votes (1 week)
 In the event of a tie there will be a run-off election.
