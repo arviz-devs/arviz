@@ -3,13 +3,14 @@ from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 from datetime import datetime
-import warnings
 from html import escape
+from xarray.core.options import OPTIONS
 
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-from xarray.core.options import OPTIONS
+import warnings
+import uuid
 
 from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
@@ -144,6 +145,7 @@ class InferenceData:
             elements = "".join(
                 [
                     HtmlTemplate.element_template.format(
+                        group_id = group + str(uuid.uuid4()),
                         group=group,
                         xr_data=getattr(  # pylint: disable=protected-access
                             self, group
