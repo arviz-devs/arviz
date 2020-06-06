@@ -145,9 +145,9 @@ class InferenceData:
                 [
                     HtmlTemplate.element_template.format(
                         group=group,
-                        xr_data=getattr(
+                        xr_data=getattr(  # pylint: disable=protected-access
                             self, group
-                        )._repr_html_(),  # pylint: disable=protected-access
+                        )._repr_html_(),
                     )
                     for group in self._groups_all
                 ]
