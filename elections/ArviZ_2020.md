@@ -21,8 +21,11 @@ The moderators for these tasks live in the PST and CST timezone so the dates are
 1. A Google Form will be shared over Slack to get core contributor names, emails, and optionally Github username.
     * Emails are needed for Elections steps so NumFOCUS can mail and track votes
     * The Google Form is moderated by Ravin (@canyon289)
-2. On June 11th at 8 PST Ravin will open a Pull Request with all names and make the form's responses public, with exception of email
+2. Ravin will open a Pull Request with all names and update the PR periodically until June 12th 8pm PST, which is also the cutoff time for the form.
+    * On June 12th 8pm PST Ravin will make the form's responses public as well, with exception of email
 3. The pull request will stay open 24 hours at a minimum. If there is no dissent the pull request will be merged. If there is discussion the timeline below will be shifted.
+
+Note: This is a one time process for identifying core contributors. After this cycle the core contributor acceptance process will performed by the ArviZ Council once elected
 
 ### Nominations for Council (June 14th)
 1. A github issue labeled *Arviz 2020 Council Elections* will be opened for nominations
