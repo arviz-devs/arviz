@@ -64,8 +64,16 @@ class PyJAGSConverter:
         """Convert all available data to an InferenceData object."""
         # obs_const_dict = self.observed_and_constant_data_to_xarray()
         # predictions_const_data = self.predictions_constant_data_to_xarray()
+        save_warmup = self.save_warmup and \
+                      self.warmup_iterations > 0
+                      # self.posterior is not None
+
+        idata_dict = {"posterior": self.posterior_to_xarray(),
+                      "prior": self.prior_to_xarray(),
+                      "save_warmup": save_warmup}
+
         return InferenceData(
-            **{"posterior": self.posterior_to_xarray(), "prior": self.prior_to_xarray()}
+            **idata_dict
         )
 
 

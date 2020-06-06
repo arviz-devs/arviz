@@ -84,11 +84,12 @@ def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: 
         save_warmup=save_warmup,
         warmup_iterations=warmup_iterations,
     )
-    # warmup_prefix = "" if save_warmup and warmup_iterations else "~"
+    warmup_prefix = "" if save_warmup and warmup_iterations > 0 and posterior is not None else "~"
+    print(f'warmup_prefix="{warmup_prefix}"')
     test_dict = {
         f'{"~" if posterior is None else ""}posterior': ["b", "int"],
         f'{"~" if prior is None else ""}prior': ["b", "int"],
-        # f'{warmup_prefix}warmup_posterior': ["b", "int"],
+        f'{warmup_prefix}warmup_posterior': ["b", "int"],
     }
 
     fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
