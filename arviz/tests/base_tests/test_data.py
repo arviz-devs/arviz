@@ -457,6 +457,7 @@ class TestInferenceData:
         assert np.allclose(idata_map.posterior.mu, idata.posterior.mu)
 
     def test_repr_html(self):
+        """Test if the function _repr_html is generating html."""
         idata = load_arviz_data("centered_eight")
         html = idata._repr_html_()  # pylint: disable=protected-access
 
