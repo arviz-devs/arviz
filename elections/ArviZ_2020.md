@@ -44,9 +44,12 @@ The election period will be exactly 7 days from when NumFOCUS email timestamp fo
     * Council Size
     * Council Members
 2. At conclusion of election period NumFOCUS will remove the voters identifying information and share the results (most likely in Google Sheets)
+    * A table of results will be added to this document
 
 ### Tie Votes (1 week)
-In the event of a tie there will be a run-off election.
+In the event of a tie there will be a run-off election. The specific timing will depend on the results of the election above.
 The tallying will be performed in accordance with `GOVERNANCE.md`
 
 1. NumFOCUS will email all registered voters a ballot for a vote on tied candidates
+2. At conclusion of election period NumFOCUS will remove the voters identifying information and share the results (most likely in Google Sheets)
+    * A table of results will be added to this document
