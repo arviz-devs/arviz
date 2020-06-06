@@ -295,7 +295,7 @@ def from_pyjags(
     dims: dict[str, List(str)]
           A mapping from variables to a list of coordinate names for the variable.
 
-   save_warmup : bool, optional
+    save_warmup : bool, optional
        Save warmup iterations in InferenceData. If not defined, use default defined by the rcParams.
     warmup_iterations: int, optional
         Number of warmup iterations
