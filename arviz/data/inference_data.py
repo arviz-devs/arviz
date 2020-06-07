@@ -239,9 +239,9 @@ class InferenceData:
 
             for group in groups:
                 xr_data = getattr(self, group)
-                ds = xr_data.data_vars
+                xr_data = xr_data.data_vars
                 data = {}
-                for key, value in ds.items():
+                for key, value in xr_data.items():
                     data[key] = value.values
                     dims = []
                     for k_, v_ in value.coords.items():
@@ -251,6 +251,8 @@ class InferenceData:
                     if len(dims) > 0:
                         ret["dims"][key] = dims
                     ret[group] = data
+
+        return ret
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
