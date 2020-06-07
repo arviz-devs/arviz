@@ -213,7 +213,7 @@ class InferenceData:
             empty_netcdf_file.close()
         return filename
 
-    def to_dict(self, groups=None, data=True):
+    def to_dict(self, groups=None):
         """Convert InferenceData to a dictionary following xarray naming
         conventions.
 
@@ -221,9 +221,6 @@ class InferenceData:
         ----------
         groups : list, optional
             Write only these groups to netcdf file.
-        data : bool, optional
-            decide whether to include the actual data in thr dictionary.
-            If False, returns just the schema
 
         Returns
         -------
@@ -232,6 +229,8 @@ class InferenceData:
             When `data=False` return just the schema.
         """
         ret = {}
+        ret.setdefault("coords", dict())
+        ret.setdefault("dims", dict())
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._groups_all
@@ -239,9 +238,19 @@ class InferenceData:
                 groups = [group for group in self._groups_all if group in groups]
 
             for group in groups:
-                ds = getattr(self, group)
-                ret[group] = ds.to_dict(data=data)
-        return ret
+                xr_data = getattr(self, group)
+                ds = xr_data.data_vars
+                data = {}
+                for key, value in ds.items():
+                    data[key] = value.values
+                    dims = []
+                    for k_, v_ in value.coords.items():
+                        if k_ not in ("chain", "draw") and not k_.startswith(key + "_dim_"):
+                            dims.append(k_)
+                            ret["coords"][k_] = v_.values
+                    if len(dims) > 0:
+                        ret["dims"][key] = dims
+                    ret[group] = data
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
