@@ -227,7 +227,7 @@ class TestDataPyMC3:
             "posterior": ["x"],
             "observed_data": ["y1", "y2"],
             "log_likelihood": ["y1", "y2"],
-            "sample_stats": ["diverging", "lp"],
+            "sample_stats": ["diverging", "lp", "~log_likelihood"],
         }
         if not log_likelihood:
             test_dict.pop("log_likelihood")
@@ -237,7 +237,6 @@ class TestDataPyMC3:
 
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
-        assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
     @pytest.mark.skipif(
         version_info < (3, 6), reason="Requires updated PyMC3, which needs Python 3.6"
@@ -250,11 +249,48 @@ class TestDataPyMC3:
             )
             trace = pm.sample(100, chains=2)
             inference_data = from_pymc3(trace=trace)
-        assert inference_data
-        assert not hasattr(inference_data, "observed_data")
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data, "sample_stats")
-        assert hasattr(inference_data, "log_likelihood")
+        test_dict = {
+            "posterior": ["mu"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["x"],
+            "observed_data": ["value", "~x"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        assert inference_data.observed_data.value.dtype.kind == "f"
+
+    def test_multiobservedrv_to_observed_data(self):
+        # fake regression data, with weights (W)
+        np.random.seed(2019)
+        N = 100
+        X = np.random.uniform(size=N)
+        W = 1 + np.random.poisson(size=N)
+        a, b = 5, 17
+        Y = a + np.random.normal(b * X)
+
+        with pm.Model():
+            a = pm.Normal("a", 0, 10)
+            b = pm.Normal("b", 0, 10)
+            mu = a + b * X
+            sigma = pm.HalfNormal("sigma", 1)
+
+            def weighted_normal(y, w):
+                return w * pm.Normal.dist(mu=mu, sd=sigma).logp(y)
+
+            y_logp = pm.DensityDist(  # pylint: disable=unused-variable
+                "y_logp", weighted_normal, observed={"y": Y, "w": W}
+            )
+            trace = pm.sample(20, tune=20)
+            idata = from_pymc3(trace)
+        test_dict = {
+            "posterior": ["a", "b", "sigma"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["y_logp"],
+            "observed_data": ["y", "w"],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert idata.observed_data.y.dtype.kind == "f"
 
     def test_single_observation(self):
         with pm.Model():

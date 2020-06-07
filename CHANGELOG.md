@@ -6,6 +6,8 @@
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215) 
 
 ### Maintenance and fixes
+* Include data from `MultiObservedRV` to `observed_data` when using
+  `from_pymc3` (#1098)
 
 * Added a note on `plot_pair` when trying to use `plot_kde` on `InferenceData`
   objects. (#1218)
