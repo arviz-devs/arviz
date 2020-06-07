@@ -201,6 +201,7 @@ Current Core Contributors can nominate candidates for consideration by the counc
 can make the determination for acceptance with a process of their choosing.
 
 #### Current Core Contributors
+* Alex Andorra (@AlexAndorra)
 * Osvaldo Martin (@aloctavodia)
 * Oriol Abril Pla (@OriolAbril) 
 * Du Phan (@fehiepsi)
