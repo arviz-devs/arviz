@@ -201,7 +201,11 @@ Current Core Contributors can nominate candidates for consideration by the counc
 can make the determination for acceptance with a process of their choosing.
 
 #### Current Core Contributors
-* Will be updated with Core Contributor list during first election
+* Osvaldo Martin (@aloctavodia)
+* Oriol Abril Pla (@OriolAbril) 
+* Du Phan (@fehiepsi)
+* Ravin Kumar (@canyon289)
+
 
 #### Core Contributor Responsibilities
 * Enforce code of conduct
