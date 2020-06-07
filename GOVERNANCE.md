@@ -202,10 +202,12 @@ can make the determination for acceptance with a process of their choosing.
 
 #### Current Core Contributors
 * Alex Andorra (@AlexAndorra)
+* Colin Carroll (@ColCarroll)
+* Ari Hartikainen (@ahartikainen)
+* Ravin Kumar (@canyon289)
 * Osvaldo Martin (@aloctavodia)
 * Oriol Abril Pla (@OriolAbril) 
 * Du Phan (@fehiepsi)
-* Ravin Kumar (@canyon289)
 
 
 #### Core Contributor Responsibilities
