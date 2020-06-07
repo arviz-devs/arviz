@@ -425,7 +425,7 @@ class TestDataPyMC3:
             obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
             prior = pm.sample_prior_predictive()
 
-        with pytest.warns(PendingDeprecationWarning, match="without the model"):
+        with pytest.warns(FutureWarning, match="without the model"):
             inference_data = from_pymc3(prior=prior)
         test_dict = {
             "prior": ["beta", "obs"],

@@ -86,7 +86,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "Using `from_pymc3` without the model will be deprecated in a future release. "
                 "Not using the model will return less accurate and less useful results. "
                 "Make sure you use the model argument or call from_pymc3 within a model context.",
-                PendingDeprecationWarning,
+                FutureWarning,
             )
 
         # This next line is brittle and may not work forever, but is a secret
