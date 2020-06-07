@@ -17,6 +17,7 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
 torch = importorskip("torch")
 pyro = importorskip("pyro")
 Predictive = pyro.infer.Predictive
+dist = pyro.distributions
 
 
 class TestDataPyro:
@@ -164,9 +165,6 @@ class TestDataPyro:
         assert not fails
 
     def test_multiple_observed_rv(self):
-        import pyro.distributions as dist
-        from pyro.infer import MCMC, NUTS
-
         y1 = torch.randn(10)
         y2 = torch.randn(10)
 
@@ -175,8 +173,8 @@ class TestDataPyro:
             pyro.sample("y1", dist.Normal(x, 1), obs=y1)
             pyro.sample("y2", dist.Normal(x, 1), obs=y2)
 
-        nuts_kernel = NUTS(model_example_multiple_obs)
-        mcmc = MCMC(nuts_kernel, num_samples=10)
+        nuts_kernel = pyro.infer.NUTS(model_example_multiple_obs)
+        mcmc = pyro.infer.MCMC(nuts_kernel, num_samples=10)
         mcmc.run(y1=y1, y2=y2)
         inference_data = from_pyro(mcmc)
         test_dict = {
@@ -190,9 +188,6 @@ class TestDataPyro:
         assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
     def test_inference_data_constant_data(self):
-        import pyro.distributions as dist
-        from pyro.infer import MCMC, NUTS
-
         x1 = 10
         x2 = 12
         y1 = torch.randn(10)
@@ -201,8 +196,8 @@ class TestDataPyro:
             _x = pyro.sample("x", dist.Normal(1, 3))
             pyro.sample("y1", dist.Normal(x * _x, 1), obs=y1)
 
-        nuts_kernel = NUTS(model_constant_data)
-        mcmc = MCMC(nuts_kernel, num_samples=10)
+        nuts_kernel = pyro.infer.NUTS(model_constant_data)
+        mcmc = pyro.infer.MCMC(nuts_kernel, num_samples=10)
         mcmc.run(x=x1, y1=y1)
         posterior = mcmc.get_samples()
         posterior_predictive = Predictive(model_constant_data, posterior)(x1)
@@ -232,3 +227,25 @@ class TestDataPyro:
         inference_data = from_pyro(predictions=predictions, num_chains=chains)
         nchains = inference_data.predictions.dims["chain"]
         assert nchains == chains
+
+    def test_log_likelihood_warning(self):
+        x = torch.randn((10, 2))
+        y = torch.randn(10)
+
+        def model_constant_data(x, y=None):
+            beta = pyro.sample("beta", dist.Normal(torch.ones(2), 3))
+            pyro.sample("y", dist.Normal(x.matmul(beta), 1), obs=y)
+
+        nuts_kernel = pyro.infer.NUTS(model_constant_data)
+        mcmc = pyro.infer.MCMC(nuts_kernel, num_samples=10)
+        mcmc.run(x=x, y=y)
+        with pytest.warns(UserWarning, match="Could not get vectorized trace"):
+            inference_data = from_pyro(mcmc)
+        test_dict = {
+            "posterior": ["beta"],
+            "sample_stats": ["diverging"],
+            "~log_likelihood": [],
+            "observed_data": ["y"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
