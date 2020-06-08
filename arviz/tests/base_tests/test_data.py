@@ -6,8 +6,10 @@ from typing import Dict
 from urllib.parse import urlunsplit
 import numpy as np
 import pytest
+from html import escape
 
 import xarray as xr
+from xarray.core.options import OPTIONS
 
 from arviz import (
     concat,
@@ -459,10 +461,22 @@ class TestInferenceData:
     def test_repr_html(self):
         """Test if the function _repr_html is generating html."""
         idata = load_arviz_data("centered_eight")
+        display_style = OPTIONS["display_style"]
+        xr.set_options(display_style="html")
         html = idata._repr_html_()  # pylint: disable=protected-access
 
         assert html is not None
         assert "<div" in html
+        for group in idata._groups:
+            assert group in html
+            xr_data = getattr(idata, group)
+            xr_data._repr_html_() in html
+        specific_style = ".xr-wrap{width:700px!important;}"
+        assert specific_style in html
+        xr.set_options(display_style="text")
+        html = idata._repr_html_()  # pylint: disable=protected-access
+        assert escape(idata.__repr__()) in html
+        xr.set_options(display_style=display_style)
 
 
 class TestNumpyToDataArray:
