@@ -178,7 +178,14 @@ def make_ufunc(
 
 
 def wrap_xarray_ufunc(
-    ufunc, *datasets, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
+    ufunc,
+    *datasets,
+    dask="forbidden",
+    output_dtypes=None,
+    ufunc_kwargs=None,
+    func_args=None,
+    func_kwargs=None,
+    **kwargs
 ):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
@@ -186,6 +193,10 @@ def wrap_xarray_ufunc(
     ----------
     ufunc : callable
     datasets : xarray.dataset
+    dask : "forbidden" or "parallelized"
+        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization. Must also provide `output_dtypes` argument if dask="parallelized".
+    output_dtypes : list of dtypes
+        Only used if dask=’parallelized’.
     ufunc_kwargs : dict
         Keyword arguments passed to `make_ufunc`.
             - 'n_dims', int, by default 2
@@ -221,7 +232,9 @@ def wrap_xarray_ufunc(
 
     callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
-    return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
+    return apply_ufunc(
+        callable_ufunc, *datasets, dask, output_dtypes, *func_args, kwargs=func_kwargs, **kwargs
+    )
 
 
 def update_docstring(ufunc, func, n_output=1):
