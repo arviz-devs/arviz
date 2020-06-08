@@ -29,6 +29,7 @@ axes.facecolor: eeeeee
 axes.edgecolor: white
 axes.linewidth: 0
 grid.color: white
+image.cmap: viridis
 xtick.major.size: 0
 ytick.major.size: 0
 xtick.minor.size: 0

@@ -4,23 +4,22 @@ import xarray as xr
 
 from ..data import convert_to_dataset
 from ..stats import mcse
-from ..stats.stats_utils import quantile as _quantile
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
-    make_label,
     default_grid,
-    _create_axes_grid,
-    get_coords,
+    filter_plotters_list,
+    get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
-from ..utils import _var_names
+from ..rcparams import rcParams
+from ..utils import _var_names, get_coords
 
 
 def plot_mcse(
-    # disable black until #763 is released
-    # fmt: off
     idata,
     var_names=None,
+    filter_vars=None,
     coords=None,
     errorbar=False,
     figsize=None,
@@ -33,52 +32,68 @@ def plot_mcse(
     rug_kwargs=None,
     extra_kwargs=None,
     text_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
     **kwargs
-    # fmt: on
 ):
-    """Plot quantile, local or evolution of effective sample sizes (ESS).
+    """Plot quantile or local Monte Carlo Standard Error.
 
     Parameters
     ----------
-    idata : obj
+    idata: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names, optional
-        Variables to be plotted.
-    coords : dict, optional
+    var_names: list of variable names, optional
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    errorbar : bool, optional
+    errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
-    figsize : tuple, optional
+    figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    extra_methods : bool, optional
+    extra_methods: bool, optional
         Plot mean and sd MCSE as horizontal lines. Only taken into account when
         ``errorbar=False``.
-    rug : bool
+    rug: bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind : bool
+    rug_kind: bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points : int
+    n_points: int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
-    rug_kwargs : dict
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
+    rug_kwargs: dict
         kwargs passed to rug plot.
-    extra_kwargs : dict, optional
+    extra_kwargs: dict, optional
         kwargs passed to ax.plot for extra methods lines.
-    text_kwargs : dict, optional
+    text_kwargs: dict, optional
         kwargs passed to ax.annotate for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show: bool, optional
+        Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes: matplotlib axes or bokeh figures
 
     References
     ----------
@@ -86,7 +101,7 @@ def plot_mcse(
 
     Examples
     --------
-    Plot quantile MCSE.
+    Plot quantile Monte Carlo Standard Error.
 
     .. plot::
         :context: close-figs
@@ -99,126 +114,103 @@ def plot_mcse(
         ... )
 
     """
+    mean_mcse = None
+    sd_mcse = None
+    text_x = None
+    text_va = None
+
     if coords is None:
         coords = {}
     if "chain" in coords or "draw" in coords:
         raise ValueError("chain and draw are invalid coordinates for this kind of plot")
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
 
     probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
     mcse_dataset = xr.concat(
         [mcse(data, var_names=var_names, method="quantile", prob=p) for p in probs], dim="mcse_dim"
     )
 
-    plotters = list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"}))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(mcse_dataset, var_names=var_names, skip_dims={"mcse_dim"})),
+        "plot_mcse",
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    kwargs.setdefault("linestyle", kwargs.pop("ls", "none"))
-    kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
-    kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs.setdefault("linestyle", "none")
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "_" if errorbar else "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
-    extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
-    extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+    extra_kwargs.setdefault("linestyle", "-")
+    extra_kwargs.setdefault("linewidth", _linewidth / 2)
     extra_kwargs.setdefault("color", "k")
     extra_kwargs.setdefault("alpha", 0.5)
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")
         sd_mcse = mcse(data, var_names=var_names, method="sd")
-        if text_kwargs is None:
-            text_kwargs = {}
+
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
-        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
         text_kwargs.setdefault("color", extra_kwargs["color"])
-        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
 
-    if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
-        )
+    mcse_kwargs = dict(
+        ax=ax,
+        plotters=plotters,
+        length_plotters=length_plotters,
+        rows=rows,
+        cols=cols,
+        figsize=figsize,
+        errorbar=errorbar,
+        rug=rug,
+        data=data,
+        probs=probs,
+        kwargs=kwargs,
+        extra_methods=extra_methods,
+        mean_mcse=mean_mcse,
+        sd_mcse=sd_mcse,
+        text_x=text_x,
+        text_va=text_va,
+        text_kwargs=text_kwargs,
+        rug_kwargs=rug_kwargs,
+        extra_kwargs=extra_kwargs,
+        idata=idata,
+        rug_kind=rug_kind,
+        _markersize=_markersize,
+        _linewidth=_linewidth,
+        xt_labelsize=xt_labelsize,
+        ax_labelsize=ax_labelsize,
+        titlesize=titlesize,
+        backend_kwargs=backend_kwargs,
+        show=show,
+    )
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        if errorbar or rug:
-            values = data[var_name].sel(**selection).values.flatten()
-        if errorbar:
-            quantile_values = _quantile(values, probs)
-            ax_.errorbar(probs, quantile_values, yerr=x, **kwargs)
-        else:
-            ax_.plot(probs, x, label="quantile", **kwargs)
-            if extra_methods:
-                mean_mcse_i = mean_mcse[var_name].sel(**selection).values.item()
-                sd_mcse_i = sd_mcse[var_name].sel(**selection).values.item()
-                ax_.axhline(mean_mcse_i, **extra_kwargs)
-                ax_.annotate(
-                    "mean",
-                    (text_x, mean_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if mean_mcse_i > sd_mcse_i
-                    else "top",
-                    **text_kwargs,
-                )
-                ax_.axhline(sd_mcse_i, **extra_kwargs)
-                ax_.annotate(
-                    "sd",
-                    (text_x, sd_mcse_i),
-                    va=text_va
-                    if text_va is not None
-                    else "bottom"
-                    if sd_mcse_i >= mean_mcse_i
-                    else "top",
-                    **text_kwargs,
-                )
-        if rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
-            if not hasattr(idata, "sample_stats"):
-                raise ValueError("InferenceData object must contain sample_stats for rug plot")
-            if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
-            rug_kwargs.setdefault("marker", "|")
-            rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
-            rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
-            rug_kwargs.setdefault("space", 0.1)
-            rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-            mask = idata.sample_stats[rug_kind].values.flatten()
-            values = np.argsort(values)[mask]
-            y_min, y_max = ax_.get_ylim()
-            y_min = y_min if errorbar else 0
-            rug_space = (y_max - y_min) * rug_kwargs.pop("space")
-            rug_x, rug_y = values / (len(mask) - 1), np.full_like(values, y_min) - rug_space
-            ax_.plot(rug_x, rug_y, **rug_kwargs)
-            ax_.axhline(y_min, color="k", linewidth=_linewidth, alpha=0.7)
+    if backend == "bokeh":
+        mcse_kwargs.pop("kwargs")
+        mcse_kwargs.pop("text_x")
+        mcse_kwargs.pop("text_va")
+        mcse_kwargs.pop("text_kwargs")
+        mcse_kwargs.pop("xt_labelsize")
+        mcse_kwargs.pop("ax_labelsize")
+        mcse_kwargs.pop("titlesize")
 
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax_.tick_params(labelsize=xt_labelsize)
-        ax_.set_xlabel("Quantile", fontsize=ax_labelsize, wrap=True)
-        ax_.set_ylabel(
-            r"Value $\pm$ MCSE for quantiles" if errorbar else "MCSE for quantiles",
-            fontsize=ax_labelsize,
-            wrap=True,
-        )
-        ax_.set_xlim(0, 1)
-        if rug:
-            ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
-            y_min, y_max = ax_.get_ylim()
-            yticks = ax_.get_yticks()
-            yticks = yticks[(yticks >= y_min) & (yticks < y_max)]
-            ax_.set_yticks(yticks)
-            ax_.set_yticklabels(["{:.3g}".format(ytick) for ytick in yticks])
-        elif not errorbar:
-            ax_.set_ylim(bottom=0)
-
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_mcse", "mcseplot", backend)
+    ax = plot(**mcse_kwargs)
     return ax

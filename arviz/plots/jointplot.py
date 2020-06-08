@@ -1,16 +1,23 @@
 """Joint scatter plot of two variables."""
-import matplotlib.pyplot as plt
+import warnings
 
 from ..data import convert_to_dataset
-from .distplot import plot_dist
-from .kdeplot import plot_kde
-from .plot_utils import _scale_fig_size, xarray_var_iter, make_label, get_coords
-from ..utils import _var_names
+from .plot_utils import (
+    _scale_fig_size,
+    xarray_var_iter,
+    get_plotting_function,
+    matplotlib_kwarg_dealiaser,
+)
+from ..rcparams import rcParams
+from ..utils import _var_names, get_coords
 
 
 def plot_joint(
     data,
+    group="posterior",
     var_names=None,
+    filter_vars=None,
+    transform=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -20,43 +27,69 @@ def plot_joint(
     fill_last=True,
     joint_kwargs=None,
     marginal_kwargs=None,
+    ax=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
 ):
     """
     Plot a scatter or hexbin of two variables with their respective marginals distributions.
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : Iter of 2 e.g. (var_1, var_2)
-        Variables to be plotted, two variables are required.
-    coords : mapping, optional
+    group: str, optional
+        Specifies which InferenceData group should be plotted. Defaults to ‘posterior’.
+    var_names: str or iterable of str
+        Variables to be plotted. Iterable of two variables or one variable (with subset
+        having exactly 2 dimensions) are required. Prefix the variables by `~` when you
+        want to exclude them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    transform: callable
+        Function to transform data (defaults to None i.e. the identity function)
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    kind : str
+    kind: str
         Type of plot to display (scatter, kde or hexbin)
-    gridsize : int or (int, int), optional.
+    gridsize: int or (int, int), optional.
         The number of hexagons in the x-direction. Ignored when hexbin is False. See `plt.hexbin`
         for details
-    contour : bool
+    contour: bool
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
-    fill_last : bool
+    fill_last: bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
-    joint_kwargs : dicts, optional
+    joint_kwargs: dicts, optional
         Additional keywords modifying the join distribution (central subplot)
-    marginal_kwargs : dicts, optional
+    marginal_kwargs: dicts, optional
         Additional keywords modifying the marginals distributions (top and right subplot)
+    ax: tuple of axes, optional
+        Tuple containing (ax_joint, ax_hist_x, ax_hist_y). If None, a new figure and axes
+        will be created. Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show: bool, optional
+        Call backend show function.
 
     Returns
     -------
-    axjoin : matplotlib axes, join (central) distribution
-    ax_hist_x : matplotlib axes, x (top) distribution
-    ax_hist_y : matplotlib axes, y (right) distribution
+    axes: matplotlib axes or bokeh figures
+        ax_joint: joint (central) distribution
+        ax_hist_x: x (top) distribution
+        ax_hist_y: y (right) distribution
 
     Examples
     --------
@@ -95,19 +128,41 @@ def plot_joint(
         >>>                 kind='kde',
         >>>                 figsize=(6, 6))
 
+    Overlayed plots:
+
+    .. plot::
+        :context: close-figs
+
+        >>> data2 = az.load_arviz_data("centered_eight")
+        >>> kde_kwargs = {"contourf_kwargs": {"alpha": 0}, "contour_kwargs": {"colors": "k"}}
+        >>> ax = az.plot_joint(
+        ...     data, var_names=("mu", "tau"), kind="kde", fill_last=False,
+        ...     joint_kwargs=kde_kwargs, marginal_kwargs={"color": "k"}
+        ... )
+        >>> kde_kwargs["contour_kwargs"]["colors"] = "r"
+        >>> az.plot_joint(
+        ...     data2, var_names=("mu", "tau"), kind="kde", fill_last=False,
+        ...     joint_kwargs=kde_kwargs, marginal_kwargs={"color": "r"}, ax=ax
+        ... )
+
     """
+    warnings.warn("plot_joint will be deprecated. Please use plot_pair instead.")
+
     valid_kinds = ["scatter", "kde", "hexbin"]
     if kind not in valid_kinds:
         raise ValueError(
             ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
         )
 
-    data = convert_to_dataset(data, group="posterior")
+    data = convert_to_dataset(data, group=group)
+
+    if transform is not None:
+        data = transform(data)
 
     if coords is None:
         coords = {}
 
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
 
     plotters = list(xarray_var_iter(get_coords(data, coords), var_names=var_names, combined=True))
 
@@ -118,55 +173,47 @@ def plot_joint(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
-    if joint_kwargs is None:
-        joint_kwargs = {}
+    if kind == "kde":
+        types = "plot"
+    elif kind == "scatter":
+        types = "scatter"
+    else:
+        types = "hexbin"
+    joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
 
     if marginal_kwargs is None:
         marginal_kwargs = {}
     marginal_kwargs.setdefault("plot_kwargs", {})
     marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
 
-    # Instantiate figure and grid
-    fig, _ = plt.subplots(0, 0, figsize=figsize, constrained_layout=True)
-    grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
+    plot_joint_kwargs = dict(
+        ax=ax,
+        figsize=figsize,
+        plotters=plotters,
+        ax_labelsize=ax_labelsize,
+        xt_labelsize=xt_labelsize,
+        kind=kind,
+        contour=contour,
+        fill_last=fill_last,
+        joint_kwargs=joint_kwargs,
+        gridsize=gridsize,
+        marginal_kwargs=marginal_kwargs,
+        backend_kwargs=backend_kwargs,
+        show=show,
+    )
 
-    # Set up main plot
-    axjoin = fig.add_subplot(grid[1:, :-1])
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-    # Set up top KDE
-    ax_hist_x = fig.add_subplot(grid[0, :-1], sharex=axjoin)
-    ax_hist_x.tick_params(labelleft=False, labelbottom=False)
+    if backend == "bokeh":
 
-    # Set up right KDE
-    ax_hist_y = fig.add_subplot(grid[1:, -1], sharey=axjoin)
-    ax_hist_y.tick_params(labelleft=False, labelbottom=False)
+        plot_joint_kwargs.pop("ax_labelsize")
+        plot_joint_kwargs["marginal_kwargs"]["plot_kwargs"]["line_width"] = plot_joint_kwargs[
+            "marginal_kwargs"
+        ]["plot_kwargs"].pop("linewidth")
 
-    # Set labels for axes
-    x_var_name = make_label(plotters[0][0], plotters[0][1])
-    y_var_name = make_label(plotters[1][0], plotters[1][1])
-
-    axjoin.set_xlabel(x_var_name, fontsize=ax_labelsize)
-    axjoin.set_ylabel(y_var_name, fontsize=ax_labelsize)
-    axjoin.tick_params(labelsize=xt_labelsize)
-
-    # Flatten data
-    x = plotters[0][2].flatten()
-    y = plotters[1][2].flatten()
-
-    if kind == "scatter":
-        axjoin.scatter(x, y, **joint_kwargs)
-    elif kind == "kde":
-        plot_kde(x, y, contour=contour, fill_last=fill_last, ax=axjoin, **joint_kwargs)
-    else:
-        if gridsize == "auto":
-            gridsize = int(len(x) ** 0.35)
-        axjoin.hexbin(x, y, mincnt=1, gridsize=gridsize, **joint_kwargs)
-        axjoin.grid(False)
-
-    for val, ax, rotate in ((x, ax_hist_x, False), (y, ax_hist_y, True)):
-        plot_dist(val, textsize=xt_labelsize, rotated=rotate, ax=ax, **marginal_kwargs)
-
-    ax_hist_x.set_xlim(axjoin.get_xlim())
-    ax_hist_y.set_ylim(axjoin.get_ylim())
-
-    return axjoin, ax_hist_x, ax_hist_y
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_joint", "jointplot", backend)
+    axes = plot(**plot_joint_kwargs)
+    return axes

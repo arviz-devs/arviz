@@ -1,74 +1,126 @@
-"""Plot a scatter or hexbin of sampled parameters."""
+"""Plot a scatter, kde and/or hexbin of sampled parameters."""
 import warnings
+from typing import Optional, Union, List
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import NullFormatter
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .kdeplot import plot_kde
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
-from ..utils import _var_names
+from .plot_utils import xarray_to_ndarray, get_plotting_function
+from ..rcparams import rcParams
+from ..utils import _var_names, get_coords
 
 
 def plot_pair(
     data,
-    var_names=None,
+    group="posterior",
+    var_names: Optional[List[str]] = None,
+    filter_vars: Optional[str] = None,
     coords=None,
+    marginals=False,
     figsize=None,
     textsize=None,
-    kind="scatter",
+    kind: Union[str, List[str]] = "scatter",
     gridsize="auto",
-    contour=True,
-    fill_last=True,
+    contour: Optional[bool] = None,
+    plot_kwargs=None,
+    fill_last=False,
     divergences=False,
     colorbar=False,
     ax=None,
     divergences_kwargs=None,
-    plot_kwargs=None,
+    scatter_kwargs=None,
+    kde_kwargs=None,
+    hexbin_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    marginal_kwargs=None,
+    point_estimate=None,
+    point_estimate_kwargs=None,
+    point_estimate_marker_kwargs=None,
+    reference_values=None,
+    reference_values_kwargs=None,
+    show=None,
 ):
     """
-    Plot a scatter or hexbin matrix of the sampled parameters.
+    Plot a scatter, kde and/or hexbin matrix with (optional) marginals on the diagonal.
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
-        Variables to be plotted, if None all variable are plotted
-    coords : mapping, optional
+    group: str, optional
+        Specifies which InferenceData group should be plotted.  Defaults to 'posterior'.
+    var_names: list of variable names, optional
+        Variables to be plotted, if None all variable are plotted. Prefix the
+        variables by `~` when you want to exclude them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : figure size tuple
+    marginals: bool, optional
+        If True pairplot will include marginal distributions for every variable
+    figsize: figure size tuple
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int
         Text size for labels. If None it will be autoscaled based on figsize.
-    kind : str
-        Type of plot to display (kde or hexbin)
-    gridsize : int or (int, int), optional
+    kind : str or List[str]
+        Type of plot to display (scatter, kde and/or hexbin)
+    gridsize: int or (int, int), optional
         Only works for kind=hexbin.
         The number of hexagons in the x-direction. The corresponding number of hexagons in the
         y-direction is chosen such that the hexagons are approximately regular.
         Alternatively, gridsize can be a tuple with two elements specifying the number of hexagons
         in the x-direction and the y-direction.
-    contour : bool
+    contour : bool, optional, deprecated, Defaults to True.
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+        **Note:** this default is implemented in the body of the code, not in argument processing.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
-    divergences : Boolean
-        If True divergences will be plotted in a different color
-    colorbar : bool
+    divergences: Boolean
+        If True divergences will be plotted in a different color, only if group is either 'prior'
+        or 'posterior'.
+    colorbar: bool
         If True a colorbar will be included as part of the plot (Defaults to False).
         Only works when kind=hexbin
-    ax: axes
-        Matplotlib axes
-    divergences_kwargs : dicts, optional
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    divergences_kwargs: dicts, optional
         Additional keywords passed to ax.scatter for divergences
-    plot_kwargs : dicts, optional
-        Additional keywords passed to ax.plot, az.plot_kde or ax.hexbin
+    scatter_kwargs:
+        Additional keywords passed to ax.plot when using scatter kind
+    kde_kwargs: dict, optional
+        Additional keywords passed to az.plot_kde when using kde kind
+    hexbin_kwargs: dict, optional
+        Additional keywords passed to ax.hexbin when using hexbin kind
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    marginal_kwargs: dict, optional
+        Additional keywords passed to az.plot_dist, modifying the marginal distributions
+        plotted in the diagonal.
+    point_estimate: str, optional
+        Select point estimate from 'mean', 'mode' or 'median'. The point estimate will be
+        plotted using a scatter marker and vertical/horizontal lines.
+    point_estimate_kwargs: dict, optional
+        Additional keywords passed to ax.vline, ax.hline (matplotlib) or ax.square, Span (bokeh)
+    point_estimate_marker_kwargs: dict, optional
+        Additional keywords passed to ax.scatter in point estimate plot. Not available in bokeh
+    reference_values: dict, optional
+        Reference values for the plotted variables. The Reference values will be plotted
+        using a scatter marker
+    reference_values_kwargs: dict, optional
+        Additional keywords passed to ax.plot or ax.circle in reference values plot
+    show: bool, optional
+        Call backend show function.
+
     Returns
     -------
-    ax : matplotlib axes
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -98,32 +150,57 @@ def plot_pair(
         >>>             textsize=18,
         >>>             kind='hexbin')
 
-    Pair plot showing divergences
+    Pair plot showing divergences and select variables with regular expressions
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_pair(centered,
-        ...             var_names=['theta', 'mu', 'tau'],
+        ...             var_names=['^t', 'mu'],
+        ...             filter_vars="regex",
         ...             coords=coords,
         ...             divergences=True,
         ...             textsize=18)
     """
     valid_kinds = ["scatter", "kde", "hexbin"]
-    if kind not in valid_kinds:
-        raise ValueError(
-            ("Plot type {} not recognized." "Plot type must be in {}").format(kind, valid_kinds)
+    kind_boolean: Union[bool, List[bool]]
+    if isinstance(kind, str):
+        kind_boolean = kind in valid_kinds
+    else:
+        kind_boolean = [kind[i] in valid_kinds for i in range(len(kind))]
+    if not np.all(kind_boolean):
+        raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
+    if fill_last or contour:
+        warnings.warn(
+            "fill_last and contour will be deprecated. Please use kde_kwargs", UserWarning,
         )
+    if contour is None:
+        contour = True
 
     if coords is None:
         coords = {}
 
     if plot_kwargs is None:
         plot_kwargs = {}
+    else:
+        warnings.warn(
+            "plot_kwargs will be deprecated."
+            " Please use scatter_kwargs, kde_kwargs and/or hexbin_kwargs",
+            UserWarning,
+        )
 
-    if kind == "scatter":
-        plot_kwargs.setdefault("marker", ".")
-        plot_kwargs.setdefault("lw", 0)
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
+
+    scatter_kwargs.setdefault("marker", ".")
+    scatter_kwargs.setdefault("lw", 0)
+    scatter_kwargs.setdefault("zorder", 0)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
+    if hexbin_kwargs is None:
+        hexbin_kwargs = {}
 
     if divergences_kwargs is None:
         divergences_kwargs = {}
@@ -133,18 +210,38 @@ def plot_pair(
     divergences_kwargs.setdefault("color", "C1")
     divergences_kwargs.setdefault("lw", 0)
 
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    if point_estimate_kwargs is None:
+        point_estimate_kwargs = {}
+
+    if point_estimate_marker_kwargs is None:
+        point_estimate_marker_kwargs = {}
+
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
-    posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data)
-    flat_var_names, _posterior = xarray_to_ndarray(
-        get_coords(posterior_data, coords), var_names=var_names, combined=True
+    grouped_data = convert_to_dataset(data, group=group)
+    var_names = _var_names(var_names, grouped_data, filter_vars)
+    flat_var_names, infdata_group = xarray_to_ndarray(
+        get_coords(grouped_data, coords), var_names=var_names, combined=True
     )
+
+    divergent_data = None
+    diverging_mask = None
+
+    # Assigning divergence group based on group param
+    if group == "posterior":
+        divergent_group = "sample_stats"
+    elif group == "prior":
+        divergent_group = "sample_stats_prior"
+    else:
+        divergences = False
 
     # Get diverging draws and combine chains
     if divergences:
-        if hasattr(data, "sample_stats") and hasattr(data.sample_stats, "diverging"):
-            divergent_data = convert_to_dataset(data, group="sample_stats")
+        if hasattr(data, divergent_group) and hasattr(getattr(data, divergent_group), "diverging"):
+            divergent_data = convert_to_dataset(data, group=divergent_group)
             _, diverging_mask = xarray_to_ndarray(
                 divergent_data, var_names=("diverging",), combined=True
             )
@@ -155,114 +252,64 @@ def plot_pair(
                 "Divergences data not found, plotting without divergences. "
                 "Make sure the sample method provides divergences data and "
                 "that it is present in the `diverging` field of `sample_stats` "
-                "or set divergences=False",
-                SyntaxWarning,
+                "or `sample_stats_prior` or set divergences=False",
+                UserWarning,
             )
 
     if gridsize == "auto":
-        gridsize = int(len(_posterior[0]) ** 0.35)
+        gridsize = int(len(infdata_group[0]) ** 0.35)
 
     numvars = len(flat_var_names)
 
     if numvars < 2:
         raise Exception("Number of variables to be plotted must be 2 or greater.")
 
-    if numvars == 2:
-        (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
-            figsize, textsize, numvars - 1, numvars - 1
-        )
+    pairplot_kwargs = dict(
+        ax=ax,
+        infdata_group=infdata_group,
+        numvars=numvars,
+        figsize=figsize,
+        textsize=textsize,
+        kind=kind,
+        plot_kwargs=plot_kwargs,
+        scatter_kwargs=scatter_kwargs,
+        kde_kwargs=kde_kwargs,
+        hexbin_kwargs=hexbin_kwargs,
+        contour=contour,
+        fill_last=fill_last,
+        gridsize=gridsize,
+        colorbar=colorbar,
+        divergences=divergences,
+        diverging_mask=diverging_mask,
+        divergences_kwargs=divergences_kwargs,
+        flat_var_names=flat_var_names,
+        backend_kwargs=backend_kwargs,
+        marginal_kwargs=marginal_kwargs,
+        show=show,
+        marginals=marginals,
+        point_estimate=point_estimate,
+        point_estimate_kwargs=point_estimate_kwargs,
+        point_estimate_marker_kwargs=point_estimate_marker_kwargs,
+        reference_values=reference_values,
+        reference_values_kwargs=reference_values_kwargs,
+    )
 
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-        if kind == "scatter":
-            ax.plot(_posterior[0], _posterior[1], **plot_kwargs)
-        elif kind == "kde":
-            plot_kde(
-                _posterior[0],
-                _posterior[1],
-                contour=contour,
-                fill_last=fill_last,
-                ax=ax,
-                **plot_kwargs
-            )
-        else:
-            hexbin = ax.hexbin(
-                _posterior[0], _posterior[1], mincnt=1, gridsize=gridsize, **plot_kwargs
-            )
-            ax.grid(False)
-
-        if kind == "hexbin" and colorbar:
-            cbar = ax.figure.colorbar(hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], ax=ax)
-            cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
-
-        if divergences:
-            ax.plot(
-                _posterior[0][diverging_mask], _posterior[1][diverging_mask], **divergences_kwargs
-            )
-
-        ax.set_xlabel("{}".format(flat_var_names[0]), fontsize=ax_labelsize, wrap=True)
-        ax.set_ylabel("{}".format(flat_var_names[1]), fontsize=ax_labelsize, wrap=True)
-        ax.tick_params(labelsize=xt_labelsize)
-
+    if backend == "bokeh":
+        pairplot_kwargs.pop("gridsize", None)
+        pairplot_kwargs.pop("colorbar", None)
+        pairplot_kwargs.pop("divergences_kwargs", None)
+        pairplot_kwargs.pop("hexbin_values", None)
+        pairplot_kwargs.pop("scatter_kwargs", None)
+        point_estimate_kwargs.setdefault("line_color", "orange")
+        point_estimate_marker_kwargs.setdefault("line_color", "orange")
     else:
-        (figsize, ax_labelsize, _, xt_labelsize, _, _) = _scale_fig_size(
-            figsize, textsize, numvars - 2, numvars - 2
-        )
+        point_estimate_kwargs.setdefault("color", "C1")
 
-        if ax is None:
-            fig, ax = plt.subplots(
-                numvars - 1, numvars - 1, figsize=figsize, constrained_layout=True
-            )
-        hexbin_values = []
-        for i in range(0, numvars - 1):
-            var1 = _posterior[i]
-
-            for j in range(0, numvars - 1):
-                if j < i:
-                    ax[j, i].axis("off")
-                    continue
-
-                var2 = _posterior[j + 1]
-
-                if kind == "scatter":
-                    ax[j, i].plot(var1, var2, **plot_kwargs)
-
-                elif kind == "kde":
-                    plot_kde(
-                        var1, var2, contour=contour, fill_last=fill_last, ax=ax[j, i], **plot_kwargs
-                    )
-
-                else:
-                    ax[j, i].grid(False)
-                    hexbin = ax[j, i].hexbin(var1, var2, mincnt=1, gridsize=gridsize, **plot_kwargs)
-                if kind == "hexbin" and colorbar:
-                    hexbin_values.append(hexbin.norm.vmin)
-                    hexbin_values.append(hexbin.norm.vmax)
-                    if j == i == 0 and colorbar:
-                        divider = make_axes_locatable(ax[0, 1])
-                        cax = divider.append_axes("left", size="7%")
-                        cbar = fig.colorbar(
-                            hexbin, ticks=[hexbin.norm.vmin, hexbin.norm.vmax], cax=cax
-                        )
-                        cbar.ax.set_yticklabels(["low", "high"], fontsize=ax_labelsize)
-
-                if divergences:
-                    ax[j, i].plot(var1[diverging_mask], var2[diverging_mask], **divergences_kwargs)
-
-                if j + 1 != numvars - 1:
-                    ax[j, i].axes.get_xaxis().set_major_formatter(NullFormatter())
-                else:
-                    ax[j, i].set_xlabel(
-                        "{}".format(flat_var_names[i]), fontsize=ax_labelsize, wrap=True
-                    )
-                if i != 0:
-                    ax[j, i].axes.get_yaxis().set_major_formatter(NullFormatter())
-                else:
-                    ax[j, i].set_ylabel(
-                        "{}".format(flat_var_names[j + 1]), fontsize=ax_labelsize, wrap=True
-                    )
-
-                ax[j, i].tick_params(labelsize=xt_labelsize)
-
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_pair", "pairplot", backend)
+    ax = plot(**pairplot_kwargs)
     return ax

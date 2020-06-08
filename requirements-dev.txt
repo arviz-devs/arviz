@@ -1,19 +1,7 @@
-emcee
-git+https://github.com/pymc-devs/pymc3
-ghp-import
-pystan
-ipython
-nbsphinx
+astroid==2.3.3
 numpydoc
 pydocstyle
-pylint
-pyro-ppl
-tensorflow
-tensorflow-probability
+pylint==2.4.4
 pytest
 pytest-cov
-Sphinx
-sphinx-bootstrap-theme
-sphinx-gallery
-black; python_version == '3.6'
-numba
+black ; python_version >= '3.6'

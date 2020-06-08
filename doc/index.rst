@@ -25,21 +25,45 @@ ArviZ: Exploratory analysis of Bayesian models
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, sample diagnostics, model checking, and comparison.
 
-The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python, by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects. See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ.
+The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
+by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
+See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ usage
+and :doc:`here <schema/schema>` for more on ``InferenceData`` structure
+and specification.
 
 
 
 
-Installation with pip is recommended
+Installation using pip
 
 .. code:: bash
 
     pip install arviz
 
-ArviZ will plot NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
-`PyStan <https://pystan.readthedocs.io/en/latest/>`_,
-`Pyro <http://pyro.ai/>`_, and
-`emcee <https://emcee.readthedocs.io/en/stable/>`_ objects. Support for PyMC4, TensorFlow Probability, Edward2, and Edward are on the roadmap.
+Alternatively you can use conda-forge
+
+.. code:: bash
+
+    conda install -c conda-forge arviz
+
+For the latest (unstable) version
+
+.. code:: bash
+
+    pip install git+https://github.com/arviz-devs/arviz
+
+
+ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
+`PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
+`Pyro <http://pyro.ai/>`_, `NumPyro <http://num.pyro.ai/>`_,
+`emcee <https://emcee.readthedocs.io/en/stable/>`_, and
+`TensorFlow Probability <https://www.tensorflow.org/probability>`_ objects. Support for PyMC4, Edward2, and Edward are on the roadmap.
+
+A Julia wrapper, `ArviZ.jl <https://arviz-devs.github.io/ArviZ.jl/stable/>`_ is
+also available. It provides built-in support for
+`Turing.jl <https://turing.ml/dev/>`_, `CmdStan.jl
+<https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
+<https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
 Contributions and issue reports are very welcome at
 `the github repository <https://github.com/arviz-devs/arviz>`_.
@@ -68,8 +92,10 @@ Here is the citation in BibTeX format
     Cookbook<notebooks/InferenceDataCookbook>
     Numba<notebooks/Numba>
     InferenceData<notebooks/XarrayforArviZ>
+    InferenceData schema<schema/schema>
     api
     usage
+    developer_guide
     about
 
 
@@ -78,64 +104,64 @@ Here is the citation in BibTeX format
     </div>
     <div class="col-md-6">
         <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/plot_pair.html">
+            <a href="examples/matplotlib/mpl_plot_pair.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_pair_thumb.png">
+                <img src="_static/mpl_plot_pair_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_forest.html">
+            <a href="examples/matplotlib/mpl_plot_forest.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_forest_thumb.png">
+                <img src="_static/mpl_plot_forest_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_density.html">
+            <a href="examples/matplotlib/mpl_plot_density.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_density_thumb.png">
+                <img src="_static/mpl_plot_density_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_energy.html">
+            <a href="examples/matplotlib/mpl_plot_energy.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_energy_thumb.png">
+                <img src="_static/mpl_plot_energy_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_posterior.html">
+            <a href="examples/matplotlib/mpl_plot_posterior.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_posterior_thumb.png">
+                <img src="_static/mpl_plot_posterior_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_kde_2d.html">
+            <a href="examples/matplotlib/mpl_plot_kde_2d.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_kde_2d_thumb.png">
+                <img src="_static/mpl_plot_kde_2d_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_forest_ridge.html">
+            <a href="examples/matplotlib/mpl_plot_forest_ridge.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_forest_ridge_thumb.png">
+                <img src="_static/mpl_plot_forest_ridge_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_parallel.html">
+            <a href="examples/matplotlib/mpl_plot_parallel.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_parallel_thumb.png">
+                <img src="_static/mpl_plot_parallel_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_trace.html">
+            <a href="examples/matplotlib/mpl_plot_trace.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_trace_thumb.png">
+                <img src="_static/mpl_plot_trace_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_joint.html">
+            <a href="examples/matplotlib/mpl_plot_joint.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_joint_thumb.png">
+                <img src="_static/mpl_plot_joint_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_ppc.html">
+            <a href="examples/matplotlib/mpl_plot_ppc.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_ppc_thumb.png">
+                <img src="_static/mpl_plot_ppc_thumb.png">
             </div>
             </a>
-            <a href="examples/plot_autocorr.html">
+            <a href="examples/matplotlib/mpl_plot_autocorr.html">
             <div class="col-md-3 thumbnail">
-                <img src="_static/plot_autocorr_thumb.png">
+                <img src="_static/mpl_plot_autocorr_thumb.png">
             </div>
             </a>
         </div>
@@ -146,7 +172,7 @@ Here is the citation in BibTeX format
     </div>
 
 
-.. |Build Status| image:: https://travis-ci.org/arviz-devs/arviz.png?branch=master
-   :target: https://travis-ci.org/arviz-devs/arviz
-.. |Coverage Status| image:: https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master
-   :target: https://coveralls.io/github/arviz-devs/arviz?branch=master
+.. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master
+   :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master
+.. |Coverage Status| image:: https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/arviz-devs/arviz

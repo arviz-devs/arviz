@@ -6,13 +6,14 @@ from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
 from .plot_utils import (
-    _scale_fig_size,
-    get_coords,
-    color_from_dim,
     format_coords_as_labels,
-    set_xticklabels,
+    color_from_dim,
+    get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
 from ..stats import waic, loo, ELPDData
+from ..rcparams import rcParams
+from ..utils import get_coords
 
 
 def plot_elpd(
@@ -25,18 +26,21 @@ def plot_elpd(
     legend=False,
     threshold=None,
     ax=None,
-    ic="waic",
-    scale="deviance",
+    ic=None,
+    scale=None,
     plot_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
 ):
     """
-    Plot a scatter or hexbin matrix of the sampled parameters.
+    Plot pointwise elpd differences between two or more models.
 
     Parameters
     ----------
     compare_dict : mapping, str -> ELPDData or InferenceData
-        A dictionary mapping the model name to the object containing its inference data or
-        the result of `waic`/`loo` functions.
+        A dictionary mapping the model name to the object containing inference data or the result
+        of `loo`/`waic` functions.
         Refer to az.convert_to_inference_data for details on possible dict items
     color : str or array_like, optional
         Colors of the scatter plot, if color is a str all dots will have the same color,
@@ -56,24 +60,33 @@ def plot_elpd(
     threshold : float
         If some elpd difference is larger than `threshold * elpd.std()`, show its label. If
         `None`, no observations will be highlighted.
-    ax: axes, optional
-        Matplotlib axes
     ic : str, optional
-        Information Criterion (WAIC or LOO) used to compare models. Default WAIC. Only taken
-        into account when input is InferenceData.
+        Information Criterion (PSIS-LOO `loo`, WAIC `waic`) used to compare models. Defaults to
+        ``rcParams["stats.information_criterion"]``.
+        Only taken into account when input is InferenceData.
     scale : str, optional
-        scale argument passed to az.waic or az.loo, see their docs for details. Only taken
+        scale argument passed to az.loo or az.waic, see their docs for details. Only taken
         into account when input is InferenceData.
     plot_kwargs : dicts, optional
-        Additional keywords passed to ax.plot
+        Additional keywords passed to ax.scatter
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
-    Compare pointwise WAIC for centered and non centered models of the 8school problem
+    Compare pointwise PSIS-LOO for centered and non centered models of the 8-schools problem
+    using matplotlib.
 
     .. plot::
         :context: close-figs
@@ -86,17 +99,29 @@ def plot_elpd(
         >>>     xlabels=True
         >>> )
 
+    .. bokeh-plot::
+        :source-position: above
+
+        import arviz as az
+        idata1 = az.load_arviz_data("centered_eight")
+        idata2 = az.load_arviz_data("non_centered_eight")
+        az.plot_elpd(
+            {"centered model": idata1, "non centered model": idata2},
+            backend="bokeh"
+        )
+
     """
-    valid_ics = ["waic", "loo"]
-    ic = ic.lower()
+    valid_ics = ["loo", "waic"]
+    ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if ic not in valid_ics:
         raise ValueError(
             ("Information Criteria type {} not recognized." "IC must be in {}").format(
                 ic, valid_ics
             )
         )
-    ic_fun = waic if ic == "waic" else loo
-
+    ic_fun = loo if ic == "loo" else waic
+    handles = None
     # Make sure all object are ELPDData
     for k, item in compare_dict.items():
         if not isinstance(item, ELPDData):
@@ -114,25 +139,33 @@ def plot_elpd(
                 set(scales)
             )
         )
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
     numvars = len(compare_dict)
     models = list(compare_dict.keys())
 
     if coords is None:
         coords = {}
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    plot_kwargs.setdefault("marker", "+")
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
+
+    if backend == "bokeh":
+        plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
 
     pointwise_data = [
         get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models
     ]
     xdata = np.arange(pointwise_data[0].size)
+    coord_labels = format_coords_as_labels(pointwise_data[0]) if xlabels else None
 
+    markersize = None
     if isinstance(color, str):
         if color in pointwise_data[0].dims:
             colors, color_mapping = color_from_dim(pointwise_data[0], color)
-            if legend:
+            if legend and backend != "bokeh":
                 cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
                 markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
                 cmap = getattr(cm, cmap_name)
@@ -158,114 +191,38 @@ def plot_elpd(
         legend = False
         plot_kwargs.setdefault("c", color)
 
-    if xlabels:
-        coord_labels = format_coords_as_labels(pointwise_data[0])
-
     if numvars < 2:
         raise Exception("Number of models to compare must be 2 or greater.")
 
-    if numvars == 2:
-        (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
-            figsize, textsize, numvars - 1, numvars - 1
-        )
-        plot_kwargs.setdefault("s", markersize ** 2)
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
 
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
+    elpd_plot_kwargs = dict(
+        ax=ax,
+        models=models,
+        pointwise_data=pointwise_data,
+        numvars=numvars,
+        figsize=figsize,
+        textsize=textsize,
+        plot_kwargs=plot_kwargs,
+        markersize=markersize,
+        xlabels=xlabels,
+        coord_labels=coord_labels,
+        xdata=xdata,
+        threshold=threshold,
+        legend=legend,
+        handles=handles,
+        color=color,
+        backend_kwargs=backend_kwargs,
+        show=show,
+    )
 
-        ydata = pointwise_data[0] - pointwise_data[1]
-        ax.scatter(xdata, ydata, **plot_kwargs)
-        if threshold is not None:
-            ydata = ydata.values.flatten()
-            diff_abs = np.abs(ydata - ydata.mean())
-            bool_ary = diff_abs > threshold * ydata.std()
-            try:
-                coord_labels
-            except NameError:
-                coord_labels = xdata.astype(str)
-            outliers = np.argwhere(bool_ary).squeeze()
-            for outlier in outliers:
-                label = coord_labels[outlier]
-                ax.text(
-                    outlier,
-                    ydata[outlier],
-                    label,
-                    horizontalalignment="center",
-                    verticalalignment="bottom" if ydata[outlier] > 0 else "top",
-                    fontsize=0.8 * xt_labelsize,
-                )
+    if backend == "bokeh":
+        elpd_plot_kwargs.pop("legend")
+        elpd_plot_kwargs.pop("handles")
+        elpd_plot_kwargs.pop("color")
 
-        ax.set_title("{} - {}".format(*models), fontsize=titlesize, wrap=True)
-        ax.set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
-        ax.tick_params(labelsize=xt_labelsize)
-        if xlabels:
-            set_xticklabels(ax, coord_labels)
-            fig.autofmt_xdate()
-            fig.tight_layout()
-        if legend:
-            ncols = len(handles) // 6 + 1
-            ax.legend(handles=handles, ncol=ncols, title=color)
-
-    else:
-        (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
-            figsize, textsize, numvars - 2, numvars - 2
-        )
-        plot_kwargs.setdefault("s", markersize ** 2)
-
-        if ax is None:
-            fig, ax = plt.subplots(
-                numvars - 1,
-                numvars - 1,
-                figsize=figsize,
-                constrained_layout=not xlabels,
-                sharey="row",
-                sharex="all",
-            )
-
-        for i in range(0, numvars - 1):
-            var1 = pointwise_data[i]
-
-            for j in range(0, numvars - 1):
-                if j < i:
-                    ax[j, i].axis("off")
-                    continue
-
-                var2 = pointwise_data[j + 1]
-                ax[j, i].scatter(xdata, var1 - var2, **plot_kwargs)
-                if threshold is not None:
-                    ydata = (var1 - var2).values.flatten()
-                    diff_abs = np.abs(ydata - ydata.mean())
-                    bool_ary = diff_abs > threshold * ydata.std()
-                    try:
-                        coord_labels
-                    except NameError:
-                        coord_labels = xdata.astype(str)
-                    outliers = np.argwhere(bool_ary).squeeze()
-                    for outlier in outliers:
-                        label = coord_labels[outlier]
-                        ax[j, i].text(
-                            outlier,
-                            ydata[outlier],
-                            label,
-                            horizontalalignment="center",
-                            verticalalignment="bottom" if ydata[outlier] > 0 else "top",
-                            fontsize=0.8 * xt_labelsize,
-                        )
-
-                if i == 0:
-                    ax[j, i].set_ylabel("ELPD difference", fontsize=ax_labelsize, wrap=True)
-
-                ax[j, i].tick_params(labelsize=xt_labelsize)
-                ax[j, i].set_title(
-                    "{} - {}".format(models[i], models[j + 1]), fontsize=titlesize, wrap=True
-                )
-        if xlabels:
-            set_xticklabels(ax[-1, -1], coord_labels)
-            fig.autofmt_xdate()
-            fig.tight_layout()
-        if legend:
-            ncols = len(handles) // 6 + 1
-            ax[0, 1].legend(
-                handles=handles, ncol=ncols, title=color, bbox_to_anchor=(0, 1), loc="upper left"
-            )
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_elpd", "elpdplot", backend)
+    ax = plot(**elpd_plot_kwargs)
     return ax

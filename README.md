@@ -1,8 +1,7 @@
 <img src="https://arviz-devs.github.io/arviz/_static/logo.png" height=100></img>
 
-[![Build Status](https://travis-ci.org/arviz-devs/arviz.svg?branch=master)](https://travis-ci.org/arviz-devs/arviz)
 [![Azure Build Status](https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master)](https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master)
-[![Coverage Status](https://coveralls.io/repos/github/arviz-devs/arviz/badge.svg?branch=master)](https://coveralls.io/github/arviz-devs/arviz?branch=master)
+[![codecov](https://codecov.io/gh/arviz-devs/arviz/branch/master/graph/badge.svg)](https://codecov.io/gh/arviz-devs/arviz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/arviz-devs/community)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01143/status.svg)](https://doi.org/10.21105/joss.01143) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540945.svg)](https://doi.org/10.5281/zenodo.2540945)
@@ -11,6 +10,9 @@
 
 ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
 Includes functions for posterior analysis, model checking, comparison and diagnostics.
+
+### ArviZ in other languages
+ArviZ also has a Julia wrapper available [ArviZ.jl](https://arviz-devs.github.io/ArviZ.jl/stable/).
 
 ## Documentation
 
@@ -28,6 +30,12 @@ The latest stable version can be installed using pip:
 
 ```
 pip install arviz
+```
+
+ArviZ is also available through [conda-forge](https://anaconda.org/conda-forge/arviz).
+
+```
+conda install -c conda-forge arviz
 ```
 
 ### Development
@@ -53,30 +61,30 @@ python setup.py install
 <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest_ridge.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest_ridge.html">
   <img alt="Ridge plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_forest_ridge_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_ridge_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_parallel.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_parallel.html">
   <img alt="Parallel plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_parallel_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_parallel_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_trace.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_trace.html">
   <img alt="Trace plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_trace_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_trace_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_density.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_density.html">
   <img alt="Density plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_density_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_density_thumb.png" />
   </a>
   </td>
 
@@ -84,30 +92,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_posterior.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_posterior.html">
   <img alt="Posterior plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_posterior_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_posterior_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_joint.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_joint.html">
   <img alt="Joint plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_joint_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_joint_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_ppc.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_ppc.html">
   <img alt="Posterior predictive plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_ppc_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_ppc_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_pair.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_pair.html">
   <img alt="Pair plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_pair_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_pair_thumb.png" />
   </a>
   </td>
 
@@ -115,30 +123,30 @@ python setup.py install
   <tr>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_energy.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_energy.html">
   <img alt="Energy Plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_energy_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_energy_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_violin.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_violin.html">
   <img alt="Violin Plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_violin_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_violin_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_forest.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_forest.html">
   <img alt="Forest Plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_forest_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_forest_thumb.png" />
   </a>
   </td>
 
   <td>
-  <a href="https://arviz-devs.github.io/arviz/examples/plot_autocorr.html">
+  <a href="https://arviz-devs.github.io/arviz/examples/matplotlib/mpl_plot_autocorr.html">
   <img alt="Autocorrelation Plot"
-  src="https://arviz-devs.github.io/arviz/_static/plot_autocorr_thumb.png" />
+  src="https://arviz-devs.github.io/arviz/_static/mpl_plot_autocorr_thumb.png" />
   </a>
   </td>
 
@@ -147,7 +155,7 @@ python setup.py install
 
 ## Dependencies
 
-ArviZ is tested on Python 3.5, 3.6 and 3.7, and depends on NumPy, SciPy, xarray, and Matplotlib.
+ArviZ is tested on Python 3.6, 3.7 and 3.8, and depends on NumPy, SciPy, xarray, and Matplotlib.
 
 
 ## Citation
@@ -180,4 +188,3 @@ can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/m
 
 ## Sponsors
 [![NumFOCUS](https://i0.wp.com/numfocus.org/wp-content/uploads/2019/06/AffiliatedProject.png)](https://numfocus.org)
-

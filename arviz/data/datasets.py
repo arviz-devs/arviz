@@ -7,6 +7,8 @@ import shutil
 from urllib.request import urlretrieve
 
 from .io_netcdf import from_netcdf
+from ..rcparams import rcParams
+
 
 LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
 
@@ -46,7 +48,7 @@ See Bayesian Data Analysis (Gelman et. al.) for more details.
 REMOTE_DATASETS = {
     "radon": RemoteFileMetadata(
         filename="radon.nc",
-        url="https://ndownloader.figshare.com/files/13284311",
+        url="http://ndownloader.figshare.com/files/13284311",
         checksum="ee9d4644e498d45ab5163982fc74baf05efce5cfa87b11f8509f7b9acf471f09",
         description="""
 Radon is a radioactive gas that enters homes through contact points with the ground.
@@ -64,7 +66,7 @@ by Chris Fonnesbeck for details on this implementation.
     ),
     "rugby": RemoteFileMetadata(
         filename="rugby.nc",
-        url="https://ndownloader.figshare.com/files/16254359",
+        url="http://ndownloader.figshare.com/files/16254359",
         checksum="9eecd2c6317e45b0388dd97ae6326adecf94128b5a7d15a52c9fcfac0937e2a6",
         description="""
 The Six Nations Championship is a yearly rugby competition between Italy, Ireland,
@@ -81,7 +83,7 @@ for more details and references.
     ),
     "regression1d": RemoteFileMetadata(
         filename="regression1d.nc",
-        url="https://ndownloader.figshare.com/files/16254899",
+        url="http://ndownloader.figshare.com/files/16254899",
         checksum="909e8ffe344e196dad2730b1542881ab5729cb0977dd20ba645a532ffa427278",
         description="""
 A synthetic one dimensional linear regression dataset with latent slope,
@@ -92,7 +94,7 @@ True slope and intercept are included as deterministic variables.
     ),
     "regression10d": RemoteFileMetadata(
         filename="regression10d.nc",
-        url="https://ndownloader.figshare.com/files/16255736",
+        url="http://ndownloader.figshare.com/files/16255736",
         checksum="c6716ec7e19926ad2a52d6ae4c1d1dd5ddb747e204c0d811757c8e93fcf9f970",
         description="""
 A synthetic multi-dimensional (10 dimensions) linear regression dataset with
@@ -104,7 +106,7 @@ True weights and intercept are included as deterministic variables.
     ),
     "classification1d": RemoteFileMetadata(
         filename="classification1d.nc",
-        url="https://ndownloader.figshare.com/files/16256678",
+        url="http://ndownloader.figshare.com/files/16256678",
         checksum="1cf3806e72c14001f6864bb69d89747dcc09dd55bcbca50aba04e9939daee5a0",
         description="""
 A synthetic one dimensional logistic regression dataset with latent slope and
@@ -116,7 +118,7 @@ True slope and intercept are included as deterministic variables.
     ),
     "classification10d": RemoteFileMetadata(
         filename="classification10d.nc",
-        url="https://ndownloader.figshare.com/files/16256681",
+        url="http://ndownloader.figshare.com/files/16256681",
         checksum="16c9a45e1e6e0519d573cafc4d266d761ba347e62b6f6a79030aaa8e2fde1367",
         description="""
 A synthetic multi dimensional (10 dimensions) logistic regression dataset with
@@ -213,8 +215,14 @@ def load_arviz_data(dataset=None, data_home=None):
         remote = REMOTE_DATASETS[dataset]
         home_dir = get_data_home(data_home=data_home)
         file_path = os.path.join(home_dir, remote.filename)
+
         if not os.path.exists(file_path):
-            urlretrieve(remote.url, file_path)
+            http_type = rcParams["data.http_protocol"]
+
+            # Replaces http type. Redundant if http_type is http, useful if http_type is https
+            url = remote.url.replace("http", http_type)
+            urlretrieve(url, file_path)
+
         checksum = _sha256(file_path)
         if remote.checksum != checksum:
             raise IOError(

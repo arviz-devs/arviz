@@ -2,13 +2,14 @@
 from collections.abc import Sequence
 import logging
 import warnings
+from copy import copy as _copy, deepcopy as _deepcopy
 
 import numpy as np
 import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
-from ..utils import conditional_jit
+from ..utils import conditional_jit, conditional_vect
 
 _log = logging.getLogger(__name__)
 
@@ -113,27 +114,36 @@ def make_ufunc(
     elif check_shape is None:
         check_shape = False
 
-    def _ufunc(*args, out=None, **kwargs):
+    def _ufunc(*args, out=None, out_shape=None, **kwargs):
         """General ufunc for single-output function."""
         arys = args[:n_input]
+        n_dims_out = None
         if out is None:
-            out = np.empty(arys[-1].shape[:-n_dims])
+            if out_shape is None:
+                out = np.empty(arys[-1].shape[:-n_dims])
+            else:
+                out = np.empty((*arys[-1].shape[:-n_dims], *out_shape))
+                n_dims_out = -len(out_shape)
         elif check_shape:
             if out.shape != arys[-1].shape[:-n_dims]:
                 msg = "Shape incorrect for `out`: {}.".format(out.shape)
                 msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
                 raise TypeError(msg)
-        for idx in np.ndindex(out.shape):
+        for idx in np.ndindex(out.shape[:n_dims_out]):
             arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
             out[idx] = np.asarray(func(*arys_idx, *args[n_input:], **kwargs))[index]
         return out
 
-    def _multi_ufunc(*args, out=None, **kwargs):
+    def _multi_ufunc(*args, out=None, out_shape=None, **kwargs):
         """General ufunc for multi-output function."""
         arys = args[:n_input]
         element_shape = arys[-1].shape[:-n_dims]
         if out is None:
-            out = tuple(np.empty(element_shape) for _ in range(n_output))
+            if out_shape is None:
+                out = tuple(np.empty(element_shape) for _ in range(n_output))
+            else:
+                out = tuple(np.empty((*element_shape, *out_shape[i])) for i in range(n_output))
+
         elif check_shape:
             raise_error = False
             correct_shape = tuple(element_shape for _ in range(n_output))
@@ -184,6 +194,7 @@ def wrap_xarray_ufunc(
         Arguments passed to 'ufunc'.
     func_kwargs : dict
         Keyword arguments passed to 'ufunc'.
+            - 'out_shape', int, by default None
     **kwargs
         Passed to xarray.apply_ufunc.
 
@@ -199,12 +210,13 @@ def wrap_xarray_ufunc(
     if func_kwargs is None:
         func_kwargs = {}
 
-    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
-
     kwargs.setdefault(
-        "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + 1))
+        "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + len(datasets)))
     )
+    ufunc_kwargs.setdefault("n_dims", len(kwargs["input_core_dims"][-1]))
     kwargs.setdefault("output_core_dims", tuple([] for _ in range(ufunc_kwargs.get("n_output", 1))))
+
+    callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
     return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
 
@@ -386,6 +398,31 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
     return nan_error | chain_error | draw_error
 
 
+def get_log_likelihood(idata, var_name=None):
+    """Retrieve the log likelihood dataarray of a given variable."""
+    if hasattr(idata, "sample_stats") and hasattr(idata.sample_stats, "log_likelihood"):
+        warnings.warn(
+            "Storing the log_likelihood in sample_stats groups has been deprecated",
+            DeprecationWarning,
+        )
+        return idata.sample_stats.log_likelihood
+    if not hasattr(idata, "log_likelihood"):
+        raise TypeError("log likelihood not found in inference data object")
+    if var_name is None:
+        var_names = list(idata.log_likelihood.data_vars)
+        if len(var_names) > 1:
+            raise TypeError(
+                "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
+            )
+        return idata.log_likelihood[var_names[0]]
+    else:
+        try:
+            log_likelihood = idata.log_likelihood[var_name]
+        except KeyError:
+            raise TypeError("No log likelihood data named {} found".format(var_name))
+        return log_likelihood
+
+
 BASE_FMT = """Computed from {{n_samples}} by {{n_points}} log-likelihood matrix
 
 {{0:{0}}} Estimate       SE
@@ -400,7 +437,12 @@ Pareto k diagnostic values:
    (0.7, 1]   (bad)      {{4:{0}d}} {{8:6.1f}}%
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
-SCALE_DICT = {"deviance": "IC", "log": "elpd", "negative_log": "-elpd"}
+SCALE_WARNING_FORMAT = """
+The scale is now log by default. Use 'scale' argument or 'stats.ic_scale' rcParam if
+you rely on a specific value.
+A higher log-score (or a lower deviance) indicates a model with better predictive
+accuracy."""
+SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
 
 
 class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
@@ -410,7 +452,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         """Print elpd data in a user friendly way."""
         kind = self.index[0]
 
-        if kind not in ("waic", "loo"):
+        if kind not in ("loo", "waic"):
             raise ValueError("Invalid ELPDData object")
 
         scale_str = SCALE_DICT[self["{}_scale".format(kind)]]
@@ -429,17 +471,29 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             base += "\n\nThere has been a warning during the calculation. Please check the results."
 
         if kind == "loo" and "pareto_k" in self:
-            counts = histogram(self.pareto_k)
+            bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
+            counts, *_ = histogram(self.pareto_k.values, bins)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
             )
             base = "\n".join([base, extended])
+        base = "\n".join([base, SCALE_WARNING_FORMAT])
         return base
 
     def __repr__(self):
         """Alias to ``__str__``."""
         return self.__str__()
+
+    def copy(self, deep=True):
+        """Perform a pandas deep copy of the ELPDData plus a copy of the stored data."""
+        copied_obj = pd.Series.copy(self)
+        for key in copied_obj.keys():
+            if deep:
+                copied_obj[key] = _deepcopy(copied_obj[key])
+            else:
+                copied_obj[key] = _copy(copied_obj[key])
+        return ELPDData(copied_obj)
 
 
 @conditional_jit
@@ -469,7 +523,56 @@ def stats_variance_2d(data, ddof=0, axis=1):
         return var
 
 
-@conditional_jit
-def histogram(data):
-    kcounts, _ = np.histogram(data, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
-    return kcounts
+@conditional_jit(cache=True)
+def histogram(data, bins, range_hist=None):
+    """Conditionally jitted histogram.
+
+    Parameters
+    ----------
+    data : array-like
+        Input data. Passed as first positional argument to ``np.histogram``.
+    bins : int or array-like
+        Passed as keyword argument ``bins`` to ``np.histogram``.
+    range_hist : (float, float), optional
+        Passed as keyword argument ``range`` to ``np.histogram``.
+
+    Returns
+    -------
+    hist : array
+        The number of counts per bin.
+    density : array
+        The density corresponding to each bin.
+    bin_edges : array
+        The edges of the bins used.
+    """
+    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
+    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
+    return hist, hist_dens, bin_edges
+
+
+@conditional_vect
+def _sqrt(a_a, b_b):
+    return (a_a + b_b) ** 0.5
+
+
+def _circfunc(samples, high, low, skipna):
+    samples = np.asarray(samples)
+    if skipna:
+        samples = samples[~np.isnan(samples)]
+    if samples.size == 0:
+        return np.nan
+    return _angle(samples, low, high, np.pi)
+
+
+@conditional_vect
+def _angle(samples, low, high, p_i=np.pi):
+    ang = (samples - low) * 2.0 * p_i / (high - low)
+    return ang
+
+
+def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, axis=None):
+    ang = _circfunc(samples, high, low, skipna)
+    s_s = np.sin(ang).mean(axis=axis)
+    c_c = np.cos(ang).mean(axis=axis)
+    r_r = np.hypot(s_s, c_c)
+    return ((high - low) / 2.0 / np.pi) * np.sqrt(-2 * np.log(r_r))

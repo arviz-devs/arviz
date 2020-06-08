@@ -14,11 +14,13 @@ from .stats_utils import (
     wrap_xarray_ufunc as _wrap_xarray_ufunc,
     stats_variance_2d as svar,
     histogram,
+    _circular_standard_deviation,
+    _sqrt,
 )
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, conditional_vect, Numba, _numba_var
+from ..utils import _var_names, conditional_jit, Numba, _numba_var, _stack
 
-__all__ = ["bfmi", "effective_sample_size", "ess", "rhat", "mcse", "geweke"]
+__all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 
 
 def bfmi(data):
@@ -46,6 +48,7 @@ def bfmi(data):
     Examples
     --------
     Compute the BFMI of an InferenceData object
+
     .. ipython::
 
         In [1]: import arviz as az
@@ -62,85 +65,19 @@ def bfmi(data):
     return _bfmi(dataset.energy)
 
 
-def effective_sample_size(data, *, var_names=None, method="bulk", relative=False, prob=None):
-    r"""Calculate estimate of the effective sample size.
-
-    Function deprecated. Use `arviz.ess`.
-
-    Parameters
-    ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
-        For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
-    var_names : list
-        Names of variables to include in the effective_sample_size_mean report
-    method : str
-        Select ess method. Valid methods are:
-
-        - "bulk"
-        - "tail"     # prob, optional
-        - "quantile" # prob
-        - "mean" (old ess)
-        - "sd"
-        - "median"
-        - "mad" (mean absolute deviance)
-        - "z_scale"
-        - "folded"
-        - "identity"
-
-    relative : bool
-        Return relative ess
-        `ress = ess / N`
-    prob : float, optional
-        probability value for "tail" and "quantile" ess functions.
-
-    Returns
-    -------
-    xarray.Dataset
-        Return the effective sample size for mean, :math:`\hat{N}_{eff}`
-
-    Notes
-    -----
-    The basic ess diagnostic is computed by:
-
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
-    .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_t'
-
-    where :math:`\hat{\rho}_t` is the estimated _autocorrelation at lag t, and T
-    is the first odd positive integer for which the sum
-    :math:`\hat{\rho}_{T+1} + \hat{\rho}_{T+1}` is negative.
-
-    The current implementation is similar to Stan, which uses Geyer's initial monotone sequence
-    criterion (Geyer, 1992; Geyer, 2011).
-
-    References
-    ----------
-    * Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-    * https://mc-stan.org/docs/2_18/reference-manual/effective-sample-size-section.html
-      Section 15.4.2
-    * Gelman et al. BDA (2014) Formula 11.8
-    """
-    warnings.warn(
-        "Function `arviz.effective_sample_size` is deprecated. Use `arviz.ess`", DeprecationWarning
-    )
-    return ess(data, var_names=var_names, method=method, relative=relative, prob=prob)
-
-
 def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
-    r"""Calculate estimate of the effective sample size.
+    r"""Calculate estimate of the effective sample size (ess).
 
     Parameters
     ----------
     data : obj
-        Any object that can be converted to an az.InferenceData object.
-        Refer to documentation of az.convert_to_dataset for details.
+        Any object that can be converted to an ``az.InferenceData`` object.
+        Refer to documentation of ``az.convert_to_dataset`` for details.
         For ndarray: shape = (chain, draw).
-        For n-dimensional ndarray transform first to dataset with az.convert_to_dataset.
-    var_names : list
-        Names of variables to include in the effective_sample_size_mean report
-    method : str
+        For n-dimensional ndarray transform first to dataset with ``az.convert_to_dataset``.
+    var_names : str or list of str
+        Names of variables to include in the return value Dataset.
+    method : str, optional, default "bulk"
         Select ess method. Valid methods are:
 
         - "bulk"
@@ -153,12 +90,12 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
         - "z_scale"
         - "folded"
         - "identity"
-
+        - "local"
     relative : bool
         Return relative ess
         `ress = ess / n`
-    prob : float, optional
-        probability value for "tail" and "quantile" ess functions.
+    prob : float, or tuple of two floats, optional
+        probability value for "tail", "quantile" or "local" ess functions.
 
     Returns
     -------
@@ -167,8 +104,10 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     Notes
     -----
-    The basic ess diagnostic is computed by:
-    .. math:: \hat{N}_{eff} = \frac{MN}{\hat{\tau}}
+    The basic ess (:math:`N_{\mathit{eff}}`) diagnostic is computed by:
+
+    .. math:: \hat{N}_{\mathit{eff}} = \frac{MN}{\hat{\tau}}
+
     .. math:: \hat{\tau} = -1 + 2 \sum_{t'=0}^K \hat{P}_{t'}
 
     where :math:`M` is the number of chains, :math:`N` the number of draws,
@@ -226,7 +165,7 @@ def ess(data, *, var_names=None, method="bulk", relative=False, prob=None):
 
     if method not in methods:
         raise TypeError(
-            "ESS method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
+            "ess method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
         )
     ess_func = methods[method]
 
@@ -449,11 +388,6 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
     )
 
 
-@conditional_vect
-def _sqrt(a_a, b_b):
-    return (a_a + b_b) ** 0.5
-
-
 @conditional_jit(forceobj=True)
 def geweke(ary, first=0.1, last=0.5, intervals=20):
     r"""Compute z-scores for convergence diagnostics.
@@ -550,9 +484,10 @@ def ks_summary(pareto_tail_indices):
     """
     _numba_flag = Numba.numba_flag
     if _numba_flag:
-        kcounts = histogram(pareto_tail_indices)
+        bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, *_ = histogram(pareto_tail_indices, bins)
     else:
-        kcounts, _ = np.histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, *_ = histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
@@ -591,9 +526,9 @@ def _bfmi(energy):
     energy_mat = np.atleast_2d(energy)
     num = np.square(np.diff(energy_mat, axis=1)).mean(axis=1)  # pylint: disable=no-member
     if energy_mat.ndim == 2:
-        den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=0)
+        den = _numba_var(svar, np.var, energy_mat, axis=1, ddof=1)
     else:
-        den = np.var(energy, axis=1)
+        den = np.var(energy, axis=1, ddof=1)
     return num / den
 
 
@@ -625,7 +560,7 @@ def _split_chains(ary):
         ary = np.atleast_2d(ary)
         _, n_draw = ary.shape
     half = n_draw // 2
-    return np.vstack((ary[:, :half], ary[:, -half:]))
+    return _stack(ary[:, :half], ary[:, -half:])
 
 
 def _z_fold(ary):
@@ -816,7 +751,7 @@ def _ess_quantile(ary, prob, relative=False):
         return np.nan
     if prob is None:
         raise TypeError("Prob not defined.")
-    quantile, = _quantile(ary, prob)
+    (quantile,) = _quantile(ary, prob)
     iquantile = ary <= quantile
     return _ess(_split_chains(iquantile), relative=relative)
 
@@ -938,28 +873,6 @@ def _mcse_quantile(ary, prob):
     return mcse_q
 
 
-def _circfunc(samples, high, low):
-    samples = np.asarray(samples)
-    if samples.size == 0:
-        return np.nan, np.nan
-    return samples, _angle(samples, low, high, np.pi)
-
-
-@conditional_vect
-def _angle(samples, low, high, p_i=np.pi):
-    ang = (samples - low) * 2.0 * p_i / (high - low)
-    return ang
-
-
-def _circular_standard_deviation(samples, high=2 * np.pi, low=0, axis=None):
-    p_i = np.pi
-    samples, ang = _circfunc(samples, high, low)
-    s_s = np.sin(ang).mean(axis=axis)
-    c_c = np.cos(ang).mean(axis=axis)
-    r_r = np.hypot(s_s, c_c)
-    return ((high - low) / 2.0 / p_i) * np.sqrt(-2 * np.log(r_r))
-
-
 def _mc_error(ary, batches=5, circular=False):
     """Calculate the simulation standard error, accounting for non-independent samples.
 
@@ -1038,7 +951,7 @@ def _multichain_statistics(ary):
     """
     ary = np.atleast_2d(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+        return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
     # ess mean
     ess_mean_value = _ess_mean(ary)
 

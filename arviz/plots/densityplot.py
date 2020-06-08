@@ -1,17 +1,19 @@
 """KDE and histogram plots for multiple variables."""
-import numpy as np
+from itertools import cycle
+import warnings
+
+import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
-from ..stats import hpd
-from .kdeplot import _fast_kde
 from .plot_utils import (
     _scale_fig_size,
     make_label,
     xarray_var_iter,
     default_grid,
-    _create_axes_grid,
+    get_plotting_function,
 )
-from ..utils import _var_names
+from ..rcparams import rcParams
+from ..utils import _var_names, credible_interval_warning
 
 
 # pylint:disable-msg=too-many-function-args
@@ -20,20 +22,26 @@ def plot_density(
     group="posterior",
     data_labels=None,
     var_names=None,
-    credible_interval=0.94,
-    point_estimate="mean",
+    transform=None,
+    hdi_prob=None,
+    point_estimate="auto",
     colors="cycle",
     outline=True,
-    hpd_markers="",
+    hdi_markers="",
     shade=0.0,
     bw=4.5,
     figsize=None,
     textsize=None,
+    ax=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
+    credible_interval=None,
 ):
     """Generate KDE plots for continuous variables and histograms for discrete ones.
 
-    Plots are truncated at their 100*(1-alpha)% credible intervals. Plots are grouped per variable
-    and colors assigned to models.
+    Plots are truncated at their 100*(1-alpha)% highest density intervals. Plots are grouped per
+    variable and colors assigned to models.
 
     Parameters
     ----------
@@ -52,21 +60,24 @@ def plot_density(
         List of variables to plot.  If multiple datasets are supplied and var_names is not None,
         will print the same set of variables for each dataset.  Defaults to None, which results in
         all the variables being plotted.
-    credible_interval : float
-        Credible intervals. Should be in the interval (0, 1]. Defaults to 0.94.
+    transform : callable
+        Function to transform data (defaults to None i.e. the identity function)
+    hdi_prob : float
+        Probability for the highest density interval. Should be in the interval (0, 1].
+        Defaults to 0.94.
     point_estimate : Optional[str]
-        Plot point estimate per variable. Values should be 'mean', 'median' or None.
-        Defaults to 'mean'.
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
     colors : Optional[Union[List[str],str]]
         List with valid matplotlib colors, one color per model. Alternative a string can be passed.
-        If the string is `cycle`, it will automatically choose a color per model from matplolib's
+        If the string is `cycle`, it will automatically choose a color per model from matplotlib's
         cycle. If a single color is passed, e.g. 'k', 'C2' or 'red' this color will be used for all
         models. Defaults to `cycle`.
     outline : bool
         Use a line to draw KDEs and histograms. Default to True
-    hpd_markers : str
-        A valid `matplotlib.markers` like 'v', used to indicate the limits of the hpd interval.
-        Defaults to empty string (no marker).
+    hdi_markers : str
+        A valid `matplotlib.markers` like 'v', used to indicate the limits of the highest density
+        interval. Defaults to empty string (no marker).
     shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
@@ -79,10 +90,21 @@ def plot_density(
     textsize: Optional[float]
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
     Returns
     -------
-    ax : Matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples
@@ -111,12 +133,12 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], group="prior")
 
-    Specify credible interval
+    Specify highest density interval
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_density([centered, non_centered], var_names=["mu"], credible_interval=.5)
+        >>> az.plot_density([centered, non_centered], var_names=["mu"], hdi_prob=.5)
 
     Shade plots and/or remove outlines
 
@@ -132,18 +154,18 @@ def plot_density(
 
         >>> az.plot_density([centered, non_centered], var_names=["mu"], bw=.9)
     """
+    if credible_interval:
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+
     if not isinstance(data, (list, tuple)):
         datasets = [convert_to_dataset(data, group=group)]
     else:
         datasets = [convert_to_dataset(datum, group=group) for datum in data]
 
+    if transform is not None:
+        datasets = [transform(dataset) for dataset in datasets]
+
     var_names = _var_names(var_names, datasets)
-
-    if point_estimate not in ("mean", "median", None):
-        raise ValueError(
-            "Point estimate should be 'mean'," "median' or None, not {}".format(point_estimate)
-        )
-
     n_data = len(datasets)
 
     if data_labels is None:
@@ -158,12 +180,20 @@ def plot_density(
         )
 
     if colors == "cycle":
-        colors = ["C{}".format(idx % 10) for idx in range(n_data)]
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
     elif isinstance(colors, str):
         colors = [colors for _ in range(n_data)]
 
-    if not 1 >= credible_interval > 0:
-        raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
+    else:
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     to_plot = [list(xarray_var_iter(data, var_names, combined=True)) for data in datasets]
     all_labels = []
@@ -174,133 +204,69 @@ def plot_density(
             label = make_label(var_name, selection)
             if label not in all_labels:
                 all_labels.append(label)
-    length_plotters = max(length_plotters)
+    length_plotters = len(all_labels)
+    max_plots = rcParams["plot.max_subplots"]
+    max_plots = length_plotters if max_plots is None else max_plots
+    if length_plotters > max_plots:
+        warnings.warn(
+            "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "
+            "of variables to plot ({len_plotters}) in plot_density, generating only "
+            "{max_plots} plots".format(max_plots=max_plots, len_plotters=length_plotters),
+            UserWarning,
+        )
+        all_labels = all_labels[:max_plots]
+        to_plot = [
+            [
+                (var_name, selection, values)
+                for var_name, selection, values in plotters
+                if make_label(var_name, selection) in all_labels
+            ]
+            for plotters in to_plot
+        ]
+        length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
     (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
 
-    _, ax = _create_axes_grid(length_plotters, rows, cols, figsize=figsize, squeeze=False)
+    plot_density_kwargs = dict(
+        ax=ax,
+        all_labels=all_labels,
+        to_plot=to_plot,
+        colors=colors,
+        bw=bw,
+        figsize=figsize,
+        length_plotters=length_plotters,
+        rows=rows,
+        cols=cols,
+        titlesize=titlesize,
+        xt_labelsize=xt_labelsize,
+        linewidth=linewidth,
+        markersize=markersize,
+        hdi_prob=hdi_prob,
+        point_estimate=point_estimate,
+        hdi_markers=hdi_markers,
+        outline=outline,
+        shade=shade,
+        n_data=n_data,
+        data_labels=data_labels,
+        backend_kwargs=backend_kwargs,
+        show=show,
+    )
 
-    axis_map = {label: ax_ for label, ax_ in zip(all_labels, ax.flatten())}
-    for m_idx, plotters in enumerate(to_plot):
-        for var_name, selection, values in plotters:
-            label = make_label(var_name, selection)
-            _d_helper(
-                values.flatten(),
-                label,
-                colors[m_idx],
-                bw,
-                titlesize,
-                xt_labelsize,
-                linewidth,
-                markersize,
-                credible_interval,
-                point_estimate,
-                hpd_markers,
-                outline,
-                shade,
-                axis_map[label],
-            )
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-    if n_data > 1:
-        for m_idx, label in enumerate(data_labels):
-            ax[0].plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax[0].legend(fontsize=xt_labelsize)
+    if backend == "bokeh":
 
+        plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
+        plot_density_kwargs.pop("titlesize")
+        plot_density_kwargs.pop("xt_labelsize")
+        plot_density_kwargs.pop("n_data")
+
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_density", "densityplot", backend)
+    ax = plot(**plot_density_kwargs)
     return ax
-
-
-def _d_helper(
-    vec,
-    vname,
-    color,
-    bw,
-    titlesize,
-    xt_labelsize,
-    linewidth,
-    markersize,
-    credible_interval,
-    point_estimate,
-    hpd_markers,
-    outline,
-    shade,
-    ax,
-):
-    """Plot an individual dimension.
-
-    Parameters
-    ----------
-    vec : array
-        1D array from trace
-    vname : str
-        variable name
-    color : str
-        matplotlib color
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
-    titlesize : float
-        font size for title
-    xt_labelsize : float
-       fontsize for xticks
-    linewidth : float
-        Thickness of lines
-    markersize : float
-        Size of markers
-    credible_interval : float
-        Credible intervals. Defaults to 0.94
-    point_estimate : str or None
-        'mean' or 'median'
-    shade : float
-        Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
-        (opaque). Defaults to 0.
-    ax : matplotlib axes
-    """
-    if vec.dtype.kind == "f":
-        if credible_interval != 1:
-            hpd_ = hpd(vec, credible_interval)
-            new_vec = vec[(vec >= hpd_[0]) & (vec <= hpd_[1])]
-        else:
-            new_vec = vec
-
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
-        density *= credible_interval
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
-
-        if outline:
-            ax.plot(x, density, color=color, lw=linewidth)
-            ax.plot([xmin, xmin], [-ymin / 100, ymin], color=color, ls="-", lw=linewidth)
-            ax.plot([xmax, xmax], [-ymax / 100, ymax], color=color, ls="-", lw=linewidth)
-
-        if shade:
-            ax.fill_between(x, density, color=color, alpha=shade)
-
-    else:
-        xmin, xmax = hpd(vec, credible_interval)
-        bins = range(xmin, xmax + 2)
-        if outline:
-            ax.hist(vec, bins=bins, color=color, histtype="step", align="left")
-        if shade:
-            ax.hist(vec, bins=bins, color=color, alpha=shade)
-
-    if hpd_markers:
-        ax.plot(xmin, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
-        ax.plot(xmax, 0, hpd_markers, color=color, markeredgecolor="k", markersize=markersize)
-
-    if point_estimate is not None:
-        if point_estimate == "mean":
-            est = np.mean(vec)
-        elif point_estimate == "median":
-            est = np.median(vec)
-        ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
-
-    ax.set_yticks([])
-    ax.set_title(vname, fontsize=titlesize, wrap=True)
-    for pos in ["left", "right", "top"]:
-        ax.spines[pos].set_visible(False)
-    ax.tick_params(labelsize=xt_labelsize)

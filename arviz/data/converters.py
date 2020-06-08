@@ -7,6 +7,7 @@ from .base import dict_to_dataset
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_emcee import from_emcee
+from .io_numpyro import from_numpyro
 from .io_pymc3 import from_pymc3
 from .io_pyro import from_pyro
 from .io_pystan import from_pystan
@@ -32,6 +33,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
             | emcee sampler: Automatically extracts data
             | pyro MCMC: Automatically extracts data
             | xarray.Dataset: adds to InferenceData as only group
+            | xarray.DataArray: creates an xarray dataset as the only group, gives the
+                         array an arbitrary name, if name not set
             | dict: creates an xarray dataset as the only group
             | numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name
@@ -56,6 +59,8 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
 
     # Cases that convert to InferenceData
     if isinstance(obj, InferenceData):
+        if coords is not None or dims is not None:
+            raise TypeError("Cannot use coords or dims arguments with InferenceData value.")
         return obj
     elif isinstance(obj, str):
         if obj.endswith(".csv"):
@@ -65,16 +70,20 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
                 kwargs["prior"] = kwargs.pop(group)
             return from_cmdstan(**kwargs)
         else:
+            if coords is not None or dims is not None:
+                raise TypeError(
+                    "Cannot use coords or dims arguments reading InferenceData from netcdf."
+                )
             return InferenceData.from_netcdf(obj)
     elif (
-        obj.__class__.__name__ in {"StanFit4Model", "RunSet"}
+        obj.__class__.__name__ in {"StanFit4Model", "CmdStanMCMC"}
         or obj.__class__.__module__ == "stan.fit"
     ):
         if group == "sample_stats":
             kwargs["posterior"] = kwargs.pop(group)
         elif group == "sample_stats_prior":
             kwargs["prior"] = kwargs.pop(group)
-        if obj.__class__.__name__ == "RunSet":
+        if obj.__class__.__name__ == "CmdStanMCMC":
             return from_cmdstanpy(**kwargs)
         else:  # pystan or pystan3
             return from_pystan(**kwargs)
@@ -84,10 +93,16 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         return from_emcee(sampler=kwargs.pop(group), **kwargs)
     elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("pyro"):
         return from_pyro(posterior=kwargs.pop(group), **kwargs)
+    elif obj.__class__.__name__ == "MCMC" and obj.__class__.__module__.startswith("numpyro"):
+        return from_numpyro(posterior=kwargs.pop(group), **kwargs)
 
     # Cases that convert to xarray
     if isinstance(obj, xr.Dataset):
         dataset = obj
+    elif isinstance(obj, xr.DataArray):
+        if obj.name is None:
+            obj.name = "x"
+        dataset = obj.to_dataset()
     elif isinstance(obj, dict):
         dataset = dict_to_dataset(obj, coords=coords, dims=dims)
     elif isinstance(obj, np.ndarray):
@@ -100,15 +115,17 @@ def convert_to_inference_data(obj, *, group="posterior", coords=None, dims=None,
         return from_cmdstan(**kwargs)
     else:
         allowable_types = (
+            "xarray dataarray",
             "xarray dataset",
             "dict",
-            "netcdf file",
+            "netcdf filename",
             "numpy array",
             "pystan fit",
             "pymc3 trace",
             "emcee fit",
             "pyro mcmc fit",
-            "cmdstan fit csv",
+            "numpyro mcmc fit",
+            "cmdstan fit csv filename",
             "cmdstanpy fit",
         )
         raise ValueError(
@@ -139,6 +156,8 @@ def convert_to_dataset(obj, *, group="posterior", coords=None, dims=None):
             pystan fit: Automatically extracts data
             pymc3 trace: Automatically extracts data
             xarray.Dataset: adds to InferenceData as only group
+            xarray.DataArray: creates an xarray dataset as the only group, gives the
+                         array an arbitrary name, if name not set
             dict: creates an xarray dataset as the only group
             numpy array: creates an xarray dataset as the only group, gives the
                          array an arbitrary name

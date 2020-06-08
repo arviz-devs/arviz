@@ -1,6 +1,7 @@
 matplotlib>=3.0
-numpy
-scipy
-pandas
-xarray
+numpy>=1.12
+scipy>=0.19
+packaging
+pandas>=0.23
+xarray>=0.11
 netcdf4

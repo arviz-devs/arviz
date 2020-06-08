@@ -1,14 +1,17 @@
+# pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-import matplotlib.pyplot as plt
 
-from .kdeplot import plot_kde
-from .plot_utils import get_bins
+import xarray as xr
+from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
+from ..numeric_utils import get_bins
+from ..data import InferenceData
+from ..rcparams import rcParams
 
 
 def plot_dist(
     values,
     values2=None,
-    color="C0",
+    color=None,
     kind="auto",
     cumulative=False,
     label=None,
@@ -23,8 +26,14 @@ def plot_dist(
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     hist_kwargs=None,
     ax=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
+    **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
 
@@ -40,7 +49,7 @@ def plot_dist(
         valid matplotlib color
     kind : string
         By default ("auto") continuous variables are plotted using KDEs and discrete ones using
-        histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        histograms. To override this use "hist" to plot histograms and "kde" for KDEs
     cumulative : bool
         If true plot the estimated cumulative distribution function. Defaults to False.
         Ignored for 2D KDE
@@ -63,7 +72,7 @@ def plot_dist(
         If True fill the last contour of the 2D KDE plot. Defaults to True.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -75,81 +84,127 @@ def plot_dist(
         the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
-    ax : matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
+
+    Examples
+    --------
+    Plot an integer distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> a = np.random.poisson(4, 1000)
+        >>> az.plot_dist(a)
+
+    Plot a continuous distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> b = np.random.normal(0, 1, 1000)
+        >>> az.plot_dist(b)
+
+    Add a rug under the Gaussian distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True)
+
+    Segment into quantiles
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75])
+
+    Plot as the cumulative distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
-    if ax is None:
-        ax = plt.gca()
+    if isinstance(values, (InferenceData, xr.Dataset)):
+        raise ValueError(
+            "InferenceData or xarray.Dateset object detected,"
+            " use plot_posterior, plot_density or plot_pair"
+            " instead of plot_dist"
+        )
 
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    hist_kwargs.setdefault("bins", None)
-    hist_kwargs.setdefault("cumulative", cumulative)
-    hist_kwargs.setdefault("color", color)
-    hist_kwargs.setdefault("label", label)
-    hist_kwargs.setdefault("rwidth", 0.9)
-    hist_kwargs.setdefault("align", "left")
-    hist_kwargs.setdefault("density", True)
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-
-    if rotated:
-        hist_kwargs.setdefault("orientation", "horizontal")
-    else:
-        hist_kwargs.setdefault("orientation", "vertical")
+    if kind not in ["auto", "kde", "hist"]:
+        raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if kind == "auto":
-        kind = "hist" if values.dtype.kind == "i" else "density"
+        kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
-        _histplot_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
-        )
-    elif kind == "density":
-        plot_kwargs.setdefault("color", color)
-        legend = label is not None
+        hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
+        hist_kwargs.setdefault("bins", get_bins(values))
+        hist_kwargs.setdefault("cumulative", cumulative)
+        hist_kwargs.setdefault("color", color)
+        hist_kwargs.setdefault("label", label)
+        hist_kwargs.setdefault("rwidth", 0.9)
+        hist_kwargs.setdefault("align", "left")
+        hist_kwargs.setdefault("density", True)
 
-        plot_kde(
-            values,
-            values2,
-            cumulative=cumulative,
-            rug=rug,
-            label=label,
-            bw=bw,
-            quantiles=quantiles,
-            rotated=rotated,
-            contour=contour,
-            legend=legend,
-            fill_last=fill_last,
-            textsize=textsize,
-            plot_kwargs=plot_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            contour_kwargs=contour_kwargs,
-            ax=ax,
-        )
-    return ax
+        if rotated:
+            hist_kwargs.setdefault("orientation", "horizontal")
+        else:
+            hist_kwargs.setdefault("orientation", "vertical")
 
+    dist_plot_args = dict(
+        # User Facing API that can be simplified
+        values=values,
+        values2=values2,
+        color=color,
+        kind=kind,
+        cumulative=cumulative,
+        label=label,
+        rotated=rotated,
+        rug=rug,
+        bw=bw,
+        quantiles=quantiles,
+        contour=contour,
+        fill_last=fill_last,
+        textsize=textsize,
+        plot_kwargs=plot_kwargs,
+        fill_kwargs=fill_kwargs,
+        rug_kwargs=rug_kwargs,
+        contour_kwargs=contour_kwargs,
+        contourf_kwargs=contourf_kwargs,
+        pcolormesh_kwargs=pcolormesh_kwargs,
+        hist_kwargs=hist_kwargs,
+        ax=ax,
+        backend_kwargs=backend_kwargs,
+        show=show,
+        **kwargs,
+    )
 
-def _histplot_op(values, values2, rotated, ax, hist_kwargs):
-    """Add a histogram for the data to the axes."""
-    if values2 is not None:
-        raise NotImplementedError("Insert hexbin plot here")
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-    bins = hist_kwargs.pop("bins")
-    if bins is None:
-        bins = get_bins(values)
-    ax.hist(values, bins=bins, **hist_kwargs)
-    if rotated:
-        ax.set_yticks(bins[:-1])
-    else:
-        ax.set_xticks(bins[:-1])
-    if hist_kwargs["label"] is not None:
-        ax.legend()
+    plot = get_plotting_function("plot_dist", "distplot", backend)
+    ax = plot(**dist_plot_args)
     return ax

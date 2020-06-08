@@ -7,9 +7,9 @@ from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
-from .hpdplot import plot_hpd
+from .hdiplot import plot_hdi, plot_hpd
 from .jointplot import plot_joint
-from .kdeplot import plot_kde, _fast_kde, _fast_kde_2d
+from .kdeplot import plot_kde
 from .khatplot import plot_khat
 from .loopitplot import plot_loo_pit
 from .mcseplot import plot_mcse
@@ -20,6 +20,7 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
+from ..numeric_utils import _fast_kde_2d
 
 
 __all__ = [
@@ -31,10 +32,10 @@ __all__ = [
     "plot_energy",
     "plot_ess",
     "plot_forest",
+    "plot_hdi",
     "plot_hpd",
     "plot_joint",
     "plot_kde",
-    "_fast_kde",
     "_fast_kde_2d",
     "plot_khat",
     "plot_loo_pit",

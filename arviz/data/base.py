@@ -1,15 +1,26 @@
 """Low level converters usually used by other functions."""
 from copy import deepcopy
+from typing import Dict, List, Any
 import datetime
 import warnings
-
-import numpy as np
 import pkg_resources
 import xarray as xr
 
+from .. import utils
+from .. import __version__
+
+CoordSpec = Dict[str, List[Any]]
+DimSpec = Dict[str, List[str]]
+
 
 class requires:  # pylint: disable=invalid-name
-    """Decorator to return None if an object does not have the required attribute."""
+    """Decorator to return None if an object does not have the required attribute.
+
+    If the decorator is called various times on the same function with different
+    attributes, it will return None if one of them is missing. If instead a list
+    of attributes is passed, it will return None if all attributes in the list are
+    missing. Both functionalities can be combined as desired.
+    """
 
     def __init__(self, *props):
         self.props = props
@@ -20,7 +31,8 @@ class requires:  # pylint: disable=invalid-name
         def wrapped(cls, *args, **kwargs):
             """Return None if not all props are available."""
             for prop in self.props:
-                if getattr(cls, prop) is None:
+                prop = [prop] if isinstance(prop, str) else prop
+                if all([getattr(cls, prop_i) is None for prop_i in prop]):
                     return None
             return func(cls, *args, **kwargs)
 
@@ -35,13 +47,18 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
     shape : tuple[int]
         Shape of the variable
     var_name : str
-        Name of the variable. Used in the default name, if necessary
+        Name of the variable. If no dimension name(s) is provided, ArviZ
+        will generate a default dimension name using ``var_name``, e.g.,
+        ``"foo_dim_0"`` for the first dimension if ``var_name`` is ``"foo"``.
     dims : list
         List of dimensions for the variable
     coords : dict[str] -> list[str]
         Map of dimensions to coordinates
     default_dims : list[str]
-        Dimensions that do not apply to the variable's shape
+        Dimension names that are not part of the variable's shape. For example,
+        when manipulating Monte Carlo traces, the ``default_dims`` would be
+        ``["chain" , "draw"]`` which ArviZ uses as its own names for dimensions
+        of MCMC traces.
 
     Returns
     -------
@@ -59,9 +76,14 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
             (
                 "In variable {var_name}, there are "
                 + "more dims ({dims_len}) given than exist ({shape_len}). "
-                + "Passed array should have shape (chains, draws, *shape)"
-            ).format(var_name=var_name, dims_len=len(dims), shape_len=len(shape)),
-            SyntaxWarning,
+                + "Passed array should have shape ({defaults}*shape)"
+            ).format(
+                var_name=var_name,
+                dims_len=len(dims),
+                shape_len=len(shape),
+                defaults=",".join(default_dims) + ", " if default_dims is not None else "",
+            ),
+            UserWarning,
         )
     if coords is None:
         coords = {}
@@ -78,7 +100,7 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 dims[idx] = dim_name
         dim_name = dims[idx]
         if dim_name not in coords:
-            coords[dim_name] = np.arange(dim_len)
+            coords[dim_name] = utils.arange(dim_len)
     coords = {key: coord for key, coord in coords.items() if any(key == dim for dim in dims)}
     return dims, coords
 
@@ -113,7 +135,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
     """
     # manage and transform copies
     default_dims = ["chain", "draw"]
-    ary = np.atleast_2d(ary)
+    ary = utils.two_de(ary)
     n_chains, n_samples, *shape = ary.shape
     if n_chains > n_samples:
         warnings.warn(
@@ -121,7 +143,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
             "Passed array should have shape (chains, draws, *shape)".format(
                 n_chains=n_chains, n_samples=n_samples
             ),
-            SyntaxWarning,
+            UserWarning,
         )
 
     dims, coords = generate_dims_coords(
@@ -135,9 +157,9 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
         dims = ["chain"] + dims
 
     if "chain" not in coords:
-        coords["chain"] = np.arange(n_chains)
+        coords["chain"] = utils.arange(n_chains)
     if "draw" not in coords:
-        coords["draw"] = np.arange(n_samples)
+        coords["draw"] = utils.arange(n_samples)
 
     # filter coords based on the dims
     coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in dims}
@@ -167,7 +189,7 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
     Examples
     --------
-    dict_to_dataset({'x': np.random.randn(4, 100), 'y', np.random.rand(4, 100)})
+    dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
 
     """
     if dims is None:
@@ -194,7 +216,10 @@ def make_attrs(attrs=None, library=None):
     dict
         attrs
     """
-    default_attrs = {"created_at": datetime.datetime.utcnow().isoformat()}
+    default_attrs = {
+        "created_at": datetime.datetime.utcnow().isoformat(),
+        "arviz_version": __version__,
+    }
     if library is not None:
         library_name = library.__name__
         default_attrs["inference_library"] = library_name

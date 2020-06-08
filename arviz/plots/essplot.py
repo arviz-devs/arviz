@@ -7,19 +7,19 @@ from ..stats import ess
 from .plot_utils import (
     xarray_var_iter,
     _scale_fig_size,
-    make_label,
     default_grid,
-    _create_axes_grid,
-    get_coords,
+    filter_plotters_list,
+    get_plotting_function,
+    matplotlib_kwarg_dealiaser,
 )
-from ..utils import _var_names
+from ..rcparams import rcParams
+from ..utils import _var_names, get_coords
 
 
 def plot_ess(
-    # disable black until #763 is released
-    # fmt: off
     idata,
     var_names=None,
+    filter_vars=None,
     kind="local",
     relative=False,
     coords=None,
@@ -35,59 +35,75 @@ def plot_ess(
     text_kwargs=None,
     hline_kwargs=None,
     rug_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
     **kwargs
-    # fmt: on
 ):
     """Plot quantile, local or evolution of effective sample sizes (ESS).
 
     Parameters
     ----------
-    idata : obj
+    idata: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names, optional
-        Variables to be plotted.
-    kind : str, optional
+    var_names: list of variable names, optional
+        Variables to be plotted. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    kind: str, optional
         Options: ``local``, ``quantile`` or ``evolution``, specify the kind of plot.
-    relative : bool
+    relative: bool
         Show relative ess in plot ``ress = ess / N``.
-    coords : dict, optional
+    coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple, optional
+    figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    rug : bool
+    rug: bool
         Plot rug plot of values diverging or that reached the max tree depth.
-    rug_kind : bool
+    rug_kind: bool
         Variable in sample stats to use as rug mask. Must be a boolean variable.
-    n_points : int
+    n_points: int
         Number of points for which to plot their quantile/local ess or number of subsets
         in the evolution plot.
-    extra_methods : bool, optional
+    extra_methods: bool, optional
         Plot mean and sd ESS as horizontal lines. Not taken into account in evolution kind
-    min_ess : int
+    min_ess: int
         Minimum number of ESS desired.
-    ax : axes, optional
-        Matplotlib axes. Defaults to None.
-    extra_kwargs : dict, optional
+    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+        A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
+        its own array of plot areas (and return it).
+    extra_kwargs: dict, optional
         If evolution plot, extra_kwargs is used to plot ess tail and differentiate it
         from ess bulk. Otherwise, passed to extra methods lines.
-    text_kwargs : dict, optional
+    text_kwargs: dict, optional
         Only taken into account when ``extra_methods=True``. kwargs passed to ax.annotate
         for extra methods lines labels. It accepts the additional
         key ``x`` to set ``xy=(text_kwargs["x"], mcse)``
-    hline_kwargs : dict, optional
+    hline_kwargs: dict, optional
         kwargs passed to ax.axhline for the horizontal minimum ESS line.
-    rug_kwargs : dict
+    rug_kwargs: dict
         kwargs passed to rug plot.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show: bool, optional
+        Call backend show function.
     **kwargs
         Passed as-is to plt.hist() or plt.plot() function depending on the value of `kind`.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes: matplotlib axes or bokeh figures
 
     References
     ----------
@@ -97,7 +113,7 @@ def plot_ess(
     --------
     Plot local ESS. This plot, together with the quantile ESS plot, is recommended to check
     that there are enough samples for all the explored regions of parameter space. Checking
-    local and quantile ESS is particularly relevant when working with credible intervals as
+    local and quantile ESS is particularly relevant when working with hdi intervals as
     opposed to ESS bulk, which is relevant for point estimates.
 
     .. plot::
@@ -110,13 +126,13 @@ def plot_ess(
         ...     idata, kind="local", var_names=["mu", "theta"], coords=coords
         ... )
 
-    Plot quantile ESS.
+    Plot quantile ESS and exclude variables with partial naming
 
     .. plot::
         :context: close-figs
 
         >>> az.plot_ess(
-        ...     idata, kind="quantile", var_names=["mu", "theta"], coords=coords
+        ...     idata, kind="quantile", var_names=['~thet'], filter_vars="like", coords=coords
         ... )
 
     Plot ESS evolution as the number of samples increase. When the model is converging properly,
@@ -163,9 +179,15 @@ def plot_ess(
     extra_methods = False if kind == "evolution" else extra_methods
 
     data = get_coords(convert_to_dataset(idata, group="posterior"), coords)
-    var_names = _var_names(var_names, data)
+    var_names = _var_names(var_names, data, filter_vars)
     n_draws = data.dims["draw"]
     n_samples = n_draws * data.dims["chain"]
+
+    ess_tail_dataset = None
+    mean_ess = None
+    sd_ess = None
+    text_x = None
+    text_va = None
 
     if kind == "quantile":
         probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
@@ -225,21 +247,24 @@ def plot_ess(
             dim="ess_dim",
         )
 
-    plotters = list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"}))
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})), "plot_ess"
+    )
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
-    _linestyle = kwargs.pop("ls", "-" if kind == "evolution" else "none")
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    _linestyle = "-" if kind == "evolution" else "none"
     kwargs.setdefault("linestyle", _linestyle)
-    kwargs.setdefault("linewidth", kwargs.pop("lw", _linewidth))
-    kwargs.setdefault("markersize", kwargs.pop("ms", _markersize))
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("zorder", 3)
-    if extra_kwargs is None:
-        extra_kwargs = {}
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
     if kind == "evolution":
         extra_kwargs = {
             **extra_kwargs,
@@ -248,103 +273,69 @@ def plot_ess(
         kwargs.setdefault("label", "bulk")
         extra_kwargs.setdefault("label", "tail")
     else:
-        extra_kwargs.setdefault("linestyle", extra_kwargs.pop("ls", "-"))
-        extra_kwargs.setdefault("linewidth", extra_kwargs.pop("lw", _linewidth / 2))
+        extra_kwargs.setdefault("linestyle", "-")
+        extra_kwargs.setdefault("linewidth", _linewidth / 2)
         extra_kwargs.setdefault("color", "k")
         extra_kwargs.setdefault("alpha", 0.5)
     kwargs.setdefault("label", kind)
-    if hline_kwargs is None:
-        hline_kwargs = {}
-    hline_kwargs.setdefault("linewidth", hline_kwargs.pop("lw", _linewidth))
-    hline_kwargs.setdefault("linestyle", hline_kwargs.pop("ls", "--"))
-    hline_kwargs.setdefault("color", hline_kwargs.pop("c", "gray"))
+
+    hline_kwargs = matplotlib_kwarg_dealiaser(hline_kwargs, "plot")
+    hline_kwargs.setdefault("linewidth", _linewidth)
+    hline_kwargs.setdefault("linestyle", "--")
+    hline_kwargs.setdefault("color", "gray")
     hline_kwargs.setdefault("alpha", 0.7)
     if extra_methods:
         mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)
         sd_ess = ess(data, var_names=var_names, method="sd", relative=relative)
-        if text_kwargs is None:
-            text_kwargs = {}
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
         text_x = text_kwargs.pop("x", 1)
-        text_kwargs.setdefault("fontsize", text_kwargs.pop("size", xt_labelsize * 0.7))
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
         text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
         text_kwargs.setdefault("color", extra_kwargs["color"])
-        text_kwargs.setdefault("horizontalalignment", text_kwargs.pop("ha", "right"))
-        text_va = text_kwargs.pop("verticalalignment", text_kwargs.pop("va", None))
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
 
-    if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, squeeze=False, constrained_layout=True
-        )
+    essplot_kwargs = dict(
+        ax=ax,
+        plotters=plotters,
+        xdata=xdata,
+        ess_tail_dataset=ess_tail_dataset,
+        mean_ess=mean_ess,
+        sd_ess=sd_ess,
+        idata=idata,
+        data=data,
+        text_x=text_x,
+        text_va=text_va,
+        kind=kind,
+        extra_methods=extra_methods,
+        rows=rows,
+        cols=cols,
+        figsize=figsize,
+        kwargs=kwargs,
+        extra_kwargs=extra_kwargs,
+        text_kwargs=text_kwargs,
+        _linewidth=_linewidth,
+        _markersize=_markersize,
+        n_samples=n_samples,
+        relative=relative,
+        min_ess=min_ess,
+        xt_labelsize=xt_labelsize,
+        titlesize=titlesize,
+        ax_labelsize=ax_labelsize,
+        ylabel=ylabel,
+        rug=rug,
+        rug_kind=rug_kind,
+        rug_kwargs=rug_kwargs,
+        hline_kwargs=hline_kwargs,
+        backend_kwargs=backend_kwargs,
+        show=show,
+    )
 
-    for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
-        ax_.plot(xdata, x, **kwargs)
-        if kind == "evolution":
-            ess_tail = ess_tail_dataset[var_name].sel(**selection)
-            ax_.plot(xdata, ess_tail, **extra_kwargs)
-        elif rug:
-            if rug_kwargs is None:
-                rug_kwargs = {}
-            if not hasattr(idata, "sample_stats"):
-                raise ValueError("InferenceData object must contain sample_stats for rug plot")
-            if not hasattr(idata.sample_stats, rug_kind):
-                raise ValueError("InferenceData does not contain {} data".format(rug_kind))
-            rug_kwargs.setdefault("marker", "|")
-            rug_kwargs.setdefault("linestyle", rug_kwargs.pop("ls", "None"))
-            rug_kwargs.setdefault("color", rug_kwargs.pop("c", kwargs.get("color", "C0")))
-            rug_kwargs.setdefault("space", 0.1)
-            rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-            values = data[var_name].sel(**selection).values.flatten()
-            mask = idata.sample_stats[rug_kind].values.flatten()
-            values = np.argsort(values)[mask]
-            rug_space = np.max(x) * rug_kwargs.pop("space")
-            rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
-            ax_.plot(rug_x, rug_y, **rug_kwargs)
-            ax_.axhline(0, color="k", linewidth=_linewidth, alpha=0.7)
-        if extra_methods:
-            mean_ess_i = mean_ess[var_name].sel(**selection).values.item()
-            sd_ess_i = sd_ess[var_name].sel(**selection).values.item()
-            ax_.axhline(mean_ess_i, **extra_kwargs)
-            ax_.annotate(
-                "mean",
-                (text_x, mean_ess_i),
-                va=text_va
-                if text_va is not None
-                else "bottom"
-                if mean_ess_i >= sd_ess_i
-                else "top",
-                **text_kwargs,
-            )
-            ax_.axhline(sd_ess_i, **extra_kwargs)
-            ax_.annotate(
-                "sd",
-                (text_x, sd_ess_i),
-                va=text_va if text_va is not None else "bottom" if sd_ess_i > mean_ess_i else "top",
-                **text_kwargs,
-            )
-
-        ax_.axhline(400 / n_samples if relative else min_ess, **hline_kwargs)
-
-        ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
-        ax_.tick_params(labelsize=xt_labelsize)
-        ax_.set_xlabel(
-            "Total number of draws" if kind == "evolution" else "Quantile", fontsize=ax_labelsize
-        )
-        ax_.set_ylabel(
-            ylabel.format("Relative ESS" if relative else "ESS"), fontsize=ax_labelsize, wrap=True
-        )
-        if kind == "evolution":
-            ax_.legend(title="Method", title_fontsize=xt_labelsize, fontsize=xt_labelsize)
-        else:
-            ax_.set_xlim(0, 1)
-        if rug:
-            ax_.yaxis.get_major_locator().set_params(nbins="auto", steps=[1, 2, 5, 10])
-            _, ymax = ax_.get_ylim()
-            yticks = ax_.get_yticks().astype(np.int64)
-            yticks = yticks[(yticks >= 0) & (yticks < ymax)]
-            ax_.set_yticks(yticks)
-            ax_.set_yticklabels(yticks)
-        else:
-            ax_.set_ylim(bottom=0)
-
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_ess", "essplot", backend)
+    ax = plot(**essplot_kwargs)
     return ax

@@ -1,13 +1,19 @@
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, comparison-with-callable
 """Test helper functions."""
 import gzip
 import importlib
+import logging
 import os
 import pickle
 import sys
-import logging
-import pytest
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
+import pytest
+from _pytest.outcomes import Skipped
+from packaging.version import Version
+
+from ..data import InferenceData, from_dict
 
 _log = logging.getLogger(__name__)
 
@@ -34,16 +40,150 @@ def chains():
     return 2
 
 
-def check_multiple_attrs(test_dict, parent):
+def create_model(seed=10):
+    """Create model with fake data."""
+    np.random.seed(seed)
+    nchains = 4
+    ndraws = 500
+    data = {
+        "J": 8,
+        "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
+        "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
+    }
+    posterior = {
+        "mu": np.random.randn(nchains, ndraws),
+        "tau": abs(np.random.randn(nchains, ndraws)),
+        "eta": np.random.randn(nchains, ndraws, data["J"]),
+        "theta": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    posterior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"]))}
+    sample_stats = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": np.random.randn(nchains, ndraws) > 0.90,
+        "max_depth": np.random.randn(nchains, ndraws) > 0.90,
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    prior = {
+        "mu": np.random.randn(nchains, ndraws) / 2,
+        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
+        "eta": np.random.randn(nchains, ndraws, data["J"]) / 2,
+        "theta": np.random.randn(nchains, ndraws, data["J"]) / 2,
+    }
+    prior_predictive = {"y": np.random.randn(nchains, ndraws, len(data["y"])) / 2}
+    sample_stats_prior = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
+    }
+    model = from_dict(
+        posterior=posterior,
+        posterior_predictive=posterior_predictive,
+        sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
+        prior=prior,
+        prior_predictive=prior_predictive,
+        sample_stats_prior=sample_stats_prior,
+        observed_data={"y": data["y"]},
+        dims={"y": ["obs_dim"], "log_likelihood": ["obs_dim"]},
+        coords={"obs_dim": range(data["J"])},
+    )
+    return model
+
+
+def create_multidimensional_model(seed=10):
+    """Create model with fake data."""
+    np.random.seed(seed)
+    nchains = 4
+    ndraws = 500
+    ndim1 = 5
+    ndim2 = 7
+    data = {
+        "y": np.random.normal(size=(ndim1, ndim2)),
+        "sigma": np.random.normal(size=(ndim1, ndim2)),
+    }
+    posterior = {
+        "mu": np.random.randn(nchains, ndraws),
+        "tau": abs(np.random.randn(nchains, ndraws)),
+        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2),
+        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    posterior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2)}
+    sample_stats = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": np.random.randn(nchains, ndraws) > 0.90,
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    prior = {
+        "mu": np.random.randn(nchains, ndraws) / 2,
+        "tau": abs(np.random.randn(nchains, ndraws)) / 2,
+        "eta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
+        "theta": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2,
+    }
+    prior_predictive = {"y": np.random.randn(nchains, ndraws, ndim1, ndim2) / 2}
+    sample_stats_prior = {
+        "energy": np.random.randn(nchains, ndraws),
+        "diverging": (np.random.randn(nchains, ndraws) > 0.95).astype(int),
+    }
+    model = from_dict(
+        posterior=posterior,
+        posterior_predictive=posterior_predictive,
+        sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
+        prior=prior,
+        prior_predictive=prior_predictive,
+        sample_stats_prior=sample_stats_prior,
+        observed_data={"y": data["y"]},
+        dims={"y": ["dim1", "dim2"], "log_likelihood": ["dim1", "dim2"]},
+        coords={"dim1": range(ndim1), "dim2": range(ndim2)},
+    )
+    return model
+
+
+@pytest.fixture(scope="module")
+def models():
+    """Fixture containing 2 mock inference data instances for testing."""
+    # blank line to keep black and pydocstyle happy
+
+    class Models:
+        model_1 = create_model(seed=10)
+        model_2 = create_model(seed=11)
+
+    return Models()
+
+
+@pytest.fixture(scope="module")
+def multidim_models():
+    """Fixture containing 2 mock inference data instances with multidimensional data for testing."""
+    # blank line to keep black and pydocstyle happy
+
+    class Models:
+        model_1 = create_multidimensional_model(seed=10)
+        model_2 = create_multidimensional_model(seed=11)
+
+    return Models()
+
+
+def check_multiple_attrs(
+    test_dict: Dict[str, List[str]], parent: InferenceData
+) -> List[Union[str, Tuple[str, str]]]:
     """Perform multiple hasattr checks on InferenceData objects.
 
     It is thought to first check if the parent object contains a given dataset,
     and then (if present) check the attributes of the dataset.
 
-    Args
-    ----
-    test_dict: dict
-        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`
+    Given the ouput of the function, all missmatches between expectation and reality can
+    be retrieved: a single string indicates a group mismatch and a tuple of strings
+    ``(group, var)`` indicates a mismatch in the variable ``var`` of ``group``.
+
+    Parameters
+    ----------
+    test_dict: dict of {str : list of str}
+        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`.
+        A ``~`` at the beggining of a dataset or variable name indicates the name NOT
+        being present must be asserted.
     parent: InferenceData
         InferenceData object on which to check the attributes.
 
@@ -53,13 +193,36 @@ def check_multiple_attrs(test_dict, parent):
         List containing the failed checks. It will contain either the dataset_name or a
         tuple (dataset_name, var) for all non present attributes.
 
+    Examples
+    --------
+    The output below indicates that ``posterior`` group was expected but not found, and
+    variables ``a`` and ``b``:
+
+        ["posterior", ("prior", "a"), ("prior", "b")]
+
+    Another example could be the following:
+
+        [("posterior", "a"), "~observed_data", ("sample_stats", "~log_likelihood")]
+
+    In this case, the output indicates that variable ``a`` was not found in ``posterior``
+    as it was expected, however, in the other two cases, the preceding ``~`` (kept from the
+    input negation notation) indicates that ``observed_data`` group should not be present
+    but was found in the InferenceData and that ``log_likelihood`` variable was found
+    in ``sample_stats``, also against what was expected.
+
     """
     failed_attrs = []
     for dataset_name, attributes in test_dict.items():
-        if hasattr(parent, dataset_name):
+        if dataset_name.startswith("~"):
+            if hasattr(parent, dataset_name[1:]):
+                failed_attrs.append(dataset_name)
+        elif hasattr(parent, dataset_name):
             dataset = getattr(parent, dataset_name)
             for attribute in attributes:
-                if not hasattr(dataset, attribute):
+                if attribute.startswith("~"):
+                    if hasattr(dataset, attribute[1:]):
+                        failed_attrs.append((dataset_name, attribute))
+                elif not hasattr(dataset, attribute):
                     failed_attrs.append((dataset_name, attribute))
         else:
             failed_attrs.append(dataset_name)
@@ -94,7 +257,7 @@ def _emcee_lnprior(theta):
     if tau < 0:
         return -np.inf
     prior_tau = -np.log(tau ** 2 + 25 ** 2)
-    prior_mu = -(mu / 10) ** 2  # normal prior, loc=0, scale=10
+    prior_mu = -((mu / 10) ** 2)  # normal prior, loc=0, scale=10
     prior_eta = -np.sum(eta ** 2)  # normal prior, loc=0, scale=1
     return prior_mu + prior_tau + prior_eta
 
@@ -103,7 +266,7 @@ def _emcee_lnprob(theta, y, sigma):
     """Proper function to allow pickling."""
     mu, tau, eta = theta[0], theta[1], theta[2:]
     prior = _emcee_lnprior(theta)
-    like_vect = -((mu + tau * eta - y) / sigma) ** 2
+    like_vect = -(((mu + tau * eta - y) / sigma) ** 2)
     like = np.sum(like_vect)
     return like + prior, (like_vect, np.random.normal((mu + tau * eta), sigma))
 
@@ -118,11 +281,8 @@ def emcee_schools_model(data, draws, chains):
     J = data["J"]  # pylint: disable=invalid-name
     ndim = J + 2
 
-    # make reproducible
-    np.random.seed(0)
-
     pos = np.random.normal(size=(chains, ndim))
-    pos[:, 1] = np.absolute(pos[:, 1])
+    pos[:, 1] = np.absolute(pos[:, 1])  #  pylint: disable=unsupported-assignment-operation
 
     if emcee_version() < 3:
         sampler = emcee.EnsembleSampler(chains, ndim, _emcee_lnprob, args=(y, sigma))
@@ -143,62 +303,82 @@ def emcee_schools_model(data, draws, chains):
     return sampler
 
 
-# pylint:disable=no-member,no-value-for-parameter
-def _pyro_centered_model(sigma):
-    """Centered model setup."""
+# pylint:disable=no-member,no-value-for-parameter,invalid-name
+def _pyro_noncentered_model(J, sigma, y=None):
     import pyro
-    import torch
     import pyro.distributions as dist
 
-    mu = pyro.sample("mu", dist.Normal(torch.zeros(1), 10 * torch.ones(1)))
-    tau = pyro.sample("tau", dist.HalfCauchy(scale=25 * torch.ones(1)))
-
-    theta = pyro.sample("theta", dist.Normal(mu * torch.ones(8), tau * torch.ones(8)))
-
-    return pyro.sample("obs", dist.Normal(theta, sigma))
-
-
-def _pyro_conditioned_model(model, sigma, y):
-    """Condition the model."""
-    import pyro
-
-    return pyro.poutine.condition(model, data={"obs": y})(sigma)
+    mu = pyro.sample("mu", dist.Normal(0, 5))
+    tau = pyro.sample("tau", dist.HalfCauchy(5))
+    with pyro.plate("J", J):
+        eta = pyro.sample("eta", dist.Normal(0, 1))
+        theta = mu + tau * eta
+        return pyro.sample("obs", dist.Normal(theta, sigma), obs=y)
 
 
-def pyro_centered_schools(data, draws, chains):
-    """Centered eight schools implementation in Pyro.
-
-    Note there is not really a deterministic node in pyro, so I do not
-    know how to do a non-centered implementation.
-    """
+def pyro_noncentered_schools(data, draws, chains):
+    """Non-centered eight schools implementation in Pyro."""
     import torch
-    from pyro.infer.mcmc import MCMC, NUTS
+    from pyro.infer import MCMC, NUTS
 
-    del chains
-    y = torch.Tensor(data["y"]).type(torch.Tensor)
-    sigma = torch.Tensor(data["sigma"]).type(torch.Tensor)
+    y = torch.from_numpy(data["y"]).float()
+    sigma = torch.from_numpy(data["sigma"]).float()
 
-    nuts_kernel = NUTS(_pyro_conditioned_model, adapt_step_size=True)
-    posterior = MCMC(  # pylint:disable=not-callable
-        nuts_kernel, num_samples=draws, warmup_steps=500
-    ).run(_pyro_centered_model, sigma, y)
+    nuts_kernel = NUTS(_pyro_noncentered_model, jit_compile=True, ignore_jit_warnings=True)
+    posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=draws, num_chains=chains)
+    posterior.run(data["J"], sigma, y)
 
     # This block lets the posterior be pickled
-    for trace in posterior.exec_traces:
-        for node in trace.nodes.values():
-            node.pop("fn", None)
-    posterior.kernel = None
-    posterior.run = None
-    posterior.logger = None
-    if hasattr(posterior, "sampler"):
-        posterior.sampler = None
+    posterior.sampler = None
+    posterior.kernel.potential_fn = None
     return posterior
+
+
+# pylint:disable=no-member,no-value-for-parameter,invalid-name
+def _numpyro_noncentered_model(J, sigma, y=None):
+    import numpyro
+    import numpyro.distributions as dist
+
+    mu = numpyro.sample("mu", dist.Normal(0, 5))
+    tau = numpyro.sample("tau", dist.HalfCauchy(5))
+    with numpyro.plate("J", J):
+        eta = numpyro.sample("eta", dist.Normal(0, 1))
+        theta = mu + tau * eta
+        return numpyro.sample("obs", dist.Normal(theta, sigma), obs=y)
+
+
+def numpyro_schools_model(data, draws, chains):
+    """Centered eight schools implementation in NumPyro."""
+    from jax.random import PRNGKey
+    from numpyro.infer import MCMC, NUTS
+
+    mcmc = MCMC(
+        NUTS(_numpyro_noncentered_model),
+        num_warmup=draws,
+        num_samples=draws,
+        num_chains=chains,
+        chain_method="sequential",
+    )
+    mcmc.run(PRNGKey(0), extra_fields=("num_steps", "energy"), **data)
+
+    # This block lets the posterior be pickled
+    mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._init_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._postprocess_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._potential_fn = None  # pylint: disable=protected-access
+    mcmc._cache = {}  # pylint: disable=protected-access
+    return mcmc
 
 
 def tfp_schools_model(num_schools, treatment_stddevs):
     """Non-centered eight schools model for tfp."""
     import tensorflow_probability.python.edward2 as ed
     import tensorflow as tf
+
+    if int(tf.__version__[0]) > 1:
+        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
+        tf.disable_v2_behavior()
 
     avg_effect = ed.Normal(loc=0.0, scale=10.0, name="avg_effect")  # `mu`
     avg_stddev = ed.Normal(loc=5.0, scale=1.0, name="avg_stddev")  # `log(tau)`
@@ -217,6 +397,11 @@ def tfp_noncentered_schools(data, draws, chains):
     import tensorflow_probability as tfp
     import tensorflow_probability.python.edward2 as ed
     import tensorflow as tf
+
+    if int(tf.__version__[0]) > 1:
+        import tensorflow.compat.v1 as tf  # pylint: disable=import-error
+
+        tf.disable_v2_behavior()
 
     del chains
 
@@ -290,18 +475,23 @@ def pystan_noncentered_schools(data, draws, chains):
         }
     """
     if pystan_version() == 2:
-        import pystan
+        import pystan  # pylint: disable=import-error
 
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(
-            data=data, iter=draws, warmup=0, chains=chains, check_hmc_diagnostics=False
+            data=data,
+            iter=draws + 500,
+            warmup=500,
+            chains=chains,
+            check_hmc_diagnostics=False,
+            control=dict(adapt_engaged=False),
         )
     else:
         import stan  # pylint: disable=import-error
 
         stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
-            num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False
+            num_chains=chains, num_samples=draws, num_warmup=500, save_warmup=False
         )
     return stan_model, fit
 
@@ -340,7 +530,8 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         ("pystan", pystan_noncentered_schools),
         ("pymc3", pymc3_noncentered_schools),
         ("emcee", emcee_schools_model),
-        ("pyro", pyro_centered_schools),
+        ("pyro", pyro_noncentered_schools),
+        ("numpyro", numpyro_schools_model),
     )
     data_directory = os.path.join(here, "saved_models")
     models = {}
@@ -387,7 +578,71 @@ def pystan_version():
 
     """
     try:
-        import pystan
+        import pystan  # pylint: disable=import-error
+
+        version = int(pystan.__version__[0])
     except ImportError:
-        import stan as pystan  # pylint: disable=import-error
-    return int(pystan.__version__[0])
+        try:
+            import stan as pystan  # pylint: disable=import-error
+
+            version = int(pystan.__version__[0])
+        except ImportError:
+            version = None
+    return version
+
+
+def test_precompile_models(eight_schools_params, draws, chains):
+    """Precompile model files."""
+    load_cached_models(eight_schools_params, draws, chains)
+
+
+def running_on_ci() -> bool:
+    """Return True if running on CI machine."""
+    return os.environ.get("ARVIZ_CI_MACHINE") is not None
+
+
+def importorskip(
+    modname: str, minversion: Optional[str] = None, reason: Optional[str] = None
+) -> Any:
+    """Import and return the requested module ``modname``.
+
+        Doesn't allow skips on CI machine.
+        Borrowed and modified from ``pytest.importorskip``.
+    :param str modname: the name of the module to import
+    :param str minversion: if given, the imported module's ``__version__``
+        attribute must be at least this minimal version, otherwise the test is
+        still skipped.
+    :param str reason: if given, this reason is shown as the message when the
+        module cannot be imported.
+    :returns: The imported module. This should be assigned to its canonical
+        name.
+    Example::
+        docutils = pytest.importorskip("docutils")
+    """
+    # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
+    ARVIZ_CI_MACHINE = running_on_ci()
+    if ARVIZ_CI_MACHINE:
+        import warnings
+
+        compile(modname, "", "eval")  # to catch syntaxerrors
+
+        with warnings.catch_warnings():
+            # make sure to ignore ImportWarnings that might happen because
+            # of existing directories with the same name we're trying to
+            # import but without a __init__.py file
+            warnings.simplefilter("ignore")
+            __import__(modname)
+        mod = sys.modules[modname]
+        if minversion is None:
+            return mod
+        verattr = getattr(mod, "__version__", None)
+        if minversion is not None:
+            if verattr is None or Version(verattr) < Version(minversion):
+                raise Skipped(
+                    "module %r has __version__ %r, required is: %r"
+                    % (modname, verattr, minversion),
+                    allow_module_level=True,
+                )
+        return mod
+    else:
+        return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)

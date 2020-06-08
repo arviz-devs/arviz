@@ -21,7 +21,7 @@ Plots
     plot_energy
     plot_ess
     plot_forest
-    plot_hpd
+    plot_hdi
     plot_joint
     plot_kde
     plot_khat
@@ -45,6 +45,7 @@ Stats
 
     apply_test_function
     compare
+    hdi
     hpd
     loo
     loo_pit
@@ -64,7 +65,6 @@ Diagnostics
     bfmi
     geweke
     ess
-    effective_sample_size
     rhat
     mcse
 
@@ -81,30 +81,69 @@ Stats utils
     make_ufunc
     wrap_xarray_ufunc
 
+.. _data_api:
+
 Data
 ----
 
 .. autosummary::
     :toctree: generated/
 
-
+    InferenceData
     convert_to_inference_data
     load_arviz_data
     to_netcdf
     from_netcdf
     from_cmdstan
+    from_cmdstanpy
     from_dict
     from_emcee
     from_pymc3
+    from_pymc3_predictions
     from_pyro
+    from_numpyro
     from_pystan
+    from_tfp
+    concat
 
 Utils
 -----
 
 .. autosummary::
       :toctree: generated/
-      :template: class.rst
+      :template: class_no_members.rst
 
       Numba
       interactive_backend
+
+rcParams
+--------
+
+.. autosummary::
+   :toctree: generated/
+   :template: class_no_members.rst
+
+   rc_context
+
+.. _wrappers_api:
+
+Wrappers
+--------
+Experimental feature
+
+.. autosummary::
+    :toctree: generated/
+
+    SamplingWrapper
+    PyStanSamplingWrapper
+
+.. _stats_refit_api:
+
+Stats (requiring refitting)
+---------------------------
+Experimental feature
+
+.. autosummary::
+    :toctree: generated/
+
+    reloo

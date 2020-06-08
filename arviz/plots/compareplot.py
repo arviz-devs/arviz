@@ -1,7 +1,8 @@
 """Summary plot for model comparison."""
 import numpy as np
-import matplotlib.pyplot as plt
-from .plot_utils import _scale_fig_size
+
+from .plot_utils import _scale_fig_size, get_plotting_function
+from ..rcparams import rcParams
 
 
 def plot_compare(
@@ -14,6 +15,9 @@ def plot_compare(
     textsize=None,
     plot_kwargs=None,
     ax=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
 ):
     """
     Summary plot for model comparison.
@@ -23,8 +27,8 @@ def plot_compare(
 
     Notes
     -----
-    Defaults to comparing Widely Accepted Information Criterion (WAIC) if present in comp_df column,
-    otherwise compares Leave-one-out (loo)
+    Defaults to comparing Leave-one-out (psis-loo) if present in comp_df column,
+    otherwise compares Widely Applicable Information Criterion (WAIC)
 
 
     Parameters
@@ -50,12 +54,19 @@ def plot_compare(
         Optional arguments for plot elements. Currently accepts 'color_ic',
         'marker_ic', 'color_insample_dev', 'marker_insample_dev', 'color_dse',
         'marker_dse', 'ls_min_ic' 'color_ls_min_ic',  'fontsize'
-    ax : axes, optional
-        Matplotlib axes
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
 
 
     Examples
@@ -83,9 +94,6 @@ def plot_compare(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
-
     if plot_kwargs is None:
         plot_kwargs = {}
 
@@ -94,9 +102,10 @@ def plot_compare(
 
     yticks_labels = [""] * len(yticks_pos)
 
-    _information_criterion = ["waic", "loo"]
+    _information_criterion = ["loo", "waic"]
+    column_index = [c.lower() for c in comp_df.columns]
     for information_criterion in _information_criterion:
-        if information_criterion in comp_df.columns:
+        if information_criterion in column_index:
             break
     else:
         raise ValueError(
@@ -107,71 +116,37 @@ def plot_compare(
     if order_by_rank:
         comp_df.sort_values(by="rank", inplace=True)
 
-    if plot_ic_diff:
-        yticks_labels[0] = comp_df.index[0]
-        yticks_labels[2::2] = comp_df.index[1:]
-        ax.set_yticks(yticks_pos)
-        ax.errorbar(
-            x=comp_df[information_criterion].iloc[1:],
-            y=yticks_pos[1::2],
-            xerr=comp_df.dse[1:],
-            color=plot_kwargs.get("color_dse", "grey"),
-            fmt=plot_kwargs.get("marker_dse", "^"),
-            mew=linewidth,
-            elinewidth=linewidth,
-        )
-
-    else:
-        yticks_labels = comp_df.index
-        ax.set_yticks(yticks_pos[::2])
-
-    if plot_standard_error:
-        ax.errorbar(
-            x=comp_df[information_criterion],
-            y=yticks_pos[::2],
-            xerr=comp_df.se,
-            color=plot_kwargs.get("color_ic", "k"),
-            fmt=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=linewidth,
-        )
-    else:
-        ax.plot(
-            comp_df[information_criterion],
-            yticks_pos[::2],
-            color=plot_kwargs.get("color_ic", "k"),
-            marker=plot_kwargs.get("marker_ic", "o"),
-            mfc="None",
-            mew=linewidth,
-            lw=0,
-        )
-
-    if insample_dev:
-        ax.plot(
-            comp_df[information_criterion] - (2 * comp_df["p_" + information_criterion]),
-            yticks_pos[::2],
-            color=plot_kwargs.get("color_insample_dev", "k"),
-            marker=plot_kwargs.get("marker_insample_dev", "o"),
-            mew=linewidth,
-            lw=0,
-        )
-
-    ax.axvline(
-        comp_df[information_criterion].iloc[0],
-        ls=plot_kwargs.get("ls_min_ic", "--"),
-        color=plot_kwargs.get("color_ls_min_ic", "grey"),
-        lw=linewidth,
+    compareplot_kwargs = dict(
+        ax=ax,
+        comp_df=comp_df,
+        figsize=figsize,
+        plot_ic_diff=plot_ic_diff,
+        plot_standard_error=plot_standard_error,
+        insample_dev=insample_dev,
+        yticks_pos=yticks_pos,
+        yticks_labels=yticks_labels,
+        linewidth=linewidth,
+        plot_kwargs=plot_kwargs,
+        information_criterion=information_criterion,
+        ax_labelsize=ax_labelsize,
+        xt_labelsize=xt_labelsize,
+        step=step,
+        backend_kwargs=backend_kwargs,
+        show=show,
     )
 
-    scale_col = information_criterion + "_scale"
-    if scale_col in comp_df:
-        scale = comp_df[scale_col].iloc[0].capitalize()
-    else:
-        scale = "Deviance"
-    ax.set_xlabel(scale, fontsize=ax_labelsize)
-    ax.set_yticklabels(yticks_labels)
-    ax.set_ylim(-1 + step, 0 - step)
-    ax.tick_params(labelsize=xt_labelsize)
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
+    if backend == "bokeh":
+
+        compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")
+        compareplot_kwargs.pop("ax_labelsize")
+        compareplot_kwargs.pop("xt_labelsize")
+
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_compare", "compareplot", backend)
+    ax = plot(**compareplot_kwargs)
 
     return ax

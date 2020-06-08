@@ -1,6 +1,7 @@
 # pylint: disable=wildcard-import
 """Statistical tests and diagnostics for ArviZ."""
 from .stats_utils import *
+from .stats_refitting import *
 from .stats import *
 from .diagnostics import *
 
@@ -9,6 +10,7 @@ __all__ = [
     "apply_test_function",
     "bfmi",
     "compare",
+    "hdi",
     "hpd",
     "loo",
     "loo_pit",
@@ -16,7 +18,6 @@ __all__ = [
     "r2_score",
     "summary",
     "waic",
-    "effective_sample_size",
     "ELPDData",
     "ess",
     "rhat",
@@ -26,4 +27,5 @@ __all__ = [
     "autocov",
     "make_ufunc",
     "wrap_xarray_ufunc",
+    "reloo",
 ]

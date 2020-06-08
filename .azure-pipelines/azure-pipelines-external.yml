@@ -1,0 +1,136 @@
+jobs:
+- job: ExternalTests
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    - name: NUMBA_DISABLE_JIT
+      value: 1
+    - name: ARVIZ_CI_MACHINE
+      value: 1
+  timeoutInMinutes: 360
+  strategy:
+    matrix:
+      Python_37_Latest:
+        python.version: 3.7
+        pystan.version: "latest"
+        pymc3.version: "latest"
+        pyro.version: "latest"
+        pytorch.version: "latest"
+        emcee.version: "latest"
+        name: "External latest"
+      Python_37_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
+        python.version: 3.7
+        pystan.version: "preview"
+        pymc3.version: "github"
+        pyro.version: 1.2
+        pytorch.version: 1.4
+        emcee.version: 2
+        tensorflow.version: 1
+        name: "External special"
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version): $(name)'
+
+  - script: |
+      ls
+      env
+      pwd
+      gcc --version
+      python --version
+    displayName: 'Debug information'
+
+  - script: |
+      python -m pip install --upgrade pip
+
+      if [ "$(pytorch.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
+      else
+          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
+      fi
+
+      if [ "$(pystan.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install pystan
+      else
+          if [ "$(pystan.version)" = "preview" ]; then
+              # try to skip other pre-releases than pystan
+              python -m pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
+              python -m pip --no-cache-dir install --pre pystan
+          else
+              python -m pip --no-cache-dir install pystan=="${pystan.version}"
+          fi
+      fi
+
+      if [ "$(pyro.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install pyro-ppl
+      else
+          python -m pip --no-cache-dir install pyro-ppl=="$(pyro.version)"
+      fi
+
+      if [ "$(emcee.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install emcee
+      else
+          python -m pip --no-cache-dir install "emcee<3"
+      fi
+
+      if [ "$(tensorflow.version)" = "latest" ]; then
+          python -m pip --no-cache-dir install tensorflow
+      else
+          python -m pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
+      fi
+
+      if [ "$(pymc3.version)" = "github" ]; then
+          python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
+      else
+          python -m pip --no-cache-dir install pymc3
+      fi
+
+      python -m pip install --no-cache-dir -r requirements-external.txt
+    displayName: 'Install packages'
+
+  - script: |
+      python -m pip install  --no-cache-dir -r requirements.txt
+      python -m pip install --no-cache-dir -r requirements-dev.txt
+      python -m pip install --no-cache-dir -r requirements-optional.txt
+      python -m pip install pytest-azurepipelines codecov
+    displayName: 'Install requirements'
+
+  - script: |
+      python -m pip install .
+    displayName: 'Install ArviZ package'
+
+  - script: |
+      python -m pip freeze
+    displayName: 'Print packages'
+
+  - script: |
+      pytest arviz/tests/helpers.py
+    displayName: 'precompile models'
+
+  - script: |
+      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
+    displayName: 'pytest'
+
+  - script: |
+      python -m pylint arviz
+    displayName: 'pylint'
+
+  - script: |
+      python -m pydocstyle arviz
+    displayName: 'pydocstyle'
+
+  - script: |
+      python -m black --check arviz examples asv_benchmarks
+    displayName: 'black'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
+      testRunTitle: 'Publish test results for Python $(python.version)'
+
+  - script: |
+      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
+    displayName: 'upload coverage'

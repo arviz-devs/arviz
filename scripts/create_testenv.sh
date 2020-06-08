@@ -7,16 +7,18 @@ command -v conda >/dev/null 2>&1 || {
   exit 1;
 }
 
-# if no python specified, use Travis version, or else 3.6
-PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
+# if no python specified, use Travis version, or else 3.7
+PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.7}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
-PYTORCH_VERSION=${PYTORCH_VERSION:-1.1.0}
+PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
-EMCEE_VERSION=${EMCEE_VERSION:-2}
+EMCEE_VERSION=${EMCEE_VERSION:-latest}
+TF_VERSION=${TF_VERSION:-latest}
+PYMC3_VERSION=${PYMC3_VERSION:-latest}
 
 
 if [[ $* != *--global* ]]; then
-    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}"
+    ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}_TF_${TF_VERSION}"
 
     if conda env list | grep -q ${ENVNAME}
     then
@@ -46,7 +48,11 @@ pip install --upgrade pip
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The link can be determined from the pytorch and the python version
-pip --no-cache-dir install "https://download.pytorch.org/whl/cpu/torch-${PYTORCH_VERSION}-cp${PYTHON_VERSION//./}-cp${PYTHON_VERSION//./}m-linux_x86_64.whl"
+if [ "$PYTORCH_VERSION" = "latest" ]; then
+    pip --no-cache-dir install torch torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+else
+    pip --no-cache-dir install torch==${PYTORCH_VERSION} torchvision -f https://download.pytorch.org/whl/cpu/torch_stable.html
+fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
   pip --no-cache-dir install pystan
@@ -66,12 +72,33 @@ else
   pip --no-cache-dir install pyro-ppl==${PYRO_VERSION}
 fi
 
-if [ "$EMCEE_VERSION" = "2" ]; then
+if [ "$EMCEE_VERSION" = "latest" ]; then
   pip --no-cache-dir install emcee
 else
-  pip --no-cache-dir install git+https://github.com/dfm/emcee.git
+  pip --no-cache-dir install "emcee<3"
 fi
 
+if [ "$TF_VERSION" = "latest" ]; then
+  pip --no-cache-dir install tensorflow
+else
+  pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
+fi
+
+if [ "$PYMC3_VERSION" = "latest" ]; then
+  pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
+else
+  pip --no-cache-dir install pymc3==${PYMC3_VERSION}
+fi
+
+
 #  Install editable using the setup.py
-pip install  --no-cache-dir -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 pip install --no-cache-dir -r requirements-dev.txt
+pip install --no-cache-dir -r requirements-docs.txt
+pip install --no-cache-dir -r requirements-external.txt
+pip install --no-cache-dir -r requirements-optional.txt
+
+conda install -y geckodriver firefox jupyterlab ipywidgets nodejs --channel conda-forge
+
+jupyter nbextension enable --py widgetsnbextension
+jupyter labextension install @jupyter-widgets/jupyterlab-manager

@@ -28,6 +28,19 @@ functionality, also via pull requests.
 Please consult the [ArviZ documentation](https://arviz-devs.github.io/arviz/)
 to ensure that any new contribution does not strongly overlap with existing functionality.
 
+## Steps before starting work
+Before starting a work on a pull request double check that no one else is working on the ticket in both issue tickets and pull requests.
+
+### If an issue ticket exists
+If an issue exists check the ticket to ensure no one else has started work. If first to start work, comment on the ticket to make it evident to others. If the comment looks old or abandoned leave a comment asking if you may start work.
+
+### If an issue ticket doesn't exist
+Open an issue ticket for the issue and state that you'll be solving the issue with a pull request. Optionally create a pull request and add `[WIP]` in the title to indicate Work in Progress.
+
+### In the event of a conflict
+In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgement call if needed.
+
+## Making the pull request
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/), clone it to your local machine, and develop on a feature branch.
 
@@ -37,7 +50,7 @@ For more instructions see the
 
 ### Code Formatting
 For code generally follow the
-[TensorFlow's style guide](https://www.tensorflow.org/versions/master/how_tos/style_guide.html)
+[TensorFlow's style guide](https://www.tensorflow.org/community/contribute/code_style)
 or the [Google style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md)
 Both more or less follows PEP 8.
 
@@ -46,11 +59,21 @@ For more detailed steps on a typical development workflow see the
 [Pull request checklist](#pull-request-checklist)
 
 
-### Docstring formatting
+### Docstring formatting and type hints
 Docstrings should follow the
-[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html)
+[numpy docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
+Extra guidance can also be found in
+[pandas docstring guide](https://pandas.pydata.org/pandas-docs/stable/development/contributing_docstring.html).
 Please reasonably document any additions or changes to the codebase,
 when in doubt, add a docstring.
+
+The different formatting and aim between numpydoc style type description and
+[type hints](https://docs.python.org/3/library/typing.html)
+should be noted. numpydoc style targets docstrings and aims to be human
+readable whereas type hints target function definitions and `.pyi` files and
+aim to help third party tools such as type checkers or IDEs. ArviZ does not
+require functions to include type hints
+however contributions including them are welcome.
 
 #### Documentation for user facing methods
 If changes are made to a method documented in the
@@ -89,11 +112,17 @@ please consider adding inline documentation examples.
 
 Alternatively, there is a script to create a docker environment for development.  See: [Developing in Docker](#Developing-in-Docker).
 
+Note: Building the documentation locally requires saving Bokeh plots as
+images. To do this, bokeh needs some [extra dependencies](https://docs.bokeh.org/en/latest/docs/user_guide/export.html#exporting-plots)
+that can not be installed with pip and are therefore not in
+``requirements-dev.txt``. To build documentation locally without having to
+install these extra dependencies, Docker can be used. See: [Building documentation with Docker](#building-documentation-with-docker)
+
 5. Develop the feature on your feature branch. Add changed files using ``git add`` and then ``git commit`` files:
 
    ```bash
    $ git add modified_files
-   $ git commit
+   $ git commit -m "commit message here"
    ```
 
    to record your changes locally.
@@ -142,13 +171,13 @@ tools:
 * Save plots as part of tests. Plots will save to a directory named test_images by default
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save
+  $ pytest arviz/tests/base_tests/<name of test>.py --save
   ```
 
 * Optionally save plots to a user named directory. This is useful for comparing changes across branches
 
   ```bash
-  $ pytest arviz/tests/<name of test>.py --save user_defined_directory
+  $ pytest arviz/tests/base_tests/<name of test>.py --save user_defined_directory
   ```
 
 
@@ -159,11 +188,11 @@ tools:
   $ pytest --cov=arviz --cov-report=html arviz/tests/
   ```
 
-* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6
+* Your code has been formatted with [black](https://github.com/ambv/black) with a line length of 100 characters. Note that black only runs in Python 3.6+
 
   ```bash
   $ pip install black
-  $ black arviz/
+  $ black arviz/ examples/ asv_benchmarks/
   ```
 
 * Your code passes pylint
@@ -184,6 +213,33 @@ tools:
 We have provided a Dockerfile which helps for isolating build problems, and local development.
 Install [Docker](https://www.docker.com/) for your operating system, clone this repo. Docker will generate an environment with your local copy of `arviz` with all the packages in Dockerfile.
 
+### container.sh & container.ps1
+
+Predefined docker commands can be run with a `./scripts/container.sh` (on Linux and macOS)
+and with `./scripts/container.ps1`. The scripts enables developer easily to call predefined docker commands.
+User can use one or multiple flags.
+
+They are executed on the following order: clear-cache, build, test, docs, shell, notebook, lab
+
+    $ ./scripts/container.sh --clear-cache
+    $ ./scripts/container.sh --build
+
+    $ ./scripts/container.sh --test
+    $ ./scripts/container.sh --docs
+    $ ./scripts/container.sh --shell
+    $ ./scripts/container.sh --notebook
+    $ ./scripts/container.sh --lab
+
+
+    $ powershell.exe -File ./scripts/container.ps1 --clear-cache
+    $ powershell.exe -File ./scripts/container.ps1 --build
+
+    $ powershell.exe -File ./scripts/container.ps1 --test
+    $ powershell.exe -File ./scripts/container.ps1 --docs
+    $ powershell.exe -File ./scripts/container.ps1 --shell
+    $ powershell.exe -File ./scripts/container.ps1 --notebook
+    $ powershell.exe -File ./scripts/container.ps1 --lab
+
 ### Testing in Docker
 Testing the code using docker consists of executing the same file 3 times (you may need root privileges to run it).
 First run `./scripts/container.sh --clear-cache`. Then run `./scripts/container.sh --build`. This starts a local docker image called `arviz`. Finally run the tests with `./scripts/container.sh --test`. This should be quite close to how the tests run on TravisCI.
@@ -200,13 +256,29 @@ To start a bash shell inside Docker, run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ -it arviz bash
 
+and for Windows, use %CD% on cmd.exe and $pwd.Path on powershell.
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ -it arviz bash
+
 Alternatively, to start a jupyter notebook, there are two steps, first run:
 
     $ docker run --mount type=bind,source="$(pwd)",target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
-    $ docker exec -it jupyter-dock pip install jupyter
-    $ docker exec -it jupyter-dock jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+    $ docker exec jupyter-dock bash -c "pip install jupyter"
+    $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
+
+and the same on Windows
+
+    $ docker run --mount type=bind,source=%CD%,target=/opt/arviz/ --name jupyter-dock -it -d -p 8888:8888 arviz
+    $ docker exec jupyter-dock bash -c "pip install jupyter"
+    $ docker exec -it jupyter-dock bash -c "jupyter notebook --ip 0.0.0.0 --no-browser --allow-root"
 
 This will output something similar to `http://(<docker container id> or <ip>):8888/?token=<token id>`, and can be accessed at `http://localhost:8888/?token=<token id>`.
+
+### Building documentation with Docker
+The documentation can be build with Docker by running `./scripts/container.sh
+--docs`. The docker image contains by default all dependencies needed
+for building the documentation. After having build the docs in the Docker
+container, they can be checked at `doc/build`.
 
 ## Running the benchmark tests
 
