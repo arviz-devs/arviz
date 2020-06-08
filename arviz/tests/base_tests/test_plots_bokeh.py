@@ -25,7 +25,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_energy,
     plot_ess,
     plot_forest,
-    plot_hpd,
+    plot_hdi,
     plot_joint,
     plot_kde,
     plot_khat,
@@ -76,10 +76,10 @@ def continuous_model():
     [
         {"point_estimate": "mean"},
         {"point_estimate": "median"},
-        {"credible_interval": 0.94},
-        {"credible_interval": 1},
+        {"hdi_prob": 0.94},
+        {"hdi_prob": 1},
         {"outline": True},
-        {"hpd_markers": ["v"]},
+        {"hdi_markers": ["v"]},
         {"shade": 1},
     ],
 )
@@ -117,7 +117,7 @@ def test_plot_density_bad_kwargs(models):
         )
 
     with pytest.raises(ValueError):
-        plot_density(obj, credible_interval=2, backend="bokeh", show=False)
+        plot_density(obj, hdi_prob=2, backend="bokeh", show=False)
 
 
 @pytest.mark.parametrize(
@@ -149,7 +149,7 @@ def test_plot_trace_discrete(discrete_model):
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
-        with rc_context(rc={"plot.max_subplots": 1}):
+        with rc_context(rc={"plot.max_subplots": 2}):
             axes = plot_trace(models.model_1, backend="bokeh", show=False)
     assert axes.shape
 
@@ -488,8 +488,8 @@ def test_plot_forest_bad(models, model_fits):
         {"smooth": False},
     ],
 )
-def test_plot_hpd(models, data, kwargs):
-    axis = plot_hpd(
+def test_plot_hdi(models, data, kwargs):
+    axis = plot_hdi(
         data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
     )
     assert axis
@@ -602,9 +602,9 @@ def test_plot_khat_bad_input(models):
     [
         {},
         {"n_unif": 50},
-        {"use_hpd": True, "color": "gray"},
-        {"use_hpd": True, "credible_interval": 0.68, "plot_kwargs": {"alpha": 0.9}},
-        {"use_hpd": True, "hpd_kwargs": {"smooth": False}},
+        {"use_hdi": True, "color": "gray"},
+        {"use_hdi": True, "credible_interval": 0.68},
+        {"use_hdi": True, "hdi_kwargs": {"line_dash": "dashed", "alpha": 0}},
         {"ecdf": True},
         {"ecdf": True, "ecdf_fill": False, "plot_unif_kwargs": {"line_dash": "--"}},
         {"ecdf": True, "credible_interval": 0.97, "fill_kwargs": {"color": "red"}},
@@ -616,10 +616,10 @@ def test_plot_loo_pit(models, kwargs):
 
 
 def test_plot_loo_pit_incompatible_args(models):
-    """Test error when both ecdf and use_hpd are True."""
+    """Test error when both ecdf and use_hdi are True."""
     with pytest.raises(ValueError, match="incompatible"):
         plot_loo_pit(
-            idata=models.model_1, y="y", ecdf=True, use_hpd=True, backend="bokeh", show=False
+            idata=models.model_1, y="y", ecdf=True, use_hdi=True, backend="bokeh", show=False
         )
 
 
@@ -895,6 +895,7 @@ def test_plot_ppc_ax(models, kind):
         {"point_estimate": "mode"},
         {"point_estimate": "median"},
         {"point_estimate": None},
+        {"hdi_prob": "hide"},
         {"ref_val": 0},
         {"ref_val": None},
         {"ref_val": {"mu": [{"ref_val": 1}]}},

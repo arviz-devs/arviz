@@ -8,6 +8,7 @@ from xarray.core.indexing import MemoryCachedArray
 from ...data import load_arviz_data, datasets
 from ...stats import compare
 from ...rcparams import (
+    rc_params,
     rcParams,
     rc_context,
     _make_validate_choice,
@@ -18,6 +19,7 @@ from ...rcparams import (
     _validate_probability,
     read_rcfile,
 )
+
 
 from ..helpers import models  # pylint: disable=unused-import
 
@@ -108,8 +110,13 @@ def test_rcparams_repr_str():
 def test_rctemplate_updated():
     fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../arvizrc.template")
     rc_pars_template = read_rcfile(fname)
-    assert all([key in rc_pars_template.keys() for key in rcParams.keys()])
-    assert all([value == rc_pars_template[key] for key, value in rcParams.items()])
+    rc_defaults = rc_params(ignore_files=True)
+    assert all([key in rc_pars_template.keys() for key in rc_defaults.keys()]), [
+        key for key in rc_defaults.keys() if key not in rc_pars_template
+    ]
+    assert all([value == rc_pars_template[key] for key, value in rc_defaults.items()]), [
+        key for key, value in rc_defaults.items() if value != rc_pars_template[key]
+    ]
 
 
 ### Test validation functions ###

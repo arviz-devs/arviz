@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_show
-from ....stats import hpd
+from ....stats import hdi
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ...plot_utils import make_label, _create_axes_grid
 
@@ -21,7 +21,7 @@ def plot_violin(
     rug,
     rug_kwargs,
     bw,
-    credible_interval,
+    hdi_prob,
     linewidth,
     ax_labelsize,
     xt_labelsize,
@@ -58,11 +58,11 @@ def plot_violin(
             ax_.plot(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
-        hpd_intervals = hpd(val, credible_interval, multimodal=False)
+        hdi_probs = hdi(val, hdi_prob, multimodal=False)
 
         if quartiles:
             ax_.plot([0, 0], per[:2], lw=linewidth * 3, color="k", solid_capstyle="round")
-        ax_.plot([0, 0], hpd_intervals, lw=linewidth, color="k", solid_capstyle="round")
+        ax_.plot([0, 0], hdi_probs, lw=linewidth, color="k", solid_capstyle="round")
         ax_.plot(0, per[-1], "wo", ms=linewidth * 1.5)
 
         ax_.set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)

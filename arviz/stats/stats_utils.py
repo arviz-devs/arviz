@@ -402,16 +402,14 @@ def get_log_likelihood(idata, var_name=None):
     """Retrieve the log likelihood dataarray of a given variable."""
     if hasattr(idata, "sample_stats") and hasattr(idata.sample_stats, "log_likelihood"):
         warnings.warn(
-            "Storing the log_likelihood in sample_stats groups will be deprecated",
-            PendingDeprecationWarning,
+            "Storing the log_likelihood in sample_stats groups has been deprecated",
+            DeprecationWarning,
         )
         return idata.sample_stats.log_likelihood
     if not hasattr(idata, "log_likelihood"):
         raise TypeError("log likelihood not found in inference data object")
     if var_name is None:
         var_names = list(idata.log_likelihood.data_vars)
-        if "lp" in var_names:
-            var_names.remove("lp")
         if len(var_names) > 1:
             raise TypeError(
                 "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
@@ -440,9 +438,9 @@ Pareto k diagnostic values:
    (1, Inf)   (very bad) {{5:{0}d}} {{9:6.1f}}%
 """
 SCALE_WARNING_FORMAT = """
-The scale is now log by default. Use 'scale' argument or 'stats.ic_scale' rcParam if 
-you rely on a specific value. 
-A higher log-score (or a lower deviance) indicates a model with better predictive 
+The scale is now log by default. Use 'scale' argument or 'stats.ic_scale' rcParam if
+you rely on a specific value.
+A higher log-score (or a lower deviance) indicates a model with better predictive
 accuracy."""
 SCALE_DICT = {"deviance": "deviance", "log": "elpd", "negative_log": "-elpd"}
 

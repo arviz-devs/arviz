@@ -1,4 +1,4 @@
-"""Bokeh hpdplot."""
+"""Bokeh hdiplot."""
 from itertools import cycle
 
 import bokeh.plotting as bkp
@@ -9,8 +9,8 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 
 
-def plot_hpd(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
-    """Bokeh hpd plot."""
+def plot_hdi(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
+    """Bokeh hdi plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
 

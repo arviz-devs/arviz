@@ -6,7 +6,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ....numeric_utils import _fast_kde, histogram, get_bins
 from ...plot_utils import make_label, _create_axes_grid
-from ....stats import hpd
+from ....stats import hdi
 
 
 def plot_violin(
@@ -22,7 +22,7 @@ def plot_violin(
     rug,
     rug_kwargs,
     bw,
-    credible_interval,
+    hdi_prob,
     linewidth,
     quartiles,
     backend_kwargs,
@@ -65,13 +65,13 @@ def plot_violin(
             ax_.scatter(rug_x, val, **rug_kwargs)
 
         per = np.percentile(val, [25, 75, 50])
-        hpd_intervals = hpd(val, credible_interval, multimodal=False)
+        hdi_probs = hdi(val, hdi_prob, multimodal=False)
 
         if quartiles:
             ax_.line(
                 [0, 0], per[:2], line_width=linewidth * 3, line_color="black", line_cap="round"
             )
-        ax_.line([0, 0], hpd_intervals, line_width=linewidth, line_color="black", line_cap="round")
+        ax_.line([0, 0], hdi_probs, line_width=linewidth, line_color="black", line_cap="round")
         ax_.circle(
             0,
             per[-1],

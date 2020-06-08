@@ -1,17 +1,20 @@
-"""Plot hpd intervals for regression data."""
+"""Plot highest density intervals for regression data."""
+import warnings
+
 import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 
-from ..stats import hpd
+from ..stats import hdi
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
+from ..utils import credible_interval_warning
 
 
-def plot_hpd(
+def plot_hdi(
     x,
     y,
-    credible_interval=None,
+    hdi_prob=None,
     color="C1",
     circular=False,
     smooth=True,
@@ -22,22 +25,23 @@ def plot_hpd(
     backend=None,
     backend_kwargs=None,
     show=None,
+    credible_interval=None,
 ):
     r"""
-    Plot hpd intervals for regression data.
+    Plot hdi intervals for regression data.
 
     Parameters
     ----------
     x : array-like
-        Values to plot
+        Values to plot.
     y : array-like
-        values from which to compute the hpd. Assumed shape (chain, draw, \*shape).
-    credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.94.
+        Values from which to compute the hdi. Assumed shape (chain, draw, \*shape).
+    hdi_prob : float, optional
+        Probability for the highest density interval. Defaults to 0.94.
     color : str
-        Color used for the limits of the HPD interval and fill. Should be a valid matplotlib color
+        Color used for the limits of the hdi and fill. Should be a valid matplotlib color.
     circular : bool, optional
-        Whether to compute the hpd taking into account `x` is a circular variable
+        Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     smooth : boolean
         If True the result will be smoothed by first computing a linear interpolation of the data
@@ -45,11 +49,11 @@ def plot_hpd(
         Defaults to True.
     smooth_kwargs : dict, optional
         Additional keywords modifying the Savitzky-Golay filter. See Scipy's documentation for
-        details
+        details.
     fill_kwargs : dict
         Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
     plot_kwargs : dict
-        Keywords passed to HPD limits
+        Keywords passed to hdi limits.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional
@@ -59,11 +63,16 @@ def plot_hpd(
         check the plotting method of the backend.
     show : bool, optional
         Call backend show function.
+    credible_interval: float, optional
+        Deprecated: Please see hdi_prob
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
     """
+    if credible_interval:
+        hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
+
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
     plot_kwargs.setdefault("alpha", 0)
@@ -87,13 +96,13 @@ def plot_hpd(
         new_shape = tuple([-1] + list(x_shape))
         y = y.reshape(new_shape)
 
-    if credible_interval is None:
-        credible_interval = rcParams["stats.credible_interval"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        if not 1 >= credible_interval > 0:
-            raise ValueError("The value of credible_interval should be in the interval (0, 1]")
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-    hpd_ = hpd(y, credible_interval=credible_interval, circular=circular, multimodal=False)
+    hdi_ = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False)
 
     if smooth:
         if smooth_kwargs is None:
@@ -102,14 +111,14 @@ def plot_hpd(
         smooth_kwargs.setdefault("polyorder", 2)
         x_data = np.linspace(x.min(), x.max(), 200)
         x_data[0] = (x_data[0] + x_data[1]) / 2
-        hpd_interp = griddata(x, hpd_, x_data)
-        y_data = savgol_filter(hpd_interp, axis=0, **smooth_kwargs)
+        hdi_interp = griddata(x, hdi_, x_data)
+        y_data = savgol_filter(hdi_interp, axis=0, **smooth_kwargs)
     else:
         idx = np.argsort(x)
         x_data = x[idx]
-        y_data = hpd_[idx]
+        y_data = hdi_[idx]
 
-    hpdplot_kwargs = dict(
+    hdiplot_kwargs = dict(
         ax=ax,
         x_data=x_data,
         y_data=y_data,
@@ -124,6 +133,11 @@ def plot_hpd(
     backend = backend.lower()
 
     # TODO: Add backend kwargs
-    plot = get_plotting_function("plot_hpd", "hpdplot", backend)
-    ax = plot(**hpdplot_kwargs)
+    plot = get_plotting_function("plot_hdi", "hdiplot", backend)
+    ax = plot(**hdiplot_kwargs)
     return ax
+
+
+def plot_hpd(*args, **kwargs):  # noqa: D103
+    warnings.warn("plot_hdi has been deprecated, please use plot_hdi", DeprecationWarning)
+    return plot_hdi(*args, **kwargs)

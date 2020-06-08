@@ -1,6 +1,7 @@
 """
 Matplotlib styles
-======
+=================
+
 _thumb: .8, .8
 """
 import matplotlib.pyplot as plt

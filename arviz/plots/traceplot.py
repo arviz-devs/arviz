@@ -141,7 +141,7 @@ def plot_trace(
 
         >>> az.plot_trace(
         >>>     data, var_names=('^theta'), filter_vars="regex", coords=coords, combined=True
-        >>>> )
+        >>> )
 
 
     Plot reference lines against distribution and trace
@@ -230,7 +230,7 @@ def plot_trace(
 
     plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
     max_plots = rcParams["plot.max_subplots"]
-    max_plots = len(plotters) if max_plots is None else max_plots
+    max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)
     if len(plotters) > max_plots:
         warnings.warn(
             "rcParams['plot.max_subplots'] ({max_plots}) is smaller than the number "

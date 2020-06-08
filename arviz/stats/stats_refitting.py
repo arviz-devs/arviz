@@ -30,8 +30,8 @@ def reloo(wrapper, loo_orig=None, k_thresh=0.7, scale=None, verbose=True):
     LOO-CV with only a handful of refits, which in most cases is still much less computationally
     expensive than exact LOO-CV, which needs one refit per observation.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     wrapper: SamplingWrapper-like
         Class (preferably a subclass of ``az.SamplingWrapper``, see :ref:`wrappers_api`
         for details) implementing the methods described

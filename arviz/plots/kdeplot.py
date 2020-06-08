@@ -66,7 +66,8 @@ def plot_kde(
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
-        Keywords passed to the pdf line of a 1D KDE.
+        Keywords passed to the pdf line of a 1D KDE. See :meth:`mpl:matplotlib.axes.Axes.plot`
+        or :meth:`bokeh:bokeh.plotting.figure.Figure.line` for a description of accepted values.
     fill_kwargs : dict
         Keywords passed to the fill under the line (use fill_kwargs={'alpha': 0} to disable fill).
         Ignored for 2D KDE
@@ -162,9 +163,10 @@ def plot_kde(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_kde(mu_posterior, values2=tau_posterior,
-        ...             contour_kwargs={"levels":3}
-        ...             contourf_kwargs={"levels":3};
+        >>> az.plot_kde(
+        ...     mu_posterior, values2=tau_posterior,
+        ...     contour_kwargs={"levels":3}, contourf_kwargs={"levels":3}
+        ... );
 
     Plot 2d smooth KDE
 
@@ -180,7 +182,10 @@ def plot_kde(
             "or plot_pair instead of plot_kde"
         )
     if isinstance(values, InferenceData):
-        raise ValueError(" Inference Data object detected. Use plot_posterior instead of plot_kde")
+        raise ValueError(
+            " Inference Data object detected. Use plot_posterior "
+            "or plot_pair instead of plot_kde"
+        )
 
     if values2 is None:
         density, lower, upper = _fast_kde(values, cumulative, bw)

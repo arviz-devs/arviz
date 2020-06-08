@@ -7,7 +7,7 @@ from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
-from .hpdplot import plot_hpd
+from .hdiplot import plot_hdi, plot_hpd
 from .jointplot import plot_joint
 from .kdeplot import plot_kde
 from .khatplot import plot_khat
@@ -33,6 +33,7 @@ __all__ = [
     "plot_energy",
     "plot_ess",
     "plot_forest",
+    "plot_hdi",
     "plot_hpd",
     "plot_joint",
     "plot_kde",
