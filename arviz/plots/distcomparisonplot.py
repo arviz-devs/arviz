@@ -27,7 +27,8 @@ def plot_dist_comparison(
     backend_kwargs=None,
     show=None,
 ):
-    """Plot that compare fitted and unfitted distributions.
+    """Plot to compare fitted and unfitted distributions.
+
     The resulting plots will show the compared distributions both on
     separate axes (particularly useful when one of them is substantially tighter
     than another), and plotted together, so three plots per distribution
@@ -91,7 +92,6 @@ def plot_dist_comparison(
         >>> az.plot_dist_comparison(data, var_names=["defs"], coords={"team" : ["Italy"]})
 
     """
-
     all_groups = ["prior", "posterior"]
 
     if kind == "observed":
