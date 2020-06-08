@@ -194,7 +194,8 @@ def wrap_xarray_ufunc(
     ufunc : callable
     datasets : xarray.dataset
     dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization. Must also provide `output_dtypes` argument if dask="parallelized".
+        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
+        Must also provide `output_dtypes` argument if dask="parallelized".
     output_dtypes : list of dtypes
         Only used if dask=’parallelized’.
     ufunc_kwargs : dict

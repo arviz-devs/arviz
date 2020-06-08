@@ -103,7 +103,8 @@ def ess(
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
     dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization. Must also provide `output_dtypes` argument if dask="parallelized".
+        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
+        Must also provide `output_dtypes` argument if dask="parallelized".
     output_dtypes : list of dtypes
         Only used if dask=’parallelized’.
 
@@ -238,7 +239,8 @@ def rhat(data, *, var_names=None, method="rank", dask="forbidden", output_dtypes
         - "z_scale"
         - "identity"
     dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization. Must also provide `output_dtypes` argument if dask="parallelized".
+        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
+        Must also provide `output_dtypes` argument if dask="parallelized".
     output_dtypes : list of dtypes
         Only used if dask=’parallelized’.
 
@@ -345,7 +347,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask="forbidden", ou
     prob : float
         Quantile information.
     dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization. Must also provide `output_dtypes` argument if dask="parallelized".
+        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
+        Must also provide `output_dtypes` argument if dask="parallelized".
     output_dtypes : list of dtypes
         Only used if dask=’parallelized’.
 
