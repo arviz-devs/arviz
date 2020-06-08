@@ -676,7 +676,7 @@ def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
 
 
 def is_valid_quantile(value):
-    """check if value is a number between 0 and 1"""
+    """Check if value is a number between 0 and 1."""
     try:
         value = float(value)
         return 0 < value < 1
@@ -685,7 +685,7 @@ def is_valid_quantile(value):
 
 
 def sample_reference_distribution(dist, shape):
-    """Generates samples from a scipy distribution with a given shape"""
+    """Generate samples from a scipy distribution with a given shape."""
     x_ss = []
     densities = []
     dist_rvs = dist.rvs(size=shape)
