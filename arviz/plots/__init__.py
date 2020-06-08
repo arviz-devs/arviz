@@ -1,5 +1,6 @@
 """Plotting functions."""
 from .autocorrplot import plot_autocorr
+from .bpvplot import plot_bpv
 from .compareplot import plot_compare
 from .densityplot import plot_density
 from .distplot import plot_dist
@@ -17,7 +18,6 @@ from .pairplot import plot_pair
 from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
-from .ppctstatplot import plot_ppc_tstat
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
@@ -26,6 +26,7 @@ from ..numeric_utils import _fast_kde_2d
 
 __all__ = [
     "plot_autocorr",
+    "plot_bpv",
     "plot_compare",
     "plot_density",
     "plot_dist",
@@ -45,7 +46,6 @@ __all__ = [
     "plot_parallel",
     "plot_posterior",
     "plot_ppc",
-    "plot_ppc_tstat",
     "plot_rank",
     "plot_trace",
     "plot_violin",
