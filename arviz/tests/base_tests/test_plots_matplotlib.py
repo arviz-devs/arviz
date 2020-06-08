@@ -565,7 +565,7 @@ def test_plot_ppc_discrete(kind, animated):
 
 @pytest.mark.skipif(
     not animation.writers.is_available("ffmpeg"),
-    "matplotlib animations within ArviZ require ffmpeg",
+    reason="matplotlib animations within ArviZ require ffmpeg",
 )
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_save_animation(models, kind):
@@ -590,7 +590,7 @@ def test_plot_ppc_save_animation(models, kind):
 
 @pytest.mark.skipif(
     not animation.writers.is_available("ffmpeg"),
-    "matplotlib animations within ArviZ require ffmpeg",
+    reason="matplotlib animations within ArviZ require ffmpeg",
 )
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_discrete_save_animation(kind):
@@ -619,7 +619,7 @@ def test_plot_ppc_discrete_save_animation(kind):
 
 @pytest.mark.skipif(
     not animation.writers.is_available("ffmpeg"),
-    "matplotlib animations within ArviZ require ffmpeg",
+    reason="matplotlib animations within ArviZ require ffmpeg",
 )
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
 def test_non_linux_blit(models, monkeypatch, system, caplog):
@@ -678,7 +678,7 @@ def test_plot_ppc_ax(models, kind, fig_ax):
 
 @pytest.mark.skipif(
     not animation.writers.is_available("ffmpeg"),
-    "matplotlib animations within ArviZ require ffmpeg",
+    reason="matplotlib animations within ArviZ require ffmpeg",
 )
 def test_plot_ppc_bad_ax(models, fig_ax):
     _, ax = fig_ax
