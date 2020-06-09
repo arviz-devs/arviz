@@ -93,8 +93,12 @@ Council Members will have the responsibility of
 * Make decisions when regular community discussion doesn’t produce consensus on an issue in a reasonable time frame.
 * Make decisions about strategic collaborations with other organizations or individuals.
 * Make decisions about the overall scope, vision and direction of the project.
+* Developing funding sources
+* Deciding how to disburse funds with consultation from Core Contributors
 
-Note that each individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
+The council may choose to delegate these responsibilities to sub-committees. If so, Council members must update this document to make the delegation clear.
+
+Note that individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
 
 ArviZ will be holding its first election to determine its initial council in the coming weeks and this document will be updated.
 
@@ -202,4 +206,3 @@ can make the determination for acceptance with a process of their choosing.
 #### Core Contributor Responsibilities
 * Enforce code of conduct
 * Maintain a check against Council
-
