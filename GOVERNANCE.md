@@ -201,6 +201,7 @@ Current Core Contributors can nominate candidates for consideration by the counc
 can make the determination for acceptance with a process of their choosing.
 
 #### Current Core Contributors
+* Aki Vehtari (@avehtari)
 * Alex Andorra (@AlexAndorra)
 * Colin Carroll (@ColCarroll)
 * Ari Hartikainen (@ahartikainen)
