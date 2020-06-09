@@ -201,15 +201,14 @@ Current Core Contributors can nominate candidates for consideration by the counc
 can make the determination for acceptance with a process of their choosing.
 
 #### Current Core Contributors
-* Aki Vehtari (@avehtari)
 * Alex Andorra (@AlexAndorra)
 * Colin Carroll (@ColCarroll)
 * Ari Hartikainen (@ahartikainen)
 * Ravin Kumar (@canyon289)
 * Osvaldo Martin (@aloctavodia)
-* Oriol Abril Pla (@OriolAbril) 
 * Du Phan (@fehiepsi)
-
+* Oriol Abril Pla (@OriolAbril) 
+* Aki Vehtari (@avehtari)
 
 #### Core Contributor Responsibilities
 * Enforce code of conduct
