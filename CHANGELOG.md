@@ -7,13 +7,14 @@
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
 * Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215)
+* Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using
   `from_pymc3` (#1098)
 * Added a note on `plot_pair` when trying to use `plot_kde` on `InferenceData`
   objects. (#1218)
-* Added a warning in `from_pymc3` if log likelihood cannot be obtained (#1227)
+* Added `log_likelihood` argument to `from_pyro` and a warning if log likelihood cannot be obtained (#1227)
 * Skip tests on matplotlib animations if ffmpeg is not installed (#1227)
 
 ### Deprecation
