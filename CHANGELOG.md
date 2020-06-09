@@ -4,6 +4,7 @@
 
 ### New features
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215) 
+* Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using
@@ -15,6 +16,7 @@
 ### Deprecation
 
 ### Documentation
+* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
 * Fixed inconsistent capitalization in `plot_hdi` docstring (#1221)
 
 ## v0.8.3 (2020 May 28)
