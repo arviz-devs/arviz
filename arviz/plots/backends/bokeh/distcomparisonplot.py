@@ -17,7 +17,4 @@ def plot_dist_comparison(
     show,
 ):
     """Bokeh Density Comparison plot."""
-    warnings.warn(
-        "The bokeh backend is still under development. Use matplotlib bakend.", UserWarning
-    )
-    raise
+    raise NotImplementedError("The bokeh backend is still under development. Use matplotlib bakend.")
