@@ -4,10 +4,12 @@ from collections import namedtuple
 import os
 from typing import Dict
 from urllib.parse import urlunsplit
+from html import escape
 import numpy as np
 import pytest
 
 import xarray as xr
+from xarray.core.options import OPTIONS
 
 from arviz import (
     concat,
@@ -455,6 +457,28 @@ class TestInferenceData:
             idata_map.posterior_predictive.obs, fun(idata.posterior_predictive.obs, *args, **kwargs)
         )
         assert np.allclose(idata_map.posterior.mu, idata.posterior.mu)
+
+    def test_repr_html(self):
+        """Test if the function _repr_html is generating html."""
+        idata = load_arviz_data("centered_eight")
+        display_style = OPTIONS["display_style"]
+        xr.set_options(display_style="html")
+        html = idata._repr_html_()  # pylint: disable=protected-access
+
+        assert html is not None
+        assert "<div" in html
+        for group in idata._groups:  # pylint: disable=protected-access
+            assert group in html
+            xr_data = getattr(idata, group)
+            for item, _ in xr_data.items():
+                assert item in html
+        specific_style = ".xr-wrap{width:700px!important;}"
+        assert specific_style in html
+
+        xr.set_options(display_style="text")
+        html = idata._repr_html_()  # pylint: disable=protected-access
+        assert escape(idata.__repr__()) in html
+        xr.set_options(display_style=display_style)
 
 
 class TestNumpyToDataArray:
