@@ -191,11 +191,6 @@ def plot_dist_comparison(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-    if backend == "bokeh":
-        warnings.warn(
-            "The bokeh backend is still under development. Using matplotlib bakend.", UserWarning
-        )
-    backend = "matplotlib"
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_dist_comparison", "distcomparisonplot", backend)

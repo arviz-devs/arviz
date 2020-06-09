@@ -22,7 +22,7 @@ def plot_dist_comparison(
     backend_kwargs,
     show,
 ):
-    """Matplotlib Density Comparison plot.."""
+    """Matplotlib Density Comparison plot."""
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         axes = np.empty((nvars, ngroups + 1), dtype=object)
