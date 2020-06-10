@@ -153,10 +153,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
 
         self.dims = dims
         if dims is None and hasattr(model, "RV_dims"):
-            self.dims = {
-                k: list(v)
-                for k, v in model.RV_dims.items()
-            }
+            self.dims = {k: list(v) for k, v in model.RV_dims.items()}
 
         self.observations, self.multi_observations = self.find_observations()
 
