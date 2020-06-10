@@ -207,6 +207,7 @@ can make the determination for acceptance with a process of their choosing.
 * Ari Hartikainen (@ahartikainen)
 * Ravin Kumar (@canyon289)
 * Osvaldo Martin (@aloctavodia)
+* Mitzi Morris (@mitzimorris)
 * Du Phan (@fehiepsi)
 * Aki Vehtari (@avehtari)
 
