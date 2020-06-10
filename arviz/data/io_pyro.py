@@ -1,5 +1,6 @@
 """Pyro-specific conversion code."""
 import logging
+import warnings
 import numpy as np
 from packaging import version
 import xarray as xr
@@ -26,6 +27,7 @@ class PyroConverter:
         posterior=None,
         prior=None,
         posterior_predictive=None,
+        log_likelihood=True,
         predictions=None,
         constant_data=None,
         predictions_constant_data=None,
@@ -62,6 +64,7 @@ class PyroConverter:
         self.posterior = posterior
         self.prior = prior
         self.posterior_predictive = posterior_predictive
+        self.log_likelihood = log_likelihood
         self.predictions = predictions
         self.constant_data = constant_data
         self.predictions_constant_data = predictions_constant_data
@@ -130,6 +133,8 @@ class PyroConverter:
     @requires("model")
     def log_likelihood_to_xarray(self):
         """Extract log likelihood from Pyro posterior."""
+        if not self.log_likelihood:
+            return None
         data = {}
         if self.observations is not None:
             try:
@@ -143,6 +148,10 @@ class PyroConverter:
                     data[obs_name] = np.reshape(log_like, shape)
             except:  # pylint: disable=bare-except
                 # cannot get vectorized trace
+                warnings.warn(
+                    "Could not get vectorized trace, log_likelihood group will be omitted. "
+                    "Check your model vectorization or set log_likelihood=False"
+                )
                 return None
         return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
 
@@ -273,6 +282,7 @@ def from_pyro(
     *,
     prior=None,
     posterior_predictive=None,
+    log_likelihood=True,
     predictions=None,
     constant_data=None,
     predictions_constant_data=None,
@@ -294,6 +304,8 @@ def from_pyro(
         Prior samples from a Pyro model
     posterior_predictive : dict
         Posterior predictive samples for the posterior
+    log_likelihood : bool, optional
+        Calculate and store pointwise log likelihood values.
     predictions: dict
         Out of sample predictions
     constant_data: dict
@@ -313,6 +325,7 @@ def from_pyro(
         posterior=posterior,
         prior=prior,
         posterior_predictive=posterior_predictive,
+        log_likelihood=log_likelihood,
         predictions=predictions,
         constant_data=constant_data,
         predictions_constant_data=predictions_constant_data,

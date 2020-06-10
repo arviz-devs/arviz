@@ -3,6 +3,7 @@
 import os
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
 import numpy as np
@@ -497,6 +498,8 @@ def test_plot_pair_shapes(marginals, max_subplots):
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc(models, kind, alpha, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     animation_kwargs = {"blit": False}
     axes = plot_ppc(
         models.model_1,
@@ -516,6 +519,8 @@ def test_plot_ppc(models, kind, alpha, animated):
 @pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_multichain(kind, jitter, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     data = from_dict(
         posterior_predictive={
             "x": np.random.randn(4, 100, 30),
@@ -543,6 +548,8 @@ def test_plot_ppc_multichain(kind, jitter, animated):
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_discrete(kind, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     data = from_dict(
         observed_data={"obs": np.random.randint(1, 100, 15)},
         posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
@@ -556,6 +563,10 @@ def test_plot_ppc_discrete(kind, animated):
     assert axes
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_save_animation(models, kind):
     animation_kwargs = {"blit": False}
@@ -577,6 +588,10 @@ def test_plot_ppc_save_animation(models, kind):
     assert os.path.getsize(path)
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_discrete_save_animation(kind):
     data = from_dict(
@@ -602,6 +617,10 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert os.path.getsize(path)
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
 def test_non_linux_blit(models, monkeypatch, system, caplog):
     import platform
@@ -657,6 +676,10 @@ def test_plot_ppc_ax(models, kind, fig_ax):
     assert axes[0] is ax
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 def test_plot_ppc_bad_ax(models, fig_ax):
     _, ax = fig_ax
     _, ax2 = plt.subplots(1, 2)
