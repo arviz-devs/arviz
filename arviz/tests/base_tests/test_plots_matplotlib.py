@@ -30,6 +30,7 @@ from ...plots import (
     plot_parallel,
     plot_pair,
     plot_joint,
+    plot_dist_comparison,
     plot_ppc,
     plot_violin,
     plot_compare,
@@ -1217,3 +1218,35 @@ def test_plot_mcse_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_mcse(idata, rug=True)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"]},
+        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
+        {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
+        {
+            "var_names": ["tau"],
+            "prior_kwargs": {"plot_kwargs": {"color": "r"}},
+            "posterior_kwargs": {"plot_kwargs": {"color": "b"}},
+        },
+        {"var_names": ["y"], "kind": "observed"},
+    ],
+)
+def test_plot_dist_comparison(models, kwargs):
+    idata = models.model_1
+    ax = plot_dist_comparison(idata, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_dist_comparison_different_vars():
+    data = from_dict(
+        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
+    )
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x")
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
+    assert np.all(ax)
