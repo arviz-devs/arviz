@@ -338,15 +338,15 @@ def hpd(
     warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
     return hdi(
         ary,
-        hdi_prob=None,
-        circular=False,
-        multimodal=False,
-        skipna=False,
-        group="posterior",
-        var_names=None,
-        filter_vars=None,
-        coords=None,
-        max_modes=10,
+        hdi_prob,
+        circular,
+        multimodal,
+        skipna,
+        group,
+        var_names,
+        filter_vars,
+        coords,
+        max_modes,
         **kwargs,
     )
 
