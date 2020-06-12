@@ -205,6 +205,7 @@ can make the determination for acceptance with a process of their choosing.
 * Alex Andorra (@AlexAndorra)
 * Seth Axen (@sethaxen)
 * Colin Carroll (@ColCarroll)
+* Robert P. Goldman (@rpgoldman)
 * Ari Hartikainen (@ahartikainen)
 * Ravin Kumar (@canyon289)
 * Osvaldo Martin (@aloctavodia)
