@@ -729,3 +729,41 @@ def either_dict_or_kwargs(
         return pos_kwargs
     else:
         return kw_kwargs
+
+
+class Dask:
+    """Class to toggle Dask states."""
+
+    dask_flag = False
+    dask_kwargs = {}
+
+    @classmethod
+    def enable_dask(cls, **kwargs):
+        """To enable Dask.
+        Parameters
+        ----------
+        **kwargs : dask kwargs passed to `xarray.apply_ufunc`
+            See :function:`xarray:xarray.apply_ufunc` for accepted values.
+        """
+        cls.dask_flag = True
+        cls.dask_kwargs = kwargs
+
+    @classmethod
+    def disable_dask(cls):
+        """To disable Dask."""
+        cls.dask_flag = False
+        cls.dask_kwargs = {}
+
+
+def conditional_dask(func):
+    """Conditionally pass dask kwargs to `wrap_xarray_ufunc`."""
+
+    def wrapper(*args, **kwargs):
+
+        if Dask.dask_flag:
+            dask_kwargs = Dask.dask_kwargs
+            return func(*args, **kwargs, **dask_kwargs)
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper

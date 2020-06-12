@@ -63,14 +63,7 @@ def bfmi(data):
 
 
 def ess(
-    data,
-    *,
-    var_names=None,
-    method="bulk",
-    relative=False,
-    prob=None,
-    dask="forbidden",
-    output_dtypes=None
+    data, *, var_names=None, method="bulk", relative=False, prob=None, **kwargs,
 ):
     r"""Calculate estimate of the effective sample size (ess).
 
@@ -102,11 +95,8 @@ def ess(
         `ress = ess / n`
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
-    dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
-        Must also provide `output_dtypes` argument if dask="parallelized".
-    output_dtypes : list of dtypes
-        Only used if dask=’parallelized’.
+    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
+        See :function:`xarray:xarray.apply_ufunc` for accepted values.
 
     Returns
     -------
@@ -207,11 +197,11 @@ def ess(
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {"relative": relative} if prob is None else {"prob": prob, "relative": relative}
     return _wrap_xarray_ufunc(
-        ess_func, dataset, dask, output_dtypes, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
+        ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
     )
 
 
-def rhat(data, *, var_names=None, method="rank", dask="forbidden", output_dtypes=None):
+def rhat(data, *, var_names=None, method="rank", **kwargs):
     r"""Compute estimate of rank normalized splitR-hat for a set of traces.
 
     The rank normalized R-hat diagnostic tests for lack of convergence by comparing the variance
@@ -238,11 +228,8 @@ def rhat(data, *, var_names=None, method="rank", dask="forbidden", output_dtypes
         - "folded"
         - "z_scale"
         - "identity"
-    dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
-        Must also provide `output_dtypes` argument if dask="parallelized".
-    output_dtypes : list of dtypes
-        Only used if dask=’parallelized’.
+    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
+        See :function:`xarray:xarray.apply_ufunc` for accepted values.
 
     Returns
     -------
@@ -321,11 +308,11 @@ def rhat(data, *, var_names=None, method="rank", dask="forbidden", output_dtypes
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {}
     return _wrap_xarray_ufunc(
-        rhat_func, dataset, dask, output_dtypes, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
+        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
     )
 
 
-def mcse(data, *, var_names=None, method="mean", prob=None, dask="forbidden", output_dtypes=None):
+def mcse(data, *, var_names=None, method="mean", prob=None, **kwargs):
     """Calculate Markov Chain Standard Error statistic.
 
     Parameters
@@ -346,11 +333,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask="forbidden", ou
 
     prob : float
         Quantile information.
-    dask : "forbidden" or "parallelized"
-        Defaults to "forbidden". Use "parallelized" if passing dask arrays to enable parallelization.
-        Must also provide `output_dtypes` argument if dask="parallelized".
-    output_dtypes : list of dtypes
-        Only used if dask=’parallelized’.
+    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
+        See :function:`xarray:xarray.apply_ufunc` for accepted values.
 
     Returns
     -------
@@ -413,7 +397,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask="forbidden", ou
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {} if prob is None else {"prob": prob}
     return _wrap_xarray_ufunc(
-        mcse_func, dataset, dask, output_dtypes, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs
+        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
     )
 
 

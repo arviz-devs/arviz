@@ -18,7 +18,7 @@ from .plots import *
 from .plots import backends
 from .stats import *
 from .rcparams import rc_context, rcParams
-from .utils import Numba, interactive_backend
+from .utils import Numba, Dask, interactive_backend
 from .wrappers import *
 
 # add ArviZ's styles to matplotlib's styles
