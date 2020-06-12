@@ -186,9 +186,9 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 
 #### Voting Criteria For Future Elections
 Voting for first election is restricted to establish stable governance, and to defer major decision to elected leaders
-* For the first election only the folks in Slack can vote (excluding GSOC students)
+* For the first election only the people registered following the guidelines in elections/ArviZ_2020.md can vote
 * In the first year, the council must determine voting eligibility for future elections between two criteria:
-  * Those with commit bits
+  * Core contributors
   * The contributing community at large
 
 ### Core Contributors
