@@ -3,6 +3,7 @@ from sys import version_info
 from typing import Dict, Tuple
 
 import numpy as np
+import pandas as pd
 import pytest
 from numpy import ma
 
@@ -195,6 +196,43 @@ class TestDataPyMC3:
         assert np.all([obs_s == s for obs_s, s in zip(shape, (1, 370, eight_schools_params["J"]))])
         assert len(records) == 1
         assert records[0].levelname == "WARNING"
+
+    def test_autodetect_coords_from_model(self):
+        df_data = pd.DataFrame(columns=["date"]).set_index("date")
+        dates = pd.date_range(start="2020-05-01", end="2020-05-20")
+        for city, mu in {'Berlin': 15, 'San Marino': 18, 'Paris':16}.items():
+            df_data[city] = np.random.normal(loc=mu, size=len(dates))
+        df_data.index = dates
+        df_data.index.name = "date"
+
+        coords = {
+            "date": df_data.index,
+            "city": df_data.columns
+        }
+        with pm.Model(coords=coords) as model:
+            europe_mean = pm.Normal("europe_mean_temp", mu=15.0, sd=3.0)
+            city_offset = pm.Normal("city_offset", mu=0.0, sd=3.0, dims="city")
+            city_temperature = pm.Deterministic(
+                "city_temperature", europe_mean + city_offset, dims="city"
+            )
+
+            data_dims = ("date", "city")
+            data = pm.Data("data", df_data, dims=data_dims)
+            _ = pm.Normal("likelihood", mu=city_temperature, sd=0.5, observed=data, dims=data_dims)
+
+            trace = pm.sample(
+                return_inferencedata=False,
+                compute_convergence_checks=False,
+                cores=1, chains=1,
+                tune=20, draws=30,
+                step=pm.Metropolis()
+            )
+        idata = from_pymc3(trace=trace, model=model)
+
+        np.testing.assert_array_equal(idata.posterior.coords["city"], coords["city"])
+        np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
+        np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
+        return
 
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py
