@@ -1,7 +1,7 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access
-import packaging
+# pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access, too-many-public-methods
 from sys import version_info
 from typing import Dict, Tuple
+import packaging
 
 import numpy as np
 import pandas as pd
@@ -236,7 +236,6 @@ class TestDataPyMC3:
         np.testing.assert_array_equal(idata.posterior.coords["city"], coords["city"])
         np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
         np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
-        return
 
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py
