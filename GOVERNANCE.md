@@ -203,6 +203,7 @@ can make the determination for acceptance with a process of their choosing.
 #### Current Core Contributors
 * Oriol Abril-Pla (@OriolAbril) 
 * Alex Andorra (@AlexAndorra)
+* Seth Axen (@sethaxen)
 * Colin Carroll (@ColCarroll)
 * Ari Hartikainen (@ahartikainen)
 * Ravin Kumar (@canyon289)
