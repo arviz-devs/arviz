@@ -197,6 +197,10 @@ class TestDataPyMC3:
         assert len(records) == 1
         assert records[0].levelname == "WARNING"
 
+    @pytest.mark.skipif(
+        packaging.version.Version(pm.__version__) < packaging.version.Version("3.9.0"),
+        reason="Requires PyMC3 >= 3.9.0",
+    )
     def test_autodetect_coords_from_model(self):
         df_data = pd.DataFrame(columns=["date"]).set_index("date")
         dates = pd.date_range(start="2020-05-01", end="2020-05-20")
