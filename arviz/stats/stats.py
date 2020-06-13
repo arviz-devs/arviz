@@ -484,7 +484,9 @@ def hdi(
     var_names = _var_names(var_names, ary, filter_vars)
     ary = ary[var_names] if var_names else ary
 
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs)
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
+        hdi=["lower", "higher"]
+    )
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
     return hdi_data.x.values if isarray else hdi_data
 
@@ -1161,13 +1163,9 @@ def summary(
 
         sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hdi_lower, hdi_higher = xr.apply_ufunc(
-            _make_ufunc(hdi, n_output=2),
-            posterior,
-            kwargs=dict(hdi_prob=hdi_prob, multimodal=False, skipna=skipna),
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(2)),
-        )
+        hdi_post = hdi(posterior, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+        hdi_lower = hdi_post.sel(hdi="lower", drop=True)
+        hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
     if include_circ:
         nan_policy = "omit" if skipna else "propagate"
@@ -1199,13 +1197,9 @@ def summary(
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hdi_lower, circ_hdi_higher = xr.apply_ufunc(
-            _make_ufunc(hdi, n_output=2),
-            posterior,
-            kwargs=dict(hdi_prob=hdi_prob, circular=True, skipna=skipna),
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(2)),
-        )
+        circ_hdi = hdi(posterior, hdi_prob=hdi_prob, circular=True, skipna=skipna)
+        circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
+        circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
         mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
