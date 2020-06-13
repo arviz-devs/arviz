@@ -26,7 +26,9 @@ class DictConverter:
         constant_data=None,
         predictions_constant_data=None,
         coords=None,
-        dims=None
+        dims=None,
+        pred_dims=None,
+        attrs=None,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -41,6 +43,10 @@ class DictConverter:
         self.predictions_constant_data = predictions_constant_data
         self.coords = coords
         self.dims = dims
+        self.pred_dims = dims if pred_dims is None else pred_dims
+        self.attrs = {} if attrs is None else attrs
+        self.attrs.pop("created_at", None)
+        self.attrs.pop("arviz_version", None)
 
     @requires("posterior")
     def posterior_to_xarray(self):
@@ -56,7 +62,7 @@ class DictConverter:
                 UserWarning,
             )
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("sample_stats")
     def sample_stats_to_xarray(self):
@@ -73,7 +79,7 @@ class DictConverter:
                 PendingDeprecationWarning,
             )
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("log_likelihood")
     def log_likelihood_to_xarray(self):
@@ -82,7 +88,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.log_likelihood is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -91,7 +97,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("predictions")
     def predictions_to_xarray(self):
@@ -100,7 +106,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.predictions is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.pred_dims, attrs=self.attrs)
 
     @requires("prior")
     def prior_to_xarray(self):
@@ -109,7 +115,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("sample_stats_prior")
     def sample_stats_prior_to_xarray(self):
@@ -118,7 +124,7 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
     @requires("prior_predictive")
     def prior_predictive_to_xarray(self):
@@ -127,17 +133,15 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
 
-    def data_to_xarray(self, dct, group):
+    def data_to_xarray(self, dct, group, dims=None):
         """Convert data to xarray."""
         data = dct
         if not isinstance(data, dict):
             raise TypeError("DictConverter.{} is not a dictionary".format(group))
-        if self.dims is None:
-            dims = {}
-        else:
-            dims = self.dims
+        if dims is None:
+            dims = {} if self.dims is None else self.dims
         new_data = dict()
         for key, vals in data.items():
             vals = utils.one_de(vals)
@@ -146,12 +150,12 @@ class DictConverter:
                 vals.shape, key, dims=val_dims, coords=self.coords
             )
             new_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
-        return xr.Dataset(data_vars=new_data, attrs=make_attrs(library=None))
+        return xr.Dataset(data_vars=new_data, attrs=make_attrs(attrs=self.attrs, library=None))
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
         """Convert observed_data to xarray."""
-        return self.data_to_xarray(self.observed_data, group="observed_data")
+        return self.data_to_xarray(self.observed_data, group="observed_data", dims=self.dims)
 
     @requires("constant_data")
     def constant_data_to_xarray(self):
@@ -162,7 +166,7 @@ class DictConverter:
     def predictions_constant_data_to_xarray(self):
         """Convert predictions_constant_data to xarray."""
         return self.data_to_xarray(
-            self.predictions_constant_data, group="predictions_constant_data"
+            self.predictions_constant_data, group="predictions_constant_data", dims=self.pred_dims
         )
 
     def to_inference_data(self):
@@ -203,12 +207,11 @@ def from_dict(
     constant_data=None,
     predictions_constant_data=None,
     coords=None,
-    dims=None
+    dims=None,
+    pred_dims=None,
+    attrs=None,
 ):
     """Convert Dictionary data into an InferenceData object.
-
-    For a usage example read the
-    :doc:`Cookbook section on from_dict </notebooks/InferenceDataCookbook>`
 
     Parameters
     ----------
@@ -247,4 +250,6 @@ def from_dict(
         predictions_constant_data=predictions_constant_data,
         coords=coords,
         dims=dims,
+        pred_dims=pred_dims,
+        attrs=attrs,
     ).to_inference_data()
