@@ -92,10 +92,6 @@ def plot_hdi(
         msg += " (draw, *x.shape)"
         raise TypeError(msg.format(x_shape, y_shape))
 
-    if len(y_shape[: -len(x_shape)]) > 1:
-        new_shape = tuple([-1] + list(x_shape))
-        y = y.reshape(new_shape)
-
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
