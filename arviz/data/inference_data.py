@@ -3,13 +3,16 @@ from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 from datetime import datetime
+from html import escape
 import warnings
+import uuid
 
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
+from xarray.core.options import OPTIONS
 
-from ..utils import _subset_list
+from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
 
 SUPPORTED_GROUPS = [
@@ -125,13 +128,38 @@ class InferenceData:
                     self._groups_warmup.append(key)
 
     def __repr__(self):
-        """Make string representation of object."""
+        """Make string representation of InferenceData object."""
         msg = "Inference data with groups:\n\t> {options}".format(
             options="\n\t> ".join(self._groups)
         )
         if self._groups_warmup:
             msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
         return msg
+
+    def _repr_html_(self):
+        """Make html representation of InferenceData object."""
+        display_style = OPTIONS["display_style"]
+        if display_style == "text":
+            html_repr = f"<pre>{escape(repr(self))}</pre>"
+        else:
+            elements = "".join(
+                [
+                    HtmlTemplate.element_template.format(
+                        group_id=group + str(uuid.uuid4()),
+                        group=group,
+                        xr_data=getattr(  # pylint: disable=protected-access
+                            self, group
+                        )._repr_html_(),
+                    )
+                    for group in self._groups_all
+                ]
+            )
+            formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                elements
+            )
+            css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
+            html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+        return html_repr
 
     def __delattr__(self, group):
         """Delete a group from the InferenceData object."""

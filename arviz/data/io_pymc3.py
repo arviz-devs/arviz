@@ -1,7 +1,7 @@
 """PyMC3-specific conversion code."""
 import logging
 import warnings
-from typing import Dict, List, Any, Optional, Iterable, Union, TYPE_CHECKING, Tuple
+from typing import Dict, List, Tuple, Any, Optional, Iterable, Union, TYPE_CHECKING
 from types import ModuleType
 
 import numpy as np
@@ -86,7 +86,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 "Using `from_pymc3` without the model will be deprecated in a future release. "
                 "Not using the model will return less accurate and less useful results. "
                 "Make sure you use the model argument or call from_pymc3 within a model context.",
-                PendingDeprecationWarning,
+                FutureWarning,
             )
 
         # This next line is brittle and may not work forever, but is a secret
@@ -148,19 +148,28 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             self.ndraws = aelem.shape[0]
 
         self.coords = coords
-        self.dims = dims
-        self.observations = self.find_observations()
+        if coords is None and hasattr(model, "coords"):
+            self.coords = model.coords
 
-    def find_observations(self) -> Optional[Dict[str, Var]]:
+        self.dims = dims
+        if dims is None and hasattr(model, "RV_dims"):
+            self.dims = {k: list(v) for k, v in model.RV_dims.items()}
+
+        self.observations, self.multi_observations = self.find_observations()
+
+    def find_observations(self) -> Tuple[Optional[Dict[str, Var]], Optional[Dict[str, Var]]]:
         """If there are observations available, return them as a dictionary."""
-        has_observations = False
-        if self.model is not None:
-            if any((hasattr(obs, "observations") for obs in self.model.observed_RVs)):
-                has_observations = True
-        if has_observations:
-            assert self.model is not None
-            return {obs.name: obs.observations for obs in self.model.observed_RVs}
-        return None
+        if self.model is None:
+            return (None, None)
+        observations = {}
+        multi_observations = {}
+        for obs in self.model.observed_RVs:
+            if hasattr(obs, "observations"):
+                observations[obs.name] = obs.observations
+            elif hasattr(obs, "data"):
+                for key, val in obs.data.items():
+                    multi_observations[key] = val.eval() if hasattr(val, "eval") else val
+        return observations, multi_observations
 
     def split_trace(self) -> Tuple[Union[None, MultiTrace], Union[None, MultiTrace]]:
         """Split MultiTrace object into posterior and warmup.
@@ -361,7 +370,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             )
         return priors_dict
 
-    @requires("observations")
+    @requires(["observations", "multi_observations"])
     @requires("model")
     def observed_data_to_xarray(self):
         """Convert observed data to xarray."""
@@ -372,7 +381,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         else:
             dims = self.dims
         observed_data = {}
-        for name, vals in self.observations.items():
+        for name, vals in {**self.observations, **self.multi_observations}.items():
             if hasattr(vals, "get_value"):
                 vals = vals.get_value()
             vals = utils.one_de(vals)
