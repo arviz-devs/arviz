@@ -229,9 +229,9 @@ class InferenceData:
             When `data=False` return just the schema.
         """
         ret = {}
-        ret.setdefault('coords', dict())
-        ret.setdefault('dims', dict())
-        ret.setdefault('pred_dims', dict())
+        ret.setdefault("coords", dict())
+        ret.setdefault("dims", dict())
+        ret.setdefault("pred_dims", dict())
         attrs = None
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
@@ -244,26 +244,28 @@ class InferenceData:
                 ds = xr_data.data_vars
                 data = {}
                 for key, value in ds.items():
-                    data[key] =value.values
+                    data[key] = value.values
                     dims = []
                     for k_, v_ in value.coords.items():
-                        if k_ not in ('chain', 'draw') and not k_.startswith(key + '_dim_'):
+                        if k_ not in ("chain", "draw") and not k_.startswith(key + "_dim_"):
                             dims.append(k_)
-                            ret['coords'][k_] = v_.values
+                            ret["coords"][k_] = v_.values
 
-                    if group in ("predictions","predictions_constant_data",):
-                        dims_key="pred_dims"
+                    if group in ("predictions", "predictions_constant_data",):
+                        dims_key = "pred_dims"
                     else:
-                        dims_key="dims"
+                        dims_key = "dims"
                     if len(dims) > 0:
                         ret[dims_key][key] = dims
                     ret[group] = data
                 if attrs is None:
                     attrs = xr_data.attrs
                 elif attrs != xr_data.attrs:
-                    warnings.warn("The attributes are not same for all groups. Considering only the first group `attrs`")
+                    warnings.warn(
+                        "The attributes are not same for all groups. Considering only the first group `attrs`"
+                    )
 
-        ret['attrs'] = attrs
+        ret["attrs"] = attrs
         return ret
 
     def __add__(self, other):

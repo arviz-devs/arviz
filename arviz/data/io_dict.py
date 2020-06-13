@@ -62,7 +62,9 @@ class DictConverter:
                 UserWarning,
             )
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("sample_stats")
     def sample_stats_to_xarray(self):
@@ -79,7 +81,9 @@ class DictConverter:
                 PendingDeprecationWarning,
             )
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("log_likelihood")
     def log_likelihood_to_xarray(self):
@@ -88,7 +92,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.log_likelihood is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
@@ -97,7 +103,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("predictions")
     def predictions_to_xarray(self):
@@ -106,7 +114,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.predictions is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.pred_dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.pred_dims, attrs=self.attrs
+        )
 
     @requires("prior")
     def prior_to_xarray(self):
@@ -115,7 +125,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("sample_stats_prior")
     def sample_stats_prior_to_xarray(self):
@@ -124,7 +136,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats_prior is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     @requires("prior_predictive")
     def prior_predictive_to_xarray(self):
@@ -133,7 +147,9 @@ class DictConverter:
         if not isinstance(data, dict):
             raise TypeError("DictConverter.prior_predictive is not a dictionary")
 
-        return dict_to_dataset(data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs)
+        return dict_to_dataset(
+            data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+        )
 
     def data_to_xarray(self, dct, group, dims=None):
         """Convert data to xarray."""
