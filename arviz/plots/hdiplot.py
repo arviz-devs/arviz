@@ -135,5 +135,5 @@ def plot_hdi(
 
 
 def plot_hpd(*args, **kwargs):  # noqa: D103
-    warnings.warn("plot_hdi has been deprecated, please use plot_hdi", DeprecationWarning)
+    warnings.warn("plot_hpd has been deprecated, please use plot_hdi", DeprecationWarning)
     return plot_hdi(*args, **kwargs)
