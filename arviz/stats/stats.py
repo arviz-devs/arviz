@@ -484,9 +484,8 @@ def hdi(
     var_names = _var_names(var_names, ary, filter_vars)
     ary = ary[var_names] if var_names else ary
 
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
-        hdi=["lower", "higher"]
-    )
+    hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords({"hdi": hdi_coord})
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
     return hdi_data.x.values if isarray else hdi_data
 

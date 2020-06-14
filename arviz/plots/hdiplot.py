@@ -13,14 +13,16 @@ from ..utils import credible_interval_warning
 
 def plot_hdi(
     x,
-    y,
+    y=None,
     hdi_prob=None,
+    hdi_data=None,
     color="C1",
     circular=False,
     smooth=True,
     smooth_kwargs=None,
     fill_kwargs=None,
     plot_kwargs=None,
+    hdi_kwargs=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
@@ -34,8 +36,11 @@ def plot_hdi(
     ----------
     x : array-like
         Values to plot.
-    y : array-like
+    y : array-like, optional
         Values from which to compute the HDI. Assumed shape (chain, draw, \*shape).
+        Only optional if hdi_data is present.
+    hdi_data : array_like, optional
+        HDI values to use.
     hdi_prob : float, optional
         Probability for the highest density interval. Defaults to 0.94.
     color : str
@@ -73,6 +78,8 @@ def plot_hdi(
     if credible_interval:
         hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
 
+    if hdi_kwargs is None:
+        hdi_kwargs = {}
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs.setdefault("color", color)
     plot_kwargs.setdefault("alpha", 0)
@@ -82,23 +89,31 @@ def plot_hdi(
     fill_kwargs.setdefault("alpha", 0.5)
 
     x = np.asarray(x)
-    y = np.asarray(y)
-
     x_shape = x.shape
-    y_shape = y.shape
-    if y_shape[-len(x_shape) :] != x_shape:
-        msg = "Dimension mismatch for x: {} and y: {}."
-        msg += " y-dimensions should be (chain, draw, *x.shape) or"
-        msg += " (draw, *x.shape)"
-        raise TypeError(msg.format(x_shape, y_shape))
 
-    if hdi_prob is None:
-        hdi_prob = rcParams["stats.hdi_prob"]
+
+    if y is None and hdi_data is None:
+        raise ValueError("One of {y, hdi_data} is required")
+    elif hdi_data is not None and y is not None:
+        warnings.warn("Both y and hdi_data arguments present, ignoring y")
+    elif y is not None:
+        y = np.asarray(y)
+        if hdi_prob is None:
+            hdi_prob = rcParams["stats.hdi_prob"]
+        else:
+            if not 1 >= hdi_prob > 0:
+                raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+        hdi_data = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False, **hdi_kwargs)
     else:
-        if not 1 >= hdi_prob > 0:
-            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
+        hdi_prob = hdi_data.hdi.attrs.get("hdi_prob", np.nan)
 
-    hdi_ = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False)
+    hdi_shape = hdi_data.shape
+    if hdi_shape[:-1] != x_shape:
+        msg = (
+            "Dimension mismatch for x: {} and hdi: {}. Check the dimensions of y and"
+            "hdi_kwargs to make sure they are compatible"
+        )
+        raise TypeError(msg.format(x_shape, hdi_shape))
 
     if smooth:
         if smooth_kwargs is None:
@@ -107,12 +122,12 @@ def plot_hdi(
         smooth_kwargs.setdefault("polyorder", 2)
         x_data = np.linspace(x.min(), x.max(), 200)
         x_data[0] = (x_data[0] + x_data[1]) / 2
-        hdi_interp = griddata(x, hdi_, x_data)
+        hdi_interp = griddata(x, hdi_data, x_data)
         y_data = savgol_filter(hdi_interp, axis=0, **smooth_kwargs)
     else:
         idx = np.argsort(x)
         x_data = x[idx]
-        y_data = hdi_[idx]
+        y_data = hdi_data[idx]
 
     hdiplot_kwargs = dict(
         ax=ax,
