@@ -229,6 +229,9 @@ def from_dict(
 ):
     """Convert Dictionary data into an InferenceData object.
 
+    For a usage example read the
+    :doc:`Cookbook section on from_dict </notebooks/InferenceDataCookbook>`
+
     Parameters
     ----------
     posterior : dict
@@ -247,6 +250,10 @@ def from_dict(
         is the name of the dimension, the values are the index values.
     dims : dict[str, List(str)]
         A mapping from variables to a list of coordinate names for the variable.
+    pred_dims : dict[str, List(str)]
+        A mapping from variables to a list of coordinate names for predictions.
+    attrs : dict
+        A dictionary containing attributes for different groups.
 
     Returns
     -------

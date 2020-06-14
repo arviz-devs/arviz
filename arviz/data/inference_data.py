@@ -1,5 +1,5 @@
 """Data structure for using netcdf groups with xarray."""
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
 from datetime import datetime
@@ -241,7 +241,7 @@ class InferenceData:
             empty_netcdf_file.close()
         return filename
 
-    def to_dict(self, groups=None):
+    def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming
         conventions.
 
@@ -256,39 +256,35 @@ class InferenceData:
             A dictionary containing all groups of InferenceData object.
             When `data=False` return just the schema.
         """
-        ret = {}
-        ret.setdefault("coords", dict())
-        ret.setdefault("dims", dict())
-        ret.setdefault("pred_dims", dict())
+        ret = defaultdict(dict)
         attrs = None
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
-                groups = self._groups_all
+                groups = self._group_names(groups, filter_groups)
             else:
                 groups = [group for group in self._groups_all if group in groups]
 
             for group in groups:
-                xr_data = getattr(self, group)
-                ds = xr_data.data_vars
+                dataset = getattr(self, group)
                 data = {}
-                for key, value in ds.items():
-                    data[key] = value.values
+                for var_name, dataarray in dataset.items():
+                    data[var_name] = dataarray.values
                     dims = []
-                    for k_, v_ in value.coords.items():
-                        if k_ not in ("chain", "draw") and not k_.startswith(key + "_dim_"):
-                            dims.append(k_)
-                            ret["coords"][k_] = v_.values
+                    for coord_name, coord_values in dataarray.coords.items():
+                        if coord_name not in ("chain", "draw") and not k_.startswith(var_name + "_dim_"):
+                            dims.append(coord_name)
+                            ret["coords"][coord_name] = coord_values.values
 
                     if group in ("predictions", "predictions_constant_data",):
                         dims_key = "pred_dims"
                     else:
                         dims_key = "dims"
                     if len(dims) > 0:
-                        ret[dims_key][key] = dims
+                        ret[dims_key][var_name] = dims
                     ret[group] = data
                 if attrs is None:
-                    attrs = xr_data.attrs
-                elif attrs != xr_data.attrs:
+                    attrs = dataset.attrs
+                elif attrs != dataset.attrs:
                     warnings.warn(
                         "The attributes are not same for all groups. Considering only the first group `attrs`"
                     )
