@@ -271,7 +271,9 @@ class InferenceData:
                     data[var_name] = dataarray.values
                     dims = []
                     for coord_name, coord_values in dataarray.coords.items():
-                        if coord_name not in ("chain", "draw") and not k_.startswith(var_name + "_dim_"):
+                        if coord_name not in ("chain", "draw") and not k_.startswith(
+                            var_name + "_dim_"
+                        ):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
 
