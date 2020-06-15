@@ -28,20 +28,20 @@ def plot_hdi(
     credible_interval=None,
 ):
     r"""
-    Plot hdi intervals for regression data.
+    Plot HDI intervals for regression data.
 
     Parameters
     ----------
     x : array-like
         Values to plot.
     y : array-like
-        Values from which to compute the hdi. Assumed shape (chain, draw, \*shape).
+        Values from which to compute the HDI. Assumed shape (chain, draw, \*shape).
     hdi_prob : float, optional
         Probability for the highest density interval. Defaults to 0.94.
     color : str
-        Color used for the limits of the hdi and fill. Should be a valid matplotlib color.
+        Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
     circular : bool, optional
-        Whether to compute the hdi taking into account `x` is a circular variable
+        Whether to compute the HDI taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
     smooth : boolean
         If True the result will be smoothed by first computing a linear interpolation of the data
@@ -53,7 +53,7 @@ def plot_hdi(
     fill_kwargs : dict
         Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
     plot_kwargs : dict
-        Keywords passed to hdi limits.
+        Keywords passed to HDI limits.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional

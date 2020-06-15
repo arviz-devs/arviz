@@ -36,9 +36,9 @@ def plot_forest(
     show=None,
     credible_interval=None,
 ):
-    """Forest plot to compare hdi intervals from a number of distributions.
+    """Forest plot to compare HDI intervals from a number of distributions.
 
-    Generates a forest plot of 100*(hdi_prob)% hdi intervals from
+    Generates a forest plot of 100*(hdi_prob)% HDI intervals from
     a trace or list of traces.
 
     Parameters
@@ -227,3 +227,4 @@ def plot_forest(
     plot = get_plotting_function("plot_forest", "forestplot", backend)
     axes = plot(**plot_forest_kwargs)
     return axes
+``

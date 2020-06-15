@@ -10,7 +10,7 @@ from .. import show_layout
 
 
 def plot_hdi(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
-    """Bokeh hdi plot."""
+    """Bokeh HDI plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
 

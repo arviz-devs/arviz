@@ -6,7 +6,7 @@ from . import backend_show
 
 
 def plot_hdi(ax, x_data, y_data, plot_kwargs, fill_kwargs, backend_kwargs, show):
-    """Matplotlib hdi plot."""
+    """Matplotlib HDI plot."""
     if backend_kwargs is not None:
         warnings.warn(
             (
