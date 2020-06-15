@@ -227,4 +227,3 @@ def plot_forest(
     plot = get_plotting_function("plot_forest", "forestplot", backend)
     axes = plot(**plot_forest_kwargs)
     return axes
-``
