@@ -1,8 +1,10 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access
+# pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access, too-many-public-methods
 from sys import version_info
 from typing import Dict, Tuple
+import packaging
 
 import numpy as np
+import pandas as pd
 import pytest
 from numpy import ma
 
@@ -196,6 +198,45 @@ class TestDataPyMC3:
         assert len(records) == 1
         assert records[0].levelname == "WARNING"
 
+    @pytest.mark.skipif(
+        packaging.version.Version(pm.__version__) < packaging.version.Version("3.9.0"),
+        reason="Requires PyMC3 >= 3.9.0",
+    )
+    def test_autodetect_coords_from_model(self):
+        df_data = pd.DataFrame(columns=["date"]).set_index("date")
+        dates = pd.date_range(start="2020-05-01", end="2020-05-20")
+        for city, mu in {"Berlin": 15, "San Marino": 18, "Paris": 16}.items():
+            df_data[city] = np.random.normal(loc=mu, size=len(dates))
+        df_data.index = dates
+        df_data.index.name = "date"
+
+        coords = {"date": df_data.index, "city": df_data.columns}
+        with pm.Model(coords=coords) as model:
+            europe_mean = pm.Normal("europe_mean_temp", mu=15.0, sd=3.0)
+            city_offset = pm.Normal("city_offset", mu=0.0, sd=3.0, dims="city")
+            city_temperature = pm.Deterministic(
+                "city_temperature", europe_mean + city_offset, dims="city"
+            )
+
+            data_dims = ("date", "city")
+            data = pm.Data("data", df_data, dims=data_dims)
+            _ = pm.Normal("likelihood", mu=city_temperature, sd=0.5, observed=data, dims=data_dims)
+
+            trace = pm.sample(
+                return_inferencedata=False,
+                compute_convergence_checks=False,
+                cores=1,
+                chains=1,
+                tune=20,
+                draws=30,
+                step=pm.Metropolis(),
+            )
+        idata = from_pymc3(trace=trace, model=model)
+
+        np.testing.assert_array_equal(idata.posterior.coords["city"], coords["city"])
+        np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
+        np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
+
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py
         data = ma.masked_values([1, 2, -1, 4, -1], value=-1)
@@ -227,7 +268,7 @@ class TestDataPyMC3:
             "posterior": ["x"],
             "observed_data": ["y1", "y2"],
             "log_likelihood": ["y1", "y2"],
-            "sample_stats": ["diverging", "lp"],
+            "sample_stats": ["diverging", "lp", "~log_likelihood"],
         }
         if not log_likelihood:
             test_dict.pop("log_likelihood")
@@ -237,7 +278,6 @@ class TestDataPyMC3:
 
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
-        assert not hasattr(inference_data.sample_stats, "log_likelihood")
 
     @pytest.mark.skipif(
         version_info < (3, 6), reason="Requires updated PyMC3, which needs Python 3.6"
@@ -250,11 +290,48 @@ class TestDataPyMC3:
             )
             trace = pm.sample(100, chains=2)
             inference_data = from_pymc3(trace=trace)
-        assert inference_data
-        assert not hasattr(inference_data, "observed_data")
-        assert hasattr(inference_data, "posterior")
-        assert hasattr(inference_data, "sample_stats")
-        assert hasattr(inference_data, "log_likelihood")
+        test_dict = {
+            "posterior": ["mu"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["x"],
+            "observed_data": ["value", "~x"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        assert inference_data.observed_data.value.dtype.kind == "f"
+
+    def test_multiobservedrv_to_observed_data(self):
+        # fake regression data, with weights (W)
+        np.random.seed(2019)
+        N = 100
+        X = np.random.uniform(size=N)
+        W = 1 + np.random.poisson(size=N)
+        a, b = 5, 17
+        Y = a + np.random.normal(b * X)
+
+        with pm.Model():
+            a = pm.Normal("a", 0, 10)
+            b = pm.Normal("b", 0, 10)
+            mu = a + b * X
+            sigma = pm.HalfNormal("sigma", 1)
+
+            def weighted_normal(y, w):
+                return w * pm.Normal.dist(mu=mu, sd=sigma).logp(y)
+
+            y_logp = pm.DensityDist(  # pylint: disable=unused-variable
+                "y_logp", weighted_normal, observed={"y": Y, "w": W}
+            )
+            trace = pm.sample(20, tune=20)
+            idata = from_pymc3(trace)
+        test_dict = {
+            "posterior": ["a", "b", "sigma"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["y_logp"],
+            "observed_data": ["y", "w"],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert idata.observed_data.y.dtype.kind == "f"
 
     def test_single_observation(self):
         with pm.Model():
@@ -389,7 +466,7 @@ class TestDataPyMC3:
             obs = pm.Normal("obs", x * beta, 1, observed=y)  # pylint: disable=unused-variable
             prior = pm.sample_prior_predictive()
 
-        with pytest.warns(PendingDeprecationWarning, match="without the model"):
+        with pytest.warns(FutureWarning, match="without the model"):
             inference_data = from_pymc3(prior=prior)
         test_dict = {
             "prior": ["beta", "obs"],

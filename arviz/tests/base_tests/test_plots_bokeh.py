@@ -35,6 +35,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_parallel,
     plot_posterior,
     plot_ppc,
+    plot_dist_comparison,
     plot_rank,
     plot_trace,
     plot_violin,
@@ -956,3 +957,8 @@ def test_plot_posterior_point_estimates(models, point_estimate):
 def test_plot_rank(models, kwargs):
     axes = plot_rank(models.model_1, backend="bokeh", show=False, **kwargs)
     assert axes.shape
+
+
+def test_plot_dist_comparison_warn(models):
+    with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib bakend."):
+        plot_dist_comparison(models.model_1, backend="bokeh")
