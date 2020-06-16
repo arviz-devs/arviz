@@ -194,7 +194,7 @@ def plot_pair(
 
     scatter_kwargs.setdefault("marker", ".")
     scatter_kwargs.setdefault("lw", 0)
-    scatter_kwargs.setdefault("zorder", 0)
+    scatter_kwargs.setdefault("zorder", 1)
 
     if kde_kwargs is None:
         kde_kwargs = {}
