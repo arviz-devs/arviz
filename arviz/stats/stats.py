@@ -413,7 +413,7 @@ def hdi(
 
     Examples
     --------
-    Calculate the hdi of a Normal random variable:
+    Calculate the HDI of a Normal random variable:
 
     .. ipython::
 
@@ -422,7 +422,7 @@ def hdi(
            ...: data = np.random.normal(size=2000)
            ...: az.hdi(data, hdi_prob=.68)
 
-    Calculate the hdi of a dataset:
+    Calculate the HDI of a dataset:
 
     .. ipython::
 
@@ -430,13 +430,13 @@ def hdi(
            ...: data = az.load_arviz_data('centered_eight')
            ...: az.hdi(data)
 
-    We can also calculate the hdi of some of the variables of dataset:
+    We can also calculate the HDI of some of the variables of dataset:
 
     .. ipython::
 
         In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    If we want to calculate the hdi over specified dimension of dataset,
+    If we want to calculate the HDI over specified dimension of dataset,
     we can pass `input_core_dims` by kwargs:
 
     .. ipython::
@@ -527,7 +527,7 @@ def _hdi(ary, hdi_prob, circular, skipna):
 
 
 def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
-    """Compute hdi if the distribution is multimodal."""
+    """Compute HDI if the distribution is multimodal."""
     ary = ary.flatten()
     if skipna:
         ary = ary[~np.isnan(ary)]
@@ -1029,7 +1029,7 @@ def summary(
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     hdi_prob: float, optional
-        hdi interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
+        HDI interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
     order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
