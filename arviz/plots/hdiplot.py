@@ -64,7 +64,7 @@ def plot_hdi(
         HDI limits keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
         :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
     hdi_kwargs : dict, optional
-        Keyword arguments passed to :func:`~arviz.hdi`. Ingnored if ``hdi_data`` is present.
+        Keyword arguments passed to :func:`~arviz.hdi`. Ignored if ``hdi_data`` is present.
     ax : axes, optional
         Matplotlib axes or bokeh figures.
     backend : {"matplotlib","bokeh"}, optional
