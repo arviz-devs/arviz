@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
+from xarray import Dataset
 
 from ..stats import hdi
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser, vectorized_to_hex
@@ -130,6 +131,14 @@ def plot_hdi(
         hdi_prob = (
             hdi_data.hdi.attrs.get("hdi_prob", np.nan) if hasattr(hdi_data, "hdi") else np.nan
         )
+        if isinstance(hdi_data, Dataset):
+            data_vars = list(hdi_data.data_vars)
+            if len(data_vars) != 1:
+                raise ValueError(
+                    "Found several variables in hdi_data. Only single variable Datasets are "
+                    "supported."
+                )
+            hdi_data = hdi_data[data_vars[0]]
     else:
         y = np.asarray(y)
         if hdi_prob is None:

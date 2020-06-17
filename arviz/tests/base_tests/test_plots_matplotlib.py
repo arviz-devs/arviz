@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from ...data import from_dict, load_arviz_data
-from ...stats import compare, loo, waic
+from ...stats import compare, loo, waic, hdi
 from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -847,14 +847,43 @@ def test_plot_compare_no_ic(models):
     "kwargs",
     [
         {"color": "0.5", "circular": True},
-        {"fill_kwargs": {"alpha": 0}},
+        {"hdi_data": True, "fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
-        {"smooth": False},
+        {"hdi_data": True, "smooth": False},
     ],
 )
 def test_plot_hdi(models, data, kwargs):
-    plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    hdi_data = kwargs.pop("hdi_data", None)
+    if hdi_data:
+        hdi_data = hdi(models.model_1.posterior["theta"])
+        ax = plot_hdi(data["y"], hdi_data=hdi_data, **kwargs)
+    else:
+        ax = plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    assert ax
+
+
+def test_plot_hdi_warning():
+    """Check using both y and hdi_data sends a warning."""
+    x_data = np.random.normal(0, 1, 100)
+    y_data = np.random.normal(2 + x_data * 0.5, 0.5, (1, 200, 100))
+    hdi_data = hdi(y_data)
+    with pytest.warns(UserWarning, match="Both y and hdi_data"):
+        ax = plot_hdi(x_data, y=y_data, hdi_data=hdi_data)
+    assert ax
+
+
+def test_plot_hdi_missing_arg_error():
+    """Check that both y and hdi_data missing raises an error."""
+    with pytest.raises(ValueError, match="One of {y, hdi_data"):
+        plot_hdi(np.arange(20))
+
+
+def test_plot_hdi_dataset_error(models):
+    """Check hdi_data as multiple variable Dataset raises an error."""
+    hdi_data = hdi(models.model_1)
+    with pytest.raises(ValueError, match="Only single variable Dataset"):
+        plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
