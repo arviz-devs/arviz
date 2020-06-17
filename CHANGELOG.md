@@ -18,11 +18,12 @@
 * Added `log_likelihood` argument to `from_pyro` and a warning if log likelihood cannot be obtained (#1227)
 * Skip tests on matplotlib animations if ffmpeg is not installed (#1227)
 * Fix hpd bug where arguments were being ignored (#1236)
-* Remove false positive warning in `plot_hdi` (#1241)
+* Remove false positive warning in `plot_hdi` and fixed matplotlib axes generation (#1241)
 
 ### Deprecation
 * Using `from_pymc3` without a model context available now raises a
   `FutureWarning` and will be deprecated in a future version (#1227)
+* `hdi` with 2d data raises a FutureWarning (#1241)
 
 ### Documentation
 * A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
