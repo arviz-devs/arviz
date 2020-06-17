@@ -1,3 +1,4 @@
+# pylint: disable=no-member, invalid-name, redefined-outer-name
 import typing as tp
 import numpy as np
 import pytest
@@ -25,7 +26,7 @@ EIGHT_SCHOOL_DATA = {
     "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
 }
 
-EIGHT_SCHOOL_PRIOR_MODEL_CODE = """ 
+EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
 model {
     mu ~ dnorm(0.0, 1.0/25)
     tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
@@ -35,7 +36,7 @@ model {
 }
 """
 
-EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """ 
+EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
 model {
     mu ~ dnorm(0.0, 1.0/25)
     tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
@@ -47,8 +48,8 @@ model {
 }
 """
 
-parameters = ("mu", "tau", "theta_tilde")
-variables = tuple(list(parameters) + ["log_like"])
+PARAMETERS = ("mu", "tau", "theta_tilde")
+VARIABLES = tuple(list(PARAMETERS) + ["log_like"])
 
 NUMBER_OF_WARMUP_SAMPLES = 1000
 NUMBER_OF_POST_WARMUP_SAMPLES = 5000
@@ -160,14 +161,14 @@ def jags_posterior_model() -> pyjags.Model:
 @pytest.fixture()
 def jags_prior_samples(jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
     return jags_prior_model.sample(
-        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=parameters
+        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
     )
 
 
 @pytest.fixture()
 def jags_posterior_samples(jags_posterior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
     return jags_posterior_model.sample(
-        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=variables
+        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=VARIABLES
     )
 
 

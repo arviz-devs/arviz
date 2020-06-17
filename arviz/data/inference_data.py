@@ -232,7 +232,7 @@ class InferenceData:
                 data = getattr(self, group)
                 kwargs = {}
                 if compress:
-                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.variables}
+                    kwargs["encoding"] = {var_name: {"zlib": True} for var_name in data.VARIABLES}
                 data.to_netcdf(filename, mode=mode, group=group, **kwargs)
                 data.close()
                 mode = "a"
