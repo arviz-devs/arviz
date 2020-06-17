@@ -365,7 +365,7 @@ def hdi(
     **kwargs,
 ):
     """
-    Calculate highest density interval (HDI) of array for given percentage.
+    Calculate highest density interval (HDI) of array for given probability.
 
     The HDI is the minimum width Bayesian credible interval (BCI).
 
@@ -376,15 +376,15 @@ def hdi(
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
     hdi_prob: float, optional
-        HDI prob for which interval will be computed. Defaults to 0.94.
+        HDI prob for which interval will be computed. Defaults to ``stats.hdi_prob`` rcParam.
     circular: bool, optional
         Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
-    multimodal: bool
+    multimodal: bool, optional
         If true it may compute more than one hdi interval if the distribution is multimodal and the
         modes are well separated.
-    skipna: bool
+    skipna: bool, optional
         If true ignores nan values when computing the hdi interval. Defaults to false.
     group: str, optional
         Specifies which InferenceData group should be used to calculate hdi.
@@ -403,13 +403,17 @@ def hdi(
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
     kwargs: dict, optional
-        Additional keywords passed to `wrap_xarray_ufunc`.
-        See the docstring of :obj:`wrap_xarray_ufunc method </.stats_utils.wrap_xarray_ufunc>`.
+        Additional keywords passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
     np.ndarray or xarray.Dataset, depending upon input
         lower(s) and upper(s) values of the interval(s).
+
+    See Also
+    --------
+    plot_hdi : Plot HDI intervals for regression data.
+    xarray.Dataset.quantile : Calculate quantiles of array for given probabilities.
 
     Examples
     --------
@@ -476,7 +480,12 @@ def hdi(
         return hdi_data[~np.isnan(hdi_data).all(axis=1), :] if multimodal else hdi_data
 
     if isarray and ary.ndim == 2:
-        kwargs.setdefault("input_core_dims", [["chain"]])
+        warnings.warn(
+            "hdi currently interprets 2d data as (draw, shape) but this will change in "
+            "a future release to (chain, draw) for coherence with other functions",
+            FutureWarning,
+        )
+        ary = np.expand_dims(ary, 0)
 
     ary = convert_to_dataset(ary, group=group)
     if coords is not None:
@@ -485,7 +494,9 @@ def hdi(
     ary = ary[var_names] if var_names else ary
 
     hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords({"hdi": hdi_coord})
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
+        {"hdi": hdi_coord}
+    )
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
     return hdi_data.x.values if isarray else hdi_data
 

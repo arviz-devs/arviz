@@ -8,6 +8,7 @@
 * Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
 * `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228
   and #1240)
+* `plot_hdi` can now take already computed HDI values (#1241)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using

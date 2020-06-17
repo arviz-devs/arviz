@@ -37,43 +37,74 @@ def plot_hdi(
     x : array-like
         Values to plot.
     y : array-like, optional
-        Values from which to compute the HDI. Assumed shape (chain, draw, \*shape).
+        Values from which to compute the HDI. Assumed shape ``(chain, draw, \*shape)``.
         Only optional if hdi_data is present.
     hdi_data : array_like, optional
-        HDI values to use.
+        Precomputed HDI values to use. Assumed shape is ``(*x.shape, 2)``.
     hdi_prob : float, optional
-        Probability for the highest density interval. Defaults to 0.94.
-    color : str
+        Probability for the highest density interval. Defaults to ``stats.hdi_prob`` rcParam.
+    color : str, optional
         Color used for the limits of the HDI and fill. Should be a valid matplotlib color.
     circular : bool, optional
         Whether to compute the HDI taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
-    smooth : boolean
+    smooth : boolean, optional
         If True the result will be smoothed by first computing a linear interpolation of the data
         over a regular grid and then applying the Savitzky-Golay filter to the interpolated data.
         Defaults to True.
     smooth_kwargs : dict, optional
-        Additional keywords modifying the Savitzky-Golay filter. See Scipy's documentation for
-        details.
-    fill_kwargs : dict
-        Keywords passed to `fill_between` (use fill_kwargs={'alpha': 0} to disable fill).
-    plot_kwargs : dict
-        Keywords passed to HDI limits.
-    ax: axes, optional
+        Additional keywords modifying the Savitzky-Golay filter. See
+        :func:`scipy:scipy.signal.savgol_filter` for details.
+    fill_kwargs : dict, optional
+        Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
+        (use fill_kwargs={'alpha': 0} to disable fill) or to
+        :meth:`bokeh:bokeh.plotting.figure.Figure.patch`.
+    plot_kwargs : dict, optional
+        HDI limits keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`~bokeh:bokeh.plotting.figure.Figure.patch`.
+    hdi_kwargs : dict, optional
+        Keyword arguments passed to :func:`~arviz.hdi`. Ingnored if ``hdi_data`` is present.
+    ax : axes, optional
         Matplotlib axes or bokeh figures.
-    backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
-        These are kwargs specific to the backend being used. For additional documentation
-        check the plotting method of the backend.
+    backend : {"matplotlib","bokeh"}, optional
+        Select plotting backend.
+    backend_kwargs : bool, optional
+        These are kwargs specific to the backend being used. Passed to ::``
     show : bool, optional
         Call backend show function.
-    credible_interval: float, optional
+    credible_interval : float, optional
         Deprecated: Please see hdi_prob
 
     Returns
     -------
     axes : matplotlib axes or bokeh figures
+
+    See Also
+    --------
+    hdi : Calculate highest density interval (HDI) of array for given probability.
+
+    Examples
+    --------
+    Plot HDI interval of simulated regression data using `y` argument:
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> x_data = np.random.normal(0, 1, 100)
+        >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
+        >>> az.plot_hdi(x_data, y_data)
+
+    Precalculate HDI interval per chain and plot separately:
+
+    .. plot::
+        :context: close-figs
+
+        >>> hdi_data = az.hdi(y_data, input_core_dims=[["draw"]])
+        >>> ax = az.plot_hdi(x_data, hdi_data=hdi_data[0], color="r", fill_kwargs={"alpha": .2})
+        >>> az.plot_hdi(x_data, hdi_data=hdi_data[1], color="k", ax=ax, fill_kwargs={"alpha": .2})
+
     """
     if credible_interval:
         hdi_prob = credible_interval_warning(credible_interval, hdi_prob)
@@ -91,12 +122,15 @@ def plot_hdi(
     x = np.asarray(x)
     x_shape = x.shape
 
-
     if y is None and hdi_data is None:
         raise ValueError("One of {y, hdi_data} is required")
-    elif hdi_data is not None and y is not None:
+    if hdi_data is not None and y is not None:
         warnings.warn("Both y and hdi_data arguments present, ignoring y")
-    elif y is not None:
+    elif hdi_data is not None:
+        hdi_prob = (
+            hdi_data.hdi.attrs.get("hdi_prob", np.nan) if hasattr(hdi_data, "hdi") else np.nan
+        )
+    else:
         y = np.asarray(y)
         if hdi_prob is None:
             hdi_prob = rcParams["stats.hdi_prob"]
@@ -104,8 +138,6 @@ def plot_hdi(
             if not 1 >= hdi_prob > 0:
                 raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
         hdi_data = hdi(y, hdi_prob=hdi_prob, circular=circular, multimodal=False, **hdi_kwargs)
-    else:
-        hdi_prob = hdi_data.hdi.attrs.get("hdi_prob", np.nan)
 
     hdi_shape = hdi_data.shape
     if hdi_shape[:-1] != x_shape:
