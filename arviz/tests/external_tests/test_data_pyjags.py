@@ -23,28 +23,6 @@ PYJAGS_POSTERIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(
 PYJAGS_PRIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 
 
-EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
-model {
-    mu ~ dnorm(0.0, 1.0/25)
-    tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-    for (j in 1:J) {
-        theta_tilde[j] ~ dnorm(0.0, 1.0)
-    }
-}
-"""
-
-EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
-model {
-    mu ~ dnorm(0.0, 1.0/25)
-    tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-    for (j in 1:J) {
-        theta_tilde[j] ~ dnorm(0.0, 1.0)
-        y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
-        log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
-    }
-}
-"""
-
 PARAMETERS = ("mu", "tau", "theta_tilde")
 VARIABLES = tuple(list(PARAMETERS) + ["log_like"])
 
@@ -139,6 +117,16 @@ def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: 
 
 @pytest.fixture()
 def jags_prior_model() -> pyjags.Model:
+    EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
+    model {
+        mu ~ dnorm(0.0, 1.0/25)
+        tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+        for (j in 1:J) {
+            theta_tilde[j] ~ dnorm(0.0, 1.0)
+        }
+    }
+    """
+
     return pyjags.Model(
         code=EIGHT_SCHOOL_PRIOR_MODEL_CODE, data={"J": 8}, chains=4, threads=4, chains_per_thread=1
     )
@@ -148,6 +136,18 @@ def jags_prior_model() -> pyjags.Model:
 def jags_posterior_model(
     eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
 ) -> pyjags.Model:
+    EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
+    model {
+        mu ~ dnorm(0.0, 1.0/25)
+        tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+        for (j in 1:J) {
+            theta_tilde[j] ~ dnorm(0.0, 1.0)
+            y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+            log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+        }
+    }
+    """
+
     return pyjags.Model(
         code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
         data=eight_schools_params,
