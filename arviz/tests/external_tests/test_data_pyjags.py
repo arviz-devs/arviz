@@ -1,14 +1,10 @@
-# pylint: disable=no-member, invalid-name, redefined-outer-name
+# pylint: disable=no-member, invalid-name, redefined-outer-name, unused-import
 import typing as tp
 import numpy as np
 import pytest
 import pyjags
 
-from arviz import (
-    from_pyjags,
-    InferenceData,
-    waic
-)
+from arviz import from_pyjags, InferenceData, waic
 
 from arviz.data.io_pyjags import (
     _convert_pyjags_dict_to_arviz_dict,
