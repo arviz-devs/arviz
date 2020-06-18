@@ -127,9 +127,11 @@ def jags_prior_model() -> pyjags.Model:
     }
     """
 
-    return pyjags.Model(
+    prior_model = pyjags.Model(
         code=EIGHT_SCHOOL_PRIOR_MODEL_CODE, data={"J": 8}, chains=4, threads=4, chains_per_thread=1
     )
+
+    return prior_model
 
 
 @pytest.fixture()
@@ -148,13 +150,15 @@ def jags_posterior_model(
     }
     """
 
-    return pyjags.Model(
+    posterior_model = pyjags.Model(
         code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
         data=eight_schools_params,
         chains=4,
         threads=4,
         chains_per_thread=1,
     )
+
+    return posterior_model
 
 
 @pytest.fixture()
