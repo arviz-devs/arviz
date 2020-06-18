@@ -255,8 +255,9 @@ def _convert_arviz_dict_to_pyjags_dict(
 
     Parameters
     ----------
-    samples: a dictionary mapping variable names to NumPy arrays with shape
-             (number_of_chains, chain_length, parameter_dimension)
+    samples: dict of {str : array_like}
+        a dictionary mapping variable names to NumPy arrays with shape
+        (number_of_chains, chain_length, parameter_dimension)
 
     Returns
     -------
@@ -301,28 +302,29 @@ def from_pyjags(
     Parameters
     ----------
     posterior: dict of {str : array_like}, optional
-               a dictionary mapping variable names to NumPy arrays containing
-               posterior samples with shape
-               (parameter_dimension, chain_length, number_of_chains)
+        a dictionary mapping variable names to NumPy arrays containing
+        posterior samples with shape
+        (parameter_dimension, chain_length, number_of_chains)
 
     prior: dict of {str : array_like}, optional
-               a dictionary mapping variable names to NumPy arrays containing
-               prior samples with shape
-               (parameter_dimension, chain_length, number_of_chains)
+        a dictionary mapping variable names to NumPy arrays containing
+        prior samples with shape
+        (parameter_dimension, chain_length, number_of_chains)
 
     log_likelihood_name: str, optional
-                         the variable name in the posterior samples dictionary representing the
-                         log-likelihood at each observation
+        the variable name in the posterior samples dictionary representing the
+        log-likelihood at each observation
 
     coords: dict[str, iterable]
-            A dictionary containing the values that are used as index. The key
-            is the name of the dimension, the values are the index values.
+        A dictionary containing the values that are used as index. The key
+        is the name of the dimension, the values are the index values.
 
     dims: dict[str, List(str)]
-          A mapping from variables to a list of coordinate names for the variable.
+        A mapping from variables to a list of coordinate names for the variable.
 
     save_warmup : bool, optional
        Save warmup iterations in InferenceData. If not defined, use default defined by the rcParams.
+
     warmup_iterations: int, optional
         Number of warmup iterations
 
