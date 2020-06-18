@@ -271,7 +271,7 @@ class InferenceData:
                     data[var_name] = dataarray.values
                     dims = []
                     for coord_name, coord_values in dataarray.coords.items():
-                        if coord_name not in ("chain", "draw") and not k_.startswith(
+                        if coord_name not in ("chain", "draw") and not coord_name.startswith(
                             var_name + "_dim_"
                         ):
                             dims.append(coord_name)
@@ -288,7 +288,8 @@ class InferenceData:
                     attrs = dataset.attrs
                 elif attrs != dataset.attrs:
                     warnings.warn(
-                        "The attributes are not same for all groups. Considering only the first group `attrs`"
+                        "The attributes are not same for all groups."
+                        " Considering only the first group `attrs`"
                     )
 
         ret["attrs"] = attrs
