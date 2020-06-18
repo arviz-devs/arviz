@@ -242,8 +242,7 @@ class InferenceData:
         return filename
 
     def to_dict(self, groups=None, filter_groups=None):
-        """Convert InferenceData to a dictionary following xarray naming
-        conventions.
+        """Convert InferenceData to a dictionary following xarray naming conventions.
 
         Parameters
         ----------
