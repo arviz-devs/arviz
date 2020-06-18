@@ -202,7 +202,8 @@ class TestDataPyMC3:
         packaging.version.Version(pm.__version__) < packaging.version.Version("3.9.0"),
         reason="Requires PyMC3 >= 3.9.0",
     )
-    def test_autodetect_coords_from_model(self):
+    @pytest.mark.parametrize("use_context", [True, False])
+    def test_autodetect_coords_from_model(self, use_context):
         df_data = pd.DataFrame(columns=["date"]).set_index("date")
         dates = pd.date_range(start="2020-05-01", end="2020-05-20")
         for city, mu in {"Berlin": 15, "San Marino": 18, "Paris": 16}.items():
@@ -231,8 +232,14 @@ class TestDataPyMC3:
                 draws=30,
                 step=pm.Metropolis(),
             )
-        idata = from_pymc3(trace=trace, model=model)
+            if use_context:
+                idata = from_pymc3(trace=trace)
+        if not use_context:
+            idata = from_pymc3(trace=trace, model=model)
 
+        assert "city" in list(idata.posterior.dims)
+        assert "city" in list(idata.observed_data.dims)
+        assert "date" in list(idata.observed_data.dims)
         np.testing.assert_array_equal(idata.posterior.coords["city"], coords["city"])
         np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
         np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
