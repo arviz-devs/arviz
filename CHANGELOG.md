@@ -15,6 +15,7 @@
 * Added `log_likelihood` argument to `from_pyro` and a warning if log likelihood cannot be obtained (#1227)
 * Skip tests on matplotlib animations if ffmpeg is not installed (#1227)
 * Fix hpd bug where arguments were being ignored (#1236)
+* Change the default `zorder` of scatter points from `0` to `0.6` in `plot_pair` (#1246)
 
 ### Deprecation
 * Using `from_pymc3` without a model context available now raises a
