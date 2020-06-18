@@ -13,18 +13,12 @@ from arviz.data.io_pyjags import (
     from_pyjags,
 )
 
-from arviz.tests.helpers import check_multiple_attrs
+from arviz.tests.helpers import check_multiple_attrs, eight_schools_params
 
 
 PYJAGS_POSTERIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 PYJAGS_PRIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 
-
-EIGHT_SCHOOL_DATA = {
-    "J": 8,
-    "y": np.array([28.0, 8.0, -3.0, 7.0, -1.0, 1.0, 18.0, 12.0]),
-    "sigma": np.array([15.0, 10.0, 16.0, 11.0, 9.0, 11.0, 10.0, 18.0]),
-}
 
 EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
 model {
@@ -148,10 +142,12 @@ def jags_prior_model() -> pyjags.Model:
 
 
 @pytest.fixture()
-def jags_posterior_model() -> pyjags.Model:
+def jags_posterior_model(
+    eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
+) -> pyjags.Model:
     return pyjags.Model(
         code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
-        data=EIGHT_SCHOOL_DATA,
+        data=eight_schools_params,
         chains=4,
         threads=4,
         chains_per_thread=1,
