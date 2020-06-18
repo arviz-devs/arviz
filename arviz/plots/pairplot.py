@@ -194,7 +194,8 @@ def plot_pair(
 
     scatter_kwargs.setdefault("marker", ".")
     scatter_kwargs.setdefault("lw", 0)
-    scatter_kwargs.setdefault("zorder", 0)
+    # Sets the default zorder higher than zorder of grid, which is 0.5
+    scatter_kwargs.setdefault("zorder", 0.6)
 
     if kde_kwargs is None:
         kde_kwargs = {}
