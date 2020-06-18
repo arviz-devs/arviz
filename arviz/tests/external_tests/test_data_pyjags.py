@@ -4,13 +4,16 @@ import numpy as np
 import pytest
 import pyjags
 
-import arviz as az
+from arviz import (
+    from_pyjags,
+    InferenceData,
+    waic
+)
 
 from arviz.data.io_pyjags import (
     _convert_pyjags_dict_to_arviz_dict,
     _convert_arviz_dict_to_pyjags_dict,
     _extract_arviz_dict_from_inference_data,
-    from_pyjags,
 )
 
 from arviz.tests.helpers import check_multiple_attrs, eight_schools_params
@@ -171,8 +174,8 @@ def jags_posterior_samples(jags_posterior_model: pyjags.Model) -> tp.Dict[str, n
 @pytest.fixture()
 def pyjags_data(
     jags_prior_samples: tp.Dict[str, np.ndarray], jags_posterior_samples: tp.Dict[str, np.ndarray]
-) -> az.InferenceData:
-    return az.from_pyjags(
+) -> InferenceData:
+    return from_pyjags(
         posterior=jags_posterior_samples,
         prior=jags_prior_samples,
         log_likelihood_name="log_like",
@@ -181,8 +184,8 @@ def pyjags_data(
     )
 
 
-def test_waic(pyjags_data: az.InferenceData):
-    waic = az.waic(pyjags_data)
+def test_waic(pyjags_data: InferenceData):
+    waic_result = waic(pyjags_data)
 
-    assert -31.0 < waic.waic < -30.0
-    assert 0.75 < waic.p_waic < 0.90
+    assert -31.0 < waic_result.waic < -30.0
+    assert 0.75 < waic_result.p_waic < 0.90
