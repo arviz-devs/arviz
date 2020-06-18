@@ -244,7 +244,8 @@ class TestDataPyMC3:
         np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
         np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
 
-    def test_override_model_coords_dims(self):
+    def test_ovewrite_model_coords_dims(self):
+        """Check coords and dims from model object can be partially overwrited."""
         dim1 = ["a", "b"]
         new_dim1 = ["c", "d"]
         coords = {"dim1": dim1, "dim2": ["c1", "c2"]}
