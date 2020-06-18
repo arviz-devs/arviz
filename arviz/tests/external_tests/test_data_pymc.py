@@ -253,9 +253,9 @@ class TestDataPyMC3:
         with pm.Model(coords=coords):
             x = pm.Data("x", x_data, dims=("dim1", "dim2"))
             beta = pm.Normal("beta", 0, 1, dims="dim1")
-            obs = pm.Normal(
+            _ = pm.Normal(
                 "obs", x * beta, 1, observed=y, dims=("dim1", "dim2")
-            )  # pylint: disable=unused-variable
+            )
             trace = pm.sample(100, tune=100)
             idata1 = from_pymc3(trace)
             idata2 = from_pymc3(trace, coords={"dim1": new_dim1}, dims={"beta": ["dim2"]})
