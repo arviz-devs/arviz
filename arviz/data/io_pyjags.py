@@ -20,15 +20,27 @@ class PyJAGSConverter:
         *,
         posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
         prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
-        log_likelihood_name: tp.Optional[str] = None,
+        log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
         coords=None,
         dims=None,
         save_warmup: bool = None,
         warmup_iterations: int = 0
     ):
-        if log_likelihood_name is not None:
+        if log_likelihood is not None:
             self.posterior = posterior.copy()  # create a shallow copy of the dictionary
-            self.log_likelihood = {"log_likelihood": self.posterior.pop(log_likelihood_name)}
+
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            if isinstance(log_likelihood, (list, tuple)):
+                log_likelihood = {name: name for name in log_likelihood}
+
+            self.log_likelihood = {
+                obs_var_name: self.posterior.pop(log_like_name)
+                for obs_var_name, log_like_name in log_likelihood.items()
+                # if log_like_name in log_likelihood_draws
+            }
+
+            # self.log_likelihood = {"log_likelihood": self.posterior.pop(log_likelihood)}
         else:
             self.posterior = posterior
             self.log_likelihood = None
@@ -285,7 +297,7 @@ def _convert_arviz_dict_to_pyjags_dict(
 def from_pyjags(
     posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
     prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
-    log_likelihood_name: tp.Optional[str] = None,
+    log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
     coords=None,
     dims=None,
     save_warmup=None,
@@ -311,9 +323,12 @@ def from_pyjags(
         prior samples with shape
         (parameter_dimension, chain_length, number_of_chains)
 
-    log_likelihood_name: str, optional
-        the variable name in the posterior samples dictionary representing the
-        log-likelihood at each observation
+    log_likelihood: dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        equal to its values is used.
 
     coords: dict[str, iterable]
         A dictionary containing the values that are used as index. The key
@@ -335,7 +350,7 @@ def from_pyjags(
     return PyJAGSConverter(
         posterior=posterior,
         prior=prior,
-        log_likelihood_name=log_likelihood_name,
+        log_likelihood=log_likelihood,
         dims=dims,
         coords=coords,
         save_warmup=save_warmup,

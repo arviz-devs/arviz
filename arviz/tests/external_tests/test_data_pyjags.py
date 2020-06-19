@@ -178,7 +178,7 @@ def pyjags_data(
     return from_pyjags(
         posterior=jags_posterior_samples,
         prior=jags_prior_samples,
-        log_likelihood_name="log_like",
+        log_likelihood="log_like",
         save_warmup=True,
         warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
     )
