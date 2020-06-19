@@ -43,7 +43,7 @@ def verify_equality_of_numpy_values_dictionaries(
     return True
 
 
-class TestDataPyJAGS:
+class TestDataPyJAGSWithoutEstimation:
     def test_convert_pyjags_samples_dictionary_to_arviz_samples_dictionary(self):
         arviz_samples_dict_from_pyjags_samples_dict = _convert_pyjags_dict_to_arviz_dict(
             PYJAGS_POSTERIOR_DICT
@@ -116,7 +116,9 @@ class TestDataPyJAGS:
         fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
         assert not fails
 
-    @pytest.fixture()
+
+class TestDataPyJAGSWithEstimation:
+    @pytest.fixture(scope="class")
     def jags_prior_model(self) -> pyjags.Model:
         EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
         model {
@@ -138,7 +140,7 @@ class TestDataPyJAGS:
 
         return prior_model
 
-    @pytest.fixture()
+    @pytest.fixture(scope="class")
     def jags_posterior_model(
         self, eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
     ) -> pyjags.Model:
@@ -164,13 +166,13 @@ class TestDataPyJAGS:
 
         return posterior_model
 
-    @pytest.fixture()
+    @pytest.fixture(scope="class")
     def jags_prior_samples(self, jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
         return jags_prior_model.sample(
             NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
         )
 
-    @pytest.fixture()
+    @pytest.fixture(scope="class")
     def jags_posterior_samples(
         self, jags_posterior_model: pyjags.Model
     ) -> tp.Dict[str, np.ndarray]:
@@ -192,8 +194,33 @@ class TestDataPyJAGS:
             warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
         )
 
-    def test_waic(self, pyjags_data: InferenceData):
+    def test_waic(self, pyjags_data):
         waic_result = waic(pyjags_data)
 
         assert -31.0 < waic_result.waic < -30.0
         assert 0.75 < waic_result.p_waic < 0.90
+
+    # @pytest.fixture(scope="class")
+    # def data(self, jags_posterior_model, jags_posterior_samples, jags_prior_samples):
+    #     class Data:
+    #         model = self.jags_posterior_model
+    #         posterior = self.jags_posterior_samples
+    #         prior = self.jags_prior_samples
+    #
+    #     return Data
+    #
+    # def get_inference_data(self, data) -> InferenceData:
+    #     return from_pyjags(
+    #         posterior=data.posterior,
+    #         prior=data.prior,
+    #         log_likelihood={"y": "log_like"},
+    #         save_warmup=True,
+    #         warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
+    #     )
+    #
+    # def test_waic(self, data):
+    #     pyjags_data = self.get_inference_data(data)
+    #     waic_result = waic(pyjags_data)
+    #
+    #     assert -31.0 < waic_result.waic < -30.0
+    #     assert 0.75 < waic_result.p_waic < 0.90
