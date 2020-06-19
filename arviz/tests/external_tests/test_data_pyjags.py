@@ -85,112 +85,115 @@ class TestDataPyJAGS:
             PYJAGS_POSTERIOR_DICT, pyjags_dict_from_arviz_idata
         )
 
-
-@pytest.mark.parametrize("posterior", [None, PYJAGS_POSTERIOR_DICT])
-@pytest.mark.parametrize("prior", [None, PYJAGS_PRIOR_DICT])
-@pytest.mark.parametrize("save_warmup", [True, False])
-@pytest.mark.parametrize("warmup_iterations", [0, 5])
-def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: int):
-    arviz_inference_data_from_pyjags_samples_dict = from_pyjags(
-        posterior=posterior,
-        prior=prior,
-        log_likelihood={"y": "log_like"},
-        save_warmup=save_warmup,
-        warmup_iterations=warmup_iterations,
-    )
-    posterior_warmup_prefix = (
-        "" if save_warmup and warmup_iterations > 0 and posterior is not None else "~"
-    )
-    prior_warmup_prefix = "" if save_warmup and warmup_iterations > 0 and prior is not None else "~"
-    print(f'posterior_warmup_prefix="{posterior_warmup_prefix}"')
-    test_dict = {
-        f'{"~" if posterior is None else ""}posterior': ["b", "int"],
-        f'{"~" if prior is None else ""}prior': ["b", "int"],
-        f'{"~" if posterior is None else ""}log_likelihood': ["y"],
-        f"{posterior_warmup_prefix}warmup_posterior": ["b", "int"],
-        f"{prior_warmup_prefix}warmup_prior": ["b", "int"],
-        f"{posterior_warmup_prefix}warmup_log_likelihood": ["y"],
-    }
-
-    fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
-    assert not fails
-
-
-@pytest.fixture()
-def jags_prior_model() -> pyjags.Model:
-    EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
-    model {
-        mu ~ dnorm(0.0, 1.0/25)
-        tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-        for (j in 1:J) {
-            theta_tilde[j] ~ dnorm(0.0, 1.0)
+    @pytest.mark.parametrize("posterior", [None, PYJAGS_POSTERIOR_DICT])
+    @pytest.mark.parametrize("prior", [None, PYJAGS_PRIOR_DICT])
+    @pytest.mark.parametrize("save_warmup", [True, False])
+    @pytest.mark.parametrize("warmup_iterations", [0, 5])
+    def test_inference_data_attrs(self, posterior, prior, save_warmup, warmup_iterations: int):
+        arviz_inference_data_from_pyjags_samples_dict = from_pyjags(
+            posterior=posterior,
+            prior=prior,
+            log_likelihood={"y": "log_like"},
+            save_warmup=save_warmup,
+            warmup_iterations=warmup_iterations,
+        )
+        posterior_warmup_prefix = (
+            "" if save_warmup and warmup_iterations > 0 and posterior is not None else "~"
+        )
+        prior_warmup_prefix = (
+            "" if save_warmup and warmup_iterations > 0 and prior is not None else "~"
+        )
+        print(f'posterior_warmup_prefix="{posterior_warmup_prefix}"')
+        test_dict = {
+            f'{"~" if posterior is None else ""}posterior': ["b", "int"],
+            f'{"~" if prior is None else ""}prior': ["b", "int"],
+            f'{"~" if posterior is None else ""}log_likelihood': ["y"],
+            f"{posterior_warmup_prefix}warmup_posterior": ["b", "int"],
+            f"{prior_warmup_prefix}warmup_prior": ["b", "int"],
+            f"{posterior_warmup_prefix}warmup_log_likelihood": ["y"],
         }
-    }
-    """
 
-    prior_model = pyjags.Model(
-        code=EIGHT_SCHOOL_PRIOR_MODEL_CODE, data={"J": 8}, chains=4, threads=4, chains_per_thread=1
-    )
+        fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
+        assert not fails
 
-    return prior_model
-
-
-@pytest.fixture()
-def jags_posterior_model(
-    eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
-) -> pyjags.Model:
-    EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
-    model {
-        mu ~ dnorm(0.0, 1.0/25)
-        tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-        for (j in 1:J) {
-            theta_tilde[j] ~ dnorm(0.0, 1.0)
-            y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
-            log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+    @pytest.fixture()
+    def jags_prior_model(self) -> pyjags.Model:
+        EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
+        model {
+            mu ~ dnorm(0.0, 1.0/25)
+            tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+            for (j in 1:J) {
+                theta_tilde[j] ~ dnorm(0.0, 1.0)
+            }
         }
-    }
-    """
+        """
 
-    posterior_model = pyjags.Model(
-        code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
-        data=eight_schools_params,
-        chains=4,
-        threads=4,
-        chains_per_thread=1,
-    )
+        prior_model = pyjags.Model(
+            code=EIGHT_SCHOOL_PRIOR_MODEL_CODE,
+            data={"J": 8},
+            chains=4,
+            threads=4,
+            chains_per_thread=1,
+        )
 
-    return posterior_model
+        return prior_model
 
+    @pytest.fixture()
+    def jags_posterior_model(
+        self, eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
+    ) -> pyjags.Model:
+        EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
+        model {
+            mu ~ dnorm(0.0, 1.0/25)
+            tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+            for (j in 1:J) {
+                theta_tilde[j] ~ dnorm(0.0, 1.0)
+                y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+                log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+            }
+        }
+        """
 
-@pytest.fixture()
-def jags_prior_samples(jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
-    return jags_prior_model.sample(
-        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
-    )
+        posterior_model = pyjags.Model(
+            code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
+            data=eight_schools_params,
+            chains=4,
+            threads=4,
+            chains_per_thread=1,
+        )
 
+        return posterior_model
 
-@pytest.fixture()
-def jags_posterior_samples(jags_posterior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
-    return jags_posterior_model.sample(
-        NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=VARIABLES
-    )
+    @pytest.fixture()
+    def jags_prior_samples(self, jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
+        return jags_prior_model.sample(
+            NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
+        )
 
+    @pytest.fixture()
+    def jags_posterior_samples(
+        self, jags_posterior_model: pyjags.Model
+    ) -> tp.Dict[str, np.ndarray]:
+        return jags_posterior_model.sample(
+            NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=VARIABLES
+        )
 
-@pytest.fixture()
-def pyjags_data(
-    jags_prior_samples: tp.Dict[str, np.ndarray], jags_posterior_samples: tp.Dict[str, np.ndarray]
-) -> InferenceData:
-    return from_pyjags(
-        posterior=jags_posterior_samples,
-        prior=jags_prior_samples,
-        log_likelihood={"y": "log_like"},
-        save_warmup=True,
-        warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
-    )
+    @pytest.fixture()
+    def pyjags_data(
+        self,
+        jags_prior_samples: tp.Dict[str, np.ndarray],
+        jags_posterior_samples: tp.Dict[str, np.ndarray],
+    ) -> InferenceData:
+        return from_pyjags(
+            posterior=jags_posterior_samples,
+            prior=jags_prior_samples,
+            log_likelihood={"y": "log_like"},
+            save_warmup=True,
+            warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
+        )
 
+    def test_waic(self, pyjags_data: InferenceData):
+        waic_result = waic(pyjags_data)
 
-def test_waic(pyjags_data: InferenceData):
-    waic_result = waic(pyjags_data)
-
-    assert -31.0 < waic_result.waic < -30.0
-    assert 0.75 < waic_result.p_waic < 0.90
+        assert -31.0 < waic_result.waic < -30.0
+        assert 0.75 < waic_result.p_waic < 0.90
