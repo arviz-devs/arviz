@@ -6,8 +6,7 @@
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analitically (#1215)
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
 * Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
-* `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228
-  and #1240)
+* `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228, #1240 and #1249)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using
