@@ -15,7 +15,7 @@ from arviz.data.io_pyjags import (
 from arviz.tests.helpers import check_multiple_attrs, eight_schools_params
 
 
-PYJAGS_POSTERIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
+PYJAGS_POSTERIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3), "log_like": np.random.randn(1, 10, 3)}
 PYJAGS_PRIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 
 
@@ -91,6 +91,7 @@ def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: 
     arviz_inference_data_from_pyjags_samples_dict = from_pyjags(
         posterior=posterior,
         prior=prior,
+        log_likelihood={"y": "log_like"},
         save_warmup=save_warmup,
         warmup_iterations=warmup_iterations,
     )
@@ -102,12 +103,13 @@ def test_inference_data_attrs(posterior, prior, save_warmup, warmup_iterations: 
     test_dict = {
         f'{"~" if posterior is None else ""}posterior': ["b", "int"],
         f'{"~" if prior is None else ""}prior': ["b", "int"],
+        f'{"~" if posterior is None else ""}log_likelihood': ["y"],
         f"{posterior_warmup_prefix}warmup_posterior": ["b", "int"],
         f"{prior_warmup_prefix}warmup_prior": ["b", "int"],
+        f"{posterior_warmup_prefix}warmup_log_likelihood": ["y"],
     }
 
     fails = check_multiple_attrs(test_dict, arviz_inference_data_from_pyjags_samples_dict)
-    print(fails)
     assert not fails
 
 
@@ -178,7 +180,7 @@ def pyjags_data(
     return from_pyjags(
         posterior=jags_posterior_samples,
         prior=jags_prior_samples,
-        log_likelihood="log_like",
+        log_likelihood={"y": "log_like"},
         save_warmup=True,
         warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
     )

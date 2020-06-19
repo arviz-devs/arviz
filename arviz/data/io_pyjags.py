@@ -26,7 +26,7 @@ class PyJAGSConverter:
         save_warmup: bool = None,
         warmup_iterations: int = 0
     ):
-        if log_likelihood is not None:
+        if log_likelihood is not None and posterior is not None:
             self.posterior = posterior.copy()  # create a shallow copy of the dictionary
 
             if isinstance(log_likelihood, str):
@@ -37,10 +37,7 @@ class PyJAGSConverter:
             self.log_likelihood = {
                 obs_var_name: self.posterior.pop(log_like_name)
                 for obs_var_name, log_like_name in log_likelihood.items()
-                # if log_like_name in log_likelihood_draws
             }
-
-            # self.log_likelihood = {"log_likelihood": self.posterior.pop(log_likelihood)}
         else:
             self.posterior = posterior
             self.log_likelihood = None
