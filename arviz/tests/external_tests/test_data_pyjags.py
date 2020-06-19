@@ -15,7 +15,11 @@ from arviz.data.io_pyjags import (
 from arviz.tests.helpers import check_multiple_attrs, eight_schools_params
 
 
-PYJAGS_POSTERIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3), "log_like": np.random.randn(1, 10, 3)}
+PYJAGS_POSTERIOR_DICT = {
+    "b": np.random.randn(3, 10, 3),
+    "int": np.random.randn(1, 10, 3),
+    "log_like": np.random.randn(1, 10, 3),
+}
 PYJAGS_PRIOR_DICT = {"b": np.random.randn(3, 10, 3), "int": np.random.randn(1, 10, 3)}
 
 
