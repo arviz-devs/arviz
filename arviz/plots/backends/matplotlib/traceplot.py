@@ -9,7 +9,12 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
-from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels
+from ...plot_utils import (
+    _scale_fig_size,
+    make_label,
+    format_coords_as_labels,
+    matplotlib_kwarg_dealiaser,
+)
 from ....numeric_utils import get_bins
 
 
@@ -264,7 +269,7 @@ def plot_trace(
                             markersize=30,
                             linestyle="None",
                             alpha=hist_kwargs["alpha"],
-                            zorder=-5,
+                            zorder=0.6,
                         )
                         axes[idx, 1].set_ylim(*ylims[1])
                     axes[idx, 0].plot(
@@ -276,7 +281,7 @@ def plot_trace(
                         markersize=30,
                         linestyle="None",
                         alpha=trace_kwargs["alpha"],
-                        zorder=-5,
+                        zorder=0.6,
                     )
                     axes[idx, 0].set_ylim(*ylims[0])
 
@@ -298,24 +303,29 @@ def plot_trace(
                     linewidth=1.5,
                     alpha=trace_kwargs["alpha"]
                 )
-        axes[idx, 0].set_ylim(bottom=0, top=ylims[0][1])
+        axes[idx, 0].set_ylim(ylims[0])
         if kind == "trace":
             axes[idx, 1].set_xlim(left=data.draw.min(), right=data.draw.max())
             axes[idx, 1].set_ylim(*ylims[1])
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
         handles = [
-            Line2D([], [], label=chain_id, **{chain_prop[0]: prop}, **legend_kwargs)
+            Line2D(
+                [], [], label=chain_id, **_dealiase_merge_kwargs(legend_kwargs, chain_prop[0], prop)
+            )
             for chain_id, prop in zip(data.chain.values, chain_prop[1])
         ]
         if combined:
             handles.insert(
                 0,
                 Line2D(
-                    [], [], label="combined", **{chain_prop[0]: chain_prop[1][-1]}, **plot_kwargs
+                    [],
+                    [],
+                    label="combined",
+                    **_dealiase_merge_kwargs(plot_kwargs, chain_prop[0], chain_prop[1][-1])
                 ),
             )
-        axes[0, 0].legend(handles=handles, title="chain")
+        axes[0, 1].legend(handles=handles, title="chain", loc="upper right")
 
     if backend_show(show):
         plt.show()
@@ -342,25 +352,27 @@ def _plot_chains_mpl(
 ):
     for chain_idx, row in enumerate(value):
         if kind == "trace":
-            axes[idx, 1].plot(
-                data.draw.values, row, **{chain_prop[0]: chain_prop[1][chain_idx]}, **trace_kwargs
+            aux_kwargs = _dealiase_merge_kwargs(
+                trace_kwargs, chain_prop[0], chain_prop[1][chain_idx]
             )
+            axes[idx, 1].plot(data.draw.values, row, **aux_kwargs)
 
         if not combined:
-            plot_kwargs[chain_prop[0]] = chain_prop[1][chain_idx]
+            aux_kwargs = _dealiase_merge_kwargs(
+                plot_kwargs, chain_prop[0], chain_prop[1][chain_idx]
+            )
             plot_dist(
                 values=row,
                 textsize=xt_labelsize,
                 rug=rug,
                 ax=axes[idx, 0],
                 hist_kwargs=hist_kwargs,
-                plot_kwargs=plot_kwargs,
+                plot_kwargs=aux_kwargs,
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="matplotlib",
                 show=False,
             )
-            plot_kwargs.pop(chain_prop[0])
 
     if kind == "rank_bars":
         plot_rank(data=value, kind="bars", ax=axes[idx, 1], **rank_kwargs)
@@ -368,17 +380,20 @@ def _plot_chains_mpl(
         plot_rank(data=value, kind="vlines", ax=axes[idx, 1], **rank_kwargs)
 
     if combined:
-        plot_kwargs[chain_prop[0]] = chain_prop[1][-1]
+        aux_kwargs = _dealiase_merge_kwargs(plot_kwargs, chain_prop[0], chain_prop[1][-1])
         plot_dist(
             values=value.flatten(),
             textsize=xt_labelsize,
             rug=rug,
             ax=axes[idx, 0],
             hist_kwargs=hist_kwargs,
-            plot_kwargs=plot_kwargs,
+            plot_kwargs=aux_kwargs,
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="matplotlib",
             show=False,
         )
-        plot_kwargs.pop(chain_prop[0])
+
+
+def _dealiase_merge_kwargs(left_kwargs, prop, prop_val):
+    return {**left_kwargs, **matplotlib_kwarg_dealiaser({prop: prop_val}, "plot")}

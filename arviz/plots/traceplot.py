@@ -22,7 +22,7 @@ def plot_trace(
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
-    divergences: Optional[str] = "bottom",
+    divergences: Optional[str] = "auto",
     kind: Optional[str] = "trace",
     figsize: Optional[Tuple[float, float]] = None,
     rug: bool = False,
@@ -156,6 +156,8 @@ def plot_trace(
     if kind not in {"trace", "rank_vlines", "rank_bars"}:
         raise ValueError("The value of kind must be either trace, rank_vlines or rank_bars.")
 
+    if divergences is "auto":
+        divergences = "top" if rug else "bottom"
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
