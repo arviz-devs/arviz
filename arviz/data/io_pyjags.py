@@ -324,7 +324,7 @@ def from_pyjags(
         Pointwise log_likelihood for the data. log_likelihood is extracted from the
         posterior. It is recommended to use this argument as a dictionary whose keys
         are observed variable names and its values are the variables storing log
-        likelihood arrays in the Stan code. In other cases, a dictionary with keys
+        likelihood arrays in the JAGS code. In other cases, a dictionary with keys
         equal to its values is used.
 
     coords: dict[str, iterable]
