@@ -673,3 +673,24 @@ def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
             args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {})
         )
     return args
+
+
+def _dealiase_sel_kwargs(kwargs, prop_dict, idx):
+    """Generate kwargs dict from kwargs and prop_dict.
+
+    Gets property at position ``idx`` for each property in prop_dict and adds it to
+    ``kwargs``. Values in prop_dict are dealiased and overwrite values in
+    kwargs with the same key .
+
+    Parameters
+    ----------
+    kwargs : dict
+    prop_dict : dict of {str : array_like}
+    idx : int
+    """
+    return {
+        **kwargs,
+        **matplotlib_kwarg_dealiaser(
+            {prop: props[idx] for prop, props in prop_dict.items()}, "plot"
+        ),
+    }
