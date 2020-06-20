@@ -197,8 +197,9 @@ def plot_trace(
     else:
         chain_prop = (
             {
-                "line_dash" if backend == "bokeh" else "linestyle":
-                ("solid", "dotted", "dashed", "dashdot"),
+                "line_dash"
+                if backend == "bokeh"
+                else "linestyle": ("solid", "dotted", "dashed", "dashdot"),
             }
             if chain_prop is None
             else chain_prop
@@ -220,12 +221,11 @@ def plot_trace(
     if isinstance(chain_prop, tuple):
         warnings.warn(
             "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
-            FutureWarning
+            FutureWarning,
         )
         chain_prop = {chain_prop[0]: chain_prop[1]}
     chain_prop = {
-        prop_name:
-        [prop for _, prop in zip(range(num_chain_props), cycle(props))]
+        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
         for prop_name, props in chain_prop.items()
     }
 
@@ -234,7 +234,7 @@ def plot_trace(
     if isinstance(chain_prop, tuple):
         warnings.warn(
             "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
-            FutureWarning
+            FutureWarning,
         )
         compact_prop = {compact_prop[0]: compact_prop[1]}
 
