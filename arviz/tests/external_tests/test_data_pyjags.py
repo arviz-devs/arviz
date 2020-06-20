@@ -117,110 +117,110 @@ class TestDataPyJAGSWithoutEstimation:
         assert not fails
 
 
-class TestDataPyJAGSWithEstimation:
-    @pytest.fixture(scope="class")
-    def jags_prior_model(self) -> pyjags.Model:
-        EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
-        model {
-            mu ~ dnorm(0.0, 1.0/25)
-            tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-            for (j in 1:J) {
-                theta_tilde[j] ~ dnorm(0.0, 1.0)
-            }
-        }
-        """
-
-        prior_model = pyjags.Model(
-            code=EIGHT_SCHOOL_PRIOR_MODEL_CODE,
-            data={"J": 8},
-            chains=4,
-            threads=4,
-            chains_per_thread=1,
-        )
-
-        return prior_model
-
-    @pytest.fixture(scope="class")
-    def jags_posterior_model(
-        self, eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
-    ) -> pyjags.Model:
-        EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
-        model {
-            mu ~ dnorm(0.0, 1.0/25)
-            tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
-            for (j in 1:J) {
-                theta_tilde[j] ~ dnorm(0.0, 1.0)
-                y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
-                log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
-            }
-        }
-        """
-
-        posterior_model = pyjags.Model(
-            code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
-            data=eight_schools_params,
-            chains=4,
-            threads=4,
-            chains_per_thread=1,
-        )
-
-        return posterior_model
-
-    @pytest.fixture(scope="class")
-    def jags_prior_samples(self, jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
-        return jags_prior_model.sample(
-            NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
-        )
-
-    @pytest.fixture(scope="class")
-    def jags_posterior_samples(
-        self, jags_posterior_model: pyjags.Model
-    ) -> tp.Dict[str, np.ndarray]:
-        return jags_posterior_model.sample(
-            NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=VARIABLES
-        )
-
-    @pytest.fixture()
-    def pyjags_data(
-        self,
-        jags_prior_samples: tp.Dict[str, np.ndarray],
-        jags_posterior_samples: tp.Dict[str, np.ndarray],
-    ) -> InferenceData:
-        return from_pyjags(
-            posterior=jags_posterior_samples,
-            prior=jags_prior_samples,
-            log_likelihood={"y": "log_like"},
-            save_warmup=True,
-            warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
-        )
-
-    def test_waic(self, pyjags_data):
-        waic_result = waic(pyjags_data)
-
-        assert -31.0 < waic_result.waic < -30.0
-        assert 0.75 < waic_result.p_waic < 0.90
-
-    # @pytest.fixture(scope="class")
-    # def data(self, jags_posterior_model, jags_posterior_samples, jags_prior_samples):
-    #     class Data:
-    #         model = self.jags_posterior_model
-    #         posterior = self.jags_posterior_samples
-    #         prior = self.jags_prior_samples
-    #
-    #     return Data
-    #
-    # def get_inference_data(self, data) -> InferenceData:
-    #     return from_pyjags(
-    #         posterior=data.posterior,
-    #         prior=data.prior,
-    #         log_likelihood={"y": "log_like"},
-    #         save_warmup=True,
-    #         warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
-    #     )
-    #
-    # def test_waic(self, data):
-    #     pyjags_data = self.get_inference_data(data)
-    #     waic_result = waic(pyjags_data)
-    #
-    #     assert -31.0 < waic_result.waic < -30.0
-    #     assert 0.75 < waic_result.p_waic < 0.90
+# class TestDataPyJAGSWithEstimation:
+#     @pytest.fixture(scope="class")
+#     def jags_prior_model(self) -> pyjags.Model:
+#         EIGHT_SCHOOL_PRIOR_MODEL_CODE = """
+#         model {
+#             mu ~ dnorm(0.0, 1.0/25)
+#             tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+#             for (j in 1:J) {
+#                 theta_tilde[j] ~ dnorm(0.0, 1.0)
+#             }
+#         }
+#         """
+#
+#         prior_model = pyjags.Model(
+#             code=EIGHT_SCHOOL_PRIOR_MODEL_CODE,
+#             data={"J": 8},
+#             chains=4,
+#             threads=4,
+#             chains_per_thread=1,
+#         )
+#
+#         return prior_model
+#
+#     @pytest.fixture(scope="class")
+#     def jags_posterior_model(
+#         self, eight_schools_params: tp.Dict[str, tp.Union[int, np.ndarray]]
+#     ) -> pyjags.Model:
+#         EIGHT_SCHOOL_POSTERIOR_MODEL_CODE = """
+#         model {
+#             mu ~ dnorm(0.0, 1.0/25)
+#             tau ~ dt(0.0, 1.0/25, 1.0) T(0, )
+#             for (j in 1:J) {
+#                 theta_tilde[j] ~ dnorm(0.0, 1.0)
+#                 y[j] ~ dnorm(mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+#                 log_like[j] = logdensity.norm(y[j], mu + tau * theta_tilde[j], 1.0/(sigma[j]^2))
+#             }
+#         }
+#         """
+#
+#         posterior_model = pyjags.Model(
+#             code=EIGHT_SCHOOL_POSTERIOR_MODEL_CODE,
+#             data=eight_schools_params,
+#             chains=4,
+#             threads=4,
+#             chains_per_thread=1,
+#         )
+#
+#         return posterior_model
+#
+#     @pytest.fixture(scope="class")
+#     def jags_prior_samples(self, jags_prior_model: pyjags.Model) -> tp.Dict[str, np.ndarray]:
+#         return jags_prior_model.sample(
+#             NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=PARAMETERS
+#         )
+#
+#     @pytest.fixture(scope="class")
+#     def jags_posterior_samples(
+#         self, jags_posterior_model: pyjags.Model
+#     ) -> tp.Dict[str, np.ndarray]:
+#         return jags_posterior_model.sample(
+#             NUMBER_OF_WARMUP_SAMPLES + NUMBER_OF_POST_WARMUP_SAMPLES, vars=VARIABLES
+#         )
+#
+#     @pytest.fixture()
+#     def pyjags_data(
+#         self,
+#         jags_prior_samples: tp.Dict[str, np.ndarray],
+#         jags_posterior_samples: tp.Dict[str, np.ndarray],
+#     ) -> InferenceData:
+#         return from_pyjags(
+#             posterior=jags_posterior_samples,
+#             prior=jags_prior_samples,
+#             log_likelihood={"y": "log_like"},
+#             save_warmup=True,
+#             warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
+#         )
+#
+#     def test_waic(self, pyjags_data):
+#         waic_result = waic(pyjags_data)
+#
+#         assert -31.0 < waic_result.waic < -30.0
+#         assert 0.75 < waic_result.p_waic < 0.90
+#
+#     # @pytest.fixture(scope="class")
+#     # def data(self, jags_posterior_model, jags_posterior_samples, jags_prior_samples):
+#     #     class Data:
+#     #         model = self.jags_posterior_model
+#     #         posterior = self.jags_posterior_samples
+#     #         prior = self.jags_prior_samples
+#     #
+#     #     return Data
+#     #
+#     # def get_inference_data(self, data) -> InferenceData:
+#     #     return from_pyjags(
+#     #         posterior=data.posterior,
+#     #         prior=data.prior,
+#     #         log_likelihood={"y": "log_like"},
+#     #         save_warmup=True,
+#     #         warmup_iterations=NUMBER_OF_WARMUP_SAMPLES,
+#     #     )
+#     #
+#     # def test_waic(self, data):
+#     #     pyjags_data = self.get_inference_data(data)
+#     #     waic_result = waic(pyjags_data)
+#     #
+#     #     assert -31.0 < waic_result.waic < -30.0
+#     #     assert 0.75 < waic_result.p_waic < 0.90
