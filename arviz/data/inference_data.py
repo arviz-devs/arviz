@@ -324,6 +324,268 @@ class InferenceData:
         else:
             return out
 
+    def isel(
+        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+    ):
+        """Perform an xarray selection on all groups.
+
+        Loops groups to perform Dataset.isel(key=item)
+        for every kwarg if key is a dimension of the dataset.
+        One example could be performing a burn in cut on the InferenceData object
+        or discarding a chain. The selection is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray.Dataset.isel <xarray:xarray.Dataset.isel>`
+
+        Parameters
+        ----------
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping
+            It must be accepted by Dataset.isel().
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(kwargs.keys()).intersection(dataset.dims)
+            dataset = dataset.isel(**{key: kwargs[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def stack(
+        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+    ):
+        """Perform an xarray stacking on all groups.
+
+        Stack any number of existing dimensions into a single new dimension.
+        Loops groups to perform Dataset.stack(key=value)
+        for every kwarg if value is a dimension of the dataset.
+        The selection is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray.Dataset.stack <xarray:xarray.Dataset.stack>`
+
+        Parameters
+        ----------
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping
+            It must be accepted by Dataset.stack().
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            a = {}
+            for key, value in kwargs.items():
+                if not set(value).difference(dataset.dims):
+                    a[key] = value
+            dataset = dataset.stack(**a)
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def unstack(self, groups=None, filter_groups=None, inplace=False):
+        """Perform an xarray unstacking on all groups.
+
+        Unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
+        Loops groups to perform Dataset.unstack(key=value).
+        The selection is performed on all relevant groups (like posterior, prior,
+        sample stats) while non relevant groups like observed data are omitted.
+        See :meth:`xarray.Dataset.unstack <xarray:xarray.Dataset.unstack>`
+
+        Parameters
+        ----------
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            dataset = dataset.unstack()
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of variable and dimensions on all groups.
+
+        Loops groups to perform Dataset.rename(name_dict)
+        for every key in name_dict if key is a dimension/data_vars of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray.Dataset.rename <xarray:xarray.Dataset.rename>`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current variable or dimension names
+            and whose values are the desired names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform renaming in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+        if "chain" in name_dict.keys() or "draw" in name_dict.keys():
+            raise KeyError("'chain' or 'draw' dimensions can't be renamed")
+        out = self if inplace else deepcopy(self)
+
+        for group in groups:
+            dataset = getattr(self, group)
+            expected_keys = list(dataset.prior.data_vars) + list(dataset.dims)
+            valid_keys = set(name_dict.keys()).intersection(expected_keys)
+            dataset = dataset.rename({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename_vars(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of variable or coordinate names on all groups.
+
+        Loops groups to perform Dataset.rename_vars(name_dict)
+        for every key in name_dict if key is a variable or coordinate names of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray.Dataset.rename_vars <xarray:xarray.Dataset.rename_vars>`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current variable or coordinate names
+            and whose values are the desired names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object with renamed variables including coordinates by default.
+            When `inplace==True` perform renaming in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(name_dict.keys()).intersection(dataset.data_vars)
+            dataset = dataset.rename_vars({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename_dims(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of dimensions on all groups.
+
+        Loops groups to perform Dataset.rename_dims(name_dict)
+        for every key in name_dict if key is a dimension of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray.Dataset.rename_dims <xarray:xarray.Dataset.rename_dims>`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current dimension names and whose values are the desired names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object with renamed dimension by default.
+            When `inplace==True` perform renaming in place and return `None`
+
+        """
+
+        groups = self._group_names(groups, filter_groups)
+        if "chain" in name_dict.keys() or "draw" in name_dict.keys():
+            raise KeyError("'chain' or 'draw' dimensions can't be renamed")
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(name_dict.keys()).intersection(dataset.dims)
+            dataset = dataset.rename_dims({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.
 
