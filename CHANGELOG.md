@@ -26,6 +26,7 @@
 ### Documentation
 * A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
 * Fixed inconsistent capitalization in `plot_hdi` docstring (#1221)
+* Fixed and extended `InferenceData.map` docs (#1255)
 
 ## v0.8.3 (2020 May 28)
 ### Maintenance and fixes
