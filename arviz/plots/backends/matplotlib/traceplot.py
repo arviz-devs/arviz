@@ -197,14 +197,10 @@ def plot_trace(
             }
             handles = []
             for sub_idx, label in zip(range(value.shape[2]), legend_labels):
-                if compact_prop:
-                    aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
-                    aux_trace_kwargs = _dealiase_sel_kwargs(
-                        trace_kwargs, compact_prop_iter, sub_idx
-                    )
-                else:
-                    aux_plot_kwargs = plot_kwargs
-                    aux_trace_kwargs = trace_kwargs
+                aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
+                aux_trace_kwargs = _dealiase_sel_kwargs(
+                    trace_kwargs, compact_prop_iter, sub_idx
+                )
                 _plot_chains_mpl(
                     axes,
                     idx,
