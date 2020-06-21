@@ -415,7 +415,7 @@ class InferenceData:
         else:
             return out
 
-    def unstack(self, groups=None, filter_groups=None, inplace=False):
+    def unstack(self, dim=None, groups=None, filter_groups=None, inplace=False):
         """Perform an xarray unstacking on all groups.
 
         Unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
@@ -426,6 +426,8 @@ class InferenceData:
 
         Parameters
         ----------
+        dim: Hashable or iterable of Hashable, optional
+            Dimension(s) over which to unstack. By default unstacks all MultiIndexes.
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
@@ -442,11 +444,14 @@ class InferenceData:
         """
 
         groups = self._group_names(groups, filter_groups)
+        if isinstance(dim, str):
+            dim = [dim]
 
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            dataset = dataset.unstack()
+            valid_dims = set(dim).intersection(dataset.dims)
+            dataset = dataset.unstack(dim=valid_dims)
             setattr(out, group, dataset)
         if inplace:
             return None
