@@ -231,7 +231,7 @@ def plot_trace(
 
     if isinstance(compact_prop, str):
         compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
-    if isinstance(chain_prop, tuple):
+    if isinstance(compact_prop, tuple):
         warnings.warn(
             "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
             FutureWarning,

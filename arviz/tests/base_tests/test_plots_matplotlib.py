@@ -213,7 +213,7 @@ def test_plot_trace_bad_lines_value(models, bad_kwargs):
 @pytest.mark.parametrize("prop", ["chain_prop", "compact_prop"])
 def test_plot_trace_futurewarning(models, prop):
     with pytest.warns(FutureWarning, match=f"{prop} as a tuple.+deprecated"):
-        ax = az.plot_trace(model.model_1, **{prop: ("ls", ("-", "--"))})
+        ax = plot_trace(models.model_1, **{prop: ("ls", ("-", "--"))})
     assert ax.shape
 
 
