@@ -42,6 +42,7 @@ from ...plots import (
     plot_elpd,
     plot_loo_pit,
     plot_mcse,
+    plot_bpv,
 )
 from ...utils import _cov
 from ...numeric_utils import _fast_kde
@@ -1286,3 +1287,17 @@ def test_plot_dist_comparison_different_vars():
         plot_dist_comparison(data, var_names="x")
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"reference": "analytical"},
+        {"kind": "p_value"},
+        {"kind": "t_stat", "t_stat": "std"},
+        {"kind": "t_stat", "t_stat": 0.5, "bpv": True},
+    ],
+)
+def test_plot_bpv(models, kwargs):
+    axes = plot_bpv(models.model_1, **kwargs)
+    assert axes.shape

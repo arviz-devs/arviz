@@ -18,6 +18,7 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
 from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
     plot_autocorr,
+    plot_bpv,
     plot_compare,
     plot_density,
     plot_dist,
@@ -966,3 +967,17 @@ def test_plot_rank(models, kwargs):
 def test_plot_dist_comparison_warn(models):
     with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib bakend."):
         plot_dist_comparison(models.model_1, backend="bokeh")
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"reference": "analytical"},
+        {"kind": "p_value"},
+        {"kind": "t_stat", "t_stat": "std"},
+        {"kind": "t_stat", "t_stat": 0.5, "bpv": True},
+    ],
+)
+def test_plot_bpv(models, kwargs):
+    axes = plot_bpv(models.model_1, backend="bokeh", **kwargs)
+    assert axes.shape
