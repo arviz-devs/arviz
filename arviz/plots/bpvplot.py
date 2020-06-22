@@ -1,6 +1,7 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
 import logging
 import numpy as np
+from matplotlib.colors import to_hex
 
 from .plot_utils import (
     xarray_var_iter,
@@ -24,7 +25,6 @@ def plot_bpv(
     reference=None,
     n_ref=100,
     hdi_prob=0.94,
-    alpha=None,
     color="C0",
     figsize=None,
     textsize=None,
@@ -34,7 +34,6 @@ def plot_bpv(
     coords=None,
     flatten=None,
     flatten_pp=None,
-    legend=True,
     ax=None,
     backend=None,
     plot_ref_kwargs=None,
@@ -115,7 +114,7 @@ def plot_bpv(
     backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     plot_ref_kwargs :  dict, optional
-        Extra keyword arguments to control how reference is represented. Passed to `plt.plot` or 
+        Extra keyword arguments to control how reference is represented. Passed to `plt.plot` or
         `plt.axhspan`(when `kind=u_value` and `reference=analytical`).
     backend_kwargs : bool, optional
         These are kwargs specific to the backend being used. For additional documentation
@@ -207,7 +206,7 @@ def plot_bpv(
     ]
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+    (figsize, ax_labelsize, _, _, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
 
@@ -218,7 +217,17 @@ def plot_bpv(
         plot_ref_kwargs.setdefault("linestyle", "--")
     else:
         plot_ref_kwargs.setdefault("alpha", 0.1)
-        plot_ref_kwargs.setdefault("color", "C0")
+        plot_ref_kwargs.setdefault("color", color)
+
+    if backend == "bokeh":
+        color = to_hex(color)
+        plot_ref_kwargs.pop("color")
+        if kind == "p_value" and reference == "analytical":
+            plot_ref_kwargs.pop("linestyle")
+            plot_ref_kwargs.setdefault("line_dash", "dashed")
+            plot_ref_kwargs.setdefault("color", "black")
+        else:
+            plot_ref_kwargs.setdefault("color", color)
 
     bpvplot_kwargs = dict(
         ax=ax,
@@ -227,7 +236,6 @@ def plot_bpv(
         cols=cols,
         obs_plotters=obs_plotters,
         pp_plotters=pp_plotters,
-        predictive_dataset=predictive_dataset,
         total_pp_samples=total_pp_samples,
         kind=kind,
         bpv=bpv,
@@ -238,11 +246,9 @@ def plot_bpv(
         mean=mean,
         color=color,
         figsize=figsize,
-        xt_labelsize=xt_labelsize,
         ax_labelsize=ax_labelsize,
         markersize=markersize,
         linewidth=linewidth,
-        flatten=flatten,
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
