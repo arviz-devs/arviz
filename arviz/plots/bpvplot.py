@@ -18,13 +18,13 @@ _log = logging.getLogger(__name__)
 def plot_bpv(
     data,
     kind="kde",
-    bpv=True,
     t_stat="median",
+    bpv=True,
+    mean=True,
     reference=None,
     n_ref=100,
-    hdi=0.94,
+    hdi_prob=0.94,
     alpha=None,
-    mean=True,
     color="C0",
     figsize=None,
     textsize=None,
@@ -37,6 +37,7 @@ def plot_bpv(
     legend=True,
     ax=None,
     backend=None,
+    plot_ref_kwargs=None,
     backend_kwargs=None,
     group="posterior",
     show=None,
@@ -46,25 +47,36 @@ def plot_bpv(
 
     Parameters
     ----------
-    data: az.InferenceData object
+    data : az.InferenceData object
         InferenceData object containing the observed and posterior/prior predictive data.
-    kind: str
-        Type of plot to display (kde, cumulative, or scatter). Defaults to kde.
+    kind : str
+        Type of plot to display (u_value, p_value, t_stat). Defaults to u_value.
+    t_stat : str, float, or callable
+        T statistics to compute from the observations and predictive distributions. Allowed strings
+        are "mean", "median" or "std". Defaults to "median". Alternative a quantile can be passed
+        as a float (or str) in the interval (0, 1). Finally a user defined function is also
+        acepted, see examples section for details.
     bpv : bool
-        If True (default) add the bayesian p_value to the legend.
-    alpha: float
-        Opacity of posterior/prior predictive density curves.
-        Defaults to 0.2 for kind = kde and cumulative, for scatter defaults to 0.7
-    mean: bool
-        Whether or not to plot the mean T statistic. Defaults to True
+        If True (default) add the bayesian p_value to the legend when kind = t_stat.
+    mean : bool
+        Whether or not to plot the mean T statistic. Defaults to True.
+    reference : str
+        How to compute the distributions used as reference for u_values or p_values. Allowed values
+        are "analytical" (default) and "samples". Use `None` to do not plot any reference.
+    n_ref : int, optional
+        Number of reference distributions to sample when `reference=samples`
+    hdi_prob: float, optional
+        Probability for the highest density interval for the analytical reference distribution when
+        computing u_values. Should be in the interval (0, 1]. Defaults to
+        0.94.
     color : str
         Matplotlib color
-    figsize: tuple
+    figsize : tuple
         Figure size. If None it will be defined automatically.
-    textsize: float
+    textsize : float
         Text size scaling factor for labels, titles and lines. If None it will be
         autoscaled based on figsize.
-    data_pairs: dict
+    data_pairs : dict
         Dictionary containing relations between observed data and posterior/prior predictive data.
         Dictionary structure:
 
@@ -74,41 +86,44 @@ def plot_bpv(
         For example, `data_pairs = {'y' : 'y_hat'}`
         If None, it will assume that the observed data and the posterior/prior
         predictive data have the same variable name.
-    var_names: list of variable names
+    var_names : list of variable names
         Variables to be plotted, if `None` all variable are plotted. Prefix the variables by `~`
         when you want to exclude them from the plot.
-    filter_vars: {None, "like", "regex"}, optional, default=None
+    filter_vars : {None, "like", "regex"}, optional, default=None
         If `None` (default), interpret var_names as the real variables names. If "like",
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
-    coords: dict
+    coords : dict
         Dictionary mapping dimensions to selected coordinates to be plotted.
         Dimensions without a mapping specified will include all coordinates for
         that dimension. Defaults to including all coordinates for all
         dimensions if None.
-    flatten: list
+    flatten : list
         List of dimensions to flatten in observed_data. Only flattens across the coordinates
         specified in the coords argument. Defaults to flattening all of the dimensions.
-    flatten_pp: list
+    flatten_pp : list
         List of dimensions to flatten in posterior_predictive/prior_predictive. Only flattens
         across the coordinates specified in the coords argument. Defaults to flattening all
         of the dimensions. Dimensions should match flatten excluding dimensions for data_pairs
         parameters. If flatten is defined and flatten_pp is None, then `flatten_pp=flatten`.
     legend : bool
         Add legend to figure. By default True.
-    ax: numpy array-like of matplotlib axes or bokeh figures, optional
+    ax : numpy array-like of matplotlib axes or bokeh figures, optional
         A 2D array of locations into which to plot the densities. If not supplied, Arviz will create
         its own array of plot areas (and return it).
-    backend: str, optional
+    backend : str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: bool, optional
+    plot_ref_kwargs :  dict, optional
+        Extra keyword arguments to control how reference is represented. Passed to `plt.plot` or 
+        `plt.axhspan`(when `kind=u_value` and `reference=analytical`).
+    backend_kwargs : bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
-    group: {"prior", "posterior"}, optional
+    group : {"prior", "posterior"}, optional
         Specifies which InferenceData group should be plotted. Defaults to 'posterior'.
         Other value can be 'prior'.
-    show: bool, optional
+    show : bool, optional
         Call backend show function.
 
     Returns
@@ -124,6 +139,15 @@ def plot_bpv(
 
     if kind.lower() not in ("t_stat", "u_value", "p_value"):
         raise TypeError("`kind` argument must be either `t_stat`, `u_value`, or `p_value`")
+
+    if reference.lower() not in ("analytical", "samples", None):
+        raise TypeError("`reference` argument must be either `analytical`, `samples`, or `None`")
+
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
+    else:
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
     if data_pairs is None:
         data_pairs = {}
@@ -187,6 +211,15 @@ def plot_bpv(
         figsize, textsize, rows, cols
     )
 
+    if plot_ref_kwargs is None:
+        plot_ref_kwargs = {}
+    if kind == "p_value" and reference == "analytical":
+        plot_ref_kwargs.setdefault("color", "k")
+        plot_ref_kwargs.setdefault("linestyle", "--")
+    else:
+        plot_ref_kwargs.setdefault("alpha", 0.1)
+        plot_ref_kwargs.setdefault("color", "C0")
+
     bpvplot_kwargs = dict(
         ax=ax,
         length_plotters=length_plotters,
@@ -201,8 +234,7 @@ def plot_bpv(
         t_stat=t_stat,
         reference=reference,
         n_ref=n_ref,
-        hdi=hdi,
-        alpha=alpha,
+        hdi_prob=hdi_prob,
         mean=mean,
         color=color,
         figsize=figsize,
@@ -211,15 +243,10 @@ def plot_bpv(
         markersize=markersize,
         linewidth=linewidth,
         flatten=flatten,
-        legend=legend,
+        plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )
-
-    # ppcplot_kwargs.pop("legend")
-    # ppcplot_kwargs.pop("group")
-    # ppcplot_kwargs.pop("xt_labelsize")
-    # ppcplot_kwargs.pop("ax_labelsize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_bpv", "bpvplot", backend)

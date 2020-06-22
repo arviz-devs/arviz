@@ -28,13 +28,12 @@ def plot_bpv(
     predictive_dataset,
     total_pp_samples,
     kind,
-    bpv,
     t_stat,
+    bpv,
+    mean,
     reference,
     n_ref,
-    hdi,
-    alpha,
-    mean,
+    hdi_prob,
     color,
     figsize,
     xt_labelsize,
@@ -42,7 +41,7 @@ def plot_bpv(
     markersize,
     linewidth,
     flatten,
-    legend,
+    plot_ref_kwargs,
     backend_kwargs,
     show,
 ):
@@ -72,8 +71,8 @@ def plot_bpv(
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth)
-
+            ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
+            ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
                 if reference == "analytical":
@@ -81,29 +80,28 @@ def plot_bpv(
                     upb = 1 - lwb
                     x = np.linspace(lwb, upb, 500)
                     dens_ref = dist.pdf(x)
-                    ax_i.plot(x, dens_ref, "k--")
+                    ax_i.plot(x, dens_ref, **plot_ref_kwargs)
                 elif reference == "samples":
                     x_ss, u_dens = sample_reference_distribution(
                         dist, (n_ref, tstat_pit_dens.size,)
                     )
-                    # **plot_ref_kwargs
-                    ax_i.plot(x_ss, u_dens, alpha=0.1, color="C0", linewidth=linewidth)
+                    ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.plot(x_s, tstat_pit_dens)
+            ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
-                    hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi) / 2)
-                    hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
-                    ax_i.axhspan(*hdi_odds, alpha=0.35)  # **plot_ref_kwargs
+                    hdi = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
+                    hdi_odds = (hdi / (1 - hdi), (1 - hdi) / hdi)
+                    ax_i.axhspan(*hdi_odds, **plot_ref_kwargs)
                 elif reference == "samples":
                     dist = stats.uniform(0, 1)
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
-                    ax_i.plot(x_ss, u_dens, alpha=0.1, color="C0", linewidth=linewidth)
+                    ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
             ax_i.set_ylim(0, None)
             ax_i.set_xlim(0, 1)
         else:
@@ -116,18 +114,18 @@ def plot_bpv(
                     tfunc = np.std
                 obs_vals = tfunc(obs_vals)
                 pp_vals = tfunc(pp_vals, axis=1)
+            elif hasattr(t_stat, "__call__"):
+                obs_vals = t_stat(obs_vals.flatten())
+                pp_vals = t_stat(pp_vals)
             elif is_valid_quantile(t_stat):
                 t_stat = float(t_stat)
                 obs_vals = np.quantile(obs_vals, q=t_stat)
                 pp_vals = np.quantile(pp_vals, q=t_stat, axis=1)
-            elif hasattr(t_stat, "__call__"):
-                obs_vals = t_stat(obs_vals.flatten())
-                pp_vals = t_stat(pp_vals)
             else:
                 raise ValueError(f"T statistics {t_stat} not implemented")
 
-            plot_kde(pp_vals, ax=ax_i)
-
+            plot_kde(pp_vals, ax=ax_i, plot_kwargs={"color": color})
+            ax_i.set_yticks([])
             if bpv:
                 p_value = np.mean(pp_vals <= obs_vals)
                 ax_i.plot(0, 0, label=f"bpv={p_value:.2f}", alpha=0)
@@ -143,7 +141,6 @@ def plot_bpv(
         else:
             xlabel = var_name
         ax_i.set_xlabel(make_label(xlabel, selection), fontsize=ax_labelsize)
-
 
     if backend_show(show):
         plt.show()
