@@ -7,6 +7,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 
 from numpy import newaxis
 from .rcparams import rcParams
@@ -664,3 +665,32 @@ def credible_interval_warning(credible_interval, hdi_prob):
 
     hdi_prob = credible_interval
     return hdi_prob
+
+
+class HtmlTemplate:
+    """Contain html templates for InferenceData repr."""
+
+    html_template = """
+            <div>
+              <div class='xr-header'>
+                <div class="xr-obj-type">arviz.InferenceData</div>
+              </div>
+              <ul class="xr-sections">
+              {}
+              </ul>
+            </div>
+            """
+    element_template = """
+            <li class = "xr-section-item">
+                  <input id="idata_{group_id}" class="xr-section-summary-in" type="checkbox">
+                  <label for="idata_{group_id}" class = "xr-section-summary">{group}</label>
+                  <div class="xr-section-inline-details"></div>
+                  <div class="xr-section-details">
+                      <ul id="xr-dataset-coord-list" class="xr-var-list">
+                          <div style="padding-left:2rem;">{xr_data}<br></div>
+                      </ul>
+                  </div>
+            </li>
+            """
+    specific_style = ".xr-wrap{width:700px!important;}"
+    css_template = f"<style> {xr.core.formatting_html.CSS_STYLE}{specific_style} </style>"

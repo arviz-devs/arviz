@@ -18,6 +18,7 @@ from .pairplot import plot_pair
 from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
+from .distcomparisonplot import plot_dist_comparison
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
@@ -46,6 +47,7 @@ __all__ = [
     "plot_parallel",
     "plot_posterior",
     "plot_ppc",
+    "plot_dist_comparison",
     "plot_rank",
     "plot_trace",
     "plot_violin",
