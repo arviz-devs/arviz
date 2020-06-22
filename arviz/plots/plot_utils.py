@@ -663,6 +663,7 @@ def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
         "plot": mpl.lines.Line2D,
         "hist": mpl.patches.Patch,
         "hexbin": mpl.collections.PolyCollection,
+        "fill_between": mpl.collections.PolyCollection,
         "hlines": mpl.collections.LineCollection,
         "text": mpl.text.Text,
         "contour": mpl.contour.ContourSet,

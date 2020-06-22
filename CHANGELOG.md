@@ -3,7 +3,8 @@
 ## v0.x.x Unreleased
 
 ### New features
-* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215) 
+* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215)
+* plot_bpv. A new plot intented to plot Bayesian p-values (#1222)
 
 ### Maintenance and fixes
 

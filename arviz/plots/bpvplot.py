@@ -18,11 +18,11 @@ _log = logging.getLogger(__name__)
 
 def plot_bpv(
     data,
-    kind="kde",
+    kind="u_value",
     t_stat="median",
     bpv=True,
     mean=True,
-    reference=None,
+    reference="samples",
     n_ref=100,
     hdi_prob=0.94,
     color="C0",
@@ -128,6 +128,26 @@ def plot_bpv(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    Examples
+    --------
+    Plot Bayesian p_values.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data("regression1d")
+        >>> az.plot_bpv(data, kind="p_value")
+
+    Plot custom t statistic comparison.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> data = az.load_arviz_data("regression1d")
+        >>> az.plot_bpv(data, kind="t_stat", t_stat=lambda x:np.percentile(x, q=50, axis=-1))
     """
     if group not in ("posterior", "prior"):
         raise TypeError("`group` argument must be either `posterior` or `prior`")
@@ -139,8 +159,11 @@ def plot_bpv(
     if kind.lower() not in ("t_stat", "u_value", "p_value"):
         raise TypeError("`kind` argument must be either `t_stat`, `u_value`, or `p_value`")
 
-    if reference.lower() not in ("analytical", "samples", None):
-        raise TypeError("`reference` argument must be either `analytical`, `samples`, or `None`")
+    if reference is not None:
+        if reference.lower() not in ("analytical", "samples"):
+            raise TypeError(
+                "`reference` argument must be either `analytical`, `samples`, or `None`"
+            )
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
