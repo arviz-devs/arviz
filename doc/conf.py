@@ -269,4 +269,5 @@ intersphinx_mapping = {
     "pymc3": ("https://docs.pymc.io/", None),
     "mpl": ("https://matplotlib.org/", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
 }
