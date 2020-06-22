@@ -7,6 +7,8 @@
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
 * Added support for PyJAGS via the function `from_pyjags`. (#1219 and #1245)
 * `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228, #1240 and #1249)
+* `plot_trace` now supports multiple aesthetics to identify chain and variable
+  shape and support matplotlib aliases (#1253)
 * `plot_hdi` can now take already computed HDI values (#1241)
 
 ### Maintenance and fixes
@@ -20,10 +22,13 @@
 * Remove false positive warning in `plot_hdi` and fixed matplotlib axes generation (#1241)
 * Change the default `zorder` of scatter points from `0` to `0.6` in `plot_pair` (#1246)
 * Update `get_bins` for numpy 1.19 compatibility (#1256)
+* Fixes to `rug`, `divergences` arguments in `plot_trace` (#1253)
 
 ### Deprecation
 * Using `from_pymc3` without a model context available now raises a
   `FutureWarning` and will be deprecated in a future version (#1227)
+* In `plot_trace`, `chain_prop` and `compact_prop` as tuples will now raise a
+  `FutureWarning` (#1253)
 * `hdi` with 2d data raises a FutureWarning (#1241)
 
 ### Documentation
