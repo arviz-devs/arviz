@@ -374,20 +374,28 @@ class InferenceData:
     def map(self, fun, groups=None, filter_groups=None, inplace=False, args=None, **kwargs):
         """Apply a function to multiple groups.
 
+        Applies ``fun`` groupwise to the selected ``InferenceData`` groups and overwrites the
+        group with the result of the function.
+
         Parameters
         ----------
-        fun: callable
-            Function to be applied to each group.
-        groups: str or list of str, optional
+        fun : callable
+            Function to be applied to each group. Assumes the function is called as
+            ``fun(dataset, *args, **kwargs)``.
+        groups : str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
-        inplace: bool, optional
+        filter_groups : {None, "like", "regex"}, optional
+            If `None` (default), interpret var_names as the real variables names. If "like",
+            interpret var_names as substrings of the real variables names. If "regex",
+            interpret var_names as regular expressions on the real variables names. A la
+            `pandas.filter`.
+        inplace : bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
-        args: array_like, optional
-            Positional arguments passed to ``fun``. Assumes the function is called as
-            ``fun(dataset, *args, **kwargs)``.
-        **kwargs: mapping, optional
+        args : array_like, optional
+            Positional arguments passed to ``fun``.
+        **kwargs : mapping, optional
             Keyword arguments passed to ``fun``.
 
         Returns
@@ -404,9 +412,39 @@ class InferenceData:
 
             In [1]: import arviz as az
                ...: idata = az.load_arviz_data("non_centered_eight")
-               ...: idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_RVs")
+               ...: idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_vars")
                ...: print(idata_shifted_obs.observed_data)
                ...: print(idata_shifted_obs.posterior_predictive)
+
+        Rename and update the coordinate values in both posterior and prior groups.
+
+        .. ipython::
+
+            In [1]: idata = az.load_arviz_data("radon")
+               ...: idata = idata.map(
+               ...:     lambda ds: ds.rename({"gamma_dim_0": "uranium_coefs"}).assign(
+               ...:         uranium_coefs=["intercept", "u_slope", "xbar_slope"]
+               ...:     ),
+               ...:     groups=["posterior", "prior"]
+               ...: )
+               ...: idata.posterior
+
+        Add extra coordinates to all groups containing observed variables
+
+        .. ipython::
+
+            In [1]: idata = az.load_arviz_data("rugby")
+               ...: home_team, away_team = np.array([
+               ...:     m.split() for m in idata.observed_data.match.values
+               ...: ]).T
+               ...: idata = idata.map(
+               ...:     lambda ds, **kwargs: ds.assign_coords(**kwargs),
+               ...:     groups="observed_vars",
+               ...:     home_team=("match", home_team),
+               ...:     away_team=("match", away_team),
+               ...: )
+               ...: print(idata.posterior_predictive)
+               ...: print(idata.observed_data)
 
         """
         if args is None:
@@ -455,7 +493,7 @@ class InferenceData:
 
             In [1]: import arviz as az
                ...: idata = az.load_arviz_data("non_centered_eight")
-               ...: idata_means = idata._wrap_xarray_method("mean", groups="latent_RVs")
+               ...: idata_means = idata._wrap_xarray_method("mean", groups="latent_vars")
                ...: print(idata_means.posterior)
                ...: print(idata_means.observed_data)
 

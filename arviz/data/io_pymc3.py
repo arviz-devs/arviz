@@ -147,13 +147,14 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             aelem = arbitrary_element(get_from)
             self.ndraws = aelem.shape[0]
 
-        self.coords = coords
-        if coords is None and hasattr(self.model, "coords"):
-            self.coords = self.model.coords
+        self.coords = {} if coords is None else coords
+        if hasattr(self.model, "coords"):
+            self.coords = {**self.model.coords, **self.coords}
 
-        self.dims = dims
-        if dims is None and hasattr(self.model, "RV_dims"):
-            self.dims = {k: list(v) for k, v in self.model.RV_dims.items()}
+        self.dims = {} if dims is None else dims
+        if hasattr(self.model, "RV_dims"):
+            model_dims = {k: list(v) for k, v in self.model.RV_dims.items()}
+            self.dims = {**model_dims, **self.dims}
 
         self.observations, self.multi_observations = self.find_observations()
 

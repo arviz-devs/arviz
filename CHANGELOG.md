@@ -5,9 +5,8 @@
 ### New features
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analitically (#1215)
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
-* Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
-* `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228
-  and #1240)
+* Added support for PyJAGS via the function `from_pyjags`. (#1219 and #1245)
+* `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228, #1240 and #1249)
 * `plot_hdi` can now take already computed HDI values (#1241)
 
 ### Maintenance and fixes
@@ -19,6 +18,8 @@
 * Skip tests on matplotlib animations if ffmpeg is not installed (#1227)
 * Fix hpd bug where arguments were being ignored (#1236)
 * Remove false positive warning in `plot_hdi` and fixed matplotlib axes generation (#1241)
+* Change the default `zorder` of scatter points from `0` to `0.6` in `plot_pair` (#1246)
+* Update `get_bins` for numpy 1.19 compatibility (#1256)
 
 ### Deprecation
 * Using `from_pymc3` without a model context available now raises a
@@ -26,8 +27,9 @@
 * `hdi` with 2d data raises a FutureWarning (#1241)
 
 ### Documentation
-* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
+* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219 and #1245)
 * Fixed inconsistent capitalization in `plot_hdi` docstring (#1221)
+* Fixed and extended `InferenceData.map` docs (#1255)
 
 ## v0.8.3 (2020 May 28)
 ### Maintenance and fixes
