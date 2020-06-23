@@ -1288,6 +1288,7 @@ def test_plot_dist_comparison_different_vars():
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
 
+
 @pytest.mark.parametrize(
     "kwargs",
     [

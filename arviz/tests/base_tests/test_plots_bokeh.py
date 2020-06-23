@@ -968,6 +968,7 @@ def test_plot_dist_comparison_warn(models):
     with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib bakend."):
         plot_dist_comparison(models.model_1, backend="bokeh")
 
+
 @pytest.mark.parametrize(
     "kwargs",
     [
