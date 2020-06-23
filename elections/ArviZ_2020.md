@@ -36,6 +36,10 @@ Note: This is a one time process for identifying core contributors. After this c
    feels they will not be able to serve as a Council Member for any reason.
 4. Nominations end at June 20th anywhere on Earth. On June 21st nominations will be compiled in the last comment and the issue will be closed.
 
+#### Historical Record
+Nominations were completed on June 21st (PST). Conversation is tracked in issue ticket.
+https://github.com/arviz-devs/arviz/issues/1243
+
 
 ### First Round Election for Council and Council size (Week of June 21)
 The first election will be for council and council size. Elections will take place over
