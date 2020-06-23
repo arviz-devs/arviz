@@ -1,5 +1,4 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
-import logging
 import numpy as np
 from matplotlib.colors import to_hex
 
@@ -12,8 +11,6 @@ from .plot_utils import (
 )
 from ..rcparams import rcParams
 from ..utils import _var_names
-
-_log = logging.getLogger(__name__)
 
 
 def plot_bpv(
@@ -42,7 +39,7 @@ def plot_bpv(
     show=None,
 ):
     """
-    Plot Bayesian p-value for observed data and Posterior/Prior predictive
+    Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
     Parameters
     ----------

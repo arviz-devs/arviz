@@ -1,5 +1,4 @@
 """Matplotib Bayesian p-value Posterior predictive plot."""
-import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -13,9 +12,6 @@ from ...plot_utils import (
     is_valid_quantile,
 )
 from ....numeric_utils import _fast_kde
-
-
-_log = logging.getLogger(__name__)
 
 
 def plot_bpv(
