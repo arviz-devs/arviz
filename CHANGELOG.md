@@ -1,7 +1,15 @@
 # Change Log
 
 ## v0.x.x Unreleased
+### New features
 
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.9.0 (2020 June 23)
 ### New features
 * loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analitically (#1215)
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
