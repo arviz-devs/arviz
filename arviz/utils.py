@@ -740,6 +740,7 @@ class Dask:
     @classmethod
     def enable_dask(cls, **kwargs):
         """To enable Dask.
+
         Parameters
         ----------
         **kwargs : dask kwargs passed to `xarray.apply_ufunc`
