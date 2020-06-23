@@ -69,7 +69,7 @@ def plot_posterior(
             rope=rope,
             ax_labelsize=ax_labelsize,
             xt_labelsize=xt_labelsize,
-            **kwargs
+            **kwargs,
         )
         idx += 1
         ax_.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
@@ -98,7 +98,7 @@ def _plot_posterior_op(
     ax_labelsize,
     xt_labelsize,
     round_to: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ):  # noqa: D202
     """Artist to draw posterior."""
 
@@ -175,9 +175,23 @@ def _plot_posterior_op(
             zorder=0,
             alpha=0.7,
         )
-        text_props = {"size": ax_labelsize, "horizontalalignment": "center", "color": "C2"}
-        ax.text(vals[0], plot_height * 0.2, vals[0], weight="semibold", **text_props)
-        ax.text(vals[1], plot_height * 0.2, vals[1], weight="semibold", **text_props)
+        text_props = {"size": ax_labelsize, "color": "C2"}
+        ax.text(
+            vals[0],
+            plot_height * 0.2,
+            f"{vals[0]} ",
+            weight="semibold",
+            horizontalalignment="right",
+            **text_props,
+        )
+        ax.text(
+            vals[1],
+            plot_height * 0.2,
+            f" {vals[1]}",
+            weight="semibold",
+            horizontalalignment="left",
+            **text_props,
+        )
 
     def display_point_estimate():
         if not point_estimate:
@@ -211,16 +225,16 @@ def _plot_posterior_op(
             ax.text(
                 hdi_i[0],
                 plot_height * 0.07,
-                round_num(hdi_i[0], round_to),
+                round_num(hdi_i[0], round_to) + " ",
                 size=ax_labelsize,
-                horizontalalignment="center",
+                horizontalalignment="right",
             )
             ax.text(
                 hdi_i[1],
                 plot_height * 0.07,
-                round_num(hdi_i[1], round_to),
+                " " + round_num(hdi_i[1], round_to),
                 size=ax_labelsize,
-                horizontalalignment="center",
+                horizontalalignment="left",
             )
             ax.text(
                 (hdi_i[0] + hdi_i[1]) / 2,
