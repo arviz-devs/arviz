@@ -2,6 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Added InferenceData object containing circular variables (#1265)
 
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)
