@@ -3,13 +3,14 @@
 import os
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
 import numpy as np
 import pytest
 
 from ...data import from_dict, load_arviz_data
-from ...stats import compare, loo, waic
+from ...stats import compare, loo, waic, hdi
 from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -29,6 +30,7 @@ from ...plots import (
     plot_parallel,
     plot_pair,
     plot_joint,
+    plot_dist_comparison,
     plot_ppc,
     plot_violin,
     plot_compare,
@@ -206,6 +208,13 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
 def test_plot_trace_bad_lines_value(models, bad_kwargs):
     with pytest.raises(ValueError, match="line-positions should be numeric"):
         plot_trace(models.model_1, **bad_kwargs)
+
+
+@pytest.mark.parametrize("prop", ["chain_prop", "compact_prop"])
+def test_plot_trace_futurewarning(models, prop):
+    with pytest.warns(FutureWarning, match=f"{prop} as a tuple.+deprecated"):
+        ax = plot_trace(models.model_1, **{prop: ("ls", ("-", "--"))})
+    assert ax.shape
 
 
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
@@ -497,6 +506,8 @@ def test_plot_pair_shapes(marginals, max_subplots):
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc(models, kind, alpha, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     animation_kwargs = {"blit": False}
     axes = plot_ppc(
         models.model_1,
@@ -516,6 +527,8 @@ def test_plot_ppc(models, kind, alpha, animated):
 @pytest.mark.parametrize("jitter", [None, 0, 0.1, 1, 3])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_multichain(kind, jitter, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     data = from_dict(
         posterior_predictive={
             "x": np.random.randn(4, 100, 30),
@@ -543,6 +556,8 @@ def test_plot_ppc_multichain(kind, jitter, animated):
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("animated", [False, True])
 def test_plot_ppc_discrete(kind, animated):
+    if animation and not animation.writers.is_available("ffmpeg"):
+        pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     data = from_dict(
         observed_data={"obs": np.random.randint(1, 100, 15)},
         posterior_predictive={"obs": np.random.randint(1, 300, (1, 20, 15))},
@@ -556,6 +571,10 @@ def test_plot_ppc_discrete(kind, animated):
     assert axes
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_save_animation(models, kind):
     animation_kwargs = {"blit": False}
@@ -577,6 +596,10 @@ def test_plot_ppc_save_animation(models, kind):
     assert os.path.getsize(path)
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 def test_plot_ppc_discrete_save_animation(kind):
     data = from_dict(
@@ -602,6 +625,10 @@ def test_plot_ppc_discrete_save_animation(kind):
     assert os.path.getsize(path)
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 @pytest.mark.parametrize("system", ["Windows", "Darwin"])
 def test_non_linux_blit(models, monkeypatch, system, caplog):
     import platform
@@ -657,6 +684,10 @@ def test_plot_ppc_ax(models, kind, fig_ax):
     assert axes[0] is ax
 
 
+@pytest.mark.skipif(
+    not animation.writers.is_available("ffmpeg"),
+    reason="matplotlib animations within ArviZ require ffmpeg",
+)
 def test_plot_ppc_bad_ax(models, fig_ax):
     _, ax = fig_ax
     _, ax2 = plt.subplots(1, 2)
@@ -823,14 +854,43 @@ def test_plot_compare_no_ic(models):
     "kwargs",
     [
         {"color": "0.5", "circular": True},
-        {"fill_kwargs": {"alpha": 0}},
+        {"hdi_data": True, "fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
-        {"smooth": False},
+        {"hdi_data": True, "smooth": False},
     ],
 )
 def test_plot_hdi(models, data, kwargs):
-    plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    hdi_data = kwargs.pop("hdi_data", None)
+    if hdi_data:
+        hdi_data = hdi(models.model_1.posterior["theta"])
+        ax = plot_hdi(data["y"], hdi_data=hdi_data, **kwargs)
+    else:
+        ax = plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    assert ax
+
+
+def test_plot_hdi_warning():
+    """Check using both y and hdi_data sends a warning."""
+    x_data = np.random.normal(0, 1, 100)
+    y_data = np.random.normal(2 + x_data * 0.5, 0.5, (1, 200, 100))
+    hdi_data = hdi(y_data)
+    with pytest.warns(UserWarning, match="Both y and hdi_data"):
+        ax = plot_hdi(x_data, y=y_data, hdi_data=hdi_data)
+    assert ax
+
+
+def test_plot_hdi_missing_arg_error():
+    """Check that both y and hdi_data missing raises an error."""
+    with pytest.raises(ValueError, match="One of {y, hdi_data"):
+        plot_hdi(np.arange(20))
+
+
+def test_plot_hdi_dataset_error(models):
+    """Check hdi_data as multiple variable Dataset raises an error."""
+    hdi_data = hdi(models.model_1)
+    with pytest.raises(ValueError, match="Only single variable Dataset"):
+        plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
@@ -1194,3 +1254,35 @@ def test_plot_mcse_no_divergences(models):
     idata.sample_stats = idata.sample_stats.rename({"diverging": "diverging_missing"})
     with pytest.raises(ValueError, match="not contain diverging"):
         plot_mcse(idata, rug=True)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"var_names": ["theta"]},
+        {"var_names": ["theta"], "coords": {"theta_dim_0": [0, 1]}},
+        {"var_names": ["eta"], "posterior_kwargs": {"rug": True, "rug_kwargs": {"color": "r"}}},
+        {"var_names": ["mu"], "prior_kwargs": {"fill_kwargs": {"alpha": 0.5}}},
+        {
+            "var_names": ["tau"],
+            "prior_kwargs": {"plot_kwargs": {"color": "r"}},
+            "posterior_kwargs": {"plot_kwargs": {"color": "b"}},
+        },
+        {"var_names": ["y"], "kind": "observed"},
+    ],
+)
+def test_plot_dist_comparison(models, kwargs):
+    idata = models.model_1
+    ax = plot_dist_comparison(idata, **kwargs)
+    assert np.all(ax)
+
+
+def test_plot_dist_comparison_different_vars():
+    data = from_dict(
+        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
+    )
+    with pytest.raises(KeyError):
+        plot_dist_comparison(data, var_names="x")
+    ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
+    assert np.all(ax)

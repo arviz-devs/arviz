@@ -218,7 +218,7 @@ def plot_loo_pit(
                 hdi_kwargs = {}
             hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
             hdi_kwargs.setdefault("alpha", 0.35)
-            hdi_kwargs.setdefault("label", "Uniform hdi")
+            hdi_kwargs.setdefault("label", "Uniform HDI")
 
     loo_pit_kwargs = dict(
         ax=ax,
