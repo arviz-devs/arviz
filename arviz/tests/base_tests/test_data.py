@@ -433,6 +433,115 @@ class TestInferenceData:
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
 
+    @pytest.mark.parametrize("inplace", [True, False])
+    def test_isel(self, inplace):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        original_groups = getattr(idata, "_groups")
+        ndraws = idata.posterior.draw.values.size
+        kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
+        if inplace:
+            idata.isel(inplace=inplace, **kwargs)
+        else:
+            idata2 = idata.isel(inplace=inplace, **kwargs)
+            assert idata2 is not idata
+            idata = idata2
+        groups = getattr(idata, "_groups")
+        assert np.all(np.isin(groups, original_groups))
+        for group in groups:
+            dataset = getattr(idata, group)
+            assert "b_dim_0" in dataset.dims
+            assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
+            if group != "observed_data":
+                assert np.all(np.isin(["chain", "draw"], dataset.dims))
+                assert np.all(dataset.chain.values == np.arange(0, 4, 2))
+                assert np.all(dataset.draw.values == np.arange(200, ndraws))
+
+    def test_rename(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.data_vars)
+            assert "b" not in list(xr_data.data_vars)
+
+        renamed_idata = idata.rename({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.dims)
+            assert "b_dim_0" not in list(xr_data.dims)
+
+    def test_rename_vars(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename_vars({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.data_vars)
+            assert "b" not in list(xr_data.data_vars)
+
+        renamed_idata = idata.rename_vars({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" not in list(xr_data.dims)
+            assert "b_dim_0" in list(xr_data.dims)
+
+    def test_rename_dims(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename_dims({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.dims)
+            assert "b_dim_0" not in list(xr_data.dims)
+
+        renamed_idata = idata.rename_dims({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" not in list(xr_data.data_vars)
+            assert "b" in list(xr_data.data_vars)
+
+    def test_stack_unstack(self):
+        datadict = {
+            "a": np.random.randn(100),
+            "b": np.random.randn(1, 100, 10),
+            "c": np.random.randn(1, 100, 3, 4),
+        }
+        coords = {
+            "c1": np.arange(3),
+            "c99": np.arange(4),
+            "b1": np.arange(10),
+        }
+        dims = {"c": ["c1", "c99"], "b": ["b1"]}
+        dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
+        assert dataset.stack(z=["c1", "c99"]).posterior == dataset.posterior.stack(z=["c1", "c99"])
+        assert dataset.stack(z=["c1", "c99"]).unstack().posterior == dataset.posterior
+        assert dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior == dataset.posterior
+
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
         idata = load_arviz_data("centered_eight")

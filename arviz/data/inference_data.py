@@ -262,6 +262,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -341,6 +346,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -385,6 +395,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -431,6 +446,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -450,7 +470,7 @@ class InferenceData:
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            valid_dims = set(dim).intersection(dataset.dims)
+            valid_dims = set(dim).intersection(dataset.dims) if dim is not None else dim
             dataset = dataset.unstack(dim=valid_dims)
             setattr(out, group, dataset)
         if inplace:
@@ -475,6 +495,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -495,7 +520,7 @@ class InferenceData:
 
         for group in groups:
             dataset = getattr(self, group)
-            expected_keys = list(dataset.prior.data_vars) + list(dataset.dims)
+            expected_keys = list(dataset.data_vars) + list(dataset.dims)
             valid_keys = set(name_dict.keys()).intersection(expected_keys)
             dataset = dataset.rename({key: name_dict[key] for key in valid_keys})
             setattr(out, group, dataset)
@@ -521,6 +546,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
@@ -563,6 +593,11 @@ class InferenceData:
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
