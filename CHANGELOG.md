@@ -4,6 +4,7 @@
 ### New features
 
 ### Maintenance and fixes
+* plot_posterior: fix overlap of hdi and rope (#1263)
 
 ### Deprecation
 
