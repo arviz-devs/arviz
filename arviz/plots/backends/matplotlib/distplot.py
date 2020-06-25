@@ -29,6 +29,7 @@ def plot_dist(
     contourf_kwargs,
     pcolormesh_kwargs,
     hist_kwargs,
+    is_circular,
     ax,
     backend_kwargs,
     show,
@@ -43,11 +44,16 @@ def plot_dist(
         )
         backend_kwargs = None
     if ax is None:
-        ax = plt.gca()
+        ax = plt.gca(polar=is_circular)
 
     if kind == "hist":
         ax = _histplot_mpl_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
+            values=values,
+            values2=values2,
+            rotated=rotated,
+            ax=ax,
+            hist_kwargs=hist_kwargs,
+            is_circular=is_circular,
         )
 
     elif kind == "kde":
@@ -77,6 +83,7 @@ def plot_dist(
             ax=ax,
             backend="matplotlib",
             backend_kwargs=backend_kwargs,
+            is_circular=is_circular,
             show=show,
         )
 
@@ -86,20 +93,50 @@ def plot_dist(
     return ax
 
 
-def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs):
+def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     """Add a histogram for the data to the axes."""
+
+    bins = hist_kwargs.pop("bins")
+
+    if is_circular:
+
+        if values.min() < np.pi and values.max() > np.pi:
+            if bins is None:
+                bins = get_bins(values)
+            values = np.deg2rad(values)
+            bins = np.deg2rad(bins)
+        else:
+            label = [
+                r"$0$",
+                r"$\pi/4$",
+                r"$\pi/2$",
+                r"$3\pi/4$",
+                r"$\pi$",
+                r"$5\pi/4$",
+                r"$3\pi/2$",
+                r"$7\pi/4$",
+            ]
+
+            ax.set_xticklabels(label)
+        ax.set_yticklabels([])
+
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
 
-    bins = hist_kwargs.pop("bins")
     if bins is None:
         bins = get_bins(values)
-    ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
-    if rotated:
+    n, _, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
+
+    if rotated or is_circular:
         ax.set_yticks(bins[:-1])
     else:
         ax.set_xticks(bins[:-1])
+
+    if is_circular:
+        ax.set_ylim(0, n.max() + 0.5 * n.max())
+
     if hist_kwargs.get("label") is not None:
         ax.legend()
+
     return ax

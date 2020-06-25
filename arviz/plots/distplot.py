@@ -3,7 +3,6 @@
 
 import xarray as xr
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
-from ..numeric_utils import get_bins
 from ..data import InferenceData
 from ..rcparams import rcParams
 
@@ -32,6 +31,7 @@ def plot_dist(
     ax=None,
     backend=None,
     backend_kwargs=None,
+    is_circular=False,
     show=None,
     **kwargs
 ):
@@ -90,6 +90,8 @@ def plot_dist(
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
+    is_circular : bool
+        Plot circular histogram or KDE plot.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional
@@ -160,7 +162,7 @@ def plot_dist(
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
-        hist_kwargs.setdefault("bins", get_bins(values))
+        hist_kwargs.setdefault("bins", None)
         hist_kwargs.setdefault("cumulative", cumulative)
         hist_kwargs.setdefault("color", color)
         hist_kwargs.setdefault("label", label)
@@ -197,6 +199,7 @@ def plot_dist(
         hist_kwargs=hist_kwargs,
         ax=ax,
         backend_kwargs=backend_kwargs,
+        is_circular=is_circular,
         show=show,
         **kwargs,
     )

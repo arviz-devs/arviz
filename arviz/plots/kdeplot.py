@@ -26,6 +26,7 @@ def plot_kde(
     contour_kwargs=None,
     contourf_kwargs=None,
     pcolormesh_kwargs=None,
+    is_circular=False,
     ax=None,
     legend=True,
     backend=None,
@@ -81,6 +82,8 @@ def plot_kde(
         Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
+    is_circular : bool
+        Plot circular KDE plot.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
@@ -230,6 +233,7 @@ def plot_kde(
         contour_kwargs=contour_kwargs,
         contourf_kwargs=contourf_kwargs,
         pcolormesh_kwargs=pcolormesh_kwargs,
+        is_circular=is_circular,
         ax=ax,
         legend=legend,
         backend_kwargs=backend_kwargs,
