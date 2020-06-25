@@ -25,7 +25,7 @@ def plot_bpv(
     kind,
     t_stat,
     bpv,
-    mean,
+    plot_mean,
     reference,
     n_ref,
     hdi_prob,
@@ -123,7 +123,7 @@ def plot_bpv(
                 ax_i.plot(0, 0, label=f"bpv={p_value:.2f}", alpha=0)
                 ax_i.legend()
 
-            if mean:
+            if plot_mean:
                 ax_i.plot(
                     obs_vals.mean(), 0, "o", color=color, markeredgecolor="k", markersize=markersize
                 )

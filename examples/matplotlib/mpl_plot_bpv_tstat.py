@@ -1,6 +1,6 @@
 """
-Bayesian p-value Posterior plot
-===============================
+Bayesian p-value with median T statistic Posterior plot
+=======================================================
 
 _thumb: .6, .5
 """

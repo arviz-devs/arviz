@@ -18,7 +18,7 @@ def plot_bpv(
     kind="u_value",
     t_stat="median",
     bpv=True,
-    mean=True,
+    plot_mean=True,
     reference="samples",
     n_ref=100,
     hdi_prob=0.94,
@@ -46,7 +46,16 @@ def plot_bpv(
     data : az.InferenceData object
         InferenceData object containing the observed and posterior/prior predictive data.
     kind : str
-        Type of plot to display (u_value, p_value, t_stat). Defaults to u_value.
+        Type of plot to display ("p_value", "u_value", "t_stat"). Defaults to u_value.
+        For "p_value" we compute p := p(y* ≤ y | y). This is the probability of the data y being
+        larger or equal than the predicted data y*. The ideal value is 0.5 (half the predictions
+        below and half above the data).
+        For "u_value" we compute pi := p(yi* ≤ yi | y). i.e. like a p_value but per observation yi.
+        This is also known as marginal p_value. The ideal distribution is uniform. This is similar
+        to the LOO-pit calculation/plot, the difference is than in LOO-pit plot we compute
+        pi = p(yi* r ≤ yi | y-i ), where y-i, is all other data except yi.
+        For "t_stat" we compute := p(T(y)* ≤ T(y) | y) where T is any T statistic. See t_stat
+        argument below for details of available options.
     t_stat : str, float, or callable
         T statistics to compute from the observations and predictive distributions. Allowed strings
         are "mean", "median" or "std". Defaults to "median". Alternative a quantile can be passed
@@ -54,13 +63,14 @@ def plot_bpv(
         acepted, see examples section for details.
     bpv : bool
         If True (default) add the bayesian p_value to the legend when kind = t_stat.
-    mean : bool
+    plot_mean : bool
         Whether or not to plot the mean T statistic. Defaults to True.
     reference : str
         How to compute the distributions used as reference for u_values or p_values. Allowed values
         are "analytical" (default) and "samples". Use `None` to do not plot any reference.
+        Defaults to "samples".
     n_ref : int, optional
-        Number of reference distributions to sample when `reference=samples`
+        Number of reference distributions to sample when `reference=samples`. Defaults to 100.
     hdi_prob: float, optional
         Probability for the highest density interval for the analytical reference distribution when
         computing u_values. Should be in the interval (0, 1]. Defaults to
@@ -125,6 +135,10 @@ def plot_bpv(
     Returns
     -------
     axes: matplotlib axes or bokeh figures
+
+    References
+    ----------
+    * Gelman et al. (2013) see http://www.stat.columbia.edu/~gelman/book/ pages 151-153 for details
 
     Examples
     --------
@@ -263,7 +277,7 @@ def plot_bpv(
         reference=reference,
         n_ref=n_ref,
         hdi_prob=hdi_prob,
-        mean=mean,
+        plot_mean=plot_mean,
         color=color,
         figsize=figsize,
         ax_labelsize=ax_labelsize,
