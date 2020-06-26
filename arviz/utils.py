@@ -735,7 +735,7 @@ class Dask:
     """Class to toggle Dask states."""
 
     dask_flag = False
-    dask_kwargs = {}
+    dask_kwargs = None
 
     @classmethod
     def enable_dask(cls, **kwargs):
@@ -753,7 +753,7 @@ class Dask:
     def disable_dask(cls):
         """To disable Dask."""
         cls.dask_flag = False
-        cls.dask_kwargs = {}
+        cls.dask_kwargs = None
 
 
 def conditional_dask(func):
@@ -763,7 +763,7 @@ def conditional_dask(func):
 
         if Dask.dask_flag:
             dask_kwargs = Dask.dask_kwargs
-            return func(*args, **kwargs, **dask_kwargs)
+            return func(dask_kwargs=dask_kwargs, *args, **kwargs)
         else:
             return func(*args, **kwargs)
 

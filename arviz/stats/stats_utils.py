@@ -179,7 +179,13 @@ def make_ufunc(
 
 @conditional_dask
 def wrap_xarray_ufunc(
-    ufunc, *datasets, ufunc_kwargs=None, func_args=None, func_kwargs=None, **kwargs
+    ufunc,
+    *datasets,
+    ufunc_kwargs=None,
+    func_args=None,
+    func_kwargs=None,
+    dask_kwargs=None,
+    **kwargs
 ):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
@@ -199,6 +205,9 @@ def wrap_xarray_ufunc(
     func_kwargs : dict
         Keyword arguments passed to 'ufunc'.
             - 'out_shape', int, by default None
+    dask_kwargs : dict
+        Dask kwargs passed to `xarray.apply_ufunc`.
+        Use :meth:`arviz.Dask.enable_dask` method to pass this dict automatically.
     **kwargs
         Passed to xarray.apply_ufunc.
 
@@ -213,6 +222,8 @@ def wrap_xarray_ufunc(
         func_args = tuple()
     if func_kwargs is None:
         func_kwargs = {}
+    if dask_kwargs is None:
+        dask_kwargs = {}
 
     kwargs.setdefault(
         "input_core_dims", tuple(("chain", "draw") for _ in range(len(func_args) + len(datasets)))
@@ -222,7 +233,9 @@ def wrap_xarray_ufunc(
 
     callable_ufunc = make_ufunc(ufunc, **ufunc_kwargs)
 
-    return apply_ufunc(callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **kwargs)
+    return apply_ufunc(
+        callable_ufunc, *datasets, *func_args, kwargs=func_kwargs, **dask_kwargs, **kwargs
+    )
 
 
 def update_docstring(ufunc, func, n_output=1):
