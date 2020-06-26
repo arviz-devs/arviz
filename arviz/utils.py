@@ -738,7 +738,7 @@ class Dask:
     dask_kwargs = None
 
     @classmethod
-    def enable_dask(cls, **kwargs):
+    def enable_dask(cls, **dask_kwargs):
         """To enable Dask.
 
         Parameters
@@ -747,7 +747,7 @@ class Dask:
             See :function:`xarray:xarray.apply_ufunc` for accepted values.
         """
         cls.dask_flag = True
-        cls.dask_kwargs = kwargs
+        cls.dask_kwargs = dask_kwargs
 
     @classmethod
     def disable_dask(cls):
