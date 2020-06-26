@@ -100,24 +100,24 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     if is_circular:
 
-        if values.min() < np.pi and values.max() > np.pi:
+        if is_circular == "degrees":
             if bins is None:
                 bins = get_bins(values)
             values = np.deg2rad(values)
             bins = np.deg2rad(bins)
         else:
-            label = [
-                r"$0$",
-                r"$\pi/4$",
-                r"$\pi/2$",
-                r"$3\pi/4$",
-                r"$\pi$",
-                r"$5\pi/4$",
-                r"$3\pi/2$",
-                r"$7\pi/4$",
+            labels = [
+                r"0",
+                r"π/4",
+                r"π/2",
+                r"3π/4",
+                r"π",
+                r"5π/4",
+                r"3π/2",
+                r"7π/4",
             ]
 
-            ax.set_xticklabels(label)
+            ax.set_xticklabels(labels)
         ax.set_yticklabels([])
 
     if values2 is not None:

@@ -29,6 +29,7 @@ def plot_dist(
     contourf_kwargs,
     pcolormesh_kwargs,
     hist_kwargs,
+    is_circular,
     ax,
     backend_kwargs,
     show,
@@ -43,14 +44,22 @@ def plot_dist(
         **backend_kwargs,
     }
     if ax is None:
-        ax = bkp.figure(**backend_kwargs)
+        if is_circular:
+            ax = bkp.figure(x_axis_type=None, y_axis_type=None,)
+        else:
+            ax = bkp.figure(**backend_kwargs)
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
     if kind == "hist":
         _histplot_bokeh_op(
-            values=values, values2=values2, rotated=rotated, ax=ax, hist_kwargs=hist_kwargs
+            values=values,
+            values2=values2,
+            rotated=rotated,
+            ax=ax,
+            hist_kwargs=hist_kwargs,
+            is_circular=is_circular,
         )
     elif kind == "kde":
         if plot_kwargs is None:
@@ -91,7 +100,7 @@ def plot_dist(
     return ax
 
 
-def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
+def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
@@ -119,8 +128,84 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs):
     if hist_kwargs.pop("cumulative", False):
         hist = np.cumsum(hist)
         hist /= hist[-1]
-    if rotated:
-        ax.quad(top=edges[:-1], bottom=edges[1:], left=0, right=hist, **hist_kwargs)
+
+    if is_circular:
+
+        start_angle = edges
+        outer_radius = hist
+
+        ax.annular_wedge(
+            x=0,
+            y=0,
+            inner_radius=0,
+            outer_radius=outer_radius,
+            start_angle=start_angle,
+            end_angle=start_angle + 0.8,
+            **hist_kwargs,
+        )
+
+        ticks = np.linspace(-np.pi, np.pi, 9)
+        ax.annular_wedge(
+            x=0,
+            y=0,
+            inner_radius=0,
+            outer_radius=np.max(outer_radius) * 1.1,
+            start_angle=ticks[:-1],
+            end_angle=ticks[:-1] + 0.002,
+            **hist_kwargs,
+        )
+
+        radii_circles = np.linspace(0, np.max(outer_radius) * 1.1, 4)
+        ax.circle(0, 0, radius=radii_circles, fill_color=None, **hist_kwargs)
+
+        if is_circular == 'degrees':
+            labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
+        else:
+            
+            labels = [
+                r"0",
+                r"π/4",
+                r"π/2",
+                r"3π/4",
+                r"π",
+                r"5π/4",
+                r"3π/2",
+                r"7π/4",
+            ]
+
+        offset = np.max(outer_radius * 1.05) * 0.15
+        ticks_labels_pos = np.max(outer_radius * 1.05)
+
+        ax.text(
+            [
+                ticks_labels_pos + offset,
+                ticks_labels_pos * np.sqrt(2) / 2 + offset,
+                0,
+                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+                -ticks_labels_pos - offset,
+                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+                0,
+                ticks_labels_pos * np.sqrt(2) / 2 + offset,
+            ],
+            [
+                0,
+                ticks_labels_pos * np.sqrt(2) / 2 + offset / 2,
+                ticks_labels_pos + offset,
+                ticks_labels_pos * np.sqrt(2) / 2 + offset / 2,
+                0,
+                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+                -ticks_labels_pos - offset,
+                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+            ],
+            text=labels,
+            text_align="center",
+        )
+
     else:
-        ax.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], **hist_kwargs)
+
+        if rotated:
+            ax.quad(top=edges[:-1], bottom=edges[1:], left=0, right=hist, **hist_kwargs)
+        else:
+            ax.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], **hist_kwargs)
+
     return ax

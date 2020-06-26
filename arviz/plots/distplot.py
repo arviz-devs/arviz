@@ -28,10 +28,10 @@ def plot_dist(
     contourf_kwargs=None,
     pcolormesh_kwargs=None,
     hist_kwargs=None,
+    is_circular=None,
     ax=None,
     backend=None,
     backend_kwargs=None,
-    is_circular=False,
     show=None,
     **kwargs
 ):
@@ -90,8 +90,8 @@ def plot_dist(
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
-    is_circular : bool
-        Plot circular histogram or KDE plot.
+    is_circular : str
+        Select input type {"radians","degrees"} for circular histogram or KDE plot.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     backend: str, optional

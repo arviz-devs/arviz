@@ -191,7 +191,7 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
+@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}, {'is_circular':'radians'}, {'is_circular':'degrees'}])
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
     assert axes
