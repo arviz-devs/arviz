@@ -128,6 +128,20 @@ Five hundred data points, fit with PyMC3.
 True weights and intercept are included as deterministic variables.
 """,
     ),
+    "glycan_torsion_angles": RemoteFileMetadata(
+        filename="glycan_torsion_angles.nc",
+        url="http://ndownloader.figshare.com/files/22882652",
+        checksum="4622621fe7a1d3075c18c4c34af8cc57c59eabbb3501b20c6e2d9c6c4737034c",
+        description="""
+Torsion angles phi and psi are critical for determining the three dimensional
+structure of bio-molecules. Combinations of phi and psi torsion angles that
+produce clashes between atoms in the bio-molecule result in high energy, unlikely structures.
+
+This model uses a Von Mises distribution to propose torsion angles for the
+structure of a glycan molecule (pdb id: 2LIQ), and a Potential to estimate
+the proposed structure's energy. Said Potential is bound by Boltzman's law.
+""",
+    ),
 }
 
 
