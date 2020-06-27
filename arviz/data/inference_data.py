@@ -1,4 +1,5 @@
 """Data structure for using netcdf groups with xarray."""
+# pylint: disable=too-many-lines
 from collections import OrderedDict
 from collections.abc import Sequence
 from copy import copy as ccopy, deepcopy
@@ -174,6 +175,7 @@ class InferenceData:
     def _groups_all(self):
         return self._groups + self._groups_warmup
 
+    @staticmethod
     def extend_xr_method(func):
         """Wrapper to add methods to InferenceData Class"""
 
@@ -187,11 +189,11 @@ class InferenceData:
 
             out = self if _inplace else deepcopy(self)
 
-            groups = self._group_names(_groups, _filter)
+            groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
             for group in groups:
                 xr_data = getattr(out, group)
                 args[0] = xr_data
-                xr_data = func(*args, **kwargs)
+                xr_data = func(*args, **kwargs)  # pylint: disable=not-callable
                 setattr(out, group, xr_data)
 
             return None if _inplace else out
@@ -444,11 +446,11 @@ class InferenceData:
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
-            a = {}
+            kwarg_dict = {}
             for key, value in kwargs.items():
                 if not set(value).difference(dataset.dims):
-                    a[key] = value
-            dataset = dataset.stack(**a)
+                    kwarg_dict[key] = value
+            dataset = dataset.stack(**kwarg_dict)
             setattr(out, group, dataset)
         if inplace:
             return None
@@ -614,7 +616,8 @@ class InferenceData:
         Parameters
         ----------
         name_dict: dict
-            Dictionary whose keys are current dimension names and whose values are the desired names.
+            Dictionary whose keys are current dimension names and whose values are the desired
+            names.
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
