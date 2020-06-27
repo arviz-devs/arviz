@@ -6,6 +6,7 @@ from datetime import datetime
 from html import escape
 import warnings
 import uuid
+import functools
 
 import netCDF4 as nc
 import numpy as np
@@ -172,6 +173,29 @@ class InferenceData:
     @property
     def _groups_all(self):
         return self._groups + self._groups_warmup
+
+    def extend_xr_method(func):
+        """Wrapper to add methods to InferenceData Class"""
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            _filter = kwargs.pop('filter_groups', None)
+            _groups = kwargs.pop('groups', None)
+            _inplace = kwargs.pop('inplace', False)
+            self = args[0]
+            args = list(args)
+
+            out = self if _inplace else deepcopy(self)
+
+            groups = self._group_names(_groups, _filter)
+            for group in groups:
+                xr_data = getattr(out, group)
+                args[0] = xr_data
+                xr_data = func(*args, **kwargs)
+                setattr(out, group, xr_data)
+
+            return None if _inplace else out
+
+        return wrapped
 
     @staticmethod
     def from_netcdf(filename):
