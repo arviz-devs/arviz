@@ -176,11 +176,12 @@ class InferenceData:
 
     def extend_xr_method(func):
         """Wrapper to add methods to InferenceData Class"""
+
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            _filter = kwargs.pop('filter_groups', None)
-            _groups = kwargs.pop('groups', None)
-            _inplace = kwargs.pop('inplace', False)
+            _filter = kwargs.pop("filter_groups", None)
+            _groups = kwargs.pop("groups", None)
+            _inplace = kwargs.pop("inplace", False)
             self = args[0]
             args = list(args)
 
