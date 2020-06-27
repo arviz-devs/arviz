@@ -323,6 +323,18 @@ class TestInferenceData:
         fails = check_multiple_attrs(test_dict, new_idata)
         assert not fails
 
+    def test_extend_xr_method(self):
+        arr = xr.DataArray(
+            data=np.ones((2, 3)),
+            dims=["x", "y"],
+            coords={"x": range(2), "y": range(3), "a": ("x", [3, 4])},
+        )
+        ds = xr.Dataset({"v": arr})
+        dataset = convert_to_inference_data(ds)
+        assert dataset.set_index(x="a").posterior == ds.set_index(x="a")
+        dataset.set_index(x="a", inplace=True)
+        assert dataset.posterior == ds.set_index(x="a")
+
     @pytest.mark.parametrize("inplace", [True, False])
     def test_sel(self, inplace):
         data = np.random.normal(size=(4, 500, 8))

@@ -651,6 +651,13 @@ class InferenceData:
         else:
             return out
 
+    # extending xarray.Dataset methods
+    set_index = extend_xr_method(xr.Dataset.set_index)
+    get_index = extend_xr_method(xr.Dataset.get_index)
+    reset_index = extend_xr_method(xr.Dataset.reset_index)
+    set_coords = extend_xr_method(xr.Dataset.set_coords)
+    reset_coords = extend_xr_method(xr.Dataset.reset_coords)
+
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.
 
