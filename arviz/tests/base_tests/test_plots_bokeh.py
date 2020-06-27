@@ -40,7 +40,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_trace,
     plot_violin,
 )
-from ...stats import compare, loo, waic  # pylint: disable=wrong-import-position
+from ...stats import compare, loo, waic, hdi  # pylint: disable=wrong-import-position
 
 # Skip tests if bokeh not installed
 bkp = importorskip("bokeh.plotting")  # pylint: disable=invalid-name
@@ -127,8 +127,8 @@ def test_plot_density_bad_kwargs(models):
         {},
         {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
-        {"combined": True},
-        {"compact": True},
+        {"combined": True, "rug": True},
+        {"compact": True, "legend": True},
         {"combined": True, "compact": True, "legend": True},
         {"divergences": "top"},
         {"divergences": False},
@@ -483,16 +483,20 @@ def test_plot_forest_bad(models, model_fits):
     "kwargs",
     [
         {"color": "C5", "circular": True},
-        {"fill_kwargs": {"alpha": 0}},
+        {"hdi_data": True, "fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
-        {"smooth": False},
+        {"hdi_data": True, "smooth": False, "color": "xkcd:jade"},
     ],
 )
 def test_plot_hdi(models, data, kwargs):
-    axis = plot_hdi(
-        data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
-    )
+    hdi_data = kwargs.pop("hdi_data", None)
+    y_data = models.model_1.posterior["theta"]
+    if hdi_data:
+        hdi_data = hdi(y_data)
+        axis = plot_hdi(data["y"], hdi_data=hdi_data, backend="bokeh", show=False, **kwargs)
+    else:
+        axis = plot_hdi(data["y"], y_data, backend="bokeh", show=False, **kwargs)
     assert axis
 
 
