@@ -175,8 +175,7 @@ class InferenceData:
     def _groups_all(self):
         return self._groups + self._groups_warmup
 
-    @staticmethod
-    def extend_xr_method(func):
+    def extend_xr_method(func):  # pylint: disable=no-self-argument
         """Wrapper to add methods to InferenceData Class"""
 
         @functools.wraps(func)
