@@ -695,3 +695,25 @@ def _dealiase_sel_kwargs(kwargs, prop_dict, idx):
             {prop: props[idx] for prop, props in prop_dict.items()}, "plot"
         ),
     }
+
+
+def is_valid_quantile(value):
+    """Check if value is a number between 0 and 1."""
+    try:
+        value = float(value)
+        return 0 < value < 1
+    except ValueError:
+        return False
+
+
+def sample_reference_distribution(dist, shape):
+    """Generate samples from a scipy distribution with a given shape."""
+    x_ss = []
+    densities = []
+    dist_rvs = dist.rvs(size=shape)
+    for idx in range(shape[1]):
+        density, xmin, xmax = _fast_kde(dist_rvs[:, idx])
+        x_s = np.linspace(xmin, xmax, len(density))
+        x_ss.append(x_s)
+        densities.append(density)
+    return np.array(x_ss).T, np.array(densities).T

@@ -20,6 +20,7 @@
 * `plot_trace` now supports multiple aesthetics to identify chain and variable
   shape and support matplotlib aliases (#1253)
 * `plot_hdi` can now take already computed HDI values (#1241)
+* `plot_bpv`. A new plot for Bayesian p-values (#1222)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using

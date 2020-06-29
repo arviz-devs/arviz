@@ -1,5 +1,6 @@
 """Plotting functions."""
 from .autocorrplot import plot_autocorr
+from .bpvplot import plot_bpv
 from .compareplot import plot_compare
 from .densityplot import plot_density
 from .distplot import plot_dist
@@ -26,6 +27,7 @@ from ..numeric_utils import _fast_kde_2d
 
 __all__ = [
     "plot_autocorr",
+    "plot_bpv",
     "plot_compare",
     "plot_density",
     "plot_dist",
