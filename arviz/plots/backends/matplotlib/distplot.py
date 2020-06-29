@@ -98,26 +98,26 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     bins = hist_kwargs.pop("bins")
 
-    if is_circular:
+    if is_circular == "degrees":
+        if bins is None:
+            bins = get_bins(values)
+        values = np.deg2rad(values)
+        bins = np.deg2rad(bins)
+        ax.set_yticklabels([])
 
-        if is_circular == "degrees":
-            if bins is None:
-                bins = get_bins(values)
-            values = np.deg2rad(values)
-            bins = np.deg2rad(bins)
-        else:
-            labels = [
-                r"0",
-                r"π/4",
-                r"π/2",
-                r"3π/4",
-                r"π",
-                r"5π/4",
-                r"3π/2",
-                r"7π/4",
-            ]
+    elif is_circular == "radians":
+        labels = [
+            r"0",
+            r"π/4",
+            r"π/2",
+            r"3π/4",
+            r"π",
+            r"5π/4",
+            r"3π/2",
+            r"7π/4",
+        ]
 
-            ax.set_xticklabels(labels)
+        ax.set_xticklabels(labels)
         ax.set_yticklabels([])
 
     if values2 is not None:

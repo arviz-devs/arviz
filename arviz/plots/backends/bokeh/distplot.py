@@ -131,6 +131,9 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     if is_circular:
 
+        if is_circular == "degrees":
+            edges = np.deg2rad(edges)
+
         start_angle = edges
         outer_radius = hist
 
@@ -152,16 +155,16 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
             outer_radius=np.max(outer_radius) * 1.1,
             start_angle=ticks[:-1],
             end_angle=ticks[:-1] + 0.002,
-            **hist_kwargs,
+            line_color="grey",
         )
 
         radii_circles = np.linspace(0, np.max(outer_radius) * 1.1, 4)
-        ax.circle(0, 0, radius=radii_circles, fill_color=None, **hist_kwargs)
+        ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
 
-        if is_circular == 'degrees':
+        if is_circular == "degrees":
             labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
         else:
-            
+
             labels = [
                 r"0",
                 r"π/4",
