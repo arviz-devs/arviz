@@ -196,10 +196,11 @@ class ExampleGenerator:
         # exist or it was modified less recently than the example
         if not op.exists(outfilename) or (op.getmtime(outfilename) < op.getmtime(filename)):
 
+            print("Running {0}".format(self.filename))
             self.exec_file()
         else:
 
-            print("skipping {0}".format(self.filename))
+            print("Skipping {0}".format(self.filename))
 
     @property
     def dirname(self):
