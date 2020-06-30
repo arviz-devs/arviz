@@ -42,97 +42,97 @@ jobs:
       python --version
     displayName: 'Debug information'
 
-  - script: |
-      sudo apt-get update
-      sudo apt-get install jags
-      python -m pip install --upgrade pip
-
-      if [ "$(pytorch.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      else
-          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      fi
-
-      if [ "$(pystan.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install pystan
-      else
-          if [ "$(pystan.version)" = "preview" ]; then
-              # try to skip other pre-releases than pystan
-              python -m pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
-              python -m pip --no-cache-dir install --pre pystan
-          else
-              python -m pip --no-cache-dir install pystan=="${pystan.version}"
-          fi
-      fi
-
-      if [ "$(pyro.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install pyro-ppl
-      else
-          python -m pip --no-cache-dir install pyro-ppl=="$(pyro.version)"
-      fi
-
-      if [ "$(emcee.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install emcee
-      else
-          python -m pip --no-cache-dir install "emcee<3"
-      fi
-
-      if [ "$(tensorflow.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install tensorflow
-      else
-          python -m pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
-      fi
-
-      if [ "$(pymc3.version)" = "github" ]; then
-          python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
-      else
-          python -m pip --no-cache-dir install pymc3
-      fi
-
-      python -m pip install --no-cache-dir -r requirements-external.txt
-    displayName: 'Install packages'
-
-  - script: |
-      python -m pip install  --no-cache-dir -r requirements.txt
-      python -m pip install --no-cache-dir -r requirements-dev.txt
-      python -m pip install --no-cache-dir -r requirements-optional.txt
-      python -m pip install pytest-azurepipelines codecov
-    displayName: 'Install requirements'
-
-  - script: |
-      python -m pip install .
-    displayName: 'Install ArviZ package'
-
-  - script: |
-      python -m pip freeze
-    displayName: 'Print packages'
-
-  - script: |
-      pytest arviz/tests/helpers.py
-    displayName: 'precompile models'
-
-  - script: |
-      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
-    displayName: 'pytest'
-
-  - script: |
-      python -m pylint arviz
-    displayName: 'pylint'
-
-  - script: |
-      python -m pydocstyle arviz
-    displayName: 'pydocstyle'
-
-  - script: |
-      python -m black --check arviz examples asv_benchmarks
-    displayName: 'black'
-
-  - task: PublishTestResults@2
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
-      testRunTitle: 'Publish test results for Python $(python.version)'
-
-  - script: |
-      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
-    displayName: 'upload coverage'
+#  - script: |
+#      sudo apt-get update
+#      sudo apt-get install jags
+#      python -m pip install --upgrade pip
+#
+#      if [ "$(pytorch.version)" = "latest" ]; then
+#          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
+#      else
+#          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
+#      fi
+#
+#      if [ "$(pystan.version)" = "latest" ]; then
+#          python -m pip --no-cache-dir install pystan
+#      else
+#          if [ "$(pystan.version)" = "preview" ]; then
+#              # try to skip other pre-releases than pystan
+#              python -m pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
+#              python -m pip --no-cache-dir install --pre pystan
+#          else
+#              python -m pip --no-cache-dir install pystan=="${pystan.version}"
+#          fi
+#      fi
+#
+#      if [ "$(pyro.version)" = "latest" ]; then
+#          python -m pip --no-cache-dir install pyro-ppl
+#      else
+#          python -m pip --no-cache-dir install pyro-ppl=="$(pyro.version)"
+#      fi
+#
+#      if [ "$(emcee.version)" = "latest" ]; then
+#          python -m pip --no-cache-dir install emcee
+#      else
+#          python -m pip --no-cache-dir install "emcee<3"
+#      fi
+#
+#      if [ "$(tensorflow.version)" = "latest" ]; then
+#          python -m pip --no-cache-dir install tensorflow
+#      else
+#          python -m pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
+#      fi
+#
+#      if [ "$(pymc3.version)" = "github" ]; then
+#          python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
+#      else
+#          python -m pip --no-cache-dir install pymc3
+#      fi
+#
+#      python -m pip install --no-cache-dir -r requirements-external.txt
+#    displayName: 'Install packages'
+#
+#  - script: |
+#      python -m pip install  --no-cache-dir -r requirements.txt
+#      python -m pip install --no-cache-dir -r requirements-dev.txt
+#      python -m pip install --no-cache-dir -r requirements-optional.txt
+#      python -m pip install pytest-azurepipelines codecov
+#    displayName: 'Install requirements'
+#
+#  - script: |
+#      python -m pip install .
+#    displayName: 'Install ArviZ package'
+#
+#  - script: |
+#      python -m pip freeze
+#    displayName: 'Print packages'
+#
+#  - script: |
+#      pytest arviz/tests/helpers.py
+#    displayName: 'precompile models'
+#
+#  - script: |
+#      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
+#    displayName: 'pytest'
+#
+#  - script: |
+#      python -m pylint arviz
+#    displayName: 'pylint'
+#
+#  - script: |
+#      python -m pydocstyle arviz
+#    displayName: 'pydocstyle'
+#
+#  - script: |
+#      python -m black --check arviz examples asv_benchmarks
+#    displayName: 'black'
+#
+#  - task: PublishTestResults@2
+#    condition: succeededOrFailed()
+#    inputs:
+#      testResultsFiles: '$(System.DefaultWorkingDirectory)/test-*.xml'
+#      testRunTitle: 'Publish test results for Python $(python.version)'
+#
+#  - script: |
+#      bash <(curl -s https://codecov.io/bash) -n "$(NAME)" -C $BUILD_SOURCEVERSION
+#    displayName: 'upload coverage'
