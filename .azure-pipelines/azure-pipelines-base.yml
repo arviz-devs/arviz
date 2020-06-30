@@ -27,17 +27,18 @@ jobs:
     displayName: 'Use Python $(python.version)'
 
   - script: |
-      sudo apt-get update
-      sudo apt-get install -y ffmpeg
+      echo "Skipping"
+#      sudo apt-get update
+#      sudo apt-get install -y ffmpeg
     displayName: 'Install external libraries'
 
-  - script: |
-      ls -ahl
-      env
-      pwd
-      gcc --version
-      python --version
-    displayName: 'Debug information'
+#  - script: |
+#      ls -ahl
+#      env
+#      pwd
+#      gcc --version
+#      python --version
+#    displayName: 'Debug information'
 
 #  - script: |
 #      python -m pip install --no-cache-dir -r requirements.txt
