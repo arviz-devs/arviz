@@ -67,6 +67,7 @@ if isinstance(ax, ndarray):
     else:
         export_png(gridplot(ax.tolist()), filename="{pngfilename}")
 else:
+    print(ax)
     export_png(ax, filename="{pngfilename}")
 """
 
@@ -299,8 +300,6 @@ class ExampleGenerator:
         self.end_line = erow + 1 + start_row
 
     def exec_file(self):
-        print("running {0}".format(self.filename))
-
         thumbfile = op.join("example_thumbs", self.thumbfilename)
         cx, cy = self.thumbloc
         pngfile = op.join(self.target_dir, self.pngfilename)
