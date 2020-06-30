@@ -3,7 +3,7 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+#  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -55,6 +55,6 @@ jobs:
       env
     displayName: 'Debug information 2'
 
-  - script: |
-      ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
-    displayName: 'Deploy docs'
+#  - script: |
+#      ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
+#    displayName: 'Deploy docs'
