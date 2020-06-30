@@ -47,7 +47,7 @@ jobs:
 
   - script: |
       python -msphinx -M clean doc doc/build
-      sphinx-build doc doc/build -b html
+      sudo sphinx-build -v -v -v doc doc/build -b html
     displayName: 'Build a docs'
 
   - script: |
