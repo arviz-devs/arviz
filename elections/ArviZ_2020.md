@@ -52,6 +52,19 @@ The election period will be exactly 7 days from when NumFOCUS email timestamp fo
     * Council Members
 2. At conclusion of election period NumFOCUS will remove the voters identifying information and share the results (most likely in Google Sheets)
     * A table of results will be added to this document
+    
+#### Historical Record
+Call for election took place in this issue ticket. https://github.com/arviz-devs/arviz/issues/1260  
+NumFOCUS mediated election using [this google form](https://forms.gle/P9P9Yx9tMQ5jbY1L9) as template, and shared the results with us over email. Result verification proof is attached in issue ticket linked above.
+
+Outcome of election was vote for 7 Person council comprised of following core contributors
+* @OriolAbril
+* @aloctavodia
+* @ColCarroll
+* @ahartikainen
+* @sethaxen
+* @AlexAndorra
+* @canyon289
 
 ### Tie Votes (1 week)
 In the event of a tie there will be a run-off election. The specific timing will depend on the results of the election above.
@@ -60,3 +73,9 @@ The tallying will be performed in accordance with `GOVERNANCE.md`
 1. NumFOCUS will email all registered voters a ballot for a vote on tied candidates
 2. At conclusion of election period NumFOCUS will remove the voters identifying information and share the results (most likely in Google Sheets)
     * A table of results will be added to this document
+    
+#### Historical Record
+A tied election was not needed. The primary election was decisive.
+    
+    
+ 
