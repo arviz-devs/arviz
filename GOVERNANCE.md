@@ -62,7 +62,7 @@ direction.
 Community Architecture
 -----------------------
 
-* N Person steering council (Must be odd, will be decided in first election)
+* 7 Person steering council
 * Core Contributors (of which Council members are also a part of)
 * General Contributors
 
