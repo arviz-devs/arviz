@@ -87,6 +87,7 @@ def plot_dist(
             contour_kwargs=contour_kwargs,
             contourf_kwargs=contourf_kwargs,
             pcolormesh_kwargs=pcolormesh_kwargs,
+            is_circular=is_circular,
             ax=ax,
             backend="bokeh",
             backend_kwargs={},
@@ -133,35 +134,6 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
         if is_circular == "degrees":
             edges = np.deg2rad(edges)
-
-        start_angle = edges
-        outer_radius = hist
-
-        ax.annular_wedge(
-            x=0,
-            y=0,
-            inner_radius=0,
-            outer_radius=outer_radius,
-            start_angle=start_angle,
-            end_angle=start_angle + 0.8,
-            **hist_kwargs,
-        )
-
-        ticks = np.linspace(-np.pi, np.pi, 9)
-        ax.annular_wedge(
-            x=0,
-            y=0,
-            inner_radius=0,
-            outer_radius=np.max(outer_radius) * 1.1,
-            start_angle=ticks[:-1],
-            end_angle=ticks[:-1] + 0.002,
-            line_color="grey",
-        )
-
-        radii_circles = np.linspace(0, np.max(outer_radius) * 1.1, 4)
-        ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
-
-        if is_circular == "degrees":
             labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
         else:
 
@@ -176,29 +148,54 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
                 r"7π/4",
             ]
 
-        offset = np.max(outer_radius * 1.05) * 0.15
-        ticks_labels_pos = np.max(outer_radius * 1.05)
+        ax.annular_wedge(
+            x=0,
+            y=0,
+            inner_radius=0,
+            outer_radius=hist,
+            start_angle=edges[:-1],
+            end_angle=edges[1:],
+            **hist_kwargs,
+        )
+
+        ticks = np.linspace(-np.pi, np.pi, len(labels), endpoint=False)
+        ax.annular_wedge(
+            x=0,
+            y=0,
+            inner_radius=0,
+            outer_radius=np.max(hist) * 1.1,
+            start_angle=ticks,
+            end_angle=ticks,
+            line_color="grey",
+        )
+
+        radii_circles = np.linspace(0, np.max(hist) * 1.1, 4)
+        ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
+
+        offset = np.max(hist * 1.05) * 0.15
+        ticks_labels_pos_1 = np.max(hist * 1.05)
+        ticks_labels_pos_2 = ticks_labels_pos_1 * np.sqrt(2) / 2
 
         ax.text(
             [
-                ticks_labels_pos + offset,
-                ticks_labels_pos * np.sqrt(2) / 2 + offset,
+                ticks_labels_pos_1 + offset,
+                ticks_labels_pos_2 + offset,
                 0,
-                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
-                -ticks_labels_pos - offset,
-                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+                -ticks_labels_pos_2 - offset,
+                -ticks_labels_pos_1 - offset,
+                -ticks_labels_pos_2 - offset,
                 0,
-                ticks_labels_pos * np.sqrt(2) / 2 + offset,
+                ticks_labels_pos_2 + offset,
             ],
             [
                 0,
-                ticks_labels_pos * np.sqrt(2) / 2 + offset / 2,
-                ticks_labels_pos + offset,
-                ticks_labels_pos * np.sqrt(2) / 2 + offset / 2,
+                ticks_labels_pos_2 + offset / 2,
+                ticks_labels_pos_1 + offset,
+                ticks_labels_pos_2 + offset / 2,
                 0,
-                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
-                -ticks_labels_pos - offset,
-                -ticks_labels_pos * np.sqrt(2) / 2 - offset,
+                -ticks_labels_pos_2 - offset,
+                -ticks_labels_pos_1 - offset,
+                -ticks_labels_pos_2 - offset,
             ],
             text=labels,
             text_align="center",
