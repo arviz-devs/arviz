@@ -118,6 +118,7 @@ Utils
       :template: class_no_members.rst
 
       Numba
+      Dask
       interactive_backend
 
 rcParams

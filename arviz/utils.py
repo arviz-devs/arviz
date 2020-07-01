@@ -759,6 +759,7 @@ class Dask:
 def conditional_dask(func):
     """Conditionally pass dask kwargs to `wrap_xarray_ufunc`."""
 
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
 
         if Dask.dask_flag:
