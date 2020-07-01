@@ -206,8 +206,8 @@ def wrap_xarray_ufunc(
         Keyword arguments passed to 'ufunc'.
             - 'out_shape', int, by default None
     dask_kwargs : dict
-        Dask kwargs passed to `xarray.apply_ufunc`.
-        Use :meth:`arviz.Dask.enable_dask` method to pass this dict automatically.
+        Dask related kwargs passed to :func:`xarray:xarray.apply_ufunc`.
+        Use :meth:`arviz.Dask.enable_dask` to set default kwargs.
     **kwargs
         Passed to xarray.apply_ufunc.
 

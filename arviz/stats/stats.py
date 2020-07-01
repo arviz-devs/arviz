@@ -573,7 +573,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     return np.array(hdi_intervals)
 
 
-def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
+def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=None):
     """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
@@ -604,8 +604,8 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -672,7 +672,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
                 np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
-    log_weights, pareto_shape = psislw(-log_likelihood, reff)
+    log_weights, pareto_shape = psislw(-log_likelihood, reff, dask_kwargs=dask_kwargs)
     log_weights += log_likelihood
 
     warn_mg = False
@@ -687,9 +687,9 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
         warn_mg = True
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs.setdefault("input_core_dims", [["sample"]])
+    kwargs = {"input_core_dims": [["sample"]]}
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
-        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
+        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=dask_kwargs, **kwargs
     )
     loo_lppd = loo_lppd_i.values.sum()
     loo_lppd_se = (n_data_points * np.var(loo_lppd_i.values)) ** 0.5
@@ -700,6 +700,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
+            dask_kwargs=dask_kwargs,
             **kwargs,
         ).values
     )
@@ -743,7 +744,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, **kwargs):
         )
 
 
-def psislw(log_weights, reff=1.0, **kwargs):
+def psislw(log_weights, reff=1.0, dask_kwargs=None):
     """
     Pareto smoothed importance sampling (PSIS).
 
@@ -753,8 +754,8 @@ def psislw(log_weights, reff=1.0, **kwargs):
         Array of size (n_observations, n_samples)
     reff: float
         relative MCMC efficiency, `ess / n`
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -796,10 +797,9 @@ def psislw(log_weights, reff=1.0, **kwargs):
     # define kwargs
     func_kwargs = {"cutoff_ind": cutoff_ind, "cutoffmin": cutoffmin, "k_min": k_min, "out": out}
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
-    kwargs.setdefault("input_core_dims", [["sample"]])
-    kwargs.setdefault("output_core_dims", [["sample"], []])
+    kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
-        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs, **kwargs
     )
     if isinstance(log_weights, xr.DataArray):
         log_weights = log_weights.rename("log_weights").rename(sample="sample")
@@ -1353,7 +1353,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=None, var_name=None, scale=None, **kwargs):
+def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     """Compute the widely applicable information criterion.
 
     Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
@@ -1380,8 +1380,8 @@ def waic(data, pointwise=None, var_name=None, scale=None, **kwargs):
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -1433,12 +1433,13 @@ def waic(data, pointwise=None, var_name=None, scale=None, **kwargs):
     n_data_points = np.product(shape[:-1])
 
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
-    kwargs.setdefault("input_core_dims", [["sample"]])
+    kwargs = {"input_core_dims": [["sample"]]}
     lppd_i = _wrap_xarray_ufunc(
         _logsumexp,
         log_likelihood,
         func_kwargs={"b_inv": n_samples},
         ufunc_kwargs=ufunc_kwargs,
+        dask_kwargs=dask_kwargs,
         **kwargs,
     )
 
@@ -1503,7 +1504,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, **kwargs):
         )
 
 
-def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, **kwargs):
+def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, dask_kwargs=None):
     """Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     Parameters
@@ -1519,8 +1520,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, **kwargs):
         equal to y, thus, y must be str too.
     log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -1589,14 +1590,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, **kwargs):
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)
-            ess_p = ess(posterior, method="mean")
+            ess_p = ess(posterior, method="mean", dask_kwargs=dask_kwargs)
             # this mean is over all data variables
             reff = (
                 (np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples)
                 if n_chains > 1
                 else 1
             )
-            log_weights = psislw(-log_likelihood, reff=reff)[0].values
+            log_weights = psislw(-log_likelihood, reff=reff, dask_kwargs=dask_kwargs)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
                 "log_weights must be None or of types array or DataArray, not {}".format(
@@ -1623,12 +1624,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, **kwargs):
             )
         )
 
-    kwargs.setdefault("input_core_dims", [[], ["sample"], ["sample"]])
-    kwargs.setdefault("output_core_dims", [[]])
-    kwargs.setdefault("join", "left")
+    kwargs = {
+        "input_core_dims": [[], ["sample"], ["sample"]],
+        "output_core_dims": [[]],
+        "join": "left",
+    }
     ufunc_kwargs = {"n_dims": 1}
 
-    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs)
+    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=dask_kwargs, **kwargs)
 
 
 def _loo_pit(y, y_hat, log_weights):
@@ -1695,8 +1698,8 @@ def apply_test_function(
     func_kwargs: mapping, optional
         Passed as is to ``func``
     wrap_data_kwargs, wrap_pp_kwargs: mapping, optional
-        kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
-        are used. See :function:`xarray:xarray.apply_ufunc` for accepted values.
+        kwargs passed to :func:`~arviz.wrap_xarray_ufunc`. By default, some suitable input_core_dims
+        are used.
     inplace: bool, optional
         If True, add the variables inplace, othewise, return a copy of idata with the variables
         added.

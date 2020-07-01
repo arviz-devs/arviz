@@ -63,7 +63,7 @@ def bfmi(data):
 
 
 def ess(
-    data, *, var_names=None, method="bulk", relative=False, prob=None, **kwargs,
+    data, *, var_names=None, method="bulk", relative=False, prob=None, dask_kwargs=None,
 ):
     r"""Calculate estimate of the effective sample size (ess).
 
@@ -95,8 +95,8 @@ def ess(
         `ress = ess / n`
     prob : float, or tuple of two floats, optional
         probability value for "tail", "quantile" or "local" ess functions.
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -197,11 +197,11 @@ def ess(
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {"relative": relative} if prob is None else {"prob": prob, "relative": relative}
     return _wrap_xarray_ufunc(
-        ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
     )
 
 
-def rhat(data, *, var_names=None, method="rank", **kwargs):
+def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     r"""Compute estimate of rank normalized splitR-hat for a set of traces.
 
     The rank normalized R-hat diagnostic tests for lack of convergence by comparing the variance
@@ -228,8 +228,8 @@ def rhat(data, *, var_names=None, method="rank", **kwargs):
         - "folded"
         - "z_scale"
         - "identity"
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -308,11 +308,11 @@ def rhat(data, *, var_names=None, method="rank", **kwargs):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {}
     return _wrap_xarray_ufunc(
-        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
     )
 
 
-def mcse(data, *, var_names=None, method="mean", prob=None, **kwargs):
+def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
     """Calculate Markov Chain Standard Error statistic.
 
     Parameters
@@ -333,8 +333,8 @@ def mcse(data, *, var_names=None, method="mean", prob=None, **kwargs):
 
     prob : float
         Quantile information.
-    **kwargs : kwargs passed to `xarray.apply_ufunc`, optional
-        See :function:`xarray:xarray.apply_ufunc` for accepted values.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -397,7 +397,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None, **kwargs):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {} if prob is None else {"prob": prob}
     return _wrap_xarray_ufunc(
-        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
     )
 
 

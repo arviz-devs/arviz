@@ -738,13 +738,13 @@ class Dask:
     dask_kwargs = None
 
     @classmethod
-    def enable_dask(cls, **dask_kwargs):
+    def enable_dask(cls, dask_kwargs=None):
         """To enable Dask.
 
         Parameters
         ----------
-        **kwargs : dask kwargs passed to `xarray.apply_ufunc`
-            See :function:`xarray:xarray.apply_ufunc` for accepted values.
+        dask_kwargs : dict
+            Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
         """
         cls.dask_flag = True
         cls.dask_kwargs = dask_kwargs
@@ -762,8 +762,12 @@ def conditional_dask(func):
     def wrapper(*args, **kwargs):
 
         if Dask.dask_flag:
-            dask_kwargs = Dask.dask_kwargs
-            return func(dask_kwargs=dask_kwargs, *args, **kwargs)
+            user_kwargs = kwargs.pop("dask_kwargs", None)
+            if user_kwargs is None:
+                default_kwargs = Dask.dask_kwargs
+                return func(dask_kwargs=default_kwargs, *args, **kwargs)
+            else:
+                return func(dask_kwargs=user_kwargs, *args, **kwargs)
         else:
             return func(*args, **kwargs)
 
