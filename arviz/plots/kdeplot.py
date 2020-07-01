@@ -82,8 +82,8 @@ def plot_kde(
         Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
-    is_circular : bool
-        Plot circular KDE plot.
+    is_circular : str
+        Select input type {"radians","degrees"} for circular histogram or KDE plot.
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
@@ -250,6 +250,7 @@ def plot_kde(
         kde_plot_args.pop("textsize")
         kde_plot_args.pop("label")
         kde_plot_args.pop("legend")
+        kde_plot_args.pop("is_circular")
     else:
         kde_plot_args.pop("return_glyph")
 

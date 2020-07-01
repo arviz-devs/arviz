@@ -87,7 +87,6 @@ def plot_dist(
             contour_kwargs=contour_kwargs,
             contourf_kwargs=contourf_kwargs,
             pcolormesh_kwargs=pcolormesh_kwargs,
-            is_circular=is_circular,
             ax=ax,
             backend="bokeh",
             backend_kwargs={},
@@ -114,6 +113,10 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if color:
         hist_kwargs["fill_color"] = color
         hist_kwargs["line_color"] = color
+
+    line_alpha = hist_kwargs.pop("line_alpha", False)
+    if not line_alpha:
+        hist_kwargs["line_alpha"] = 0
 
     # remove defaults for mpl
     hist_kwargs.pop("rwidth", None)
