@@ -72,7 +72,12 @@ def plot_energy(
             hist_kwargs["line_color"] = None
             hist_kwargs["line_alpha"] = alpha
             _histplot_bokeh_op(
-                value.flatten(), values2=None, rotated=False, ax=ax, hist_kwargs=hist_kwargs
+                value.flatten(),
+                values2=None,
+                rotated=False,
+                ax=ax,
+                hist_kwargs=hist_kwargs,
+                is_circular=None,
             )
 
     else:

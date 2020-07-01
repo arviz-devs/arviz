@@ -95,7 +95,6 @@ def plot_dist(
 
 def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     """Add a histogram for the data to the axes."""
-
     bins = hist_kwargs.pop("bins")
 
     if is_circular == "degrees":

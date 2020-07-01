@@ -45,7 +45,7 @@ def plot_dist(
     }
     if ax is None:
         if is_circular:
-            ax = bkp.figure(x_axis_type=None, y_axis_type=None,)
+            ax = bkp.figure(x_axis_type=None, y_axis_type=None, **backend_kwargs)
         else:
             ax = bkp.figure(**backend_kwargs)
 
