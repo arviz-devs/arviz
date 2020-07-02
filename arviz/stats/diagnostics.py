@@ -197,7 +197,11 @@ def ess(
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {"relative": relative} if prob is None else {"prob": prob, "relative": relative}
     return _wrap_xarray_ufunc(
-        ess_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
+        ess_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
     )
 
 
@@ -308,7 +312,11 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {}
     return _wrap_xarray_ufunc(
-        rhat_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
+        rhat_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
     )
 
 
@@ -397,7 +405,11 @@ def mcse(data, *, var_names=None, method="mean", prob=None, dask_kwargs=None):
     ufunc_kwargs = {"ravel": False}
     func_kwargs = {} if prob is None else {"prob": prob}
     return _wrap_xarray_ufunc(
-        mcse_func, dataset, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs
+        mcse_func,
+        dataset,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
     )
 
 

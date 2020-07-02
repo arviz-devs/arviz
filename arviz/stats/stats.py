@@ -799,7 +799,12 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
-        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs, **kwargs
+        _psislw,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        dask_kwargs=dask_kwargs,
+        **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
         log_weights = log_weights.rename("log_weights").rename(sample="sample")
@@ -1631,7 +1636,15 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, dask_kwargs=Non
     }
     ufunc_kwargs = {"n_dims": 1}
 
-    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=dask_kwargs, **kwargs)
+    return _wrap_xarray_ufunc(
+        _loo_pit,
+        y,
+        y_hat,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        dask_kwargs=dask_kwargs,
+        **kwargs,
+    )
 
 
 def _loo_pit(y, y_hat, log_weights):
