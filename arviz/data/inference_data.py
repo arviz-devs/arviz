@@ -180,22 +180,43 @@ class InferenceData:
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            _filter = kwargs.pop("filter_groups", None)
-            _groups = kwargs.pop("groups", None)
-            _inplace = kwargs.pop("inplace", False)
+
+            _filter = kwargs.pop('filter_groups', None)
+            _groups = kwargs.pop('groups', None)
+            _inplace = kwargs.pop('inplace', False)
             self = args[0]
             args = list(args)
 
             out = self if _inplace else deepcopy(self)
 
-            groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
+            groups = self._group_names(_groups, _filter)
             for group in groups:
                 xr_data = getattr(out, group)
                 args[0] = xr_data
-                xr_data = func(*args, **kwargs)  # pylint: disable=not-callable
+                xr_data = func(*args, **kwargs)
                 setattr(out, group, xr_data)
 
             return None if _inplace else out
+
+        description = """\
+        This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
+        """.format(method_name = func.__name__)
+        params = """\
+            Parameters
+            ----------
+            groups: str or list of str, optional
+                Groups where the selection is to be applied. Can either be group names
+                or metagroup names.
+            filter_groups: {None, "like", "regex"}, optional, default=None
+                If `None` (default), interpret groups as the real group or metagroup names.
+                If "like", interpret groups as substrings of the real group or metagroup names.
+                If "regex", interpret groups as regular expressions on the real group or
+                metagroup names. A la `pandas.filter`.
+            inplace: bool, optional
+                If ``True``, modify the InferenceData object inplace,
+                otherwise, return the modified copy.
+            """
+        wrapped.__doc__ = description+params
 
         return wrapped
 
@@ -365,7 +386,7 @@ class InferenceData:
         One example could be performing a burn in cut on the InferenceData object
         or discarding a chain. The selection is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted. See :meth:`xarray.Dataset.isel <xarray:xarray.Dataset.isel>`
+        omitted. See :meth:`xarray:xarray.Dataset.isel`
 
         Parameters
         ----------
@@ -381,7 +402,7 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
         **kwargs: mapping
-            It must be accepted by Dataset.isel().
+            It must be accepted by :meth:`xarray:xarray.Dataset.isel`.
 
         Returns
         -------
@@ -405,7 +426,7 @@ class InferenceData:
             return out
 
     def stack(
-        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
     ):
         """Perform an xarray stacking on all groups.
 
@@ -414,10 +435,12 @@ class InferenceData:
         for every kwarg if value is a dimension of the dataset.
         The selection is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted. See :meth:`xarray.Dataset.stack <xarray:xarray.Dataset.stack>`
+        omitted. See :meth:`xarray:xarray.Dataset.stack`
 
         Parameters
         ----------
+        dimensions: dict
+            Names of new dimensions, and the existing dimensions that they replace.
         groups: str or list of str, optional
             Groups where the selection is to be applied. Can either be group names
             or metagroup names.
@@ -430,7 +453,7 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
         **kwargs: mapping
-            It must be accepted by Dataset.stack().
+            It must be accepted by :meth:`xarray:xarray.Dataset.stack`.
 
         Returns
         -------
@@ -442,11 +465,13 @@ class InferenceData:
 
         groups = self._group_names(groups, filter_groups)
 
+        dimensions = {} if dimensions is None else dimensions
+        dimensions.update(kwargs)
         out = self if inplace else deepcopy(self)
         for group in groups:
             dataset = getattr(self, group)
             kwarg_dict = {}
-            for key, value in kwargs.items():
+            for key, value in dimensions.items():
                 if not set(value).difference(dataset.dims):
                     kwarg_dict[key] = value
             dataset = dataset.stack(**kwarg_dict)
@@ -463,7 +488,7 @@ class InferenceData:
         Loops groups to perform Dataset.unstack(key=value).
         The selection is performed on all relevant groups (like posterior, prior,
         sample stats) while non relevant groups like observed data are omitted.
-        See :meth:`xarray.Dataset.unstack <xarray:xarray.Dataset.unstack>`
+        See :meth:`xarray:xarray.Dataset.unstack`
 
         Parameters
         ----------
@@ -511,7 +536,7 @@ class InferenceData:
         for every key in name_dict if key is a dimension/data_vars of the dataset.
         The renaming is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted. See :meth:`xarray.Dataset.rename <xarray:xarray.Dataset.rename>`
+        omitted. See :meth:`xarray:xarray.Dataset.rename`
 
         Parameters
         ----------
@@ -562,7 +587,7 @@ class InferenceData:
         for every key in name_dict if key is a variable or coordinate names of the dataset.
         The renaming is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted. See :meth:`xarray.Dataset.rename_vars <xarray:xarray.Dataset.rename_vars>`
+        omitted. See :meth:`xarray:xarray.Dataset.rename_vars`
 
         Parameters
         ----------
@@ -610,7 +635,7 @@ class InferenceData:
         for every key in name_dict if key is a dimension of the dataset.
         The renaming is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted. See :meth:`xarray.Dataset.rename_dims <xarray:xarray.Dataset.rename_dims>`
+        omitted. See :meth:`xarray:xarray.Dataset.rename_dims`
 
         Parameters
         ----------
