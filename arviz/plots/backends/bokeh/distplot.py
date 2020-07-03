@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde
+from ...plot_utils import set_bokeh_circular_ticks_labels
 from ....numeric_utils import get_bins
 
 
@@ -161,48 +162,7 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
             **hist_kwargs,
         )
 
-        ticks = np.linspace(-np.pi, np.pi, len(labels), endpoint=False)
-        ax.annular_wedge(
-            x=0,
-            y=0,
-            inner_radius=0,
-            outer_radius=np.max(hist) * 1.1,
-            start_angle=ticks,
-            end_angle=ticks,
-            line_color="grey",
-        )
-
-        radii_circles = np.linspace(0, np.max(hist) * 1.1, 4)
-        ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
-
-        offset = np.max(hist * 1.05) * 0.15
-        ticks_labels_pos_1 = np.max(hist * 1.05)
-        ticks_labels_pos_2 = ticks_labels_pos_1 * np.sqrt(2) / 2
-
-        ax.text(
-            [
-                ticks_labels_pos_1 + offset,
-                ticks_labels_pos_2 + offset,
-                0,
-                -ticks_labels_pos_2 - offset,
-                -ticks_labels_pos_1 - offset,
-                -ticks_labels_pos_2 - offset,
-                0,
-                ticks_labels_pos_2 + offset,
-            ],
-            [
-                0,
-                ticks_labels_pos_2 + offset / 2,
-                ticks_labels_pos_1 + offset,
-                ticks_labels_pos_2 + offset / 2,
-                0,
-                -ticks_labels_pos_2 - offset,
-                -ticks_labels_pos_1 - offset,
-                -ticks_labels_pos_2 - offset,
-            ],
-            text=labels,
-            text_align="center",
-        )
+        ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
 
     else:
 
