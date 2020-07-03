@@ -57,7 +57,7 @@ The election period will be exactly 7 days from when NumFOCUS email timestamp fo
 Call for election took place in this issue ticket. https://github.com/arviz-devs/arviz/issues/1260  
 NumFOCUS mediated election using [this google form](https://forms.gle/P9P9Yx9tMQ5jbY1L9) as template, and shared the results with us over email. Result verification proof is attached in issue ticket linked above.
 
-Outcome of election was vote for 7 Person council comprised of following core contributors
+The outcome of the election was a vote for a 7 Person Council, comprised of the following core contributors:
 * @OriolAbril
 * @aloctavodia
 * @ColCarroll
