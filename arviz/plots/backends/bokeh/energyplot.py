@@ -77,7 +77,7 @@ def plot_energy(
                 rotated=False,
                 ax=ax,
                 hist_kwargs=hist_kwargs,
-                is_circular=None,
+                is_circular=False,
             )
 
     else:

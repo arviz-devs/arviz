@@ -2,7 +2,7 @@
 
 ## v0.x.x Unreleased
 ### New features
-* Added InferenceData dataset containing circular variables (#1266)
+* Added InferenceData dataset containing circular variables (#1265)
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)

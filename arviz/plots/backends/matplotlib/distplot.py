@@ -95,7 +95,7 @@ def plot_dist(
 
 def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     """Add a histogram for the data to the axes."""
-    bins = hist_kwargs.pop("bins")
+    bins = hist_kwargs.pop("bins", None)
 
     if is_circular == "degrees":
         if bins is None:
@@ -104,7 +104,7 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         bins = np.deg2rad(bins)
         ax.set_yticklabels([])
 
-    elif is_circular == "radians":
+    elif is_circular:
         labels = [
             r"0",
             r"π/4",

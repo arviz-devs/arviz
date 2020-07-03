@@ -45,7 +45,7 @@ def plot_dist(
     }
     if ax is None:
         if is_circular:
-            ax = bkp.figure(x_axis_type=None, y_axis_type=None, **backend_kwargs)
+            ax = bkp.figure(x_axis_type=None, y_axis_type=None)
         else:
             ax = bkp.figure(**backend_kwargs)
 
@@ -116,7 +116,7 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     line_alpha = hist_kwargs.pop("line_alpha", False)
     if not line_alpha:
-        hist_kwargs["line_alpha"] = 0
+        hist_kwargs.setdefault("line_alpha", 0)
 
     # remove defaults for mpl
     hist_kwargs.pop("rwidth", None)
