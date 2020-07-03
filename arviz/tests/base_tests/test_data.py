@@ -10,6 +10,7 @@ import pytest
 
 import xarray as xr
 from xarray.core.options import OPTIONS
+from xarray.testing import assert_identical
 
 from arviz import (
     concat,
@@ -331,9 +332,9 @@ class TestInferenceData:
         )
         ds = xr.Dataset({"v": arr})
         dataset = convert_to_inference_data(ds)
-        assert dataset.set_index(x="a").posterior == ds.set_index(x="a")
+        assert_identical(dataset.set_index(x="a").posterior, ds.set_index(x="a"))
         dataset.set_index(x="a", inplace=True)
-        assert dataset.posterior == ds.set_index(x="a")
+        assert_identical(dataset.posterior, ds.set_index(x="a"))
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_sel(self, inplace):
@@ -550,9 +551,9 @@ class TestInferenceData:
         }
         dims = {"c": ["c1", "c99"], "b": ["b1"]}
         dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
-        assert dataset.stack(z=["c1", "c99"]).posterior == dataset.posterior.stack(z=["c1", "c99"])
-        assert dataset.stack(z=["c1", "c99"]).unstack().posterior == dataset.posterior
-        assert dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior == dataset.posterior
+        assert_identical(dataset.stack(z=["c1", "c99"]).posterior, dataset.posterior.stack(z=["c1", "c99"]))
+        assert_identical(dataset.stack(z=["c1", "c99"]).unstack().posterior, dataset.posterior)
+        assert_identical(dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior)
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
