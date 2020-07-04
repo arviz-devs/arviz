@@ -193,11 +193,19 @@ Voting for first election is restricted to establish stable governance, and to d
 ### Core Contributors
 Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
 These can be, but are not limited to, code contributions, community contributions, tutorial
-development etc.
+development etc. Core Contributors will be given the ability to manage the ArviZ github
+repository, including code merges to master. This does not necessarily mean Core Contributors
+must submit code, but more so signifies trust with the project as a whole.
+
+#### Core Contributor Responsibilities
+* Enforce code of conduct
+* Maintain a check against Council
 
 #### Core Contributor Nominations and Confirmation Process
-Current Core Contributors can nominate candidates for consideration by the council. The council
-can make the determination for acceptance with a process of their choosing.
+Current Core Contributors can nominate candidates for consideration by the council. On the first
+of the month following a nomination the Council will vote on each nominee where greater than 50% of the votes
+means a confirmation. In the event of a tie a second election will occur where all core contributors can vote,
+if 50% or greater of the community confirms the nominee will be accepted.
 
 #### Current Core Contributors
 * Oriol Abril-Pla (@OriolAbril) 
@@ -212,6 +220,4 @@ can make the determination for acceptance with a process of their choosing.
 * Du Phan (@fehiepsi)
 * Aki Vehtari (@avehtari)
 
-#### Core Contributor Responsibilities
-* Enforce code of conduct
-* Maintain a check against Council
+
