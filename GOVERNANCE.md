@@ -1,5 +1,4 @@
 # Main Governance Document
-*Note* This Governance has not been implemented yet. Please see Election PR or document for specifics of where we are in establishing governance
 
 The Project
 ===========
