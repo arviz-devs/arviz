@@ -2,6 +2,7 @@
 """Plot distribution as histogram or kernel density estimates."""
 
 import xarray as xr
+import numpy as np
 from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..numeric_utils import get_bins
 from ..data import InferenceData
@@ -145,6 +146,8 @@ def plot_dist(
 
         >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
+    values = np.array(values) if str(type(values)) == "<class 'list'>" else values
+
     if isinstance(values, (InferenceData, xr.Dataset)):
         raise ValueError(
             "InferenceData or xarray.Dateset object detected,"
