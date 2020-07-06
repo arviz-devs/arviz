@@ -689,7 +689,6 @@ class InferenceData:
 
     # extending apply methods
     mean = extend_xr_method(xr.Dataset.mean)
-    mode = extend_xr_method(xr.Dataset.mode)
     median = extend_xr_method(xr.Dataset.median)
     min = extend_xr_method(xr.Dataset.min)
     max = extend_xr_method(xr.Dataset.max)
