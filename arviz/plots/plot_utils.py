@@ -720,7 +720,7 @@ def sample_reference_distribution(dist, shape):
 
 
 def set_bokeh_circular_ticks_labels(ax, hist, labels):
-    """Place ticks and ticklabels on Bokeh's circular histogram"""
+    """Place ticks and ticklabels on Bokeh's circular histogram."""
     ticks = np.linspace(-np.pi, np.pi, len(labels), endpoint=False)
     ax.annular_wedge(
         x=0,
