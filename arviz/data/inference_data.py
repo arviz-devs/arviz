@@ -181,9 +181,9 @@ class InferenceData:
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
 
-            _filter = kwargs.pop('filter_groups', None)
-            _groups = kwargs.pop('groups', None)
-            _inplace = kwargs.pop('inplace', False)
+            _filter = kwargs.pop("filter_groups", None)
+            _groups = kwargs.pop("groups", None)
+            _inplace = kwargs.pop("inplace", False)
             self = args[0]
             args = list(args)
 
@@ -200,7 +200,9 @@ class InferenceData:
 
         description = """\
         This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
-        """.format(method_name = func.__name__)
+        """.format(
+            method_name=func.__name__
+        )
         params = """\
             Parameters
             ----------
@@ -216,7 +218,7 @@ class InferenceData:
                 If ``True``, modify the InferenceData object inplace,
                 otherwise, return the modified copy.
             """
-        wrapped.__doc__ = description+params
+        wrapped.__doc__ = description + params
 
         return wrapped
 
@@ -684,6 +686,14 @@ class InferenceData:
     reset_index = extend_xr_method(xr.Dataset.reset_index)
     set_coords = extend_xr_method(xr.Dataset.set_coords)
     reset_coords = extend_xr_method(xr.Dataset.reset_coords)
+
+    # extending apply methods
+    mean = extend_xr_method(xr.Dataset.mean)
+    mode = extend_xr_method(xr.Dataset.mode)
+    median = extend_xr_method(xr.Dataset.median)
+    min = extend_xr_method(xr.Dataset.min)
+    max = extend_xr_method(xr.Dataset.max)
+    cumsum = extend_xr_method(xr.Dataset.cumsum)
 
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.

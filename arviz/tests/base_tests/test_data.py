@@ -551,9 +551,13 @@ class TestInferenceData:
         }
         dims = {"c": ["c1", "c99"], "b": ["b1"]}
         dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
-        assert_identical(dataset.stack(z=["c1", "c99"]).posterior, dataset.posterior.stack(z=["c1", "c99"]))
+        assert_identical(
+            dataset.stack(z=["c1", "c99"]).posterior, dataset.posterior.stack(z=["c1", "c99"])
+        )
         assert_identical(dataset.stack(z=["c1", "c99"]).unstack().posterior, dataset.posterior)
-        assert_identical(dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior)
+        assert_identical(
+            dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior
+        )
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
