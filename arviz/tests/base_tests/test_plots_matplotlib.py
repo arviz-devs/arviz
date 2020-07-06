@@ -339,6 +339,8 @@ def test_plot_joint_bad(models):
         },
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"is_circular": True},
+        {"is_circular": "degrees"}
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
