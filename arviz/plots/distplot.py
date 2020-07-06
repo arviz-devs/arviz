@@ -90,8 +90,8 @@ def plot_dist(
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
-    is_circular : {True, False, "degrees"}, default False
-        Select input type {"radians","degrees"} for circular histogram or KDE plot. If True,
+    is_circular : {False, True, "radians", "degrees"}. Default False.
+        Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
         default input type is "radians".
     ax: axes, optional
         Matplotlib axes or bokeh figures.
