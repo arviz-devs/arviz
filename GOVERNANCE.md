@@ -99,8 +99,6 @@ The council may choose to delegate these responsibilities to sub-committees. If 
 
 Note that individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
 
-ArviZ will be holding its first election to determine its initial council in the coming weeks and this document will be updated.
-
 ### Private communications of the Council
 
 Unless specifically required, all Council discussions and activities will be
