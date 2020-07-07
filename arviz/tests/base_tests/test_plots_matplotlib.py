@@ -341,6 +341,7 @@ def test_plot_joint_bad(models):
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
         {"is_circular": True},
         {"is_circular": "degrees"},
+        {"is_circular": "radians"},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -374,7 +375,13 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 
 @pytest.mark.parametrize(
     "kwargs",
-    [{"kind": "hist"}, {"kind": "kde"}, {"is_circular": True}, {"is_circular": "degrees"},],
+    [
+        {"kind": "hist"},
+        {"kind": "kde"},
+        {"is_circular": True},
+        {"is_circular": "degrees"},
+        {"is_circular": "radians"},
+    ],
 )
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
