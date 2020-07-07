@@ -278,6 +278,6 @@ def test_set_bokeh_circular_ticks_labels():
     labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
     ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
     renderers = ax.renderers
-    assert len(renderers) == 4
-    assert renderers[3].data_source.data["text"] == labels
-    assert len(renderers[1].data_source.data["start_angle"]) == len(labels)
+    assert len(renderers) == 3
+    assert renderers[2].data_source.data["text"] == labels
+    assert len(renderers[0].data_source.data["start_angle"]) == len(labels)
