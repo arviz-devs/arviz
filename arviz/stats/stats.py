@@ -23,7 +23,8 @@ from .stats_utils import (
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
 )
-from ..numeric_utils import _fast_kde, histogram, get_bins
+from ..numeric_utils import histogram, get_bins
+from ..kde_utils import kde
 from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
 from ..rcparams import rcParams
 
@@ -545,10 +546,10 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
         ary = ary[~np.isnan(ary)]
 
     if ary.dtype.kind == "f":
-        density, lower, upper = _fast_kde(ary)
+        bins, density = kde(ary)
+        lower, upper = bins[0], bins[-1]
         range_x = upper - lower
         dx = range_x / len(density)
-        bins = np.linspace(lower, upper, len(density))
     else:
         bins = get_bins(ary)
         _, density, _ = histogram(ary, bins=bins)

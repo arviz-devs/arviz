@@ -12,8 +12,8 @@ from ...plot_utils import (
     _create_axes_grid,
     _scale_fig_size,
 )
-from ....numeric_utils import _fast_kde, histogram, get_bins
-
+from ....numeric_utils import histogram, get_bins
+from ....kde_utils import kde
 _log = logging.getLogger(__name__)
 
 
@@ -149,8 +149,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_density, lower, upper = _fast_kde(vals)
-                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:
@@ -368,18 +367,13 @@ def _set_animation(
     if kind == "kde":
         length = len(pp_sampled_vals)
         if dtype == "f":
-            y_vals, lower, upper = _fast_kde(pp_sampled_vals[0])
-            x_vals = np.linspace(lower, upper, len(y_vals))
-
-            max_max = max([max(_fast_kde(pp_sampled_vals[i])[0]) for i in range(length)])
-
+            x_vals, y_vals = kde(pp_sampled_vals[0])
+            max_max = max([max(kde(pp_sampled_vals[i])[1]) for i in range(length)])
             ax.set_ylim(0, max_max)
-
             (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
             def animate(i):
-                y_vals, lower, upper = _fast_kde(pp_sampled_vals[i])
-                x_vals = np.linspace(lower, upper, len(y_vals))
+                x_vals, y_vals = kde(pp_sampled_vals[i])
                 line.set_data(x_vals, y_vals)
                 return line
 

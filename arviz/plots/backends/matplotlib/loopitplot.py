@@ -10,6 +10,7 @@ from ...plot_utils import (
     _scale_fig_size,
     matplotlib_kwarg_dealiaser,
 )
+from ....kde_utils import kde
 from ....numeric_utils import _fast_kde
 
 
@@ -118,8 +119,7 @@ def plot_loo_pit(
             ax.axhspan(*hdi_odds, **hdi_kwargs)
         else:
             for idx in range(n_unif):
-                unif_density, xmin, xmax = _fast_kde(unif[idx, :])
-                x_s = np.linspace(xmin, xmax, len(unif_density))
+                x_s, unif_density = kde(unif[idx, :])
                 x_ss[idx] = x_s
                 u_dens[idx] = unif_density
             ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)

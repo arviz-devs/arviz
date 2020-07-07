@@ -25,7 +25,7 @@ def plot_density(
     outline=True,
     hdi_markers="",
     shade=0.0,
-    bw=4.5,
+    bw=1,
     figsize=None,
     textsize=None,
     ax=None,
@@ -78,9 +78,9 @@ def plot_density(
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
     bw : Optional[float]
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy).
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]

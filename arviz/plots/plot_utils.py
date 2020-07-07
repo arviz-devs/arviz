@@ -13,7 +13,7 @@ from matplotlib.colors import to_hex
 from scipy.stats import mode
 import xarray as xr
 
-from ..numeric_utils import _fast_kde
+from ..kde_utils import kde
 from ..rcparams import rcParams
 
 KwargSpec = Dict[str, Any]
@@ -611,7 +611,7 @@ def get_plotting_function(plot_name, plot_module, backend):
     return plotting_method
 
 
-def calculate_point_estimate(point_estimate, values, bw=4.5):
+def calculate_point_estimate(point_estimate, values, bw=1):
     """Validate and calculate the point estimate.
 
     Parameters
@@ -620,10 +620,10 @@ def calculate_point_estimate(point_estimate, values, bw=4.5):
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
     values : 1-d array
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
+    bw: float, optional
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
 
     Returns
     -------
@@ -643,8 +643,7 @@ def calculate_point_estimate(point_estimate, values, bw=4.5):
         point_value = values.mean()
     elif point_estimate == "mode":
         if isinstance(values[0], float):
-            density, lower, upper = _fast_kde(values, bw=bw)
-            x = np.linspace(lower, upper, len(density))
+            x, density = kde(values, bw_fct=bw)
             point_value = x[np.argmax(density)]
         else:
             point_value = mode(values)[0][0]
@@ -713,8 +712,7 @@ def sample_reference_distribution(dist, shape):
     densities = []
     dist_rvs = dist.rvs(size=shape)
     for idx in range(shape[1]):
-        density, xmin, xmax = _fast_kde(dist_rvs[:, idx])
-        x_s = np.linspace(xmin, xmax, len(density))
+        x_s, density = kde(dist_rvs[:, idx])
         x_ss.append(x_s)
         densities.append(density)
     return np.array(x_ss).T, np.array(densities).T

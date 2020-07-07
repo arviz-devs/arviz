@@ -7,9 +7,8 @@ from xarray import DataArray
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...kdeplot import _fast_kde
+from ....kde_utils import kde
 from ...plot_utils import _scale_fig_size
-
 
 def plot_loo_pit(
     ax,
@@ -184,8 +183,7 @@ def plot_loo_pit(
             )
         else:
             for idx in range(n_unif):
-                unif_density, xmin, xmax = _fast_kde(unif[idx, :])
-                x_s = np.linspace(xmin, xmax, len(unif_density))
+                x_s, unif_density = kde(unif[idx, :])
                 ax.line(
                     x_s,
                     unif_density,

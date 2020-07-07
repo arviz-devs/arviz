@@ -3,7 +3,8 @@
 import xarray as xr
 
 from ..data import InferenceData
-from ..numeric_utils import _fast_kde, _fast_kde_2d
+from ..numeric_utils import _fast_kde_2d
+from ..kde_utils import kde
 from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 
@@ -14,7 +15,7 @@ def plot_kde(
     cumulative=False,
     rug=False,
     label=None,
-    bw=4.5,
+    bw=1,
     quantiles=None,
     rotated=False,
     contour=True,
@@ -50,17 +51,18 @@ def plot_kde(
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
     label : string
         Text to include as part of the legend
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
-        rule of thumb (the default rule used by SciPy).
+    bw: float, optional
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
     quantiles : list
-        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
-        Defaults to None.
+        Quantiles in ascending order used to segment the KDE.
+        Use [.25, .5, .75] for quartiles. Defaults to None.
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
-        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
+        Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
     textsize: float
@@ -192,7 +194,8 @@ def plot_kde(
         )
 
     if values2 is None:
-        density, lower, upper = _fast_kde(values, cumulative, bw)
+        grid, density = kde(values, bw_fct=bw, cumulative=cumulative)
+        lower, upper = grid[0], grid[-1]
 
         if cumulative:
             density_q = density

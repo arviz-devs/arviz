@@ -15,7 +15,7 @@ def plot_dist(
     label=None,
     rotated=False,
     rug=False,
-    bw=4.5,
+    bw=1,
     quantiles=None,
     contour=True,
     fill_last=True,
@@ -59,9 +59,9 @@ def plot_dist(
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
     bw : float
-        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
-        rule of thumb (the default rule used by SciPy).
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
     quantiles : list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to None.

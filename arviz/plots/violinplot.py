@@ -19,7 +19,7 @@ def plot_violin(
     rug=False,
     hdi_prob=None,
     shade=0.35,
-    bw=4.5,
+    bw=1,
     sharex=True,
     sharey=True,
     figsize=None,
@@ -64,9 +64,8 @@ def plot_violin(
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
     bw: float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default rule used by SciPy).
+        Bandwidth scaling factor. Must be larger than 0. The higher this number the smoother the
+        KDE will be. Defaults to 1 (no modification)
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int

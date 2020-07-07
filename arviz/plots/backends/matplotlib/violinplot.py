@@ -4,7 +4,8 @@ import numpy as np
 
 from . import backend_show
 from ....stats import hdi
-from ....numeric_utils import _fast_kde, histogram, get_bins
+from ....kde_utils import kde
+from ....numeric_utils import histogram, get_bins
 from ...plot_utils import make_label, _create_axes_grid, matplotlib_kwarg_dealiaser, _scale_fig_size
 
 
@@ -86,8 +87,7 @@ def plot_violin(
 
 def _violinplot(val, rug, shade, bw, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
-    density, low_b, up_b = _fast_kde(val, bw=bw)
-    x = np.linspace(low_b, up_b, len(density))
+    x, density = kde(val, bw_fct=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])

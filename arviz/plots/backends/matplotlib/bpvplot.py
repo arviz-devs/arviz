@@ -13,8 +13,7 @@ from ...plot_utils import (
     is_valid_quantile,
     matplotlib_kwarg_dealiaser,
 )
-from ....numeric_utils import _fast_kde
-
+from ....kde_utils import kde
 
 def plot_bpv(
     ax,
@@ -77,8 +76,7 @@ def plot_bpv(
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
             ax_i.set_yticks([])
             if reference is not None:
@@ -97,8 +95,7 @@ def plot_bpv(
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":

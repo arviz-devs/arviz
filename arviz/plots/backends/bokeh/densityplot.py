@@ -16,8 +16,8 @@ from ...plot_utils import (
     vectorized_to_hex,
 )
 from ....stats import hdi
-from ....numeric_utils import _fast_kde, histogram, get_bins
-
+from ....numeric_utils import histogram, get_bins
+from ....kde_utils import kde
 
 def plot_density(
     ax,
@@ -144,11 +144,10 @@ def _d_helper(
         else:
             new_vec = vec
 
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        x, density = kde(new_vec, bw_fct=bw)
         density *= hdi_prob
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
+        xmin, xmax = x[0], x[-1]
+        ymin, ymax = density[0], density[-1]
 
         if outline:
             plotted.append(ax.line(x, density, line_color=color, line_width=line_width, **extra))

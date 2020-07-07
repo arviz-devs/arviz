@@ -12,7 +12,8 @@ from ...plot_utils import (
     _scale_fig_size,
     calculate_point_estimate,
 )
-from ....numeric_utils import _fast_kde, get_bins
+from ....numeric_utils import get_bins
+from ....kde_utils import kde
 
 
 def plot_density(
@@ -101,7 +102,7 @@ def _d_helper(
     vec,
     vname,
     color,
-    bw,
+    bw_fct,
     titlesize,
     xt_labelsize,
     linewidth,
@@ -123,10 +124,10 @@ def _d_helper(
         variable name
     color : str
         matplotlib color
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
+    bw_fct: float, optional
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
     titlesize : float
         font size for title
     xt_labelsize : float
@@ -152,11 +153,10 @@ def _d_helper(
         else:
             new_vec = vec
 
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        x, density = kde(new_vec, bw_fct=bw_fct)
         density *= hdi_prob
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
+        xmin, xmax = x[0], x[-1]
+        ymin, ymax = density[0], density[-1]
 
         if outline:
             ax.plot(x, density, color=color, lw=linewidth)
@@ -179,7 +179,7 @@ def _d_helper(
         ax.plot(xmax, 0, hdi_markers, color=color, markeredgecolor="k", markersize=markersize)
 
     if point_estimate is not None:
-        est = calculate_point_estimate(point_estimate, vec, bw)
+        est = calculate_point_estimate(point_estimate, vec, bw_fct)
         ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])

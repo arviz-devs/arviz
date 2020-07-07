@@ -45,7 +45,7 @@ from ...plots import (
     plot_bpv,
 )
 from ...utils import _cov
-from ...numeric_utils import _fast_kde
+from ...kde_utils import kde
 
 rcParams["data.load"] = "eager"
 
@@ -923,24 +923,25 @@ def test_plot_hdi_dataset_error(models):
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
-def test_fast_kde_scipy(limits):
+def test_kde_scipy(limits):
+    """
+    Evaluates if sum of density is the same for our implementation
+    and the implementation in scipy
+    """
     data = np.random.normal(0, 1, 10000)
-    if limits[0] is None:
-        x = np.linspace(data.min(), data.max(), 200)  # pylint: disable=no-member
-    else:
-        x = np.linspace(*limits, 500)
-    density = gaussian_kde(data).evaluate(x)
-    density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1])[0]
-
-    np.testing.assert_almost_equal(density_fast.sum(), density.sum(), 1)
+    grid, density_own = kde(data, custom_lims=limits)[1]
+    density_sp = gaussian_kde(data).evaluate(grid)
+    np.testing.assert_almost_equal(density_own.sum(), density_sp.sum(), 1)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
-def test_fast_kde_cumulative(limits):
+def test_kde_cumulative(limits):
+    """
+    Evaluates if last value of cumulative density is 1
+    """
     data = np.random.normal(0, 1, 1000)
-    density_fast = _fast_kde(data, xmin=limits[0], xmax=limits[1], cumulative=True)[0]
-    np.testing.assert_almost_equal(round(density_fast[-1], 3), 1)
-
+    density = kde(data, custom_lims=limits, cumulative=True)[1]
+    np.testing.assert_almost_equal(round(density[-1], 3), 1)
 
 @pytest.mark.parametrize(
     "kwargs",

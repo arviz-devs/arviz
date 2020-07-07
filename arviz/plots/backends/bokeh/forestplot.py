@@ -16,8 +16,10 @@ from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
-from ....numeric_utils import _fast_kde, histogram, get_bins
+from ....numeric_utils import histogram, get_bins
+from ....kde_utils import kde
 from ....utils import conditional_jit
+
 
 
 def pairwise(iterable):
@@ -570,9 +572,8 @@ class VarHandler:
                 _, density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
-                density, lower, upper = _fast_kde(values)
+                x, density = kde(values)
                 density_q = density.cumsum() / density.sum()
-                x = np.linspace(lower, upper, len(density))
 
             xvals.append(x)
             pdfs.append(density)

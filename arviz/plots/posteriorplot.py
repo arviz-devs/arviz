@@ -26,7 +26,7 @@ def plot_posterior(
     rope=None,
     ref_val=None,
     kind="kde",
-    bw=4.5,
+    bw=1,
     bins=None,
     ax=None,
     backend=None,
@@ -82,10 +82,11 @@ def plot_posterior(
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
         a histogram is always used.
-    bw: float
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy). Only works if `kind == kde`.
+    bw : float
+        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
+        The higher this number the smoother the KDE will be.
+        Defaults to 1 which means the bandwidth is not modified.
+        Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
