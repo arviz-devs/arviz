@@ -4,7 +4,7 @@ The Project
 ===========
 
 The ArviZ Project (The Project) is an open source software project
-affiliated with the 501c3 NumFocus Foundation. The goal of The Project is to
+affiliated with the 501c3 NumFOCUS Foundation. The goal of The Project is to
 develop open source software and deploy open and public websites and services
 for reproducible, exploratory and interactive computing. The Software developed
 by The Project is released under the Apache 2 open source license,
@@ -19,8 +19,8 @@ documentation, designs or other work to one or more Project repositories.
 Anyone can be a Contributor. Contributors can be affiliated with any legal
 entity or none. Contributors participate in the project by submitting,
 reviewing and discussing GitHub Pull Requests and Issues and participating in
-open and public Project discussions on GitHub, Slack, and Gitter chat rooms. The foundation of Project participation is openness
-and transparency.
+open and public Project discussions on GitHub, Slack, and Gitter chat rooms.
+The foundation of Project participation is openness and transparency.
 
 There have been many Contributors to the Project, whose contributions are listed in the
 logs of any of the repositories under the ArviZ-devs organization.
@@ -89,7 +89,8 @@ in terms of project direction, to potentially less experienced contributors.
 
 Council Members will have the responsibility of
 * Removing members, including Council Members, if they are in violation of the Code of Conduct
-* Make decisions when regular community discussion doesn’t produce consensus on an issue in a reasonable time frame.
+* Make decisions when regular community discussion does not produce consensus on an issue
+  in a reasonable time frame.
 * Make decisions about strategic collaborations with other organizations or individuals.
 * Make decisions about the overall scope, vision and direction of the project.
 * Developing funding sources
@@ -97,24 +98,51 @@ Council Members will have the responsibility of
 
 The council may choose to delegate these responsibilities to sub-committees. If so, Council members must update this document to make the delegation clear.
 
-Note that individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
+Note that individual council member does not have the power to unilaterally wield these
+responsibilities, but the council as a whole must jointly make these decisions.
+In other words, Council Members are first and foremost Core Contributors, but only
+when needed they can collectively make decisions for the health of the project.
 
 ### Council Decision Making Process
-By and large we expect the decisions in ArviZ to be made ad hoc and require formal coordination and with the community at large. However for conterversial proposals and new core contributors the council will make the final decision in a group vote.
+By and large we expect the decisions in ArviZ to be made _ad hoc_ and require little formal
+coordination and with the community at large. However for controversial proposals and
+new core contributors the council may need to intervene to make the final decision
+in a group vote.
+
+#### Call for a vote
+Core contributors can call for a vote on to resolve a target issue they feel has
+been stale for too long and informal consensus appears unlikely. For a voting
+to be called, the target issue must be at least 2 months old.
+
+To do so, they have to open a proposal issue ticket labeled "Council Vote".
+The proposal issue should contain a link to the target issue and a proposal
+on how to resolve it. Proposals should include a statement making clear what it
+means to "agree" or to "disagree".
+
+Before voting starts, at least 3 days will be left for Core
+Contributors to raise doubts about proposal _phrasing_, no extra discussion will take
+place in the proposal issue. Proposal issues should be locked from creation
+to prevent attracting discussion from people not familiar with the decision
+process.
+
+#### Voting process
 
 * Each council member will vote either Yes, No, or Neutral.
+  * "No" votes must list the reasons for disagreement.
 * An absence of vote is considered as neutral.
 * Voting will remain open for at least 3 days.
-* For the proposal to pass, at least 60% of the council must vote Yes, and no more than 20% can vote No.
+* For the proposal to pass, at least 60% of the council must vote Yes, and no more
+  than 20% can vote No.
 
-For decisions about the project the Council will perform it over Issue Ticket, where the ticket is labeled "Council Vote".
-For decisions about people, such as Core Contributors or ejecting folks, the Council will vote privately. However the decision will be posted
-publicly in an Issue Ticket.
+For decisions about the project the Council will perform it over Issue Ticket, where
+the ticket is labeled "Council Vote".
+For decisions about people, such as Core Contributors or ejecting folks, the Council
+will vote privately. However the decision will be posted publicly in an Issue Ticket.
 
 ### Private communications of the Council
 
 Unless specifically required, all Council discussions and activities will be
-between public (Github, gitter), and partially public channels (Slack)
+between public (GitHub, Gitter), and partially public channels (Slack)
 and done in collaboration and discussion with the Core Contributors
 and Community. The Council will have a private channel that will be used
 sparingly and only when a specific matter requires privacy. When private
@@ -145,7 +173,7 @@ issue, but must recuse themselves from voting on the issue.
 * Must be core contributor for at least one year
 
 #### Nominations
-* Nominations are taken over a public github issue ticket over the course of 2 weeks.
+* Nominations are taken over a public GitHub issue ticket over the course of 2 weeks.
 * Only Core Contributors may nominate folks
 * Self Nominations are allowed
 * At the conclusion of the 2 weeks, the list of nominations is posted on the ticket and this ticket is closed.
@@ -153,18 +181,32 @@ issue, but must recuse themselves from voting on the issue.
 
 #### Election Process
 
-* Voting occurs over a period of at least 1 week, at the conclusion of the nominations. Voting is blind and mediated by either an application or a third party like Numfocus.
-Each voter can vote zero or more times, once per each candidate. As this is not about ranking but about capabilities, voters vote on a yes/no basis per candidate -- “would I trust this person to lead ArviZ?”.
-* In the event of a tie there will be a runoff election for the tied candidates. To avoid further ties and discriminate more among the tied candidates, this vote will be held by [Majority Judgment](https://en.wikipedia.org/wiki/Majority_judgment): for each candidate, voters judge their suitability for office as either Excellent, Very Good, Good, Acceptable, Poor, or Reject. Multiple candidates may be given the same grade by a voter. The candidate with the highest median grade is the winner.
-* If more than one candidate has the same highest median-grade, the MJ winner is discovered by removing (one-by-one) any grades equal in value to the shared median grade from each tied candidate's total. This is repeated until only one of the previously tied candidates is currently found to have the highest median-grade.
-* If ties are still present after this second round, the winner will be chosen at random. Each person tied will pick a number between 0 and 100, and a random integer will be generated from random.org. The person with the closet circular distance will be selected.
+* Voting occurs over a period of at least 1 week, at the conclusion of the nominations.
+  Voting is blind and mediated by either an application or a third party like NumFOCUS.
+  Each voter can vote zero or more times, once per each candidate. As this is not about
+  ranking but about capabilities, voters vote on a yes/neutral/no basis
+  per candidate -- “would I trust this person to lead ArviZ?”.
+* In the event of a tie there will be a runoff election for the tied candidates. To avoid
+  further ties and discriminate more among the tied candidates, this vote will be held
+  by [Majority Judgment](https://en.wikipedia.org/wiki/Majority_judgment) (MJ): for each
+  candidate, voters judge their suitability for office as either Excellent, Very Good,
+  Good, Acceptable, Poor, or Reject. Multiple candidates may be given the same grade by
+  a voter. The candidate with the highest median grade is the winner.
+* If more than one candidate has the same highest median-grade, the MJ winner is
+  discovered by removing (one-by-one) any grades equal in value to the shared median
+  grade from each tied candidate's total. This is repeated until only one of the
+  previously tied candidates is currently found to have the highest median-grade.
+* If ties are still present after this second round, the winner will be chosen at random.
+  Each person tied will pick a number between 0 and 100, and a random integer will be
+  generated from random.org. The person with the closet circular distance will be selected.
 * At the conclusion of voting, all the results will be posted.
-* The decision about who can vote after the first election is deferred to the council. See below for details
+* The decision about who can vote after the first election is deferred to the council.
+  See below for details
 
 #### Length of Tenure and Reverification
 * Council members term limits are 4 years, after which point their seat will come up for reelection.
 * Each year on April 7th council members will be asked to restate their commitment to being on the council
-* Attempts should be made to reach every council member over at least 2 communication media. For example: email, slack, phone, or github.
+* Attempts should be made to reach every council member over at least 2 communication media. For example: email, Slack, phone, or GitHub.
 * If a council member does not restate their commitment their seat will be vacated.
 * Inactivity can be determined by lack of substantial contribution, including votes on council, code or discussion contributions, contributions in the community or otherwise.
 * In the event of a vacancy in the council, an election will be held to fill the position.
@@ -181,7 +223,7 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
 * If a whole-council vote succeeds, the council is dissolved and a new council election is triggered immediately.
 
 #### Ejecting Core Contributors
-* Core contributors can be ejected through a simple majority vote by the council
+* Core contributors can be ejected through a simple majority vote by the council. Council members vote "Yes" or "No".
 * Upon ejecting a core contributor the council must publish an issue ticket, or public document detailing the
   * Violations
   * Evidence if available
@@ -189,13 +231,9 @@ Each voter can vote zero or more times, once per each candidate. As this is not 
   * Signatures majority of council members to validate correctness and accuracy
 * Core contributors can also voluntarily leave the project by notifying the community through a public means or by notifying the entire council.
 
-### One Time Decisions
-* The first election will also include a vote for the number of Council Members, options being 5 and 7. A simple majority will indicate preference.
-  * At the conclusion of the vote this section should be removed
-
 #### Voting Criteria For Future Elections
 Voting for first election is restricted to establish stable governance, and to defer major decision to elected leaders
-* For the first election only the people registered following the guidelines in elections/ArviZ_2020.md can vote
+* For the first election only the people registered following the guidelines in `elections/ArviZ_2020.md` can vote
 * In the first year, the council must determine voting eligibility for future elections between two criteria:
   * Core contributors
   * The contributing community at large
@@ -203,7 +241,7 @@ Voting for first election is restricted to establish stable governance, and to d
 ### Core Contributors
 Core Contributors are those who have provided consistent and meaningful contributions to ArviZ.
 These can be, but are not limited to, code contributions, community contributions, tutorial
-development etc. Core Contributors will be given the ability to manage the ArviZ github
+development etc. Core Contributors will be given the ability to manage the ArviZ GitHub
 repository, including code merges to master. This does not necessarily mean Core Contributors
 must submit code, but more so signifies trust with the project as a whole.
 
@@ -212,10 +250,19 @@ must submit code, but more so signifies trust with the project as a whole.
 * Maintain a check against Council
 
 #### Core Contributor Nominations and Confirmation Process
-Current Core Contributors can nominate candidates to become Core Contributors. If nominated candidates accept their nomination (explicit comment approving nomination on the GitHub issue or "thumbsup" emoji on the same issue), then they can be considered by the Council: on the first of the month following a nomination, the Council will vote on each nominee using the process above.
+Current Core Contributors can nominate candidates to become Core Contributors by
+requesting so in a GitHub issue. If nominated candidates accept their nomination
+(explicit comment approving nomination on the issue or "thumbs-up" emoji on the same issue),
+then they can be considered by the Council: on the first of the month following a
+nomination, the Council will vote on each nominee using the process above.
+
+Voting will be private with results published on the issue ticket. In the case of a
+rejection, results must include the reasons behind the decision (e.g. the time since
+starting to contribute is deemed too short for now). The candidate
+would then have to wait 3 months to be considered again.
 
 #### Current Core Contributors
-* Oriol Abril-Pla (@OriolAbril) 
+* Oriol Abril-Pla (@OriolAbril)
 * Alex Andorra (@AlexAndorra)
 * Seth Axen (@sethaxen)
 * Colin Carroll (@ColCarroll)
