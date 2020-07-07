@@ -134,10 +134,10 @@ process.
 * For the proposal to pass, at least 60% of the council must vote Yes, and no more
   than 20% can vote No.
 
-For decisions about the project the Council will perform it over Issue Ticket, where
-the ticket is labeled "Council Vote".
+For decisions about the project the Council will perform it directly on the
+proposal issue.
 For decisions about people, such as Core Contributors or ejecting folks, the Council
-will vote privately. However the decision will be posted publicly in an Issue Ticket.
+will vote privately. However the decision will be posted publicly in an issue ticket.
 
 ### Private communications of the Council
 
