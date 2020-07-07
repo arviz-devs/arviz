@@ -120,7 +120,7 @@ on how to resolve it. Proposals should include a statement making clear what it
 means to "agree" or to "disagree".
 
 Before voting starts, at least 3 days will be left for Core
-Contributors to raise doubts about proposal _phrasing_, no extra discussion will take
+Contributors to raise doubts about the proposal's _phrasing_, no extra discussion will take
 place in the proposal issue. Proposal issues should be locked from creation
 to prevent attracting discussion from people not familiar with the decision
 process.
