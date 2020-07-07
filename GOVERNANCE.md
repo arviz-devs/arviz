@@ -107,6 +107,10 @@ By and large we expect the decisions in ArviZ to be made ad hoc and require form
 * Voting will remain open for at least 3 days
 * To pass 60% of the council must vote Yes, and no more than 25% can vote No
 
+For decisions about the project the Council will perform it over Issue Ticket, where the ticket is labeled "Council Vote".
+For decisions about people, such as Core Contributors or ejecting folks, the Council will vote privately. However the decision will be posted
+publicly in an Issue Ticket.
+
 ### Private communications of the Council
 
 Unless specifically required, all Council discussions and activities will be
