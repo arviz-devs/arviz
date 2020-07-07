@@ -6,7 +6,7 @@ import pytest
 import xarray as xr
 
 from ...data import from_dict
-from ..helpers import running_on_ci
+from ..helpers import running_on_ci, importorskip
 from ...plots.plot_utils import (
     filter_plotters_list,
     format_sig_figs,
@@ -267,13 +267,17 @@ def test_dealiase_sel_kwargs():
     assert res["line_color"] == "red"
 
 
+# Skip tests if bokeh not installed
+bkp = importorskip("bokeh.plotting")  # pylint: disable=invalid-name
+
+
 def test_set_bokeh_circular_ticks_labels():
     """Assert the axes returned after placing ticks and tick labels for circular plots."""
     ax = bkp.figure(x_axis_type=None, y_axis_type=None)
     hist = np.linspace(0, 1, 10)
     labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
     ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
-    renderes = ax.renderers
+    renderers = ax.renderers
     assert len(renderers) == 4
-    assert a[3].data_source.data["text"] == labels
-    assert len(a[1].data_source.data["start_angle"]) == len(labels)
+    assert renderers[3].data_source.data["text"] == labels
+    assert len(renderers[1].data_source.data["start_angle"]) == len(labels)
