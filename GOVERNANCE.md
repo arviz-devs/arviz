@@ -208,7 +208,7 @@ must submit code, but more so signifies trust with the project as a whole.
 * Maintain a check against Council
 
 #### Core Contributor Nominations and Confirmation Process
-Current Core Contributors can nominate candidates to become Core Contributors. If nominated candidates accept their nomination (explicit comment approving nomination on the GitHub issue or "thumbsup" emoji on the same issue), then they can be considered by the Council: on the first of the month following a nomination, the Council will vote on each nominee, where greater than 50% of the votes means a confirmation. In the event of a tie, a second election will occur, where all core contributors can vote. If 50% or greater of the community confirm, the nominee will be accepted.
+Current Core Contributors can nominate candidates to become Core Contributors. If nominated candidates accept their nomination (explicit comment approving nomination on the GitHub issue or "thumbsup" emoji on the same issue), then they can be considered by the Council: on the first of the month following a nomination, the Council will vote on each nominee using the process above.
 
 #### Current Core Contributors
 * Oriol Abril-Pla (@OriolAbril) 
