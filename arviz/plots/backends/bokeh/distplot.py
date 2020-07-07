@@ -115,9 +115,7 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         hist_kwargs["fill_color"] = color
         hist_kwargs["line_color"] = color
 
-    line_alpha = hist_kwargs.pop("line_alpha", False)
-    if not line_alpha:
-        hist_kwargs.setdefault("line_alpha", 0)
+    hist_kwargs.setdefault("line_alpha", 0)
 
     # remove defaults for mpl
     hist_kwargs.pop("rwidth", None)
