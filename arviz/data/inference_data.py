@@ -203,20 +203,20 @@ class InferenceData:
         """.format(
             method_name=func.__name__
         )
-        params = """\
-            Parameters
-            ----------
-            groups: str or list of str, optional
-                Groups where the selection is to be applied. Can either be group names
-                or metagroup names.
-            filter_groups: {None, "like", "regex"}, optional, default=None
-                If `None` (default), interpret groups as the real group or metagroup names.
-                If "like", interpret groups as substrings of the real group or metagroup names.
-                If "regex", interpret groups as regular expressions on the real group or
-                metagroup names. A la `pandas.filter`.
-            inplace: bool, optional
-                If ``True``, modify the InferenceData object inplace,
-                otherwise, return the modified copy.
+        params = """
+        Parameters
+        ----------
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
             """
         wrapped.__doc__ = description + params
 
