@@ -99,6 +99,14 @@ The council may choose to delegate these responsibilities to sub-committees. If 
 
 Note that individual council member does not have the power to unilaterally wield these responsibilities, but the council as a whole must jointly make these decisions. In other words, Council Members are first and foremost Core Contributors, but only when needed they can collectively make decisions for the health of the project.
 
+### Council Decision Making Process
+By and large we expect the decisions in ArviZ to be made ad hoc and require formal coordination and with the community at large. However for conterversial proposals and new core contributors the council will make the final decision in a group vote.
+
+* Each council member will vote either Yes, No, or Neutral
+  * A non vote is considered nuetral
+* Voting will remain open for at least 3 days
+* To pass 60% of the council must vote Yes, and no more than 25% can vote No
+
 ### Private communications of the Council
 
 Unless specifically required, all Council discussions and activities will be
