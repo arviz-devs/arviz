@@ -167,10 +167,7 @@ def plot_dist(
         hist_kwargs.setdefault("color", color)
         hist_kwargs.setdefault("label", label)
         hist_kwargs.setdefault("rwidth", 0.9)
-        if is_circular:
-            hist_kwargs.setdefault("align", "mid")
-        else:
-            hist_kwargs.setdefault("align", "left")
+        hist_kwargs.setdefault("align", "left")
         hist_kwargs.setdefault("density", True)
 
         if rotated:

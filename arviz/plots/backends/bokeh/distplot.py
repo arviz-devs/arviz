@@ -150,13 +150,16 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
                 r"7π/4",
             ]
 
+        delta = np.mean(np.diff(edges) / 2)
+
         ax.annular_wedge(
             x=0,
             y=0,
             inner_radius=0,
             outer_radius=hist,
-            start_angle=edges[:-1],
-            end_angle=edges[1:],
+            start_angle=edges[1:] - delta,
+            end_angle=edges[:-1] - delta,
+            direction="clock",
             **hist_kwargs,
         )
 
