@@ -128,7 +128,9 @@ process.
 #### Voting process
 
 * Each council member will vote either Yes, No, or Neutral.
-  * "No" votes must list the reasons for disagreement.
+* It is recommended that all council members expose their reasons when voting.
+  "No" votes however _must_ list the reasons for disagreement. Any "no" vote
+  with no reason listed will be considered a "neutral" vote.
 * An absence of vote is considered as neutral.
 * Voting will remain open for at least 3 days.
 * For the proposal to pass, at least 60% of the council must vote Yes, and no more
@@ -186,6 +188,15 @@ issue, but must recuse themselves from voting on the issue.
   Each voter can vote zero or more times, once per each candidate. As this is not about
   ranking but about capabilities, voters vote on a yes/neutral/no basis
   per candidate -- “would I trust this person to lead ArviZ?”.
+* Candidates are evaluated independently, each candidate having 60% or more of
+  yes votes _and_ less or equal than 20% of no votes is chosen. If the number
+  of chosen candidates is >=4 and <=10 all candidates are confirmed and the
+  election process stops here.
+* In the event that either not enough or too many candidates were confirmed,
+  candidates are ranked by interpreting yes=+1, neutral=0 and no=-1. If too
+  many candidates were confirmed, the 10 candidates with higher rank are
+  elected. If not enough candidates were chosen, the 4 candidates with higher
+  rank are elected.
 * In the event of a tie there will be a runoff election for the tied candidates. To avoid
   further ties and discriminate more among the tied candidates, this vote will be held
   by [Majority Judgment](https://en.wikipedia.org/wiki/Majority_judgment) (MJ): for each
@@ -199,9 +210,10 @@ issue, but must recuse themselves from voting on the issue.
 * If ties are still present after this second round, the winner will be chosen at random.
   Each person tied will pick a number between 0 and 100, and a random integer will be
   generated from random.org. The person with the closet circular distance will be selected.
-* At the conclusion of voting, all the results will be posted.
-* The decision about who can vote after the first election is deferred to the council.
-  See below for details
+* At the conclusion of voting, all the results will be posted. And at least 24
+  hours will be left to challenge the election result in case there were
+  suspicions of irregularities or the process had not been correctly carried
+  out.
 
 #### Length of Tenure and Reverification
 * Council members term limits are 4 years, after which point their seat will come up for reelection.
