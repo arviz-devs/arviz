@@ -175,33 +175,29 @@ class InferenceData:
     def _groups_all(self):
         return self._groups + self._groups_warmup
 
-    def extend_xr_method(func):  # pylint: disable=no-self-argument
+    def _extend_xr_method(func):  # pylint: disable=no-self-argument
         """Wrapper to add methods to InferenceData Class"""
 
         @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-
+        def wrapped(self, *args, **kwargs):
             _filter = kwargs.pop("filter_groups", None)
             _groups = kwargs.pop("groups", None)
             _inplace = kwargs.pop("inplace", False)
-            self = args[0]
-            args = list(args)
 
             out = self if _inplace else deepcopy(self)
 
-            groups = self._group_names(_groups, _filter)
+            groups = self._group_names(_groups, _filter) # pylint: disable=protected-access
             for group in groups:
                 xr_data = getattr(out, group)
-                args[0] = xr_data
-                xr_data = func(*args, **kwargs)
+                xr_data = func(xr_data, *args, **kwargs) # pylint: disable=not-callable
                 setattr(out, group, xr_data)
 
             return None if _inplace else out
 
-        description = """\
+        description = """
         This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
         """.format(
-            method_name=func.__name__
+            method_name=func.__name__ # pylint: disable=no-member
         )
         params = """
         Parameters
@@ -216,9 +212,16 @@ class InferenceData:
             metagroup names. A la `pandas.filter`.
         inplace: bool, optional
             If ``True``, modify the InferenceData object inplace,
-            otherwise, return the modified copy.
-            """
-        wrapped.__doc__ = description + params
+            otherwise, return the modified copy. 
+        """
+        see_also = """
+        See Also
+        --------
+        xarray.Dataset.{method_name}
+        """.format(
+            method_name=func.__name__ # pylint: disable=no-member
+        )
+        wrapped.__doc__ = description + params + see_also
 
         return wrapped
 
@@ -329,7 +332,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform selection in place and return `None`
+            When `inplace==True` perform selection in-place and return `None`
 
         Examples
         --------
@@ -410,7 +413,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform selection in place and return `None`
+            When `inplace==True` perform selection in-place and return `None`
 
         """
 
@@ -461,7 +464,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform selection in place and return `None`
+            When `inplace==True` perform selection in-place and return `None`
 
         """
 
@@ -562,7 +565,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform renaming in place and return `None`
+            When `inplace==True` perform renaming in-place and return `None`
 
         """
 
@@ -613,7 +616,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object with renamed variables including coordinates by default.
-            When `inplace==True` perform renaming in place and return `None`
+            When `inplace==True` perform renaming in-place and return `None`
 
         """
 
@@ -661,7 +664,7 @@ class InferenceData:
         -------
         InferenceData
             A new InferenceData object with renamed dimension by default.
-            When `inplace==True` perform renaming in place and return `None`
+            When `inplace==True` perform renaming in-place and return `None`
 
         """
 
@@ -680,19 +683,22 @@ class InferenceData:
         else:
             return out
 
-    # extending xarray.Dataset methods
-    set_index = extend_xr_method(xr.Dataset.set_index)
-    get_index = extend_xr_method(xr.Dataset.get_index)
-    reset_index = extend_xr_method(xr.Dataset.reset_index)
-    set_coords = extend_xr_method(xr.Dataset.set_coords)
-    reset_coords = extend_xr_method(xr.Dataset.reset_coords)
+    set_index = _extend_xr_method(xr.Dataset.set_index)
+    get_index = _extend_xr_method(xr.Dataset.get_index)
+    reset_index = _extend_xr_method(xr.Dataset.reset_index)
+    set_coords = _extend_xr_method(xr.Dataset.set_coords)
+    reset_coords = _extend_xr_method(xr.Dataset.reset_coords)
+    assign = _extend_xr_method(xr.Dataset.assign)
+    assign_coords = _extend_xr_method(xr.Dataset.assign_coords)
+    sortby = _extend_xr_method(xr.Dataset.sortby)
 
-    # extending apply methods
-    mean = extend_xr_method(xr.Dataset.mean)
-    median = extend_xr_method(xr.Dataset.median)
-    min = extend_xr_method(xr.Dataset.min)
-    max = extend_xr_method(xr.Dataset.max)
-    cumsum = extend_xr_method(xr.Dataset.cumsum)
+    mean = _extend_xr_method(xr.Dataset.mean)
+    median = _extend_xr_method(xr.Dataset.median)
+    min = _extend_xr_method(xr.Dataset.min)
+    max = _extend_xr_method(xr.Dataset.max)
+    cumsum = _extend_xr_method(xr.Dataset.cumsum)
+    sum = _extend_xr_method(xr.Dataset.sum)
+    quantile = _extend_xr_method(xr.Dataset.quantile)
 
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.
