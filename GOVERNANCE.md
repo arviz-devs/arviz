@@ -209,7 +209,7 @@ issue, but must recuse themselves from voting on the issue.
   previously tied candidates is currently found to have the highest median-grade.
 * If ties are still present after this second round, the winner will be chosen at random.
   Each person tied will pick a number between 0 and 100, and a random integer will be
-  generated from random.org. The person with the closet circular distance will be selected.
+  generated from random.org. The person with the closest circular distance will be selected.
 * At the conclusion of voting, all the results will be posted. And at least 24
   hours will be left to challenge the election result in case there were
   suspicions of irregularities or the process had not been correctly carried
