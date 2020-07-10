@@ -186,10 +186,10 @@ class InferenceData:
 
             out = self if _inplace else deepcopy(self)
 
-            groups = self._group_names(_groups, _filter) # pylint: disable=protected-access
+            groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
             for group in groups:
                 xr_data = getattr(out, group)
-                xr_data = func(xr_data, *args, **kwargs) # pylint: disable=not-callable
+                xr_data = func(xr_data, *args, **kwargs)  # pylint: disable=not-callable
                 setattr(out, group, xr_data)
 
             return None if _inplace else out
@@ -197,7 +197,7 @@ class InferenceData:
         description = """
         This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
         """.format(
-            method_name=func.__name__ # pylint: disable=no-member
+            method_name=func.__name__  # pylint: disable=no-member
         )
         params = """
         Parameters
@@ -219,7 +219,7 @@ class InferenceData:
         --------
         xarray.Dataset.{method_name}
         """.format(
-            method_name=func.__name__ # pylint: disable=no-member
+            method_name=func.__name__  # pylint: disable=no-member
         )
         wrapped.__doc__ = description + params + see_also
 

@@ -324,17 +324,25 @@ class TestInferenceData:
         fails = check_multiple_attrs(test_dict, new_idata)
         assert not fails
 
-    def test_extend_xr_method(self):
-        arr = xr.DataArray(
-            data=np.ones((2, 3)),
-            dims=["x", "y"],
-            coords={"x": range(2), "y": range(3), "a": ("x", [3, 4])},
+    @pytest.mark.parametrize("inplace", [True, False])
+    def test_extend_xr_method(self, inplace):
+        data = np.random.normal(size=(4, 500, 8))
+        dataset = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            prior={"a": data[..., 0], "b": data},
+            posterior_predictive={"a": data[..., 0], "b": data},
         )
-        ds = xr.Dataset({"v": arr})
-        dataset = convert_to_inference_data(ds)
-        assert_identical(dataset.set_index(x="a").posterior, ds.set_index(x="a"))
-        dataset.set_index(x="a", inplace=True)
-        assert_identical(dataset.posterior, ds.set_index(x="a"))
+        dataset_copy = dataset
+        kwargs = {"groups": "posterior_groups"}
+        if inplace:
+            dataset_copy.sum(inplace=inplace, **kwargs)
+        else:
+            idata = dataset_copy.sum(inplace=inplace, **kwargs)
+            assert idata is not dataset_copy
+            dataset_copy = idata
+        assert_identical(dataset_copy.posterior, dataset.posterior.sum())
+        assert_identical(dataset_copy.posterior_predictive, dataset.posterior_predictive.sum())
+        assert_identical(dataset_copy.prior, dataset.prior)
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_sel(self, inplace):
