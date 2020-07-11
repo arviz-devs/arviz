@@ -82,8 +82,9 @@ def plot_kde(
         Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
-    is_circular : str
-        Select input type {"radians","degrees"} for circular histogram or KDE plot.
+    is_circular : {False, True, "radians", "degrees"}. Default False.
+        Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
+        default input type is "radians".
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
