@@ -2,6 +2,6 @@ astroid==2.3.3
 numpydoc
 pydocstyle
 pylint==2.4.4
-pytest
+pytest==6.0.0rc1
 pytest-cov
 black ; python_version >= '3.6'
