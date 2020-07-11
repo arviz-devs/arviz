@@ -89,7 +89,7 @@ in terms of project direction, to potentially less experienced contributors.
 
 Council Members will have the responsibility of
 * Removing members, including Council Members, if they are in violation of the Code of Conduct
-* Make decisions when regular community discussion does not produce consensus on an issue
+* Making decisions when regular community discussion does not produce consensus on an issue
   in a reasonable time frame.
 * Make decisions about strategic collaborations with other organizations or individuals.
 * Make decisions about the overall scope, vision and direction of the project.
