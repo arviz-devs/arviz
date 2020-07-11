@@ -110,7 +110,7 @@ new Core Contributors the council may need to intervene to make the final decisi
 in a group vote.
 
 #### Call for a vote
-Core contributors can call for a vote to resolve a target issue they feel has
+Core Contributors can call for a vote to resolve a target issue they feel has
 been stale for too long and informal consensus appears unlikely. For a voting
 to be called, the target issue must be at least 2 months old.
 
