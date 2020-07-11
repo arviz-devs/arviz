@@ -127,7 +127,7 @@ process.
 
 #### Voting process
 
-* Each council member will vote either Yes, No, or Neutral.
+* Each Council Member will vote either "Yes", "No", or "Neutral".
 * It is recommended that all council members expose their reasons when voting.
   "No" votes however _must_ list the reasons for disagreement. Any "no" vote
   with no reason listed will be considered a "neutral" vote.
