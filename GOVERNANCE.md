@@ -130,11 +130,11 @@ process.
 * Each Council Member will vote either "Yes", "No", or "Neutral".
 * It is recommended that all Council Members expose their reasons when voting.
   "No" votes, however, _must_ list the reasons for disagreement. Any "No" vote
-  with no reason listed will be considered a "neutral" vote.
-* An absence of vote is considered as neutral.
+  with no reason listed will be considered a "Neutral" vote.
+* An absence of vote is considered as "Neutral".
 * Voting will remain open for at least 3 days.
-* For the proposal to pass, at least 60% of the council must vote Yes, and no more
-  than 20% can vote No.
+* For the proposal to pass, at least 60% of the council must vote "Yes", and no more
+  than 20% can vote "No".
 
 For decisions about the project the Council will perform it directly on the
 proposal issue.
