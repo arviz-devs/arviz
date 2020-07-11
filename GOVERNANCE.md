@@ -111,7 +111,7 @@ in a group vote.
 
 #### Call for a vote
 Core Contributors can call for a vote to resolve a target issue they feel has
-been stale for too long and informal consensus appears unlikely. For a voting
+been stale for too long and for which informal consensus appears unlikely. For a vote
 to be called, the target issue must be at least 2 months old.
 
 To do so, they have to open a proposal issue ticket labeled "Council Vote".
