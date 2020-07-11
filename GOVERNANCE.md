@@ -106,7 +106,7 @@ when needed they can collectively make decisions for the health of the project.
 ### Council Decision Making Process
 By and large we expect the decisions in ArviZ to be made _ad hoc_ and require little formal
 coordination and with the community at large. However, for controversial proposals and
-new core contributors the council may need to intervene to make the final decision
+new Core Contributors the council may need to intervene to make the final decision
 in a group vote.
 
 #### Call for a vote
