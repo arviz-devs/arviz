@@ -98,7 +98,7 @@ Council Members will have the responsibility of
 
 The council may choose to delegate these responsibilities to sub-committees. If so, Council members must update this document to make the delegation clear.
 
-Note that individual council member does not have the power to unilaterally wield these
+Note that an individual council member does not have the power to unilaterally wield these
 responsibilities, but the council as a whole must jointly make these decisions.
 In other words, Council Members are first and foremost Core Contributors, but only
 when needed they can collectively make decisions for the health of the project.
