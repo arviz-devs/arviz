@@ -133,7 +133,7 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         ax.set_xticks(bins[:-1])
 
     if is_circular:
-        ax.set_ylim(0, n.max() + 0.5 * n.max())
+        ax.set_ylim(0, 1.5 * n.max())
 
     if hist_kwargs.get("label") is not None:
         ax.legend()
