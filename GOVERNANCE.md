@@ -91,8 +91,8 @@ Council Members will have the responsibility of
 * Removing members, including Council Members, if they are in violation of the Code of Conduct
 * Making decisions when regular community discussion does not produce consensus on an issue
   in a reasonable time frame.
-* Make decisions about strategic collaborations with other organizations or individuals.
-* Make decisions about the overall scope, vision and direction of the project.
+* Making decisions about strategic collaborations with other organizations or individuals.
+* Making decisions about the overall scope, vision and direction of the project.
 * Developing funding sources
 * Deciding how to disburse funds with consultation from Core Contributors
 
