@@ -269,13 +269,14 @@ def test_dealiase_sel_kwargs():
 
 # Check if Bokeh is installed
 bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
+
+
 @pytest.mark.skipif(
     not (bokeh_installed | running_on_ci()), reason="test requires bokeh which is not installed",
 )
 def test_set_bokeh_circular_ticks_labels():
     """Assert the axes returned after placing ticks and tick labels for circular plots."""
     import bokeh.plotting as bkp
-
 
     ax = bkp.figure(x_axis_type=None, y_axis_type=None)
     hist = np.linspace(0, 1, 10)
