@@ -127,10 +127,8 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     n, _, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
-    if rotated or is_circular:
+    if rotated:
         ax.set_yticks(bins[:-1])
-    else:
-        ax.set_xticks(bins[:-1])
 
     if is_circular:
         ax.set_ylim(0, 1.5 * n.max())
