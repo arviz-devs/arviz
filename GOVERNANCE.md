@@ -129,7 +129,7 @@ process.
 
 * Each Council Member will vote either "Yes", "No", or "Neutral".
 * It is recommended that all Council Members expose their reasons when voting.
-  "No" votes however _must_ list the reasons for disagreement. Any "no" vote
+  "No" votes, however, _must_ list the reasons for disagreement. Any "No" vote
   with no reason listed will be considered a "neutral" vote.
 * An absence of vote is considered as neutral.
 * Voting will remain open for at least 3 days.
