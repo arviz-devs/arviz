@@ -138,7 +138,7 @@ process.
 
 For decisions about the project the Council will perform it directly on the
 proposal issue.
-For decisions about people, such as Core Contributors or ejecting folks, the Council
+For decisions about people, such as electing or ejecting Core Contributors, the Council
 will vote privately. However the decision will be posted publicly in an issue ticket.
 
 ### Private communications of the Council
@@ -200,16 +200,20 @@ issue, but must recuse themselves from voting on the issue.
 * In the event of a tie there will be a runoff election for the tied candidates. To avoid
   further ties and discriminate more among the tied candidates, this vote will be held
   by [Majority Judgment](https://en.wikipedia.org/wiki/Majority_judgment) (MJ): for each
-  candidate, voters judge their suitability for office as either Excellent, Very Good,
-  Good, Acceptable, Poor, or Reject. Multiple candidates may be given the same grade by
-  a voter. The candidate with the highest median grade is the winner.
+  candidate, voters judge their suitability for office as either "Excellent", "Very Good",
+  "Good", "Acceptable", "Poor", or "Reject". Multiple candidates may be given the same
+  grade by a voter. The candidate with the highest median grade is the winner.
 * If more than one candidate has the same highest median-grade, the MJ winner is
   discovered by removing (one-by-one) any grades equal in value to the shared median
   grade from each tied candidate's total. This is repeated until only one of the
   previously tied candidates is currently found to have the highest median-grade.
 * If ties are still present after this second round, the winner will be chosen at random.
-  Each person tied will pick a number between 0 and 100, and a random integer will be
-  generated from random.org. The person with the closest circular distance will be selected.
+  Each person tied will pick an integer number in the `[1, 100]` interval and send it
+  privately to the third party mediating the election. After receiving all the numbers,
+  said third party will draw a random integer from random.org. The person with the
+  closest circular distance, defined as `min(|a-b|, 100-|a-b|)`, will be selected.
+  This process will be repeated as many times as necessary as there may be ties
+  resulting from candidates choosing the same number.
 * At the conclusion of voting, all the results will be posted. And at least 24
   hours will be left to challenge the election result in case there were
   suspicions of irregularities or the process had not been correctly carried
