@@ -102,7 +102,6 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
             bins = get_bins(values)
         values = np.deg2rad(values)
         bins = np.deg2rad(bins)
-        ax.set_yticklabels([])
 
     elif is_circular:
         labels = [
@@ -117,7 +116,6 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
         ]
 
         ax.set_xticklabels(labels)
-        ax.set_yticklabels([])
 
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
@@ -134,6 +132,7 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
 
     if is_circular:
         ax.set_ylim(0, 1.5 * n.max())
+        ax.set_yticklabels([])
 
     if hist_kwargs.get("label") is not None:
         ax.legend()

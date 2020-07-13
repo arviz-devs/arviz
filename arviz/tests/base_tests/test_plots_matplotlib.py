@@ -380,9 +380,13 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
         {"kind": "hist"},
         {"kind": "kde"},
         {"is_circular": False},
+        {"is_circular": False, "kind": "hist"},
         {"is_circular": True},
+        {"is_circular": True, "kind": "hist"},
         {"is_circular": "radians"},
+        {"is_circular": "radians", "kind": "hist"},
         {"is_circular": "degrees"},
+        {"is_circular": "degrees", "kind": "hist"},
     ],
 )
 def test_plot_dist(continuous_model, kwargs):
