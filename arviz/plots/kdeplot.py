@@ -26,6 +26,7 @@ def plot_kde(
     contour_kwargs=None,
     contourf_kwargs=None,
     pcolormesh_kwargs=None,
+    is_circular=False,
     ax=None,
     legend=True,
     backend=None,
@@ -81,6 +82,9 @@ def plot_kde(
         Keywords passed to ax.contourf to draw filled contours. Ignored for 1D KDE.
     pcolormesh_kwargs : dict
         Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
+    is_circular : {False, True, "radians", "degrees"}. Default False.
+        Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
+        default input type is "radians".
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     legend : bool
@@ -230,6 +234,7 @@ def plot_kde(
         contour_kwargs=contour_kwargs,
         contourf_kwargs=contourf_kwargs,
         pcolormesh_kwargs=pcolormesh_kwargs,
+        is_circular=is_circular,
         ax=ax,
         legend=legend,
         backend_kwargs=backend_kwargs,
@@ -246,6 +251,7 @@ def plot_kde(
         kde_plot_args.pop("textsize")
         kde_plot_args.pop("label")
         kde_plot_args.pop("legend")
+        kde_plot_args.pop("is_circular")
     else:
         kde_plot_args.pop("return_glyph")
 

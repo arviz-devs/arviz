@@ -3,7 +3,7 @@
 ## v0.x.x Unreleased
 ### New features
 * Added InferenceData dataset containing circular variables (#1265)
-
+* Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)
 
@@ -73,7 +73,7 @@
 
 ### New features
 * Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
-* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
+* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables (#1140)
 * Allow xarray.Dataarray input for plots.(#1120)
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)
