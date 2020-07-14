@@ -5,6 +5,7 @@ import datetime
 import warnings
 import pkg_resources
 import xarray as xr
+import functools
 
 from .. import utils
 from .. import __version__
@@ -234,3 +235,54 @@ def make_attrs(attrs=None, library=None):
     if attrs is not None:
         default_attrs.update(attrs)
     return default_attrs
+
+
+def _extend_xr_method(func):
+    """Wrapper to add methods to InferenceData Class"""
+
+    @functools.wraps(func)
+    def wrapped(self, *args, **kwargs):
+        _filter = kwargs.pop("filter_groups", None)
+        _groups = kwargs.pop("groups", None)
+        _inplace = kwargs.pop("inplace", False)
+
+        out = self if _inplace else deepcopy(self)
+
+        groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
+        for group in groups:
+            xr_data = getattr(out, group)
+            xr_data = func(xr_data, *args, **kwargs)  # pylint: disable=not-callable
+            setattr(out, group, xr_data)
+
+        return None if _inplace else out
+
+    description = """
+    This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
+    """.format(
+        method_name=func.__name__  # pylint: disable=no-member
+    )
+    params = """
+    Parameters
+    ----------
+    groups: str or list of str, optional
+        Groups where the selection is to be applied. Can either be group names
+        or metagroup names.
+    filter_groups: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret groups as the real group or metagroup names.
+        If "like", interpret groups as substrings of the real group or metagroup names.
+        If "regex", interpret groups as regular expressions on the real group or
+        metagroup names. A la `pandas.filter`.
+    inplace: bool, optional
+        If ``True``, modify the InferenceData object inplace,
+        otherwise, return the modified copy. 
+    """
+    see_also = """
+    See Also
+    --------
+    xarray.Dataset.{method_name}
+    """.format(
+        method_name=func.__name__  # pylint: disable=no-member
+    )
+    wrapped.__doc__ = description + params + see_also
+
+    return wrapped

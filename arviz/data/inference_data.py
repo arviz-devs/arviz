@@ -7,13 +7,13 @@ from datetime import datetime
 from html import escape
 import warnings
 import uuid
-import functools
 
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
 
+from .base import _extend_xr_method
 from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
 
@@ -174,56 +174,6 @@ class InferenceData:
     @property
     def _groups_all(self):
         return self._groups + self._groups_warmup
-
-    def _extend_xr_method(func):  # pylint: disable=no-self-argument
-        """Wrapper to add methods to InferenceData Class"""
-
-        @functools.wraps(func)
-        def wrapped(self, *args, **kwargs):
-            _filter = kwargs.pop("filter_groups", None)
-            _groups = kwargs.pop("groups", None)
-            _inplace = kwargs.pop("inplace", False)
-
-            out = self if _inplace else deepcopy(self)
-
-            groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
-            for group in groups:
-                xr_data = getattr(out, group)
-                xr_data = func(xr_data, *args, **kwargs)  # pylint: disable=not-callable
-                setattr(out, group, xr_data)
-
-            return None if _inplace else out
-
-        description = """
-        This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
-        """.format(
-            method_name=func.__name__  # pylint: disable=no-member
-        )
-        params = """
-        Parameters
-        ----------
-        groups: str or list of str, optional
-            Groups where the selection is to be applied. Can either be group names
-            or metagroup names.
-        filter_groups: {None, "like", "regex"}, optional, default=None
-            If `None` (default), interpret groups as the real group or metagroup names.
-            If "like", interpret groups as substrings of the real group or metagroup names.
-            If "regex", interpret groups as regular expressions on the real group or
-            metagroup names. A la `pandas.filter`.
-        inplace: bool, optional
-            If ``True``, modify the InferenceData object inplace,
-            otherwise, return the modified copy. 
-        """
-        see_also = """
-        See Also
-        --------
-        xarray.Dataset.{method_name}
-        """.format(
-            method_name=func.__name__  # pylint: disable=no-member
-        )
-        wrapped.__doc__ = description + params + see_also
-
-        return wrapped
 
     @staticmethod
     def from_netcdf(filename):
