@@ -115,7 +115,6 @@ Utils
 
 .. autosummary::
       :toctree: generated/
-      :template: class_no_members.rst
 
       Numba
       Dask

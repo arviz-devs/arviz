@@ -764,11 +764,8 @@ def conditional_dask(func):
 
         if Dask.dask_flag:
             user_kwargs = kwargs.pop("dask_kwargs", None)
-            if user_kwargs is None:
-                default_kwargs = Dask.dask_kwargs
-                return func(dask_kwargs=default_kwargs, *args, **kwargs)
-            else:
-                return func(dask_kwargs=user_kwargs, *args, **kwargs)
+            default_kwargs = Dask.dask_kwargs
+            return func(dask_kwargs={**default_kwargs, **user_kwargs}, *args, **kwargs)
         else:
             return func(*args, **kwargs)
 
