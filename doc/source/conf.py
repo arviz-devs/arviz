@@ -45,9 +45,9 @@ arviz.rcParams["data.load"] = "eager"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-sys.path.insert(0, os.path.abspath("sphinxext"))
+sys.path.insert(0, os.path.abspath("../sphinxext"))
 
-thumb_directory = "example_thumbs"
+thumb_directory = "../example_thumbs"
 if not os.path.isdir(thumb_directory):
     os.mkdir(thumb_directory)
 
@@ -84,7 +84,7 @@ autosummary_generate = True
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["../_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
