@@ -88,10 +88,8 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
     Quickstart<notebooks/Introduction>
     Example Gallery<examples/index>
     Cookbook<notebooks/InferenceDataCookbook>
-    Numba<notebooks/Numba>
-    InferenceData<notebooks/XarrayforArviZ>
-    InferenceData schema<schema/schema>
-    api
+    notebooks/index
+    api/index
     usage
     developer_guide
     about

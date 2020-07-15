@@ -191,6 +191,18 @@ html_logo = "_static/logo.png"
 # pixels large.
 html_favicon = "_static/favicon.ico"
 
+header = f"""\
+.. currentmodule:: arviz
+.. ipython:: python
+   :suppress:
+   import numpy as np
+   np.random.seed(123456)
+   np.set_printoptions(precision=4, suppress=True)
+"""
+
+
+html_context = {"header": header}
+
 
 def setup(app):
     app.add_css_file("custom.css")
