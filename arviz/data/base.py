@@ -3,9 +3,9 @@ from copy import deepcopy
 from typing import Dict, List, Any
 import datetime
 import warnings
+import functools
 import pkg_resources
 import xarray as xr
-import functools
 
 from .. import utils
 from .. import __version__
