@@ -12,6 +12,7 @@ import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
 
+from .base import dict_to_dataset
 from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
 
@@ -323,6 +324,59 @@ class InferenceData:
             return None
         else:
             return out
+
+    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
+        """Add new groups to InferenceData object.
+
+        Parameters
+        ----------
+        group_dict: dict[str] -> dict, xr.Dataset
+            Groups to be added
+        coords : dict[str] -> ndarray
+            Coordinates for the dataset
+        dims : dict[str] -> list[str]
+            Dimensions of each variable. The keys are variable names, values are lists of
+            coordinates.
+        **kwargs: mapping
+            The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
+
+        """
+        if group_dict is None:
+            group_dict = {}
+
+        group_dict.update(kwargs)
+        if not group_dict:
+            raise ValueError("One of group_dict or kwargs must be provided.")
+        for group, dataset in group_dict.items():
+            if group in self._groups_all:
+                warnings.warn(
+                    "{group} group already exists. Continuing without adding the group {group}".format(
+                        group=group
+                    ),
+                    UserWarning,
+                )
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                )
+            if dataset is None:
+                continue
+            elif isinstance(dataset, dict):
+                dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
+            elif not isinstance(dataset, xr.Dataset):
+                raise ValueError(
+                    "Arguments to add_groups() must be xarray Datasets or dicts"
+                    "(argument '{}' was type '{}')".format(group, type(dataset))
+                )
+            if not group.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, group, dataset)
+                    self._groups.append(group)
+            elif group.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, group, dataset)
+                    self._groups_warmup.append(group)
+        return None
 
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.
