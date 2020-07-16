@@ -238,7 +238,7 @@ def make_attrs(attrs=None, library=None):
 
 
 def _extend_xr_method(func):
-    """Wrapper to add methods to InferenceData Class"""
+    """A wrapper to add methods to InferenceData Class."""
 
     @functools.wraps(func)
     def wrapped(self, *args, **kwargs):

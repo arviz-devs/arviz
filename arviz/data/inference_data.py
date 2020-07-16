@@ -366,7 +366,6 @@ class InferenceData:
             When `inplace==True` perform selection in-place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
@@ -417,7 +416,6 @@ class InferenceData:
             When `inplace==True` perform selection in-place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
 
         dimensions = {} if dimensions is None else dimensions
@@ -468,7 +466,6 @@ class InferenceData:
             When `inplace==True` perform selection in place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
         if isinstance(dim, str):
             dim = [dim]
@@ -518,7 +515,6 @@ class InferenceData:
             When `inplace==True` perform renaming in-place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
             raise KeyError("'chain' or 'draw' dimensions can't be renamed")
@@ -569,7 +565,6 @@ class InferenceData:
             When `inplace==True` perform renaming in-place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
@@ -617,7 +612,6 @@ class InferenceData:
             When `inplace==True` perform renaming in-place and return `None`
 
         """
-
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
             raise KeyError("'chain' or 'draw' dimensions can't be renamed")
