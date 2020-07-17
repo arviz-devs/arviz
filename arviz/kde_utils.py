@@ -1,14 +1,13 @@
 """Kernel density estimation functions for ArviZ."""
 
+import warnings
 import numpy as np
-from scipy.signal import gaussian, convolve
 from scipy.fftpack import fft
 from scipy.optimize import fsolve
 from scipy.optimize import brentq
+from scipy.signal import gaussian, convolve
 from scipy.special import ive
-import warnings
 
-# Own
 from .stats.stats_utils import histogram
 
 # Bandwidth functions ---------------------------------------------------------------
@@ -40,8 +39,9 @@ def bw_isj(x, grid_counts=None, x_range=None):
     """
     Improved Sheather and Jones method as explained in [1]
     This is an internal version pretended to be used by the KDE estimator.
-    When used internally computation time is saved because
-    things like minimums, maximums and the grid are pre-computed.
+    When used internally computation time is saved because things like minimums,
+
+    maximums and the grid are pre-computed.
 
     References
     ----------
@@ -85,7 +85,7 @@ def bw_experimental(x, grid_counts=None, x_std=None, x_range=None):
     return 0.5 * (bw_silverman(x, x_std) + bw_isj(x, grid_counts, x_range))
 
 
-def bw_circular(x):
+def bw_taylor(x):
     """
     Bandwidth selector for circular kernel density estimation
     as introduced in [1].
@@ -205,12 +205,12 @@ def circular_mean(x):
     return mean
 
 
-def A1inv(x):
+def a1inv(x):
     """
     Inverse function of the ratio of the first and zeroth order
     Bessel functions of the first kind.
 
-    Returns the value k, such that A1inv(x) = k, i.e. A1(k) = x.
+    Returns the value k, such that a1inv(x) = k, i.e. a1(k) = x.
     """
     if 0 <= x < 0.53:
         return 2 * x + x ** 3 + (5 * x ** 5) / 6
@@ -222,7 +222,7 @@ def A1inv(x):
 
 def kappa_mle(x):
     mean = circular_mean(x)
-    kappa = A1inv(np.mean(np.cos(x - mean)))
+    kappa = a1inv(np.mean(np.cos(x - mean)))
     return kappa
 
 
@@ -397,8 +397,7 @@ def check_custom_lims(custom_lims, x_min, x_max):
     if custom_lims[1] is None:
         custom_lims[1] = x_max
 
-    types = (int, float, np.integer, np.float)
-    all_numeric = all(isinstance(i, types) for i in custom_lims)
+    all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
     if not all_numeric:
         raise TypeError((
             f"Elements of `custom_lims` must be numeric or None.\n"
@@ -452,9 +451,7 @@ def get_grid(x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True
 
     """
 
-    # Set up number of bins. Should enable larger grids?
-    if grid_len > 4096:
-        grid_len = 4096
+    # Set up number of bins.
     if grid_len < 100:
         grid_len = 100
     grid_len = int(grid_len)
@@ -619,7 +616,7 @@ def kde_linear(
 
 def kde_circular(
     x,
-    bw="default",
+    bw="taylor",
     bw_fct=1,
     bw_return=False,
     custom_lims=None,
@@ -642,7 +639,7 @@ def kde_circular(
     bw: int, float or str, optional
         If numeric, indicates the bandwidth and must be positive.
         If str, indicates the method to estimate the bandwidth and must be
-        one "default". Defaults to "default".
+        "taylor" since it is the only option supported so far. Defaults to "taylor".
     bw_fct: float, optional
         A value that multiplies `bw` which enables tuning smoothness by hand.
         Must be positive. Values above 1 decrease smoothness while values
@@ -676,17 +673,17 @@ def kde_circular(
     if isinstance(bw, bool):
         raise ValueError((
             "`bw` can't be of type `bool`.\n"
-            "Expected a positive numeric or 'default'"
+            "Expected a positive numeric or 'taylor'"
         ))
     if isinstance(bw, (int, float)):
         if bw < 0:
             raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
     if isinstance(bw, str):
-        if bw == "default":
-            bw = bw_circular(x)
+        if bw == "taylor":
+            bw = bw_taylor(x)
         else:
             raise ValueError((
-                f"`bw` must be a positive numeric or `default`, not {bw}"
+                f"`bw` must be a positive numeric or `taylor`, not {bw}"
             ))
     bw *= bw_fct
 
