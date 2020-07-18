@@ -42,6 +42,7 @@ from ...plots import (
     plot_elpd,
     plot_loo_pit,
     plot_mcse,
+    plot_bpv,
 )
 from ...utils import _cov
 from ...numeric_utils import _fast_kde
@@ -338,6 +339,10 @@ def test_plot_joint_bad(models):
         },
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"is_circular": False},
+        {"is_circular": True},
+        {"is_circular": "radians"},
+        {"is_circular": "degrees"},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -369,7 +374,21 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"kind": "hist"},
+        {"kind": "kde"},
+        {"is_circular": False},
+        {"is_circular": False, "kind": "hist"},
+        {"is_circular": True},
+        {"is_circular": True, "kind": "hist"},
+        {"is_circular": "radians"},
+        {"is_circular": "radians", "kind": "hist"},
+        {"is_circular": "degrees"},
+        {"is_circular": "degrees", "kind": "hist"},
+    ],
+)
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
     assert axes
@@ -1286,3 +1305,18 @@ def test_plot_dist_comparison_different_vars():
         plot_dist_comparison(data, var_names="x")
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"reference": "analytical"},
+        {"kind": "p_value"},
+        {"kind": "t_stat", "t_stat": "std"},
+        {"kind": "t_stat", "t_stat": 0.5, "bpv": True},
+    ],
+)
+def test_plot_bpv(models, kwargs):
+    axes = plot_bpv(models.model_1, **kwargs)
+    assert axes.shape
