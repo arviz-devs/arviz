@@ -14,6 +14,7 @@ Plots
     :toctree: generated/
 
     plot_autocorr
+    plot_bpv
     plot_compare
     plot_density
     plot_dist
