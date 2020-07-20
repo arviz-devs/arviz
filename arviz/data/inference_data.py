@@ -330,7 +330,7 @@ class InferenceData:
 
         Parameters
         ----------
-        group_dict: dict[str] -> dict, xr.Dataset
+        group_dict: dict of {str : dict or xarray.Dataset}, optional
             Groups to be added
         coords : dict[str] -> ndarray
             Coordinates for the dataset
@@ -368,14 +368,12 @@ class InferenceData:
                     "Arguments to add_groups() must be xarray Datasets or dicts"
                     "(argument '{}' was type '{}')".format(group, type(dataset))
                 )
-            if not group.startswith(WARMUP_TAG):
-                if dataset:
-                    setattr(self, group, dataset)
-                    self._groups.append(group)
-            elif group.startswith(WARMUP_TAG):
-                if dataset:
-                    setattr(self, group, dataset)
+            if dataset:
+                setattr(self, group, dataset)
+                if group.startswith(WARMUP_TAG):
                     self._groups_warmup.append(group)
+                else:
+                    self._groups.append(group)
         return None
 
     def _group_names(self, groups, filter_groups=None):
