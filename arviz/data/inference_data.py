@@ -11,6 +11,7 @@ import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
+from xarray.core.utils import either_dict_or_kwargs
 
 from .base import dict_to_dataset
 from ..utils import _subset_list, HtmlTemplate
@@ -341,20 +342,12 @@ class InferenceData:
             The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
 
         """
-        if group_dict is None:
-            group_dict = {}
-
-        group_dict.update(kwargs)
+        group_dict = either_dict_or_kwargs(group_dict, kwargs,"add_groups")
         if not group_dict:
             raise ValueError("One of group_dict or kwargs must be provided.")
         for group, dataset in group_dict.items():
             if group in self._groups_all:
-                warnings.warn(
-                    "{group} group already exists. Continuing without adding the group {group}".format(
-                        group=group
-                    ),
-                    UserWarning,
-                )
+                raise ValueError("{} group already exists.".format(group))
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
                     "{} group is not defined in the InferenceData scheme".format(group), UserWarning

@@ -488,19 +488,44 @@ class TestInferenceData:
             observed_data={"b": data[0, 0, :]},
             posterior_predictive={"a": data[..., 0], "b": data},
         )
-        with pytest.raises(ValueError):
-            idata.add_groups()
         idata.add_groups({"prior": {"a": data[..., 0], "b": data}})
         assert "prior" in idata._groups
         assert isinstance(idata.prior, xr.Dataset)
+        assert hasattr(idata, "prior")
+
+        idata.add_groups(posterior_warmup = {"a": data[..., 0], "b": data})
+        assert "posterior_warmup" in idata._groups
+        assert isinstance(idata.posterior_warmup, xr.Dataset)
+        assert hasattr(idata, "posterior_warmup")
+
+    def test_add_groups_warning(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
         with pytest.warns(UserWarning):
             idata.add_groups({"new_group": idata.posterior})
-        assert "new_group" in idata._groups
         assert idata.new_group.equals(idata.posterior)
-        with pytest.warns(UserWarning):
-            idata.add_groups({"new_group": idata.observed_data})
+
+    def test_add_groups_error(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        with pytest.raises(ValueError):
+            idata.add_groups()
         with pytest.raises(ValueError):
             idata.add_groups({"new_group": "new_group"})
+        with pytest.raises(ValueError):
+            idata.add_groups({"posterior": idata.posterior})
+        with pytest.raises(ValueError):
+            idata.add_groups({"new_group": idata.posterior}, new_group2 = idata.sample_stats)
 
 
 class TestNumpyToDataArray:
