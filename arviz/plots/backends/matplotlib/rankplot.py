@@ -69,10 +69,10 @@ def plot_rank(
             if labels:
                 ax.set_ylabel("Chain", fontsize=ax_labelsize)
         elif kind == "vlines":
-            ymin = np.full(len(all_counts), all_counts.mean())
+            ymin = all_counts.mean()
             for idx, counts in enumerate(all_counts):
                 ax.plot(bin_ary, counts, "o", color=colors[idx])
-                ax.vlines(bin_ary, ymin, counts, lw=2, color=colors[idx])
+                ax.vlines(bin_ary, ymin, counts, lw=2, colors=colors[idx])
             ax.set_ylim(0, all_counts.mean() * 2)
             if ref_line:
                 ax.axhline(y=all_counts.mean(), linestyle="--", color="k")
