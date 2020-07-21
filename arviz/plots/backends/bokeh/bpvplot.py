@@ -2,6 +2,7 @@
 import numpy as np
 from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
+from matplotlib.colors import to_hex
 from scipy import stats
 
 from . import backend_kwarg_defaults
@@ -9,6 +10,7 @@ from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _create_axes_grid,
+    _scale_fig_size,
     sample_reference_distribution,
     is_valid_quantile,
 )
@@ -32,9 +34,7 @@ def plot_bpv(
     hdi_prob,
     color,
     figsize,
-    ax_labelsize,
-    markersize,
-    linewidth,
+    textsize,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -47,6 +47,20 @@ def plot_bpv(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    if plot_ref_kwargs is None:
+        plot_ref_kwargs = {}
+    if kind == "p_value" and reference == "analytical":
+        plot_ref_kwargs.setdefault("color", "black")
+        plot_ref_kwargs.setdefault("line_dash", "dashed")
+    else:
+        plot_ref_kwargs.setdefault("alpha", 0.1)
+        plot_ref_kwargs.setdefault("color", to_hex(color))
+
+    (figsize, ax_labelsize, _, _, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
     if ax is None:
         _, axes = _create_axes_grid(
             length_plotters,

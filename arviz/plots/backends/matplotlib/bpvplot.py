@@ -8,6 +8,7 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
     sample_reference_distribution,
     is_valid_quantile,
 )
@@ -31,14 +32,25 @@ def plot_bpv(
     hdi_prob,
     color,
     figsize,
-    ax_labelsize,
-    markersize,
-    linewidth,
+    textsize,
     plot_ref_kwargs,
     backend_kwargs,
     show,
 ):
     """Matplotlib bpv plot."""
+    figsize, ax_labelsize, _, _, linewidth, markersize = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
+    if plot_ref_kwargs is None:
+        plot_ref_kwargs = {}
+    if kind == "p_value" and reference == "analytical":
+        plot_ref_kwargs.setdefault("color", "k")
+        plot_ref_kwargs.setdefault("linestyle", "--")
+    else:
+        plot_ref_kwargs.setdefault("alpha", 0.1)
+        plot_ref_kwargs.setdefault("color", color)
+
     if ax is None:
         _, axes = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs

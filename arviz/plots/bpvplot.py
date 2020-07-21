@@ -1,10 +1,9 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
 import numpy as np
-from matplotlib.colors import to_hex
+
 
 from .plot_utils import (
     xarray_var_iter,
-    _scale_fig_size,
     default_grid,
     filter_plotters_list,
     get_plotting_function,
@@ -240,29 +239,6 @@ def plot_bpv(
     ]
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, _, _, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
-    if plot_ref_kwargs is None:
-        plot_ref_kwargs = {}
-    if kind == "p_value" and reference == "analytical":
-        plot_ref_kwargs.setdefault("color", "k")
-        plot_ref_kwargs.setdefault("linestyle", "--")
-    else:
-        plot_ref_kwargs.setdefault("alpha", 0.1)
-        plot_ref_kwargs.setdefault("color", color)
-
-    if backend == "bokeh":
-        color = to_hex(color)
-        plot_ref_kwargs.pop("color")
-        if kind == "p_value" and reference == "analytical":
-            plot_ref_kwargs.pop("linestyle")
-            plot_ref_kwargs.setdefault("line_dash", "dashed")
-            plot_ref_kwargs.setdefault("color", "black")
-        else:
-            plot_ref_kwargs.setdefault("color", color)
-
     bpvplot_kwargs = dict(
         ax=ax,
         length_plotters=length_plotters,
@@ -280,9 +256,7 @@ def plot_bpv(
         plot_mean=plot_mean,
         color=color,
         figsize=figsize,
-        ax_labelsize=ax_labelsize,
-        markersize=markersize,
-        linewidth=linewidth,
+        textsize=textsize,
         plot_ref_kwargs=plot_ref_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
