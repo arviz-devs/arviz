@@ -5,7 +5,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...plot_utils import _create_axes_grid, make_label
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
 from ....stats import autocorr
 
 
@@ -16,8 +16,8 @@ def plot_autocorr(
     figsize,
     rows,
     cols,
-    line_width,
     combined,
+    textsize,
     backend_config,
     backend_kwargs,
     show,
@@ -41,6 +41,8 @@ def plot_autocorr(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     if axes is None:
         _, axes = _create_axes_grid(
