@@ -2,9 +2,7 @@
 
 from .plot_utils import (
     xarray_var_iter,
-    _scale_fig_size,
     get_plotting_function,
-    vectorized_to_hex,
 )
 from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
@@ -100,18 +98,6 @@ def plot_dist_comparison(
     if coords is None:
         coords = {}
 
-    if prior_kwargs is None:
-        prior_kwargs = {}
-
-    if posterior_kwargs is None:
-        posterior_kwargs = {}
-
-    if observed_kwargs is None:
-        observed_kwargs = {}
-
-    if backend_kwargs is None:
-        backend_kwargs = {}
-
     datasets = []
     groups = []
     for group in all_groups:
@@ -146,32 +132,6 @@ def plot_dist_comparison(
     nvars = len(dc_plotters[0])
     ngroups = len(groups)
 
-    (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, 2 * nvars, ngroups)
-
-    posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        posterior_kwargs["plot_kwargs"].get("color", "C0")
-    )
-    posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    posterior_kwargs.setdefault("hist_kwargs", dict())
-    posterior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
-
-    prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        prior_kwargs["plot_kwargs"].get("color", "C1")
-    )
-    prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    prior_kwargs.setdefault("hist_kwargs", dict())
-    prior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
-
-    observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        observed_kwargs["plot_kwargs"].get("color", "C2")
-    )
-    observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
-    observed_kwargs.setdefault("hist_kwargs", dict())
-    observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
-
     distcomparisonplot_kwargs = dict(
         ax=ax,
         nvars=nvars,
@@ -180,6 +140,7 @@ def plot_dist_comparison(
         dc_plotters=dc_plotters,
         legend=legend,
         groups=groups,
+        textsize=textsize,
         prior_kwargs=prior_kwargs,
         posterior_kwargs=posterior_kwargs,
         observed_kwargs=observed_kwargs,
