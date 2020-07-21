@@ -1,7 +1,7 @@
 """Summary plot for model comparison."""
 import numpy as np
 
-from .plot_utils import _scale_fig_size, get_plotting_function
+from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 
 
@@ -89,11 +89,6 @@ def plot_compare(
         >>> az.plot_compare(model_compare, insample_dev=False)
 
     """
-    if figsize is None:
-        figsize = (6, len(comp_df))
-
-    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
-
     if plot_kwargs is None:
         plot_kwargs = {}
 
@@ -125,11 +120,9 @@ def plot_compare(
         insample_dev=insample_dev,
         yticks_pos=yticks_pos,
         yticks_labels=yticks_labels,
-        linewidth=linewidth,
         plot_kwargs=plot_kwargs,
         information_criterion=information_criterion,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
+        textsize=textsize,
         step=step,
         backend_kwargs=backend_kwargs,
         show=show,
@@ -138,12 +131,6 @@ def plot_compare(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        compareplot_kwargs["line_width"] = compareplot_kwargs.pop("linewidth")
-        compareplot_kwargs.pop("ax_labelsize")
-        compareplot_kwargs.pop("xt_labelsize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_compare", "compareplot", backend)
