@@ -529,6 +529,52 @@ class TestInferenceData:
         with pytest.raises(ValueError):
             idata.add_groups({"new_group": idata.posterior}, new_group2=idata.sample_stats)
 
+    def test_merge(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"a": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        idata2 = from_dict(
+            prior={"a": data[..., 0], "b": data},
+            prior_predictive={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+        )
+        idata.merge(idata2)
+        assert hasattr(idata, "prior")
+        assert hasattr(idata, "prior_predictive")
+        assert idata.prior.equals(idata2.prior)
+        assert not idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+        idata.merge(idata2, join="right")
+        assert idata.prior.equals(idata2.prior)
+        assert idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+    def test_merge_errors_warnings(self):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = from_dict(
+            posterior={"a": data[..., 0], "b": data},
+            sample_stats={"a": data[..., 0], "b": data},
+            observed_data={"a": data[0, 0, :]},
+            posterior_predictive={"a": data[..., 0], "b": data},
+        )
+        idata2 = from_dict(
+            prior={"a": data[..., 0], "b": data},
+            prior_predictive={"a": data[..., 0], "b": data},
+            observed_data={"b": data[0, 0, :]},
+        )
+        with pytest.raises(ValueError):
+            idata.merge("something")
+        with pytest.raises(ValueError):
+            idata.merge(idata2, join="outer")
+        idata2.add_groups(new_group=idata2.prior)
+        with pytest.warns(UserWarning):
+            idata.merge(idata2)
+
 
 class TestNumpyToDataArray:
     def test_1d_dataset(self):

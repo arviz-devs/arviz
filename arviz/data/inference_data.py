@@ -445,7 +445,7 @@ class InferenceData:
         if join not in ("left", "right"):
             raise ValueError("join must be either 'left' or 'right', found {}".format(join))
         for group in other._groups_all:
-            if hasattr(group, self):
+            if hasattr(self, group):
                 if join == "left":
                     continue
             if group not in SUPPORTED_GROUPS_ALL:
