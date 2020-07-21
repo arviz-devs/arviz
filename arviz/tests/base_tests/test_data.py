@@ -493,7 +493,7 @@ class TestInferenceData:
         assert isinstance(idata.prior, xr.Dataset)
         assert hasattr(idata, "prior")
 
-        idata.add_groups(posterior_warmup = {"a": data[..., 0], "b": data})
+        idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
         assert "posterior_warmup" in idata._groups
         assert isinstance(idata.posterior_warmup, xr.Dataset)
         assert hasattr(idata, "posterior_warmup")
@@ -509,7 +509,7 @@ class TestInferenceData:
         with pytest.warns(UserWarning):
             idata.add_groups({"new_group": idata.posterior})
         with pytest.warns(UserWarning):
-            idata.add_groups(new_group2 = {"a": data[..., 0], "b": data})
+            idata.add_groups(new_group2={"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
 
     def test_add_groups_error(self):
@@ -527,7 +527,7 @@ class TestInferenceData:
         with pytest.raises(ValueError):
             idata.add_groups({"posterior": idata.posterior})
         with pytest.raises(ValueError):
-            idata.add_groups({"new_group": idata.posterior}, new_group2 = idata.sample_stats)
+            idata.add_groups({"new_group": idata.posterior}, new_group2=idata.sample_stats)
 
 
 class TestNumpyToDataArray:

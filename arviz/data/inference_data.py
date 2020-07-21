@@ -342,7 +342,7 @@ class InferenceData:
             The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
 
         """
-        group_dict = either_dict_or_kwargs(group_dict, kwargs,"add_groups")
+        group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
         if not group_dict:
             raise ValueError("One of group_dict or kwargs must be provided.")
         for group, dataset in group_dict.items():
@@ -355,9 +355,13 @@ class InferenceData:
             if dataset is None:
                 continue
             elif isinstance(dataset, dict):
-                if group in ("observed_data", "constant_data", "predictions_constant_data") or group not in SUPPORTED_GROUPS_ALL:
+                if (
+                    group in ("observed_data", "constant_data", "predictions_constant_data")
+                    or group not in SUPPORTED_GROUPS_ALL
+                ):
                     warnings.warn(
-                        "the default dims 'chain' and 'draw' will be added automatically", UserWarning
+                        "the default dims 'chain' and 'draw' will be added automatically",
+                        UserWarning,
                     )
                 dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
             elif not isinstance(dataset, xr.Dataset):
@@ -371,6 +375,85 @@ class InferenceData:
                     self._groups_warmup.append(group)
                 else:
                     self._groups.append(group)
+        return None
+
+    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
+        """Add new groups to InferenceData object.
+
+        Parameters
+        ----------
+        group_dict: dict of {str : dict or xarray.Dataset}, optional
+            Groups to be added
+        coords : dict[str] -> ndarray
+            Coordinates for the dataset
+        dims : dict[str] -> list[str]
+            Dimensions of each variable. The keys are variable names, values are lists of
+            coordinates.
+        **kwargs: mapping
+            The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
+
+        """
+        group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
+        if not group_dict:
+            raise ValueError("One of group_dict or kwargs must be provided.")
+        for group, dataset in group_dict.items():
+            if group in self._groups_all:
+                raise ValueError("{} group already exists.".format(group))
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                )
+            if dataset is None:
+                continue
+            elif isinstance(dataset, dict):
+                if (
+                    group in ("observed_data", "constant_data", "predictions_constant_data")
+                    or group not in SUPPORTED_GROUPS_ALL
+                ):
+                    warnings.warn(
+                        "the default dims 'chain' and 'draw' will be added automatically",
+                        UserWarning,
+                    )
+                dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
+            elif not isinstance(dataset, xr.Dataset):
+                raise ValueError(
+                    "Arguments to add_groups() must be xarray Datasets or dicts"
+                    "(argument '{}' was type '{}')".format(group, type(dataset))
+                )
+            if dataset:
+                setattr(self, group, dataset)
+                if group.startswith(WARMUP_TAG):
+                    self._groups_warmup.append(group)
+                else:
+                    self._groups.append(group)
+        return None
+
+    def merge(self, other, join="left"):
+        """Merge InferenceData object with other InferenceData object.
+
+        Parameters
+        ----------
+        other : InferenceData object
+            InferenceData to be added
+        join : str, optional
+            defines the type of join. Can be either 'left' or 'right'.
+            Default is 'left'.
+
+        """
+        if not isinstance(other, InferenceData):
+            raise ValueError("Merging is possible between two InferenceData objects only.")
+        if join not in ("left", "right"):
+            raise ValueError("join must be either 'left' or 'right', found {}".format(join))
+        for group in other._groups_all:
+            if hasattr(group, self):
+                if join == "left":
+                    continue
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                )
+            dataset = getattr(other, group)
+            setattr(self, group, dataset)
         return None
 
     def _group_names(self, groups, filter_groups=None):
