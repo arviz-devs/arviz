@@ -508,6 +508,8 @@ class TestInferenceData:
         )
         with pytest.warns(UserWarning):
             idata.add_groups({"new_group": idata.posterior})
+        with pytest.warns(UserWarning):
+            idata.add_groups(new_group2 = {"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
 
     def test_add_groups_error(self):

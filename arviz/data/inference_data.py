@@ -355,6 +355,10 @@ class InferenceData:
             if dataset is None:
                 continue
             elif isinstance(dataset, dict):
+                if group in ("observed_data", "constant_data", "predictions_constant_data") or group not in SUPPORTED_GROUPS_ALL:
+                    warnings.warn(
+                        "the default dims 'chain' and 'draw' will be added automatically", UserWarning
+                    )
                 dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
