@@ -1,12 +1,8 @@
 """KDE and histogram plots for multiple variables."""
-from itertools import cycle
 import warnings
-
-import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from .plot_utils import (
-    _scale_fig_size,
     make_label,
     xarray_var_iter,
     default_grid,
@@ -179,16 +175,6 @@ def plot_density(
             "does not match the number of models ({})".format(len(data_labels), n_data)
         )
 
-    if colors == "cycle":
-        colors = [
-            prop
-            for _, prop in zip(
-                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-            )
-        ]
-    elif isinstance(colors, str):
-        colors = [colors for _ in range(n_data)]
-
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
@@ -226,10 +212,6 @@ def plot_density(
         length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
-    (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
     plot_density_kwargs = dict(
         ax=ax,
         all_labels=all_labels,
@@ -240,10 +222,7 @@ def plot_density(
         length_plotters=length_plotters,
         rows=rows,
         cols=cols,
-        titlesize=titlesize,
-        xt_labelsize=xt_labelsize,
-        linewidth=linewidth,
-        markersize=markersize,
+        textsize=textsize,
         hdi_prob=hdi_prob,
         point_estimate=point_estimate,
         hdi_markers=hdi_markers,
@@ -258,13 +237,6 @@ def plot_density(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
-        plot_density_kwargs.pop("titlesize")
-        plot_density_kwargs.pop("xt_labelsize")
-        plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_density", "densityplot", backend)

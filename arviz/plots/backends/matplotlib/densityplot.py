@@ -1,4 +1,6 @@
 """Matplotlib Densityplot."""
+from itertools import cycle
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -7,6 +9,7 @@ from ....stats import hdi
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
     calculate_point_estimate,
 )
 from ....numeric_utils import _fast_kde, get_bins
@@ -22,10 +25,7 @@ def plot_density(
     length_plotters,
     rows,
     cols,
-    titlesize,
-    xt_labelsize,
-    linewidth,
-    markersize,
+    textsize,
     hdi_prob,
     point_estimate,
     hdi_markers,
@@ -37,6 +37,20 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
+    if colors == "cycle":
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
+    elif isinstance(colors, str):
+        colors = [colors for _ in range(n_data)]
+
+    (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
