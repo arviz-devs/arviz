@@ -1178,51 +1178,38 @@ def summary(
         hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
     if circ_var_names:
-        circ_mean = []
-        circ_sd = []
-        circ_mcse = []
-        circ_hdi_lower = []
-        circ_hdi_higher = []
+        nan_policy = "omit" if skipna else "propagate"
+        circ_mean = xr.apply_ufunc(
+            _make_ufunc(st.circmean),
+            posterior,
+            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
+            input_core_dims=(("chain", "draw"),),
+        )
+        _numba_flag = Numba.numba_flag
+        func = None
+        if _numba_flag:
+            func = _circular_standard_deviation
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
+        else:
+            func = st.circstd
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
+        circ_sd = xr.apply_ufunc(
+            _make_ufunc(func),
+            posterior,
+            kwargs=kwargs_circ_std,
+            input_core_dims=(("chain", "draw"),),
+        )
 
-        for var_name in circ_var_names:
-            nan_policy = "omit" if skipna else "propagate"
-            circ_mean_var = xr.apply_ufunc(
-                _make_ufunc(st.circmean),
-                posterior[var_name],
-                kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
-                input_core_dims=(("chain", "draw"),),
-            )
-            _numba_flag = Numba.numba_flag
-            func = None
-            if _numba_flag:
-                func = _circular_standard_deviation
-                kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
-            else:
-                func = st.circstd
-                kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
-            circ_sd_var = xr.apply_ufunc(
-                _make_ufunc(func),
-                posterior[var_name],
-                kwargs=kwargs_circ_std,
-                input_core_dims=(("chain", "draw"),),
-            )
+        circ_mcse = xr.apply_ufunc(
+            _make_ufunc(_mc_error),
+            posterior,
+            kwargs=dict(circular=True),
+            input_core_dims=(("chain", "draw"),),
+        )
 
-            circ_mcse_var = xr.apply_ufunc(
-                _make_ufunc(_mc_error),
-                posterior[var_name],
-                kwargs=dict(circular=True),
-                input_core_dims=(("chain", "draw"),),
-            )
-
-            circ_hdi_var = hdi(posterior[var_name], hdi_prob=hdi_prob, circular=True, skipna=skipna)
-            circ_hdi_lower_var = circ_hdi_var.sel(hdi="lower", drop=True)
-            circ_hdi_higher_var = circ_hdi_var.sel(hdi="higher", drop=True)
-
-            circ_mean.append(circ_mean_var)
-            circ_sd.append(circ_sd_var)
-            circ_mcse.append(circ_mcse_var)
-            circ_hdi_lower.append(circ_hdi_lower_var)
-            circ_hdi_higher.append(circ_hdi_higher_var)
+        circ_hdi = hdi(posterior, hdi_prob=hdi_prob, circular=True, skipna=skipna)
+        circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
+        circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
         mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
@@ -1274,50 +1261,12 @@ def summary(
 
     if circ_var_names:
 
-        for i, var_name in enumerate(circ_var_names):
-            if kind == "all":
-                metrics[0][var_name] = circ_mean[i]
-                metrics[1][var_name] = circ_sd[i]
-                metrics[2][var_name] = circ_hdi_lower[i][var_name]
-                metrics[3][var_name] = circ_hdi_higher[i][var_name]
-                # Implement circular diagnostics?
-                # mcse_mean
-                metrics[4][var_name] = circ_mcse[i]
-                # mcse_sd
-                metrics[5][var_name] = np.NAN
-                # ess_mean
-                metrics[6][var_name] = np.NAN
-                # ess_sd
-                metrics[7][var_name] = np.NAN
-                # ess_bulk
-                metrics[8][var_name] = np.NAN
-                # ess_tail
-                metrics[9][var_name] = np.NAN
-                # r_hat
-                metrics[10][var_name] = np.NAN
-
-            elif kind == "diagnostics":
-                # Implement circular diagnostics?
-                # mcse_mean
-                metrics[0][var_name] = circ_mcse[i]
-                # mcse_sd
-                metrics[1][var_name] = np.NAN
-                # ess_mean
-                metrics[2][var_name] = np.NAN
-                # ess_sd
-                metrics[3][var_name] = np.NAN
-                # ess_bulk
-                metrics[4][var_name] = np.NAN
-                # ess_tail
-                metrics[5][var_name] = np.NAN
-                # r_hat
-                metrics[6][var_name] = np.NAN
-
-            elif kind == "stats":
-                metrics[0][var_name] = circ_mean[i]
-                metrics[1][var_name] = circ_sd[i]
-                metrics[2][var_name] = circ_hdi_lower[i][var_name]
-                metrics[3][var_name] = circ_hdi_higher[i][var_name]
+        if kind != "diagnostics":
+            for metric, circ_stat in zip(
+                metrics[:5], (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse)
+            ):
+                for circ_var in circ_var_names:
+                    metric[circ_var] = circ_stat[circ_var]
 
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
