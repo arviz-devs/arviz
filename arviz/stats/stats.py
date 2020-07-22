@@ -992,6 +992,7 @@ def summary(
     fmt: str = "wide",
     kind: str = "all",
     round_to=None,
+    include_circ=None,
     circ_var_names=None,
     stat_funcs=None,
     extend=True,
@@ -1027,6 +1028,9 @@ def summary(
         them.
     round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
+    include_circ: boolean
+        Whether to include circular statistics
+        deprecated: Please see circ_var_names
     circ_var_names: list
         A list of circular variables to compute circular stats for
     stat_funcs: dict
@@ -1116,6 +1120,9 @@ def summary(
            ...: )
 
     """
+    if include_circ:
+        warnings.warn(("include_circ will be deprecated " "Please use circ_var_names"),)
+
     if credible_interval:
         hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
 
