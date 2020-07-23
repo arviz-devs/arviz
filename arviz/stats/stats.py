@@ -1122,8 +1122,8 @@ def summary(
     """
     if include_circ:
         warnings.warn(
-            "include_circ is deprecated and will be ignored. Use circ_var_names instead", 
-            DeprecationWarning
+            "include_circ is deprecated and will be ignored. Use circ_var_names instead",
+            DeprecationWarning,
         )
 
     if credible_interval:
