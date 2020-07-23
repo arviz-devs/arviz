@@ -13,6 +13,13 @@
 * update `radon` example dataset to current InferenceData schema specification (#1320)
 * update `from_cmdstan` functionality and add warmup groups (#1330)
 * restructure plotting code to be compatible with mpl>=3.3 (#1312)
+* Replaced `_fast_kde()` with `kde()` which now also supports circular variables
+via the argument `circular` (#1284).
+
+### Maintenance and fixes
+* plot_posterior: fix overlap of hdi and rope (#1263)
+* All the functions that used to call `_fast_kde`() now use `kde()` and have
+been updated to handle the new types returned.
 
 ### Deprecation
 

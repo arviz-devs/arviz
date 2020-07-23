@@ -40,7 +40,6 @@ def bw_isj(x, grid_counts=None, x_range=None):
     Improved Sheather and Jones method as explained in [1]
     This is an internal version pretended to be used by the KDE estimator.
     When used internally computation time is saved because things like minimums,
-
     maximums and the grid are pre-computed.
 
     References
@@ -111,7 +110,7 @@ def bw_taylor(x):
     return (num / den) ** 0.4
 
 
-BW_METHODS = {
+BW_METHODS_LINEAR = {
         "scott": bw_scott,
         "silverman": bw_silverman,
         "isj": bw_isj,
@@ -137,13 +136,13 @@ def select_bw_method(method):
     """
 
     method_lower = method.lower()
-    if method_lower not in BW_METHODS.keys():
+    if method_lower not in BW_METHODS_LINEAR.keys():
         raise ValueError((
             f"Unrecognized bandwidth method.\n"
             f"Input is: {method}.\n"
-            f"Expected one of: {list(BW_METHODS.keys())}."
+            f"Expected one of: {list(BW_METHODS_LINEAR.keys())}."
         ))
-    bw_fun = BW_METHODS[method_lower]
+    bw_fun = BW_METHODS_LINEAR[method_lower]
     return bw_fun
 
 
@@ -170,7 +169,7 @@ def get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
         raise ValueError((
             f"`bw` must not be of type `bool`.\n"
             f"Expected a positive numeric or one of the following strings:\n"
-            f"{list(BW_METHODS.keys())}."))
+            f"{list(BW_METHODS_LINEAR.keys())}."))
     if isinstance(bw, (int, float)):
         if bw < 0:
             raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
@@ -187,11 +186,21 @@ def get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
         raise ValueError((
             f"Unrecognized `bw` argument.\n"
             f"Expected a positive numeric or one of the following strings:\n"
-            f"{list(BW_METHODS.keys())}."))
+            f"{list(BW_METHODS_LINEAR.keys())}."))
     return bw
 
 
-# Misc utils
+# Misc utils ------------------------------------------------------------------------
+def normalize_angle(x, pi_centered=False):
+    """
+    Takes angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
+    depending on `pi_centered`.
+    """
+    if pi_centered:
+        return x % (2 * np.pi)
+    else:
+        return (x + np.pi) % (2 * np.pi) - np.pi
+    
 def vonmises_pdf(x, mu, kappa):
     assert kappa > 0, "Argument 'kappa' must be positive."
     pdf = 1 / (2 * np.pi * ive(0, kappa)) * np.exp(np.cos(x - mu) - 1) ** kappa
@@ -495,6 +504,84 @@ def kde(x, circular=False, **kwargs):
     grid : Gridded numpy array for the x values.
     pdf : Numpy array for the density estimates.
     bw: optional, the estimated bandwidth.
+    
+    Examples
+    --------
+    Default density estimation for linear data
+    .. plot::
+        :context: close-figs
+        
+    	>>> import numpy as np
+	>>> import matplotlib.pyplot as plt
+	>>> from arviz.kde_utils import kde
+	>>> 
+	>>> rvs = np.random.gamma(shape=1.8, size=1000)
+	>>> grid, pdf = kde(rvs)
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Density estimation for linear data with Silverman's rule bandwidth
+    .. plot::
+        :context: close-figs
+
+	>>> grid, pdf = kde(rvs, bw="silverman")
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Density estimation for linear data with scaled bandwidth
+    .. plot::
+        :context: close-figs
+
+	>>> # bw_fct > 1 means more smoothness.
+	>>> grid, pdf = kde(rvs, bw_fct=2.5)
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Default density estimation for linear data with extended limits
+    .. plot::
+        :context: close-figs
+
+	>>> grid, pdf = kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Default density estimation for linear data with custom limits
+    .. plot::
+        :context: close-figs
+	# It accepts tuples and lists of length 2.
+	>>> grid, pdf = kde(rvs, bound_correction=False, custom_lims=(0, 10))
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Default density estimation for circular data
+    .. plot::
+        :context: close-figs
+
+	>>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+	>>> grid, pdf = kde(rvs, circular=True)
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Density estimation for circular data with scaled bandwidth
+    .. plot::
+        :context: close-figs
+
+	>>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+	>>> # bw_fct > 1 means less smoothness.
+	>>> grid, pdf = kde(rvs, circular=True, bw_fct=3)
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+    Density estimation for circular data with custom limits
+    .. plot::
+        :context: close-figs
+	>>> # This is still experimental, does not always work.
+	>>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
+	>>> grid, pdf = kde(rvs, circular=True, custom_lims=(-1, 1))
+	>>> plt.plot(grid, pdf)
+	>>> plt.show()
+	
+	
     """
     if circular:
         kde_fun = kde_circular
@@ -662,8 +749,7 @@ def kde_circular(
     x = check_type(x)
 
     # All values between -pi and pi
-    x[x > np.pi] = x[x > np.pi] - 2 * np.pi
-    x[x < -np.pi] = x[x < -np.pi] + 2 * np.pi
+    x = normalize_angle(x)
 
     # Assert `bw_fct` is numeric and positive
     assert isinstance(bw_fct, (int, float))
