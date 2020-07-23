@@ -10,7 +10,7 @@ from scipy.special import ive
 
 from .stats.stats_utils import histogram
 
-# Bandwidth functions ---------------------------------------------------------------
+# Bandwidth functions
 # Linear KDE
 def bw_scott(x, x_std=None):
     """
@@ -190,7 +190,7 @@ def get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
     return bw
 
 
-# Misc utils ------------------------------------------------------------------------
+# Misc utils
 def normalize_angle(x, pi_centered=False):
     """
     Takes angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
@@ -330,7 +330,7 @@ def _root(function, N, args, x):
             bw = (bw_silverman(x) / np.ptp(x)) ** 2
     return bw
 
-# KDE Utilities ---------------------------------------------------------------------
+# KDE Utilities
 
 def check_type(x):
     """
@@ -481,7 +481,7 @@ def get_grid(x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True
         grid_max = x_max
     return grid_min, grid_max, grid_len
 
-# KDE Functions --------------------------------------------------------------------
+# KDE Functions
 
 def kde(x, circular=False, **kwargs):
     """
