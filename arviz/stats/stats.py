@@ -1121,7 +1121,10 @@ def summary(
 
     """
     if include_circ:
-        warnings.warn(("include_circ will be deprecated " "Please use circ_var_names"),)
+        warnings.warn(
+            "include_circ is deprecated and will be ignored. Use circ_var_names instead", 
+            DeprecationWarning
+        )
 
     if credible_interval:
         hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
