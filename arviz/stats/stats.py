@@ -1270,7 +1270,9 @@ def summary(
 
         if kind != "diagnostics":
             for metric, circ_stat in zip(
-                metrics[:5], (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse)
+                # Replace the first 5 statistics
+                metrics[:5],
+                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
             ):
                 for circ_var in circ_var_names:
                     metric[circ_var] = circ_stat[circ_var]

@@ -23,11 +23,18 @@ rcParams["data.load"] = "eager"
 
 
 @pytest.mark.parametrize("circ_var_names", [["mu"], None])
-def test_summary_circ_vars(centered_eight, circ_var_names):
-    assert summary(centered_eight, circ_var_names=circ_var_names) is not None
+@pytest.mark.parametrize("include_circ", [True, False])
+def test_summary_circ_vars(centered_eight, circ_var_names, include_circ):
+    assert (
+        summary(centered_eight, circ_var_names=circ_var_names, include_circ=include_circ)
+        is not None
+    )
     state = Numba.numba_flag
     Numba.disable_numba()
-    assert summary(centered_eight, circ_var_names=circ_var_names) is not NotImplementedError
+    assert (
+        summary(centered_eight, circ_var_names=circ_var_names, include_circ=include_circ)
+        is not NotImplementedError
+    )
     Numba.enable_numba()
     assert state == Numba.numba_flag
 
