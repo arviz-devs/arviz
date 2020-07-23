@@ -1270,7 +1270,7 @@ def summary(
 
         if kind != "diagnostics":
             for metric, circ_stat in zip(
-                # Replace the first 5 statistics
+                # Replace only the first 5 statistics for their circular equivalent
                 metrics[:5],
                 (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
             ):
