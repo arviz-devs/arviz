@@ -48,7 +48,7 @@ See Bayesian Data Analysis (Gelman et. al.) for more details.
 REMOTE_DATASETS = {
     "radon": RemoteFileMetadata(
         filename="radon_hierarchical.nc",
-        url="https://ndownloader.figshare.com/files/24067472",
+        url="http://ndownloader.figshare.com/files/24067472",
         checksum="a9b2b4adf1bf9c5728e5bdc97107e69c4fc8d8b7d213e9147233b57be8b4587b",
         description="""
 Radon is a radioactive gas that enters homes through contact points with the ground.
