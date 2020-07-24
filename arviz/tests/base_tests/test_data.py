@@ -77,6 +77,16 @@ def no_remote_data(monkeypatch, tmpdir):
         ),
     )
 
+@pytest.fixture(scope="module")
+def data_random():
+    data = np.random.normal(size=(4, 500, 8))
+    idata = from_dict(
+        posterior={"a": data[..., 0], "b": data},
+        sample_stats={"a": data[..., 0], "b": data},
+        observed_data={"b": data[0, 0, :]},
+        posterior_predictive={"a": data[..., 0], "b": data},
+    )
+    return idata
 
 def test_load_local_arviz_data():
     inference_data = load_arviz_data("centered_eight")
@@ -327,22 +337,22 @@ class TestInferenceData:
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, inplace):
         data = np.random.normal(size=(4, 500, 8))
-        dataset = from_dict(
+        idata = from_dict(
             posterior={"a": data[..., 0], "b": data},
             prior={"a": data[..., 0], "b": data},
             posterior_predictive={"a": data[..., 0], "b": data},
         )
-        dataset_copy = dataset
+        idata_copy = idata
         kwargs = {"groups": "posterior_groups"}
         if inplace:
-            dataset_copy.sum(inplace=inplace, **kwargs)
+            idata_copy.sum(inplace=inplace, **kwargs)
         else:
-            idata = dataset_copy.sum(inplace=inplace, **kwargs)
-            assert idata is not dataset_copy
-            dataset_copy = idata
-        assert_identical(dataset_copy.posterior, dataset.posterior.sum())
-        assert_identical(dataset_copy.posterior_predictive, dataset.posterior_predictive.sum())
-        assert_identical(dataset_copy.prior, dataset.prior)
+            idata2 = idata_copy.sum(inplace=inplace, **kwargs)
+            assert idata2 is not idata_copy
+            idata_copy = idata2
+        assert_identical(idata_copy.posterior, idata.posterior.sum())
+        assert_identical(idata_copy.posterior_predictive, idata.posterior_predictive.sum())
+        assert_identical(idata_copy.prior, idata.prior)
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_sel(self, inplace):
