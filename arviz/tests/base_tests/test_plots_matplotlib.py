@@ -91,6 +91,11 @@ def fig_ax():
     return fig, ax
 
 
+@pytest.fixture(scope="module")
+def data_random():
+    return np.random.randint(1, 100, size=20)
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -391,6 +396,11 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 )
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
+    assert axes
+
+
+def test_plot_dist_hist(data_random):
+    axes = plot_dist(data_random, hist_kwargs=dict(bins=30))
     assert axes
 
 
