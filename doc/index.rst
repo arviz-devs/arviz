@@ -32,9 +32,7 @@ and :doc:`here <schema/schema>` for more on ``InferenceData`` structure
 and specification.
 
 
-
-
-Installation using pip
+**Installation** using pip
 
 .. code:: bash
 
@@ -65,8 +63,7 @@ also available. It provides built-in support for
 <https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
 <https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
-Contributions and issue reports are very welcome at
-`the github repository <https://github.com/arviz-devs/arviz>`_.
+**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
 
 If you use ArviZ and want to cite it please use |JOSS|
