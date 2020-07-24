@@ -123,7 +123,7 @@ def _histplot_mpl_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if bins is None:
         bins = get_bins(values)
 
-    n, _, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
+    n, bins, _ = ax.hist(np.asarray(values).flatten(), bins=bins, **hist_kwargs)
 
     if rotated:
         ax.set_yticks(bins[:-1])

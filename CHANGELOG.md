@@ -6,6 +6,7 @@
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)
+* `plot_dist` bins argument error fixed (#1306)
 * improve handling of circular variables in `az.summary` (#1313)
 
 ### Deprecation
