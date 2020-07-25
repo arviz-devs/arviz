@@ -351,7 +351,8 @@ class InferenceData:
         for group, dataset in group_dict.items():
             if group not in SUPPORTED_GROUPS_ALL:
                 warnings.warn(
-                    "The group {} is not defined in the InferenceData scheme".format(group), UserWarning
+                    "The group {} is not defined in the InferenceData scheme".format(group),
+                    UserWarning,
                 )
             if dataset is None:
                 continue
@@ -372,7 +373,9 @@ class InferenceData:
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to add_groups() must be xr.Dataset, xr.Dataarray or dicts\
-                    (argument '{}' was type '{}')".format(group, type(dataset))
+                    (argument '{}' was type '{}')".format(
+                        group, type(dataset)
+                    )
                 )
             if dataset:
                 setattr(self, group, dataset)
@@ -382,7 +385,7 @@ class InferenceData:
                     self._groups.append(group)
         return None
 
-    def merge(self, other, join="left"):
+    def extend(self, other, join="left"):
         """Merge InferenceData object with other InferenceData object.
 
         Parameters
