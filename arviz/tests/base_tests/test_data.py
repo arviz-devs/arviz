@@ -349,7 +349,9 @@ class TestInferenceData:
             assert idata2 is not idata_copy
             idata_copy = idata2
         assert_identical(idata_copy.posterior, idata.posterior.sum(dim="draw"))
-        assert_identical(idata_copy.posterior_predictive, idata.posterior_predictive.sum(dim="draw"))
+        assert_identical(
+            idata_copy.posterior_predictive, idata.posterior_predictive.sum(dim="draw")
+        )
         assert_identical(idata_copy.observed_data, idata.observed_data)
 
     @pytest.mark.parametrize("inplace", [False, True])
