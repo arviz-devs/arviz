@@ -506,10 +506,10 @@ class TestInferenceData:
             observed_data={"b": data[0, 0, :]},
             posterior_predictive={"a": data[..., 0], "b": data},
         )
-        with pytest.warns(UserWarning):
+        with pytest.warns(UserWarning, match = "The group.+not defined in the InferenceData scheme"):
             idata.add_groups({"new_group": idata.posterior})
-        with pytest.warns(UserWarning):
-            idata.add_groups(new_group2={"a": data[..., 0], "b": data})
+        with pytest.warns(UserWarning, match = "the default dims.+will be added automatically"):
+            idata.add_groups(constant_data={"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
 
     def test_add_groups_error(self):
@@ -520,14 +520,12 @@ class TestInferenceData:
             observed_data={"b": data[0, 0, :]},
             posterior_predictive={"a": data[..., 0], "b": data},
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="One of.+must be provided."):
             idata.add_groups()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Arguments.+xr.Dataset, xr.Dataarray or dicts"):
             idata.add_groups({"new_group": "new_group"})
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="group.+already exists"):
             idata.add_groups({"posterior": idata.posterior})
-        with pytest.raises(ValueError):
-            idata.add_groups({"new_group": idata.posterior}, new_group2=idata.sample_stats)
 
     def test_merge(self):
         data = np.random.normal(size=(4, 500, 8))
