@@ -2,6 +2,7 @@
 # pylint: disable=too-many-lines
 from collections import namedtuple
 import os
+from copy import deepcopy
 from typing import Dict
 from urllib.parse import urlunsplit
 from html import escape
@@ -339,16 +340,16 @@ class TestInferenceData:
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, data_random, inplace):
         idata = data_random
-        idata_copy = idata
+        idata_copy = deepcopy(idata)
         kwargs = {"groups": "posterior_groups"}
         if inplace:
-            idata_copy.sum(inplace=inplace, **kwargs)
+            idata_copy.sum(dim="draw", inplace=inplace, **kwargs)
         else:
-            idata2 = idata_copy.sum(inplace=inplace, **kwargs)
+            idata2 = idata_copy.sum(dim="draw", inplace=inplace, **kwargs)
             assert idata2 is not idata_copy
             idata_copy = idata2
-        assert_identical(idata_copy.posterior, idata.posterior.sum())
-        assert_identical(idata_copy.posterior_predictive, idata.posterior_predictive.sum())
+        assert_identical(idata_copy.posterior, idata.posterior.sum(dim="draw"))
+        assert_identical(idata_copy.posterior_predictive, idata.posterior_predictive.sum(dim="draw"))
         assert_identical(idata_copy.observed_data, idata.observed_data)
 
     @pytest.mark.parametrize("inplace", [False, True])
