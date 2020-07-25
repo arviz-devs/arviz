@@ -422,8 +422,8 @@ class InferenceData:
 
             In [1]: idata = az.load_arviz_data("radon")
                ...: idata = idata.map(
-               ...:     lambda ds: ds.rename({"gamma_dim_0": "uranium_coefs"}).assign(
-               ...:         uranium_coefs=["intercept", "u_slope", "xbar_slope"]
+               ...:     lambda ds: ds.rename({"g_coef": "uranium_coefs"}).assign(
+               ...:         uranium_coefs=["intercept", "u_slope"]
                ...:     ),
                ...:     groups=["posterior", "prior"]
                ...: )
