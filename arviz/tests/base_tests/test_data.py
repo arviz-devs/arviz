@@ -79,7 +79,7 @@ def no_remote_data(monkeypatch, tmpdir):
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def data_random():
     data = np.random.normal(size=(4, 500, 8))
     idata = from_dict(
