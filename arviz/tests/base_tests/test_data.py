@@ -335,13 +335,8 @@ class TestInferenceData:
         assert not fails
 
     @pytest.mark.parametrize("inplace", [True, False])
-    def test_extend_xr_method(self, inplace):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            prior={"a": data[..., 0], "b": data},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    def test_extend_xr_method(self, data_random, inplace):
+        idata = data_random
         idata_copy = idata
         kwargs = {"groups": "posterior_groups"}
         if inplace:
@@ -352,17 +347,11 @@ class TestInferenceData:
             idata_copy = idata2
         assert_identical(idata_copy.posterior, idata.posterior.sum())
         assert_identical(idata_copy.posterior_predictive, idata.posterior_predictive.sum())
-        assert_identical(idata_copy.prior, idata.prior)
+        assert_identical(idata_copy.observed_data, idata.observed_data)
 
-    @pytest.mark.parametrize("inplace", [True, False])
-    def test_sel(self, inplace):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    @pytest.mark.parametrize("inplace", [False, True])
+    def test_sel(self, data_random, inplace):
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         ndraws = idata.posterior.draw.values.size
         kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
@@ -464,15 +453,9 @@ class TestInferenceData:
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
 
-    @pytest.mark.parametrize("inplace", [True, False])
-    def test_isel(self, inplace):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    @pytest.mark.parametrize("inplace", [False, True])
+    def test_isel(self, data_random, inplace):
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         ndraws = idata.posterior.draw.values.size
         kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
@@ -493,14 +476,8 @@ class TestInferenceData:
                 assert np.all(dataset.chain.values == np.arange(0, 4, 2))
                 assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
-    def test_rename(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    def test_rename(self, data_random):
+        idata=data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename({"b": "b_new"})
         for group in original_groups:
@@ -514,14 +491,8 @@ class TestInferenceData:
             assert "b_new" in list(xr_data.dims)
             assert "b_dim_0" not in list(xr_data.dims)
 
-    def test_rename_vars(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    def test_rename_vars(self, data_random):
+        idata=data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename_vars({"b": "b_new"})
         for group in original_groups:
@@ -535,14 +506,8 @@ class TestInferenceData:
             assert "b_new" not in list(xr_data.dims)
             assert "b_dim_0" in list(xr_data.dims)
 
-    def test_rename_dims(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    def test_rename_dims(self, data_random):
+        idata=data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename_dims({"b_dim_0": "b_new"})
         for group in original_groups:
