@@ -77,6 +77,7 @@ def no_remote_data(monkeypatch, tmpdir):
         ),
     )
 
+
 @pytest.fixture(scope="module")
 def data_random():
     data = np.random.normal(size=(4, 500, 8))
@@ -87,6 +88,7 @@ def data_random():
         posterior_predictive={"a": data[..., 0], "b": data},
     )
     return idata
+
 
 def test_load_local_arviz_data():
     inference_data = load_arviz_data("centered_eight")
@@ -477,7 +479,7 @@ class TestInferenceData:
                 assert np.all(dataset.draw.values == np.arange(200, ndraws))
 
     def test_rename(self, data_random):
-        idata=data_random
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename({"b": "b_new"})
         for group in original_groups:
@@ -492,7 +494,7 @@ class TestInferenceData:
             assert "b_dim_0" not in list(xr_data.dims)
 
     def test_rename_vars(self, data_random):
-        idata=data_random
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename_vars({"b": "b_new"})
         for group in original_groups:
@@ -507,7 +509,7 @@ class TestInferenceData:
             assert "b_dim_0" in list(xr_data.dims)
 
     def test_rename_dims(self, data_random):
-        idata=data_random
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         renamed_idata = idata.rename_dims({"b_dim_0": "b_new"})
         for group in original_groups:

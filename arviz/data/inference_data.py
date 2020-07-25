@@ -637,10 +637,9 @@ class InferenceData:
     sortby = _extend_xr_method(xr.Dataset.sortby)
     chunk = _extend_xr_method(xr.Dataset.chunk)
     unify_chunks = _extend_xr_method(xr.Dataset.unify_chunks)
-    load= _extend_xr_method(xr.Dataset.load)
+    load = _extend_xr_method(xr.Dataset.load)
     compute = _extend_xr_method(xr.Dataset.compute)
     persist = _extend_xr_method(xr.Dataset.persist)
-
 
     mean = _extend_xr_method(xr.Dataset.mean)
     median = _extend_xr_method(xr.Dataset.median)
