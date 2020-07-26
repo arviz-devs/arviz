@@ -32,6 +32,8 @@ from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    create_data_random,
+    data_random,
 )
 
 
@@ -77,18 +79,6 @@ def no_remote_data(monkeypatch, tmpdir):
             description="Test bad REMOTE_DATASET",
         ),
     )
-
-
-@pytest.fixture
-def data_random():
-    data = np.random.normal(size=(4, 500, 8))
-    idata = from_dict(
-        posterior={"a": data[..., 0], "b": data},
-        sample_stats={"a": data[..., 0], "b": data},
-        observed_data={"b": data[0, 0, :]},
-        posterior_predictive={"a": data[..., 0], "b": data},
-    )
-    return idata
 
 
 def test_load_local_arviz_data():
