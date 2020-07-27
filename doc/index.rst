@@ -50,6 +50,7 @@ For the latest (unstable) version
 
     pip install git+https://github.com/arviz-devs/arviz
 
+**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
 ArviZ's functions work with NumPy arrays, dictionaries of arrays, xarray datasets, and has built-in support for `PyMC3 <https://docs.pymc.io/>`_,
 `PyStan <https://pystan.readthedocs.io/en/latest/>`_, `CmdStanPy <https://github.com/stan-dev/cmdstanpy>`_,
@@ -63,7 +64,6 @@ also available. It provides built-in support for
 <https://github.com/StanJulia/CmdStan.jl>`_, `StanSample.jl
 <https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
-**Contributions** and **issue reports** are very welcome at `the github repository <https://github.com/arviz-devs/arviz>`_. We have a `contributing guide <https://github.com/arviz-devs/arviz/blob/master/CONTRIBUTING.md>`_ to help you through the process. If you have any doubts, please do not hesitate to contact us on `gitter <https://gitter.im/arviz-devs/community>`_.
 
 
 If you use ArviZ and want to cite it please use |JOSS|
