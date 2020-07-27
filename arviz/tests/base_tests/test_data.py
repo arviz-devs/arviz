@@ -2,6 +2,7 @@
 # pylint: disable=too-many-lines
 from collections import namedtuple
 import os
+from copy import deepcopy
 from typing import Dict
 from urllib.parse import urlunsplit
 from html import escape
@@ -10,6 +11,7 @@ import pytest
 
 import xarray as xr
 from xarray.core.options import OPTIONS
+from xarray.testing import assert_identical
 
 from arviz import (
     concat,
@@ -30,6 +32,8 @@ from ..helpers import (  # pylint: disable=unused-import
     check_multiple_attrs,
     draws,
     eight_schools_params,
+    create_data_random,
+    data_random,
 )
 
 
@@ -324,14 +328,25 @@ class TestInferenceData:
         assert not fails
 
     @pytest.mark.parametrize("inplace", [True, False])
-    def test_sel(self, inplace):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
+    def test_extend_xr_method(self, data_random, inplace):
+        idata = data_random
+        idata_copy = deepcopy(idata)
+        kwargs = {"groups": "posterior_groups"}
+        if inplace:
+            idata_copy.sum(dim="draw", inplace=inplace, **kwargs)
+        else:
+            idata2 = idata_copy.sum(dim="draw", inplace=inplace, **kwargs)
+            assert idata2 is not idata_copy
+            idata_copy = idata2
+        assert_identical(idata_copy.posterior, idata.posterior.sum(dim="draw"))
+        assert_identical(
+            idata_copy.posterior_predictive, idata.posterior_predictive.sum(dim="draw")
         )
+        assert_identical(idata_copy.observed_data, idata.observed_data)
+
+    @pytest.mark.parametrize("inplace", [False, True])
+    def test_sel(self, data_random, inplace):
+        idata = data_random
         original_groups = getattr(idata, "_groups")
         ndraws = idata.posterior.draw.values.size
         kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
@@ -432,6 +447,95 @@ class TestInferenceData:
         )
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
+
+    @pytest.mark.parametrize("inplace", [False, True])
+    def test_isel(self, data_random, inplace):
+        idata = data_random
+        original_groups = getattr(idata, "_groups")
+        ndraws = idata.posterior.draw.values.size
+        kwargs = {"draw": slice(200, None), "chain": slice(None, None, 2), "b_dim_0": [1, 2, 7]}
+        if inplace:
+            idata.isel(inplace=inplace, **kwargs)
+        else:
+            idata2 = idata.isel(inplace=inplace, **kwargs)
+            assert idata2 is not idata
+            idata = idata2
+        groups = getattr(idata, "_groups")
+        assert np.all(np.isin(groups, original_groups))
+        for group in groups:
+            dataset = getattr(idata, group)
+            assert "b_dim_0" in dataset.dims
+            assert np.all(dataset.b_dim_0.values == np.array(kwargs["b_dim_0"]))
+            if group != "observed_data":
+                assert np.all(np.isin(["chain", "draw"], dataset.dims))
+                assert np.all(dataset.chain.values == np.arange(0, 4, 2))
+                assert np.all(dataset.draw.values == np.arange(200, ndraws))
+
+    def test_rename(self, data_random):
+        idata = data_random
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.data_vars)
+            assert "b" not in list(xr_data.data_vars)
+
+        renamed_idata = idata.rename({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.dims)
+            assert "b_dim_0" not in list(xr_data.dims)
+
+    def test_rename_vars(self, data_random):
+        idata = data_random
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename_vars({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.data_vars)
+            assert "b" not in list(xr_data.data_vars)
+
+        renamed_idata = idata.rename_vars({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" not in list(xr_data.dims)
+            assert "b_dim_0" in list(xr_data.dims)
+
+    def test_rename_dims(self, data_random):
+        idata = data_random
+        original_groups = getattr(idata, "_groups")
+        renamed_idata = idata.rename_dims({"b_dim_0": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" in list(xr_data.dims)
+            assert "b_dim_0" not in list(xr_data.dims)
+
+        renamed_idata = idata.rename_dims({"b": "b_new"})
+        for group in original_groups:
+            xr_data = getattr(renamed_idata, group)
+            assert "b_new" not in list(xr_data.data_vars)
+            assert "b" in list(xr_data.data_vars)
+
+    def test_stack_unstack(self):
+        datadict = {
+            "a": np.random.randn(100),
+            "b": np.random.randn(1, 100, 10),
+            "c": np.random.randn(1, 100, 3, 4),
+        }
+        coords = {
+            "c1": np.arange(3),
+            "c99": np.arange(4),
+            "b1": np.arange(10),
+        }
+        dims = {"c": ["c1", "c99"], "b": ["b1"]}
+        dataset = from_dict(posterior=datadict, coords=coords, dims=dims)
+        assert_identical(
+            dataset.stack(z=["c1", "c99"]).posterior, dataset.posterior.stack(z=["c1", "c99"])
+        )
+        assert_identical(dataset.stack(z=["c1", "c99"]).unstack().posterior, dataset.posterior)
+        assert_identical(
+            dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior
+        )
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
