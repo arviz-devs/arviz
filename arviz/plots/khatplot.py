@@ -115,19 +115,12 @@ def plot_khat(
         >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
         >>> az.plot_khat(khats, xlabels=True, annotate=True)
 
-    Use coord values to create color mapping
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_khat(loo_radon, color="observed_county", cmap="tab20")
-
     Use custom color scheme
 
     .. plot::
         :context: close-figs
 
-        >>> counties = radon.posterior.observed_county.values
+        >>> counties = radon.posterior.County[radon.constant_data.county_idx].values
         >>> colors = [
         ...     "blue" if county[-1] in ("A", "N") else "green" for county in counties
         ... ]

@@ -993,6 +993,7 @@ def summary(
     kind: str = "all",
     round_to=None,
     include_circ=None,
+    circ_var_names=None,
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
@@ -1027,8 +1028,11 @@ def summary(
         them.
     round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
-    include_circ: bool
+    include_circ: boolean
         Whether to include circular statistics
+        deprecated: Please see circ_var_names
+    circ_var_names: list
+        A list of circular variables to compute circular stats for
     stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
@@ -1116,6 +1120,12 @@ def summary(
            ...: )
 
     """
+    if include_circ:
+        warnings.warn(
+            "include_circ is deprecated and will be ignored. Use circ_var_names instead",
+            DeprecationWarning,
+        )
+
     if credible_interval:
         hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
 
@@ -1177,7 +1187,7 @@ def summary(
         hdi_lower = hdi_post.sel(hdi="lower", drop=True)
         hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
-    if include_circ:
+    if circ_var_names:
         nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
@@ -1258,17 +1268,18 @@ def summary(
             metrics_names_ = metrics_names_[4:]
         metrics.extend(metrics_)
         metric_names.extend(metrics_names_)
-    if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse))
-        metric_names.extend(
-            (
-                "circular_mean",
-                "circular_sd",
-                "circular_hdi_{:g}%".format(100 * alpha / 2),
-                "circular_hdi_{:g}%".format(100 * (1 - alpha / 2)),
-                "circular_mcse",
-            )
-        )
+
+    if circ_var_names:
+
+        if kind != "diagnostics":
+            for metric, circ_stat in zip(
+                # Replace only the first 5 statistics for their circular equivalent
+                metrics[:5],
+                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
+            ):
+                for circ_var in circ_var_names:
+                    metric[circ_var] = circ_stat[circ_var]
+
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
     joined = (
