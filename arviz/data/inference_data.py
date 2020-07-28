@@ -333,94 +333,6 @@ class InferenceData:
         else:
             return out
 
-<<<<<<< HEAD
-    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
-        """Add new groups to InferenceData object.
-
-        Parameters
-        ----------
-        group_dict: dict of {str : dict or xarray.Dataset}, optional
-            Groups to be added
-        coords : dict[str] -> ndarray
-            Coordinates for the dataset
-        dims : dict[str] -> list[str]
-            Dimensions of each variable. The keys are variable names, values are lists of
-            coordinates.
-        **kwargs: mapping
-            The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
-
-        """
-        group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
-        if not group_dict:
-            raise ValueError("One of group_dict or kwargs must be provided.")
-        repeated_groups = [group for group in group_dict.keys() if group in self._groups]
-        if repeated_groups:
-            raise ValueError("{} group(s) already exists.".format(repeated_groups))
-        for group, dataset in group_dict.items():
-            if group not in SUPPORTED_GROUPS_ALL:
-                warnings.warn(
-                    "The group {} is not defined in the InferenceData scheme".format(group),
-                    UserWarning,
-                )
-            if dataset is None:
-                continue
-            elif isinstance(dataset, dict):
-                if (
-                    group in ("observed_data", "constant_data", "predictions_constant_data")
-                    or group not in SUPPORTED_GROUPS_ALL
-                ):
-                    warnings.warn(
-                        "the default dims 'chain' and 'draw' will be added automatically",
-                        UserWarning,
-                    )
-                dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
-            elif isinstance(dataset, xr.DataArray):
-                if dataset.name is None:
-                    dataset.name = "x"
-                dataset = dataset.to_dataset()
-            elif not isinstance(dataset, xr.Dataset):
-                raise ValueError(
-                    "Arguments to add_groups() must be xr.Dataset, xr.Dataarray or dicts\
-                    (argument '{}' was type '{}')".format(
-                        group, type(dataset)
-                    )
-                )
-            if dataset:
-                setattr(self, group, dataset)
-                if group.startswith(WARMUP_TAG):
-                    self._groups_warmup.append(group)
-                else:
-                    self._groups.append(group)
-        return None
-
-    def extend(self, other, join="left"):
-        """Merge InferenceData object with other InferenceData object.
-
-        Parameters
-        ----------
-        other : InferenceData object
-            InferenceData to be added
-        join : str, optional
-            defines the type of join. Can be either 'left' or 'right'.
-            Default is 'left'.
-
-        """
-        if not isinstance(other, InferenceData):
-            raise ValueError("Merging is possible between two InferenceData objects only.")
-        if join not in ("left", "right"):
-            raise ValueError("join must be either 'left' or 'right', found {}".format(join))
-        for group in other._groups_all:
-            if hasattr(self, group):
-                if join == "left":
-                    continue
-            if group not in SUPPORTED_GROUPS_ALL:
-                warnings.warn(
-                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
-                )
-            dataset = getattr(other, group)
-            setattr(self, group, dataset)
-        return None
-=======
     def isel(
         self, groups=None, filter_groups=None, inplace=False, **kwargs,
     ):
@@ -717,6 +629,93 @@ class InferenceData:
         else:
             return out
 
+    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
+        """Add new groups to InferenceData object.
+
+        Parameters
+        ----------
+        group_dict: dict of {str : dict or xarray.Dataset}, optional
+            Groups to be added
+        coords : dict[str] -> ndarray
+            Coordinates for the dataset
+        dims : dict[str] -> list[str]
+            Dimensions of each variable. The keys are variable names, values are lists of
+            coordinates.
+        **kwargs: mapping
+            The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
+
+        """
+        group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
+        if not group_dict:
+            raise ValueError("One of group_dict or kwargs must be provided.")
+        repeated_groups = [group for group in group_dict.keys() if group in self._groups]
+        if repeated_groups:
+            raise ValueError("{} group(s) already exists.".format(repeated_groups))
+        for group, dataset in group_dict.items():
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "The group {} is not defined in the InferenceData scheme".format(group),
+                    UserWarning,
+                )
+            if dataset is None:
+                continue
+            elif isinstance(dataset, dict):
+                if (
+                    group in ("observed_data", "constant_data", "predictions_constant_data")
+                    or group not in SUPPORTED_GROUPS_ALL
+                ):
+                    warnings.warn(
+                        "the default dims 'chain' and 'draw' will be added automatically",
+                        UserWarning,
+                    )
+                dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
+            elif isinstance(dataset, xr.DataArray):
+                if dataset.name is None:
+                    dataset.name = "x"
+                dataset = dataset.to_dataset()
+            elif not isinstance(dataset, xr.Dataset):
+                raise ValueError(
+                    "Arguments to add_groups() must be xr.Dataset, xr.Dataarray or dicts\
+                    (argument '{}' was type '{}')".format(
+                        group, type(dataset)
+                    )
+                )
+            if dataset:
+                setattr(self, group, dataset)
+                if group.startswith(WARMUP_TAG):
+                    self._groups_warmup.append(group)
+                else:
+                    self._groups.append(group)
+        return None
+
+    def extend(self, other, join="left"):
+        """Merge InferenceData object with other InferenceData object.
+
+        Parameters
+        ----------
+        other : InferenceData object
+            InferenceData to be added
+        join : str, optional
+            defines the type of join. Can be either 'left' or 'right'.
+            Default is 'left'.
+
+        """
+        if not isinstance(other, InferenceData):
+            raise ValueError("Merging is possible between two InferenceData objects only.")
+        if join not in ("left", "right"):
+            raise ValueError("join must be either 'left' or 'right', found {}".format(join))
+        for group in other._groups_all:
+            if hasattr(self, group):
+                if join == "left":
+                    continue
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                )
+            dataset = getattr(other, group)
+            setattr(self, group, dataset)
+        return None
+
     set_index = _extend_xr_method(xr.Dataset.set_index)
     get_index = _extend_xr_method(xr.Dataset.get_index)
     reset_index = _extend_xr_method(xr.Dataset.reset_index)
@@ -738,7 +737,6 @@ class InferenceData:
     cumsum = _extend_xr_method(xr.Dataset.cumsum)
     sum = _extend_xr_method(xr.Dataset.sum)
     quantile = _extend_xr_method(xr.Dataset.quantile)
->>>>>>> master
 
     def _group_names(self, groups, filter_groups=None):
         """Handle expansion of group names input across arviz.
