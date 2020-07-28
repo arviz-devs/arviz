@@ -116,8 +116,8 @@ def plot_loo_pit(
         :context: close-figs
 
         >>> import arviz as az
-        >>> idata = az.load_arviz_data("centered_eight")
-        >>> az.plot_loo_pit(idata=idata, y="obs")
+        >>> idata = az.load_arviz_data("radon")
+        >>> az.plot_loo_pit(idata=idata, y="y")
 
     Fill the area containing the 94% highest density interval of the difference between uniform
     variables empirical CDF and the real uniform CDF. A LOO-PIT ECDF clearly outside of these
@@ -127,7 +127,7 @@ def plot_loo_pit(
     .. plot::
         :context: close-figs
 
-        >>> az.plot_loo_pit(idata=idata, y="obs", ecdf=True)
+        >>> az.plot_loo_pit(idata=idata, y="y", ecdf=True)
 
     """
     if ecdf and use_hdi:

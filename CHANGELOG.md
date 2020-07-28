@@ -10,6 +10,7 @@
 * `plot_dist` bins argument error fixed (#1306)
 * improve handling of circular variables in `az.summary` (#1313)
 * Removed change of default warning in `ELPDData` string representation (#1321)
+* update `radon` example dataset to current InferenceData schema specification (#1320)
 
 ### Deprecation
 
