@@ -16,7 +16,7 @@ def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
 
     warnings.warn(
         "_fast_kde() has been replaced by _kde() in kde_utils.py",
-        DeprecationWarning
+        FutureWarning
     )
     return grid, pdf
 
