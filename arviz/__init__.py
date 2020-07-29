@@ -2,27 +2,28 @@
 """ArviZ is a library for exploratory analysis of Bayesian models."""
 __version__ = "0.9.0"
 
-import os
-import logging
-from matplotlib.pyplot import style, register_cmap
-from matplotlib.colors import LinearSegmentedColormap
+from os import path as _path
+import logging as _logging
+from matplotlib.pyplot import style
+from matplotlib.pyplot import register_cmap as _register_cmap
 
+from matplotlib.colors import LinearSegmentedColormap as _LinearSegmentedColormap
 
 # add ArviZ's styles to matplotlib's styles
-arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
-style.core.USER_LIBRARY_PATHS.append(arviz_style_path)
+_arviz_style_path = _path.join(_path.dirname(__file__), "plots", "styles")
+style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
 style.core.reload_library()
 
 # Configure logging before importing arviz internals
-_log = logging.getLogger("arviz")
+_log = _logging.getLogger("arviz")
 
 
-if not logging.root.handlers:
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-    handler.setFormatter(formatter)
-    _log.setLevel(logging.INFO)
-    _log.addHandler(handler)
+if not _logging.root.handlers:
+    _handler = _logging.StreamHandler()
+    _formatter = _logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    _handler.setFormatter(_formatter)
+    _log.setLevel(_logging.INFO)
+    _log.addHandler(_handler)
 
 from .rcparams import rcParams, rc_context
 from .data import *
@@ -33,7 +34,7 @@ from .plots import backends
 from .wrappers import *
 
 # adds perceptually uniform grey scale from colorcet
-linear_grey_10_95_c0 = [
+_linear_grey_10_95_c0 = [
     [0.10767, 0.1077, 0.1077],
     [0.11032, 0.11035, 0.11035],
     [0.11295, 0.11298, 0.11297],
@@ -294,9 +295,9 @@ linear_grey_10_95_c0 = [
 
 
 def _mpl_cm(name, colorlist):
-    cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
-    register_cmap("cet_" + name, cmap=cmap)
+    cmap = _LinearSegmentedColormap.from_list(name, colorlist, N=256)
+    _register_cmap("cet_" + name, cmap=cmap)
 
 
-_mpl_cm("gray", linear_grey_10_95_c0)
-_mpl_cm("gray_r", list(reversed(linear_grey_10_95_c0)))
+_mpl_cm("gray", _linear_grey_10_95_c0)
+_mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
