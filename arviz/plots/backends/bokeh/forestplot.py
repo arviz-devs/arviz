@@ -17,7 +17,7 @@ from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
 from ....numeric_utils import histogram, get_bins
-from ....kde_utils import kde
+from ....kde_utils import _kde
 from ....utils import conditional_jit
 
 
@@ -572,7 +572,7 @@ class VarHandler:
                 _, density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
-                x, density = kde(values)
+                x, density = _kde(values)
                 density_q = density.cumsum() / density.sum()
 
             xvals.append(x)

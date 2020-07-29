@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats as stats
 
 from ..stats import loo_pit as _loo_pit
-from ..kde_utils import kde
+from ..kde_utils import _kde
 from .plot_utils import get_plotting_function
 
 from ..rcparams import rcParams
@@ -161,7 +161,7 @@ def plot_loo_pit(
         )
         unif_ecdf = unif_ecdf / n_data_points
     else:
-        x_vals, loo_pit_kde = kde(loo_pit)
+        x_vals, loo_pit_kde = _kde(loo_pit)
 
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
         if use_hdi:

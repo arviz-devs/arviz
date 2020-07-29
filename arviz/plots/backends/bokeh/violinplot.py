@@ -4,8 +4,8 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ....kde_utils import kde
-from ....numeric_utils import _fast_kde, histogram, get_bins
+from ....numeric_utils import histogram, get_bins
+from ....kde_utils import _kde
 from ...plot_utils import make_label, _create_axes_grid, _scale_fig_size
 from ....stats import hdi
 
@@ -24,6 +24,7 @@ def plot_violin(
     rug_kwargs,
     bw,
     textsize,
+    circular,
     hdi_prob,
     quartiles,
     backend_kwargs,
@@ -65,7 +66,7 @@ def plot_violin(
         if val[0].dtype.kind == "i":
             dens = cat_hist(val, rug, shade, ax_, **shade_kwargs)
         else:
-            dens = _violinplot(val, rug, shade, bw, ax_, **shade_kwargs)
+            dens = _violinplot(val, rug, shade, bw, circular, ax_, **shade_kwargs)
 
         if rug:
             rug_x = -np.abs(np.random.normal(scale=max(dens) / 3.5, size=len(val)))
@@ -100,9 +101,14 @@ def plot_violin(
     return ax
 
 
-def _violinplot(val, rug, shade, bw, ax, **shade_kwargs):
+def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
-    x, density = kde(val, bw_fct=bw)
+    if bw is "default":
+        if circular:
+            bw = "taylor"
+        else:
+            bw = "experimental"
+    x, density = _kde(val, circular=circular, bw=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])

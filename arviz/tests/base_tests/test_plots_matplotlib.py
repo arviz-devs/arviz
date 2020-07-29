@@ -45,7 +45,7 @@ from ...plots import (
     plot_bpv,
 )
 from ...utils import _cov
-from ...kde_utils import kde
+from ...kde_utils import _kde
 
 rcParams["data.load"] = "eager"
 
@@ -929,7 +929,7 @@ def test_kde_scipy(limits):
     and the implementation in scipy
     """
     data = np.random.normal(0, 1, 10000)
-    grid, density_own = kde(data, custom_lims=limits)[1]
+    grid, density_own = _kde(data, custom_lims=limits)[1]
     density_sp = gaussian_kde(data).evaluate(grid)
     np.testing.assert_almost_equal(density_own.sum(), density_sp.sum(), 1)
 
@@ -940,7 +940,7 @@ def test_kde_cumulative(limits):
     Evaluates if last value of cumulative density is 1
     """
     data = np.random.normal(0, 1, 1000)
-    density = kde(data, custom_lims=limits, cumulative=True)[1]
+    density = _kde(data, custom_lims=limits, cumulative=True)[1]
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
 
 @pytest.mark.parametrize(

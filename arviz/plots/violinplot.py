@@ -19,7 +19,8 @@ def plot_violin(
     rug=False,
     hdi_prob=None,
     shade=0.35,
-    bw=1,
+    bw="default",
+    circular=False,
     sharex=True,
     sharey=True,
     figsize=None,
@@ -63,9 +64,16 @@ def plot_violin(
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
-    bw: float
-        Bandwidth scaling factor. Must be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 1 (no modification)
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: bool, optional.
+        If True, it interprets `values` is a circular variable measured in radians
+        and a circular KDE is used. Defaults to False.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
@@ -150,6 +158,7 @@ def plot_violin(
         rug_kwargs=rug_kwargs,
         bw=bw,
         textsize=textsize,
+        circular=circular,
         hdi_prob=hdi_prob,
         quartiles=quartiles,
         backend_kwargs=backend_kwargs,

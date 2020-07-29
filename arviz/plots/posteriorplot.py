@@ -26,7 +26,8 @@ def plot_posterior(
     rope=None,
     ref_val=None,
     kind="kde",
-    bw=1,
+    bw="default",
+    circular=False,
     bins=None,
     ax=None,
     backend=None,
@@ -82,10 +83,16 @@ def plot_posterior(
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
         a histogram is always used.
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
-        The higher this number the smoother the KDE will be.
-        Defaults to 1 which means the bandwidth is not modified.
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular 
+        and "taylor" when it is. Only works if `kind == kde`.
+    circular: bool, optional
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False. 
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
@@ -225,6 +232,7 @@ def plot_posterior(
         figsize=figsize,
         plotters=plotters,
         bw=bw,
+        circular=circular,
         bins=bins,
         kind=kind,
         point_estimate=point_estimate,

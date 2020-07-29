@@ -25,7 +25,8 @@ def plot_density(
     outline=True,
     hdi_markers="",
     shade=0.0,
-    bw=1,
+    bw="default",
+    circular=False,
     figsize=None,
     textsize=None,
     ax=None,
@@ -77,10 +78,16 @@ def plot_density(
     shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
-    bw : Optional[float]
-        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
-        The higher this number the smoother the KDE will be.
-        Defaults to 1 which means the bandwidth is not modified.
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
@@ -212,12 +219,19 @@ def plot_density(
         length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
+    if bw is "default":
+        if circular:
+            bw = "taylor"
+        else:
+            bw = "experimental"
+
     plot_density_kwargs = dict(
         ax=ax,
         all_labels=all_labels,
         to_plot=to_plot,
         colors=colors,
         bw=bw,
+        circular=circular,
         figsize=figsize,
         length_plotters=length_plotters,
         rows=rows,

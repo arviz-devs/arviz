@@ -7,7 +7,7 @@ from xarray import DataArray
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ....kde_utils import kde
+from ....kde_utils import _kde
 from ...plot_utils import _scale_fig_size
 
 def plot_loo_pit(
@@ -183,7 +183,7 @@ def plot_loo_pit(
             )
         else:
             for idx in range(n_unif):
-                x_s, unif_density = kde(unif[idx, :])
+                x_s, unif_density = _kde(unif[idx, :])
                 ax.line(
                     x_s,
                     unif_density,

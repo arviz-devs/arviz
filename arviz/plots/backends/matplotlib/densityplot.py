@@ -13,15 +13,16 @@ from ...plot_utils import (
     calculate_point_estimate,
 )
 from ....numeric_utils import get_bins
-from ....kde_utils import kde
+from ....kde_utils import _kde
 
 
 def plot_density(
-    ax,
+    ax, 
     all_labels,
     to_plot,
     colors,
     bw,
+    circular,
     figsize,
     length_plotters,
     rows,
@@ -75,6 +76,7 @@ def plot_density(
                 label,
                 colors[m_idx],
                 bw,
+                circular,
                 titlesize,
                 xt_labelsize,
                 linewidth,
@@ -102,7 +104,8 @@ def _d_helper(
     vec,
     vname,
     color,
-    bw_fct,
+    bw,
+    circular,
     titlesize,
     xt_labelsize,
     linewidth,
@@ -124,10 +127,11 @@ def _d_helper(
         variable name
     color : str
         matplotlib color
-    bw_fct: float, optional
-        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
-        The higher this number the smoother the KDE will be.
-        Defaults to 1 which means the bandwidth is not modified.
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
     titlesize : float
         font size for title
     xt_labelsize : float
@@ -153,7 +157,7 @@ def _d_helper(
         else:
             new_vec = vec
 
-        x, density = kde(new_vec, bw_fct=bw_fct)
+        x, density = _kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
         xmin, xmax = x[0], x[-1]
         ymin, ymax = density[0], density[-1]
@@ -179,7 +183,7 @@ def _d_helper(
         ax.plot(xmax, 0, hdi_markers, color=color, markeredgecolor="k", markersize=markersize)
 
     if point_estimate is not None:
-        est = calculate_point_estimate(point_estimate, vec, bw_fct)
+        est = calculate_point_estimate(point_estimate, vec, bw)
         ax.plot(est, 0, "o", color=color, markeredgecolor="k", markersize=markersize)
 
     ax.set_yticks([])

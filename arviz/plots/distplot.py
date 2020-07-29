@@ -15,7 +15,8 @@ def plot_dist(
     label=None,
     rotated=False,
     rug=False,
-    bw=1,
+    bw="default",
+    circular=False,
     quantiles=None,
     contour=True,
     fill_last=True,
@@ -58,10 +59,16 @@ def plot_dist(
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
-        The higher this number the smoother the KDE will be.
-        Defaults to 1 which means the bandwidth is not modified.
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular 
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to None.
@@ -171,6 +178,7 @@ def plot_dist(
         rotated=rotated,
         rug=rug,
         bw=bw,
+        circular=circular,
         quantiles=quantiles,
         contour=contour,
         fill_last=fill_last,

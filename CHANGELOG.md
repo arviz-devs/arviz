@@ -19,7 +19,7 @@ via the argument `circular` (#1284).
 
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)
-* All the functions that used to call `_fast_kde`() now use `kde()` and have been updated to handle the new types returned.
+* All the functions that used to call `_fast_kde`() now use `kde()` and have been updated to handle the new types returned (#1284).
 
 ### Deprecation
 

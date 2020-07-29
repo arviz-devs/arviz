@@ -1,11 +1,24 @@
 """Numerical utility functions for ArviZ."""
 import warnings
 import numpy as np
-from scipy.signal import convolve, convolve2d
+from scipy.signal import convolve2d
 from scipy.sparse import coo_matrix
 
 from .stats.stats_utils import histogram
 from .utils import _stack, _dot, _cov
+from .kde_utils import _kde
+
+def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
+    """Deprecated Kernel Density Estimate
+
+    """
+    grid, pdf = _kde(x)
+
+    warnings.warn(
+        "_fast_kde() has been replaced by _kde() in kde_utils.py",
+        DeprecationWarning
+    )
+    return grid, pdf
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
@@ -141,3 +154,29 @@ def _sturges_formula(dataset, mult=1):
         Number of bins to use
     """
     return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
+
+
+def _circular_mean(x, na_rm=False):
+    """
+    Computes mean of circular variable measured in radians.
+    The result is between -pi and pi.
+    """
+    if na_rm:
+        x = x[~np.isnan(x)]
+
+    sinr = np.sum(np.sin(x))
+    cosr = np.sum(np.cos(x))
+    mean = np.arctan2(sinr, cosr)
+
+    return mean
+
+def _normalize_angle(x, zero_centered=True):
+    """
+    Takes angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
+    depending on `zero_centered`.
+    """
+    if zero_centered:
+        return (x + np.pi) % (2 * np.pi) - np.pi
+    else:
+        return x % (2 * np.pi)
+        

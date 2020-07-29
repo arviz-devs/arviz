@@ -6,7 +6,7 @@ from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import _create_axes_grid, _scale_fig_size
 from ....numeric_utils import histogram, get_bins
-from ....kde_utils import kde
+from ....kde_utils import _kde
 
 
 def plot_ppc(
@@ -94,7 +94,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_x, pp_density = kde(vals)
+                    pp_x, pp_density = _kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:

@@ -13,7 +13,7 @@ from matplotlib.colors import to_hex
 from scipy.stats import mode
 import xarray as xr
 
-from ..kde_utils import kde
+from ..kde_utils import _kde
 from ..rcparams import rcParams
 
 KwargSpec = Dict[str, Any]
@@ -611,7 +611,7 @@ def get_plotting_function(plot_name, plot_module, backend):
     return plotting_method
 
 
-def calculate_point_estimate(point_estimate, values, bw=1):
+def calculate_point_estimate(point_estimate, values, bw="default", circular=False):
     """Validate and calculate the point estimate.
 
     Parameters
@@ -620,10 +620,16 @@ def calculate_point_estimate(point_estimate, values, bw=1):
         Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
         Defaults to 'auto' i.e. it falls back to default set in rcParams.
     values : 1-d array
-    bw: float, optional
-        Bandwidth scaling factor for 1D KDE. Must be larger than 0.
-        The higher this number the smoother the KDE will be.
-        Defaults to 1 which means the bandwidth is not modified.
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular 
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
 
     Returns
     -------
@@ -643,7 +649,12 @@ def calculate_point_estimate(point_estimate, values, bw=1):
         point_value = values.mean()
     elif point_estimate == "mode":
         if isinstance(values[0], float):
-            x, density = kde(values, bw_fct=bw)
+            if bw is "default":
+                if circular:
+                    bw = "taylor"
+                else:
+                    bw = "experimental"
+            x, density = _kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
             point_value = mode(values)[0][0]
@@ -712,7 +723,7 @@ def sample_reference_distribution(dist, shape):
     densities = []
     dist_rvs = dist.rvs(size=shape)
     for idx in range(shape[1]):
-        x_s, density = kde(dist_rvs[:, idx])
+        x_s, density = _kde(dist_rvs[:, idx])
         x_ss.append(x_s)
         densities.append(density)
     return np.array(x_ss).T, np.array(densities).T

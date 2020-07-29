@@ -17,7 +17,7 @@ from ...plot_utils import (
 )
 from ....stats import hdi
 from ....numeric_utils import histogram, get_bins
-from ....kde_utils import kde
+from ....kde_utils import _kde
 
 def plot_density(
     ax,
@@ -25,6 +25,7 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    circular,
     figsize,
     length_plotters,
     rows,
@@ -97,6 +98,7 @@ def plot_density(
                 label,
                 colors[m_idx],
                 bw,
+                circular,
                 line_width,
                 markersize,
                 hdi_prob,
@@ -124,6 +126,7 @@ def _d_helper(
     vname,
     color,
     bw,
+    circular,
     line_width,
     markersize,
     hdi_prob,
@@ -144,7 +147,7 @@ def _d_helper(
         else:
             new_vec = vec
 
-        x, density = kde(new_vec, bw_fct=bw)
+        x, density = _kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
         xmin, xmax = x[0], x[-1]
         ymin, ymax = density[0], density[-1]
@@ -228,7 +231,7 @@ def _d_helper(
         plotted.append(ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize))
 
     if point_estimate is not None:
-        est = calculate_point_estimate(point_estimate, vec, bw)
+        est = calculate_point_estimate(point_estimate, vec, bw, circular)
         plotted.append(ax.circle(est, 0, fill_color=color, line_color="black", size=markersize))
 
     _title = Title()
