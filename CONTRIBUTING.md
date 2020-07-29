@@ -103,7 +103,7 @@ please consider adding inline documentation examples.
 
    Always use a ``feature`` branch. It's good practice to never routinely work on the ``master`` branch of any repository.
 
-4. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/)) run:
+4. Project requirements are in ``requirements.txt``, and libraries used for development are in ``requirements-dev.txt``.  To set up a development environment, you may (probably in a [virtual environment](https://python-guide-cn.readthedocs.io/en/latest/dev/virtualenvs.html)) run:
 
    ```bash
    $ pip install -r requirements.txt
