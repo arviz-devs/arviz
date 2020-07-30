@@ -1,4 +1,4 @@
-astroid==2.3.3
+astroid
 numpydoc
 pydocstyle
 pylint
