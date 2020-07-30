@@ -18,7 +18,7 @@ def plot_energy(
     kind,
     bfmi,
     figsize,
-    line_width,
+    textsize,
     fill_kwargs,
     plot_kwargs,
     bw,
@@ -38,6 +38,7 @@ def plot_energy(
 
     figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("line_width", line_width)
     if kind in {"hist", "histogram"}:
         legend = False

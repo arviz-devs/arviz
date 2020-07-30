@@ -14,6 +14,7 @@ def plot_energy(
     kind,
     bfmi,
     figsize,
+    textsize,
     fill_kwargs,
     plot_kwargs,
     bw,

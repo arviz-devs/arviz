@@ -123,6 +123,7 @@ def plot_energy(
         kind=kind,
         bfmi=bfmi,
         figsize=figsize,
+        textsize=textsize,
         fill_kwargs=fill_kwargs,
         plot_kwargs=plot_kwargs,
         bw=bw,
