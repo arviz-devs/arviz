@@ -66,6 +66,11 @@ def plot_trace(
     }
     dpi = backend_kwargs.pop("dpi")
 
+    if figsize is None:
+        figsize = (12, len(plotters) * 2)
+
+    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
+
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
     backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
 
@@ -116,9 +121,6 @@ def plot_trace(
         )
         compact_prop = {compact_prop[0]: compact_prop[1]}
 
-    if figsize is None:
-        figsize = (12, len(plotters) * 2)
-
     trace_kwargs = {} if trace_kwargs is None else trace_kwargs
     trace_kwargs.setdefault("alpha", 0.35)
 
@@ -134,8 +136,6 @@ def plot_trace(
         rug_kwargs = {}
     if rank_kwargs is None:
         rank_kwargs = {}
-
-    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
 
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)
