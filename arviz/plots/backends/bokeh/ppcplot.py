@@ -25,9 +25,9 @@ def plot_ppc(
     mean,
     jitter,
     total_pp_samples,
-    legend,
-    group,
-    animation_kwargs,
+    legend,  # pylint: disable=unused-argument
+    group,  # pylint: disable=unused-argument
+    animation_kwargs,  # pylint: disable=unused-argument
     num_pp_samples,
     backend_kwargs,
     show,
