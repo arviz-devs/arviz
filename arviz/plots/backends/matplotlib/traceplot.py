@@ -42,7 +42,7 @@ def plot_trace(
     divergence_data,
     axes,
     backend_kwargs,
-    backend_config,
+    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
