@@ -30,7 +30,7 @@ def plot_loo_pit(
     unif,
     plot_unif_kwargs,
     loo_pit_kde,
-    legend,
+    legend,  # pylint: disable=unused-argument
     y_hat,
     y,
     color,
