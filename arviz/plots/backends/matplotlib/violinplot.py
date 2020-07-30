@@ -5,7 +5,7 @@ import numpy as np
 from . import backend_show
 from ....stats import hdi
 from ....numeric_utils import _fast_kde, histogram, get_bins
-from ...plot_utils import make_label, _create_axes_grid
+from ...plot_utils import make_label, _create_axes_grid, matplotlib_kwarg_dealiaser, _scale_fig_size
 
 
 def plot_violin(
@@ -21,15 +21,23 @@ def plot_violin(
     rug,
     rug_kwargs,
     bw,
+    textsize,
     hdi_prob,
-    linewidth,
-    ax_labelsize,
-    xt_labelsize,
     quartiles,
     backend_kwargs,
     show,
 ):
     """Matplotlib violin plot."""
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
+    shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
+    rug_kwargs.setdefault("alpha", 0.1)
+    rug_kwargs.setdefault("marker", ".")
+    rug_kwargs.setdefault("linestyle", "")
+
     if ax is None:
         fig, ax = _create_axes_grid(
             len(plotters),

@@ -5,7 +5,7 @@ import numpy as np
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ....numeric_utils import _fast_kde, histogram, get_bins
-from ...plot_utils import make_label, _create_axes_grid
+from ...plot_utils import make_label, _create_axes_grid, _scale_fig_size
 from ....stats import hdi
 
 
@@ -22,8 +22,8 @@ def plot_violin(
     rug,
     rug_kwargs,
     bw,
+    textsize,
     hdi_prob,
-    linewidth,
     quartiles,
     backend_kwargs,
     show,
@@ -36,6 +36,12 @@ def plot_violin(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+    (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+
+    shade_kwargs = {} if shade_kwargs is None else shade_kwargs
+    rug_kwargs = {} if rug_kwargs is None else rug_kwargs
+    rug_kwargs.setdefault("fill_alpha", 0.1)
+    rug_kwargs.setdefault("line_alpha", 0.1)
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),
