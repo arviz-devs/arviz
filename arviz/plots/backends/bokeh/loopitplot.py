@@ -52,7 +52,8 @@ def plot_loo_pit(
 
     (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
 
-    plot_kwargs["color"] = to_hex(color)
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    plot_kwargs.setdefault("color", to_hex(color))
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
@@ -65,7 +66,7 @@ def plot_loo_pit(
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
 
-    plot_kwargs.setdefault("label", label)
+    plot_kwargs.setdefault("legend_label", label)
 
     plot_unif_kwargs = {} if plot_unif_kwargs is None else plot_unif_kwargs
     light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
@@ -88,13 +89,14 @@ def plot_loo_pit(
             fill_kwargs.setdefault(
                 "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
             )
-            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
+            fill_kwargs.setdefault(
+                "legend_label", "{:.3g}% credible interval".format(credible_interval)
+            )
     elif use_hdi:
         if hdi_kwargs is None:
             hdi_kwargs = {}
         hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
         hdi_kwargs.setdefault("alpha", 0.35)
-        hdi_kwargs.setdefault("label", "Uniform HDI")
 
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
