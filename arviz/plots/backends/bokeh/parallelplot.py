@@ -11,14 +11,14 @@ from ...plot_utils import _scale_fig_size
 
 def plot_parallel(
     ax,
-    colornd,
-    colord,
-    shadend,
+    colornd,  # pylint: disable=unused-argument
+    colord,  # pylint: disable=unused-argument
+    shadend,  # pylint: disable=unused-argument
     diverging_mask,
     _posterior,
     textsize,
     var_names,
-    legend,
+    legend,  # pylint: disable=unused-argument
     figsize,
     backend_kwargs,
     backend_config,

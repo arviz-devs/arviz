@@ -18,7 +18,7 @@ def plot_parallel(
     legend,
     figsize,
     backend_kwargs,
-    backend_config,
+    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Matplotlib parallel plot."""
