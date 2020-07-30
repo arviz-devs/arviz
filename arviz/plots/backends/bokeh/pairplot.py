@@ -49,28 +49,9 @@ def plot_pair(
         **backend_kwargs,
     }
 
-    if scatter_kwargs is None:
-        scatter_kwargs = {}
-
-    scatter_kwargs.setdefault("marker", ".")
-    scatter_kwargs.setdefault("lw", 0)
-    # Sets the default zorder higher than zorder of grid, which is 0.5
-    scatter_kwargs.setdefault("zorder", 0.6)
-
-    if kde_kwargs is None:
-        kde_kwargs = {}
-
     if hexbin_kwargs is None:
         hexbin_kwargs = {}
     hexbin_kwargs.setdefault("size", 0.5)
-
-    if divergences_kwargs is None:
-        divergences_kwargs = {}
-
-    divergences_kwargs.setdefault("marker", "o")
-    divergences_kwargs.setdefault("markeredgecolor", "k")
-    divergences_kwargs.setdefault("color", "C1")
-    divergences_kwargs.setdefault("lw", 0)
 
     if marginal_kwargs is None:
         marginal_kwargs = {}
@@ -78,13 +59,14 @@ def plot_pair(
     if point_estimate_kwargs is None:
         point_estimate_kwargs = {}
 
-    if point_estimate_marker_kwargs is None:
-        point_estimate_marker_kwargs = {}
+    if kde_kwargs is None:
+        kde_kwargs = {}
 
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
         kde_kwargs.setdefault("contour_kwargs", {})
-        kde_kwargs["contour_kwargs"].setdefault("colors", "k")
+        kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
+        kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
 
     if reference_values:
         reference_values_copy = {}
@@ -108,21 +90,6 @@ def plot_pair(
                 ),
                 UserWarning,
             )
-
-    if reference_values_kwargs is None:
-        reference_values_kwargs = {}
-
-    reference_values_kwargs.setdefault("color", "C3")
-    reference_values_kwargs.setdefault("marker", "o")
-
-    point_estimate_marker_kwargs.setdefault("marker", "s")
-    point_estimate_marker_kwargs.setdefault("color", "C1")
-
-    if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
-        kde_kwargs.setdefault("contour_kwargs", {})
-        kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
-        kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
 
     if reference_values:
         reference_values_copy = {}
@@ -177,6 +144,9 @@ def plot_pair(
     (figsize, _, _, _, _, markersize) = _scale_fig_size(
         figsize, textsize, numvars - offset, numvars - offset
     )
+
+    if point_estimate_marker_kwargs is None:
+        point_estimate_marker_kwargs = {}
 
     point_estimate_marker_kwargs.setdefault("line_width", markersize)
     point_estimate_kwargs.setdefault("line_color", "orange")
