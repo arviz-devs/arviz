@@ -3,10 +3,8 @@ import warnings
 
 from ..data import convert_to_dataset
 from .plot_utils import (
-    _scale_fig_size,
     xarray_var_iter,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
@@ -171,32 +169,16 @@ def plot_joint(
             "Number of variables to be plotted must 2 (you supplied {})".format(len(plotters))
         )
 
-    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
-
-    if kind == "kde":
-        types = "plot"
-    elif kind == "scatter":
-        types = "scatter"
-    else:
-        types = "hexbin"
-    joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
-
-    if marginal_kwargs is None:
-        marginal_kwargs = {}
-    marginal_kwargs.setdefault("plot_kwargs", {})
-    marginal_kwargs["plot_kwargs"]["linewidth"] = linewidth
-
     plot_joint_kwargs = dict(
         ax=ax,
         figsize=figsize,
         plotters=plotters,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         kind=kind,
         contour=contour,
         fill_last=fill_last,
         joint_kwargs=joint_kwargs,
         gridsize=gridsize,
+        textsize=textsize,
         marginal_kwargs=marginal_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
@@ -205,13 +187,6 @@ def plot_joint(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        plot_joint_kwargs.pop("ax_labelsize")
-        plot_joint_kwargs["marginal_kwargs"]["plot_kwargs"]["line_width"] = plot_joint_kwargs[
-            "marginal_kwargs"
-        ]["plot_kwargs"].pop("linewidth")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_joint", "jointplot", backend)
