@@ -45,6 +45,7 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
+    backend_config,
     show,
 ):
     """Matplotlib forest plot."""
