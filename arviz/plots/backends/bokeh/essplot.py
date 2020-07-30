@@ -25,6 +25,7 @@ def plot_ess(
     data,
     kind,
     extra_methods,
+    textsize,
     rows,
     cols,
     figsize,

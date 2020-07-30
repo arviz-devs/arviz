@@ -184,8 +184,6 @@ def plot_ess(
     ess_tail_dataset = None
     mean_ess = None
     sd_ess = None
-    text_x = None
-    text_va = None
 
     if kind == "quantile":
         probs = np.linspace(1 / n_points, 1 - 1 / n_points, n_points)
@@ -264,8 +262,6 @@ def plot_ess(
         sd_ess=sd_ess,
         idata=idata,
         data=data,
-        text_x=text_x,
-        text_va=text_va,
         kind=kind,
         extra_methods=extra_methods,
         textsize=textsize,
