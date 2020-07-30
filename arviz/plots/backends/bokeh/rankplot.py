@@ -9,6 +9,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ...plot_utils import (
     _create_axes_grid,
+    _scale_fig_size,
     make_label,
 )
 from ....stats.stats_utils import histogram
@@ -37,6 +38,7 @@ def plot_rank(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+    figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,

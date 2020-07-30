@@ -6,6 +6,7 @@ import scipy.stats
 from . import backend_show
 from ...plot_utils import (
     _create_axes_grid,
+    _scale_fig_size,
     make_label,
 )
 from ....stats.stats_utils import histogram
@@ -23,12 +24,12 @@ def plot_rank(
     colors,
     ref_line,
     labels,
-    ax_labelsize,
-    titlesize,
     backend_kwargs,
     show,
 ):
     """Matplotlib rankplot.."""
+    figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
+
     if axes is None:
         _, axes = _create_axes_grid(
             length_plotters,

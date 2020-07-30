@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
 from .plot_utils import (
-    _scale_fig_size,
     xarray_var_iter,
     default_grid,
     filter_plotters_list,
@@ -142,12 +141,6 @@ def plot_rank(
         bins = _sturges_formula(posterior_data, mult=2)
 
     rows, cols = default_grid(length_plotters)
-    if ax is None:
-        figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(
-            figsize, None, rows=rows, cols=cols
-        )
-    else:
-        figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None)
 
     chains = len(posterior_data.chain)
     if colors == "cycle":
@@ -172,8 +165,6 @@ def plot_rank(
         colors=colors,
         ref_line=ref_line,
         labels=labels,
-        ax_labelsize=ax_labelsize,
-        titlesize=titlesize,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -181,11 +172,6 @@ def plot_rank(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        rankplot_kwargs.pop("ax_labelsize")
-        rankplot_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_rank", "rankplot", backend)
