@@ -154,9 +154,6 @@ def plot_elpd(
     if numvars < 2:
         raise Exception("Number of models to compare must be 2 or greater.")
 
-    # flatten data (data must be flattened after selecting, labeling and coloring)
-    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
-
     elpd_plot_kwargs = dict(
         ax=ax,
         models=models,
@@ -169,6 +166,7 @@ def plot_elpd(
         coord_labels=coord_labels,
         xdata=xdata,
         threshold=threshold,
+        legend=legend,
         color=color,
         backend_kwargs=backend_kwargs,
         show=show,

@@ -21,11 +21,12 @@ def plot_elpd(
     figsize,
     textsize,
     plot_kwargs,
-    color,
     xlabels,
     coord_labels,
     xdata,
     threshold,
+    legend,
+    color,
     backend_kwargs,
     show,
 ):
@@ -39,11 +40,16 @@ def plot_elpd(
     }
     dpi = backend_kwargs.pop("dpi")
 
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
-    plot_kwargs.setdefault("color", color)
     if isinstance(color, str):
         if color in pointwise_data[0].dims:
             colors, _ = color_from_dim(pointwise_data[0], color)
+            plot_kwargs.setdefault("color", colors)
+    plot_kwargs.setdefault("color", color)
+
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
 
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(

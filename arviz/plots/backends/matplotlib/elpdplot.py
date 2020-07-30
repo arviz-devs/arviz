@@ -30,7 +30,6 @@ def plot_elpd(
     xdata,
     threshold,
     legend,
-    handles,
     color,
     backend_kwargs,
     show,
@@ -48,7 +47,7 @@ def plot_elpd(
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
 
     markersize = None
-    plot_kwargs.setdefault("c", color)
+
     if isinstance(color, str):
         if color in pointwise_data[0].dims:
             colors, color_mapping = color_from_dim(pointwise_data[0], color)
@@ -68,6 +67,10 @@ def plot_elpd(
             legend = False
     else:
         legend = False
+    plot_kwargs.setdefault("c", color)
+
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
 
     if numvars == 2:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
