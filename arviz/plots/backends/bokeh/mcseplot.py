@@ -25,12 +25,12 @@ def plot_mcse(
     rug,
     data,
     probs,
-    kwargs,
+    kwargs,  # pylint: disable=unused-argument
     extra_methods,
     mean_mcse,
     sd_mcse,
     textsize,
-    text_kwargs,
+    text_kwargs,  # pylint: disable=unused-argument
     rug_kwargs,
     extra_kwargs,
     idata,
