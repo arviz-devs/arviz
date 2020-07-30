@@ -37,7 +37,7 @@ def plot_kde(
     legend,
     backend_kwargs,
     show,
-    return_glyph,
+    return_glyph,  # pylint: disable=unused-argument
 ):
     """Matplotlib kde plot."""
     if backend_kwargs is not None:
