@@ -19,8 +19,8 @@ from ....stats.stats_utils import histogram
 
 
 def plot_khat(
-    hover_label,
-    hover_format,
+    hover_label,  # pylint: disable=unused-argument
+    hover_format,  # pylint: disable=unused-argument
     ax,
     figsize,
     xdata,
@@ -29,13 +29,13 @@ def plot_khat(
     annotate,
     coord_labels,
     show_bins,
-    hlines_kwargs,
-    xlabels,
-    legend,
+    hlines_kwargs,  # pylint: disable=unused-argument
+    xlabels,  # pylint: disable=unused-argument
+    legend,  # pylint: disable=unused-argument
     color,
     dims,
     textsize,
-    markersize,
+    markersize,  # pylint: disable=unused-argument
     n_data_points,
     bin_format,
     backend_kwargs,
