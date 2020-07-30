@@ -1,16 +1,11 @@
 """Plot LOO-PIT predictive checks of inference data."""
 import numpy as np
 import scipy.stats as stats
-from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
-from xarray import DataArray
 
 from ..stats import loo_pit as _loo_pit
 from ..numeric_utils import _fast_kde
-from .plot_utils import (
-    _scale_fig_size,
-    get_plotting_function,
-    matplotlib_kwarg_dealiaser,
-)
+from .plot_utils import get_plotting_function
+
 from ..rcparams import rcParams
 
 
@@ -133,35 +128,8 @@ def plot_loo_pit(
     if ecdf and use_hdi:
         raise ValueError("use_hdi is incompatible with ecdf plot")
 
-    (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
-
     loo_pit = _loo_pit(idata=idata, y=y, y_hat=y_hat, log_weights=log_weights)
     loo_pit = loo_pit.flatten() if isinstance(loo_pit, np.ndarray) else loo_pit.values.flatten()
-
-    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
-    plot_kwargs["color"] = to_hex(color)
-    plot_kwargs.setdefault("linewidth", linewidth * 1.4)
-    if isinstance(y, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
-    elif isinstance(y, DataArray):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
-    elif isinstance(y_hat, str):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
-    elif isinstance(y_hat, DataArray):
-        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
-    else:
-        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
-
-    plot_kwargs.setdefault("label", label)
-    plot_kwargs.setdefault("zorder", 5)
-
-    plot_unif_kwargs = matplotlib_kwarg_dealiaser(plot_unif_kwargs, "plot")
-    light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
-    light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
-    light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation
-    plot_unif_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
-    plot_unif_kwargs.setdefault("alpha", 0.5)
-    plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
 
     loo_pit_ecdf = None
     unif_ecdf = None
@@ -192,19 +160,6 @@ def plot_loo_pit(
             0.5 - credible_interval / 2, unif_ecdf + 1, n_data_points - unif_ecdf + 1
         )
         unif_ecdf = unif_ecdf / n_data_points
-
-        plot_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
-        plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
-
-        if ecdf_fill:
-            if fill_kwargs is None:
-                fill_kwargs = {}
-            fill_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
-            fill_kwargs.setdefault("alpha", 0.5)
-            fill_kwargs.setdefault(
-                "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
-            )
-            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
     else:
         loo_pit_kde, xmin, xmax = _fast_kde(loo_pit)
 
@@ -214,11 +169,6 @@ def plot_loo_pit(
             n_obs = loo_pit.size
             hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - credible_interval) / 2)
             hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
-            if hdi_kwargs is None:
-                hdi_kwargs = {}
-            hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
-            hdi_kwargs.setdefault("alpha", 0.35)
-            hdi_kwargs.setdefault("label", "Uniform HDI")
 
     loo_pit_kwargs = dict(
         ax=ax,
@@ -239,8 +189,11 @@ def plot_loo_pit(
         unif=unif,
         plot_unif_kwargs=plot_unif_kwargs,
         loo_pit_kde=loo_pit_kde,
-        xt_labelsize=xt_labelsize,
+        textsize=textsize,
+        color=color,
         legend=legend,
+        y_hat=y_hat,
+        y=y,
         credible_interval=credible_interval,
         plot_kwargs=plot_kwargs,
         backend_kwargs=backend_kwargs,
@@ -250,13 +203,6 @@ def plot_loo_pit(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        if use_hdi:
-            loo_pit_kwargs["hdi_kwargs"].pop("label", None)
-        loo_pit_kwargs.pop("legend")
-        loo_pit_kwargs.pop("xt_labelsize")
-        loo_pit_kwargs.pop("credible_interval")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_loo_pit", "loopitplot", backend)
