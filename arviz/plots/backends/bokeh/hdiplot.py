@@ -17,9 +17,11 @@ def plot_hdi(ax, x_data, y_data, color, plot_kwargs, fill_kwargs, backend_kwargs
         **backend_kwargs,
     }
 
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs["color"] = vectorized_to_hex(plot_kwargs.get("color", color))
     plot_kwargs.setdefault("alpha", 0)
 
+    fill_kwargs = {} if fill_kwargs is None else fill_kwargs
     fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
     fill_kwargs.setdefault("alpha", 0.5)
 
