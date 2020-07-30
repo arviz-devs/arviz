@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size
 
 
 def plot_parallel(
@@ -14,10 +15,10 @@ def plot_parallel(
     _posterior,
     textsize,
     var_names,
-    xt_labelsize,
     legend,
     figsize,
     backend_kwargs,
+    backend_config,
     show,
 ):
     """Matplotlib parallel plot."""
@@ -28,6 +29,9 @@ def plot_parallel(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 

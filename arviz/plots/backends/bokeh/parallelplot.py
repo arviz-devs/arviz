@@ -6,10 +6,23 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
+from ...plot_utils import _scale_fig_size
 
 
 def plot_parallel(
-    ax, diverging_mask, _posterior, var_names, figsize, backend_config, backend_kwargs, show
+    ax,
+    colornd,
+    colord,
+    shadend,
+    diverging_mask,
+    _posterior,
+    textsize,
+    var_names,
+    legend,
+    figsize,
+    backend_kwargs,
+    backend_config,
+    show,
 ):
     """Bokeh parallel plot."""
     if backend_config is None:
@@ -31,6 +44,9 @@ def plot_parallel(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
+
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))
