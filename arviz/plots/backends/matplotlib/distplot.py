@@ -46,6 +46,7 @@ def plot_dist(
     if ax is None:
         ax = plt.gca(polar=is_circular)
 
+    hist_kwargs = {} if hist_kwargs is None else hist_kwargs
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
         hist_kwargs.setdefault("cumulative", cumulative)

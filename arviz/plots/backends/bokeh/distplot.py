@@ -45,12 +45,14 @@ def plot_dist(
         **backend_kwargs,
     }
 
+    hist_kwargs = {} if hist_kwargs is None else hist_kwargs
     if kind == "hist":
         hist_kwargs.setdefault("cumulative", cumulative)
         hist_kwargs.setdefault("fill_color", color)
         hist_kwargs.setdefault("line_color", color)
         hist_kwargs.setdefault("line_alpha", 0)
-        hist_kwargs.setdefault("legend_label", label)
+        if label is not None:
+            hist_kwargs.setdefault("legend_label", str(label))
 
     if ax is None:
         if is_circular:
@@ -113,10 +115,6 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     """Add a histogram for the data to the axes."""
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
-
-    legend_label = hist_kwargs.pop("label", None)
-    if legend_label:
-        hist_kwargs["legend_label"] = legend_label
 
     color = hist_kwargs.pop("color", False)
     if color:
