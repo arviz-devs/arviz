@@ -25,7 +25,7 @@ def plot_elpd(
     coord_labels,
     xdata,
     threshold,
-    legend,
+    legend,  # pylint: disable=unused-argument
     color,
     backend_kwargs,
     show,

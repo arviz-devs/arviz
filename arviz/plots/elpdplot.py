@@ -116,7 +116,7 @@ def plot_elpd(
             )
         )
     ic_fun = loo if ic == "loo" else waic
-    handles = None
+
     # Make sure all object are ELPDData
     for k, item in compare_dict.items():
         if not isinstance(item, ELPDData):
