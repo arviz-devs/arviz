@@ -260,15 +260,6 @@ def plot_pair(
         backend = rcParams["plot.backend"]
     backend = backend.lower()
 
-    if backend == "bokeh":
-        pairplot_kwargs.pop("gridsize", None)
-        pairplot_kwargs.pop("colorbar", None)
-        pairplot_kwargs.pop("divergences_kwargs", None)
-        pairplot_kwargs.pop("hexbin_values", None)
-        pairplot_kwargs.pop("scatter_kwargs", None)
-        point_estimate_kwargs.setdefault("line_color", "orange")
-        point_estimate_marker_kwargs.setdefault("line_color", "orange")
-
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_pair", "pairplot", backend)
     ax = plot(**pairplot_kwargs)

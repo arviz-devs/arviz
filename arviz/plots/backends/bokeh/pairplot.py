@@ -80,7 +80,6 @@ def plot_pair(
 
     if point_estimate_marker_kwargs is None:
         point_estimate_marker_kwargs = {}
-    point_estimate_kwargs.setdefault("color", "C1")
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
