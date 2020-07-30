@@ -21,12 +21,12 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    scatter_kwargs,
+    scatter_kwargs,  # pylint: disable=unused-argument
     kde_kwargs,
     hexbin_kwargs,
-    gridsize,
-    colorbar,
-    divergences,
+    gridsize,  # pylint: disable=unused-argument
+    colorbar,  # pylint: disable=unused-argument
+    divergences,  # pylint: disable=unused-argument
     diverging_mask,
     divergences_kwargs,
     flat_var_names,
