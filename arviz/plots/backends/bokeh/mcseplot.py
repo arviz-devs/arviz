@@ -9,6 +9,7 @@ from .. import show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
 )
 from ....stats.stats_utils import quantile as _quantile
 
@@ -24,15 +25,16 @@ def plot_mcse(
     rug,
     data,
     probs,
-    extra_kwargs,
+    kwargs,
     extra_methods,
     mean_mcse,
     sd_mcse,
+    textsize,
+    text_kwargs,
     rug_kwargs,
+    extra_kwargs,
     idata,
     rug_kind,
-    _markersize,
-    _linewidth,
     backend_kwargs,
     show,
 ):
@@ -44,6 +46,14 @@ def plot_mcse(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    (figsize, *_, _linewidth, _markersize) = _scale_fig_size(figsize, textsize, rows, cols)
+
+    extra_kwargs = {} if extra_kwargs is None else extra_kwargs
+    extra_kwargs.setdefault("linewidth", _linewidth / 2)
+    extra_kwargs.setdefault("color", "black")
+    extra_kwargs.setdefault("alpha", 0.5)
+
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
@@ -76,7 +86,7 @@ def plot_mcse(
                 hline_mean = Span(
                     location=mean_mcse_i,
                     dimension="width",
-                    line_color="black",
+                    line_color=extra_kwargs["color"],
                     line_width=extra_kwargs["linewidth"] * 2,
                     line_alpha=extra_kwargs["alpha"],
                 )
