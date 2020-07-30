@@ -50,7 +50,7 @@ def plot_posterior(
         **backend_kwargs,
     }
 
-    (figsize, ax_labelsize, *_) = _scale_fig_size(figsize, textsize, rows, cols)
+    (figsize, ax_labelsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
         _, ax = _create_axes_grid(
@@ -81,6 +81,7 @@ def plot_posterior(
             round_to=round_to,
             hdi_prob=hdi_prob,
             multimodal=multimodal,
+            linewidth=linewidth,
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
