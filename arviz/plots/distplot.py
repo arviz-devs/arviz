@@ -2,7 +2,7 @@
 """Plot distribution as histogram or kernel density estimates."""
 
 import xarray as xr
-from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
+from .plot_utils import get_plotting_function
 from ..data import InferenceData
 from ..rcparams import rcParams
 
@@ -160,20 +160,6 @@ def plot_dist(
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
-
-    if kind == "hist":
-        hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
-        hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("color", color)
-        hist_kwargs.setdefault("label", label)
-        hist_kwargs.setdefault("rwidth", 0.9)
-        hist_kwargs.setdefault("align", "left")
-        hist_kwargs.setdefault("density", True)
-
-        if rotated:
-            hist_kwargs.setdefault("orientation", "horizontal")
-        else:
-            hist_kwargs.setdefault("orientation", "vertical")
 
     dist_plot_args = dict(
         # User Facing API that can be simplified

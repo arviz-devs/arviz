@@ -44,6 +44,14 @@ def plot_dist(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    if kind == "hist":
+        hist_kwargs.setdefault("cumulative", cumulative)
+        hist_kwargs.setdefault("fill_color", color)
+        hist_kwargs.setdefault("line_color", color)
+        hist_kwargs.setdefault("line_alpha", 0)
+        hist_kwargs.setdefault("legend_label", label)
+
     if ax is None:
         if is_circular:
             ax = bkp.figure(x_axis_type=None, y_axis_type=None)
@@ -114,14 +122,6 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if color:
         hist_kwargs["fill_color"] = color
         hist_kwargs["line_color"] = color
-
-    hist_kwargs.setdefault("line_alpha", 0)
-
-    # remove defaults for mpl
-    hist_kwargs.pop("rwidth", None)
-    hist_kwargs.pop("align", None)
-    hist_kwargs.pop("density", None)
-    hist_kwargs.pop("orientation", None)
 
     bins = hist_kwargs.pop("bins", None)
     if bins is None:
