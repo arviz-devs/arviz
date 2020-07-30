@@ -21,23 +21,24 @@ def plot_pair(
     figsize,
     textsize,
     kind,
+    scatter_kwargs,
     kde_kwargs,
     hexbin_kwargs,
-    contour,  # pylint: disable=unused-argument
-    plot_kwargs,  # pylint: disable=unused-argument
-    fill_last,  # pylint: disable=unused-argument
+    gridsize,
+    colorbar,
     divergences,
     diverging_mask,
+    divergences_kwargs,
     flat_var_names,
     backend_kwargs,
-    marginals,
     marginal_kwargs,
+    show,
+    marginals,
     point_estimate,
     point_estimate_kwargs,
     point_estimate_marker_kwargs,
     reference_values,
     reference_values_kwargs,
-    show,
 ):
     """Bokeh pair plot."""
     if backend_kwargs is None:
@@ -48,10 +49,75 @@ def plot_pair(
         **backend_kwargs,
     }
 
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
+
+    scatter_kwargs.setdefault("marker", ".")
+    scatter_kwargs.setdefault("lw", 0)
+    # Sets the default zorder higher than zorder of grid, which is 0.5
+    scatter_kwargs.setdefault("zorder", 0.6)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
     if hexbin_kwargs is None:
         hexbin_kwargs = {}
-
     hexbin_kwargs.setdefault("size", 0.5)
+
+    if divergences_kwargs is None:
+        divergences_kwargs = {}
+
+    divergences_kwargs.setdefault("marker", "o")
+    divergences_kwargs.setdefault("markeredgecolor", "k")
+    divergences_kwargs.setdefault("color", "C1")
+    divergences_kwargs.setdefault("lw", 0)
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    if point_estimate_kwargs is None:
+        point_estimate_kwargs = {}
+
+    if point_estimate_marker_kwargs is None:
+        point_estimate_marker_kwargs = {}
+    point_estimate_kwargs.setdefault("color", "C1")
+
+    if kind != "kde":
+        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contour_kwargs", {})
+        kde_kwargs["contour_kwargs"].setdefault("colors", "k")
+
+    if reference_values:
+        reference_values_copy = {}
+        label = []
+        for variable in list(reference_values.keys()):
+            if " " in variable:
+                variable_copy = variable.replace(" ", "\n", 1)
+            else:
+                variable_copy = variable
+
+            label.append(variable_copy)
+            reference_values_copy[variable_copy] = reference_values[variable]
+
+        difference = set(flat_var_names).difference(set(label))
+
+        if difference:
+            warn = [diff.replace("\n", " ", 1) for diff in difference]
+            warnings.warn(
+                "Argument reference_values does not include reference value for: {}".format(
+                    ", ".join(warn)
+                ),
+                UserWarning,
+            )
+
+    if reference_values_kwargs is None:
+        reference_values_kwargs = {}
+
+    reference_values_kwargs.setdefault("color", "C3")
+    reference_values_kwargs.setdefault("marker", "o")
+
+    point_estimate_marker_kwargs.setdefault("marker", "s")
+    point_estimate_marker_kwargs.setdefault("color", "C1")
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
