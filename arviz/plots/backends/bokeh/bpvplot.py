@@ -48,14 +48,16 @@ def plot_bpv(
         **backend_kwargs,
     }
 
+    to_hex(color)
+
     if plot_ref_kwargs is None:
         plot_ref_kwargs = {}
     if kind == "p_value" and reference == "analytical":
-        plot_ref_kwargs.setdefault("color", "black")
+        plot_ref_kwargs.setdefault("line_color", "black")
         plot_ref_kwargs.setdefault("line_dash", "dashed")
     else:
         plot_ref_kwargs.setdefault("alpha", 0.1)
-        plot_ref_kwargs.setdefault("color", to_hex(color))
+        plot_ref_kwargs.setdefault("line_color", color)
 
     (figsize, ax_labelsize, _, _, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
@@ -91,7 +93,7 @@ def plot_bpv(
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, color=color)
+            ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
             # ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
@@ -112,7 +114,7 @@ def plot_bpv(
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.line(x_s, tstat_pit_dens, color=color)
+            ax_i.line(x_s, tstat_pit_dens, line_color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
@@ -123,7 +125,7 @@ def plot_bpv(
                             bottom=hdi_odds[1],
                             top=hdi_odds[0],
                             fill_alpha=plot_ref_kwargs.pop("alpha"),
-                            fill_color=plot_ref_kwargs.pop("color"),
+                            fill_color=plot_ref_kwargs.pop("line_color"),
                             **plot_ref_kwargs,
                         )
                     )
