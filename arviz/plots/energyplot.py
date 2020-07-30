@@ -4,7 +4,7 @@ from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, get_plotting_function, matplotlib_kwarg_dealiaser
+from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
 from ..rcparams import rcParams
 
 
@@ -97,8 +97,6 @@ def plot_energy(
     types = "hist" if kind in {"hist", "histogram"} else "plot"
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
 
-    figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
-
     _colors = [
         prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
     ]
@@ -125,8 +123,6 @@ def plot_energy(
         kind=kind,
         bfmi=bfmi,
         figsize=figsize,
-        xt_labelsize=xt_labelsize,
-        linewidth=linewidth,
         fill_kwargs=fill_kwargs,
         plot_kwargs=plot_kwargs,
         bw=bw,
@@ -138,13 +134,6 @@ def plot_energy(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        plot_energy_kwargs.pop("xt_labelsize")
-        plot_energy_kwargs["line_width"] = plot_energy_kwargs.pop("linewidth")
-        if kind in {"hist", "histogram"}:
-            plot_energy_kwargs["legend"] = False
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_energy", "energyplot", backend)

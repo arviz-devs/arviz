@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size
 from ....stats import bfmi as e_bfmi
 
 
@@ -13,8 +14,6 @@ def plot_energy(
     kind,
     bfmi,
     figsize,
-    xt_labelsize,
-    linewidth,
     fill_kwargs,
     plot_kwargs,
     bw,
@@ -30,6 +29,9 @@ def plot_energy(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 

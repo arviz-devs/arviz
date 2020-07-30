@@ -7,6 +7,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from .distplot import _histplot_bokeh_op
 from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size
 from ....stats import bfmi as e_bfmi
 
 
@@ -34,19 +35,26 @@ def plot_energy(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
+    plot_kwargs.setdefault("line_width", line_width)
+    if kind in {"hist", "histogram"}:
+        legend = False
+
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))
         ax = bkp.figure(**backend_kwargs)
 
     labels = []
+
     if kind == "kde":
         for alpha, color, label, value in series:
             fill_kwargs["fill_alpha"] = alpha
             fill_kwargs["fill_color"] = color
-            plot_kwargs["line_color"] = color
             plot_kwargs["line_alpha"] = alpha
-            plot_kwargs.setdefault("line_width", line_width)
+            plot_kwargs["line_color"] = color
             _, glyph = plot_kde(
                 value,
                 bw=bw,
