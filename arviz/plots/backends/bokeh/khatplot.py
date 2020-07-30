@@ -3,23 +3,41 @@ from collections.abc import Iterable
 
 import bokeh.plotting as bkp
 from bokeh.models import Span
+import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba_array
+import matplotlib.cm as cm
 import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
+from ...plot_utils import (
+    _scale_fig_size,
+    vectorized_to_hex,
+    color_from_dim,
+)
 from ....stats.stats_utils import histogram
 
 
 def plot_khat(
+    hover_label,
+    hover_format,
     ax,
     figsize,
     xdata,
     khats,
     rgba_c,
+    kwargs,
     annotate,
     coord_labels,
     show_bins,
     linewidth,
+    hlines_kwargs,
+    xlabels,
+    legend,
+    cmap,
+    color,
+    dims,
+    textsize,
     n_data_points,
     bin_format,
     backend_kwargs,
@@ -34,6 +52,33 @@ def plot_khat(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    (figsize, *_, line_width, _) = _scale_fig_size(figsize, textsize)
+
+    cmap = None
+    if isinstance(color, str):
+        if color in dims:
+            colors, _ = color_from_dim(khats, color)
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            rgba_c = cmap(colors)
+        else:
+            legend = False
+            rgba_c = to_rgba_array(np.full(n_data_points, color))
+    else:
+        legend = False
+        try:
+            rgba_c = to_rgba_array(color)
+        except ValueError:
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            rgba_c = cmap(color)
+
+    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
+    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
+    rgba_c[:, 3] = alphas
+    rgba_c = vectorized_to_hex(rgba_c)
+
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))
@@ -55,7 +100,7 @@ def plot_khat(
             location=hline,
             dimension="width",
             line_color="grey",
-            line_width=linewidth,
+            line_width=line_width,
             line_dash="dashed",
         )
 

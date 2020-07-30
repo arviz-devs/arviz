@@ -3,10 +3,18 @@ import warnings
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba_array
+import matplotlib.cm as cm
 import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import set_xticklabels
+from ...plot_utils import (
+    set_xticklabels,
+    _scale_fig_size,
+    matplotlib_kwarg_dealiaser,
+    vectorized_to_hex,
+    color_from_dim,
+)
 from ....stats.stats_utils import histogram
 
 
@@ -21,16 +29,15 @@ def plot_khat(
     kwargs,
     annotate,
     coord_labels,
-    ax_labelsize,
-    xt_labelsize,
     show_bins,
     linewidth,
     hlines_kwargs,
     xlabels,
     legend,
-    color_mapping,
     cmap,
     color,
+    dims,
+    textsize,
     n_data_points,
     bin_format,
     backend_kwargs,
@@ -54,6 +61,48 @@ def plot_khat(
         **backend_kwarg_defaults(constrained_layout=(not xlabels)),
         **backend_kwargs,
     }
+
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
+        figsize, textsize
+    )
+    hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
+    hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
+    hlines_kwargs.setdefault("alpha", 0.7)
+    hlines_kwargs.setdefault("zorder", -1)
+    hlines_kwargs.setdefault("color", "C1")
+    hlines_kwargs["color"] = vectorized_to_hex(hlines_kwargs["color"])
+
+    if markersize is None:
+        markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
+        # for dots to have the same size
+
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
+    kwargs.setdefault("s", markersize)
+    kwargs.setdefault("marker", "+")
+    color_mapping = None
+    cmap = None
+    if isinstance(color, str):
+        if color in dims:
+            colors, color_mapping = color_from_dim(khats, color)
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            rgba_c = cmap(colors)
+        else:
+            legend = False
+            rgba_c = to_rgba_array(np.full(n_data_points, color))
+    else:
+        legend = False
+        try:
+            rgba_c = to_rgba_array(color)
+        except ValueError:
+            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
+            cmap = getattr(cm, cmap_name)
+            rgba_c = cmap(color)
+
+    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
+    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
+    rgba_c[:, 3] = alphas
+    rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
