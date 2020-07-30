@@ -11,6 +11,7 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
     format_sig_figs,
     round_num,
     calculate_point_estimate,
@@ -33,9 +34,9 @@ def plot_posterior(
     round_to,
     hdi_prob,
     multimodal,
+    textsize,
     ref_val,
     rope,
-    ax_labelsize,
     kwargs,
     backend_kwargs,
     show,
@@ -48,6 +49,9 @@ def plot_posterior(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    (figsize, ax_labelsize, *_) = _scale_fig_size(figsize, textsize, rows, cols)
+
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,

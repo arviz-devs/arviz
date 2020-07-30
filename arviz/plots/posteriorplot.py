@@ -1,14 +1,10 @@
 """Plot posterior densities."""
-from typing import Optional
-
 from ..data import convert_to_dataset
 from .plot_utils import (
     xarray_var_iter,
-    _scale_fig_size,
     default_grid,
     filter_plotters_list,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
 )
 from ..utils import _var_names, get_coords, credible_interval_warning
 from ..rcparams import rcParams
@@ -24,7 +20,7 @@ def plot_posterior(
     textsize=None,
     hdi_prob=None,
     multimodal=False,
-    round_to: Optional[int] = None,
+    round_to=None,
     point_estimate="auto",
     group="posterior",
     rope=None,
@@ -220,15 +216,6 @@ def plot_posterior(
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-    if kind == "hist":
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
-    else:
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
-    kwargs.setdefault("linewidth", _linewidth)
-
     posteriorplot_kwargs = dict(
         ax=ax,
         length_plotters=length_plotters,
@@ -243,12 +230,10 @@ def plot_posterior(
         round_to=round_to,
         hdi_prob=hdi_prob,
         multimodal=multimodal,
+        textsize=textsize,
         ref_val=ref_val,
         rope=rope,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         kwargs=kwargs,
-        titlesize=titlesize,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -256,11 +241,6 @@ def plot_posterior(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        posteriorplot_kwargs.pop("xt_labelsize")
-        posteriorplot_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_posterior", "posteriorplot", backend)
