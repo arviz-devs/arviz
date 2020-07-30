@@ -287,7 +287,7 @@ def test_stats_information_criterion(models):
     assert "loo" in df_comp.columns
 
 
-def test_http_type_request(models, monkeypatch):
+def test_http_type_request(monkeypatch):
     def _urlretrive(url, _):
         raise Exception("URL Retrieved: {}".format(url))
 
