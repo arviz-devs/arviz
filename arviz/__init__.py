@@ -2,27 +2,27 @@
 """ArviZ is a library for exploratory analysis of Bayesian models."""
 __version__ = "0.9.0"
 
-from os import path as _path
-import logging as _logging
+import os
+import logging
 from matplotlib.pyplot import style
-from matplotlib.pyplot import register_cmap as _register_cmap
-
-from matplotlib.colors import LinearSegmentedColormap as _LinearSegmentedColormap
+from matplotlib.pyplot import register_cmap
+from matplotlib.colors import LinearSegmentedColormap
 
 # add ArviZ's styles to matplotlib's styles
-_arviz_style_path = _path.join(_path.dirname(__file__), "plots", "styles")
+_arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
 style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
 style.core.reload_library()
 
+
 # Configure logging before importing arviz internals
-_log = _logging.getLogger("arviz")
+_log = logging.getLogger("arviz")
 
 
-if not _logging.root.handlers:
-    _handler = _logging.StreamHandler()
-    _formatter = _logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+if not logging.root.handlers:
+    _handler = logging.StreamHandler()
+    _formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
     _handler.setFormatter(_formatter)
-    _log.setLevel(_logging.INFO)
+    _log.setLevel(logging.INFO)
     _log.addHandler(_handler)
 
 from .rcparams import rcParams, rc_context
@@ -295,9 +295,13 @@ _linear_grey_10_95_c0 = [
 
 
 def _mpl_cm(name, colorlist):
-    cmap = _LinearSegmentedColormap.from_list(name, colorlist, N=256)
-    _register_cmap("cet_" + name, cmap=cmap)
+    cmap = LinearSegmentedColormap.from_list(name, colorlist, N=256)
+    register_cmap("cet_" + name, cmap=cmap)
 
 
 _mpl_cm("gray", _linear_grey_10_95_c0)
 _mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
+
+
+# clean namespace
+del os, logging, register_cmap, LinearSegmentedColormap
