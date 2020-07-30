@@ -26,9 +26,9 @@ def plot_pair(
     hexbin_kwargs,
     gridsize,  # pylint: disable=unused-argument
     colorbar,  # pylint: disable=unused-argument
-    divergences,  # pylint: disable=unused-argument
+    divergences,
     diverging_mask,
-    divergences_kwargs,
+    divergences_kwargs,  # pylint: disable=unused-argument
     flat_var_names,
     backend_kwargs,
     marginal_kwargs,
