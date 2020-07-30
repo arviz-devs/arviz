@@ -9,7 +9,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, color_from_dim
 from ....rcparams import rcParams, _validate_bokeh_marker
 
 
@@ -21,7 +21,7 @@ def plot_elpd(
     figsize,
     textsize,
     plot_kwargs,
-    markersize,
+    color,
     xlabels,
     coord_labels,
     xdata,
@@ -38,6 +38,13 @@ def plot_elpd(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
+    plot_kwargs.setdefault("color", color)
+    if isinstance(color, str):
+        if color in pointwise_data[0].dims:
+            colors, _ = color_from_dim(pointwise_data[0], color)
+
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1

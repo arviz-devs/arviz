@@ -1,15 +1,10 @@
 """Plot pointwise elpd estimations of inference data."""
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from matplotlib.lines import Line2D
 
 from ..data import convert_to_inference_data
 from .plot_utils import (
     format_coords_as_labels,
-    color_from_dim,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
 )
 from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
@@ -150,46 +145,11 @@ def plot_elpd(
     if coords is None:
         coords = {}
 
-    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
-
-    if backend == "bokeh":
-        plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
-
     pointwise_data = [
         get_coords(compare_dict[model]["{}_i".format(ic)], coords) for model in models
     ]
     xdata = np.arange(pointwise_data[0].size)
     coord_labels = format_coords_as_labels(pointwise_data[0]) if xlabels else None
-
-    markersize = None
-    if isinstance(color, str):
-        if color in pointwise_data[0].dims:
-            colors, color_mapping = color_from_dim(pointwise_data[0], color)
-            if legend and backend != "bokeh":
-                cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
-                markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
-                cmap = getattr(cm, cmap_name)
-                handles = [
-                    Line2D(
-                        [],
-                        [],
-                        color=cmap(float_color),
-                        label=coord,
-                        ms=markersize,
-                        lw=0,
-                        **plot_kwargs
-                    )
-                    for coord, float_color in color_mapping.items()
-                ]
-                plot_kwargs.setdefault("cmap", cmap_name)
-                plot_kwargs.setdefault("s", markersize ** 2)
-            plot_kwargs.setdefault("c", colors)
-        else:
-            plot_kwargs.setdefault("c", color)
-            legend = False
-    else:
-        legend = False
-        plot_kwargs.setdefault("c", color)
 
     if numvars < 2:
         raise Exception("Number of models to compare must be 2 or greater.")
@@ -205,22 +165,14 @@ def plot_elpd(
         figsize=figsize,
         textsize=textsize,
         plot_kwargs=plot_kwargs,
-        markersize=markersize,
         xlabels=xlabels,
         coord_labels=coord_labels,
         xdata=xdata,
         threshold=threshold,
-        legend=legend,
-        handles=handles,
         color=color,
         backend_kwargs=backend_kwargs,
         show=show,
     )
-
-    if backend == "bokeh":
-        elpd_plot_kwargs.pop("legend")
-        elpd_plot_kwargs.pop("handles")
-        elpd_plot_kwargs.pop("color")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_elpd", "elpdplot", backend)
