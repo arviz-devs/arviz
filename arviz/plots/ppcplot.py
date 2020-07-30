@@ -1,12 +1,10 @@
 """Posterior/Prior predictive plot."""
 from numbers import Integral
-import platform
 import logging
 import numpy as np
 
 from .plot_utils import (
     xarray_var_iter,
-    _scale_fig_size,
     default_grid,
     filter_plotters_list,
     get_plotting_function,
@@ -197,26 +195,9 @@ def plot_ppc(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if animation_kwargs is None:
-        animation_kwargs = {}
-    if platform.system() == "Linux":
-        animation_kwargs.setdefault("blit", True)
-    else:
-        animation_kwargs.setdefault("blit", False)
-
-    if alpha is None:
+    if backend == "bokeh":
         if animated:
-            alpha = 1
-        else:
-            if kind.lower() == "scatter":
-                alpha = 0.7
-            else:
-                alpha = 0.2
-
-    if jitter is None:
-        jitter = 0.0
-    assert jitter >= 0.0
+            raise TypeError("Animation option is only supported with matplotlib backend.")
 
     observed = data.observed_data
 
@@ -289,10 +270,6 @@ def plot_ppc(
     ]
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
     ppcplot_kwargs = dict(
         ax=ax,
         length_plotters=length_plotters,
@@ -306,31 +283,17 @@ def plot_ppc(
         pp_sample_ix=pp_sample_ix,
         kind=kind,
         alpha=alpha,
-        linewidth=linewidth,
-        mean=mean,
-        xt_labelsize=xt_labelsize,
-        ax_labelsize=ax_labelsize,
         jitter=jitter,
+        textsize=textsize,
+        mean=mean,
         total_pp_samples=total_pp_samples,
         legend=legend,
         group=group,
-        markersize=markersize,
         animation_kwargs=animation_kwargs,
         num_pp_samples=num_pp_samples,
         backend_kwargs=backend_kwargs,
         show=show,
     )
-
-    if backend == "bokeh":
-        if animated:
-            raise TypeError("Animation option is only supported with matplotlib backend.")
-
-        ppcplot_kwargs.pop("animated")
-        ppcplot_kwargs.pop("animation_kwargs")
-        ppcplot_kwargs.pop("legend")
-        ppcplot_kwargs.pop("group")
-        ppcplot_kwargs.pop("xt_labelsize")
-        ppcplot_kwargs.pop("ax_labelsize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_ppc", "ppcplot", backend)
