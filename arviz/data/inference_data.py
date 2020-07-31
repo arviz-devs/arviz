@@ -1068,6 +1068,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         "Concatenating overlapping groups is not supported unless `dim` is defined."
                     )
                     msg += " Valid dimensions are `chain` and `draw`."
+                    msg += " Use `merge` to concat overlapping groups"
                     raise TypeError(msg)
                 group_data = getattr(arg, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
