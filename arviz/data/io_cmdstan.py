@@ -561,7 +561,7 @@ def _read_output_file(path):
             if line.startswith(b"#"):
                 comments.append(line.decode("utf-8").strip())
 
-    with open("large_cmdstan.csv", "rb") as f_obj:
+    with open(path, "rb") as f_obj:
         data = pd.read_csv(f_obj, comment="#")
 
     return data, comments
