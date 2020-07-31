@@ -686,7 +686,6 @@ class InferenceData:
                     self._groups_warmup.append(group)
                 else:
                     self._groups.append(group)
-        return None
 
     def extend(self, other, join="left"):
         """Merge InferenceData object with other InferenceData object.
@@ -704,7 +703,7 @@ class InferenceData:
             raise ValueError("Merging is possible between two InferenceData objects only.")
         if join not in ("left", "right"):
             raise ValueError("join must be either 'left' or 'right', found {}".format(join))
-        for group in other._groups_all:
+        for group in other._groups_all:  # pylint: disable=protected-access
             if hasattr(self, group):
                 if join == "left":
                     continue
@@ -714,7 +713,6 @@ class InferenceData:
                 )
             dataset = getattr(other, group)
             setattr(self, group, dataset)
-        return None
 
     set_index = _extend_xr_method(xr.Dataset.set_index)
     get_index = _extend_xr_method(xr.Dataset.get_index)

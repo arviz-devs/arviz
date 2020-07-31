@@ -593,12 +593,12 @@ class TestInferenceData:
             posterior_predictive={"a": data[..., 0], "b": data},
         )
         idata.add_groups({"prior": {"a": data[..., 0], "b": data}})
-        assert "prior" in idata._groups
+        assert "prior" in idata._groups  # pylint: disable=protected-access
         assert isinstance(idata.prior, xr.Dataset)
         assert hasattr(idata, "prior")
 
         idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
-        assert "posterior_warmup" in idata._groups
+        assert "posterior_warmup" in idata._groups  # pylint: disable=protected-access
         assert isinstance(idata.posterior_warmup, xr.Dataset)
         assert hasattr(idata, "posterior_warmup")
 
