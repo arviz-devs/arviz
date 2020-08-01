@@ -584,14 +584,9 @@ class TestInferenceData:
         assert escape(idata.__repr__()) in html
         xr.set_options(display_style=display_style)
 
-    def test_add_groups(self):
+    def test_add_groups(self, data_random):
         data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+        idata = data_random
         idata.add_groups({"prior": {"a": data[..., 0], "b": data}})
         assert "prior" in idata._groups  # pylint: disable=protected-access
         assert isinstance(idata.prior, xr.Dataset)
@@ -602,28 +597,17 @@ class TestInferenceData:
         assert isinstance(idata.posterior_warmup, xr.Dataset)
         assert hasattr(idata, "posterior_warmup")
 
-    def test_add_groups_warning(self):
+    def test_add_groups_warning(self, data_random):
         data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+        idata = data_random
         with pytest.warns(UserWarning, match="The group.+not defined in the InferenceData scheme"):
             idata.add_groups({"new_group": idata.posterior})
         with pytest.warns(UserWarning, match="the default dims.+will be added automatically"):
             idata.add_groups(constant_data={"a": data[..., 0], "b": data})
         assert idata.new_group.equals(idata.posterior)
 
-    def test_add_groups_error(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
+    def test_add_groups_error(self, data_random):
+        idata = data_random
         with pytest.raises(ValueError, match="One of.+must be provided."):
             idata.add_groups()
         with pytest.raises(ValueError, match="Arguments.+xr.Dataset, xr.Dataarray or dicts"):
@@ -631,19 +615,9 @@ class TestInferenceData:
         with pytest.raises(ValueError, match="group.+already exists"):
             idata.add_groups({"posterior": idata.posterior})
 
-    def test_extend(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"a": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
-        idata2 = from_dict(
-            prior={"a": data[..., 0], "b": data},
-            prior_predictive={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-        )
+    def test_extend(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
         idata.extend(idata2)
         assert hasattr(idata, "prior")
         assert hasattr(idata, "prior_predictive")
@@ -656,20 +630,10 @@ class TestInferenceData:
         assert idata.observed_data.equals(idata2.observed_data)
         assert idata.prior_predictive.equals(idata2.prior_predictive)
 
-    def test_extend_errors_warnings(self):
-        data = np.random.normal(size=(4, 500, 8))
-        idata = from_dict(
-            posterior={"a": data[..., 0], "b": data},
-            sample_stats={"a": data[..., 0], "b": data},
-            observed_data={"a": data[0, 0, :]},
-            posterior_predictive={"a": data[..., 0], "b": data},
-        )
-        idata2 = from_dict(
-            prior={"a": data[..., 0], "b": data},
-            prior_predictive={"a": data[..., 0], "b": data},
-            observed_data={"b": data[0, 0, :]},
-        )
-        with pytest.raises(ValueError, match="Merging.+InferenceData objects only."):
+    def test_extend_errors_warnings(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        with pytest.raises(ValueError, match="Extending.+InferenceData objects only."):
             idata.extend("something")
         with pytest.raises(ValueError, match="join must be either"):
             idata.extend(idata2, join="outer")

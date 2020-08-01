@@ -644,6 +644,10 @@ class InferenceData:
         **kwargs: mapping
             The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
 
+        See Also
+        --------
+        extend : Extend InferenceData with groups from another InferenceData.
+        concat : Concatenate InferenceData objects.
         """
         group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
         if not group_dict:
@@ -699,9 +703,14 @@ class InferenceData:
             present in both objects. 'left' will discard the group in ``other`` whereas 'right' 
             will keep the group in ``other`` and discard the one in ``self``.
 
+        See Also
+        --------
+        add_groups : Add new groups to InferenceData object.
+        concat : Concatenate InferenceData objects.
+
         """
         if not isinstance(other, InferenceData):
-            raise ValueError("Merging is possible between two InferenceData objects only.")
+            raise ValueError("Extending is possible between two InferenceData objects only.")
         if join not in ("left", "right"):
             raise ValueError("join must be either 'left' or 'right', found {}".format(join))
         for group in other._groups_all:  # pylint: disable=protected-access
@@ -973,6 +982,11 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     InferenceData
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
+
+    See Also
+    --------
+    add_groups : Add new groups to InferenceData object.
+    extend : Extend InferenceData with groups from another InferenceData.
 
     Examples
     --------
