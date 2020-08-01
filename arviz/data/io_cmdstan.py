@@ -144,7 +144,7 @@ class CmdStanConverter:
         )
 
         attrs = {}
-        for item in enumerate(chain_data):
+        for item in chain_data:
             for key, value in item["configuration_info"].items():
                 if key not in attrs:
                     attrs[key] = []
@@ -171,7 +171,7 @@ class CmdStanConverter:
         )
 
         attrs = {}
-        for item in enumerate(chain_data):
+        for item in chain_data:
             for key, value in item["configuration_info"].items():
                 if key not in attrs:
                     attrs[key] = []
@@ -623,11 +623,11 @@ def _process_configuration(comments):
                 .strip("seconds (Total)")
             )
             key = (
-                "warmup"
+                "warmup_time"
                 if "(Warm-up)" in comment
-                else "sampling"
+                else "sampling_time"
                 if "(Sampling)" in comment
-                else "total"
+                else "total_time"
             )
             results[key] = float(value)
         else:
