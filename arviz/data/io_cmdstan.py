@@ -13,6 +13,7 @@ import xarray as xr
 from .. import utils
 from .inference_data import InferenceData
 from .base import requires, dict_to_dataset, generate_dims_coords, CoordSpec, DimSpec
+from ..rcparams import rcParams
 
 _log = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ class CmdStanConverter:
         coords=None,
         dims=None,
         disable_glob=False,
+        save_warmup=None,
     ):
         self.posterior_ = check_glob(posterior, "posterior", disable_glob)
         self.posterior_predictive = check_glob(
@@ -78,6 +80,8 @@ class CmdStanConverter:
         self.sample_stats_prior = None
         self.attrs = None
         self.attrs_prior = None
+
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         # populate posterior and sample_stats
         self._parse_posterior()
@@ -530,6 +534,7 @@ class CmdStanConverter:
         will not have those groups.
         """
         return InferenceData(
+            save_warmup=self.save_warmup,
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
@@ -542,7 +547,7 @@ class CmdStanConverter:
                 "constant_data": self.constant_data_to_xarray(),
                 "predictions": self.predictions_to_xarray(),
                 "predictions_constant_data": self.predictions_constant_data_to_xarray(),
-            }
+            },
         )
 
 
@@ -573,7 +578,7 @@ def _process_configuration(comments):
             results["step_size"] = float(val.strip())
         elif "inverse mass matrix" in comment:
             comment = next(comments_gen).strip("#").strip()
-            results["step_size"] = np.array(comment.split(","), dtype=float)
+            results["inverse_mass_matrix"] = np.array(comment.split(","), dtype=float)
         elif ("seconds" in comment) and any(
             item in comment for item in ("(Warm-up)", "(Sampling)", "(Total)")
         ):
@@ -584,11 +589,11 @@ def _process_configuration(comments):
                 .strip("seconds (Total)")
             )
             key = (
-                "warmup_time"
+                "warmup_time_seconds"
                 if "(Warm-up)" in comment
-                else "sampling_time"
+                else "sampling_time_seconds"
                 if "(Sampling)" in comment
-                else "total_time"
+                else "total_time_seconds"
             )
             results[key] = float(value)
         else:
@@ -771,6 +776,7 @@ def from_cmdstan(
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
     disable_glob: Optional[bool] = False,
+    save_warmup: Optional[bool] = None,
 ) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
 
@@ -815,6 +821,9 @@ def from_cmdstan(
     disable_glob : bool
         Don't use glob for string input. This means that all string input is
         assumed to be variable names (samples) or a path (data).
+    save_warmup : bool
+        Save warmup iterations into InferenceData object, if found in the input files.
+        If not defined, use default defined by the rcParams.
 
     Returns
     -------
@@ -836,4 +845,5 @@ def from_cmdstan(
         coords=coords,
         dims=dims,
         disable_glob=disable_glob,
+        save_warmup=save_warmup,
     ).to_inference_data()

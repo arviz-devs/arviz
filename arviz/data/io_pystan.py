@@ -778,7 +778,7 @@ def from_pystan(
     prior_model : stan.model.Model
         PyStan3 specific model object. Needed for automatic dtype parsing.
     save_warmup : bool
-        Save warmup iterations InferenceData object. If not defined, use default
+        Save warmup iterations into InferenceData object. If not defined, use default
         defined by the rcParams.
 
     Returns

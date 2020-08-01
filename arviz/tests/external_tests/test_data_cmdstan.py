@@ -135,6 +135,8 @@ class TestDataCmdStan:
                 "predictions_constant_data": ["y"],
                 "log_likelihood": ["log_lik"],
             }
+            if "output_warmup" in path:
+                test_dict.update({"warmup_posterior": ["mu", "tau", "theta_tilde", "theta"]})
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
 
@@ -287,15 +289,6 @@ class TestDataCmdStan:
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
-
-    def test_inference_data_bad_csv(self, paths):
-        """Check ValueError for csv with missing headers"""
-        for key, _paths in paths.items():
-            if "missing" not in key:
-                continue
-            for path in _paths:
-                with pytest.raises(ValueError):
-                    self.get_inference_data(posterior=path)
 
     def test_inference_data_observed_data1(self, observed_data_paths):
         """Read Rdump, check shapes are correct
