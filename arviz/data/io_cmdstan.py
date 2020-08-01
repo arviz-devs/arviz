@@ -117,6 +117,8 @@ class CmdStanConverter:
         self.sample_stats = None
         self.prior = None
         self.sample_stats_prior = None
+        self.attrs = None
+        self.attrs_prior = None
 
         # populate posterior and sample_stats
         self._parse_posterior()
@@ -141,6 +143,14 @@ class CmdStanConverter:
             [item["sample_stats_warmup"] for item in chain_data],
         )
 
+        attrs = {}
+        for item in enumerate(chain_data):
+            for key, value in item["configuration_info"].items():
+                if key not in attrs:
+                    attrs[key] = []
+                attrs[key].append(value)
+        self.attrs = attrs
+
     @requires("prior_")
     def _parse_prior(self):
         """Read csv paths to list of dataframes."""
@@ -159,6 +169,14 @@ class CmdStanConverter:
             [item["sample_stats"] for item in chain_data],
             [item["sample_stats_warmup"] for item in chain_data],
         )
+
+        attrs = {}
+        for item in enumerate(chain_data):
+            for key, value in item["configuration_info"].items():
+                if key not in attrs:
+                    attrs[key] = []
+                attrs[key].append(value)
+        self.attrs_prior = attrs
 
     @requires("posterior")
     def posterior_to_xarray(self):
@@ -211,8 +229,8 @@ class CmdStanConverter:
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior[0]])
         data_warmup = _unpack_dataframes([item[valid_cols] for item in self.posterior[1]])
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
         )
 
     @requires("posterior")
@@ -259,11 +277,20 @@ class CmdStanConverter:
                 posterior_predictive = [posterior_predictive]
             chain_data = []
             chain_data_warmup = []
+            attrs = {}
             for path in posterior_predictive:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
-            data = _unpack_dataframes(chain_data), _unpack_dataframes(chain_data_warmup)
+
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
+
         else:
             if isinstance(posterior_predictive, str):
                 posterior_predictive = [posterior_predictive]
@@ -278,9 +305,11 @@ class CmdStanConverter:
             data_warmup = _unpack_dataframes(
                 [item[posterior_predictive_cols] for item in self.posterior[1]]
             )
+
+            attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
         )
 
     @requires("posterior")
@@ -298,11 +327,19 @@ class CmdStanConverter:
                 predictions = [predictions]
             chain_data = []
             chain_data_warmup = []
+            attrs = {}
             for path in predictions:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
-            data = _unpack_dataframes(chain_data), _unpack_dataframes(chain_data_warmup)
+
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
         else:
             if isinstance(predictions, str):
                 predictions = [predictions]
@@ -311,9 +348,11 @@ class CmdStanConverter:
             ]
             data = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
             data_warmup = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+
+            attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
         )
 
     @requires("prior")
@@ -342,8 +381,10 @@ class CmdStanConverter:
         data = _unpack_dataframes([item[valid_cols] for item in self.prior[0]])
         data_warmup = _unpack_dataframes([item[valid_cols] for item in self.prior[1]])
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
+            dict_to_dataset(
+                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
+            ),
         )
 
     @requires("prior")
@@ -391,11 +432,17 @@ class CmdStanConverter:
                 prior_predictive = [prior_predictive]
             chain_data = []
             chain_data_warmup = []
+            attrs = {}
             for path in prior_predictive:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
-            data = _unpack_dataframes(chain_data), _unpack_dataframes(chain_data_warmup)
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
         else:
             if isinstance(prior_predictive, str):
                 prior_predictive = [prior_predictive]
@@ -408,9 +455,10 @@ class CmdStanConverter:
             data_warmup = _unpack_dataframes(
                 [item[prior_predictive_cols] for item in self.prior[1]]
             )
+            attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
         )
 
     @requires("observed_data")
@@ -486,11 +534,17 @@ class CmdStanConverter:
 
             chain_data = []
             chain_data_warmup = []
+            attrs = {}
             for path in log_likelihood:
                 parsed_output = _read_output(path)
                 chain_data.append(parsed_output["sample"])
                 chain_data_warmup.append(parsed_output["sample_warmup"])
-            data = _unpack_dataframes(chain_data), _unpack_dataframes(chain_data_warmup)
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
         else:
             if isinstance(log_likelihood, str):
                 log_likelihood = [log_likelihood]
@@ -501,9 +555,10 @@ class CmdStanConverter:
             data_warmup = _unpack_dataframes(
                 [item[log_likelihood_cols] for item in self.posterior[1]]
             )
+            attrs = None
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
         )
 
     def to_inference_data(self):
