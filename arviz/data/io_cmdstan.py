@@ -1,6 +1,5 @@
 """CmdStan-specific conversion code."""
 from collections import defaultdict
-from copy import deepcopy
 from glob import glob
 from typing import Optional, Union, List
 import os
@@ -212,11 +211,12 @@ class CmdStanConverter:
 
         invalid_cols = posterior_predictive + predictions + log_likelihood
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = (
-            _unpack_dataframes([item[valid_cols] for item in self.posterior[0]]),
-            _unpack_dataframes([item[valid_cols] for item in self.posterior[1]]),
+        data = _unpack_dataframes([item[valid_cols] for item in self.posterior[0]])
+        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.posterior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
         )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
     @requires("sample_stats")
@@ -241,7 +241,10 @@ class CmdStanConverter:
             sampler_params_warmup[j] = sampler_params_warmup[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
-        return dict_to_dataset((data, data_warmup), coords=self.coords, dims=self.dims)
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -275,11 +278,12 @@ class CmdStanConverter:
                 for col in columns
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
-            data = (
-                _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[0]]),
-                _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[1]]),
-            )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+            data = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[0]])
+            data_warmup = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     @requires("posterior")
     @requires("predictions")
@@ -310,11 +314,12 @@ class CmdStanConverter:
             predictions_cols = [
                 col for col in columns if any(item == col.split(".")[0] for item in predictions)
             ]
-            data = (
-                _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]]),
-                _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]]),
-            )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+            data = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+            data_warmup = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     @requires("prior")
     def prior_to_xarray(self):
@@ -342,21 +347,18 @@ class CmdStanConverter:
 
         invalid_cols = prior_predictive
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = (
-            _unpack_dataframes([item[valid_cols] for item in self.prior[0]]),
-            _unpack_dataframes([item[valid_cols] for item in self.prior[1]]),
+        data = _unpack_dataframes([item[valid_cols] for item in self.prior[0]])
+        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.prior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
         )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
 
     @requires("prior")
     @requires("sample_stats_prior")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
-
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
 
         sampler_params, sampler_params_warmup = self.sample_stats_prior
         for j, s_params in enumerate(sampler_params):
@@ -372,8 +374,12 @@ class CmdStanConverter:
                 )
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
             sampler_params_warmup[j] = sampler_params_warmup[j].rename(columns=rename_dict)
-        data = _unpack_dataframes(sampler_params), _unpack_dataframes(sampler_params_warmup)
-        return dict_to_dataset(data, coords=coords, dims=dims)
+        data = _unpack_dataframes(sampler_params)
+        data_warmup = _unpack_dataframes(sampler_params_warmup)
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -406,11 +412,13 @@ class CmdStanConverter:
                 for col in columns
                 if any(item == col.split(".")[0] for item in prior_predictive)
             ]
-            data = (
-                _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[0]]),
-                _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[1]]),
+            data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[0]])
+            data_warmup = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[1]])
             )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -499,11 +507,12 @@ class CmdStanConverter:
             log_likelihood_cols = [
                 col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
             ]
-            data = (
-                _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[0]]),
-                _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[1]]),
-            )
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+            data = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[0]])
+            data_warmup = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+        )
 
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
