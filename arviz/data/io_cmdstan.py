@@ -164,7 +164,7 @@ class CmdStanConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        if self.posterior[0].empty:
+        if self.posterior[0][0].empty:
             columns = self.posterior[0][0].columns
         else:
             columns = self.posterior[1][0].columns
@@ -249,7 +249,7 @@ class CmdStanConverter:
         """Convert posterior_predictive samples to xarray."""
         posterior_predictive = self.posterior_predictive
         
-        if self.posterior[0].empty:
+        if self.posterior[0][0].empty:
             columns = self.posterior[0][0].columns
         else:
             columns = self.posterior[1][0].columns
@@ -287,7 +287,7 @@ class CmdStanConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = self.predictions
 
-        if self.posterior[0].empty:
+        if self.posterior[0][0].empty:
             columns = self.posterior[0][0].columns
         else:
             columns = self.posterior[1][0].columns
@@ -322,7 +322,7 @@ class CmdStanConverter:
         # filter prior_predictive
         prior_predictive = self.prior_predictive
         
-        if self.prior[0].empty:
+        if self.prior[0][0].empty:
             columns = self.prior[0][0].columns
         else:
             columns = self.prior[1][0].columns
@@ -381,7 +381,7 @@ class CmdStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior_predictive = self.prior_predictive
 
-        if self.prior[0].empty:
+        if self.prior[0][0].empty:
             columns = self.prior[0][0].columns
         else:
             columns = self.prior[1][0].columns
@@ -475,7 +475,7 @@ class CmdStanConverter:
         """Convert elementwise log_likelihood samples to xarray."""
         log_likelihood = self.log_likelihood
 
-        if self.posterior[0].empty:
+        if self.posterior[0][0].empty:
             columns = self.posterior[0][0].columns
         else:
             columns = self.posterior[1][0].columns
@@ -604,13 +604,7 @@ def _read_output(path):
 
     Returns
     -------
-    List[DataFrame, DataFrame, Dict[str, Any]]
-        pandas.DataFrame
-            Sample data
-        pandas.DataFrame
-            Sample stats
-        dict
-            Configuration information
+    Dict[str, Any]
     """
     # Read data
     data, comments = _read_output_file(path)
