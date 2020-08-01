@@ -36,6 +36,9 @@ def plot_energy(
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
+    fill_kwargs = {} if fill_kwargs is None else fill_kwargs
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+
     if kind == "kde":
         for alpha, color, label, value in series:
             fill_kwargs["alpha"] = alpha

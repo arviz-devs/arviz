@@ -1,5 +1,4 @@
 """Density Comparison plot."""
-
 from .plot_utils import (
     xarray_var_iter,
     get_plotting_function,

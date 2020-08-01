@@ -1,7 +1,6 @@
 """Bayesian p-value Posterior/Prior predictive plot."""
 import numpy as np
 
-
 from .plot_utils import (
     xarray_var_iter,
     default_grid,

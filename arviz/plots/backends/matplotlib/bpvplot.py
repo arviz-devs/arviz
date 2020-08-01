@@ -11,6 +11,7 @@ from ...plot_utils import (
     _scale_fig_size,
     sample_reference_distribution,
     is_valid_quantile,
+    matplotlib_kwarg_dealiaser,
 )
 from ....numeric_utils import _fast_kde
 
@@ -42,8 +43,11 @@ def plot_bpv(
         figsize, textsize, rows, cols
     )
 
-    if plot_ref_kwargs is None:
-        plot_ref_kwargs = {}
+    if (kind == "u_value") and (reference == "analytical"):
+        plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "fill_between")
+    else:
+        plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "plot")
+
     if kind == "p_value" and reference == "analytical":
         plot_ref_kwargs.setdefault("color", "k")
         plot_ref_kwargs.setdefault("linestyle", "--")
