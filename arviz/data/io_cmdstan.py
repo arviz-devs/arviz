@@ -163,10 +163,7 @@ class CmdStanConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        if self.posterior[0][0].empty:
-            columns = self.posterior[0][0].columns
-        else:
-            columns = self.posterior[1][0].columns
+        columns = self.posterior[0][0].columns
 
         # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
@@ -214,8 +211,8 @@ class CmdStanConverter:
         data = _unpack_dataframes([item[valid_cols] for item in self.posterior[0]])
         data_warmup = _unpack_dataframes([item[valid_cols] for item in self.posterior[1]])
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("posterior")
@@ -242,8 +239,8 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("posterior")
@@ -251,11 +248,8 @@ class CmdStanConverter:
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         posterior_predictive = self.posterior_predictive
-        
-        if self.posterior[0][0].empty:
-            columns = self.posterior[0][0].columns
-        else:
-            columns = self.posterior[1][0].columns
+
+        columns = self.posterior[0][0].columns
 
         if (
             isinstance(posterior_predictive, (tuple, list))
@@ -278,11 +272,15 @@ class CmdStanConverter:
                 for col in columns
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
-            data = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[0]])
-            data_warmup = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior[1]])
+            data = _unpack_dataframes(
+                [item[posterior_predictive_cols] for item in self.posterior[0]]
+            )
+            data_warmup = _unpack_dataframes(
+                [item[posterior_predictive_cols] for item in self.posterior[1]]
+            )
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("posterior")
@@ -291,10 +289,7 @@ class CmdStanConverter:
         """Convert out of sample predictions samples to xarray."""
         predictions = self.predictions
 
-        if self.posterior[0][0].empty:
-            columns = self.posterior[0][0].columns
-        else:
-            columns = self.posterior[1][0].columns
+        columns = self.posterior[0][0].columns
 
         if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
             isinstance(predictions, str) and predictions.endswith(".csv")
@@ -317,8 +312,8 @@ class CmdStanConverter:
             data = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
             data_warmup = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("prior")
@@ -326,11 +321,8 @@ class CmdStanConverter:
         """Convert prior samples to xarray."""
         # filter prior_predictive
         prior_predictive = self.prior_predictive
-        
-        if self.prior[0][0].empty:
-            columns = self.prior[0][0].columns
-        else:
-            columns = self.prior[1][0].columns
+
+        columns = self.prior[0][0].columns
 
         if prior_predictive is None or (
             isinstance(prior_predictive, str) and prior_predictive.lower().endswith(".csv")
@@ -350,8 +342,8 @@ class CmdStanConverter:
         data = _unpack_dataframes([item[valid_cols] for item in self.prior[0]])
         data_warmup = _unpack_dataframes([item[valid_cols] for item in self.prior[1]])
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("prior")
@@ -377,8 +369,8 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("prior")
@@ -413,11 +405,12 @@ class CmdStanConverter:
                 if any(item == col.split(".")[0] for item in prior_predictive)
             ]
             data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[0]])
-            data_warmup = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[1]])
+            data_warmup = _unpack_dataframes(
+                [item[prior_predictive_cols] for item in self.prior[1]]
             )
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     @requires("observed_data")
@@ -483,10 +476,7 @@ class CmdStanConverter:
         """Convert elementwise log_likelihood samples to xarray."""
         log_likelihood = self.log_likelihood
 
-        if self.posterior[0][0].empty:
-            columns = self.posterior[0][0].columns
-        else:
-            columns = self.posterior[1][0].columns
+        columns = self.posterior[0][0].columns
 
         if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
             isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
@@ -508,10 +498,12 @@ class CmdStanConverter:
                 col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
             ]
             data = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[0]])
-            data_warmup = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[1]])
+            data_warmup = _unpack_dataframes(
+                [item[log_likelihood_cols] for item in self.posterior[1]]
+            )
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims), 
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims)
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
         )
 
     def to_inference_data(self):
