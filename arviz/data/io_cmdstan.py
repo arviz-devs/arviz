@@ -17,6 +17,20 @@ from .base import requires, dict_to_dataset, generate_dims_coords, CoordSpec, Di
 _log = logging.getLogger(__name__)
 
 
+def check_glob(path, group, disable_glob):
+    """Find files with glob."""
+    if isinstance(path, str) and (not disable_glob):
+        path_glob = glob(path)
+        if path_glob:
+            path = sorted(path_glob)
+            msg = "\n".join(
+                "{}: {}".format(i, os.path.normpath(fpath)) for i, fpath in enumerate(path, 1)
+            )
+            len_p = len(path)
+            _log.info("glob found %d files for '%s':\n%s", len_p, group, msg)
+    return path
+
+
 class CmdStanConverter:
     """Encapsulate CmdStan specific logic."""
 
@@ -38,81 +52,26 @@ class CmdStanConverter:
         predictions_constant_data_var=None,
         log_likelihood=None,
         coords=None,
-        dims=None
+        dims=None,
+        disable_glob=False,
     ):
-        if isinstance(posterior, str):
-            posterior_glob = glob(posterior)
-            if len(posterior_glob) > 1:
-                posterior = sorted(posterior_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(posterior, 1)
-                )
-                len_p = len(posterior)
-                _log.info("glob found %d files for 'posterior':\n%s", len_p, msg)
-        self.posterior_ = posterior
-        if isinstance(posterior_predictive, str):
-            posterior_predictive_glob = glob(posterior_predictive)
-            if len(posterior_predictive_glob) > 1:
-                posterior_predictive = sorted(posterior_predictive_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(posterior_predictive, 1)
-                )
-                len_pp = len(posterior_predictive)
-                _log.info("glob found %d files for 'posterior_predictive':\n%s", len_pp, msg)
-        if isinstance(predictions, str):
-            predictions_glob = glob(predictions)
-            if len(predictions_glob) > 1:
-                predictions = sorted(predictions_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(predictions, 1)
-                )
-                len_p = len(predictions)
-                _log.info("glob found %d files for 'predictions':\n%s", len_p, msg)
-        if isinstance(prior, str):
-            prior_glob = glob(prior)
-            if len(prior_glob) > 1:
-                prior = sorted(prior_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
-                )
-                len_p = len(prior)
-                _log.info("glob found %d files for 'prior':\n%s", len_p, msg)
-        if isinstance(prior_predictive, str):
-            prior_predictive_glob = glob(prior_predictive)
-            if len(prior_predictive_glob) > 1:
-                prior_predictive = sorted(prior_predictive_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(prior_predictive, 1)
-                )
-                len_pp = len(prior_predictive)
-                _log.info("glob found %d files for 'prior_predictive':\n%s", len_pp, msg)
-        if isinstance(log_likelihood, str):
-            log_likelihood_glob = glob(log_likelihood)
-            if len(log_likelihood_glob) > 1:
-                log_likelihood = sorted(log_likelihood_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(log_likelihood, 1)
-                )
-                len_ll = len(log_likelihood)
-                _log.info("glob found %d files for 'log_likelihood':\n%s", len_ll, msg)
-        self.posterior_predictive = posterior_predictive
-        self.predictions = predictions
-        self.prior_ = prior
-        self.prior_predictive = prior_predictive
+        self.posterior_ = check_glob(posterior, "posterior", disable_glob)
+        self.posterior_predictive = check_glob(
+            posterior_predictive, "posterior_predictive", disable_glob
+        )
+        self.predictions = check_glob(predictions, "predictions", disable_glob)
+        self.prior_ = check_glob(prior, "prior", disable_glob)
+        self.prior_predictive = check_glob(prior_predictive, "prior_predictive", disable_glob)
+        self.log_likelihood = check_glob(log_likelihood, "log_likelihood", disable_glob)
         self.observed_data = observed_data
         self.observed_data_var = observed_data_var
         self.constant_data = constant_data
         self.constant_data_var = constant_data_var
         self.predictions_constant_data = predictions_constant_data
         self.predictions_constant_data_var = predictions_constant_data_var
-        self.log_likelihood = log_likelihood
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
+
         self.posterior = None
         self.sample_stats = None
         self.prior = None
@@ -130,6 +89,7 @@ class CmdStanConverter:
         paths = self.posterior_
         if isinstance(paths, str):
             paths = [paths]
+
         chain_data = []
         for path in paths:
             chain_data.append(_read_output(path))
@@ -157,6 +117,7 @@ class CmdStanConverter:
         paths = self.prior_
         if isinstance(paths, str):
             paths = [paths]
+
         chain_data = []
         for path in paths:
             chain_data.append(_read_output(path))
@@ -808,7 +769,8 @@ def from_cmdstan(
     predictions_constant_data_var: Optional[Union[str, List[str]]] = None,
     log_likelihood: Optional[Union[str, List[str]]] = None,
     coords: Optional[CoordSpec] = None,
-    dims: Optional[DimSpec] = None
+    dims: Optional[DimSpec] = None,
+    disable_glob: Optional[bool] = False,
 ) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
 
@@ -850,6 +812,9 @@ def from_cmdstan(
         is the name of the dimension, the values are the index values.
     dims : dict of {str: list of str, optional
         A mapping from variables to a list of coordinate names for the variable.
+    disable_glob : bool
+        Don't use glob for string input. This means that all string input is
+        assumed to be variable names (samples) or a path (data).
 
     Returns
     -------
@@ -870,4 +835,5 @@ def from_cmdstan(
         log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
+        disable_glob=disable_glob,
     ).to_inference_data()
