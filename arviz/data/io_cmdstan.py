@@ -164,7 +164,10 @@ class CmdStanConverter:
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        columns = self.posterior[0].columns
+        if self.posterior[0].empty:
+            columns = self.posterior[0][0].columns
+        else:
+            columns = self.posterior[1][0].columns
 
         # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
@@ -245,7 +248,12 @@ class CmdStanConverter:
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         posterior_predictive = self.posterior_predictive
-        columns = self.posterior[0].columns
+        
+        if self.posterior[0].empty:
+            columns = self.posterior[0][0].columns
+        else:
+            columns = self.posterior[1][0].columns
+
         if (
             isinstance(posterior_predictive, (tuple, list))
             and posterior_predictive[0].endswith(".csv")
@@ -278,7 +286,12 @@ class CmdStanConverter:
     def predictions_to_xarray(self):
         """Convert out of sample predictions samples to xarray."""
         predictions = self.predictions
-        columns = self.posterior[0].columns
+
+        if self.posterior[0].empty:
+            columns = self.posterior[0][0].columns
+        else:
+            columns = self.posterior[1][0].columns
+
         if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
             isinstance(predictions, str) and predictions.endswith(".csv")
         ):
@@ -308,7 +321,12 @@ class CmdStanConverter:
         """Convert prior samples to xarray."""
         # filter prior_predictive
         prior_predictive = self.prior_predictive
-        columns = self.prior[0][0].columns
+        
+        if self.prior[0].empty:
+            columns = self.prior[0][0].columns
+        else:
+            columns = self.prior[1][0].columns
+
         if prior_predictive is None or (
             isinstance(prior_predictive, str) and prior_predictive.lower().endswith(".csv")
         ):
@@ -363,6 +381,11 @@ class CmdStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior_predictive = self.prior_predictive
 
+        if self.prior[0].empty:
+            columns = self.prior[0][0].columns
+        else:
+            columns = self.prior[1][0].columns
+
         if (
             isinstance(prior_predictive, (tuple, list)) and prior_predictive[0].endswith(".csv")
         ) or (isinstance(prior_predictive, str) and prior_predictive.endswith(".csv")):
@@ -380,7 +403,7 @@ class CmdStanConverter:
                 prior_predictive = [prior_predictive]
             prior_predictive_cols = [
                 col
-                for col in self.prior[0].columns
+                for col in columns
                 if any(item == col.split(".")[0] for item in prior_predictive)
             ]
             data = (
@@ -451,7 +474,12 @@ class CmdStanConverter:
     def log_likelihood_to_xarray(self):
         """Convert elementwise log_likelihood samples to xarray."""
         log_likelihood = self.log_likelihood
-        columns = self.posterior[0].columns
+
+        if self.posterior[0].empty:
+            columns = self.posterior[0][0].columns
+        else:
+            columns = self.posterior[1][0].columns
+
         if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
             isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
         ):
@@ -741,20 +769,12 @@ def from_cmdstan(
     ----------
     posterior : str or list of str, optional
         List of paths to output.csv files.
-        CSV file can be stacked csv containing all the chains
-
-            cat output*.csv > combined_output.csv
-
     posterior_predictive : str or list of str, optional
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
     predictions : str or list of str, optional
         Out of sample predictions samples for the fit. If endswith ".csv" assumes file.
     prior : str or list of str, optional
         List of paths to output.csv files
-        CSV file can be stacked csv containing all the chains.
-
-            cat output*.csv > combined_output.csv
-
     prior_predictive : str or list of str, optional
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
     observed_data : str, optional
