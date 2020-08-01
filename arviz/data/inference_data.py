@@ -698,9 +698,9 @@ class InferenceData:
         ----------
         other : InferenceData
             InferenceData to be added
-        join : {'left', 'right'}, default 'left' 
+        join : {'left', 'right'}, default 'left'
             Defines how the two decide which group to keep when the same group is
-            present in both objects. 'left' will discard the group in ``other`` whereas 'right' 
+            present in both objects. 'left' will discard the group in ``other`` whereas 'right'
             will keep the group in ``other`` and discard the one in ``self``.
 
         See Also
@@ -1079,8 +1079,8 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 if group in args_groups or group in arg0_groups:
                     msg = (
                         "Concatenating overlapping groups is not supported unless `dim` is defined."
-                        " Valid dimensions are `chain` and `draw`. Alternatively, use extend to combine"
-                        " InferenceData with overlapping groups"
+                        " Valid dimensions are `chain` and `draw`. Alternatively, use extend to"
+                        " combine InferenceData with overlapping groups"
                     )
                     raise TypeError(msg)
                 group_data = getattr(arg, group)
