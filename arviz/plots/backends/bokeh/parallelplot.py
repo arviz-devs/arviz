@@ -15,7 +15,7 @@ def plot_parallel(
     colord,  # pylint: disable=unused-argument
     shadend,  # pylint: disable=unused-argument
     diverging_mask,
-    _posterior,
+    posterior,
     textsize,
     var_names,
     legend,  # pylint: disable=unused-argument
@@ -52,7 +52,7 @@ def plot_parallel(
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))
         ax = bkp.figure(**backend_kwargs)
 
-    non_div = list(_posterior[:, ~diverging_mask].T)
+    non_div = list(posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]
 
     ax.multi_line(
@@ -60,7 +60,7 @@ def plot_parallel(
     )
 
     if np.any(diverging_mask):
-        div = list(_posterior[:, diverging_mask].T)
+        div = list(posterior[:, diverging_mask].T)
         x_non_div = [list(range(len(div[0]))) for _ in range(len(div))]
         ax.multi_line(x_non_div, div, color="lime", line_width=1, line_alpha=0.5)
 
