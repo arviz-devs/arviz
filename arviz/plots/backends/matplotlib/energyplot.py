@@ -13,7 +13,6 @@ from ....stats import bfmi as e_bfmi
 
 def plot_energy(
     ax,
-    series,
     energy,
     kind,
     bfmi,
