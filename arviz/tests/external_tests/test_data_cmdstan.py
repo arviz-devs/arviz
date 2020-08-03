@@ -32,16 +32,6 @@ class TestDataCmdStan:
             ],
             "no_warmup_glob": os.path.join(data_directory, "cmdstan/output_no_warmup[0-9].csv"),
             "warmup_glob": os.path.join(data_directory, "cmdstan/output_warmup[0-9].csv"),
-            "combined_no_warmup": [
-                os.path.join(data_directory, "cmdstan/combined_output_no_warmup.csv")
-            ],
-            "combined_warmup": [os.path.join(data_directory, "cmdstan/combined_output_warmup.csv")],
-            "combined_no_warmup_glob": os.path.join(
-                data_directory, "cmdstan/combined_output_no_warmup.csv"
-            ),
-            "combined_warmup_glob": os.path.join(
-                data_directory, "cmdstan/combined_output_warmup.csv"
-            ),
             "eight_schools_glob": os.path.join(
                 data_directory, "cmdstan/eight_schools_output[0-9].csv"
             ),
@@ -50,12 +40,6 @@ class TestDataCmdStan:
                 os.path.join(data_directory, "cmdstan/eight_schools_output2.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output3.csv"),
                 os.path.join(data_directory, "cmdstan/eight_schools_output4.csv"),
-            ],
-            "missing_files": [
-                os.path.join(data_directory, "cmdstan/combined_missing_config.csv"),
-                os.path.join(data_directory, "cmdstan/combined_missing_adaptation.csv"),
-                os.path.join(data_directory, "cmdstan/combined_missing_timing1.csv"),
-                os.path.join(data_directory, "cmdstan/combined_missing_timing2.csv"),
             ],
         }
         return paths
@@ -151,6 +135,8 @@ class TestDataCmdStan:
                 "predictions_constant_data": ["y"],
                 "log_likelihood": ["log_lik"],
             }
+            if "output_warmup" in path:
+                test_dict.update({"warmup_posterior": ["mu", "tau", "theta_tilde", "theta"]})
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
 
@@ -245,8 +231,8 @@ class TestDataCmdStan:
             dims --> one to many + one to one
         """
 
-        path = paths["combined_no_warmup"]
-        for path in [path, path[0]]:
+        paths_ = paths["no_warmup"]
+        for path in [paths_, paths_[0]]:
             inference_data = self.get_inference_data(
                 posterior=path,
                 posterior_predictive=path,
@@ -303,15 +289,6 @@ class TestDataCmdStan:
             }
             fails = check_multiple_attrs(test_dict, inference_data)
             assert not fails
-
-    def test_inference_data_bad_csv(self, paths):
-        """Check ValueError for csv with missing headers"""
-        for key, _paths in paths.items():
-            if "missing" not in key:
-                continue
-            for path in _paths:
-                with pytest.raises(ValueError):
-                    self.get_inference_data(posterior=path)
 
     def test_inference_data_observed_data1(self, observed_data_paths):
         """Read Rdump, check shapes are correct
