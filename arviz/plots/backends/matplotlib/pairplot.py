@@ -74,7 +74,8 @@ def plot_pair(
     point_estimate_kwargs = matplotlib_kwarg_dealiaser(point_estimate_kwargs, "fill_between")
 
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {})
+        kde_kwargs["contourf_kwargs"].setdefault("alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
 

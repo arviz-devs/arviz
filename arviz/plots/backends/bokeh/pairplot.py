@@ -64,7 +64,7 @@ def plot_pair(
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {})
-        kde_kwargs["contour_kwargs"].setdefault("fill_alpha", 0)
+        kde_kwargs["contourf_kwargs"].setdefault("fill_alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
