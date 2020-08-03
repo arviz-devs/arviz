@@ -929,7 +929,7 @@ def test_kde_scipy(limits):
     and the implementation in scipy
     """
     data = np.random.normal(0, 1, 10000)
-    grid, density_own = _kde(data, custom_lims=limits)[1]
+    grid, density_own = _kde(data, custom_lims=limits)
     density_sp = gaussian_kde(data).evaluate(grid)
     np.testing.assert_almost_equal(density_own.sum(), density_sp.sum(), 1)
 

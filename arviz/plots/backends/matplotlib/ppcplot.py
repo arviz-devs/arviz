@@ -368,12 +368,12 @@ def _set_animation(
         length = len(pp_sampled_vals)
         if dtype == "f":
             x_vals, y_vals = _kde(pp_sampled_vals[0])
-            max_max = max([max(kde(pp_sampled_vals[i])[1]) for i in range(length)])
+            max_max = max([max(_kde(pp_sampled_vals[i])[1]) for i in range(length)])
             ax.set_ylim(0, max_max)
             (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
             def animate(i):
-                x_vals, y_vals = kde(pp_sampled_vals[i])
+                x_vals, y_vals = _kde(pp_sampled_vals[i])
                 line.set_data(x_vals, y_vals)
                 return line
 

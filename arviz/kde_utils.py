@@ -313,9 +313,11 @@ def _check_type(x):
         raise e
 
     x = x[np.isfinite(x)]
+
     if x.size == 0:
         raise ValueError("`x` does not contain any finite number.")
-
+    if x.size == 1:
+        raise ValueError("`x` is of length 1. Can't produce a KDE with only one data point.")
     return x
 
 
@@ -338,7 +340,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
             f"`custom_lims` must be a numeric list or tuple of length 2.\n"
             f"Not an object of {type(custom_lims)}."
         ))
-
+    
     if len(custom_lims) != 2:
         raise AttributeError(
             f"`len(custom_lims)` must be 2, not {len(custom_lims)}.")
@@ -348,6 +350,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
         raise TypeError(
             "Elements of `custom_lims` must be numeric or None, not bool.")
 
+    custom_lims = list(custom_lims) # convert to a mutable object
     if custom_lims[0] is None:
         custom_lims[0] = x_min
 
@@ -613,7 +616,11 @@ def _kde_linear(
     """
 
     # Check `x` is from appropiate type
-    x = _check_type(x)
+    try:
+        x = _check_type(x)
+    except ValueError as e:
+        warnings.warn('Something failed: ' + str(e))
+        return np.array([np.nan]), np.array([np.nan])
 
     # Check `bw_fct` is numeric and positive
     if not isinstance(bw_fct, (int, float, np.integer, np.floating)):
@@ -700,7 +707,11 @@ def _kde_circular(
         Defaults to 512.
     """
 
-    x = _check_type(x)
+    try:
+        x = _check_type(x)
+    except ValueError as e:
+        warnings.warn('Something failed: ' + str(e))
+        return np.array([np.nan]), np.array([np.nan])
 
     # All values between -pi and pi
     x = numeric_utils._normalize_angle(x)
