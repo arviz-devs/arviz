@@ -9,7 +9,7 @@ from ..rcparams import rcParams
 def plot_dist(
     values,
     values2=None,
-    color=None,
+    color="C0",
     kind="auto",
     cumulative=False,
     label=None,

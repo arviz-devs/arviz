@@ -13,7 +13,7 @@ from ..utils import get_coords
 
 def plot_elpd(
     compare_dict,
-    color=None,
+    color="C0",
     xlabels=False,
     figsize=None,
     textsize=None,

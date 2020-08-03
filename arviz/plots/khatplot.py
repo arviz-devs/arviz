@@ -13,7 +13,7 @@ from ..utils import get_coords
 
 def plot_khat(
     khats,
-    color=None,
+    color="C0",
     xlabels=False,
     show_bins=False,
     bin_format="{1:.1f}%",
