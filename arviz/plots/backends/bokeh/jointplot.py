@@ -41,7 +41,7 @@ def plot_joint(
     if marginal_kwargs is None:
         marginal_kwargs = {}
     marginal_kwargs.setdefault("plot_kwargs", {})
-    marginal_kwargs["plot_kwargs"].set_default("line_width", linewidth)
+    marginal_kwargs["plot_kwargs"].setdefault("line_width", linewidth)
 
     if ax is None:
 
