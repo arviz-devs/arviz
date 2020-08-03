@@ -297,17 +297,12 @@ def _check_type(x):
         sample data from the variable for which a density estimate is desired.
 
     """
-    if not isinstance(x, (list, np.ndarray)):
-        raise ValueError((
-            f"Can't produce a density estimator for {type(x)}.\n"
-            f"Please input a list with numbers or numpy array."
-        ))
     # Will raise an error if `x` can't be casted to numeric or flattened to one dimension.
     try:
         x = np.asfarray(x).flatten()
     except Exception as e:
-        print(
-            "The following exception occurred while trying to convert `x`",
+        warnings.warn(
+            "The following exception occurred while trying to convert `x`" + 
             "to a 1 dimensional float array."
         )
         raise e
@@ -390,14 +385,14 @@ def _get_grid(x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=Tru
         Number of bins
     custom_lims: tuple or list
         Custom limits for the domain of the density estimation.
-        Must be numeric of length 2.
+        Must be numeric of length 2. Overrides `extend`.
     extend: bool, optional
         Whether to extend the range of the data or not.
         Default is True.
     bound_correction: bool, optional
         Whether the density estimations performs boundary correction or not.
         This does not impacts directly in the output, but is used
-        to override `extend`.
+        to override `extend`. Overrides `extend`.
         Default is False.
 
     Returns
@@ -417,8 +412,6 @@ def _get_grid(x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=Tru
     grid_len = int(grid_len)
 
     # Set up domain
-    # `custom_lims` overrides `extend`
-    # `bound_correction` overrides `extend`
     if custom_lims is not None:
         custom_lims = _check_custom_lims(custom_lims, x_min, x_max)
         grid_min = custom_lims[0]
