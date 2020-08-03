@@ -75,7 +75,7 @@ def plot_khat(
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
     rgba_c[:, 3] = alphas
-    rgba_c = vectorized_to_hex(rgba_c)
+    rgba_c = vectorized_to_hex(rgba_c, keep_alpha=True)
 
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))

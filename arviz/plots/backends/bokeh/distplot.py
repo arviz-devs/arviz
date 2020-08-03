@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde
-from ...plot_utils import set_bokeh_circular_ticks_labels
+from ...plot_utils import set_bokeh_circular_ticks_labels, vectorized_to_hex
 from ....numeric_utils import get_bins
 
 
@@ -44,6 +44,8 @@ def plot_dist(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    color = vectorized_to_hex(color)
 
     hist_kwargs = {} if hist_kwargs is None else hist_kwargs
     if kind == "hist":

@@ -72,7 +72,8 @@ def plot_ppc(
 
     if jitter is None:
         jitter = 0.0
-    assert jitter >= 0.0
+    if jitter < 0.0:
+        raise ValueError("jitter must be >=0.")
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
         var_name, _, obs_vals = obs_plotters[i]

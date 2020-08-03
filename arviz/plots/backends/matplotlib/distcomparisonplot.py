@@ -4,7 +4,7 @@ import numpy as np
 
 from . import backend_show
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, make_label, vectorized_to_hex
+from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults
 
 
@@ -39,25 +39,19 @@ def plot_dist_comparison(
     (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, 2 * nvars, ngroups)
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
-    posterior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        posterior_kwargs["plot_kwargs"].get("color", "C0")
-    )
+    posterior_kwargs["plot_kwargs"]["color"] = posterior_kwargs["plot_kwargs"].get("color", "C0")
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     posterior_kwargs.setdefault("hist_kwargs", dict())
     posterior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     prior_kwargs.setdefault("plot_kwargs", dict())
-    prior_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        prior_kwargs["plot_kwargs"].get("color", "C1")
-    )
+    prior_kwargs["plot_kwargs"]["color"] = prior_kwargs["plot_kwargs"].get("color", "C1")
     prior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     prior_kwargs.setdefault("hist_kwargs", dict())
     prior_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
     observed_kwargs.setdefault("plot_kwargs", dict())
-    observed_kwargs["plot_kwargs"]["color"] = vectorized_to_hex(
-        observed_kwargs["plot_kwargs"].get("color", "C2")
-    )
+    observed_kwargs["plot_kwargs"]["color"] = observed_kwargs["plot_kwargs"].get("color", "C2")
     observed_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
     observed_kwargs.setdefault("hist_kwargs", dict())
     observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)

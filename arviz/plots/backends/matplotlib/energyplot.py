@@ -1,9 +1,13 @@
 """Matplotlib energyplot."""
+from itertools import cycle
+
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import rcParams as mpl_rcParams
+import numpy as np
 
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
 from ....stats import bfmi as e_bfmi
 
 
@@ -15,6 +19,8 @@ def plot_energy(
     bfmi,
     figsize,
     textsize,
+    fill_alpha,
+    fill_color,
     fill_kwargs,
     plot_kwargs,
     bw,
@@ -36,8 +42,28 @@ def plot_energy(
     if ax is None:
         _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
 
-    fill_kwargs = {} if fill_kwargs is None else fill_kwargs
-    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
+    types = "hist" if kind in {"hist", "histogram"} else "plot"
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
+
+    _colors = [
+        prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
+    ]
+    if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
+        fill_color[1].startswith("C") and len(fill_color[1]) == 2
+    ):
+        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+    elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
+        fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
+    elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
+        fill_color = tuple(list(fill_color[1:]) + [_colors[int(fill_color[0][1:]) % 10]])
+
+    series = zip(
+        fill_alpha,
+        fill_color,
+        ("Marginal Energy", "Energy transition"),
+        (energy - energy.mean(), np.diff(energy)),
+    )
 
     if kind == "kde":
         for alpha, color, label, value in series:

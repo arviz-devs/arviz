@@ -1,10 +1,6 @@
 """Plot energy transition distribution in HMC inference."""
-from itertools import cycle
-from matplotlib.pyplot import rcParams as mpl_rcParams
-import numpy as np
-
 from ..data import convert_to_dataset
-from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
+from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 
 
@@ -93,37 +89,15 @@ def plot_energy(
     """
     energy = convert_to_dataset(data, group="sample_stats").energy.values
 
-    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
-    types = "hist" if kind in {"hist", "histogram"} else "plot"
-    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, types)
-
-    _colors = [
-        prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
-    ]
-    if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
-        fill_color[1].startswith("C") and len(fill_color[1]) == 2
-    ):
-        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
-    elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
-        fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
-    elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
-        fill_color = tuple(list(fill_color[1:]) + [_colors[int(fill_color[0][1:]) % 10]])
-
-    series = zip(
-        fill_alpha,
-        fill_color,
-        ("Marginal Energy", "Energy transition"),
-        (energy - energy.mean(), np.diff(energy)),
-    )
-
     plot_energy_kwargs = dict(
         ax=ax,
-        series=series,
         energy=energy,
         kind=kind,
         bfmi=bfmi,
         figsize=figsize,
         textsize=textsize,
+        fill_alpha=fill_alpha,
+        fill_color=fill_color,
         fill_kwargs=fill_kwargs,
         plot_kwargs=plot_kwargs,
         bw=bw,

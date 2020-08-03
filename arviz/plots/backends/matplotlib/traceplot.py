@@ -175,18 +175,13 @@ def plot_trace(
     trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
     trace_kwargs.setdefault("alpha", 0.35)
 
-    if hist_kwargs is None:
-        hist_kwargs = {}
+    hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
     hist_kwargs.setdefault("alpha", 0.35)
 
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    if fill_kwargs is None:
-        fill_kwargs = {}
-    if rug_kwargs is None:
-        rug_kwargs = {}
-    if rank_kwargs is None:
-        rank_kwargs = {}
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "fill_between")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "scatter")
+    rank_kwargs = matplotlib_kwarg_dealiaser(rank_kwargs, "bar")
 
     textsize = plot_kwargs.pop("textsize", 10)
 

@@ -3,8 +3,8 @@ import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-import numpy as np
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter, Span
+import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
@@ -63,7 +63,8 @@ def plot_pair(
         kde_kwargs = {}
 
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {})
+        kde_kwargs["contour_kwargs"].setdefault("fill_alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)

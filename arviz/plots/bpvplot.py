@@ -20,7 +20,7 @@ def plot_bpv(
     reference="samples",
     n_ref=100,
     hdi_prob=0.94,
-    color="blue",
+    color="C0",
     figsize=None,
     textsize=None,
     data_pairs=None,

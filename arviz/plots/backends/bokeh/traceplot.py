@@ -96,9 +96,6 @@ def plot_trace(
             else compact_prop
         )
 
-    # TODO: matplotlib is always required by arviz. Can we get rid of it?
-    # TODO: kind of related: move mpl specific code to backend and
-    # define prop_cycle instead of only colors
     if isinstance(chain_prop, str):
         chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
     if isinstance(chain_prop, tuple):

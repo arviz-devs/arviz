@@ -2,7 +2,6 @@
 import numpy as np
 from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
-from matplotlib.colors import to_hex
 from scipy import stats
 
 from . import backend_kwarg_defaults
@@ -13,6 +12,7 @@ from ...plot_utils import (
     _scale_fig_size,
     sample_reference_distribution,
     is_valid_quantile,
+    vectorized_to_hex,
 )
 from ....numeric_utils import _fast_kde
 
@@ -48,7 +48,7 @@ def plot_bpv(
         **backend_kwargs,
     }
 
-    to_hex(color)
+    color = vectorized_to_hex(color)
 
     if plot_ref_kwargs is None:
         plot_ref_kwargs = {}

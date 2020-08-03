@@ -60,7 +60,8 @@ def plot_ppc(
 
     if jitter is None:
         jitter = 0.0
-    assert jitter >= 0.0
+    if jitter < 0.0:
+        raise ValueError("jitter must be >=0")
 
     if animated:
         try:

@@ -9,7 +9,7 @@ import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
-from ...plot_utils import _scale_fig_size, color_from_dim
+from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
 from ....rcparams import rcParams, _validate_bokeh_marker
 
 
@@ -45,8 +45,8 @@ def plot_elpd(
     if isinstance(color, str):
         if color in pointwise_data[0].dims:
             colors, _ = color_from_dim(pointwise_data[0], color)
-            plot_kwargs.setdefault("color", colors)
-    plot_kwargs.setdefault("color", color)
+            plot_kwargs.setdefault("color", vectorized_to_hex(colors))
+    plot_kwargs.setdefault("color", vectorized_to_hex(color))
 
     # flatten data (data must be flattened after selecting, labeling and coloring)
     pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]

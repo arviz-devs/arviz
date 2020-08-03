@@ -57,11 +57,11 @@ def plot_loo_pit(
     plot_kwargs.setdefault("linewidth", linewidth * 1.4)
     if isinstance(y, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
-    elif isinstance(y, DataArray):
+    elif isinstance(y, DataArray) and y.name is not None:
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
     elif isinstance(y_hat, str):
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
-    elif isinstance(y_hat, DataArray):
+    elif isinstance(y_hat, DataArray) and y_hat.name is not None:
         label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
     else:
         label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"

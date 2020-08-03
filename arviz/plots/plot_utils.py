@@ -3,14 +3,14 @@ import warnings
 from typing import Dict, Any
 from itertools import product, tee
 import importlib
-from scipy.stats import mode
-from matplotlib.colors import to_hex
 
 import packaging
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
+from matplotlib.colors import to_hex
+from scipy.stats import mode
 import xarray as xr
 
 from ..numeric_utils import _fast_kde
@@ -662,6 +662,7 @@ def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
         "scatter": mpl.collections.PathCollection,
         "plot": mpl.lines.Line2D,
         "hist": mpl.patches.Patch,
+        "bar": mpl.patches.Rectangle,
         "hexbin": mpl.collections.PolyCollection,
         "fill_between": mpl.collections.PolyCollection,
         "hlines": mpl.collections.LineCollection,
