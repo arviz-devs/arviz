@@ -164,17 +164,20 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
         from bokeh.plotting import figure
         from .backends.bokeh import backend_kwarg_defaults
 
-        backend_kwargs = {
-            **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
-            **backend_kwargs,
-        }
-        dpi = backend_kwargs.pop("dpi")
         if "figsize" in kwargs:
+            backend_kwargs = {
+                **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+                **backend_kwargs,
+            }
+            dpi = backend_kwargs.pop("dpi")
             figsize = kwargs["figsize"]
             backend_kwargs.setdefault("width", int(figsize[0] * dpi / cols))
             backend_kwargs.setdefault("height", int(figsize[1] * dpi / rows))
         else:
-            backend_kwargs.setdefault()
+            backend_kwargs = {
+                **backend_kwarg_defaults(),
+                **backend_kwargs,
+            }
 
         sharex = kwargs.get("sharex", False)
         sharey = kwargs.get("sharey", False)
@@ -206,10 +209,9 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
                     else:
                         row_ax.append(figure(**backend_kwargs))
             ax.append(row_ax)
-        if len(ax) == 1:
-            ax = ax[0]
-        else:
-            ax = np.array(ax)
+        ax = np.array(ax)
+        if ax.size == 1:
+            ax = ax[0, 0]
     else:
         from .backends.matplotlib import backend_kwarg_defaults
 
