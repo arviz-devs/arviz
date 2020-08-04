@@ -5,6 +5,7 @@ Violinplot
 _thumb: .2, .8
 """
 import matplotlib.pyplot as plt
+
 import arviz as az
 
 az.style.use("arviz-darkgrid")

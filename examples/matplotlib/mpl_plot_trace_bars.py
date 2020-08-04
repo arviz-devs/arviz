@@ -5,6 +5,7 @@ Traceplot rank_bars
 _thumb: .1, .8
 """
 import matplotlib.pyplot as plt
+
 import arviz as az
 
 az.style.use("arviz-darkgrid")

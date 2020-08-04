@@ -6,6 +6,7 @@ _thumb: .8, .8
 """
 import bokeh.plotting as bkp
 import numpy as np
+
 import arviz as az
 
 x_data = np.random.normal(0, 1, 100)
