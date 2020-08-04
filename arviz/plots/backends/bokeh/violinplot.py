@@ -5,7 +5,7 @@ from bokeh.models.annotations import Title
 from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
 from ....stats import hdi
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -45,14 +45,13 @@ def plot_violin(
     rug_kwargs.setdefault("fill_alpha", 0.1)
     rug_kwargs.setdefault("line_alpha", 0.1)
     if ax is None:
-        _, ax = _create_axes_grid(
+        _, ax = create_axes_grid(
             len(plotters),
             rows,
             cols,
             sharex=sharex,
             sharey=sharey,
             figsize=figsize,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

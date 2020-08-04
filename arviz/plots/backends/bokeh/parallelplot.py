@@ -3,7 +3,7 @@ import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker
 
-from ...plot_utils import _create_axes_grid, _scale_fig_size
+from ...plot_utils import create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -46,9 +46,7 @@ def plot_parallel(
     figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     non_div = list(posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]

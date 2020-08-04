@@ -9,7 +9,7 @@ from ....numeric_utils import get_bins
 from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
@@ -54,13 +54,8 @@ def plot_posterior(
     (figsize, ax_labelsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        _, ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

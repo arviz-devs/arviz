@@ -8,7 +8,7 @@ from matplotlib.pyplot import rcParams as mpl_rcParams
 
 from ....stats import bfmi as e_bfmi
 from ...kdeplot import plot_kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size, vectorized_to_hex
+from ...plot_utils import create_axes_grid, _scale_fig_size, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 from .distplot import _histplot_bokeh_op
@@ -49,9 +49,7 @@ def plot_energy(
         legend = False
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     _colors = [
         prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))

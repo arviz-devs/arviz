@@ -4,9 +4,9 @@ from bokeh.models import DataRange1d
 from bokeh.models.annotations import Title
 
 from ....stats import autocorr
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_autocorr(
@@ -45,14 +45,13 @@ def plot_autocorr(
     figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     if axes is None:
-        _, axes = _create_axes_grid(
+        _, axes = create_axes_grid(
             len(plotters),
             rows,
             cols,
             figsize=figsize,
             sharex=True,
             sharey=True,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

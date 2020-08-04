@@ -8,7 +8,7 @@ from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 
 from ....rcparams import _validate_bokeh_marker, rcParams
-from ...plot_utils import _create_axes_grid, _scale_fig_size, color_from_dim, vectorized_to_hex
+from ...plot_utils import create_axes_grid, _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -57,14 +57,8 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            _, ax = _create_axes_grid(
-                1,
-                1,
-                1,
-                figsize=figsize,
-                squeeze=True,
-                backend="bokeh",
-                backend_kwargs=backend_kwargs,
+            _, ax = create_axes_grid(
+                1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,
             )
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(

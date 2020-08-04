@@ -4,7 +4,7 @@ import numpy as np
 
 from ....numeric_utils import get_bins
 from ...kdeplot import plot_kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
+from ...plot_utils import create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -47,16 +47,11 @@ def plot_dist(
 
     figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
 
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("polar", is_circular)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            1,
-            1,
-            1,
-            figsize=figsize,
-            backend="matplotlib",
-            polar=is_circular,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")

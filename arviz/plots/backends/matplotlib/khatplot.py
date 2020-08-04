@@ -9,7 +9,7 @@ from matplotlib.colors import to_rgba_array
 
 from ....stats.stats_utils import histogram
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     color_from_dim,
     matplotlib_kwarg_dealiaser,
@@ -104,7 +104,7 @@ def plot_khat(
     rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
-        fig, ax = _create_axes_grid(
+        fig, ax = create_axes_grid(
             1,
             1,
             1,

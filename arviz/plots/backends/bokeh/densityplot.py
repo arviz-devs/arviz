@@ -9,7 +9,7 @@ from bokeh.models.annotations import Legend, Title
 from ....numeric_utils import _fast_kde, get_bins, histogram
 from ....stats import hdi
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
     make_label,
@@ -67,13 +67,12 @@ def plot_density(
     (figsize, _, _, _, line_width, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = _create_axes_grid(
+        _, ax = create_axes_grid(
             length_plotters,
             rows,
             cols,
             figsize=figsize,
             squeeze=True,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

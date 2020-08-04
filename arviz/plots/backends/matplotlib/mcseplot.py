@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -68,7 +68,7 @@ def plot_mcse(
         text_va = text_kwargs.pop("verticalalignment", None)
 
     if ax is None:
-        _, ax = _create_axes_grid(
+        _, ax = create_axes_grid(
             length_plotters,
             rows,
             cols,

@@ -7,7 +7,7 @@ import numpy as np
 from ....numeric_utils import get_bins
 from ....kde_utils import _kde
 from ....stats import hdi
-from ...plot_utils import _create_axes_grid, _scale_fig_size, calculate_point_estimate, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, calculate_point_estimate, make_label
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -56,16 +56,10 @@ def plot_density(
         figsize, textsize, rows, cols
     )
 
+    backend_kwargs.setdefault("figsize", figsize)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend="matplotlib",
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
     else:
         ax = np.atleast_2d(ax)
 

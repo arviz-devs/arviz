@@ -5,7 +5,7 @@ from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
 from ....kde_utils import _kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size
+from ...plot_utils import create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -52,9 +52,7 @@ def plot_loo_pit(
 
     if ax is None:
         backend_kwargs.setdefault("x_range", (0, 1))
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("color", to_hex(color))

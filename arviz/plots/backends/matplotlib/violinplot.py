@@ -5,7 +5,7 @@ import numpy as np
 from ....numeric_utils import _fast_kde, get_bins, histogram
 from ....stats import hdi
 from ....kde_utils import _kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -49,7 +49,7 @@ def plot_violin(
     rug_kwargs.setdefault("linestyle", "")
 
     if ax is None:
-        fig, ax = _create_axes_grid(
+        fig, ax = create_axes_grid(
             len(plotters),
             rows,
             cols,

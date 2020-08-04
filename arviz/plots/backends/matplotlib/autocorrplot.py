@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ....stats import autocorr
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -23,22 +23,14 @@ def plot_autocorr(
         figsize, textsize, rows, cols
     )
 
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("sharex", True)
+    backend_kwargs.setdefault("sharey", True)
+
     if axes is None:
-        _, axes = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            sharex=True,
-            sharey=True,
-            backend="matplotlib",
-            backend_kwargs=backend_kwargs,
-        )
+        _, axes = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
 
-    axes = np.atleast_2d(axes)  # in case of only 1 plot
-
-    for (var_name, selection, x), ax in zip(plotters, axes.flatten()):
+    for (var_name, selection, x), ax in zip(plotters, axes):
         x_prime = x
         if combined:
             x_prime = x.flatten()
@@ -49,8 +41,8 @@ def plot_autocorr(
         ax.tick_params(labelsize=xt_labelsize)
 
     if axes.size > 0:
-        axes[0, 0].set_xlim(0, max_lag)
-        axes[0, 0].set_ylim(-1, 1)
+        axes[0].set_xlim(0, max_lag)
+        axes[0].set_ylim(-1, 1)
 
     if backend_show(show):
         plt.show()

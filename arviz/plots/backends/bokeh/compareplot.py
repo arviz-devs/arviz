@@ -1,7 +1,7 @@
 """Bokeh Compareplot."""
 from bokeh.models import Span
 
-from ...plot_utils import _create_axes_grid, _scale_fig_size
+from ...plot_utils import create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -34,9 +34,7 @@ def plot_compare(
     figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     yticks_pos = list(yticks_pos)
 

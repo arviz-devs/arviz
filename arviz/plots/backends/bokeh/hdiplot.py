@@ -1,7 +1,7 @@
 """Bokeh hdiplot."""
 import numpy as np
 
-from ...plot_utils import _create_axes_grid, _scale_fig_size, vectorized_to_hex
+from ...plot_utils import create_axes_grid, _scale_fig_size, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -27,9 +27,7 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     figsize, *_ = _scale_fig_size(figsize, None)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     plot_kwargs.setdefault("line_color", plot_kwargs.pop("color"))
     plot_kwargs.setdefault("line_alpha", plot_kwargs.pop("alpha", 0))

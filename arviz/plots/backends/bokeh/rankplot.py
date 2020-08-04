@@ -6,7 +6,7 @@ from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
 from ....stats.stats_utils import histogram
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -36,14 +36,13 @@ def plot_rank(
     }
     figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
     if axes is None:
-        _, axes = _create_axes_grid(
+        _, axes = create_axes_grid(
             length_plotters,
             rows,
             cols,
             figsize=figsize,
             sharex=True,
             sharey=True,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

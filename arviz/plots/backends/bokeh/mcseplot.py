@@ -5,7 +5,7 @@ from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -51,13 +51,8 @@ def plot_mcse(
     extra_kwargs.setdefault("alpha", 0.5)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        _, ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

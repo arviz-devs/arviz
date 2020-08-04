@@ -33,7 +33,7 @@ def plot_joint(
     }
     dpi = backend_kwargs.pop("dpi")
 
-    figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
+    figsize, *_, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
     joint_kwargs = {} if joint_kwargs is None else joint_kwargs
 

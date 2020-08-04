@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
 from . import backend_kwarg_defaults, backend_show
 
 
@@ -48,6 +48,7 @@ def plot_ess(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
 
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     _linestyle = "-" if kind == "evolution" else "none"
@@ -86,14 +87,7 @@ def plot_ess(
         text_va = text_kwargs.pop("verticalalignment", None)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)

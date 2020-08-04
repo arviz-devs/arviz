@@ -1,5 +1,6 @@
 # pylint: disable=wrong-import-position
 """Matplotlib Plotting Backend."""
+from ....rcparams import rcParams
 
 
 def backend_kwarg_defaults(*args, **kwargs):
@@ -21,6 +22,44 @@ def backend_show(show):
     if show is None:
         show = rcParams["plot.matplotlib.show"]
     return show
+
+
+def create_axes_grid(length_plotters, rows=1, cols=1, squeeze=False, backend_kwargs=None):
+    """Create figure and axes for grids with multiple plots.
+
+    Parameters
+    ----------
+    length_plotters : int
+        Number of axes required
+    rows : int
+        Number of rows
+    cols : int
+        Number of columns
+    squeeze : bool
+        Return Axis object if True else ndarray of Axis objects.
+    backend_kwargs: dict, optional
+        kwargs for backend figure.
+
+    Returns
+    -------
+    fig : matplotlib figure
+    ax : matplotlib axes
+    """
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
+
+    fig, axes = plt.subplots(rows, cols, **backend_kwargs)
+    axes = np.ravel(axes)
+    extra = (rows * cols) - length_plotters
+    if extra:
+        for i in range(1, extra + 1):
+            axes[-i].set_axis_off()
+        axes = axes[:-extra]
+    if axes.size == 1 and squeeze:
+        axes = axes[0]
+    return fig, axes
 
 
 from .autocorrplot import plot_autocorr
@@ -45,4 +84,3 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from ....rcparams import rcParams

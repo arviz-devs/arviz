@@ -9,7 +9,7 @@ from matplotlib import animation, get_backend
 from ....numeric_utils import _fast_kde, get_bins, histogram
 from ...kdeplot import plot_kde
 from ....kde_utils import _kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show
 
 _log = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ def plot_ppc(
         figsize, textsize, rows, cols
     )
     if ax is None:
-        fig, axes = _create_axes_grid(
+        fig, axes = create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
         )
     else:

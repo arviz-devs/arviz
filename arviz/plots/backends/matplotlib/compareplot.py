@@ -35,8 +35,10 @@ def plot_compare(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
+    backend_kwargs.setdefault("figsize", figsize)
+
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+        _, ax = create_axes_grid(1, **backend_kwargs)
 
     if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]

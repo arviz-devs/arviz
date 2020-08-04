@@ -4,7 +4,7 @@ import numpy as np
 from ....numeric_utils import get_bins, histogram
 from ...kdeplot import plot_kde
 from ....kde_utils import _kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size
+from ...plot_utils import create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -44,13 +44,8 @@ def plot_ppc(
 
     (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
-        _, axes = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        _, axes = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         axes = np.atleast_2d(ax)

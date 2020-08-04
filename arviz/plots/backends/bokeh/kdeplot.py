@@ -10,7 +10,7 @@ from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from ...plot_utils import _create_axes_grid, _scale_fig_size
+from ...plot_utils import create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -60,9 +60,7 @@ def plot_kde(
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     glyphs = []
     if values2 is None:

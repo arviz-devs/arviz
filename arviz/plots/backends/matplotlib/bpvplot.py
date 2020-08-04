@@ -6,7 +6,7 @@ from scipy import stats
 from ....numeric_utils import _fast_kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     is_valid_quantile,
     make_label,
@@ -52,6 +52,8 @@ def plot_bpv(
         figsize, textsize, rows, cols
     )
 
+    backend_kwargs.setdefault("figsize", figsize)
+
     if (kind == "u_value") and (reference == "analytical"):
         plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "fill_between")
     else:
@@ -65,9 +67,7 @@ def plot_bpv(
         plot_ref_kwargs.setdefault("color", color)
 
     if ax is None:
-        _, axes = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
-        )
+        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:

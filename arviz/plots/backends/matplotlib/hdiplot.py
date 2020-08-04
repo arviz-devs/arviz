@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     matplotlib_kwarg_dealiaser,
     vectorized_to_hex,
@@ -28,12 +28,11 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
     fill_kwargs.setdefault("alpha", 0.5)
 
-    figsize, *_ = _scale_fig_size(figsize, None)
+    figsize, *_ = _scale_fig_size(figsize)
+    backend_kwargs.setdefault("figsize", figsize)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, backend="matplotlib", backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
     ax.plot(x_data, y_data, **plot_kwargs)
     ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)

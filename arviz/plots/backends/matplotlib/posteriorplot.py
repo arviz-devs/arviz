@@ -8,7 +8,7 @@ from ....numeric_utils import get_bins
 from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    _create_axes_grid,
+    create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
@@ -60,7 +60,7 @@ def plot_posterior(
     kwargs.setdefault("linewidth", _linewidth)
 
     if ax is None:
-        _, ax = _create_axes_grid(
+        _, ax = create_axes_grid(
             length_plotters,
             rows,
             cols,
