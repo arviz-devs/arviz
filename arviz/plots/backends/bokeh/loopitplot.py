@@ -1,12 +1,11 @@
 """Bokeh loopitplot."""
-import bokeh.plotting as bkp
 import numpy as np
 from bokeh.models import BoxAnnotation
 from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
 from ....kde_utils import _kde
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _create_axes_grid, _scale_fig_size
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -45,12 +44,17 @@ def plot_loo_pit(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
 
     (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+
+    if ax is None:
+        backend_kwargs.setdefault("x_range", (0, 1))
+        _, ax = _create_axes_grid(
+            1, 1, 1, figsize=figsize, squeeze=False, backend="bokeh", backend_kwargs=backend_kwargs,
+        )
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("color", to_hex(color))
@@ -97,11 +101,6 @@ def plot_loo_pit(
             hdi_kwargs = {}
         hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
         hdi_kwargs.setdefault("alpha", 0.35)
-
-    if ax is None:
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(x_range=(0, 1), **backend_kwargs)
 
     if ecdf:
         if plot_kwargs.get("drawstyle") == "steps-mid":

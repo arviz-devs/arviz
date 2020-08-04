@@ -51,7 +51,7 @@ def plot_dist(
         **backend_kwargs,
     }
 
-    figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, *_ = _scale_fig_size(figsize, textsize)
 
     color = vectorized_to_hex(color)
 

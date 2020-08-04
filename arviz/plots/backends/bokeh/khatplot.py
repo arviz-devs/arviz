@@ -1,7 +1,6 @@
 """Bokeh pareto shape plot."""
 from collections.abc import Iterable
 
-import bokeh.plotting as bkp
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +8,7 @@ from bokeh.models import Span
 from matplotlib.colors import to_rgba_array
 
 from ....stats.stats_utils import histogram
-from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
+from ...plot_utils import _create_axes_grid, _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -45,7 +44,6 @@ def plot_khat(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
 
     (figsize, *_, line_width, _) = _scale_fig_size(figsize, textsize)
 
@@ -70,19 +68,35 @@ def plot_khat(
 
     khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
     alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
-    rgba_c[:, 3] = alphas
-    rgba_c = vectorized_to_hex(rgba_c, keep_alpha=True)
+
+    rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(**backend_kwargs)
+        _, ax = _create_axes_grid(
+            1, 1, 1, figsize=figsize, squeeze=False, backend="bokeh", backend_kwargs=backend_kwargs,
+        )
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
-        for idx, rgba_c_ in enumerate(rgba_c):
-            ax.cross(xdata[idx], khats[idx], line_color=rgba_c_, fill_color=rgba_c_, size=10)
+        for idx, (alpha, rgba_c_) in enumerate(zip(alphas, rgba_c)):
+            ax.cross(
+                xdata[idx],
+                khats[idx],
+                line_color=rgba_c_,
+                fill_color=rgba_c_,
+                line_alpha=alpha,
+                fill_alpha=alpha,
+                size=10,
+            )
     else:
-        ax.cross(xdata, khats, line_color=rgba_c, fill_color=rgba_c, size=10)
+        ax.cross(
+            xdata,
+            khats,
+            line_color=rgba_c,
+            fill_color=rgba_c,
+            size=10,
+            line_alpha=alphas,
+            fill_alpha=alphas,
+        )
 
     if annotate:
         idxs = xdata[khats > 1]

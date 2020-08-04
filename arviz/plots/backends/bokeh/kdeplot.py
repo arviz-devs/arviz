@@ -57,7 +57,7 @@ def plot_kde(
         **backend_kwargs,
     }
 
-    figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, *_ = _scale_fig_size(figsize, textsize)
 
     if ax is None:
         _, ax = _create_axes_grid(

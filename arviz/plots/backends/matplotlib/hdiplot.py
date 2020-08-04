@@ -1,11 +1,16 @@
 """Matplotlib hdiplot."""
 import matplotlib.pyplot as plt
 
-from ...plot_utils import matplotlib_kwarg_dealiaser, vectorized_to_hex
+from ...plot_utils import (
+    _create_axes_grid,
+    _scale_fig_size,
+    matplotlib_kwarg_dealiaser,
+    vectorized_to_hex,
+)
 from . import backend_kwarg_defaults, backend_show
 
 
-def plot_hdi(ax, x_data, y_data, color, plot_kwargs, fill_kwargs, backend_kwargs, show):
+def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backend_kwargs, show):
     """Matplotlib HDI plot."""
     if backend_kwargs is None:
         backend_kwargs = {}
@@ -23,8 +28,18 @@ def plot_hdi(ax, x_data, y_data, color, plot_kwargs, fill_kwargs, backend_kwargs
     fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
     fill_kwargs.setdefault("alpha", 0.5)
 
+    figsize, *_ = _scale_fig_size(figsize, None)
+
     if ax is None:
-        _, ax = plt.subplots(1, 1, **backend_kwargs)
+        _, ax = _create_axes_grid(
+            1,
+            1,
+            1,
+            figsize=figsize,
+            squeeze=False,
+            backend="matplotlib",
+            backend_kwargs=backend_kwargs,
+        )
 
     ax.plot(x_data, y_data, **plot_kwargs)
     ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)

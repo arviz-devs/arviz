@@ -11,6 +11,7 @@ from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
+from ..numeric_utils import histogram
 from ..utils import conditional_jit, conditional_vect
 
 _log = logging.getLogger(__name__)
@@ -517,33 +518,6 @@ def stats_variance_2d(data, ddof=0, axis=1):
         for i in range(b_b):
             var[i] = stats_variance_1d(data[:, i], ddof=ddof)
         return var
-
-
-@conditional_jit(cache=True)
-def histogram(data, bins, range_hist=None):
-    """Conditionally jitted histogram.
-
-    Parameters
-    ----------
-    data : array-like
-        Input data. Passed as first positional argument to ``np.histogram``.
-    bins : int or array-like
-        Passed as keyword argument ``bins`` to ``np.histogram``.
-    range_hist : (float, float), optional
-        Passed as keyword argument ``range`` to ``np.histogram``.
-
-    Returns
-    -------
-    hist : array
-        The number of counts per bin.
-    density : array
-        The density corresponding to each bin.
-    bin_edges : array
-        The edges of the bins used.
-    """
-    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
-    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
-    return hist, hist_dens, bin_edges
 
 
 @conditional_vect

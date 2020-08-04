@@ -45,7 +45,7 @@ def plot_bpv(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
 

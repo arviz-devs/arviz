@@ -8,7 +8,7 @@ from bokeh.models import ColumnDataSource
 from bokeh.models.annotations import Title
 
 from ....rcparams import _validate_bokeh_marker, rcParams
-from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
+from ...plot_utils import _create_axes_grid, _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 
@@ -35,10 +35,9 @@ def plot_elpd(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
@@ -58,9 +57,15 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-            backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-            ax = bkp.figure(**backend_kwargs)
+            _, ax = _create_axes_grid(
+                1,
+                1,
+                1,
+                figsize=figsize,
+                squeeze=False,
+                backend="bokeh",
+                backend_kwargs=backend_kwargs,
+            )
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
@@ -88,6 +93,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
+            dpi = backend_kwargs.pop("dpi")
             ax = []
             for row in range(numvars - 1):
                 ax_row = []
