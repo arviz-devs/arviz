@@ -18,13 +18,14 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import sys
 import re
+import sys
+
+import arviz
+import sphinx_bootstrap_theme
+from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from recommonmark.parser import CommonMarkParser
-import sphinx_bootstrap_theme
-import arviz
 
 class CustomCommonMarkParser(CommonMarkParser):
     def visit_document(self, node):

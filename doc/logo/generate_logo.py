@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.transforms import Bbox
-from matplotlib.path import Path
+import numpy as np
 from matplotlib.patches import PathPatch
+from matplotlib.path import Path
+from matplotlib.transforms import Bbox
 from scipy import stats
 
 x = np.linspace(0, 1, 200)

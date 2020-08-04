@@ -3,10 +3,9 @@ import os
 import re
 
 import setuptools
-from setuptools import setup, find_packages
-from setuptools.command.install import install
+from setuptools import find_packages, setup
 from setuptools.command.develop import develop
-
+from setuptools.command.install import install
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 REQUIREMENTS_FILE = os.path.join(PROJECT_ROOT, "requirements.txt")
