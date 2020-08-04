@@ -219,7 +219,7 @@ def plot_density(
         length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
-    if bw is "default":
+    if bw == "default":
         if circular:
             bw = "taylor"
         else:

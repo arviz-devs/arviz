@@ -10,6 +10,7 @@ from .. import show_layout
 from ....kde_utils import _kde
 from ...plot_utils import _scale_fig_size
 
+
 def plot_loo_pit(
     ax,
     figsize,

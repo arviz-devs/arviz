@@ -21,7 +21,6 @@ from ....kde_utils import _kde
 from ....utils import conditional_jit
 
 
-
 def pairwise(iterable):
     """From itertools cookbook. [a, b, c, ...] -> (a, b), (b, c), ..."""
     first, second = tee(iterable)

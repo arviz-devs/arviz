@@ -22,8 +22,9 @@ from .stats_utils import (
     stats_variance_2d as svar,
     _circular_standard_deviation,
     get_log_likelihood as _get_log_likelihood,
+    histogram,
 )
-from ..numeric_utils import histogram, get_bins
+from ..numeric_utils import get_bins
 from ..kde_utils import _kde
 from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
 from ..rcparams import rcParams

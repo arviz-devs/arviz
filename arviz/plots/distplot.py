@@ -64,7 +64,7 @@ def plot_dist(
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when `circular` is False
         and "taylor" (for now) when `circular` is True.
-        Defaults to "default" which means "experimental" when variable is not circular 
+        Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
     circular: Optional[bool]
         If True, it interprets the values passed are from a circular variable measured in radians

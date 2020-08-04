@@ -275,7 +275,7 @@ def test_flatten_inference_data_to_dict(
             assert not any("prior" in item for item in res_dict)
 
 
-@pytest.mark.parametrize("mean", [0, np.pi, 4 * np.pi, - 2 * np.pi, -10 * np.pi])
+@pytest.mark.parametrize("mean", [0, np.pi, 4 * np.pi, -2 * np.pi, -10 * np.pi])
 def test_circular_mean_scipy(mean):
     """Test our `_circular_mean()` function gives same result than Scipy version."""
     rvs = st.vonmises.rvs(loc=mean, kappa=1, size=1000)
@@ -284,7 +284,7 @@ def test_circular_mean_scipy(mean):
     np.testing.assert_almost_equal(mean_az, mean_sp)
 
 
-@pytest.mark.parametrize("mean", [0, np.pi, 4 * np.pi, - 2 * np.pi, -10 * np.pi])
+@pytest.mark.parametrize("mean", [0, np.pi, 4 * np.pi, -2 * np.pi, -10 * np.pi])
 def test_normalize_angle(mean):
     """Testing _normalize_angles() return values between expected bounds"""
     rvs = st.vonmises.rvs(loc=mean, kappa=1, size=1000)
@@ -292,4 +292,4 @@ def test_normalize_angle(mean):
     assert ((-np.pi <= values) & (values <= np.pi)).all()
 
     values = _normalize_angle(rvs, zero_centered=False)
-    assert ((0 <= values) & (values <= 2 * np.pi)).all()
+    assert ((values >= 0) & (values <= 2 * np.pi)).all()

@@ -19,6 +19,7 @@ from ....stats import hdi
 from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
 
+
 def plot_density(
     ax,
     all_labels,

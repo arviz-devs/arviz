@@ -88,11 +88,11 @@ def plot_posterior(
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when `circular` is False
         and "taylor" (for now) when `circular` is True.
-        Defaults to "default" which means "experimental" when variable is not circular 
+        Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is. Only works if `kind == kde`.
     circular: bool, optional
         If True, it interprets the values passed are from a circular variable measured in radians
-        and a circular KDE is used. Only valid for 1D KDE. Defaults to False. 
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
         Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works

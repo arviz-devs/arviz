@@ -103,7 +103,7 @@ def plot_violin(
 
 def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
-    if bw is "default":
+    if bw == "default":
         if circular:
             bw = "taylor"
         else:

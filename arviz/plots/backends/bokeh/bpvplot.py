@@ -16,6 +16,7 @@ from ...plot_utils import (
 )
 from ....kde_utils import _kde
 
+
 def plot_bpv(
     ax,
     length_plotters,

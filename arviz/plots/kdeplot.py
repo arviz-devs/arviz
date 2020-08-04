@@ -58,9 +58,9 @@ def plot_kde(
         If str, indicates the method to estimate the bandwidth and must be
         one of "scott", "silverman", "isj" or "experimental" when `circular` is False
         and "taylor" (for now) when `circular` is True.
-        Defaults to "default" which means "experimental" when variable is not circular 
+        Defaults to "default" which means "experimental" when variable is not circular
         and "taylor" when it is.
-    adaptive: bool, optional. 
+    adaptive: bool, optional.
         If True, an adaptative bandwidth is used. Only valid for 1D KDE.
         Defaults to False.
     circular: bool, optional.
@@ -220,7 +220,7 @@ def plot_kde(
         :context: close-figs
 
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
-        
+
     See Also
     --------
     plot_kde : Compute and plot a kernel density estimate.
@@ -238,8 +238,8 @@ def plot_kde(
         )
 
     if values2 is None:
-        
-        if bw is "default":
+
+        if bw == "default":
             if circular:
                 bw = "taylor"
             else:

@@ -943,6 +943,7 @@ def test_kde_cumulative(limits):
     density = _kde(data, custom_lims=limits, cumulative=True)[1]
     np.testing.assert_almost_equal(round(density[-1], 3), 1)
 
+
 @pytest.mark.parametrize(
     "kwargs",
     [

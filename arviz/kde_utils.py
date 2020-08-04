@@ -1,17 +1,17 @@
+# pylint: disable=invalid-name
 """Kernel density estimation functions for ArviZ."""
 
 import warnings
 import numpy as np
 from scipy.fftpack import fft
-from scipy.optimize import fsolve
 from scipy.optimize import brentq
 from scipy.signal import gaussian, convolve
-from scipy.special import ive
+from scipy.special import ive  # pylint: disable=no-name-in-module
 
 from .stats.stats_utils import histogram
-import arviz.numeric_utils as numeric_utils
 
-def _bw_scott(x, grid_counts=None, x_std=None, x_range=None):
+
+def _bw_scott(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
     """Scott's Rule.
 
     """
@@ -21,7 +21,7 @@ def _bw_scott(x, grid_counts=None, x_std=None, x_range=None):
     return bw
 
 
-def _bw_silverman(x, grid_counts=None, x_std=None, x_range=None):
+def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
     """Silverman's Rule.
 
     """
@@ -78,6 +78,7 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
     h = t ** 0.5 * x_range
     return h
 
+
 def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None):
     """Experimental bandwidth estimator.
 
@@ -113,11 +114,12 @@ def _bw_taylor(x):
 
 
 _BW_METHODS_LINEAR = {
-        "scott": _bw_scott,
-        "silverman": _bw_silverman,
-        "isj": _bw_isj,
-        "experimental": _bw_experimental
-    }
+    "scott": _bw_scott,
+    "silverman": _bw_silverman,
+    "isj": _bw_isj,
+    "experimental": _bw_experimental,
+}
+
 
 def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
     """
@@ -139,30 +141,36 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
         Bandwidth
     """
     if isinstance(bw, bool):
-        raise ValueError((
-            f"`bw` must not be of type `bool`.\n"
-            f"Expected a positive numeric or one of the following strings:\n"
-            f"{list(_BW_METHODS_LINEAR.keys())}."))
+        raise ValueError(
+            (
+                "`bw` must not be of type `bool`.\n"
+                "Expected a positive numeric or one of the following strings:\n"
+                "{}."
+            ).format(list(_BW_METHODS_LINEAR.keys()))
+        )
     if isinstance(bw, (int, float)):
         if bw < 0:
-            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
+            raise ValueError("Numeric `bw` must be positive.\nInput: {:.4f}.".format(bw))
     elif isinstance(bw, str):
         bw_lower = bw.lower()
 
         if bw_lower not in _BW_METHODS_LINEAR.keys():
-            raise ValueError((
-                f"Unrecognized bandwidth method.\n"
-                f"Input is: {method}.\n"
-                f"Expected one of: {list(_BW_METHODS_LINEAR.keys())}."
-            ))
+            raise ValueError(
+                (
+                    "Unrecognized bandwidth method.\n" "Input is: {}.\n" "Expected one of: {}."
+                ).format(bw_lower, list(_BW_METHODS_LINEAR.keys()))
+            )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
-        bw = bw_fun(x, grid_counts, x_std, x_range)           
+        bw = bw_fun(x, grid_counts, x_std, x_range)
     else:
-        raise ValueError((
-            f"Unrecognized `bw` argument.\n"
-            f"Expected a positive numeric or one of the following strings:\n"
-            f"{list(_BW_METHODS_LINEAR.keys())}."))
+        raise ValueError(
+            (
+                "Unrecognized `bw` argument.\n"
+                "Expected a positive numeric or one of the following strings:\n"
+                "{}."
+            ).format(list(_BW_METHODS_LINEAR.keys()))
+        )
     return bw
 
 
@@ -189,7 +197,9 @@ def _a1inv(x):
 
 
 def _kappa_mle(x):
-    mean = numeric_utils._circular_mean(x)
+    from numeric_utils import _circular_mean
+
+    mean = _circular_mean(x)
     kappa = _a1inv(np.mean(np.cos(x - mean)))
     return kappa
 
@@ -216,10 +226,7 @@ def _dct1d(x):
 
     x = np.concatenate((x[even_increasing], x[odd_decreasing]))
 
-    w_1k = np.r_[
-        1,
-        (2 * np.exp(-(0 + 1j) * (np.arange(1, x_len)) * np.pi / (2 * x_len)))
-    ]
+    w_1k = np.r_[1, (2 * np.exp(-(0 + 1j) * (np.arange(1, x_len)) * np.pi / (2 * x_len)))]
     output = np.real(w_1k * fft(x))
 
     return output
@@ -264,7 +271,7 @@ def _root(function, N, args, x):
     while not found:
         try:
             bw, res = brentq(function, 0, 0.01, args=args, full_output=True, disp=False)
-            found = True if res.converged else False
+            found = res.converged
         except ValueError:
             bw = 0
             tol *= 2.0
@@ -331,21 +338,21 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 
     """
     if not isinstance(custom_lims, (list, tuple)):
-        raise TypeError((
-            f"`custom_lims` must be a numeric list or tuple of length 2.\n"
-            f"Not an object of {type(custom_lims)}."
-        ))
-    
+        raise TypeError(
+            (
+                "`custom_lims` must be a numeric list or tuple of length 2.\n"
+                "Not an object of {}."
+            ).format(type(custom_lims))
+        )
+
     if len(custom_lims) != 2:
-        raise AttributeError(
-            f"`len(custom_lims)` must be 2, not {len(custom_lims)}.")
+        raise AttributeError("`len(custom_lims)` must be 2, not {}.".format(len(custom_lims)))
 
     any_bool = any(isinstance(i, bool) for i in custom_lims)
     if any_bool:
-        raise TypeError(
-            "Elements of `custom_lims` must be numeric or None, not bool.")
+        raise TypeError("Elements of `custom_lims` must be numeric or None, not bool.")
 
-    custom_lims = list(custom_lims) # convert to a mutable object
+    custom_lims = list(custom_lims)  # convert to a mutable object
     if custom_lims[0] is None:
         custom_lims[0] = x_min
 
@@ -354,19 +361,19 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 
     all_numeric = all(isinstance(i, (int, float, np.integer, np.float)) for i in custom_lims)
     if not all_numeric:
-        raise TypeError((
-            f"Elements of `custom_lims` must be numeric or None.\n"
-            f"At least one of them is not."
-        ))
+        raise TypeError(
+            ("Elements of `custom_lims` must be numeric or None.\n" "At least one of them is not.")
+        )
 
     if not custom_lims[0] < custom_lims[1]:
-        raise AttributeError(
-            f"`custom_lims[0]` must be smaller than `custom_lims[1]`.")
+        raise AttributeError("`custom_lims[0]` must be smaller than `custom_lims[1]`.")
 
     return custom_lims
 
-def _get_grid(x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True,
-              bound_correction=False):
+
+def _get_grid(
+    x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True, bound_correction=False
+):
     """
     Computes the grid that bins the data used to estimate the density function
 
@@ -550,7 +557,6 @@ def _kde_linear(
     custom_lims=None,
     cumulative=False,
     grid_len=512,
-    **kwargs
 ):
     """
     1 dimensional density estimation for linear data.
@@ -612,15 +618,17 @@ def _kde_linear(
     try:
         x = _check_type(x)
     except ValueError as e:
-        warnings.warn('Something failed: ' + str(e))
+        warnings.warn("Something failed: " + str(e))
         return np.array([np.nan]), np.array([np.nan])
 
     # Check `bw_fct` is numeric and positive
     if not isinstance(bw_fct, (int, float, np.integer, np.floating)):
-        raise TypeError(f"`bw_fct` must be a positive number, not an object of {type(bw_fct)}.")
+        raise TypeError(
+            "`bw_fct` must be a positive number, not an object of {}.".format(type(bw_fct))
+        )
 
-    if not bw_fct > 0:
-        raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
+    if bw_fct <= 0:
+        raise ValueError("`bw_fct` must be a positive number, not {}.".format(bw_fct))
 
     # Preliminary calculations
     x_len = len(x)
@@ -631,8 +639,7 @@ def _kde_linear(
 
     # Determine grid
     grid_min, grid_max, grid_len = _get_grid(
-        x_min, x_max, x_std, extend_fct, grid_len,
-        custom_lims, extend, bound_correction
+        x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend, bound_correction
     )
     grid_counts, _, grid_edges = histogram(x, grid_len, (grid_min, grid_max))
 
@@ -641,7 +648,7 @@ def _kde_linear(
 
     # Density estimation
     if adaptive:
-        grid, pdf = _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len,bound_correction)
+        grid, pdf = _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction)
     else:
         grid, pdf = _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction)
 
@@ -655,14 +662,7 @@ def _kde_linear(
 
 
 def _kde_circular(
-    x,
-    bw="taylor",
-    bw_fct=1,
-    bw_return=False,
-    custom_lims=None,
-    cumulative=False,
-    grid_len=512,
-    **kwargs
+    x, bw="taylor", bw_fct=1, bw_return=False, custom_lims=None, cumulative=False, grid_len=512,
 ):
     """
     1 dimensional density estimation for circular data.
@@ -703,35 +703,36 @@ def _kde_circular(
     try:
         x = _check_type(x)
     except ValueError as e:
-        warnings.warn('Something failed: ' + str(e))
+        warnings.warn("Something failed: " + str(e))
         return np.array([np.nan]), np.array([np.nan])
 
     # All values between -pi and pi
-    x = numeric_utils._normalize_angle(x)
+    from numeric_utils import _normalize_angle
+
+    x = _normalize_angle(x)
 
     # Check `bw_fct` is numeric and positive
     if not isinstance(bw_fct, (int, float, np.integer, np.floating)):
-        raise TypeError(f"`bw_fct` must be a positive number, not an object of {type(bw_fct)}.")
+        raise TypeError(
+            "`bw_fct` must be a positive number, not an object of {}.".format(type(bw_fct))
+        )
 
-    if not bw_fct > 0:
-        raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
+    if bw_fct <= 0:
+        raise ValueError("`bw_fct` must be a positive number, not {}.".format(bw_fct))
 
     # Determine bandwidth
     if isinstance(bw, bool):
-        raise ValueError((
-            "`bw` can't be of type `bool`.\n"
-            "Expected a positive numeric or 'taylor'"
-        ))
+        raise ValueError(
+            ("`bw` can't be of type `bool`.\n" "Expected a positive numeric or 'taylor'")
+        )
     if isinstance(bw, (int, float)):
         if bw < 0:
-            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
+            raise ValueError("Numeric `bw` must be positive.\nInput: {:.4f}.".format(bw))
     if isinstance(bw, str):
         if bw == "taylor":
             bw = _bw_taylor(x)
         else:
-            raise ValueError((
-                f"`bw` must be a positive numeric or `taylor`, not {bw}"
-            ))
+            raise ValueError(("`bw` must be a positive numeric or `taylor`, not {}".format(bw)))
     bw *= bw_fct
 
     # Determine grid
@@ -786,12 +787,12 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction)
 
     if bound_correction:
         npad = int(grid_len / 5)
-        f = np.concatenate([f[npad - 1::-1], f, f[grid_len:grid_len - npad - 1:-1]])
-        pdf = convolve(f, kernel, mode="same", method="direct")[npad:npad + grid_len]
+        f = np.concatenate([f[npad - 1 :: -1], f, f[grid_len : grid_len - npad - 1 : -1]])
+        pdf = convolve(f, kernel, mode="same", method="direct")[npad : npad + grid_len]
         pdf /= bw * (2 * np.pi) ** 0.5
     else:
         pdf = convolve(f, kernel, mode="same", method="direct")
-        pdf /= (bw * (2 * np.pi) ** 0.5)
+        pdf /= bw * (2 * np.pi) ** 0.5
 
     grid = (grid_edges[1:] + grid_edges[:-1]) / 2
     return grid, pdf
@@ -806,8 +807,9 @@ def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
     This is an internal function used by `_kde()`.
     """
     # Pilot computations used for bandwidth adjustment
-    pilot_grid, pilot_pdf = _kde_convolution(x, bw, grid_edges, grid_counts, grid_len,
-                                             bound_correction)
+    pilot_grid, pilot_pdf = _kde_convolution(
+        x, bw, grid_edges, grid_counts, grid_len, bound_correction
+    )
 
     # Adds to avoid np.log(0) and zero division
     pilot_pdf += 1e-9
@@ -830,27 +832,27 @@ def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
         grid_padded = np.linspace(
             grid_edges[0] - grid_pad,
             grid_edges[grid_len - 1] + grid_pad,
-            num = grid_len + 2 * grid_npad
+            num=grid_len + 2 * grid_npad,
         )
-        grid_counts = np.concatenate([
-            grid_counts[grid_npad - 1:: -1],
-            grid_counts,
-            grid_counts[grid_len:grid_len - grid_npad - 1: -1]]
+        grid_counts = np.concatenate(
+            [
+                grid_counts[grid_npad - 1 :: -1],
+                grid_counts,
+                grid_counts[grid_len : grid_len - grid_npad - 1 : -1],
+            ]
         )
-        bw_adj = np.concatenate([
-            bw_adj[grid_npad - 1:: -1],
-            bw_adj,
-            bw_adj[grid_len:grid_len - grid_npad - 1: -1]]
+        bw_adj = np.concatenate(
+            [bw_adj[grid_npad - 1 :: -1], bw_adj, bw_adj[grid_len : grid_len - grid_npad - 1 : -1]]
         )
-        pdf_mat = ((grid_padded - grid_padded[:, None]) / bw_adj[:, None])
+        pdf_mat = (grid_padded - grid_padded[:, None]) / bw_adj[:, None]
         pdf_mat = np.exp(-0.5 * pdf_mat ** 2) * grid_counts[:, None]
-        pdf_mat /= ((2 * np.pi) ** 0.5 * bw_adj[:, None])
-        pdf = np.sum(pdf_mat[:, grid_npad:grid_npad + grid_len], axis=0) / len(x)
+        pdf_mat /= (2 * np.pi) ** 0.5 * bw_adj[:, None]
+        pdf = np.sum(pdf_mat[:, grid_npad : grid_npad + grid_len], axis=0) / len(x)
 
     else:
-        pdf_mat = ((grid - grid[:, None]) / bw_adj[:, None])
+        pdf_mat = (grid - grid[:, None]) / bw_adj[:, None]
         pdf_mat = np.exp(-0.5 * pdf_mat ** 2) * grid_counts[:, None]
-        pdf_mat /= ((2 * np.pi) ** 0.5 * bw_adj[:, None])
+        pdf_mat /= (2 * np.pi) ** 0.5 * bw_adj[:, None]
         pdf = np.sum(pdf_mat, axis=0) / len(x)
 
     return grid, pdf

@@ -14,6 +14,7 @@ from ...plot_utils import (
 )
 from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
+
 _log = logging.getLogger(__name__)
 
 

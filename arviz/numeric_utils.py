@@ -4,21 +4,24 @@ import numpy as np
 from scipy.signal import convolve2d
 from scipy.sparse import coo_matrix
 
-from .stats.stats_utils import histogram
 from .utils import _stack, _dot, _cov
 from .kde_utils import _kde
+from .stats.stats_utils import histogram  # pylint: disable=unused-import
 
-def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
+
+def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument
     """Deprecated Kernel Density Estimate
 
     """
-    grid, pdf = _kde(x)
+    if not (xmin is None and xmax is None):
+        custom_lims = (xmin, xmax)
+    else:
+        custom_lims = None
+    grid, pdf = _kde(x, cumulative=cumulative, bw=bw, custom_lims=custom_lims)
 
-    warnings.warn(
-        "_fast_kde() has been replaced by _kde() in kde_utils.py",
-        FutureWarning
-    )
+    warnings.warn("_fast_kde() has been replaced by _kde() in kde_utils.py", FutureWarning)
     return grid, pdf
+
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
@@ -125,8 +128,7 @@ def get_bins(values):
     bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
 
     # The Freedman-Diaconis histogram bin estimator.
-    iqr = np.subtract(
-        *np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
+    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
     bins_fd = 2 * iqr * values.size ** (-1 / 3)
 
     width = np.round(np.max([1, bins_sturges, bins_fd])).astype(int)
@@ -170,6 +172,7 @@ def _circular_mean(x, na_rm=False):
 
     return mean
 
+
 def _normalize_angle(x, zero_centered=True):
     """
     Takes angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
@@ -179,4 +182,3 @@ def _normalize_angle(x, zero_centered=True):
         return (x + np.pi) % (2 * np.pi) - np.pi
     else:
         return x % (2 * np.pi)
-        

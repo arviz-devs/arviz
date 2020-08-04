@@ -17,7 +17,7 @@ from ....kde_utils import _kde
 
 
 def plot_density(
-    ax, 
+    ax,
     all_labels,
     to_plot,
     colors,
