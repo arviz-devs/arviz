@@ -194,10 +194,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
             row_ax = []
             for col in range(cols):
                 if (row == 0) and (col == 0) and (sharex or sharey):
-                    if is_circular:
-                        bokeh_ax = figure(**backend_kwargs)
-                    else:
-                        bokeh_ax = figure(**backend_kwargs)
+                    bokeh_ax = figure(**backend_kwargs)
                     row_ax.append(bokeh_ax)
                     if sharex:
                         backend_kwargs["x_range"] = bokeh_ax.x_range
@@ -210,7 +207,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
                         row_ax.append(figure(**backend_kwargs))
             ax.append(row_ax)
         ax = np.array(ax)
-        if ax.size == 1 and kwargs.get("squeeze", True):
+        if ax.size == 1 and kwargs.get("squeeze", False):
             ax = ax[0, 0]
     else:
         from .backends.matplotlib import backend_kwarg_defaults
