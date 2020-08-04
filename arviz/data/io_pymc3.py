@@ -13,10 +13,11 @@ from .base import CoordSpec, DimSpec, dict_to_dataset, generate_dims_coords, mak
 from .inference_data import InferenceData, concat
 
 if TYPE_CHECKING:
-    import pymc3 as pm
-    from pymc3 import MultiTrace, Model  # pylint: disable=invalid-name
-    import theano
     from typing import Set  # pylint: disable=ungrouped-imports
+
+    import pymc3 as pm
+    import theano
+    from pymc3 import Model, MultiTrace  # pylint: disable=invalid-name
 else:
     MultiTrace = Any  # pylint: disable=invalid-name
     Model = Any  # pylint: disable=invalid-name
