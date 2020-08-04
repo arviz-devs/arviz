@@ -79,7 +79,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
-            _, ax = _create_axes_grid(
+            fig, ax = _create_axes_grid(
                 1, 1, 1, figsize=figsize, backend="matplotlib", backend_kwargs=backend_kwargs,
             )
 
