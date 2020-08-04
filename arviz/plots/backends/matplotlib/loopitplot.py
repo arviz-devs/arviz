@@ -1,16 +1,12 @@
 """Matplotlib loopitplot."""
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 import numpy as np
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
-
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _scale_fig_size,
-    matplotlib_kwarg_dealiaser,
-)
 from ....kde_utils import _kde
+from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_loo_pit(

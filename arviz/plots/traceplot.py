@@ -1,15 +1,11 @@
 """Plot kde or histograms and values from MCMC samples."""
 import warnings
-from typing import Callable, List, Optional, Tuple, Any, Mapping, Union
+from typing import Any, Callable, List, Mapping, Optional, Tuple, Union
 
-from .plot_utils import (
-    get_plotting_function,
-    xarray_var_iter,
-    KwargSpec,
-)
-from ..data import convert_to_dataset, InferenceData, CoordSpec
-from ..utils import _var_names, get_coords
+from ..data import CoordSpec, InferenceData, convert_to_dataset
 from ..rcparams import rcParams
+from ..utils import _var_names, get_coords
+from .plot_utils import KwargSpec, get_plotting_function, xarray_var_iter
 
 
 def plot_trace(

@@ -2,12 +2,11 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import make_label, _scale_fig_size
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_joint(

@@ -2,13 +2,13 @@
 from itertools import cycle
 
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import rcParams as mpl_rcParams
 import numpy as np
+from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from . import backend_kwarg_defaults, backend_show
+from ....stats import bfmi as e_bfmi
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
-from ....stats import bfmi as e_bfmi
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_energy(

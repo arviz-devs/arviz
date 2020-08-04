@@ -1,19 +1,21 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 import os
+
 import numpy as np
 import pytest
 
-from arviz import from_emcee  # pylint: disable=wrong-import-position
-from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
+from arviz import from_emcee
+
+from ..helpers import _emcee_lnprior as emcee_lnprior
+from ..helpers import _emcee_lnprob as emcee_lnprob
+from ..helpers import (
     chains,
     check_multiple_attrs,
     draws,
-    _emcee_lnprior as emcee_lnprior,
-    _emcee_lnprob as emcee_lnprob,
-    needs_emcee3_func,
     eight_schools_params,
-    load_cached_models,
     importorskip,
+    load_cached_models,
+    needs_emcee3_func,
 )
 
 # Skip all tests if emcee not installed

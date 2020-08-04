@@ -1,12 +1,13 @@
 """Numerical utility functions for ArviZ."""
 import warnings
+
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.sparse import coo_matrix
 
-from .utils import _stack, _dot, _cov
 from .kde_utils import _kde
-from .stats.stats_utils import histogram  # pylint: disable=unused-import
+from .stats.stats_utils import histogram
+from .utils import _cov, _dot, _stack
 
 
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument

@@ -1,20 +1,19 @@
 """Bokeh Traceplot."""
 import warnings
-
 from collections.abc import Iterable
 from itertools import cycle
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
-from bokeh.models.annotations import Title
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...distplot import plot_dist
+from ...plot_utils import _dealiase_sel_kwargs, _scale_fig_size, make_label, xarray_var_iter
 from ...rankplot import plot_rank
-from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size, _dealiase_sel_kwargs
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_trace(

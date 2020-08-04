@@ -1,8 +1,8 @@
 """Matplotlib Compareplot."""
 import matplotlib.pyplot as plt
 
-from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_compare(

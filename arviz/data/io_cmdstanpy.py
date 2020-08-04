@@ -1,15 +1,15 @@
 """CmdStanPy-specific conversion code."""
-from collections import defaultdict
-from copy import deepcopy
 import logging
 import re
+from collections import defaultdict
+from copy import deepcopy
 
 import numpy as np
 import xarray as xr
 
 from .. import utils
+from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 
 _log = logging.getLogger(__name__)
 

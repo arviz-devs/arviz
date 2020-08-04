@@ -2,9 +2,9 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...plot_utils import vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_hdi(ax, x_data, y_data, color, plot_kwargs, fill_kwargs, backend_kwargs, show):

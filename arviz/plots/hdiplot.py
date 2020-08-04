@@ -6,10 +6,10 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 from xarray import Dataset
 
-from ..stats import hdi
-from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
+from ..stats import hdi
 from ..utils import credible_interval_warning
+from .plot_utils import get_plotting_function
 
 
 def plot_hdi(

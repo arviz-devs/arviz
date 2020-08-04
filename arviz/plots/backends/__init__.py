@@ -1,6 +1,7 @@
 # pylint: disable=no-member,invalid-name,redefined-outer-name
 """ArviZ plotting backends."""
 import re
+
 import numpy as np
 from pandas import DataFrame
 

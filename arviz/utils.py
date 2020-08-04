@@ -1,15 +1,15 @@
 # pylint: disable=too-many-nested-blocks
 """General utilities."""
-import importlib
 import functools
+import importlib
 import re
 import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
-
 from numpy import newaxis
+
 from .rcparams import rcParams
 
 

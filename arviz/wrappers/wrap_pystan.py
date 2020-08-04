@@ -1,7 +1,7 @@
 # pylint: disable=arguments-differ
 """Base class for PyStan wrappers."""
-from .base import SamplingWrapper
 from ..data import from_pystan
+from .base import SamplingWrapper
 
 
 class PyStanSamplingWrapper(SamplingWrapper):

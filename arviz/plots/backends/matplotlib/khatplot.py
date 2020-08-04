@@ -2,20 +2,20 @@
 import warnings
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import to_rgba_array
 
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    set_xticklabels,
-    _scale_fig_size,
-    matplotlib_kwarg_dealiaser,
-    vectorized_to_hex,
-    color_from_dim,
-)
 from ....stats.stats_utils import histogram
+from ...plot_utils import (
+    _scale_fig_size,
+    color_from_dim,
+    matplotlib_kwarg_dealiaser,
+    set_xticklabels,
+    vectorized_to_hex,
+)
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_khat(

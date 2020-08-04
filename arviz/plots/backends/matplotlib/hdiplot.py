@@ -1,8 +1,8 @@
 """Matplotlib hdiplot."""
 import matplotlib.pyplot as plt
 
-from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import matplotlib_kwarg_dealiaser, vectorized_to_hex
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_hdi(ax, x_data, y_data, color, plot_kwargs, fill_kwargs, backend_kwargs, show):

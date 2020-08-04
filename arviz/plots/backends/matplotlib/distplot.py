@@ -1,11 +1,11 @@
 """Matplotlib distplot."""
-import warnings
 import matplotlib.pyplot as plt
 import numpy as np
-from . import backend_show
-from ...kdeplot import plot_kde
-from ...plot_utils import matplotlib_kwarg_dealiaser
+
 from ....numeric_utils import get_bins
+from ...kdeplot import plot_kde
+from ...plot_utils import _create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_dist(
@@ -22,6 +22,7 @@ def plot_dist(
     quantiles,
     contour,
     fill_last,
+    figsize,
     textsize,
     plot_kwargs,
     fill_kwargs,
@@ -36,16 +37,26 @@ def plot_dist(
     show,
 ):
     """Matplotlib distplot."""
-    if backend_kwargs is not None:
-        warnings.warn(
-            (
-                "Argument backend_kwargs has not effect in matplotlib.plot_dist"
-                "Supplied value won't be used"
-            )
-        )
-        backend_kwargs = None
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
+
     if ax is None:
-        ax = plt.gca(polar=is_circular)
+        _, ax = _create_axes_grid(
+            1,
+            1,
+            1,
+            figsize=figsize,
+            squeeze=False,
+            backend="matplotlib",
+            backend_kwargs=backend_kwargs,
+        )
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")

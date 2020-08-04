@@ -1,33 +1,29 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
-import warnings
 import logging
+import warnings
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
-from scipy.optimize import minimize
 import xarray as xr
+from scipy.optimize import minimize
 
-from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from .diagnostics import _multichain_statistics, _mc_error, ess
-from .stats_utils import (
-    make_ufunc as _make_ufunc,
-    wrap_xarray_ufunc as _wrap_xarray_ufunc,
-    logsumexp as _logsumexp,
-    ELPDData,
-    stats_variance_2d as svar,
-    _circular_standard_deviation,
-    get_log_likelihood as _get_log_likelihood,
-    histogram,
-)
-from ..numeric_utils import get_bins
+from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..kde_utils import _kde
-from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
+from ..numeric_utils import _fast_kde, get_bins, histogram
 from ..rcparams import rcParams
+from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
+from .diagnostics import _mc_error, _multichain_statistics, ess
+from .stats_utils import ELPDData, _circular_standard_deviation
+from .stats_utils import get_log_likelihood as _get_log_likelihood
+from .stats_utils import logsumexp as _logsumexp
+from .stats_utils import make_ufunc as _make_ufunc
+from .stats_utils import stats_variance_2d as svar
+from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 _log = logging.getLogger(__name__)
 

@@ -1,21 +1,22 @@
 """Matplotlib Plot posterior densities."""
 from numbers import Number
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
+from ....numeric_utils import get_bins
 from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
     _create_axes_grid,
     _scale_fig_size,
-    format_sig_figs,
-    round_num,
     calculate_point_estimate,
+    format_sig_figs,
+    make_label,
     matplotlib_kwarg_dealiaser,
+    round_num,
 )
-from ....numeric_utils import get_bins
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_posterior(
@@ -41,6 +42,14 @@ def plot_posterior(
     show,
 ):
     """Matplotlib posterior plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )

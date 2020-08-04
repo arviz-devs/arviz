@@ -2,11 +2,10 @@
 import numpy as np
 import scipy.stats as stats
 
-from ..stats import loo_pit as _loo_pit
 from ..kde_utils import _kde
-from .plot_utils import get_plotting_function
-
 from ..rcparams import rcParams
+from ..stats import loo_pit as _loo_pit
+from .plot_utils import get_plotting_function
 
 
 def plot_loo_pit(

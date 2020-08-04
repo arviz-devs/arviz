@@ -3,13 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_show
-from ...plot_utils import (
-    make_label,
-    _scale_fig_size,
-    _create_axes_grid,
-    matplotlib_kwarg_dealiaser,
-)
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_ess(
@@ -42,6 +37,14 @@ def plot_ess(
     show,
 ):
     """Matplotlib ess plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
@@ -89,7 +92,6 @@ def plot_ess(
             cols,
             figsize=figsize,
             squeeze=False,
-            constrained_layout=True,
             backend_kwargs=backend_kwargs,
         )
 

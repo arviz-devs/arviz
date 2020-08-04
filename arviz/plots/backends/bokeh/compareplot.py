@@ -2,9 +2,9 @@
 import bokeh.plotting as bkp
 from bokeh.models import Span
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...plot_utils import _scale_fig_size
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_compare(

@@ -1,19 +1,19 @@
 """CmdStan-specific conversion code."""
+import logging
+import os
+import re
 from collections import defaultdict
 from glob import glob
-from typing import Optional, Union, List
-import os
-import logging
-import re
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from .. import utils
-from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords, CoordSpec, DimSpec
 from ..rcparams import rcParams
+from .base import CoordSpec, DimSpec, dict_to_dataset, generate_dims_coords, requires
+from .inference_data import InferenceData
 
 _log = logging.getLogger(__name__)
 

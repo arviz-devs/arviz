@@ -1,15 +1,11 @@
 """Matplotlib rankplot."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import scipy.stats
 
-from . import backend_show
-from ...plot_utils import (
-    _create_axes_grid,
-    _scale_fig_size,
-    make_label,
-)
 from ....stats.stats_utils import histogram
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_rank(
@@ -28,6 +24,14 @@ def plot_rank(
     show,
 ):
     """Matplotlib rankplot.."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
 
     if axes is None:

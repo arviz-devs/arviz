@@ -1,17 +1,13 @@
 """Histograms of ranked posterior draws, plotted for each chain."""
 from itertools import cycle
+
 import matplotlib.pyplot as plt
 
 from ..data import convert_to_dataset
-from .plot_utils import (
-    xarray_var_iter,
-    default_grid,
-    filter_plotters_list,
-    get_plotting_function,
-)
+from ..numeric_utils import _sturges_formula
 from ..rcparams import rcParams
 from ..utils import _var_names
-from ..numeric_utils import _sturges_formula
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
 def plot_rank(

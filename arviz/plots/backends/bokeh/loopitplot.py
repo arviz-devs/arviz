@@ -1,14 +1,14 @@
 """Bokeh loopitplot."""
 import bokeh.plotting as bkp
-from bokeh.models import BoxAnnotation
-from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 import numpy as np
+from bokeh.models import BoxAnnotation
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ....kde_utils import _kde
 from ...plot_utils import _scale_fig_size
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_loo_pit(

@@ -4,16 +4,11 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
-from ....stats import hdi
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-    calculate_point_estimate,
-)
 from ....numeric_utils import get_bins
 from ....kde_utils import _kde
+from ....stats import hdi
+from ...plot_utils import _create_axes_grid, _scale_fig_size, calculate_point_estimate, make_label
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_density(
@@ -39,6 +34,14 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     if colors == "cycle":
         colors = [
             prop

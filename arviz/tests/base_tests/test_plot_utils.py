@@ -6,22 +6,22 @@ import pytest
 import xarray as xr
 
 from ...data import from_dict
-from ..helpers import running_on_ci
+from ...numeric_utils import get_bins
 from ...plots.plot_utils import (
+    _dealiase_sel_kwargs,
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
     make_2d,
     matplotlib_kwarg_dealiaser,
+    set_bokeh_circular_ticks_labels,
+    vectorized_to_hex,
     xarray_to_ndarray,
     xarray_var_iter,
-    vectorized_to_hex,
-    _dealiase_sel_kwargs,
-    set_bokeh_circular_ticks_labels,
 )
 from ...rcparams import rc_context
-from ...numeric_utils import get_bins
 from ...utils import get_coords
+from ..helpers import running_on_ci
 
 
 @pytest.mark.parametrize(

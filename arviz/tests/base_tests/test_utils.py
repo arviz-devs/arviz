@@ -1,24 +1,23 @@
-"""
-Tests for arviz.utils.
-"""
+"""Tests for arviz.utils."""
 # pylint: disable=redefined-outer-name, no-member
 from unittest.mock import Mock
+
 import numpy as np
 import pytest
 import scipy.stats as st
 
 from arviz.data.base import dict_to_dataset
+
+from ...data import from_dict, load_arviz_data
 from ...utils import (
-    _var_names,
     _stack,
-    one_de,
-    two_de,
+    _subset_list,
+    _var_names,
     expand_dims,
     flatten_inference_data_to_dict,
-    _subset_list,
+    one_de,
+    two_de,
 )
-from ...data import load_arviz_data, from_dict
-from ...numeric_utils import _circular_mean, _normalize_angle
 
 
 @pytest.fixture(scope="session")

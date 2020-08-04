@@ -1,8 +1,10 @@
 """Plotting functions."""
+from ..numeric_utils import _fast_kde_2d
 from .autocorrplot import plot_autocorr
 from .bpvplot import plot_bpv
 from .compareplot import plot_compare
 from .densityplot import plot_density
+from .distcomparisonplot import plot_dist_comparison
 from .distplot import plot_dist
 from .elpdplot import plot_elpd
 from .energyplot import plot_energy
@@ -18,12 +20,9 @@ from .pairplot import plot_pair
 from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
-from .distcomparisonplot import plot_dist_comparison
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from ..numeric_utils import _fast_kde_2d
-
 
 __all__ = [
     "plot_autocorr",

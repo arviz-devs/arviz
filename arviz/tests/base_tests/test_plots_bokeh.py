@@ -1,5 +1,5 @@
-"""Tests use the 'bokeh' backend."""
 # pylint: disable=redefined-outer-name,too-many-lines
+"""Tests use the 'bokeh' backend."""
 from copy import deepcopy
 
 import numpy as np
@@ -7,21 +7,13 @@ import pytest
 from pandas import DataFrame  # pylint: disable=wrong-import-position
 
 from ...data import from_dict, load_arviz_data  # pylint: disable=wrong-import-position
-from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
-    create_model,
-    create_multidimensional_model,
-    eight_schools_params,
-    importorskip,
-    models,
-    multidim_models,
-)
-from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
     plot_autocorr,
     plot_bpv,
     plot_compare,
     plot_density,
     plot_dist,
+    plot_dist_comparison,
     plot_elpd,
     plot_energy,
     plot_ess,
@@ -36,12 +28,20 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_parallel,
     plot_posterior,
     plot_ppc,
-    plot_dist_comparison,
     plot_rank,
     plot_trace,
     plot_violin,
 )
-from ...stats import compare, loo, waic, hdi  # pylint: disable=wrong-import-position
+from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
+from ...stats import compare, hdi, loo, waic  # pylint: disable=wrong-import-position
+from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
+    create_model,
+    create_multidimensional_model,
+    eight_schools_params,
+    importorskip,
+    models,
+    multidim_models,
+)
 
 # Skip tests if bokeh not installed
 bkp = importorskip("bokeh.plotting")  # pylint: disable=invalid-name

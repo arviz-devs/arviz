@@ -1,10 +1,11 @@
 """Dictionary specific conversion code."""
 import warnings
+
 import xarray as xr
 
-from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 from .. import utils
+from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .inference_data import InferenceData
 
 
 # pylint: disable=too-many-instance-attributes

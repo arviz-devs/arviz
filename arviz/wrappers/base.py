@@ -1,7 +1,6 @@
 """Base class for sampling wrappers."""
 import numpy as np
 
-
 # from ..data import InferenceData
 from ..stats import wrap_xarray_ufunc as _wrap_xarray_ufunc
 

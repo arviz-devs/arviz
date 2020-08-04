@@ -2,9 +2,10 @@
 import numpy as np
 import xarray as xr
 
-from .inference_data import InferenceData
-from .base import dict_to_dataset, generate_dims_coords, make_attrs
 from .. import utils
+from .base import dict_to_dataset, generate_dims_coords, make_attrs
+from .inference_data import InferenceData
+
 
 # pylint: disable=too-many-instance-attributes
 class TfpConverter:

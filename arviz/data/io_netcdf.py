@@ -1,7 +1,7 @@
 """Input and output support for data."""
 
-from .inference_data import InferenceData
 from .converters import convert_to_inference_data
+from .inference_data import InferenceData
 
 
 def from_netcdf(filename):

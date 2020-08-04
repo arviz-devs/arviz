@@ -2,20 +2,16 @@
 from collections.abc import Iterable
 
 import bokeh.plotting as bkp
-from bokeh.models import Span
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models import Span
+from matplotlib.colors import to_rgba_array
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    _scale_fig_size,
-    vectorized_to_hex,
-    color_from_dim,
-)
 from ....stats.stats_utils import histogram
+from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_khat(

@@ -3,20 +3,20 @@ import warnings
 from itertools import cycle
 
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import numpy as np
+from matplotlib.lines import Line2D
 
-from . import backend_kwarg_defaults, backend_show
+from ....numeric_utils import get_bins
 from ...distplot import plot_dist
-from ...rankplot import plot_rank
 from ...plot_utils import (
-    _scale_fig_size,
-    make_label,
-    format_coords_as_labels,
     _dealiase_sel_kwargs,
+    _scale_fig_size,
+    format_coords_as_labels,
+    make_label,
     matplotlib_kwarg_dealiaser,
 )
-from ....numeric_utils import get_bins
+from ...rankplot import plot_rank
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_trace(

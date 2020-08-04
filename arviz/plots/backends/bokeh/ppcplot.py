@@ -1,12 +1,12 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....numeric_utils import get_bins, histogram
 from ...kdeplot import plot_kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size
-from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
+from ...plot_utils import _create_axes_grid, _scale_fig_size
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_ppc(

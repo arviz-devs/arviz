@@ -2,50 +2,52 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
 from copy import deepcopy
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
-import numpy as np
-import pytest
 
 from ...data import from_dict, load_arviz_data
-from ...stats import compare, loo, waic, hdi
-from ..helpers import (  # pylint: disable=unused-import
-    eight_schools_params,
-    models,
-    create_model,
-    multidim_models,
-    create_multidimensional_model,
-)
-from ...rcparams import rcParams, rc_context
+from ...numeric_utils import _fast_kde
 from ...plots import (
+    plot_autocorr,
+    plot_bpv,
+    plot_compare,
     plot_density,
-    plot_trace,
+    plot_dist,
+    plot_dist_comparison,
+    plot_elpd,
     plot_energy,
     plot_ess,
-    plot_posterior,
-    plot_autocorr,
     plot_forest,
-    plot_parallel,
-    plot_pair,
+    plot_hdi,
     plot_joint,
-    plot_dist_comparison,
-    plot_ppc,
-    plot_violin,
-    plot_compare,
     plot_kde,
     plot_khat,
-    plot_hdi,
-    plot_dist,
-    plot_rank,
-    plot_elpd,
     plot_loo_pit,
     plot_mcse,
-    plot_bpv,
+    plot_pair,
+    plot_parallel,
+    plot_posterior,
+    plot_ppc,
+    plot_rank,
+    plot_trace,
+    plot_violin,
 )
+from ...rcparams import rc_context, rcParams
+from ...stats import compare, hdi, loo, waic
 from ...utils import _cov
 from ...kde_utils import _kde
+from ..helpers import (  # pylint: disable=unused-import
+    create_model,
+    create_multidimensional_model,
+    eight_schools_params,
+    models,
+    multidim_models,
+)
 
 rcParams["data.load"] = "eager"
 

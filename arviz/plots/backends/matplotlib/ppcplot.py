@@ -1,19 +1,16 @@
 """Matplotlib Posterior predictive plot."""
-import platform
 import logging
-from matplotlib import animation, get_backend
+import platform
+
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import animation, get_backend
 
-from . import backend_show
+from ....numeric_utils import _fast_kde, get_bins, histogram
 from ...kdeplot import plot_kde
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-)
-from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show
 
 _log = logging.getLogger(__name__)
 
@@ -43,6 +40,14 @@ def plot_ppc(
     show,
 ):
     """Matplotlib ppc plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     if animation_kwargs is None:
         animation_kwargs = {}
     if platform.system() == "Linux":

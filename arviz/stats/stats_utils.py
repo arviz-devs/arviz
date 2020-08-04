@@ -1,14 +1,16 @@
 """Stats-utility functions for ArviZ."""
-from collections.abc import Sequence
 import logging
 import warnings
-from copy import copy as _copy, deepcopy as _deepcopy
+from collections.abc import Sequence
+from copy import copy as _copy
+from copy import deepcopy as _deepcopy
 
 import numpy as np
 import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
+
 from ..utils import conditional_jit, conditional_vect
 
 _log = logging.getLogger(__name__)

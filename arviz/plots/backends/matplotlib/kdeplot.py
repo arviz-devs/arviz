@@ -1,10 +1,9 @@
 """Matplotlib kdeplot."""
-import warnings
-from matplotlib import pyplot as plt
 import numpy as np
+from matplotlib import pyplot as plt
 
-from . import backend_show
-from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
+from ...plot_utils import _create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_kde(
@@ -25,6 +24,7 @@ def plot_kde(
     rotated,
     contour,
     fill_last,
+    figsize,
     textsize,
     plot_kwargs,
     fill_kwargs,
@@ -40,19 +40,27 @@ def plot_kde(
     return_glyph,  # pylint: disable=unused-argument
 ):
     """Matplotlib kde plot."""
-    if backend_kwargs is not None:
-        warnings.warn(
-            (
-                "Argument backend_kwargs has not effect in matplotlib.plot_kde"
-                "Supplied value won't be used"
-            )
-        )
-    if ax is None:
-        ax = plt.gca()
+    if backend_kwargs is None:
+        backend_kwargs = {}
 
-    figsize = ax.get_figure().get_size_inches()
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
 
     figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
+
+    if ax is None:
+        _, ax = _create_axes_grid(
+            1,
+            1,
+            1,
+            figsize=figsize,
+            squeeze=False,
+            backend="matplotlib",
+            is_circular=is_circular,
+            backend_kwargs=backend_kwargs,
+        )
 
     if values2 is None:
         plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")

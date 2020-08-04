@@ -1,15 +1,16 @@
 """Matplotlib pairplot."""
 import warnings
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import plot_kde
-from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, matplotlib_kwarg_dealiaser
 from ....rcparams import rcParams
+from ...distplot import plot_dist
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_pair(

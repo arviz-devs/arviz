@@ -1,12 +1,12 @@
 """Bokeh Parallel coordinates plot."""
 import bokeh.plotting as bkp
+import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker
-import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...plot_utils import _scale_fig_size
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_parallel(

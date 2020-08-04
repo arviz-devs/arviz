@@ -2,11 +2,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
+from ....numeric_utils import _fast_kde, get_bins, histogram
 from ....stats import hdi
 from ....kde_utils import _kde
-from ....numeric_utils import histogram, get_bins
-from ...plot_utils import make_label, _create_axes_grid, matplotlib_kwarg_dealiaser, _scale_fig_size
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_violin(
@@ -30,6 +30,14 @@ def plot_violin(
     show,
 ):
     """Matplotlib violin plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )

@@ -1,24 +1,24 @@
 # pylint: disable=all
 """Bokeh forestplot."""
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import cycle, tee
 
 import bokeh.plotting as bkp
+import matplotlib.pyplot as plt
+import numpy as np
 from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
-import matplotlib.pyplot as plt
-import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
+from ....numeric_utils import _fast_kde, get_bins, histogram
 from ....rcparams import rcParams
 from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
-from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
 from ....utils import conditional_jit
+from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def pairwise(iterable):

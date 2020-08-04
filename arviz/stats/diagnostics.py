@@ -1,24 +1,22 @@
 # pylint: disable=too-many-lines, too-many-function-args, redefined-outer-name
 """Diagnostic functions for ArviZ."""
-from collections.abc import Sequence
 import warnings
+from collections.abc import Sequence
+
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from .stats_utils import (
-    rint as _rint,
-    quantile as _quantile,
-    autocov as _autocov,
-    not_valid as _not_valid,
-    wrap_xarray_ufunc as _wrap_xarray_ufunc,
-    stats_variance_2d as svar,
-    histogram,
-    _circular_standard_deviation,
-    _sqrt,
-)
 from ..data import convert_to_dataset
-from ..utils import _var_names, conditional_jit, Numba, _numba_var, _stack
+from ..utils import Numba, _numba_var, _stack, _var_names, conditional_jit
+from .stats_utils import _circular_standard_deviation, _sqrt
+from .stats_utils import autocov as _autocov
+from .stats_utils import histogram
+from .stats_utils import not_valid as _not_valid
+from .stats_utils import quantile as _quantile
+from .stats_utils import rint as _rint
+from .stats_utils import stats_variance_2d as svar
+from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 __all__ = ["bfmi", "ess", "rhat", "mcse", "geweke"]
 

@@ -2,15 +2,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import autocorr
 from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_autocorr(
     axes, plotters, max_lag, figsize, rows, cols, combined, textsize, backend_kwargs, show,
 ):
     """Matplotlib autocorrplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
         figsize, textsize, rows, cols
     )

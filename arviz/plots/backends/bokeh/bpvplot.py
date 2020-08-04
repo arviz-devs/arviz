@@ -4,16 +4,17 @@ from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
 from scipy import stats
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....numeric_utils import _fast_kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _create_axes_grid,
     _scale_fig_size,
-    sample_reference_distribution,
     is_valid_quantile,
+    sample_reference_distribution,
     vectorized_to_hex,
 )
+from .. import show_layout
+from . import backend_kwarg_defaults
 from ....kde_utils import _kde
 
 

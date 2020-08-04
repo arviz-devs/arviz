@@ -1,17 +1,13 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
-from bokeh.models import Dash, Span, ColumnDataSource
-from bokeh.models.annotations import Title, Legend
 import numpy as np
+from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
 from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _scale_fig_size,
-    _create_axes_grid,
-)
+from . import backend_kwarg_defaults
 
 
 def plot_ess(

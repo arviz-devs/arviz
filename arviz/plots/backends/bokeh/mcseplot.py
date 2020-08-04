@@ -1,17 +1,13 @@
 """Bokeh mcseplot."""
+import numpy as np
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
-import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-)
 from ....stats.stats_utils import quantile as _quantile
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_mcse(

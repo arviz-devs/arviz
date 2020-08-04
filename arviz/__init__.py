@@ -2,11 +2,19 @@
 """ArviZ is a library for exploratory analysis of Bayesian models."""
 __version__ = "0.9.0"
 
-import os
 import logging
-from matplotlib.pyplot import style
-from matplotlib.pyplot import register_cmap
+import os
+
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.pyplot import register_cmap, style
+
+from .data import *
+from .plots import *
+from .plots import backends
+from .rcparams import rc_context, rcParams
+from .stats import *
+from .utils import Numba, interactive_backend
+from .wrappers import *
 
 # add ArviZ's styles to matplotlib's styles
 _arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
@@ -25,13 +33,6 @@ if not logging.root.handlers:
     _log.setLevel(logging.INFO)
     _log.addHandler(_handler)
 
-from .rcparams import rcParams, rc_context
-from .data import *
-from .stats import *
-from .plots import *
-from .utils import Numba, interactive_backend
-from .plots import backends
-from .wrappers import *
 
 # adds perceptually uniform grey scale from colorcet
 _linear_grey_10_95_c0 = [

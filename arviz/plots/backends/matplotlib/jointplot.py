@@ -2,10 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import make_label, _scale_fig_size, matplotlib_kwarg_dealiaser
+from ...plot_utils import _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_joint(

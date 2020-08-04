@@ -1,21 +1,22 @@
-"""Data structure for using netcdf groups with xarray."""
 # pylint: disable=too-many-lines
+"""Data structure for using netcdf groups with xarray."""
+import uuid
+import warnings
 from collections import OrderedDict
 from collections.abc import Sequence
-from copy import copy as ccopy, deepcopy
+from copy import copy as ccopy
+from copy import deepcopy
 from datetime import datetime
 from html import escape
-import warnings
-import uuid
 
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
 
-from .base import _extend_xr_method
-from ..utils import _subset_list, HtmlTemplate
 from ..rcparams import rcParams
+from ..utils import HtmlTemplate, _subset_list
+from .base import _extend_xr_method
 
 SUPPORTED_GROUPS = [
     "posterior",

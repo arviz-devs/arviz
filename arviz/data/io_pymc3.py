@@ -1,15 +1,16 @@
 """PyMC3-specific conversion code."""
 import logging
 import warnings
-from typing import Dict, List, Tuple, Any, Optional, Iterable, Union, TYPE_CHECKING
 from types import ModuleType
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import xarray as xr
+
 from .. import utils
-from .inference_data import InferenceData, concat
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs, CoordSpec, DimSpec
 from ..rcparams import rcParams
+from .base import CoordSpec, DimSpec, dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .inference_data import InferenceData, concat
 
 if TYPE_CHECKING:
     import pymc3 as pm

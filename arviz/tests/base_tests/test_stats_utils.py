@@ -1,26 +1,23 @@
 """Tests for stats_utils."""
 #  pylint: disable=no-member
 import numpy as np
-from numpy.testing import assert_array_almost_equal
 import pytest
+from numpy.testing import assert_array_almost_equal
 from scipy.special import logsumexp
 from scipy.stats import circstd
 
-from ...data import load_arviz_data, from_dict
+from ...data import from_dict, load_arviz_data
 from ...stats.stats_utils import (
-    logsumexp as _logsumexp,
-    make_ufunc,
-    wrap_xarray_ufunc,
-    not_valid,
     ELPDData,
-    stats_variance_2d,
-    histogram,
-    _sqrt,
     _angle,
     _circfunc,
     _circular_standard_deviation,
+    _sqrt,
     get_log_likelihood,
+    histogram,
 )
+from ...stats.stats_utils import logsumexp as _logsumexp
+from ...stats.stats_utils import make_ufunc, not_valid, stats_variance_2d, wrap_xarray_ufunc
 
 
 @pytest.mark.parametrize("ary_dtype", [np.float64, np.float32, np.int32, np.int64])

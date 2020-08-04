@@ -1,9 +1,10 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
 import xarray as xr
-from .plot_utils import get_plotting_function
+
 from ..data import InferenceData
 from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_dist(
@@ -20,6 +21,7 @@ def plot_dist(
     quantiles=None,
     contour=True,
     fill_last=True,
+    figsize=None,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -76,6 +78,8 @@ def plot_dist(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
@@ -182,6 +186,7 @@ def plot_dist(
         quantiles=quantiles,
         contour=contour,
         fill_last=fill_last,
+        figsize=figsize,
         textsize=textsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,

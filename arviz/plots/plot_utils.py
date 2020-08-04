@@ -1,17 +1,17 @@
 """Utilities for plotting."""
-import warnings
-from typing import Dict, Any
-from itertools import product, tee
 import importlib
+import warnings
+from itertools import product, tee
+from typing import Any, Dict
 
-import packaging
-import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
+import matplotlib.pyplot as plt
+import numpy as np
+import packaging
+import xarray as xr
 from matplotlib.colors import to_hex
 from scipy.stats import mode
-import xarray as xr
 
 from ..kde_utils import _kde
 from ..rcparams import rcParams
@@ -173,17 +173,28 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
             figsize = kwargs["figsize"]
             backend_kwargs.setdefault("width", int(figsize[0] * dpi / cols))
             backend_kwargs.setdefault("height", int(figsize[1] * dpi / rows))
+        else:
+            backend_kwargs.setdefault()
 
         sharex = kwargs.get("sharex", False)
         sharey = kwargs.get("sharey", False)
         fig = None
         ax = []
         extra = (rows * cols) - length_plotters
+
+        is_circular = kwargs.pop("is_circular", False)
+        if is_circular:
+            backend_kwargs.setdefault("x_axis_type", None)
+            backend_kwargs.setdefault("y_axis_type", None)
+
         for row in range(rows):
             row_ax = []
             for col in range(cols):
                 if (row == 0) and (col == 0) and (sharex or sharey):
-                    bokeh_ax = figure(**backend_kwargs)
+                    if is_circular:
+                        bokeh_ax = figure(**backend_kwargs)
+                    else:
+                        bokeh_ax = figure(**backend_kwargs)
                     row_ax.append(bokeh_ax)
                     if sharex:
                         backend_kwargs["x_range"] = bokeh_ax.x_range
@@ -195,7 +206,10 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
                     else:
                         row_ax.append(figure(**backend_kwargs))
             ax.append(row_ax)
-        ax = np.array(ax)
+        if len(ax) == 1:
+            ax = ax[0]
+        else:
+            ax = np.array(ax)
     else:
         from .backends.matplotlib import backend_kwarg_defaults
 

@@ -1,20 +1,19 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
-
-from . import backend_kwarg_defaults, backend_show
+from ....rcparams import rcParams
 from ...plot_utils import (
     _scale_fig_size,
-    set_xticklabels,
     color_from_dim,
     matplotlib_kwarg_dealiaser,
+    set_xticklabels,
 )
-from ....rcparams import rcParams
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_elpd(

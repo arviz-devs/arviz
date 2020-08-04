@@ -2,22 +2,24 @@
 from collections import defaultdict
 from itertools import cycle
 
-from bokeh.models.annotations import Title, Legend
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models.annotations import Legend, Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....numeric_utils import _fast_kde, get_bins, histogram
+from ....stats import hdi
 from ...plot_utils import (
-    make_label,
     _create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
+    make_label,
     vectorized_to_hex,
 )
 from ....stats import hdi
 from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_density(

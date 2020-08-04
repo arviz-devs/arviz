@@ -1,13 +1,13 @@
 """Bokeh Violinplot."""
-from bokeh.models.annotations import Title
 import numpy as np
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
-from ...plot_utils import make_label, _create_axes_grid, _scale_fig_size
 from ....stats import hdi
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_violin(

@@ -2,22 +2,22 @@
 from numbers import Number
 from typing import Optional
 
-from bokeh.models.annotations import Title
 import numpy as np
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....numeric_utils import get_bins
+from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
     _create_axes_grid,
     _scale_fig_size,
-    format_sig_figs,
-    round_num,
     calculate_point_estimate,
+    format_sig_figs,
+    make_label,
+    round_num,
 )
-from ....stats import hdi
-from ....numeric_utils import get_bins
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_posterior(
