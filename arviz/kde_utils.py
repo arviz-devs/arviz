@@ -302,7 +302,7 @@ def _check_type(x):
         x = np.asfarray(x).flatten()
     except Exception as e:
         warnings.warn(
-            "The following exception occurred while trying to convert `x`" + 
+            "The following exception occurred while trying to convert `x`"
             "to a 1 dimensional float array."
         )
         raise e
