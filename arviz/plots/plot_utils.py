@@ -213,6 +213,10 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
         from .backends.matplotlib import backend_kwarg_defaults
 
         backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs, **kwargs}
+        polar = backend_kwargs.pop("polar", False)
+        if polar:
+            backend_kwargs.setdefault("subplot_kw", {})
+            backend_kwargs["subplot_kw"].setdefault("polar", polar)
         fig, ax = plt.subplots(rows, cols, **backend_kwargs)
         ax = np.ravel(ax)
         extra = (rows * cols) - length_plotters
