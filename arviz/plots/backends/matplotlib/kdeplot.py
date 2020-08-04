@@ -37,6 +37,7 @@ def plot_kde(
     legend,
     backend_kwargs,
     show,
+    return_glyph,  # pylint: disable=unused-argument
 ):
     """Matplotlib kde plot."""
     if backend_kwargs is not None:
@@ -144,9 +145,6 @@ def plot_kde(
         contourf_kwargs = matplotlib_kwarg_dealiaser(contourf_kwargs, "contour")
         pcolormesh_kwargs = matplotlib_kwarg_dealiaser(pcolormesh_kwargs, "pcolormesh")
 
-        # gridsize = (128, 128) if contour else (256, 256)
-
-        # density, xmin, xmax, ymin, ymax = _fast_kde_2d(values, values2, gridsize=gridsize)
         g_s = complex(gridsize[0])
         x_x, y_y = np.mgrid[xmin:xmax:g_s, ymin:ymax:g_s]
 

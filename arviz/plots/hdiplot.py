@@ -7,7 +7,7 @@ from scipy.signal import savgol_filter
 from xarray import Dataset
 
 from ..stats import hdi
-from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser, vectorized_to_hex
+from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 from ..utils import credible_interval_warning
 
@@ -112,13 +112,6 @@ def plot_hdi(
 
     if hdi_kwargs is None:
         hdi_kwargs = {}
-    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
-    plot_kwargs["color"] = vectorized_to_hex(plot_kwargs.get("color", color))
-    plot_kwargs.setdefault("alpha", 0)
-
-    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "fill_between")
-    fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
-    fill_kwargs.setdefault("alpha", 0.5)
 
     x = np.asarray(x)
     x_shape = x.shape
@@ -174,6 +167,7 @@ def plot_hdi(
         ax=ax,
         x_data=x_data,
         y_data=y_data,
+        color=color,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         backend_kwargs=backend_kwargs,

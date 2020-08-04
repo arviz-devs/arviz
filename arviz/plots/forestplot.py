@@ -213,15 +213,13 @@ def plot_forest(
         ess=ess,
         r_hat=r_hat,
         backend_kwargs=backend_kwargs,
+        backend_config=backend_config,
         show=show,
     )
 
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        plot_forest_kwargs.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_forest", "forestplot", backend)

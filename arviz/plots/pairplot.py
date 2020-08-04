@@ -174,51 +174,15 @@ def plot_pair(
         warnings.warn(
             "fill_last and contour will be deprecated. Please use kde_kwargs", UserWarning,
         )
-    if contour is None:
-        contour = True
-
-    if coords is None:
-        coords = {}
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    else:
+    if plot_kwargs:
         warnings.warn(
             "plot_kwargs will be deprecated."
             " Please use scatter_kwargs, kde_kwargs and/or hexbin_kwargs",
             UserWarning,
         )
 
-    if scatter_kwargs is None:
-        scatter_kwargs = {}
-
-    scatter_kwargs.setdefault("marker", ".")
-    scatter_kwargs.setdefault("lw", 0)
-    # Sets the default zorder higher than zorder of grid, which is 0.5
-    scatter_kwargs.setdefault("zorder", 0.6)
-
-    if kde_kwargs is None:
-        kde_kwargs = {}
-
-    if hexbin_kwargs is None:
-        hexbin_kwargs = {}
-
-    if divergences_kwargs is None:
-        divergences_kwargs = {}
-
-    divergences_kwargs.setdefault("marker", "o")
-    divergences_kwargs.setdefault("markeredgecolor", "k")
-    divergences_kwargs.setdefault("color", "C1")
-    divergences_kwargs.setdefault("lw", 0)
-
-    if marginal_kwargs is None:
-        marginal_kwargs = {}
-
-    if point_estimate_kwargs is None:
-        point_estimate_kwargs = {}
-
-    if point_estimate_marker_kwargs is None:
-        point_estimate_marker_kwargs = {}
+    if coords is None:
+        coords = {}
 
     # Get posterior draws and combine chains
     data = convert_to_inference_data(data)
@@ -272,12 +236,9 @@ def plot_pair(
         figsize=figsize,
         textsize=textsize,
         kind=kind,
-        plot_kwargs=plot_kwargs,
         scatter_kwargs=scatter_kwargs,
         kde_kwargs=kde_kwargs,
         hexbin_kwargs=hexbin_kwargs,
-        contour=contour,
-        fill_last=fill_last,
         gridsize=gridsize,
         colorbar=colorbar,
         divergences=divergences,
@@ -298,17 +259,6 @@ def plot_pair(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        pairplot_kwargs.pop("gridsize", None)
-        pairplot_kwargs.pop("colorbar", None)
-        pairplot_kwargs.pop("divergences_kwargs", None)
-        pairplot_kwargs.pop("hexbin_values", None)
-        pairplot_kwargs.pop("scatter_kwargs", None)
-        point_estimate_kwargs.setdefault("line_color", "orange")
-        point_estimate_marker_kwargs.setdefault("line_color", "orange")
-    else:
-        point_estimate_kwargs.setdefault("color", "C1")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_pair", "pairplot", backend)

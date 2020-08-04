@@ -1,7 +1,7 @@
 """Matplotlib traceplot."""
+import warnings
 from itertools import cycle
 
-import warnings
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
@@ -9,7 +9,13 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
-from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels, _dealiase_sel_kwargs
+from ...plot_utils import (
+    _scale_fig_size,
+    make_label,
+    format_coords_as_labels,
+    _dealiase_sel_kwargs,
+    matplotlib_kwarg_dealiaser,
+)
 from ....numeric_utils import get_bins
 
 
@@ -21,6 +27,7 @@ def plot_trace(
     figsize,
     rug,
     lines,
+    compact,
     compact_prop,
     combined,
     chain_prop,
@@ -35,6 +42,7 @@ def plot_trace(
     divergence_data,
     axes,
     backend_kwargs,
+    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
@@ -124,6 +132,56 @@ def plot_trace(
         backend_kwargs = {}
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
+
+    if lines is None:
+        lines = ()
+
+    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
+    if not compact:
+        chain_prop = "color" if chain_prop is None else chain_prop
+    else:
+        chain_prop = (
+            {"linestyle": ("solid", "dotted", "dashed", "dashdot"),}
+            if chain_prop is None
+            else chain_prop
+        )
+        compact_prop = "color" if compact_prop is None else compact_prop
+
+    if isinstance(chain_prop, str):
+        chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
+    if isinstance(chain_prop, tuple):
+        warnings.warn(
+            "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        chain_prop = {chain_prop[0]: chain_prop[1]}
+    chain_prop = {
+        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
+        for prop_name, props in chain_prop.items()
+    }
+
+    if isinstance(compact_prop, str):
+        compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
+    if isinstance(compact_prop, tuple):
+        warnings.warn(
+            "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        compact_prop = {compact_prop[0]: compact_prop[1]}
+
+    if figsize is None:
+        figsize = (12, len(plotters) * 2)
+
+    trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
+    trace_kwargs.setdefault("alpha", 0.35)
+
+    hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
+    hist_kwargs.setdefault("alpha", 0.35)
+
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "fill_between")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "scatter")
+    rank_kwargs = matplotlib_kwarg_dealiaser(rank_kwargs, "bar")
 
     textsize = plot_kwargs.pop("textsize", 10)
 

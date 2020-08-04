@@ -6,11 +6,9 @@ from ..data import convert_to_dataset
 from ..stats import mcse
 from .plot_utils import (
     xarray_var_iter,
-    _scale_fig_size,
     default_grid,
     filter_plotters_list,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
 )
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
@@ -116,8 +114,6 @@ def plot_mcse(
     """
     mean_mcse = None
     sd_mcse = None
-    text_x = None
-    text_va = None
 
     if coords is None:
         coords = {}
@@ -139,32 +135,9 @@ def plot_mcse(
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
-    kwargs.setdefault("linestyle", "none")
-    kwargs.setdefault("linewidth", _linewidth)
-    kwargs.setdefault("markersize", _markersize)
-    kwargs.setdefault("marker", "_" if errorbar else "o")
-    kwargs.setdefault("zorder", 3)
-
-    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
-    extra_kwargs.setdefault("linestyle", "-")
-    extra_kwargs.setdefault("linewidth", _linewidth / 2)
-    extra_kwargs.setdefault("color", "k")
-    extra_kwargs.setdefault("alpha", 0.5)
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")
         sd_mcse = mcse(data, var_names=var_names, method="sd")
-
-        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
-        text_x = text_kwargs.pop("x", 1)
-        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
-        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
-        text_kwargs.setdefault("color", extra_kwargs["color"])
-        text_kwargs.setdefault("horizontalalignment", "right")
-        text_va = text_kwargs.pop("verticalalignment", None)
 
     mcse_kwargs = dict(
         ax=ax,
@@ -181,18 +154,12 @@ def plot_mcse(
         extra_methods=extra_methods,
         mean_mcse=mean_mcse,
         sd_mcse=sd_mcse,
-        text_x=text_x,
-        text_va=text_va,
+        textsize=textsize,
         text_kwargs=text_kwargs,
         rug_kwargs=rug_kwargs,
         extra_kwargs=extra_kwargs,
         idata=idata,
         rug_kind=rug_kind,
-        _markersize=_markersize,
-        _linewidth=_linewidth,
-        xt_labelsize=xt_labelsize,
-        ax_labelsize=ax_labelsize,
-        titlesize=titlesize,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -200,15 +167,6 @@ def plot_mcse(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        mcse_kwargs.pop("kwargs")
-        mcse_kwargs.pop("text_x")
-        mcse_kwargs.pop("text_va")
-        mcse_kwargs.pop("text_kwargs")
-        mcse_kwargs.pop("xt_labelsize")
-        mcse_kwargs.pop("ax_labelsize")
-        mcse_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_mcse", "mcseplot", backend)

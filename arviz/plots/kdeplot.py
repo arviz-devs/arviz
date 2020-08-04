@@ -247,14 +247,6 @@ def plot_kde(
         backend = rcParams["plot.backend"]
     backend = backend.lower()
 
-    if backend == "bokeh":
-        kde_plot_args.pop("textsize")
-        kde_plot_args.pop("label")
-        kde_plot_args.pop("legend")
-        kde_plot_args.pop("is_circular")
-    else:
-        kde_plot_args.pop("return_glyph")
-
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_kde", "kdeplot", backend)
     ax = plot(**kde_plot_args)

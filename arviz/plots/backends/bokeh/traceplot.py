@@ -1,11 +1,13 @@
-# pylint: disable=all
 """Bokeh Traceplot."""
+import warnings
+
 from collections.abc import Iterable
-from typing import Dict
+from itertools import cycle
 
 import bokeh.plotting as bkp
 from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
 from bokeh.models.annotations import Title
+import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_kwarg_defaults
@@ -13,7 +15,6 @@ from .. import show_layout
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
 from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size, _dealiase_sel_kwargs
-from ....rcparams import rcParams
 
 
 def plot_trace(
@@ -24,20 +25,22 @@ def plot_trace(
     figsize,
     rug,
     lines,
+    compact,
+    compact_prop,
     combined,
     chain_prop,
     legend,
-    plot_kwargs: [Dict],
-    fill_kwargs: [Dict],
-    rug_kwargs: [Dict],
-    hist_kwargs: [Dict],
-    trace_kwargs: [Dict],
-    rank_kwargs: [Dict],
+    plot_kwargs,
+    fill_kwargs,
+    rug_kwargs,
+    hist_kwargs,
+    trace_kwargs,
+    rank_kwargs,
     plotters,
     divergence_data,
     axes,
+    backend_kwargs,
     backend_config,
-    backend_kwargs: [Dict],
     show,
 ):
     """Bokeh traceplot."""
@@ -63,10 +66,73 @@ def plot_trace(
     }
     dpi = backend_kwargs.pop("dpi")
 
+    if figsize is None:
+        figsize = (12, len(plotters) * 2)
+
+    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
+
     backend_kwargs.setdefault("height", int(figsize[1] * dpi // len(plotters)))
     backend_kwargs.setdefault("width", int(figsize[0] * dpi // 2))
 
-    figsize, _, _, _, linewidth, _ = _scale_fig_size(figsize, 10, rows=len(plotters), cols=2)
+    if lines is None:
+        lines = ()
+
+    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
+    if not compact:
+        chain_prop = (
+            {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
+            if chain_prop is None
+            else chain_prop
+        )
+    else:
+        chain_prop = (
+            {"line_dash": ("solid", "dotted", "dashed", "dashdot"),}
+            if chain_prop is None
+            else chain_prop
+        )
+        compact_prop = (
+            {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
+            if compact_prop is None
+            else compact_prop
+        )
+
+    if isinstance(chain_prop, str):
+        chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
+    if isinstance(chain_prop, tuple):
+        warnings.warn(
+            "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        chain_prop = {chain_prop[0]: chain_prop[1]}
+    chain_prop = {
+        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
+        for prop_name, props in chain_prop.items()
+    }
+
+    if isinstance(compact_prop, str):
+        compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
+    if isinstance(compact_prop, tuple):
+        warnings.warn(
+            "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        compact_prop = {compact_prop[0]: compact_prop[1]}
+
+    trace_kwargs = {} if trace_kwargs is None else trace_kwargs
+    trace_kwargs.setdefault("alpha", 0.35)
+
+    if hist_kwargs is None:
+        hist_kwargs = {}
+    hist_kwargs.setdefault("alpha", 0.35)
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
+    if fill_kwargs is None:
+        fill_kwargs = {}
+    if rug_kwargs is None:
+        rug_kwargs = {}
+    if rank_kwargs is None:
+        rank_kwargs = {}
 
     trace_kwargs.setdefault("line_width", linewidth)
     plot_kwargs.setdefault("line_width", linewidth)

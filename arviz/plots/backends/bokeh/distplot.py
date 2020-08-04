@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import plot_kde
-from ...plot_utils import set_bokeh_circular_ticks_labels
+from ...plot_utils import set_bokeh_circular_ticks_labels, vectorized_to_hex
 from ....numeric_utils import get_bins
 
 
@@ -44,6 +44,18 @@ def plot_dist(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    color = vectorized_to_hex(color)
+
+    hist_kwargs = {} if hist_kwargs is None else hist_kwargs
+    if kind == "hist":
+        hist_kwargs.setdefault("cumulative", cumulative)
+        hist_kwargs.setdefault("fill_color", color)
+        hist_kwargs.setdefault("line_color", color)
+        hist_kwargs.setdefault("line_alpha", 0)
+        if label is not None:
+            hist_kwargs.setdefault("legend_label", str(label))
+
     if ax is None:
         if is_circular:
             ax = bkp.figure(x_axis_type=None, y_axis_type=None)
@@ -106,22 +118,10 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     if values2 is not None:
         raise NotImplementedError("Insert hexbin plot here")
 
-    legend_label = hist_kwargs.pop("label", None)
-    if legend_label:
-        hist_kwargs["legend_label"] = legend_label
-
     color = hist_kwargs.pop("color", False)
     if color:
         hist_kwargs["fill_color"] = color
         hist_kwargs["line_color"] = color
-
-    hist_kwargs.setdefault("line_alpha", 0)
-
-    # remove defaults for mpl
-    hist_kwargs.pop("rwidth", None)
-    hist_kwargs.pop("align", None)
-    hist_kwargs.pop("density", None)
-    hist_kwargs.pop("orientation", None)
 
     bins = hist_kwargs.pop("bins", None)
     if bins is None:

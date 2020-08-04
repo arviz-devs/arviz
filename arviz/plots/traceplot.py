@@ -1,15 +1,11 @@
 """Plot kde or histograms and values from MCMC samples."""
-from itertools import cycle
 import warnings
 from typing import Callable, List, Optional, Tuple, Any, Mapping, Union
-
-import matplotlib.pyplot as plt
 
 from .plot_utils import (
     get_plotting_function,
     xarray_var_iter,
     KwargSpec,
-    matplotlib_kwarg_dealiaser,
 )
 from ..data import convert_to_dataset, InferenceData, CoordSpec
 from ..utils import _var_names, get_coords
@@ -181,63 +177,6 @@ def plot_trace(
 
     var_names = _var_names(var_names, data, filter_vars)
 
-    if lines is None:
-        lines = ()
-
-    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
-    if not compact:
-        if backend == "bokeh":
-            chain_prop = (
-                {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
-                if chain_prop is None
-                else chain_prop
-            )
-        else:
-            chain_prop = "color" if chain_prop is None else chain_prop
-    else:
-        chain_prop = (
-            {
-                "line_dash"
-                if backend == "bokeh"
-                else "linestyle": ("solid", "dotted", "dashed", "dashdot"),
-            }
-            if chain_prop is None
-            else chain_prop
-        )
-        if backend == "bokeh":
-            compact_prop = (
-                {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
-                if compact_prop is None
-                else compact_prop
-            )
-        else:
-            compact_prop = "color" if compact_prop is None else compact_prop
-
-    # TODO: matplotlib is always required by arviz. Can we get rid of it?
-    # TODO: kind of related: move mpl specific code to backend and
-    # define prop_cycle instead of only colors
-    if isinstance(chain_prop, str):
-        chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
-    if isinstance(chain_prop, tuple):
-        warnings.warn(
-            "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
-            FutureWarning,
-        )
-        chain_prop = {chain_prop[0]: chain_prop[1]}
-    chain_prop = {
-        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
-        for prop_name, props in chain_prop.items()
-    }
-
-    if isinstance(compact_prop, str):
-        compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
-    if isinstance(compact_prop, tuple):
-        warnings.warn(
-            "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
-            FutureWarning,
-        )
-        compact_prop = {compact_prop[0]: compact_prop[1]}
-
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}
     else:
@@ -254,25 +193,6 @@ def plot_trace(
             UserWarning,
         )
         plotters = plotters[:max_plots]
-
-    if figsize is None:
-        figsize = (12, len(plotters) * 2)
-
-    trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
-    trace_kwargs.setdefault("alpha", 0.35)
-
-    if hist_kwargs is None:
-        hist_kwargs = {}
-    hist_kwargs.setdefault("alpha", 0.35)
-
-    if plot_kwargs is None:
-        plot_kwargs = {}
-    if fill_kwargs is None:
-        fill_kwargs = {}
-    if rug_kwargs is None:
-        rug_kwargs = {}
-    if rank_kwargs is None:
-        rank_kwargs = {}
 
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
@@ -291,6 +211,7 @@ def plot_trace(
         hist_kwargs=hist_kwargs,
         trace_kwargs=trace_kwargs,
         rank_kwargs=rank_kwargs,
+        compact=compact,
         compact_prop=compact_prop,
         combined=combined,
         chain_prop=chain_prop,
@@ -300,6 +221,7 @@ def plot_trace(
         # skip_dims=skip_dims,
         plotters=plotters,
         axes=ax,
+        backend_config=backend_config,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -307,10 +229,6 @@ def plot_trace(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        trace_plot_args.update(backend_config=backend_config)
-        trace_plot_args.pop("compact_prop")
 
     plot = get_plotting_function("plot_trace", "traceplot", backend)
     axes = plot(**trace_plot_args)

@@ -3,8 +3,8 @@ import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-import numpy as np
 from bokeh.models import ColumnDataSource, CDSView, GroupFilter, Span
+import numpy as np
 
 from . import backend_kwarg_defaults
 from .. import show_layout
@@ -21,23 +21,24 @@ def plot_pair(
     figsize,
     textsize,
     kind,
+    scatter_kwargs,  # pylint: disable=unused-argument
     kde_kwargs,
     hexbin_kwargs,
-    contour,  # pylint: disable=unused-argument
-    plot_kwargs,  # pylint: disable=unused-argument
-    fill_last,  # pylint: disable=unused-argument
+    gridsize,  # pylint: disable=unused-argument
+    colorbar,  # pylint: disable=unused-argument
     divergences,
     diverging_mask,
+    divergences_kwargs,  # pylint: disable=unused-argument
     flat_var_names,
     backend_kwargs,
-    marginals,
     marginal_kwargs,
+    show,
+    marginals,
     point_estimate,
     point_estimate_kwargs,
     point_estimate_marker_kwargs,
     reference_values,
     reference_values_kwargs,
-    show,
 ):
     """Bokeh pair plot."""
     if backend_kwargs is None:
@@ -50,14 +51,46 @@ def plot_pair(
 
     if hexbin_kwargs is None:
         hexbin_kwargs = {}
-
     hexbin_kwargs.setdefault("size", 0.5)
 
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    if point_estimate_kwargs is None:
+        point_estimate_kwargs = {}
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"fill_alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {})
+        kde_kwargs["contourf_kwargs"].setdefault("fill_alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("line_color", "black")
         kde_kwargs["contour_kwargs"].setdefault("line_alpha", 1)
+
+    if reference_values:
+        reference_values_copy = {}
+        label = []
+        for variable in list(reference_values.keys()):
+            if " " in variable:
+                variable_copy = variable.replace(" ", "\n", 1)
+            else:
+                variable_copy = variable
+
+            label.append(variable_copy)
+            reference_values_copy[variable_copy] = reference_values[variable]
+
+        difference = set(flat_var_names).difference(set(label))
+
+        if difference:
+            warn = [diff.replace("\n", " ", 1) for diff in difference]
+            warnings.warn(
+                "Argument reference_values does not include reference value for: {}".format(
+                    ", ".join(warn)
+                ),
+                UserWarning,
+            )
 
     if reference_values:
         reference_values_copy = {}
@@ -112,6 +145,9 @@ def plot_pair(
     (figsize, _, _, _, _, markersize) = _scale_fig_size(
         figsize, textsize, numvars - offset, numvars - offset
     )
+
+    if point_estimate_marker_kwargs is None:
+        point_estimate_marker_kwargs = {}
 
     point_estimate_marker_kwargs.setdefault("line_width", markersize)
     point_estimate_kwargs.setdefault("line_color", "orange")

@@ -5,20 +5,19 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import make_label
+from ...plot_utils import make_label, _scale_fig_size, matplotlib_kwarg_dealiaser
 
 
 def plot_joint(
     ax,
     figsize,
     plotters,
-    ax_labelsize,
-    xt_labelsize,
     kind,
     contour,
     fill_last,
     joint_kwargs,
     gridsize,
+    textsize,
     marginal_kwargs,
     backend_kwargs,
     show,
@@ -31,6 +30,22 @@ def plot_joint(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
+
+    if kind == "kde":
+        types = "plot"
+    elif kind == "scatter":
+        types = "scatter"
+    else:
+        types = "hexbin"
+    joint_kwargs = matplotlib_kwarg_dealiaser(joint_kwargs, types)
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+    marginal_kwargs.setdefault("plot_kwargs", {})
+    marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
+
     if ax is None:
         # Instantiate figure and grid
         fig = plt.figure(figsize=figsize, **backend_kwargs)

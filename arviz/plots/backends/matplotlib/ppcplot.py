@@ -10,6 +10,7 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
 )
 from ....numeric_utils import _fast_kde, histogram, get_bins
 
@@ -29,21 +30,39 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
-    linewidth,
+    textsize,
     mean,
-    xt_labelsize,
-    ax_labelsize,
     jitter,
     total_pp_samples,
     legend,
     group,
-    markersize,
     animation_kwargs,
     num_pp_samples,
     backend_kwargs,
     show,
 ):
     """Matplotlib ppc plot."""
+    if animation_kwargs is None:
+        animation_kwargs = {}
+    if platform.system() == "Linux":
+        animation_kwargs.setdefault("blit", True)
+    else:
+        animation_kwargs.setdefault("blit", False)
+
+    if alpha is None:
+        if animated:
+            alpha = 1
+        else:
+            if kind.lower() == "scatter":
+                alpha = 0.7
+            else:
+                alpha = 0.2
+
+    if jitter is None:
+        jitter = 0.0
+    if jitter < 0.0:
+        raise ValueError("jitter must be >=0")
+
     if animated:
         try:
             shell = get_ipython().__class__.__name__
@@ -64,6 +83,9 @@ def plot_ppc(
                 "(e.g. to TkAgg)"
             )
 
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
     if ax is None:
         fig, axes = _create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs

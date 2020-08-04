@@ -9,8 +9,10 @@ from .. import show_layout
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _create_axes_grid,
+    _scale_fig_size,
     sample_reference_distribution,
     is_valid_quantile,
+    vectorized_to_hex,
 )
 from ....numeric_utils import _fast_kde
 
@@ -32,9 +34,7 @@ def plot_bpv(
     hdi_prob,
     color,
     figsize,
-    ax_labelsize,
-    markersize,
-    linewidth,
+    textsize,
     plot_ref_kwargs,
     backend_kwargs,
     show,
@@ -47,6 +47,22 @@ def plot_bpv(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    color = vectorized_to_hex(color)
+
+    if plot_ref_kwargs is None:
+        plot_ref_kwargs = {}
+    if kind == "p_value" and reference == "analytical":
+        plot_ref_kwargs.setdefault("line_color", "black")
+        plot_ref_kwargs.setdefault("line_dash", "dashed")
+    else:
+        plot_ref_kwargs.setdefault("alpha", 0.1)
+        plot_ref_kwargs.setdefault("line_color", color)
+
+    (figsize, ax_labelsize, _, _, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
     if ax is None:
         _, axes = _create_axes_grid(
             length_plotters,
@@ -77,7 +93,7 @@ def plot_bpv(
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, color=color)
+            ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
             # ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
@@ -98,7 +114,7 @@ def plot_bpv(
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
             x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
-            ax_i.line(x_s, tstat_pit_dens, color=color)
+            ax_i.line(x_s, tstat_pit_dens, line_color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
@@ -109,7 +125,7 @@ def plot_bpv(
                             bottom=hdi_odds[1],
                             top=hdi_odds[0],
                             fill_alpha=plot_ref_kwargs.pop("alpha"),
-                            fill_color=plot_ref_kwargs.pop("color"),
+                            fill_color=plot_ref_kwargs.pop("line_color"),
                             **plot_ref_kwargs,
                         )
                     )

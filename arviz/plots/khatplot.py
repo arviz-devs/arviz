@@ -1,17 +1,10 @@
 """Pareto tail indices plot."""
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
-import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
 
 from .plot_utils import (
-    _scale_fig_size,
-    color_from_dim,
     format_coords_as_labels,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
-    vectorized_to_hex,
 )
 from ..stats import ELPDData
 from ..rcparams import rcParams
@@ -20,7 +13,7 @@ from ..utils import get_coords
 
 def plot_khat(
     khats,
-    color=None,
+    color="C0",
     xlabels=False,
     show_bins=False,
     bin_format="{1:.1f}%",
@@ -127,13 +120,6 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
-    hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
-    hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
-    hlines_kwargs.setdefault("alpha", 0.7)
-    hlines_kwargs.setdefault("zorder", -1)
-    hlines_kwargs.setdefault("color", "C1")
-    hlines_kwargs["color"] = vectorized_to_hex(hlines_kwargs["color"])
-
     if coords is None:
         coords = {}
 
@@ -161,42 +147,6 @@ def plot_khat(
     else:
         coord_labels = xdata.astype(str)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
-        figsize, textsize
-    )
-
-    if markersize is None:
-        markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
-        # for dots to have the same size
-
-    kwargs = matplotlib_kwarg_dealiaser(kwargs, "scatter")
-    kwargs.setdefault("s", markersize)
-    kwargs.setdefault("marker", "+")
-    color_mapping = None
-    cmap = None
-    if isinstance(color, str):
-        if color in dims:
-            colors, color_mapping = color_from_dim(khats, color)
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(colors)
-        else:
-            legend = False
-            rgba_c = to_rgba_array(np.full(n_data_points, color))
-    else:
-        legend = False
-        try:
-            rgba_c = to_rgba_array(color)
-        except ValueError:
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(color)
-
-    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
-    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
-    rgba_c[:, 3] = alphas
-    rgba_c = vectorized_to_hex(rgba_c)
-
     plot_khat_kwargs = dict(
         hover_label=hover_label,
         hover_format=hover_format,
@@ -204,20 +154,17 @@ def plot_khat(
         figsize=figsize,
         xdata=xdata,
         khats=khats,
-        rgba_c=rgba_c,
         kwargs=kwargs,
         annotate=annotate,
         coord_labels=coord_labels,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         show_bins=show_bins,
-        linewidth=linewidth,
         hlines_kwargs=hlines_kwargs,
         xlabels=xlabels,
         legend=legend,
-        color_mapping=color_mapping,
-        cmap=cmap,
         color=color,
+        dims=dims,
+        textsize=textsize,
+        markersize=markersize,
         n_data_points=n_data_points,
         bin_format=bin_format,
         backend_kwargs=backend_kwargs,
@@ -227,20 +174,6 @@ def plot_khat(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        plot_khat_kwargs.pop("hover_label")
-        plot_khat_kwargs.pop("hover_format")
-        plot_khat_kwargs.pop("kwargs")
-        plot_khat_kwargs.pop("ax_labelsize")
-        plot_khat_kwargs.pop("xt_labelsize")
-        plot_khat_kwargs.pop("hlines_kwargs")
-        plot_khat_kwargs.pop("xlabels")
-        plot_khat_kwargs.pop("legend")
-        plot_khat_kwargs.pop("color_mapping")
-        plot_khat_kwargs.pop("cmap")
-        plot_khat_kwargs.pop("color")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_khat", "khatplot", backend)

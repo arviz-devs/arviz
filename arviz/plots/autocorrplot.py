@@ -1,7 +1,6 @@
 """Autocorrelation plot of data."""
 from ..data import convert_to_dataset
 from .plot_utils import (
-    _scale_fig_size,
     default_grid,
     xarray_var_iter,
     filter_plotters_list,
@@ -117,10 +116,6 @@ def plot_autocorr(
     )
     rows, cols = default_grid(len(plotters))
 
-    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
     autocorr_plot_args = dict(
         axes=ax,
         plotters=plotters,
@@ -129,9 +124,7 @@ def plot_autocorr(
         rows=rows,
         cols=cols,
         combined=combined,
-        linewidth=linewidth,
-        xt_labelsize=xt_labelsize,
-        titlesize=titlesize,
+        textsize=textsize,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -141,10 +134,6 @@ def plot_autocorr(
     backend = backend.lower()
 
     if backend == "bokeh":
-
-        autocorr_plot_args.pop("xt_labelsize")
-        autocorr_plot_args.pop("titlesize")
-        autocorr_plot_args["line_width"] = autocorr_plot_args.pop("linewidth")
         autocorr_plot_args.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs

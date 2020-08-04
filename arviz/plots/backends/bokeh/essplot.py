@@ -9,6 +9,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ...plot_utils import (
     make_label,
+    _scale_fig_size,
     _create_axes_grid,
 )
 
@@ -22,24 +23,18 @@ def plot_ess(
     sd_ess,
     idata,
     data,
-    text_x,
-    text_va,
     kind,
     extra_methods,
+    textsize,
     rows,
     cols,
     figsize,
     kwargs,
     extra_kwargs,
     text_kwargs,
-    _linewidth,
-    _markersize,
     n_samples,
     relative,
     min_ess,
-    xt_labelsize,
-    titlesize,
-    ax_labelsize,
     ylabel,
     rug,
     rug_kind,
@@ -56,6 +51,9 @@ def plot_ess(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    (figsize, *_, _linewidth, _markersize) = _scale_fig_size(figsize, textsize, rows, cols)
+
     if ax is None:
         _, ax = _create_axes_grid(
             len(plotters),

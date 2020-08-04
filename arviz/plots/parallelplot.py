@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats.mstats import rankdata
 
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_plotting_function
+from .plot_utils import xarray_to_ndarray, get_plotting_function
 from ..rcparams import rcParams
 from ..utils import _var_names, _numba_var, get_coords
 from ..stats.stats_utils import stats_variance_2d as svar
@@ -30,7 +30,7 @@ def plot_parallel(
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
 
-    Described by https://arxiv.org/abs/1709.01449, suggested by Ari Hartikainen
+    Described by https://arxiv.org/abs/1709.01449
 
     Parameters
     ----------
@@ -136,37 +136,25 @@ def plot_parallel(
         else:
             raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
 
-    figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
-
     parallel_kwargs = dict(
         ax=ax,
         colornd=colornd,
         colord=colord,
         shadend=shadend,
         diverging_mask=diverging_mask,
-        _posterior=_posterior,
+        posterior=_posterior,
         textsize=textsize,
         var_names=var_names,
-        xt_labelsize=xt_labelsize,
         legend=legend,
         figsize=figsize,
         backend_kwargs=backend_kwargs,
+        backend_config=backend_config,
         show=show,
     )
 
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        parallel_kwargs.pop("textsize")
-        parallel_kwargs.pop("xt_labelsize")
-        parallel_kwargs.pop("legend")
-        parallel_kwargs.pop("colord")
-        parallel_kwargs.pop("colornd")
-        parallel_kwargs.pop("shadend")
-        parallel_kwargs.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_parallel", "parallelplot", backend)

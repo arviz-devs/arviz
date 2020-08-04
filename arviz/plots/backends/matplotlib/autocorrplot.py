@@ -4,24 +4,17 @@ import numpy as np
 
 from . import backend_show
 from ....stats import autocorr
-from ...plot_utils import _create_axes_grid, make_label
+from ...plot_utils import _create_axes_grid, _scale_fig_size, make_label
 
 
 def plot_autocorr(
-    axes,
-    plotters,
-    max_lag,
-    figsize,
-    rows,
-    cols,
-    linewidth,
-    titlesize,
-    combined,
-    xt_labelsize,
-    backend_kwargs,
-    show,
+    axes, plotters, max_lag, figsize, rows, cols, combined, textsize, backend_kwargs, show,
 ):
     """Matplotlib autocorrplot."""
+    figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
     if axes is None:
         _, axes = _create_axes_grid(
             len(plotters),

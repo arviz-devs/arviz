@@ -4,6 +4,7 @@ from bokeh.models import Span
 
 from . import backend_kwarg_defaults
 from .. import show_layout
+from ...plot_utils import _scale_fig_size
 
 
 def plot_compare(
@@ -15,8 +16,8 @@ def plot_compare(
     insample_dev,
     yticks_pos,
     yticks_labels,
-    line_width,
     plot_kwargs,
+    textsize,
     information_criterion,
     step,
     backend_kwargs,
@@ -31,6 +32,8 @@ def plot_compare(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))

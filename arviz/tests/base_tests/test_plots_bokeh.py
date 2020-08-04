@@ -979,7 +979,7 @@ def test_plot_rank(models, kwargs):
 
 
 def test_plot_dist_comparison_warn(models):
-    with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib bakend."):
+    with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib backend."):
         plot_dist_comparison(models.model_1, backend="bokeh")
 
 

@@ -1,7 +1,9 @@
 """Bokeh Densityplot."""
 from collections import defaultdict
+from itertools import cycle
 
 from bokeh.models.annotations import Title, Legend
+import matplotlib.pyplot as plt
 import numpy as np
 
 from . import backend_kwarg_defaults
@@ -9,7 +11,9 @@ from .. import show_layout
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
     calculate_point_estimate,
+    vectorized_to_hex,
 )
 from ....stats import hdi
 from ....numeric_utils import _fast_kde, histogram, get_bins
@@ -25,13 +29,13 @@ def plot_density(
     length_plotters,
     rows,
     cols,
-    line_width,
-    markersize,
+    textsize,
     hdi_prob,
     point_estimate,
     hdi_markers,
     outline,
     shade,
+    n_data,
     data_labels,
     backend_kwargs,
     show,
@@ -44,6 +48,19 @@ def plot_density(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    if colors == "cycle":
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
+    elif isinstance(colors, str):
+        colors = [colors for _ in range(n_data)]
+    colors = vectorized_to_hex(colors)
+
+    (figsize, _, _, _, line_width, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
         _, ax = _create_axes_grid(

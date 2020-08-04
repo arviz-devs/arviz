@@ -28,17 +28,21 @@ def plot_kde(
     values,
     values2,
     rug,
+    label,  # pylint: disable=unused-argument
     quantiles,
     rotated,
     contour,
     fill_last,
+    textsize,  # pylint: disable=unused-argument
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
     contour_kwargs,
     contourf_kwargs,
     pcolormesh_kwargs,
+    is_circular,  # pylint: disable=unused-argument
     ax,
+    legend,  # pylint: disable=unused-argument
     backend_kwargs,
     show,
     return_glyph,

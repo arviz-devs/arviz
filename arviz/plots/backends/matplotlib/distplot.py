@@ -47,6 +47,19 @@ def plot_dist(
         ax = plt.gca(polar=is_circular)
 
     if kind == "hist":
+        hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
+        hist_kwargs.setdefault("cumulative", cumulative)
+        hist_kwargs.setdefault("color", color)
+        hist_kwargs.setdefault("label", label)
+        hist_kwargs.setdefault("rwidth", 0.9)
+        hist_kwargs.setdefault("align", "left")
+        hist_kwargs.setdefault("density", True)
+
+        if rotated:
+            hist_kwargs.setdefault("orientation", "horizontal")
+        else:
+            hist_kwargs.setdefault("orientation", "vertical")
+
         ax = _histplot_mpl_op(
             values=values,
             values2=values2,

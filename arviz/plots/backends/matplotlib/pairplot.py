@@ -1,5 +1,4 @@
 """Matplotlib pairplot."""
-
 import warnings
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
@@ -9,7 +8,7 @@ import numpy as np
 from . import backend_kwarg_defaults, backend_show
 from ...kdeplot import plot_kde
 from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, matplotlib_kwarg_dealiaser
 from ....rcparams import rcParams
 
 
@@ -20,9 +19,6 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    fill_last,  # pylint: disable=unused-argument
-    contour,  # pylint: disable=unused-argument
-    plot_kwargs,  # pylint: disable=unused-argument
     scatter_kwargs,
     kde_kwargs,
     hexbin_kwargs,
@@ -52,13 +48,34 @@ def plot_pair(
     }
     backend_kwargs.pop("constrained_layout")
 
+    scatter_kwargs = matplotlib_kwarg_dealiaser(scatter_kwargs, "scatter")
+
+    scatter_kwargs.setdefault("marker", ".")
+    scatter_kwargs.setdefault("lw", 0)
+    # Sets the default zorder higher than zorder of grid, which is 0.5
+    scatter_kwargs.setdefault("zorder", 0.6)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
     if hexbin_kwargs is None:
         hexbin_kwargs = {}
-
     hexbin_kwargs.setdefault("mincnt", 1)
 
+    divergences_kwargs = matplotlib_kwarg_dealiaser(divergences_kwargs, "plot")
+    divergences_kwargs.setdefault("marker", "o")
+    divergences_kwargs.setdefault("markeredgecolor", "k")
+    divergences_kwargs.setdefault("color", "C1")
+    divergences_kwargs.setdefault("lw", 0)
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    point_estimate_kwargs = matplotlib_kwarg_dealiaser(point_estimate_kwargs, "fill_between")
+
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {})
+        kde_kwargs["contourf_kwargs"].setdefault("alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
 
@@ -77,7 +94,7 @@ def plot_pair(
         difference = set(flat_var_names).difference(set(label))
 
         if difference:
-            warn = [dif.replace("\n", " ", 1) for dif in difference]
+            warn = [diff.replace("\n", " ", 1) for diff in difference]
             warnings.warn(
                 "Argument reference_values does not include reference value for: {}".format(
                     ", ".join(warn)
@@ -91,6 +108,9 @@ def plot_pair(
     reference_values_kwargs.setdefault("color", "C3")
     reference_values_kwargs.setdefault("marker", "o")
 
+    point_estimate_marker_kwargs = matplotlib_kwarg_dealiaser(
+        point_estimate_marker_kwargs, "scatter"
+    )
     point_estimate_marker_kwargs.setdefault("marker", "s")
     point_estimate_marker_kwargs.setdefault("color", "C1")
 

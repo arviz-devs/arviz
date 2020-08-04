@@ -1,11 +1,14 @@
 """Bokeh loopitplot."""
 import bokeh.plotting as bkp
 from bokeh.models import BoxAnnotation
+from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 import numpy as np
+from xarray import DataArray
 
 from . import backend_kwarg_defaults
 from .. import show_layout
 from ...kdeplot import _fast_kde
+from ...plot_utils import _scale_fig_size
 
 
 def plot_loo_pit(
@@ -27,6 +30,12 @@ def plot_loo_pit(
     unif,
     plot_unif_kwargs,
     loo_pit_kde,
+    legend,  # pylint: disable=unused-argument
+    y_hat,
+    y,
+    color,
+    textsize,
+    credible_interval,
     plot_kwargs,
     backend_kwargs,
     show,
@@ -40,6 +49,55 @@ def plot_loo_pit(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    plot_kwargs.setdefault("color", to_hex(color))
+    plot_kwargs.setdefault("linewidth", linewidth * 1.4)
+    if isinstance(y, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+    elif isinstance(y, DataArray) and y.name is not None:
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+    elif isinstance(y_hat, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+    elif isinstance(y_hat, DataArray) and y_hat.name is not None:
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
+    else:
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+
+    plot_kwargs.setdefault("legend_label", label)
+
+    plot_unif_kwargs = {} if plot_unif_kwargs is None else plot_unif_kwargs
+    light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
+    light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
+    light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation
+    plot_unif_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+    plot_unif_kwargs.setdefault("alpha", 0.5)
+    plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
+
+    if ecdf:
+        n_data_points = loo_pit.size
+        plot_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
+        plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
+
+        if ecdf_fill:
+            if fill_kwargs is None:
+                fill_kwargs = {}
+            fill_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+            fill_kwargs.setdefault("alpha", 0.5)
+            fill_kwargs.setdefault(
+                "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
+            )
+            fill_kwargs.setdefault(
+                "legend_label", "{:.3g}% credible interval".format(credible_interval)
+            )
+    elif use_hdi:
+        if hdi_kwargs is None:
+            hdi_kwargs = {}
+        hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+        hdi_kwargs.setdefault("alpha", 0.35)
+
     if ax is None:
         backend_kwargs.setdefault("width", int(figsize[0] * dpi))
         backend_kwargs.setdefault("height", int(figsize[1] * dpi))

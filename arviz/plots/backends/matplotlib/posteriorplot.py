@@ -1,5 +1,4 @@
 """Matplotlib Plot posterior densities."""
-from typing import Optional
 from numbers import Number
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,9 +9,11 @@ from ...kdeplot import plot_kde
 from ...plot_utils import (
     make_label,
     _create_axes_grid,
+    _scale_fig_size,
     format_sig_figs,
     round_num,
     calculate_point_estimate,
+    matplotlib_kwarg_dealiaser,
 )
 from ....numeric_utils import get_bins
 
@@ -31,16 +32,23 @@ def plot_posterior(
     round_to,
     hdi_prob,
     multimodal,
+    textsize,
     ref_val,
     rope,
-    ax_labelsize,
-    xt_labelsize,
     kwargs,
-    titlesize,
     backend_kwargs,
     show,
 ):
     """Matplotlib posterior plot."""
+    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    if kind == "hist":
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
+    else:
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs.setdefault("linewidth", _linewidth)
+
     if ax is None:
         _, ax = _create_axes_grid(
             length_plotters,
@@ -97,7 +105,7 @@ def _plot_posterior_op(
     rope,
     ax_labelsize,
     xt_labelsize,
-    round_to: Optional[int] = None,
+    round_to=None,
     **kwargs,
 ):  # noqa: D202
     """Artist to draw posterior."""

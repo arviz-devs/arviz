@@ -1,12 +1,10 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
 from .plot_utils import (
-    _scale_fig_size,
     xarray_var_iter,
     filter_plotters_list,
     default_grid,
     get_plotting_function,
-    matplotlib_kwarg_dealiaser,
 )
 from ..utils import _var_names, credible_interval_warning
 from ..rcparams import rcParams
@@ -131,15 +129,7 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
-
     rows, cols = default_grid(len(plotters))
-
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
-    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
@@ -160,10 +150,8 @@ def plot_violin(
         rug=rug,
         rug_kwargs=rug_kwargs,
         bw=bw,
+        textsize=textsize,
         hdi_prob=hdi_prob,
-        linewidth=linewidth,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         quartiles=quartiles,
         backend_kwargs=backend_kwargs,
         show=show,
@@ -172,19 +160,6 @@ def plot_violin(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        violinplot_kwargs.pop("ax_labelsize")
-        violinplot_kwargs.pop("xt_labelsize")
-
-        rug_kwargs.setdefault("fill_alpha", 0.1)
-        rug_kwargs.setdefault("line_alpha", 0.1)
-
-    else:
-        rug_kwargs.setdefault("alpha", 0.1)
-        rug_kwargs.setdefault("marker", ".")
-        rug_kwargs.setdefault("linestyle", "")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_violin", "violinplot", backend)
