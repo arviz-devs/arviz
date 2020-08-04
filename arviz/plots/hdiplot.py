@@ -21,6 +21,7 @@ def plot_hdi(
     circular=False,
     smooth=True,
     smooth_kwargs=None,
+    figsize=None,
     fill_kwargs=None,
     plot_kwargs=None,
     hdi_kwargs=None,
@@ -56,6 +57,8 @@ def plot_hdi(
     smooth_kwargs : dict, optional
         Additional keywords modifying the Savitzky-Golay filter. See
         :func:`scipy:scipy.signal.savgol_filter` for details.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
         (use fill_kwargs={'alpha': 0} to disable fill) or to
@@ -168,6 +171,7 @@ def plot_hdi(
         x_data=x_data,
         y_data=y_data,
         color=color,
+        figsize=figsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         backend_kwargs=backend_kwargs,
