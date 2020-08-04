@@ -49,7 +49,13 @@ def plot_dist(
 
     if ax is None:
         _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, backend="matplotlib", backend_kwargs=backend_kwargs,
+            1,
+            1,
+            1,
+            figsize=figsize,
+            backend="matplotlib",
+            polar=is_circular,
+            backend_kwargs=backend_kwargs,
         )
 
     if kind == "hist":
