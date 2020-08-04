@@ -5,6 +5,7 @@
 * Added InferenceData dataset containing circular variables (#1265)
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
 * Added `to_dict` method for InferenceData object (#1223)
+* Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) (#1336)
 
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)

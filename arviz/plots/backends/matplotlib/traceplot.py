@@ -23,9 +23,9 @@ def plot_trace(
     figsize,
     rug,
     lines,
-    compact,
-    radians,
     circ_var_names,
+    radians,
+    compact,
     compact_prop,
     combined,
     chain_prop,
@@ -65,8 +65,12 @@ def plot_trace(
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE. Only affects continuous
         variables.
     lines : tuple or list
-        list of tuple of (var_name, {'coord': selection}, [line_positions]) to be overplotted as
+        List of tuple of (var_name, {'coord': selection}, [line_positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
+    circ_var_names : list
+        List of circular variables to account for when plotting KDE.
+    radians : bool
+        Whether the variables in ´circ_var_names´ are in radians.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
