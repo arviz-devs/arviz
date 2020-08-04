@@ -8,15 +8,7 @@ from arviz import from_emcee
 
 from ..helpers import _emcee_lnprior as emcee_lnprior
 from ..helpers import _emcee_lnprob as emcee_lnprob
-from ..helpers import (
-    chains,
-    check_multiple_attrs,
-    draws,
-    eight_schools_params,
-    importorskip,
-    load_cached_models,
-    needs_emcee3_func,
-)
+from ..helpers import check_multiple_attrs, importorskip, load_cached_models, needs_emcee3_func
 
 # Skip all tests if emcee not installed
 emcee = importorskip("emcee")
