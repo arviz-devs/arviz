@@ -59,7 +59,6 @@ def plot_posterior(
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )

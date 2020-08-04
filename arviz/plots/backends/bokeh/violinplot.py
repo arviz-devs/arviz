@@ -52,7 +52,6 @@ def plot_violin(
             sharex=sharex,
             sharey=sharey,
             figsize=figsize,
-            squeeze=False,
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )

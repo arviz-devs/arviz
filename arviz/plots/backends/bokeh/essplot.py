@@ -56,7 +56,6 @@ def plot_ess(
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             constrained_layout=True,
             backend="bokeh",
             backend_kwargs=backend_kwargs,

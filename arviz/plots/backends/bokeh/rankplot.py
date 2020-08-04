@@ -41,7 +41,6 @@ def plot_rank(
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             sharex=True,
             sharey=True,
             backend="bokeh",

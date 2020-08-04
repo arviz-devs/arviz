@@ -53,7 +53,7 @@ def plot_loo_pit(
     if ax is None:
         backend_kwargs.setdefault("x_range", (0, 1))
         _, ax = _create_axes_grid(
-            1, 1, 1, figsize=figsize, squeeze=False, backend="bokeh", backend_kwargs=backend_kwargs,
+            1, 1, 1, figsize=figsize, squeeze=True, backend="bokeh", backend_kwargs=backend_kwargs,
         )
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs

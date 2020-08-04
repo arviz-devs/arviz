@@ -50,7 +50,6 @@ def plot_autocorr(
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             sharex=True,
             sharey=True,
             backend="bokeh",

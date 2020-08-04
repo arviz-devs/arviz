@@ -72,7 +72,7 @@ def plot_density(
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
+            squeeze=True,
             backend="bokeh",
             backend_kwargs=backend_kwargs,
         )

@@ -62,7 +62,7 @@ def plot_elpd(
                 1,
                 1,
                 figsize=figsize,
-                squeeze=False,
+                squeeze=True,
                 backend="bokeh",
                 backend_kwargs=backend_kwargs,
             )

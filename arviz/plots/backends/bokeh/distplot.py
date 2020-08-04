@@ -70,7 +70,7 @@ def plot_dist(
             1,
             1,
             figsize=figsize,
-            squeeze=False,
+            squeeze=True,
             backend="bokeh",
             is_circular=is_circular,
             backend_kwargs=backend_kwargs,

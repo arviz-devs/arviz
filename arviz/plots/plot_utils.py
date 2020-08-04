@@ -210,7 +210,7 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
                         row_ax.append(figure(**backend_kwargs))
             ax.append(row_ax)
         ax = np.array(ax)
-        if ax.size == 1:
+        if ax.size == 1 and kwargs.get("squeeze", True):
             ax = ax[0, 0]
     else:
         from .backends.matplotlib import backend_kwarg_defaults
