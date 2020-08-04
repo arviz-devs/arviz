@@ -159,6 +159,8 @@ def test_plot_density_bad_kwargs(models):
         {"kind": "rank_bars"},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
+        {"circ_var_names": ["mu"]},
+        {"radians": True},
     ],
 )
 def test_plot_trace(models, kwargs):
