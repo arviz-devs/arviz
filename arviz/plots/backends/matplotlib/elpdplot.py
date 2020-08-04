@@ -8,6 +8,7 @@ from matplotlib.lines import Line2D
 
 from ....rcparams import rcParams
 from ...plot_utils import (
+    _create_axes_grid,
     _scale_fig_size,
     color_from_dim,
     matplotlib_kwarg_dealiaser,
@@ -78,7 +79,9 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize ** 2)
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            _, ax = _create_axes_grid(
+                1, 1, 1, figsize=figsize, backend="matplotlib", backend_kwargs=backend_kwargs,
+            )
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)

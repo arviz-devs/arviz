@@ -58,7 +58,7 @@ def plot_kde(
             figsize=figsize,
             squeeze=False,
             backend="matplotlib",
-            is_circular=is_circular,
+            polar=is_circular,
             backend_kwargs=backend_kwargs,
         )
 

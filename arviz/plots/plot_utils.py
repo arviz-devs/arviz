@@ -185,8 +185,8 @@ def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=
         ax = []
         extra = (rows * cols) - length_plotters
 
-        is_circular = kwargs.pop("is_circular", False)
-        if is_circular:
+        polar = kwargs.pop("polar", False)
+        if polar:
             backend_kwargs.setdefault("x_axis_type", None)
             backend_kwargs.setdefault("y_axis_type", None)
 
