@@ -7,13 +7,12 @@ import xarray as xr
 
 from ...data import from_dict
 from ...numeric_utils import get_bins
+from ...plots.backends.matplotlib import dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 from ...plots.plot_utils import (
-    _dealiase_sel_kwargs,
     filter_plotters_list,
     format_sig_figs,
     get_plotting_function,
     make_2d,
-    matplotlib_kwarg_dealiaser,
     set_bokeh_circular_ticks_labels,
     vectorized_to_hex,
     xarray_to_ndarray,
@@ -248,21 +247,46 @@ def test_vectorized_to_hex_array(c_values):
     assert np.all([item == "#0000ff" for item in output])
 
 
-def test_dealiase_sel_kwargs():
-    """Check _dealiase_sel_kwargs behaviour.
+def test_mpl_dealiase_sel_kwargs():
+    """Check mpl dealiase_sel_kwargs behaviour.
 
     Makes sure kwargs are overwritten when necessary even with alias involved and that
     they are not modified when not included in props.
     """
     kwargs = {"linewidth": 3, "alpha": 0.4, "line_color": "red"}
     props = {"lw": [1, 2, 4, 5], "linestyle": ["-", "--", ":"]}
-    res = _dealiase_sel_kwargs(kwargs, props, 2)
+    res = dealiase_sel_kwargs(kwargs, props, 2)
     assert "linewidth" in res
     assert res["linewidth"] == 4
     assert "linestyle" in res
     assert res["linestyle"] == ":"
     assert "alpha" in res
     assert res["alpha"] == 0.4
+    assert "line_color" in res
+    assert res["line_color"] == "red"
+
+
+@pytest.mark.skipif(
+    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    reason="test requires bokeh which is not installed",
+)
+def test_bokeh_dealiase_sel_kwargs():
+    """Check bokeh dealiase_sel_kwargs behaviour.
+
+    Makes sure kwargs are overwritten when necessary even with alias involved and that
+    they are not modified when not included in props.
+    """
+    from ...plots.backends.bokeh import dealiase_sel_kwargs
+
+    kwargs = {"line_width": 3, "line_alpha": 0.4, "line_color": "red"}
+    props = {"line_width": [1, 2, 4, 5], "line_dash": ["dashed", "dashed", "dashed"]}
+    res = dealiase_sel_kwargs(kwargs, props, 2)
+    assert "line_width" in res
+    assert res["line_width"] == 4
+    assert "line_dash" in res
+    assert res["line_dash"] == "dashed"
+    assert "line_alpha" in res
+    assert res["line_alpha"] == 0.4
     assert "line_color" in res
     assert res["line_color"] == "red"
 
