@@ -48,7 +48,7 @@ def plot_dist(
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
     backend_kwargs.setdefault("figsize", figsize)
-    backend_kwargs.setdefault("", {})
+    backend_kwargs.setdefault("subplot_kw", {})
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
