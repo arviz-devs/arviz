@@ -14,7 +14,7 @@ from scipy.optimize import minimize
 
 from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..kde_utils import _kde
-from ..numeric_utils import _fast_kde, get_bins, histogram
+from ..numeric_utils import get_bins, histogram
 from ..rcparams import rcParams
 from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
 from .diagnostics import _mc_error, _multichain_statistics, ess
