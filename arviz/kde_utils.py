@@ -12,9 +12,7 @@ from .stats.stats_utils import histogram
 
 
 def _bw_scott(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
-    """Scott's Rule.
-
-    """
+    """Scott's Rule."""
     if x_std is None:
         x_std = np.std(x)
     bw = 1.06 * x_std * len(x) ** (-0.2)
@@ -22,9 +20,7 @@ def _bw_scott(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
 
 
 def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
-    """Silverman's Rule.
-
-    """
+    """Silverman's Rule."""
     if x_std is None:
         x_std = np.std(x)
     q75, q25 = np.percentile(x, [75, 25])
@@ -35,8 +31,7 @@ def _bw_silverman(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
 
 
 def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
-    """
-    Improved Sheather-Jones bandwidth estimation.
+    """Improved Sheather-Jones bandwidth estimation.
 
     Improved Sheather and Jones method as explained in [1]_.
     This is an internal version pretended to be used by the KDE estimator.
@@ -49,7 +44,6 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
        Z. I. Botev, J. F. Grotowski, and D. P. Kroese.
        Ann. Statist. 38 (2010), no. 5, 2916--2957.
     """
-
     x_len = len(x)
     if x_range is None:
         x_min = np.min(x)
@@ -80,9 +74,7 @@ def _bw_isj(x, grid_counts=None, x_std=None, x_range=None):
 
 
 def _bw_experimental(x, grid_counts=None, x_std=None, x_range=None):
-    """Experimental bandwidth estimator.
-
-    """
+    """Experimental bandwidth estimator."""
     bw_silverman = _bw_silverman(x, x_std=x_std)
     bw_isj = _bw_isj(x, grid_counts=grid_counts, x_range=x_range)
     return 0.5 * (bw_silverman + bw_isj)
@@ -122,8 +114,8 @@ _BW_METHODS_LINEAR = {
 
 
 def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
-    """
-    Computes bandwidth for a given data `x` and `bw`.
+    """Compute bandwidth for a given data `x` and `bw`.
+
     Also checks `bw` is correctly specified.
 
     Parameters
@@ -175,6 +167,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
 
 
 def _vonmises_pdf(x, mu, kappa):
+    """Calculate vonmises_pdf."""
     if kappa <= 0:
         raise ValueError("Argument 'kappa' must be positive.")
     pdf = 1 / (2 * np.pi * ive(0, kappa)) * np.exp(np.cos(x - mu) - 1) ** kappa
@@ -182,7 +175,8 @@ def _vonmises_pdf(x, mu, kappa):
 
 
 def _a1inv(x):
-    """
+    """Compute inverse function.
+
     Inverse function of the ratio of the first and
     zeroth order Bessel functions of the first kind.
 
@@ -205,8 +199,7 @@ def _kappa_mle(x):
 
 
 def _dct1d(x):
-    """
-    Discrete Cosine Transform in 1 Dimension
+    """Discrete Cosine Transform in 1 Dimension.
 
     Parameters
     ----------
@@ -218,7 +211,6 @@ def _dct1d(x):
     -------
     output : DTC transformed values
     """
-
     x_len = len(x)
 
     even_increasing = np.arange(0, x_len, 2)
@@ -233,8 +225,9 @@ def _dct1d(x):
 
 
 def _fixed_point(t, N, k_sq, a_sq):
-    """
-    Implementation of the function t-zeta*gamma^[l](t) derived from equation (30) in [1]
+    """Calculate t-zeta*gamma^[l](t).
+
+    Implementation of the function t-zeta*gamma^[l](t) derived from equation (30) in [1].
 
     References
     ----------
@@ -242,7 +235,6 @@ def _fixed_point(t, N, k_sq, a_sq):
        Z. I. Botev, J. F. Grotowski, and D. P. Kroese.
        Ann. Statist. 38 (2010), no. 5, 2916--2957.
     """
-
     k_sq = np.asfarray(k_sq, dtype=np.float64)
     a_sq = np.asfarray(a_sq, dtype=np.float64)
 
@@ -288,8 +280,8 @@ def _root(function, N, args, x):
 
 
 def _check_type(x):
-    """
-    Checks the input is of the correct type.
+    """Check the input is of the correct type.
+
     It only accepts numeric lists/numpy arrays of 1 dimension or something that
     can be flattened to 1 dimension.
 
@@ -302,7 +294,6 @@ def _check_type(x):
     x : 1-D numpy array
         If no error is thrown, a 1 dimensional array of
         sample data from the variable for which a density estimate is desired.
-
     """
     # Will raise an error if `x` can't be casted to numeric or flattened to one dimension.
     try:
@@ -324,8 +315,8 @@ def _check_type(x):
 
 
 def _check_custom_lims(custom_lims, x_min, x_max):
-    """
-    Checks whether `custom_lims` are of the correct type.
+    """Check if `custom_lims` are of the correct type.
+
     It accepts numeric lists/tuples of length 2.
 
     Parameters
@@ -335,7 +326,6 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     Returns
     -------
     None: Object of type None
-
     """
     if not isinstance(custom_lims, (list, tuple)):
         raise TypeError(
@@ -374,8 +364,7 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 def _get_grid(
     x_min, x_max, x_std, extend_fct, grid_len, custom_lims, extend=True, bound_correction=False
 ):
-    """
-    Computes the grid that bins the data used to estimate the density function
+    """Compute the grid that bins the data used to estimate the density function.
 
     Parameters
     ----------
@@ -410,9 +399,7 @@ def _get_grid(
         Minimum value of the grid
     grid_max: float
         Maximum value of the grid
-
     """
-
     # Set up number of bins.
     if grid_len < 100:
         grid_len = 100
@@ -434,7 +421,7 @@ def _get_grid(
 
 
 def _kde(x, circular=False, **kwargs):
-    """1 dimensional density estimation.
+    """One dimensional density estimation.
 
     It is a wrapper around `kde_linear()` and `kde_circular()`.
 
@@ -461,81 +448,80 @@ def _kde(x, circular=False, **kwargs):
     .. plot::
         :context: close-figs
 
-    	>>> import numpy as np
-	>>> import matplotlib.pyplot as plt
-	>>> from arviz.kde_utils import _kde
-	>>>
-	>>> rvs = np.random.gamma(shape=1.8, size=1000)
-	>>> grid, pdf = _kde(rvs)
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> from arviz.kde_utils import _kde
+    >>>
+    >>> rvs = np.random.gamma(shape=1.8, size=1000)
+    >>> grid, pdf = _kde(rvs)
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Density estimation for linear data with Silverman's rule bandwidth
     .. plot::
         :context: close-figs
 
-	>>> grid, pdf = _kde(rvs, bw="silverman")
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> grid, pdf = _kde(rvs, bw="silverman")
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Density estimation for linear data with scaled bandwidth
     .. plot::
         :context: close-figs
 
-	>>> # bw_fct > 1 means more smoothness.
-	>>> grid, pdf = _kde(rvs, bw_fct=2.5)
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> # bw_fct > 1 means more smoothness.
+    >>> grid, pdf = _kde(rvs, bw_fct=2.5)
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Default density estimation for linear data with extended limits
     .. plot::
         :context: close-figs
 
-	>>> grid, pdf = _kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> grid, pdf = _kde(rvs, bound_correction=False, extend=True, extend_fct=0.5)
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Default density estimation for linear data with custom limits
     .. plot::
         :context: close-figs
-	# It accepts tuples and lists of length 2.
-	>>> grid, pdf = __kde(rvs, bound_correction=False, custom_lims=(0, 10))
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    # It accepts tuples and lists of length 2.
+    >>> grid, pdf = __kde(rvs, bound_correction=False, custom_lims=(0, 10))
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Default density estimation for circular data
     .. plot::
         :context: close-figs
 
-	>>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-	>>> grid, pdf = _kde(rvs, circular=True)
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+    >>> grid, pdf = _kde(rvs, circular=True)
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Density estimation for circular data with scaled bandwidth
     .. plot::
         :context: close-figs
 
-	>>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
-	>>> # bw_fct > 1 means less smoothness.
-	>>> grid, pdf = _kde(rvs, circular=True, bw_fct=3)
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> rvs = np.random.vonmises(mu=np.pi, kappa=1, size=500)
+    >>> # bw_fct > 1 means less smoothness.
+    >>> grid, pdf = _kde(rvs, circular=True, bw_fct=3)
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     Density estimation for circular data with custom limits
     .. plot::
         :context: close-figs
-	>>> # This is still experimental, does not always work.
-	>>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
-	>>> grid, pdf = _kde(rvs, circular=True, custom_lims=(-1, 1))
-	>>> plt.plot(grid, pdf)
-	>>> plt.show()
+    >>> # This is still experimental, does not always work.
+    >>> rvs = np.random.vonmises(mu=0, kappa=30, size=500)
+    >>> grid, pdf = _kde(rvs, circular=True, custom_lims=(-1, 1))
+    >>> plt.plot(grid, pdf)
+    >>> plt.show()
 
     See Also
     --------
     plot_kde : Compute and plot a kernel density estimate.
     arviz.kde_utils._kde: Arviz KDE estimator
-
     """
     if circular:
         kde_fun = _kde_circular
@@ -558,8 +544,7 @@ def _kde_linear(
     cumulative=False,
     grid_len=512,
 ):
-    """
-    1 dimensional density estimation for linear data.
+    """One dimensional density estimation for linear data.
 
     Given an array of data points `x` it returns an estimate of
     the probability density function that generated the samples in `x`.
@@ -613,7 +598,6 @@ def _kde_linear(
     pdf : Numpy array for the density estimates.
     bw: optional, the estimated bandwidth.
     """
-
     # Check `x` is from appropiate type
     try:
         x = _check_type(x)
@@ -664,8 +648,7 @@ def _kde_linear(
 def _kde_circular(
     x, bw="taylor", bw_fct=1, bw_return=False, custom_lims=None, cumulative=False, grid_len=512,
 ):
-    """
-    1 dimensional density estimation for circular data.
+    """One dimensional density estimation for circular data.
 
     Given an array of data points `x` measured in radians,
     it returns an estimate of the probability density function that generated
@@ -699,7 +682,6 @@ def _kde_circular(
         (a.k.a. the length of the grid used in the estimation)
         Defaults to 512.
     """
-
     try:
         x = _check_type(x)
     except ValueError as e:
@@ -764,12 +746,12 @@ def _kde_circular(
 
 
 def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
-    """
-    1 dimensional Gaussian kernel density estimation via
+    """Kernel density with convolution.
+
+    One dimensional Gaussian kernel density estimation via
     convolution of the binned relative frequencies and a Gaussian filter.
     This is an internal function used by `_kde()`.
     """
-
     # Calculate relative frequencies per bin
     bin_width = grid_edges[1] - grid_edges[0]
     f = grid_counts / bin_width / len(x)
@@ -799,8 +781,9 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction)
 
 
 def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
-    """
-    1 dimensional adaptive Gaussian kernel density estimation.
+    """Compute Adaptive Kernel Density Estimation.
+
+    One dimensional adaptive Gaussian kernel density estimation.
     The implementation uses the binning technique.
     Since there is not an unique `bw`, the convolution is not possible.
     The alternative implemented in this function is known as Abramson's method.

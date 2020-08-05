@@ -10,9 +10,7 @@ from .stats.stats_utils import histogram  # pylint: disable=unused-import
 
 
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument
-    """Deprecated Kernel Density Estimate
-
-    """
+    """Kernel Density Estimate, Deprecated."""
     if not (xmin is None and xmax is None):
         custom_lims = (xmin, xmax)
     else:
@@ -150,7 +148,7 @@ def _sturges_formula(dataset, mult=1):
     mult: float
         Used to scale the number of bins up or down. Default is 1 for Sturges' formula.
 
-     Returns
+    Returns
     -------
     int
         Number of bins to use
@@ -159,8 +157,8 @@ def _sturges_formula(dataset, mult=1):
 
 
 def _circular_mean(x, na_rm=False):
-    """
-    Computes mean of circular variable measured in radians.
+    """Compute mean of circular variable measured in radians.
+
     The result is between -pi and pi.
     """
     if na_rm:
@@ -174,8 +172,9 @@ def _circular_mean(x, na_rm=False):
 
 
 def _normalize_angle(x, zero_centered=True):
-    """
-    Takes angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
+    """Normalize angles.
+
+    Take angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
     depending on `zero_centered`.
     """
     if zero_centered:
