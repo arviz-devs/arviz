@@ -57,11 +57,9 @@ def plot_density(
     )
 
     backend_kwargs.setdefault("figsize", figsize)
-    backend_kwargs["squeeze"] = False
+    backend_kwargs.setdefault("squeeze", False)
     if ax is None:
         _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
-    else:
-        ax = np.atleast_2d(ax)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
@@ -88,8 +86,8 @@ def plot_density(
 
     if n_data > 1:
         for m_idx, label in enumerate(data_labels):
-            ax.item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax.item(0).legend(fontsize=xt_labelsize)
+            np.ravel(ax).item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
+        np.ravel(ax).item(0).legend(fontsize=xt_labelsize)
 
     if backend_show(show):
         plt.show()

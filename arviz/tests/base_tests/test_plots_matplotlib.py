@@ -117,15 +117,12 @@ def data_random():
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
-    if "ax" in kwargs:
-        assert axes.shape == (6, 3)
-    else:
-        assert axes.shape[0] >= 18
+    assert axes.shape == (6, 3)
 
 
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=0.9)
-    assert axes.shape[0] == 2
+    assert axes.size == 2
 
 
 def test_plot_density_no_subset():
@@ -133,7 +130,7 @@ def test_plot_density_no_subset():
     model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
     model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
     axes = plot_density([model_ab, model_bc])
-    assert axes.shape[0] == 3
+    assert axes.size == 3
 
 
 def test_plot_density_bad_kwargs(models):
@@ -249,7 +246,7 @@ def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     axes = plot_forest(obj, **args)
-    assert axes.shape == (expected,)
+    assert axes.size == expected
 
 
 def test_plot_forest_rope_exception():
@@ -712,7 +709,7 @@ def test_plot_ppc_ax(models, kind, fig_ax):
     """Test ax argument of plot_ppc."""
     _, ax = fig_ax
     axes = plot_ppc(models.model_1, kind=kind, ax=ax)
-    assert axes[0] is ax
+    assert np.asarray(axes).item(0) is ax
 
 
 @pytest.mark.skipif(
