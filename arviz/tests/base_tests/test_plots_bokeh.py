@@ -994,5 +994,5 @@ def test_plot_dist_comparison_warn(models):
     ],
 )
 def test_plot_bpv(models, kwargs):
-    axes = plot_bpv(models.model_1, backend="bokeh", **kwargs)
+    axes = plot_bpv(models.model_1, backend="bokeh", show=False, **kwargs)
     assert axes.shape
