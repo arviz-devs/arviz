@@ -52,7 +52,7 @@ def plot_dist(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
+        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs)
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
