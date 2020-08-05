@@ -24,7 +24,7 @@ def plot_trace(
     rug,
     lines,
     circ_var_names,
-    radians,
+    degrees,
     compact,
     compact_prop,
     combined,
@@ -69,8 +69,8 @@ def plot_trace(
         vertical lines on the density and horizontal lines on the trace.
     circ_var_names : list
         List of circular variables to account for when plotting KDE.
-    radians : bool
-        Whether the variables in ´circ_var_names´ are in radians.
+    degrees : bool
+        Whether the variables in `circ_var_names` are in degrees. Defaults to False.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
@@ -218,6 +218,7 @@ def plot_trace(
                     invalid_var_names, all_var_names
                 )
             )
+    # pylint: disable=too-many-nested-blocks
     for idx, (var_name, selection, value) in enumerate(plotters):
         for idy in range(2):
             value = np.atleast_2d(value)
@@ -234,7 +235,7 @@ def plot_trace(
                     aux_plot_kwargs = plot_kwargs
                     aux_trace_kwargs = trace_kwargs
 
-                _plot_chains_mpl(
+                axes = _plot_chains_mpl(
                     axes,
                     idy,
                     value,
@@ -251,6 +252,7 @@ def plot_trace(
                     rug_kwargs,
                     rank_kwargs,
                     is_circular,
+                    degrees,
                 )
 
             else:
@@ -274,7 +276,7 @@ def plot_trace(
                     aux_trace_kwargs = _dealiase_sel_kwargs(
                         trace_kwargs, compact_prop_iter, sub_idx
                     )
-                    _plot_chains_mpl(
+                    axes = _plot_chains_mpl(
                         axes,
                         idy,
                         value[..., sub_idx],
@@ -291,6 +293,7 @@ def plot_trace(
                         rug_kwargs,
                         rank_kwargs,
                         is_circular,
+                        degrees,
                     )
                     if legend:
                         handles.append(
@@ -358,29 +361,38 @@ def plot_trace(
                         )
                         axes.set_ylim(ylims)
 
-                if is_circular and radians:
-                    axes.set_xticklabels(
-                        [r"0", r"π/4", r"π/2", r"3π/4", r"π", r"5π/4", r"3π/2", r"7π/4",]
+            for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
+                if isinstance(vlines, (float, int)):
+                    line_values = [vlines]
+                else:
+                    line_values = np.atleast_1d(vlines).ravel()
+                    if not np.issubdtype(line_values.dtype, np.number):
+                        raise ValueError(
+                            "line-positions should be numeric, found {}".format(line_values)
+                        )
+                if idy == 1:
+                    axes.hlines(
+                        line_values,
+                        xlims[0],
+                        xlims[1],
+                        colors="black",
+                        linewidth=1.5,
+                        alpha=trace_kwargs["alpha"],
                     )
 
-        for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
-            if isinstance(vlines, (float, int)):
-                line_values = [vlines]
-            else:
-                line_values = np.ravel(vlines)
-                if not np.issubdtype(line_values.dtype, np.number):
-                    raise ValueError(
-                        "line-positions should be numeric, found {}".format(line_values)
+                else:
+                    axes.vlines(
+                        line_values,
+                        ylims[0],
+                        ylims[1],
+                        colors="black",
+                        linewidth=1.5,
+                        alpha=trace_kwargs["alpha"],
                     )
-            axes.vlines(line_values, ylims, colors="black", linewidth=1.5, alpha=0.75)
-            if kind == "trace":
-                axes.hlines(
-                    line_values, xlims, colors="black", linewidth=1.5, alpha=trace_kwargs["alpha"]
-                )
 
         if kind == "trace":
             axes.set_xlim(left=data.draw.min(), right=data.draw.max())
-            axes.set_ylim(ylims)
+            axes.set_ylim(*ylims)
 
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
@@ -422,7 +434,14 @@ def _plot_chains_mpl(
     rug_kwargs,
     rank_kwargs,
     is_circular,
+    degrees,
 ):
+
+    if is_circular and degrees:
+        is_circular = "degrees"
+    elif is_circular and not degrees:
+        is_circular = "radians"
+
     for chain_idx, row in enumerate(value):
         if kind == "trace":
             aux_kwargs = _dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
@@ -432,7 +451,7 @@ def _plot_chains_mpl(
         if not combined:
             aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
             if not idy:
-                plot_dist(
+                axes = plot_dist(
                     values=row,
                     textsize=xt_labelsize,
                     rug=rug,
@@ -446,15 +465,15 @@ def _plot_chains_mpl(
                     is_circular=is_circular,
                 )
 
-    if kind == "rank_bars":
-        plot_rank(data=value, kind="bars", ax=axes, **rank_kwargs)
-    elif kind == "rank_vlines":
-        plot_rank(data=value, kind="vlines", ax=axes, **rank_kwargs)
+    if kind == "rank_bars" and idy == 1:
+        axes = plot_rank(data=value, kind="bars", ax=axes, **rank_kwargs)
+    elif kind == "rank_vlines" and idy == 1:
+        axes = plot_rank(data=value, kind="vlines", ax=axes, **rank_kwargs)
 
     if combined:
         aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
         if not idy:
-            plot_dist(
+            axes = plot_dist(
                 values=value.flatten(),
                 textsize=xt_labelsize,
                 rug=rug,
@@ -467,23 +486,4 @@ def _plot_chains_mpl(
                 show=False,
                 is_circular=is_circular,
             )
-
-    if kind == "rank_bars":
-        plot_rank(data=value, kind="bars", ax=axes[idx, 1], **rank_kwargs)
-    elif kind == "rank_vlines":
-        plot_rank(data=value, kind="vlines", ax=axes[idx, 1], **rank_kwargs)
-
-    if combined:
-        aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
-        plot_dist(
-            values=value.flatten(),
-            textsize=xt_labelsize,
-            rug=rug,
-            ax=axes[idx, 0],
-            hist_kwargs=hist_kwargs,
-            plot_kwargs=aux_kwargs,
-            fill_kwargs=fill_kwargs,
-            rug_kwargs=rug_kwargs,
-            backend="matplotlib",
-            show=False,
-        )
+    return axes

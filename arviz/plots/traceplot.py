@@ -20,7 +20,7 @@ def plot_trace(
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
     circ_var_names: Optional[List[str]] = None,
-    radians: bool = True,
+    degrees: bool = False,
     compact: bool = False,
     compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
@@ -74,8 +74,8 @@ def plot_trace(
         vertical lines on the density and horizontal lines on the trace.
     circ_var_names : list
         List of circular variables to account for when plotting KDE.
-    radians : bool
-        Whether the variables in `circ_var_names` are in radians.
+    degrees : bool
+        Whether the variables in `circ_var_names` are in degrees. Defaults to False.
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
@@ -207,7 +207,7 @@ def plot_trace(
         figsize=figsize,
         rug=rug,
         lines=lines,
-        radians=radians,
+        degrees=degrees,
         circ_var_names=circ_var_names,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
