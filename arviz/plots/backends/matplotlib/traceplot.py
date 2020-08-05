@@ -166,6 +166,9 @@ def plot_trace(
     if figsize is None:
         figsize = (12, len(plotters) * 2)
 
+    backend_kwargs.setdefault("squeeze", False)
+    backend_kwargs.setdefault("figsize", figsize)
+
     trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
     trace_kwargs.setdefault("alpha", 0.35)
 
@@ -187,7 +190,7 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     if axes is None:
-        _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
+        _, axes = plt.subplots(len(plotters), 2, **backend_kwargs)
 
     axes = np.atleast_2d(axes)
     # Check the input for lines

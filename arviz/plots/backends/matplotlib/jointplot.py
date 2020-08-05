@@ -33,6 +33,8 @@ def plot_joint(
 
     figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
 
+    backend_kwargs.setdefault("figsize", figsize)
+
     if kind == "kde":
         types = "plot"
     elif kind == "scatter":
@@ -48,7 +50,7 @@ def plot_joint(
 
     if ax is None:
         # Instantiate figure and grid
-        fig = plt.figure(figsize=figsize, **backend_kwargs)
+        fig = plt.figure(**backend_kwargs)
         grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
         # Set up main plot

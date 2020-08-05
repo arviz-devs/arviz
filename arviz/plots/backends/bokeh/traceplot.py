@@ -141,14 +141,16 @@ def plot_trace(
 
     if axes is None:
         axes = []
+        backend_kwargs_copy = backend_kwargs.copy()
         for i in range(len(plotters)):
-            if i != 0:
+            if not i:
+                _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs_copy)]
+                backend_kwargs_copy.setdefault("x_range", _axes[1].x_range)
+            else:
                 _axes = [
                     bkp.figure(**backend_kwargs),
-                    bkp.figure(x_range=axes[0][1].x_range, **backend_kwargs),
+                    bkp.figure(**backend_kwargs_copy),
                 ]
-            else:
-                _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
             axes.append(_axes)
 
     axes = np.atleast_2d(axes)

@@ -45,6 +45,8 @@ def plot_dist_comparison(
 
     (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, 2 * nvars, ngroups)
 
+    backend_kwargs.setdefault("figsize", figsize)
+
     posterior_kwargs.setdefault("plot_kwargs", dict())
     posterior_kwargs["plot_kwargs"]["color"] = posterior_kwargs["plot_kwargs"].get("color", "C0")
     posterior_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
@@ -65,7 +67,7 @@ def plot_dist_comparison(
 
     if ax is None:
         axes = np.empty((nvars, ngroups + 1), dtype=object)
-        fig = plt.figure(**backend_kwargs, figsize=figsize)
+        fig = plt.figure(**backend_kwargs)
         gs = fig.add_gridspec(ncols=ngroups, nrows=nvars * 2)
         for i in range(nvars):
             for j in range(ngroups):

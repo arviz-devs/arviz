@@ -104,10 +104,10 @@ def plot_forest(
                 "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
             if i == 0:
-                ax = bkp.figure(**backend_kwargs,)
-                _y_range = ax.y_range
+                ax = bkp.figure(**backend_kwargs_i,)
+                backend_kwargs_i.setdefault("y_range", ax.y_range)
             else:
-                ax = bkp.figure(y_range=_y_range, **backend_kwargs,)
+                ax = bkp.figure(**backend_kwargs_i)
             axes.append(ax)
     else:
         axes = ax
