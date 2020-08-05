@@ -36,7 +36,7 @@ def plot_rank(
     }
     figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
     if axes is None:
-        _, axes = create_axes_grid(
+        axes = create_axes_grid(
             length_plotters,
             rows,
             cols,

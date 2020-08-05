@@ -45,7 +45,7 @@ def plot_violin(
     rug_kwargs.setdefault("fill_alpha", 0.1)
     rug_kwargs.setdefault("line_alpha", 0.1)
     if ax is None:
-        _, ax = create_axes_grid(
+        ax = create_axes_grid(
             len(plotters),
             rows,
             cols,

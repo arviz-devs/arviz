@@ -59,7 +59,7 @@ def plot_density(
     (figsize, _, _, _, line_width, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = create_axes_grid(
+        ax = create_axes_grid(
             length_plotters,
             rows,
             cols,

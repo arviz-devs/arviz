@@ -60,7 +60,7 @@ def plot_dist(
             hist_kwargs.setdefault("legend_label", str(label))
 
     if ax is None:
-        _, ax = create_axes_grid(
+        ax = create_axes_grid(
             1, figsize=figsize, squeeze=True, polar=is_circular, backend_kwargs=backend_kwargs,
         )
 

@@ -53,7 +53,7 @@ def plot_posterior(
     (figsize, ax_labelsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = create_axes_grid(
+        ax = create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:

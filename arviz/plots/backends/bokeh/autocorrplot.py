@@ -45,7 +45,7 @@ def plot_autocorr(
     figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, rows, cols)
 
     if axes is None:
-        _, axes = create_axes_grid(
+        axes = create_axes_grid(
             len(plotters),
             rows,
             cols,

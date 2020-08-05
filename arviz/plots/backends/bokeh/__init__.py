@@ -67,7 +67,7 @@ def create_axes_grid(
 
     Returns
     -------
-    p : bokeh figure or np.array of bokeh.figure
+    figures : bokeh figure or np.array of bokeh.figure
     """
     if backend_kwargs is None:
         backend_kwargs = {}

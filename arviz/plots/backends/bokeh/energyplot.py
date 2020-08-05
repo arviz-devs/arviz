@@ -49,7 +49,7 @@ def plot_energy(
         legend = False
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     _colors = [
         prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))

@@ -46,7 +46,7 @@ def plot_parallel(
     figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     non_div = list(posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]

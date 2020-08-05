@@ -60,7 +60,7 @@ def plot_kde(
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     glyphs = []
     if values2 is None:

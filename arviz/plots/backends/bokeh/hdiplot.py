@@ -27,7 +27,7 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     figsize, *_ = _scale_fig_size(figsize, None)
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     plot_kwargs.setdefault("line_color", plot_kwargs.pop("color"))
     plot_kwargs.setdefault("line_alpha", plot_kwargs.pop("alpha", 0))

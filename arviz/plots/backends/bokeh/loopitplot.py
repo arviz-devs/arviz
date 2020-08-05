@@ -52,7 +52,7 @@ def plot_loo_pit(
 
     if ax is None:
         backend_kwargs.setdefault("x_range", (0, 1))
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     plot_kwargs = {} if plot_kwargs is None else plot_kwargs
     plot_kwargs.setdefault("color", to_hex(color))

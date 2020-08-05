@@ -34,7 +34,7 @@ def plot_compare(
     figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     yticks_pos = list(yticks_pos)
 

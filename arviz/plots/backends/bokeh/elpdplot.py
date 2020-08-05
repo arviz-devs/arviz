@@ -57,9 +57,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            _, ax = create_axes_grid(
-                1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,
-            )
+            ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs

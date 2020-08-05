@@ -64,7 +64,7 @@ def plot_bpv(
     )
 
     if ax is None:
-        _, axes = create_axes_grid(
+        axes = create_axes_grid(
             length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:

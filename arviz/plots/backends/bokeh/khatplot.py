@@ -72,7 +72,7 @@ def plot_khat(
     rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
-        _, ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     if not isinstance(rgba_c, str) and isinstance(rgba_c, Iterable):
         for idx, (alpha, rgba_c_) in enumerate(zip(alphas, rgba_c)):
