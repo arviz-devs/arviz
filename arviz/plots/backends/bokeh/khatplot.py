@@ -8,9 +8,9 @@ from bokeh.models import Span
 from matplotlib.colors import to_rgba_array
 
 from ....stats.stats_utils import histogram
-from ...plot_utils import create_axes_grid, _scale_fig_size, color_from_dim, vectorized_to_hex
+from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_khat(

@@ -5,8 +5,6 @@ from itertools import product, tee
 from typing import Any, Dict
 
 import matplotlib as mpl
-import matplotlib.cbook as cbook
-import matplotlib.pyplot as plt
 import numpy as np
 import packaging
 import xarray as xr
@@ -584,50 +582,6 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         point_value = np.median(values)
 
     return point_value
-
-
-def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
-    """De-aliase the kwargs passed to plots."""
-    if args is None:
-        return {}
-    matplotlib_kwarg_dealiaser_dict = {
-        "scatter": mpl.collections.PathCollection,
-        "plot": mpl.lines.Line2D,
-        "hist": mpl.patches.Patch,
-        "bar": mpl.patches.Rectangle,
-        "hexbin": mpl.collections.PolyCollection,
-        "fill_between": mpl.collections.PolyCollection,
-        "hlines": mpl.collections.LineCollection,
-        "text": mpl.text.Text,
-        "contour": mpl.contour.ContourSet,
-        "pcolormesh": mpl.collections.QuadMesh,
-    }
-    if backend == "matplotlib":
-        return cbook.normalize_kwargs(
-            args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {})
-        )
-    return args
-
-
-def _dealiase_sel_kwargs(kwargs, prop_dict, idx):
-    """Generate kwargs dict from kwargs and prop_dict.
-
-    Gets property at position ``idx`` for each property in prop_dict and adds it to
-    ``kwargs``. Values in prop_dict are dealiased and overwrite values in
-    kwargs with the same key .
-
-    Parameters
-    ----------
-    kwargs : dict
-    prop_dict : dict of {str : array_like}
-    idx : int
-    """
-    return {
-        **kwargs,
-        **matplotlib_kwarg_dealiaser(
-            {prop: props[idx] for prop, props in prop_dict.items()}, "plot"
-        ),
-    }
 
 
 def is_valid_quantile(value):

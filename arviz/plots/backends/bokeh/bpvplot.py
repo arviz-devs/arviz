@@ -7,14 +7,13 @@ from scipy import stats
 from ....numeric_utils import _fast_kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    create_axes_grid,
     _scale_fig_size,
     is_valid_quantile,
     sample_reference_distribution,
     vectorized_to_hex,
 )
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 from ....kde_utils import _kde
 
 

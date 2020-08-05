@@ -4,14 +4,9 @@ import numpy as np
 
 from ....numeric_utils import get_bins
 from ...kdeplot import plot_kde
-from ...plot_utils import (
-    create_axes_grid,
-    _scale_fig_size,
-    set_bokeh_circular_ticks_labels,
-    vectorized_to_hex,
-)
+from ...plot_utils import _scale_fig_size, set_bokeh_circular_ticks_labels, vectorized_to_hex
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_dist(

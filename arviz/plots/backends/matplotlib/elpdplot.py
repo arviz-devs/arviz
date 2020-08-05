@@ -7,14 +7,8 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from ....rcparams import rcParams
-from ...plot_utils import (
-    create_axes_grid,
-    _scale_fig_size,
-    color_from_dim,
-    matplotlib_kwarg_dealiaser,
-    set_xticklabels,
-)
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_elpd(

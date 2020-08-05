@@ -5,8 +5,8 @@ import numpy as np
 from ....numeric_utils import _fast_kde, get_bins, histogram
 from ....stats import hdi
 from ....kde_utils import _kde
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_violin(
@@ -41,6 +41,9 @@ def plot_violin(
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("sharex", sharex)
+    backend_kwargs.setdefault("sharey", sharey)
 
     shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
@@ -49,16 +52,7 @@ def plot_violin(
     rug_kwargs.setdefault("linestyle", "")
 
     if ax is None:
-        fig, ax = create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            sharex=sharex,
-            sharey=sharey,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        fig, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
         fig.set_constrained_layout(False)
         fig.subplots_adjust(wspace=0)
 

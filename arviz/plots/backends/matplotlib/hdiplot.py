@@ -1,13 +1,8 @@
 """Matplotlib hdiplot."""
 import matplotlib.pyplot as plt
 
-from ...plot_utils import (
-    create_axes_grid,
-    _scale_fig_size,
-    matplotlib_kwarg_dealiaser,
-    vectorized_to_hex,
-)
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, vectorized_to_hex
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backend_kwargs, show):
@@ -28,7 +23,7 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
     fill_kwargs.setdefault("alpha", 0.5)
 
-    figsize, *_ = _scale_fig_size(figsize)
+    figsize, *_ = _scale_fig_size(figsize, None)
     backend_kwargs.setdefault("figsize", figsize)
 
     if ax is None:

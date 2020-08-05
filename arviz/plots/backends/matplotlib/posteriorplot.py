@@ -8,15 +8,13 @@ from ....numeric_utils import get_bins
 from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
     make_label,
-    matplotlib_kwarg_dealiaser,
     round_num,
 )
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_posterior(
@@ -53,6 +51,8 @@ def plot_posterior(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
+
     if kind == "hist":
         kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
     else:
@@ -60,14 +60,7 @@ def plot_posterior(
     kwargs.setdefault("linewidth", _linewidth)
 
     if ax is None:
-        _, ax = create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
     idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(

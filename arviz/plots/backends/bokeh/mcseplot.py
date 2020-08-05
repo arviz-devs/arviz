@@ -5,9 +5,9 @@ from bokeh.models.annotations import Title
 from scipy.stats import rankdata
 
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_mcse(

@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 
 from ...plot_utils import _scale_fig_size
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_compare(

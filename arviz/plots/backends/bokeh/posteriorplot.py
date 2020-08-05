@@ -9,7 +9,6 @@ from ....numeric_utils import get_bins
 from ....stats import hdi
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    create_axes_grid,
     _scale_fig_size,
     calculate_point_estimate,
     format_sig_figs,
@@ -17,7 +16,7 @@ from ...plot_utils import (
     round_num,
 )
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_posterior(

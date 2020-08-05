@@ -21,10 +21,9 @@ import os
 import re
 import sys
 
+import arviz
 import sphinx_bootstrap_theme
 from recommonmark.parser import CommonMarkParser
-
-import arviz
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

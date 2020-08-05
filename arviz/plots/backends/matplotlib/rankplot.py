@@ -4,8 +4,8 @@ import numpy as np
 import scipy.stats
 
 from ....stats.stats_utils import histogram
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_rank(
@@ -33,16 +33,9 @@ def plot_rank(
     }
 
     figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
-
+    backend_kwargs.setdefault("figsize", figsize)
     if axes is None:
-        _, axes = create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)

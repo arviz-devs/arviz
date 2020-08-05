@@ -5,9 +5,9 @@ from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
 from ....kde_utils import _kde
-from ...plot_utils import create_axes_grid, _scale_fig_size
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_loo_pit(

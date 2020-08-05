@@ -5,8 +5,8 @@ from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
 from ....kde_utils import _kde
-from ...plot_utils import _scale_fig_size, matplotlib_kwarg_dealiaser
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_loo_pit(
@@ -48,6 +48,10 @@ def plot_loo_pit(
     }
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+    backend_kwargs.setdefault("figsize", figsize)
+
+    if ax is None:
+        _, ax = create_axes_grid(1, squeeze=True, **backend_kwargs)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs["color"] = to_hex(color)
@@ -94,9 +98,6 @@ def plot_loo_pit(
         hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
         hdi_kwargs.setdefault("alpha", 0.35)
         hdi_kwargs.setdefault("label", "Uniform HDI")
-
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, **backend_kwargs)
 
     if ecdf:
         ax.plot(

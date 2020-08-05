@@ -7,8 +7,8 @@ from matplotlib.pyplot import rcParams as mpl_rcParams
 
 from ....stats import bfmi as e_bfmi
 from ...kdeplot import plot_kde
-from ...plot_utils import create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_energy(
@@ -38,9 +38,8 @@ def plot_energy(
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
     backend_kwargs.setdefault("figsize", figsize)
-    backend_kwargs.setdefault("squeeze", squeeze)
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs)
 
     fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
     types = "hist" if kind in {"hist", "histogram"} else "plot"

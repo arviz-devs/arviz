@@ -1,9 +1,9 @@
 """Bokeh hdiplot."""
 import numpy as np
 
-from ...plot_utils import create_axes_grid, _scale_fig_size, vectorized_to_hex
+from ...plot_utils import _scale_fig_size, vectorized_to_hex
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backend_kwargs, show):

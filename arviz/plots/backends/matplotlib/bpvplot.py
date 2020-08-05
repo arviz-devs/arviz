@@ -6,15 +6,13 @@ from scipy import stats
 from ....numeric_utils import _fast_kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    create_axes_grid,
     _scale_fig_size,
     is_valid_quantile,
     make_label,
-    matplotlib_kwarg_dealiaser,
     sample_reference_distribution,
 )
 from ....kde_utils import _kde
-from . import backend_kwarg_defaults, backend_show
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_bpv(

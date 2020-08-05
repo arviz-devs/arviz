@@ -1,9 +1,10 @@
 # pylint: disable=wrong-import-position
 """Bokeh Plotting Backend."""
-from packaging import version
-from ....rcparams import rcParams
-
 from bokeh.plotting import figure
+from numpy import array
+from packaging import version
+
+from ....rcparams import rcParams
 
 
 def backend_kwarg_defaults(*args, **kwargs):
@@ -95,7 +96,7 @@ def create_axes_grid(
         row_figures = []
         for col in range(cols):
             if (row == 0) and (col == 0) and (sharex or sharey):
-                p = figure(**backend_kwargs)
+                p = figure(**backend_kwargs)  # pylint: disable=invalid-name
                 row_figures.append(p)
                 if sharex:
                     backend_kwargs["x_range"] = p.x_range
@@ -107,10 +108,29 @@ def create_axes_grid(
                 else:
                     row_figures.append(figure(**backend_kwargs))
         figures.append(row_figures)
-    figures = np.array(figures)
+    figures = array(figures)
     if figures.size == 1 and squeeze:
         figures = figures[0, 0]
     return figures
+
+
+def dealiase_sel_kwargs(kwargs, prop_dict, idx):
+    """Generate kwargs dict from kwargs and prop_dict.
+
+    Gets property at position ``idx`` for each property in prop_dict and adds it to
+    ``kwargs``. Values in prop_dict are dealiased and overwrite values in
+    kwargs with the same key .
+
+    Parameters
+    ----------
+    kwargs : dict
+    prop_dict : dict of {str : array_like}
+    idx : int
+    """
+    return {
+        **kwargs,
+        **{prop: props[idx] for prop, props in prop_dict.items()},
+    }
 
 
 from .autocorrplot import plot_autocorr

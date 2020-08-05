@@ -2,8 +2,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from ...plot_utils import create_axes_grid, _scale_fig_size, matplotlib_kwarg_dealiaser
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_kde(
@@ -48,21 +48,14 @@ def plot_kde(
         **backend_kwargs,
     }
 
-    figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
+    figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize)
 
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("", {})
+    backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(
-            1,
-            1,
-            1,
-            figsize=figsize,
-            squeeze=True,
-            backend="matplotlib",
-            polar=is_circular,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs,)
 
     if values2 is None:
         plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
@@ -81,10 +74,6 @@ def plot_kde(
 
         plot_kwargs.setdefault("linewidth", linewidth)
         rug_kwargs.setdefault("markersize", 2 * markersize)
-
-        figsize = ax.get_figure().get_size_inches()
-
-        figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize, 1, 1)
 
         rug_space = max(density) * rug_kwargs.pop("space")
 

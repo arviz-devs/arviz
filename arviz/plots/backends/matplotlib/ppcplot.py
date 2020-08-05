@@ -9,8 +9,8 @@ from matplotlib import animation, get_backend
 from ....numeric_utils import _fast_kde, get_bins, histogram
 from ...kdeplot import plot_kde
 from ....kde_utils import _kde
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 _log = logging.getLogger(__name__)
 
@@ -92,10 +92,9 @@ def plot_ppc(
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
     if ax is None:
-        fig, axes = create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
-        )
+        fig, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:

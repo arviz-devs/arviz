@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ....stats import autocorr
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_autocorr(

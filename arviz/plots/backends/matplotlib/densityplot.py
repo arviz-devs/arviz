@@ -7,8 +7,8 @@ import numpy as np
 from ....numeric_utils import get_bins
 from ....kde_utils import _kde
 from ....stats import hdi
-from ...plot_utils import create_axes_grid, _scale_fig_size, calculate_point_estimate, make_label
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_density(

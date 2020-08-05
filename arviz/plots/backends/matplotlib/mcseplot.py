@@ -4,8 +4,8 @@ import numpy as np
 from scipy.stats import rankdata
 
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import create_axes_grid, _scale_fig_size, make_label, matplotlib_kwarg_dealiaser
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_mcse(
@@ -44,6 +44,8 @@ def plot_mcse(
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
+
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     kwargs.setdefault("linestyle", "none")
     kwargs.setdefault("linewidth", _linewidth)
@@ -69,12 +71,7 @@ def plot_mcse(
 
     if ax is None:
         _, ax = create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
+            length_plotters, rows, cols, squeeze=False, backend_kwargs=backend_kwargs,
         )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):

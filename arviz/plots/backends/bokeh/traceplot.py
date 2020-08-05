@@ -10,10 +10,10 @@ from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
 from bokeh.models.annotations import Title
 
 from ...distplot import plot_dist
-from ...plot_utils import _dealiase_sel_kwargs, _scale_fig_size, make_label, xarray_var_iter
+from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
 from ...rankplot import plot_rank
 from .. import show_layout
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, dealiase_sel_kwargs
 
 
 def plot_trace(
@@ -365,7 +365,7 @@ def _plot_chains_bokeh(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **_dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             )
             if marker:
                 ax_trace.circle(
@@ -374,7 +374,7 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **_dealiase_sel_kwargs({}, chain_prop, chain_idx)
+                    **dealiase_sel_kwargs({}, chain_prop, chain_idx)
                 )
         if not combined:
             rug_kwargs["cds"] = cds
@@ -385,7 +385,7 @@ def _plot_chains_bokeh(
                 ax=ax_density,
                 rug=rug,
                 hist_kwargs=hist_kwargs,
-                plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx),
+                plot_kwargs=dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx),
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
@@ -409,7 +409,7 @@ def _plot_chains_bokeh(
             ax=ax_density,
             rug=rug,
             hist_kwargs=hist_kwargs,
-            plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, -1),
+            plot_kwargs=dealiase_sel_kwargs(plot_kwargs, chain_prop, -1),
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
