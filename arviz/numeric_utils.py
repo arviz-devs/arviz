@@ -1,83 +1,24 @@
 """Numerical utility functions for ArviZ."""
 import warnings
 import numpy as np
-from scipy.signal import convolve, convolve2d
-from scipy.signal.windows import gaussian
+from scipy.signal import convolve2d
 from scipy.sparse import coo_matrix
 
-from .stats.stats_utils import histogram
 from .utils import _stack, _dot, _cov
+from .kde_utils import _kde
+from .stats.stats_utils import histogram  # pylint: disable=unused-import
 
 
-def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):
-    """Fast Fourier transform-based Gaussian kernel density estimate (KDE).
+def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument
+    """Kernel Density Estimate, Deprecated."""
+    if not (xmin is None and xmax is None):
+        custom_lims = (xmin, xmax)
+    else:
+        custom_lims = None
+    grid, pdf = _kde(x, cumulative=cumulative, bw=bw, custom_lims=custom_lims)
 
-    The code was adapted from https://github.com/mfouesneau/faststats
-
-    Parameters
-    ----------
-    x : Numpy array or list
-    cumulative : bool
-        If true, estimate the cdf instead of the pdf
-    bw : float
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy).
-    xmin : float
-        Manually set lower limit.
-    xmax : float
-        Manually set upper limit.
-
-    Returns
-    -------
-    density: A gridded 1D KDE of the input points (x)
-    xmin: minimum value of x
-    xmax: maximum value of x
-    """
-    x = np.asarray(x, dtype=float)
-    x = x[np.isfinite(x)]
-    if x.size == 0:
-        warnings.warn("kde plot failed, you may want to check your data")
-        return np.array([np.nan]), np.nan, np.nan
-
-    len_x = len(x)
-    n_points = 200 if (xmin or xmax) is None else 500
-
-    if xmin is None:
-        xmin = np.min(x)
-    if xmax is None:
-        xmax = np.max(x)
-
-    assert np.min(x) >= xmin
-    assert np.max(x) <= xmax
-
-    log_len_x = np.log(len_x) * bw
-
-    n_bins = min(int(len_x ** (1 / 3) * log_len_x * 2), n_points)
-    if n_bins < 2:
-        warnings.warn("kde plot failed, you may want to check your data")
-        return np.array([np.nan]), np.nan, np.nan
-
-    # hist, bin_edges = np.histogram(x, bins=n_bins, range=(xmin, xmax))
-    # grid = hist / (hist.sum() * np.diff(bin_edges))
-
-    _, grid, _ = histogram(x, n_bins, range_hist=(xmin, xmax))
-
-    scotts_factor = len_x ** (-0.2)
-    kern_nx = int(scotts_factor * 2 * np.pi * log_len_x)
-    kernel = gaussian(kern_nx, scotts_factor * log_len_x)
-
-    npad = min(n_bins, 2 * kern_nx)
-    grid = np.concatenate([grid[npad:0:-1], grid, grid[n_bins : n_bins - npad : -1]])
-    density = convolve(grid, kernel, mode="same", method="direct")[npad : npad + n_bins]
-    norm_factor = (2 * np.pi * log_len_x ** 2 * scotts_factor ** 2) ** 0.5
-
-    density /= norm_factor
-
-    if cumulative:
-        density = density.cumsum() / density.sum()
-
-    return density, xmin, xmax
+    warnings.warn("_fast_kde() has been replaced by _kde() in kde_utils.py", FutureWarning)
+    return grid, pdf
 
 
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
@@ -202,7 +143,7 @@ def _sturges_formula(dataset, mult=1):
     Parameters
     ----------
     dataset: xarray.DataSet
-        Must have the `draw` dimension
+       Must have the `draw` dimension
 
     mult: float
         Used to scale the number of bins up or down. Default is 1 for Sturges' formula.
@@ -213,3 +154,30 @@ def _sturges_formula(dataset, mult=1):
         Number of bins to use
     """
     return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
+
+
+def _circular_mean(x, na_rm=False):
+    """Compute mean of circular variable measured in radians.
+
+    The result is between -pi and pi.
+    """
+    if na_rm:
+        x = x[~np.isnan(x)]
+
+    sinr = np.sum(np.sin(x))
+    cosr = np.sum(np.cos(x))
+    mean = np.arctan2(sinr, cosr)
+
+    return mean
+
+
+def _normalize_angle(x, zero_centered=True):
+    """Normalize angles.
+
+    Take angles in radians and normalize them to [-pi, pi) or [0, 2 * pi)
+    depending on `zero_centered`.
+    """
+    if zero_centered:
+        return (x + np.pi) % (2 * np.pi) - np.pi
+    else:
+        return x % (2 * np.pi)

@@ -28,6 +28,7 @@ def plot_posterior(
     figsize,
     plotters,
     bw,
+    circular,
     bins,
     kind,
     point_estimate,
@@ -75,6 +76,7 @@ def plot_posterior(
             selection,
             ax=ax_,
             bw=bw,
+            circular=circular,
             bins=bins,
             kind=kind,
             point_estimate=point_estimate,
@@ -104,6 +106,7 @@ def _plot_posterior_op(
     selection,
     ax,
     bw,
+    circular,
     linewidth,
     bins,
     kind,
@@ -192,7 +195,7 @@ def _plot_posterior_op(
     def display_point_estimate(max_data):
         if not point_estimate:
             return
-        point_value = calculate_point_estimate(point_estimate, values, bw)
+        point_value = calculate_point_estimate(point_estimate, values, bw, circular)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
@@ -234,6 +237,7 @@ def _plot_posterior_op(
         plot_kde(
             values,
             bw=bw,
+            circular=circular,
             fill_kwargs={"fill_alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,

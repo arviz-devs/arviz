@@ -12,7 +12,8 @@ from ...plot_utils import (
     _scale_fig_size,
     calculate_point_estimate,
 )
-from ....numeric_utils import _fast_kde, get_bins
+from ....numeric_utils import get_bins
+from ....kde_utils import _kde
 
 
 def plot_density(
@@ -21,6 +22,7 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    circular,
     figsize,
     length_plotters,
     rows,
@@ -74,6 +76,7 @@ def plot_density(
                 label,
                 colors[m_idx],
                 bw,
+                circular,
                 titlesize,
                 xt_labelsize,
                 linewidth,
@@ -102,6 +105,7 @@ def _d_helper(
     vname,
     color,
     bw,
+    circular,
     titlesize,
     xt_labelsize,
     linewidth,
@@ -123,10 +127,11 @@ def _d_helper(
         variable name
     color : str
         matplotlib color
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
     titlesize : float
         font size for title
     xt_labelsize : float
@@ -152,11 +157,10 @@ def _d_helper(
         else:
             new_vec = vec
 
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        x, density = _kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
+        xmin, xmax = x[0], x[-1]
+        ymin, ymax = density[0], density[-1]
 
         if outline:
             ax.plot(x, density, color=color, lw=linewidth)

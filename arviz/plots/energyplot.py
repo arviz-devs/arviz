@@ -12,7 +12,7 @@ def plot_energy(
     legend=True,
     fill_alpha=(1, 0.75),
     fill_color=("C0", "C5"),
-    bw=4.5,
+    bw="experimental",
     textsize=None,
     fill_kwargs=None,
     plot_kwargs=None,
@@ -43,10 +43,11 @@ def plot_energy(
     fill_color : tuple of valid matplotlib color
         Color for Marginal energy distribution and Energy transition distribution.
         Defaults to ('C0', 'C5')
-    bw : float
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy). Only works if `kind='kde'`
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental". Defaults to "experimental"
+        Only works if `kind='kde'`
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.

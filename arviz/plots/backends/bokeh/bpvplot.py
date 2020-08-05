@@ -14,7 +14,7 @@ from ...plot_utils import (
     is_valid_quantile,
     vectorized_to_hex,
 )
-from ....numeric_utils import _fast_kde
+from ....kde_utils import _kde
 
 
 def plot_bpv(
@@ -91,8 +91,7 @@ def plot_bpv(
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = _kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
             # ax_i.set_yticks([])
             if reference is not None:
@@ -112,8 +111,7 @@ def plot_bpv(
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = _kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_color=color)
             if reference is not None:
                 if reference == "analytical":

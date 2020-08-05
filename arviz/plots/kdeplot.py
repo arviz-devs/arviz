@@ -3,7 +3,8 @@
 import xarray as xr
 
 from ..data import InferenceData
-from ..numeric_utils import _fast_kde, _fast_kde_2d
+from ..numeric_utils import _fast_kde_2d
+from ..kde_utils import _kde
 from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
 
@@ -14,7 +15,9 @@ def plot_kde(
     cumulative=False,
     rug=False,
     label=None,
-    bw=4.5,
+    bw="default",
+    adaptive=False,
+    circular=False,
     quantiles=None,
     rotated=False,
     contour=True,
@@ -50,17 +53,27 @@ def plot_kde(
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
     label : string
         Text to include as part of the legend
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
-        rule of thumb (the default rule used by SciPy).
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    adaptive: bool, optional.
+        If True, an adaptative bandwidth is used. Only valid for 1D KDE.
+        Defaults to False.
+    circular: bool, optional.
+        If True, it interprets `values` is a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
-        Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
-        Defaults to None.
+        Quantiles in ascending order used to segment the KDE.
+        Use [.25, .5, .75] for quartiles. Defaults to None.
     rotated : bool
         Whether to rotate the 1D KDE plot 90 degrees.
     contour : bool
-        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
+        If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE.
+        Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
     textsize: float
@@ -127,6 +140,35 @@ def plot_kde(
 
         >>> az.plot_kde(mu_posterior, rug=True)
 
+    Plot KDE with adaptive bandwidth
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, adaptive=True)
+
+    Plot KDE with a different bandwidth estimator
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, bw="scott")
+
+    Plot KDE with a bandwidth specified manually
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_kde(mu_posterior, bw=0.4)
+
+    Plot KDE for a circular variable
+
+    .. plot::
+        :context: close-figs
+
+        >>> rvs = np.random.vonmises(mu=np.pi, kappa=2, size=500)
+        >>> az.plot_kde(rvs, circular=True)
+
 
     Plot a cumulative distribution
 
@@ -179,6 +221,10 @@ def plot_kde(
 
         >>> az.plot_kde(mu_posterior, values2=tau_posterior, contour=False)
 
+    See Also
+    --------
+    plot_kde : Compute and plot a kernel density estimate.
+
     """
     if isinstance(values, xr.Dataset):
         raise ValueError(
@@ -192,7 +238,15 @@ def plot_kde(
         )
 
     if values2 is None:
-        density, lower, upper = _fast_kde(values, cumulative, bw)
+
+        if bw == "default":
+            if circular:
+                bw = "taylor"
+            else:
+                bw = "experimental"
+
+        grid, density = _kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
+        lower, upper = grid[0], grid[-1]
 
         if cumulative:
             density_q = density

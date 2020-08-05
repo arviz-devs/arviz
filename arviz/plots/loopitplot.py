@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats as stats
 
 from ..stats import loo_pit as _loo_pit
-from ..numeric_utils import _fast_kde
+from ..kde_utils import _kde
 from .plot_utils import get_plotting_function
 
 from ..rcparams import rcParams
@@ -161,10 +161,9 @@ def plot_loo_pit(
         )
         unif_ecdf = unif_ecdf / n_data_points
     else:
-        loo_pit_kde, xmin, xmax = _fast_kde(loo_pit)
+        x_vals, loo_pit_kde = _kde(loo_pit)
 
         unif = np.random.uniform(size=(n_unif, loo_pit.size))
-        x_vals = np.linspace(xmin, xmax, len(loo_pit_kde))
         if use_hdi:
             n_obs = loo_pit.size
             hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - credible_interval) / 2)
