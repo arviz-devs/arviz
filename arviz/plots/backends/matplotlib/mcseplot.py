@@ -45,6 +45,7 @@ def plot_mcse(
         figsize, textsize, rows, cols
     )
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
 
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     kwargs.setdefault("linestyle", "none")
@@ -70,9 +71,7 @@ def plot_mcse(
         text_va = text_kwargs.pop("verticalalignment", None)
 
     if ax is None:
-        _, ax = create_axes_grid(
-            length_plotters, rows, cols, squeeze=False, backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         if errorbar or rug:

@@ -93,6 +93,7 @@ def plot_ppc(
         figsize, textsize, rows, cols
     )
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
     if ax is None:
         fig, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
     else:
@@ -108,7 +109,7 @@ def plot_ppc(
             if not all([ax.get_figure() is fig for ax in axes]):
                 raise ValueError("All axes must be on the same figure for animation to work")
 
-    for i, ax_i in enumerate(axes):
+    for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind

@@ -38,8 +38,9 @@ def plot_energy(
 
     figsize, _, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
     if ax is None:
-        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "hexbin")
     types = "hist" if kind in {"hist", "histogram"} else "plot"

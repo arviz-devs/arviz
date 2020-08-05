@@ -49,9 +49,10 @@ def plot_loo_pit(
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
 
     if ax is None:
-        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs["color"] = to_hex(color)

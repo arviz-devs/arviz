@@ -32,8 +32,9 @@ def plot_parallel(
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
     if ax is None:
-        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     ax.plot(posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
 

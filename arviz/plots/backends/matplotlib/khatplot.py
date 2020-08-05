@@ -58,6 +58,7 @@ def plot_khat(
         figsize, textsize
     )
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
 
     hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])

@@ -44,6 +44,7 @@ def plot_violin(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs.setdefault("sharex", sharex)
     backend_kwargs.setdefault("sharey", sharey)
+    backend_kwargs.setdefault("squeeze", True)
 
     shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")

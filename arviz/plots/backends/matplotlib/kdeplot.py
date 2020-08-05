@@ -51,11 +51,12 @@ def plot_kde(
     figsize, *_, xt_labelsize, linewidth, markersize = _scale_fig_size(figsize, textsize)
 
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
     backend_kwargs.setdefault("subplot_kw", {})
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(1, squeeze=True, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
     if values2 is None:
         plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")

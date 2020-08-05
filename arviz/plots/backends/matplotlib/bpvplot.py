@@ -51,6 +51,7 @@ def plot_bpv(
     )
 
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
 
     if (kind == "u_value") and (reference == "analytical"):
         plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "fill_between")
@@ -67,15 +68,16 @@ def plot_bpv(
     if ax is None:
         _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
     else:
-        axes = np.ravel(ax)
-        if len(axes) != length_plotters:
+        axes = np.asarray(ax)
+        if axes.size < length_plotters:
             raise ValueError(
-                "Found {} variables to plot but {} axes instances. They must be equal.".format(
-                    length_plotters, len(axes)
-                )
+                (
+                    "Found {} variables to plot but {} axes instances. "
+                    "Axes instances must at minimum be equal to variables."
+                ).format(length_plotters, axes.size)
             )
 
-    for i, ax_i in enumerate(axes):
+    for i, ax_i in enumerate(axes.ravel()[:length_plotters]):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
 

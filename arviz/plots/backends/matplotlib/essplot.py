@@ -49,6 +49,7 @@ def plot_ess(
         figsize, textsize, rows, cols
     )
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
 
     kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
     _linestyle = "-" if kind == "evolution" else "none"

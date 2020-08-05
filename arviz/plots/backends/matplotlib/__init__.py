@@ -4,7 +4,7 @@ import matplotlib as mpl
 
 from matplotlib.cbook import normalize_kwargs
 from matplotlib.pyplot import subplots
-from numpy import ravel
+from numpy import ndenumerate
 
 from ....rcparams import rcParams
 
@@ -30,7 +30,7 @@ def backend_show(show):
     return show
 
 
-def create_axes_grid(length_plotters, rows=1, cols=1, squeeze=False, backend_kwargs=None):
+def create_axes_grid(length_plotters, rows=1, cols=1, backend_kwargs=None):
     """Create figure and axes for grids with multiple plots.
 
     Parameters
@@ -41,8 +41,6 @@ def create_axes_grid(length_plotters, rows=1, cols=1, squeeze=False, backend_kwa
         Number of rows
     cols : int
         Number of columns
-    squeeze : bool
-        Return Axis object if True else ndarray of Axis objects.
     backend_kwargs: dict, optional
         kwargs for backend figure.
 
@@ -57,14 +55,11 @@ def create_axes_grid(length_plotters, rows=1, cols=1, squeeze=False, backend_kwa
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
     fig, axes = subplots(rows, cols, **backend_kwargs)
-    axes = ravel(axes)
     extra = (rows * cols) - length_plotters
-    if extra:
-        for i in range(1, extra + 1):
-            axes[-i].set_axis_off()
-        axes = axes[:-extra]
-    if axes.size == 1 and squeeze:
-        axes = axes[0]
+    if extra > 0:
+        for (row, col), ax in ndenumerate(axes):
+            if (row * cols + col + 1) > length_plotters:
+                axes[row, col].set_axis_off()
     return fig, axes
 
 

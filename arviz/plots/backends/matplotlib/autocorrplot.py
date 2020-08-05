@@ -26,11 +26,12 @@ def plot_autocorr(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs.setdefault("sharex", True)
     backend_kwargs.setdefault("sharey", True)
+    backend_kwargs.setdefault("squeeze", True)
 
     if axes is None:
         _, axes = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
 
-    for (var_name, selection, x), ax in zip(plotters, axes):
+    for (var_name, selection, x), ax in zip(plotters, np.ravel(axes)):
         x_prime = x
         if combined:
             x_prime = x.flatten()
@@ -40,9 +41,9 @@ def plot_autocorr(
         ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True)
         ax.tick_params(labelsize=xt_labelsize)
 
-    if axes.size > 0:
-        axes[0].set_xlim(0, max_lag)
-        axes[0].set_ylim(-1, 1)
+    if np.asarray(axes).size > 0:
+        np.asarray(axes).item(0).set_xlim(0, max_lag)
+        np.asarray(axes).item(0).set_ylim(-1, 1)
 
     if backend_show(show):
         plt.show()

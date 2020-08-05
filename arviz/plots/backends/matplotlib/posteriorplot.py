@@ -52,6 +52,7 @@ def plot_posterior(
         figsize, textsize, rows, cols
     )
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
 
     if kind == "hist":
         kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")

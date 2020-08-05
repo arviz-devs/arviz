@@ -34,6 +34,7 @@ def plot_rank(
 
     figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
     if axes is None:
         _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 

@@ -57,7 +57,7 @@ def plot_density(
     )
 
     backend_kwargs.setdefault("figsize", figsize)
-
+    backend_kwargs["squeeze"] = False
     if ax is None:
         _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
     else:

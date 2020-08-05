@@ -72,6 +72,7 @@ def plot_elpd(
         )
         plot_kwargs.setdefault("s", markersize ** 2)
         backend_kwargs.setdefault("figsize", figsize)
+        backend_kwargs["squeeze"] = True
         if ax is None:
             fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
@@ -129,6 +130,7 @@ def plot_elpd(
                 numvars - 1,
                 numvars - 1,
                 figsize=figsize,
+                squeeze=False,
                 constrained_layout=not xlabels,
                 sharey="row",
                 sharex="all",

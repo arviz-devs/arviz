@@ -25,6 +25,7 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
 
     figsize, *_ = _scale_fig_size(figsize, None)
     backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
 
     if ax is None:
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
