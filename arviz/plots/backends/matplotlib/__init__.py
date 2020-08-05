@@ -59,7 +59,7 @@ def create_axes_grid(length_plotters, rows=1, cols=1, backend_kwargs=None):
     if extra > 0:
         for (row, col), ax in ndenumerate(axes):
             if (row * cols + col + 1) > length_plotters:
-                axes[row, col].set_axis_off()
+                ax.set_axis_off()
     return fig, axes
 
 
