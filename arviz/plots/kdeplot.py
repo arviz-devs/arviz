@@ -3,8 +3,8 @@
 import xarray as xr
 
 from ..data import InferenceData
-from ..numeric_utils import _fast_kde_2d
 from ..kde_utils import _kde
+from ..numeric_utils import _fast_kde_2d
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 

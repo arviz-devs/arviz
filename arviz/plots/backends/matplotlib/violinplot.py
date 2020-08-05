@@ -2,9 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....numeric_utils import _fast_kde, get_bins, histogram
-from ....stats import hdi
 from ....kde_utils import _kde
+from ....numeric_utils import get_bins, histogram
+from ....stats import hdi
 from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 

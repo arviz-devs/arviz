@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation, get_backend
 
-from ....numeric_utils import _fast_kde, get_bins, histogram
-from ...kdeplot import plot_kde
 from ....kde_utils import _kde
+from ....numeric_utils import get_bins, histogram
+from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 

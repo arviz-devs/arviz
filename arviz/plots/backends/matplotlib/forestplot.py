@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba
 
-from ....numeric_utils import _fast_kde, get_bins, histogram
+from ....kde_utils import _kde
+from ....numeric_utils import get_bins, histogram
 from ....stats import hdi
 from ....stats.diagnostics import _ess, _rhat
-from ....kde_utils import _kde
 from ....utils import conditional_jit
 from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
 from . import backend_kwarg_defaults, backend_show

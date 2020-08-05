@@ -6,9 +6,8 @@ import numpy as np
 import pytest
 import scipy.stats as st
 
-from arviz.data.base import dict_to_dataset
-
-from ...data import from_dict, load_arviz_data
+from ...data import dict_to_dataset, from_dict, load_arviz_data
+from ...numeric_utils import _circular_mean, _normalize_angle
 from ...utils import (
     _stack,
     _subset_list,

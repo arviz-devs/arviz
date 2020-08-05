@@ -5,13 +5,13 @@ import numpy as np
 from scipy.signal import convolve2d
 from scipy.sparse import coo_matrix
 
-from .kde_utils import _kde
-from .stats.stats_utils import histogram
 from .utils import _cov, _dot, _stack, conditional_jit
 
 
 def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument
     """Kernel Density Estimate, Deprecated."""
+    from .kde_utils import _kde
+
     if not (xmin is None and xmax is None):
         custom_lims = (xmin, xmax)
     else:

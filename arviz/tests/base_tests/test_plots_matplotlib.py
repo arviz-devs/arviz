@@ -11,6 +11,7 @@ from pandas import DataFrame
 from scipy.stats import gaussian_kde
 
 from ...data import from_dict, load_arviz_data
+from ...kde_utils import _kde
 from ...numeric_utils import _fast_kde
 from ...plots import (
     plot_autocorr,
@@ -40,7 +41,6 @@ from ...plots import (
 from ...rcparams import rc_context, rcParams
 from ...stats import compare, hdi, loo, waic
 from ...utils import _cov
-from ...kde_utils import _kde
 from ..helpers import (  # pylint: disable=unused-import
     create_model,
     create_multidimensional_model,

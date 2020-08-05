@@ -2,8 +2,8 @@
 import numpy as np
 from bokeh.models.annotations import Title
 
-from ....numeric_utils import histogram, get_bins
 from ....kde_utils import _kde
+from ....numeric_utils import get_bins, histogram
 from ....stats import hdi
 from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout

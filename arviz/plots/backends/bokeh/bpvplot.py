@@ -4,7 +4,7 @@ from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
 from scipy import stats
 
-from ....numeric_utils import _fast_kde
+from ....kde_utils import _kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -14,7 +14,6 @@ from ...plot_utils import (
 )
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
-from ....kde_utils import _kde
 
 
 def plot_bpv(

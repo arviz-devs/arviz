@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-from ....numeric_utils import _fast_kde
+from ....kde_utils import _kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -11,7 +11,6 @@ from ...plot_utils import (
     make_label,
     sample_reference_distribution,
 )
-from ....kde_utils import _kde
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 

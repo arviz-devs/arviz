@@ -2,13 +2,14 @@
 """Kernel density estimation functions for ArviZ."""
 
 import warnings
+
 import numpy as np
 from scipy.fftpack import fft
 from scipy.optimize import brentq
-from scipy.signal import gaussian, convolve
+from scipy.signal import convolve, gaussian
 from scipy.special import ive  # pylint: disable=no-name-in-module
 
-from .stats.stats_utils import histogram
+from .numeric_utils import histogram
 
 
 def _bw_scott(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
@@ -191,7 +192,7 @@ def _a1inv(x):
 
 
 def _kappa_mle(x):
-    from numeric_utils import _circular_mean
+    from .numeric_utils import _circular_mean
 
     mean = _circular_mean(x)
     kappa = _a1inv(np.mean(np.cos(x - mean)))
@@ -689,7 +690,7 @@ def _kde_circular(
         return np.array([np.nan]), np.array([np.nan])
 
     # All values between -pi and pi
-    from numeric_utils import _normalize_angle
+    from .numeric_utils import _normalize_angle
 
     x = _normalize_angle(x)
 
