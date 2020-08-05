@@ -42,7 +42,10 @@ class TestDataCmdStanPy:
 
         class Data:
             args = CmdStanArgs(
-                "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
+                "dummy.stan",
+                "dummy.exe",
+                list(range(1, 5)),
+                method_args=SamplerArgs(iter_sampling=100),
             )
             runset_obj = RunSet(args)
             runset_obj._csv_files = filepaths  # pylint: disable=protected-access
