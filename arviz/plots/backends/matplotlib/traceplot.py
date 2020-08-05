@@ -340,7 +340,7 @@ def plot_trace(
             if isinstance(vlines, (float, int)):
                 line_values = [vlines]
             else:
-                line_values = np.atleast_1d(vlines).ravel()
+                line_values = np.ravel(vlines)
                 if not np.issubdtype(line_values.dtype, np.number):
                     raise ValueError(
                         "line-positions should be numeric, found {}".format(line_values)

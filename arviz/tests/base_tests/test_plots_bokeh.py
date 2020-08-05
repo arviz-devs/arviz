@@ -102,7 +102,7 @@ def test_plot_density_no_subset():
     model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
     model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
     axes = plot_density([model_ab, model_bc])
-    assert axes.shape[0] == 3
+    assert axes.size == 3
 
 
 def test_plot_density_bad_kwargs(models):

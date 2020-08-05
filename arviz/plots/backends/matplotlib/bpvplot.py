@@ -77,7 +77,7 @@ def plot_bpv(
                 ).format(length_plotters, axes.size)
             )
 
-    for i, ax_i in enumerate(axes.ravel()[:length_plotters]):
+    for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
 
