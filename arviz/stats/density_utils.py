@@ -258,7 +258,7 @@ def _fixed_point(t, N, k_sq, a_sq):
 def _root(function, N, args, x):
     # The right bound is at most 0.01
     found = False
-    N = np.max(np.min(1050, N), 50)
+    N = max(min(1050, N), 50)
     tol = 10e-12 + 0.01 * (N - 50) / 1000
 
     while not found:
