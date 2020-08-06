@@ -13,6 +13,7 @@ from .plots import *
 from .plots import backends
 from .rcparams import rc_context, rcParams
 from .stats import *
+from .stats.density_utils import kde
 from .utils import Numba, interactive_backend
 from .wrappers import *
 

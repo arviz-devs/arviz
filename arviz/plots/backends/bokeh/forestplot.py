@@ -10,10 +10,9 @@ from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins, histogram
 from ....rcparams import rcParams
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
 from ....utils import conditional_jit
 from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
@@ -571,7 +570,7 @@ class VarHandler:
                 _, density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
-                x, density = _kde(values)
+                x, density = kde(values)
                 density_q = density.cumsum() / density.sum()
 
             xvals.append(x)

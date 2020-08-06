@@ -7,7 +7,7 @@ import pytest
 import scipy.stats as st
 
 from ...data import dict_to_dataset, from_dict, load_arviz_data
-from ...numeric_utils import _circular_mean, _normalize_angle
+from ...density_utils import _circular_mean, _normalize_angle
 from ...utils import (
     _stack,
     _subset_list,

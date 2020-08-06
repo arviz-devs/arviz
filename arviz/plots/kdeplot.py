@@ -3,9 +3,8 @@
 import xarray as xr
 
 from ..data import InferenceData
-from ..kde_utils import _kde
-from ..numeric_utils import _fast_kde_2d
 from ..rcparams import rcParams
+from ..stats.density_utils import _fast_kde_2d, kde
 from .plot_utils import get_plotting_function
 
 
@@ -248,7 +247,7 @@ def plot_kde(
             else:
                 bw = "experimental"
 
-        grid, density = _kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
+        grid, density = kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
         if cumulative:

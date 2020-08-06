@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....numeric_utils import get_bins
+from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, set_bokeh_circular_ticks_labels, vectorized_to_hex
 from .. import show_layout
@@ -129,8 +129,9 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     bins = hist_kwargs.pop("bins", None)
     if bins is None:
         bins = get_bins(values)
-    density = hist_kwargs.pop("density", True)
-    hist, edges = np.histogram(np.asarray(values).flatten(), density=density, bins=bins)
+    hist, hist_dens, edges = histogram(np.asarray(values).flatten(), bins=bins)
+    if hist_kwargs.pop("density", True):
+        hist = hist_dens
     if hist_kwargs.pop("cumulative", False):
         hist = np.cumsum(hist)
         hist /= hist[-1]

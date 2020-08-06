@@ -4,7 +4,7 @@ from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
 from scipy import stats
 
-from ....kde_utils import _kde
+from ....stats.density_utils import kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -85,7 +85,7 @@ def plot_bpv(
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-            x_s, tstat_pit_dens = _kde(tstat_pit)
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
             # ax_i.set_yticks([])
             if reference is not None:
@@ -105,7 +105,7 @@ def plot_bpv(
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-            x_s, tstat_pit_dens = _kde(tstat_pit)
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_color=color)
             if reference is not None:
                 if reference == "analytical":

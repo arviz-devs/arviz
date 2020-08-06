@@ -4,8 +4,8 @@ from numbers import Number
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....numeric_utils import get_bins
 from ....stats import hdi
+from ....stats.density_utils import get_bins
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,

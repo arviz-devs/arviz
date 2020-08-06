@@ -1,5 +1,4 @@
 """Plotting functions."""
-from ..numeric_utils import _fast_kde_2d
 from .autocorrplot import plot_autocorr
 from .bpvplot import plot_bpv
 from .compareplot import plot_compare
@@ -38,7 +37,6 @@ __all__ = [
     "plot_hpd",
     "plot_joint",
     "plot_kde",
-    "_fast_kde_2d",
     "plot_khat",
     "plot_loo_pit",
     "plot_mcse",

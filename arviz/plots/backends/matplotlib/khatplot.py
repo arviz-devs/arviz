@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba_array
 
-from ....stats.stats_utils import histogram
+from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels, vectorized_to_hex
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 

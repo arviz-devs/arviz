@@ -1,8 +1,7 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins, histogram
+from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size
 from .. import show_layout
@@ -89,7 +88,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_x, pp_density = _kde(vals)
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:

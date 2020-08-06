@@ -11,8 +11,8 @@ import xarray as xr
 from matplotlib.colors import to_hex
 from scipy.stats import mode
 
-from ..kde_utils import _kde
 from ..rcparams import rcParams
+from ..stats.density_utils import kde
 
 KwargSpec = Dict[str, Any]
 
@@ -574,7 +574,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
                     bw = "taylor"
                 else:
                     bw = "experimental"
-            x, density = _kde(values, circular=circular, bw=bw)
+            x, density = kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
             point_value = mode(values)[0][0]
@@ -599,7 +599,7 @@ def sample_reference_distribution(dist, shape):
     densities = []
     dist_rvs = dist.rvs(size=shape)
     for idx in range(shape[1]):
-        x_s, density = _kde(dist_rvs[:, idx])
+        x_s, density = kde(dist_rvs[:, idx])
         x_ss.append(x_s)
         densities.append(density)
     return np.array(x_ss).T, np.array(densities).T

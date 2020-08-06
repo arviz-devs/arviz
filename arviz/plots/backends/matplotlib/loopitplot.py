@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
-from ....kde_utils import _kde
+from ....stats.density_utils import kde
 from ...plot_utils import _scale_fig_size
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
@@ -116,7 +116,7 @@ def plot_loo_pit(
             ax.axhspan(*hdi_odds, **hdi_kwargs)
         else:
             for idx in range(n_unif):
-                x_s, unif_density = _kde(unif[idx, :])
+                x_s, unif_density = kde(unif[idx, :])
                 x_ss[idx] = x_s
                 u_dens[idx] = unif_density
             ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)

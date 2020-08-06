@@ -391,17 +391,19 @@ def expand_dims(x):
     return x.reshape(shape[:0] + (1,) + shape[0:])
 
 
-@conditional_jit(cache=True)
+@conditional_jit(cache=True, nopython=True)
 def _dot(x, y):
     return np.dot(x, y)
 
 
+@conditional_jit(cache=True, nopython=True)
 def _cov_1d(x):
     x = x - x.mean(axis=0)
     ddof = x.shape[0] - 1
     return np.dot(x.T, x.conj()) / ddof
 
 
+@conditional_jit(cache=True, nopython=True)
 def _cov(data):
     if data.ndim == 1:
         return _cov_1d(data)
@@ -422,7 +424,7 @@ def _cov(data):
         raise ValueError("{} dimension arrays are not supported".format(data.ndim))
 
 
-@conditional_jit
+@conditional_jit(nopython=True)
 def full(shape, x, dtype=None):
     """Jitting numpy full."""
     return np.full(shape, x, dtype=dtype)

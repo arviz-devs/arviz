@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 
-from ....stats.stats_utils import histogram
+from ....stats.density_utils import histogram
 from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 

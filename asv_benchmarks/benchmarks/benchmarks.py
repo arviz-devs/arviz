@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import circstd
 
 import arviz as az
-from arviz.numeric_utils import _fast_kde, _fast_kde_2d, histogram
+from arviz.stats.density_utils import _fast_kde_2d, histogram, kde
 from arviz.stats.stats_utils import _circular_standard_deviation, stats_variance_2d
 
 
@@ -54,7 +54,7 @@ class CircStd:
         self.circstd(self.data)
 
 
-class Fast_Kde_1d:
+class Kde_1d:
     params = [(True, False), (10 ** 5, 10 ** 6, 10 ** 7)]
     param_names = ("Numba", "n")
 
@@ -66,7 +66,7 @@ class Fast_Kde_1d:
             az.Numba.disable_numba()
 
     def time_fast_kde_normal(self, numba_flag, n):
-        _fast_kde(self.x)
+        kde(self.x)
 
 
 class Fast_KDE_2d:

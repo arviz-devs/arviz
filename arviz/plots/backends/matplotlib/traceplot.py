@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-from ....numeric_utils import get_bins
+from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size, format_coords_as_labels, make_label
 from ...rankplot import plot_rank

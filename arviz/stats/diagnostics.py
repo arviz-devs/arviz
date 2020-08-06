@@ -9,9 +9,9 @@ from scipy import stats
 
 from ..data import convert_to_dataset
 from ..utils import Numba, _numba_var, _stack, _var_names, conditional_jit
+from .density_utils import histogram as _histogram
 from .stats_utils import _circular_standard_deviation, _sqrt
 from .stats_utils import autocov as _autocov
-from .stats_utils import histogram
 from .stats_utils import not_valid as _not_valid
 from .stats_utils import quantile as _quantile
 from .stats_utils import rint as _rint
@@ -483,9 +483,9 @@ def ks_summary(pareto_tail_indices):
     _numba_flag = Numba.numba_flag
     if _numba_flag:
         bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
-        kcounts, *_ = histogram(pareto_tail_indices, bins)
+        kcounts, *_ = _histogram(pareto_tail_indices, bins)
     else:
-        kcounts, *_ = histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, *_ = _histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)

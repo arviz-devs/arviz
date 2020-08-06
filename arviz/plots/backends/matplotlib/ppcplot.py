@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation, get_backend
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins, histogram
+from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
@@ -155,7 +154,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_x, pp_density = _kde(vals)
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:
@@ -373,13 +372,13 @@ def _set_animation(
     if kind == "kde":
         length = len(pp_sampled_vals)
         if dtype == "f":
-            x_vals, y_vals = _kde(pp_sampled_vals[0])
-            max_max = max([max(_kde(pp_sampled_vals[i])[1]) for i in range(length)])
+            x_vals, y_vals = kde(pp_sampled_vals[0])
+            max_max = max([max(kde(pp_sampled_vals[i])[1]) for i in range(length)])
             ax.set_ylim(0, max_max)
             (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
             def animate(i):
-                x_vals, y_vals = _kde(pp_sampled_vals[i])
+                x_vals, y_vals = kde(pp_sampled_vals[i])
                 line.set_data(x_vals, y_vals)
                 return line
 

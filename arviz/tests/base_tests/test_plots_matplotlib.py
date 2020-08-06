@@ -11,7 +11,7 @@ from pandas import DataFrame
 from scipy.stats import gaussian_kde
 
 from ...data import from_dict, load_arviz_data
-from ...kde_utils import _kde
+from ...density_utils import kde as _kde
 from ...plots import (
     plot_autocorr,
     plot_bpv,

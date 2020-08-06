@@ -5,8 +5,8 @@ from typing import Optional
 import numpy as np
 from bokeh.models.annotations import Title
 
-from ....numeric_utils import get_bins
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -239,7 +239,7 @@ def _plot_posterior_op(
             backend_kwargs={},
             show=False,
         )
-        hist, edges = np.histogram(values, density=True)
+        _, hist, edges = histogram(values, bins="auto")
     else:
         if bins is None:
             if values.dtype.kind == "i":
@@ -248,7 +248,7 @@ def _plot_posterior_op(
                 bins = "auto"
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "blue")
-        hist, edges = np.histogram(values, density=True, bins=bins)
+        _, hist, edges = histogram(values, bins=bins)
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )

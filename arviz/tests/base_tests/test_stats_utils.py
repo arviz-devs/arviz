@@ -7,6 +7,7 @@ from scipy.special import logsumexp
 from scipy.stats import circstd
 
 from ...data import from_dict, load_arviz_data
+from ...density_utils import histogram
 from ...stats.stats_utils import (
     ELPDData,
     _angle,
@@ -14,7 +15,6 @@ from ...stats.stats_utils import (
     _circular_standard_deviation,
     _sqrt,
     get_log_likelihood,
-    histogram,
 )
 from ...stats.stats_utils import logsumexp as _logsumexp
 from ...stats.stats_utils import make_ufunc, not_valid, stats_variance_2d, wrap_xarray_ufunc

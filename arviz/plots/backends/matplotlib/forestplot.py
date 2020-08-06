@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import to_rgba
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins, histogram
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
 from ....utils import conditional_jit
 from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
@@ -519,7 +518,7 @@ class VarHandler:
                 density_q = density.cumsum() / density.sum()
                 x = x[:-1]
             elif kind == "density":
-                x, density = _kde(values)
+                x, density = kde(values)
                 density_q = density.cumsum() / density.sum()
 
             xvals.append(x)

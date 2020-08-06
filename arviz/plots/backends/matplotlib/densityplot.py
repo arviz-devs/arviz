@@ -4,9 +4,8 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins
 from ....stats import hdi
+from ....stats.density_utils import get_bins, kde
 from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
@@ -152,7 +151,7 @@ def _d_helper(
         else:
             new_vec = vec
 
-        x, density = _kde(new_vec, circular=circular, bw=bw)
+        x, density = kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
         xmin, xmax = x[0], x[-1]
         ymin, ymax = density[0], density[-1]

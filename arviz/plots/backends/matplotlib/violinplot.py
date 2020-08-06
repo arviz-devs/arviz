@@ -2,9 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....kde_utils import _kde
-from ....numeric_utils import get_bins, histogram
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
 from ...plot_utils import _scale_fig_size, make_label
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
@@ -96,7 +95,7 @@ def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
             bw = "taylor"
         else:
             bw = "experimental"
-    x, density = _kde(val, circular=circular, bw=bw)
+    x, density = kde(val, circular=circular, bw=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])
