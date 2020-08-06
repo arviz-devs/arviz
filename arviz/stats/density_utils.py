@@ -11,7 +11,7 @@ from scipy.special import ive  # pylint: disable=no-name-in-module
 
 from ..utils import _cov, _dot, _stack, conditional_jit
 
-__all__ = ["kde", "histogram"]
+__all__ = ["kde"]
 
 
 @conditional_jit(cache=True, nopython=True)
