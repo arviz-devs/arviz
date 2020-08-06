@@ -19,7 +19,6 @@ _log = logging.getLogger(__name__)
 __all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "wrap_xarray_ufunc"]
 
 
-@conditional_jit(cache=True, nopython=True)
 def autocov(ary, axis=-1):
     """Compute autocovariance estimates for every lag for the input array.
 
@@ -54,7 +53,6 @@ def autocov(ary, axis=-1):
     return cov
 
 
-@conditional_jit(cache=True, nopython=True)
 def autocorr(ary, axis=-1):
     """Compute autocorrelation using FFT for every lag for the input array.
 
@@ -264,7 +262,6 @@ def update_docstring(ufunc, func, n_output=1):
         ufunc.__doc__ += docstring
 
 
-@conditional_jit(cache=True, nopython=True)
 def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, copy=True):
     """Stable logsumexp when b >= 0 and b is scalar.
 
@@ -496,7 +493,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         return ELPDData(copied_obj)
 
 
-@conditional_jit(cache=True, nopython=True)
+@conditional_jit
 def stats_variance_1d(data, ddof=0):
     a_a, b_b = 0, 0
     for i in data:
@@ -507,7 +504,6 @@ def stats_variance_1d(data, ddof=0):
     return var
 
 
-@conditional_jit(cache=True, nopython=True)
 def stats_variance_2d(data, ddof=0, axis=1):
     if data.ndim == 1:
         return stats_variance_1d(data, ddof=ddof)
@@ -524,7 +520,7 @@ def stats_variance_2d(data, ddof=0, axis=1):
         return var
 
 
-@conditional_vect(cache=True, nopython=True)
+@conditional_vect
 def _sqrt(a_a, b_b):
     return (a_a + b_b) ** 0.5
 
@@ -538,13 +534,12 @@ def _circfunc(samples, high, low, skipna):
     return _angle(samples, low, high, np.pi)
 
 
-@conditional_vect(cache=True, nopython=True)
+@conditional_vect
 def _angle(samples, low, high, p_i=np.pi):
     ang = (samples - low) * 2.0 * p_i / (high - low)
     return ang
 
 
-@conditional_jit(cache=True, nopython=True)
 def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, axis=None):
     ang = _circfunc(samples, high, low, skipna)
     s_s = np.sin(ang).mean(axis=axis)

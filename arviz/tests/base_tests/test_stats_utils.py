@@ -7,7 +7,7 @@ from scipy.special import logsumexp
 from scipy.stats import circstd
 
 from ...data import from_dict, load_arviz_data
-from ...density_utils import histogram
+from ...stats.density_utils import histogram
 from ...stats.stats_utils import (
     ELPDData,
     _angle,

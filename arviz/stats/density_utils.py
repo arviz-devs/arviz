@@ -14,33 +14,6 @@ from ..utils import _cov, _dot, _stack, conditional_jit
 __all__ = ["kde"]
 
 
-@conditional_jit(cache=True, nopython=True)
-def histogram(data, bins, range_hist=None):
-    """Conditionally jitted histogram.
-
-    Parameters
-    ----------
-    data : array-like
-        Input data. Passed as first positional argument to ``np.histogram``.
-    bins : int or array-like
-        Passed as keyword argument ``bins`` to ``np.histogram``.
-    range_hist : (float, float), optional
-        Passed as keyword argument ``range`` to ``np.histogram``.
-
-    Returns
-    -------
-    hist : array
-        The number of counts per bin.
-    density : array
-        The density corresponding to each bin.
-    bin_edges : array
-        The edges of the bins used.
-    """
-    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
-    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
-    return hist, hist_dens, bin_edges
-
-
 def _bw_scott(x, x_std=None, **kwargs):  # pylint: disable=unused-argument
     """Scott's Rule."""
     if x_std is None:
@@ -252,7 +225,6 @@ def _dct1d(x):
     return output
 
 
-@conditional_jit(cache=True, nopython=True)
 def _fixed_point(t, N, k_sq, a_sq):
     """Calculate t-zeta*gamma^[l](t).
 
@@ -283,7 +255,6 @@ def _fixed_point(t, N, k_sq, a_sq):
     return out
 
 
-@conditional_jit(cache=True, nopython=True)
 def _root(function, N, args, x):
     # The right bound is at most 0.01
     found = False
@@ -1041,3 +1012,30 @@ def _normalize_angle(x, zero_centered=True):
         return (x + np.pi) % (2 * np.pi) - np.pi
     else:
         return x % (2 * np.pi)
+
+
+@conditional_jit(cache=True)
+def histogram(data, bins, range_hist=None):
+    """Conditionally jitted histogram.
+
+    Parameters
+    ----------
+    data : array-like
+        Input data. Passed as first positional argument to ``np.histogram``.
+    bins : int or array-like
+        Passed as keyword argument ``bins`` to ``np.histogram``.
+    range_hist : (float, float), optional
+        Passed as keyword argument ``range`` to ``np.histogram``.
+
+    Returns
+    -------
+    hist : array
+        The number of counts per bin.
+    density : array
+        The density corresponding to each bin.
+    bin_edges : array
+        The edges of the bins used.
+    """
+    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
+    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
+    return hist, hist_dens, bin_edges

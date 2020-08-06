@@ -11,8 +11,8 @@ from matplotlib.pyplot import register_cmap, style
 from .data import *
 from .plots import *
 from .plots import backends
-from .rcparams import rc_context, rcParams
 from .stats import *
+from .rcparams import rc_context, rcParams
 from .utils import Numba, interactive_backend
 from .wrappers import *
 
