@@ -480,7 +480,12 @@ def ks_summary(pareto_tail_indices):
     df_k : dataframe
       Dataframe containing k diagnostic values.
     """
-    kcounts, *_ = _histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
+    _numba_flag = Numba.numba_flag
+    if _numba_flag:
+        bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
+        kcounts, *_ = histogram(pareto_tail_indices, bins)
+    else:
+        kcounts, *_ = histogram(pareto_tail_indices, bins=[-np.Inf, 0.5, 0.7, 1, np.Inf])
     kprop = kcounts / len(pareto_tail_indices) * 100
     df_k = pd.DataFrame(
         dict(_=["(good)", "(ok)", "(bad)", "(very bad)"], Count=kcounts, Pct=kprop)
