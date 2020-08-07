@@ -24,7 +24,7 @@ def plot_trace(
     rug,
     lines,
     circ_var_names,
-    degrees,
+    circ_var_units,
     compact,
     compact_prop,
     combined,
@@ -67,10 +67,10 @@ def plot_trace(
     lines : tuple or list
         List of tuple of (var_name, {'coord': selection}, [line_positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
-    circ_var_names : list
+    circ_var_names : string, or list of strings
         List of circular variables to account for when plotting KDE.
-    degrees : bool
-        Whether the variables in `circ_var_names` are in degrees. Defaults to False.
+    circ_var_units : bool
+        Whether the variables in `circ_var_names` are in degrees or radians. Defaults to radians.
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
@@ -201,7 +201,7 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     if axes is None:
-        fig = plt.figure(tight_layout=True, figsize=figsize, **backend_kwargs)
+        fig = plt.figure(figsize=figsize, **backend_kwargs)
         spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
 
     # Check the input for lines
@@ -251,8 +251,7 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                     rank_kwargs,
-                    is_circular,
-                    degrees,
+                    circ_var_units,
                 )
 
             else:
@@ -292,8 +291,7 @@ def plot_trace(
                         fill_kwargs,
                         rug_kwargs,
                         rank_kwargs,
-                        is_circular,
-                        degrees,
+                        circ_var_units,
                     )
                     if legend:
                         handles.append(
@@ -317,7 +315,7 @@ def plot_trace(
             xlims = axes.get_xlim()
             ylims = axes.get_ylim()
 
-            if divergences and not is_circular:
+            if divergences:
                 div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
                 divs = divergence_data.sel(**div_selection).values
                 # if combined:
@@ -433,14 +431,8 @@ def _plot_chains_mpl(
     fill_kwargs,
     rug_kwargs,
     rank_kwargs,
-    is_circular,
-    degrees,
+    circ_var_units,
 ):
-
-    if is_circular and degrees:
-        is_circular = "degrees"
-    elif is_circular and not degrees:
-        is_circular = "radians"
 
     for chain_idx, row in enumerate(value):
         if kind == "trace":
@@ -462,7 +454,7 @@ def _plot_chains_mpl(
                     rug_kwargs=rug_kwargs,
                     backend="matplotlib",
                     show=False,
-                    is_circular=is_circular,
+                    is_circular=circ_var_units,
                 )
 
     if kind == "rank_bars" and idy == 1:
@@ -484,6 +476,6 @@ def _plot_chains_mpl(
                 rug_kwargs=rug_kwargs,
                 backend="matplotlib",
                 show=False,
-                is_circular=is_circular,
+                is_circular=circ_var_units,
             )
     return axes
