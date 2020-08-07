@@ -541,12 +541,12 @@ class TestInferenceData:
         idata = data_random
         test_data = from_dict(**idata.to_dict())
         assert test_data
-        for group in idata._groups_all:
+        for group in idata._groups_all:  # pylint: disable=protected-access
             xr_data = getattr(idata, group)
             test_xr_data = getattr(test_data, group)
             assert xr_data.equals(test_xr_data)
 
-    def test_to_dict_warmup(self, data_random):
+    def test_to_dict_warmup(self):
         idata = create_data_random(
             groups=[
                 "posterior",
@@ -558,7 +558,7 @@ class TestInferenceData:
         )
         test_data = from_dict(**idata.to_dict(), save_warmup=True)
         assert test_data
-        for group in idata._groups_all:
+        for group in idata._groups_all:  # pylint: disable=protected-access
             xr_data = getattr(idata, group)
             test_xr_data = getattr(test_data, group)
             assert xr_data.equals(test_xr_data)
