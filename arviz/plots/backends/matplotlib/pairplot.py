@@ -113,7 +113,7 @@ def plot_pair(
                 # Instantiate figure and grid
                 widths = [2, 2, 2, 1]
                 heights = [1.4, 2, 2, 2]
-                fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
+                fig = plt.figure(figsize=figsize, **backend_kwargs)
                 grid = plt.GridSpec(
                     4,
                     4,

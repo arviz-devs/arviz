@@ -188,7 +188,7 @@ def get_bins(values):
     iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
     bins_fd = 2 * iqr * values.size ** (-1 / 3)
 
-    width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
+    width = np.round(np.max([1, bins_sturges, bins_fd])).astype(int)
 
     return np.arange(x_min, x_max + width + 1, width)
 

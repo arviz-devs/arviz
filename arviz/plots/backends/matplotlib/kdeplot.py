@@ -32,6 +32,7 @@ def plot_kde(
     contour_kwargs,
     contourf_kwargs,
     pcolormesh_kwargs,
+    is_circular,
     ax,
     legend,
     backend_kwargs,
@@ -76,7 +77,27 @@ def plot_kde(
 
         rug_space = max(density) * rug_kwargs.pop("space")
 
-        x = np.linspace(lower, upper, len(density))
+        if is_circular:
+
+            if is_circular == "radians":
+                labels = [
+                    r"0",
+                    r"π/4",
+                    r"π/2",
+                    r"3π/4",
+                    r"π",
+                    r"5π/4",
+                    r"3π/2",
+                    r"7π/4",
+                ]
+
+                ax.set_xticklabels(labels)
+
+            x = np.linspace(-np.pi, np.pi, len(density))
+            ax.set_yticklabels([])
+
+        else:
+            x = np.linspace(lower, upper, len(density))
 
         fill_func = ax.fill_between
         fill_x, fill_y = x, density

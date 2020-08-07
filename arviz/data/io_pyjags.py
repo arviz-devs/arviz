@@ -18,14 +18,29 @@ class PyJAGSConverter:
     def __init__(
         self,
         *,
-        posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
+        posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
         prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
+        log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
         coords=None,
         dims=None,
         save_warmup: bool = None,
         warmup_iterations: int = 0
     ):
-        self.posterior = posterior
+        if log_likelihood is not None and posterior is not None:
+            self.posterior = posterior.copy()  # create a shallow copy of the dictionary
+
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            if isinstance(log_likelihood, (list, tuple)):
+                log_likelihood = {name: name for name in log_likelihood}
+
+            self.log_likelihood = {
+                obs_var_name: self.posterior.pop(log_like_name)
+                for obs_var_name, log_like_name in log_likelihood.items()
+            }
+        else:
+            self.posterior = posterior
+            self.log_likelihood = None
         self.prior = prior
         self.coords = coords
         self.dims = dims
@@ -60,6 +75,11 @@ class PyJAGSConverter:
         """Extract posterior samples from fit."""
         return self._pyjags_samples_to_xarray(self.prior)
 
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
+        """Extract log likelihood samples from fit."""
+        return self._pyjags_samples_to_xarray(self.log_likelihood)
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object."""
         # obs_const_dict = self.observed_and_constant_data_to_xarray()
@@ -70,6 +90,7 @@ class PyJAGSConverter:
         idata_dict = {
             "posterior": self.posterior_to_xarray(),
             "prior": self.prior_to_xarray(),
+            "log_likelihood": self.log_likelihood_to_xarray(),
             "save_warmup": save_warmup,
         }
 
@@ -243,8 +264,9 @@ def _convert_arviz_dict_to_pyjags_dict(
 
     Parameters
     ----------
-    samples: a dictionary mapping variable names to NumPy arrays with shape
-             (number_of_chains, chain_length, parameter_dimension)
+    samples: dict of {str : array_like}
+        a dictionary mapping variable names to NumPy arrays with shape
+        (number_of_chains, chain_length, parameter_dimension)
 
     Returns
     -------
@@ -272,6 +294,7 @@ def _convert_arviz_dict_to_pyjags_dict(
 def from_pyjags(
     posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
     prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
+    log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
     coords=None,
     dims=None,
     save_warmup=None,
@@ -288,24 +311,32 @@ def from_pyjags(
     Parameters
     ----------
     posterior: dict of {str : array_like}, optional
-               a dictionary mapping variable names to NumPy arrays containing
-               posterior samples with shape
-               (parameter_dimension, chain_length, number_of_chains)
+        a dictionary mapping variable names to NumPy arrays containing
+        posterior samples with shape
+        (parameter_dimension, chain_length, number_of_chains)
 
     prior: dict of {str : array_like}, optional
-               a dictionary mapping variable names to NumPy arrays containing
-               prior samples with shape
-               (parameter_dimension, chain_length, number_of_chains)
+        a dictionary mapping variable names to NumPy arrays containing
+        prior samples with shape
+        (parameter_dimension, chain_length, number_of_chains)
+
+    log_likelihood: dict of {str: str}, list of str or str, optional
+        Pointwise log_likelihood for the data. log_likelihood is extracted from the
+        posterior. It is recommended to use this argument as a dictionary whose keys
+        are observed variable names and its values are the variables storing log
+        likelihood arrays in the JAGS code. In other cases, a dictionary with keys
+        equal to its values is used.
 
     coords: dict[str, iterable]
-            A dictionary containing the values that are used as index. The key
-            is the name of the dimension, the values are the index values.
+        A dictionary containing the values that are used as index. The key
+        is the name of the dimension, the values are the index values.
 
     dims: dict[str, List(str)]
-          A mapping from variables to a list of coordinate names for the variable.
+        A mapping from variables to a list of coordinate names for the variable.
 
     save_warmup : bool, optional
        Save warmup iterations in InferenceData. If not defined, use default defined by the rcParams.
+
     warmup_iterations: int, optional
         Number of warmup iterations
 
@@ -316,6 +347,7 @@ def from_pyjags(
     return PyJAGSConverter(
         posterior=posterior,
         prior=prior,
+        log_likelihood=log_likelihood,
         dims=dims,
         coords=coords,
         save_warmup=save_warmup,

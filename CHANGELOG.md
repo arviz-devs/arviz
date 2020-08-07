@@ -1,11 +1,30 @@
 # Change Log
 
 ## v0.x.x Unreleased
-
 ### New features
-* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The hdi is computed analitically (#1215)
+* Added InferenceData dataset containing circular variables (#1265)
+* Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
+
+### Maintenance and fixes
+* plot_posterior: fix overlap of hdi and rope (#1263)
+* `plot_dist` bins argument error fixed (#1306)
+* improve handling of circular variables in `az.summary` (#1313)
+* update `radon` example dataset to current InferenceData schema specification (#1320)
+
+### Deprecation
+
+### Documentation
+
+## v0.9.0 (2020 June 23)
+### New features
+* loo-pit plot. The kde is computed over the data interval (this could be shorter than [0, 1]). The HDI is computed analitically (#1215)
 * Added `html_repr` of InferenceData objects for jupyter notebooks. (#1217)
-* Added support for PyJAGS via the function `from_pyjags` in the module arviz.data.io_pyjags. (#1219)
+* Added support for PyJAGS via the function `from_pyjags`. (#1219 and #1245)
+* `from_pymc3` can now retrieve `coords` and `dims` from model context (#1228, #1240 and #1249)
+* `plot_trace` now supports multiple aesthetics to identify chain and variable
+  shape and support matplotlib aliases (#1253)
+* `plot_hdi` can now take already computed HDI values (#1241)
+* `plot_bpv`. A new plot for Bayesian p-values (#1222)
 
 ### Maintenance and fixes
 * Include data from `MultiObservedRV` to `observed_data` when using
@@ -14,14 +33,23 @@
   objects. (#1218)
 * Added `log_likelihood` argument to `from_pyro` and a warning if log likelihood cannot be obtained (#1227)
 * Skip tests on matplotlib animations if ffmpeg is not installed (#1227)
+* Fix hpd bug where arguments were being ignored (#1236)
+* Remove false positive warning in `plot_hdi` and fixed matplotlib axes generation (#1241)
+* Change the default `zorder` of scatter points from `0` to `0.6` in `plot_pair` (#1246)
+* Update `get_bins` for numpy 1.19 compatibility (#1256)
+* Fixes to `rug`, `divergences` arguments in `plot_trace` (#1253)
 
 ### Deprecation
 * Using `from_pymc3` without a model context available now raises a
   `FutureWarning` and will be deprecated in a future version (#1227)
+* In `plot_trace`, `chain_prop` and `compact_prop` as tuples will now raise a
+  `FutureWarning` (#1253)
+* `hdi` with 2d data raises a FutureWarning (#1241)
 
 ### Documentation
-* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219)
+* A section has been added to the documentation at InferenceDataCookbook.ipynb illustrating the use of ArviZ in conjunction with PyJAGS. (#1219 and #1245)
 * Fixed inconsistent capitalization in `plot_hdi` docstring (#1221)
+* Fixed and extended `InferenceData.map` docs (#1255)
 
 ## v0.8.3 (2020 May 28)
 ### Maintenance and fixes
@@ -49,7 +77,7 @@
 
 ### New features
 * Stats and plotting functions that provide `var_names` arg can now filter parameters based on partial naming (`filter="like"`) or regular expressions (`filter="regex"`) (see [#1154](https://github.com/arviz-devs/arviz/pull/1154)).
-* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables #1140
+* Add `true_values` argument for `plot_pair`. It allows for a scatter plot showing the true values of the variables (#1140)
 * Allow xarray.Dataarray input for plots.(#1120)
 * Revamped the `hpd` function to make it work with mutidimensional arrays, InferenceData and xarray objects (#1117)
 * Skip test for optional/extra dependencies when not installed (#1113)

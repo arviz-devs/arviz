@@ -16,6 +16,8 @@ from ...plots.plot_utils import (
     xarray_to_ndarray,
     xarray_var_iter,
     vectorized_to_hex,
+    _dealiase_sel_kwargs,
+    set_bokeh_circular_ticks_labels,
 )
 from ...rcparams import rc_context
 from ...numeric_utils import get_bins
@@ -244,3 +246,43 @@ def test_vectorized_to_hex_scalar(c_values):
 def test_vectorized_to_hex_array(c_values):
     output = vectorized_to_hex(c_values)
     assert np.all([item == "#0000ff" for item in output])
+
+
+def test_dealiase_sel_kwargs():
+    """Check _dealiase_sel_kwargs behaviour.
+
+    Makes sure kwargs are overwritten when necessary even with alias involved and that
+    they are not modified when not included in props.
+    """
+    kwargs = {"linewidth": 3, "alpha": 0.4, "line_color": "red"}
+    props = {"lw": [1, 2, 4, 5], "linestyle": ["-", "--", ":"]}
+    res = _dealiase_sel_kwargs(kwargs, props, 2)
+    assert "linewidth" in res
+    assert res["linewidth"] == 4
+    assert "linestyle" in res
+    assert res["linestyle"] == ":"
+    assert "alpha" in res
+    assert res["alpha"] == 0.4
+    assert "line_color" in res
+    assert res["line_color"] == "red"
+
+
+# Check if Bokeh is installed
+bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
+
+
+@pytest.mark.skipif(
+    not (bokeh_installed | running_on_ci()), reason="test requires bokeh which is not installed",
+)
+def test_set_bokeh_circular_ticks_labels():
+    """Assert the axes returned after placing ticks and tick labels for circular plots."""
+    import bokeh.plotting as bkp
+
+    ax = bkp.figure(x_axis_type=None, y_axis_type=None)
+    hist = np.linspace(0, 1, 10)
+    labels = ["0°", "45°", "90°", "135°", "180°", "225°", "270°", "315°"]
+    ax = set_bokeh_circular_ticks_labels(ax, hist, labels)
+    renderers = ax.renderers
+    assert len(renderers) == 3
+    assert renderers[2].data_source.data["text"] == labels
+    assert len(renderers[0].data_source.data["start_angle"]) == len(labels)

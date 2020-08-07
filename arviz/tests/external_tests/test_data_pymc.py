@@ -202,7 +202,8 @@ class TestDataPyMC3:
         packaging.version.Version(pm.__version__) < packaging.version.Version("3.9.0"),
         reason="Requires PyMC3 >= 3.9.0",
     )
-    def test_autodetect_coords_from_model(self):
+    @pytest.mark.parametrize("use_context", [True, False])
+    def test_autodetect_coords_from_model(self, use_context):
         df_data = pd.DataFrame(columns=["date"]).set_index("date")
         dates = pd.date_range(start="2020-05-01", end="2020-05-20")
         for city, mu in {"Berlin": 15, "San Marino": 18, "Paris": 16}.items():
@@ -231,11 +232,44 @@ class TestDataPyMC3:
                 draws=30,
                 step=pm.Metropolis(),
             )
-        idata = from_pymc3(trace=trace, model=model)
+            if use_context:
+                idata = from_pymc3(trace=trace)
+        if not use_context:
+            idata = from_pymc3(trace=trace, model=model)
 
+        assert "city" in list(idata.posterior.dims)
+        assert "city" in list(idata.observed_data.dims)
+        assert "date" in list(idata.observed_data.dims)
         np.testing.assert_array_equal(idata.posterior.coords["city"], coords["city"])
         np.testing.assert_array_equal(idata.observed_data.coords["date"], coords["date"])
         np.testing.assert_array_equal(idata.observed_data.coords["city"], coords["city"])
+
+    def test_ovewrite_model_coords_dims(self):
+        """Check coords and dims from model object can be partially overwrited."""
+        dim1 = ["a", "b"]
+        new_dim1 = ["c", "d"]
+        coords = {"dim1": dim1, "dim2": ["c1", "c2"]}
+        x_data = np.arange(4).reshape((2, 2))
+        y = x_data + np.random.normal(size=(2, 2))
+        with pm.Model(coords=coords):
+            x = pm.Data("x", x_data, dims=("dim1", "dim2"))
+            beta = pm.Normal("beta", 0, 1, dims="dim1")
+            _ = pm.Normal("obs", x * beta, 1, observed=y, dims=("dim1", "dim2"))
+            trace = pm.sample(100, tune=100)
+            idata1 = from_pymc3(trace)
+            idata2 = from_pymc3(trace, coords={"dim1": new_dim1}, dims={"beta": ["dim2"]})
+
+        test_dict = {"posterior": ["beta"], "observed_data": ["obs"], "constant_data": ["x"]}
+        fails1 = check_multiple_attrs(test_dict, idata1)
+        assert not fails1
+        fails2 = check_multiple_attrs(test_dict, idata2)
+        assert not fails2
+        assert "dim1" in list(idata1.posterior.beta.dims)
+        assert "dim2" in list(idata2.posterior.beta.dims)
+        assert np.all(idata1.constant_data.x.dim1.values == np.array(dim1))
+        assert np.all(idata1.constant_data.x.dim2.values == np.array(["c1", "c2"]))
+        assert np.all(idata2.constant_data.x.dim1.values == np.array(new_dim1))
+        assert np.all(idata2.constant_data.x.dim2.values == np.array(["c1", "c2"]))
 
     def test_missing_data_model(self):
         # source pymc3/pymc3/tests/test_missing.py

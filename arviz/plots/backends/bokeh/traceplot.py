@@ -12,7 +12,7 @@ from . import backend_kwarg_defaults
 from .. import show_layout
 from ...distplot import plot_dist
 from ...rankplot import plot_rank
-from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size
+from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size, _dealiase_sel_kwargs
 from ....rcparams import rcParams
 
 
@@ -300,8 +300,7 @@ def _plot_chains_bokeh(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **{chain_prop[0]: chain_prop[1][chain_idx]},
-                **trace_kwargs,
+                **_dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             )
             if marker:
                 ax_trace.circle(
@@ -310,26 +309,24 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **{chain_prop[0]: chain_prop[1][chain_idx],},
+                    **_dealiase_sel_kwargs({}, chain_prop, chain_idx)
                 )
         if not combined:
             rug_kwargs["cds"] = cds
             if legend:
                 plot_kwargs["legend_label"] = "chain {}".format(chain_idx)
-            plot_kwargs[chain_prop[0]] = chain_prop[1][chain_idx]
             plot_dist(
                 cds.data[y_name],
                 ax=ax_density,
                 rug=rug,
                 hist_kwargs=hist_kwargs,
-                plot_kwargs=plot_kwargs,
+                plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx),
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
                 backend_kwargs={},
                 show=False,
             )
-            plot_kwargs.pop(chain_prop[0])
 
     if kind == "rank_bars":
         value = np.array([item.data[y_name] for item in data.values()])
@@ -342,17 +339,15 @@ def _plot_chains_bokeh(
         rug_kwargs["cds"] = data
         if legend:
             plot_kwargs["legend_label"] = "combined chains"
-        plot_kwargs[chain_prop[0]] = chain_prop[1][-1]
         plot_dist(
             np.concatenate([item.data[y_name] for item in data.values()]).flatten(),
             ax=ax_density,
             rug=rug,
             hist_kwargs=hist_kwargs,
-            plot_kwargs=plot_kwargs,
+            plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, -1),
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",
             backend_kwargs={},
             show=False,
         )
-        plot_kwargs.pop(chain_prop[0])

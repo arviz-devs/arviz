@@ -18,6 +18,7 @@ from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
 from ...rcparams import rc_context, rcParams  # pylint: disable=wrong-import-position
 from ...plots import (  # pylint: disable=wrong-import-position
     plot_autocorr,
+    plot_bpv,
     plot_compare,
     plot_density,
     plot_dist,
@@ -40,7 +41,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_trace,
     plot_violin,
 )
-from ...stats import compare, loo, waic  # pylint: disable=wrong-import-position
+from ...stats import compare, loo, waic, hdi  # pylint: disable=wrong-import-position
 
 # Skip tests if bokeh not installed
 bkp = importorskip("bokeh.plotting")  # pylint: disable=invalid-name
@@ -127,8 +128,8 @@ def test_plot_density_bad_kwargs(models):
         {},
         {"var_names": "mu"},
         {"var_names": ["mu", "tau"]},
-        {"combined": True},
-        {"compact": True},
+        {"combined": True, "rug": True},
+        {"compact": True, "legend": True},
         {"combined": True, "compact": True, "legend": True},
         {"divergences": "top"},
         {"divergences": False},
@@ -190,7 +191,21 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"kind": "hist"},
+        {"kind": "kde"},
+        {"is_circular": False},
+        {"is_circular": False, "kind": "hist"},
+        {"is_circular": True},
+        {"is_circular": True, "kind": "hist"},
+        {"is_circular": "radians"},
+        {"is_circular": "radians", "kind": "hist"},
+        {"is_circular": "degrees"},
+        {"is_circular": "degrees", "kind": "hist"},
+    ],
+)
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], backend="bokeh", show=False, **kwargs)
     assert axes
@@ -483,16 +498,20 @@ def test_plot_forest_bad(models, model_fits):
     "kwargs",
     [
         {"color": "C5", "circular": True},
-        {"fill_kwargs": {"alpha": 0}},
+        {"hdi_data": True, "fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
-        {"smooth": False},
+        {"hdi_data": True, "smooth": False, "color": "xkcd:jade"},
     ],
 )
 def test_plot_hdi(models, data, kwargs):
-    axis = plot_hdi(
-        data["y"], models.model_1.posterior["theta"], backend="bokeh", show=False, **kwargs
-    )
+    hdi_data = kwargs.pop("hdi_data", None)
+    y_data = models.model_1.posterior["theta"]
+    if hdi_data:
+        hdi_data = hdi(y_data)
+        axis = plot_hdi(data["y"], hdi_data=hdi_data, backend="bokeh", show=False, **kwargs)
+    else:
+        axis = plot_hdi(data["y"], y_data, backend="bokeh", show=False, **kwargs)
     assert axis
 
 
@@ -962,3 +981,18 @@ def test_plot_rank(models, kwargs):
 def test_plot_dist_comparison_warn(models):
     with pytest.raises(NotImplementedError, match="The bokeh backend.+Use matplotlib bakend."):
         plot_dist_comparison(models.model_1, backend="bokeh")
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"reference": "analytical"},
+        {"kind": "p_value"},
+        {"kind": "t_stat", "t_stat": "std"},
+        {"kind": "t_stat", "t_stat": 0.5, "bpv": True},
+    ],
+)
+def test_plot_bpv(models, kwargs):
+    axes = plot_bpv(models.model_1, backend="bokeh", **kwargs)
+    assert axes.shape

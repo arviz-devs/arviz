@@ -83,7 +83,12 @@ is an example on getting a reference from matplotlib docs::
   :std:doc:`api/_as_gen/matplotlib.axes.Axes.plot_date`
 
 We can therefore link to matplotlib docs on ``Axes.plot`` from any docstring
-using ``:meth:`matplotlib.axes.Axes.plot```.
+using::
+
+  :meth:`mpl:matplotlib.axes.Axes.plot`
+
+The `intersphinx_mappings`
+defined for ArviZ can be seen in `conf.py <https://github.com/arviz-devs/arviz/blob/master/doc/conf.py>`_
 
 Referencing ArviZ objects
 """""""""""""""""""""""""

@@ -24,6 +24,7 @@ def backend_show(show):
 
 
 from .autocorrplot import plot_autocorr
+from .bpvplot import plot_bpv
 from .compareplot import plot_compare
 from .densityplot import plot_density
 from .distplot import plot_dist

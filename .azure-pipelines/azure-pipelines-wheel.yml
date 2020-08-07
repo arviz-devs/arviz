@@ -34,7 +34,8 @@ jobs:
   - script: |
       python -m pip install --upgrade pip
       python -m pip install --no-cache-dir -r requirements.txt
-      pip install wheel
+      python -m pip install wheel
+      python -m pip install twine
     displayName: 'Install requirements'
 
   - script: |
@@ -43,9 +44,10 @@ jobs:
     displayName: 'Build a wheel'
 
   - script: |
-      cd dist
-      ls -lh
-      ls | grep *.whl | xargs python -m pip install
+      mkdir install_test
+      cd install_test
+      ls -lh ../dist
+      python -m pip install ../dist/*.whl
       python -c "import arviz as az; print(az);print(az.summary(az.load_arviz_data('non_centered_eight')))"
       cd ..
     displayName: 'Install and test the wheel'
@@ -60,3 +62,7 @@ jobs:
       pathtoPublish: 'dist'
       artifactName: 'arviz_wheel_dist'
     displayName: 'Publish the wheel'
+
+  - script: |
+      python -m twine upload -u __token__ -p $(PYPI_PASSWORD) --skip-existing dist/*
+    displayName: 'Upload wheel to PyPI'

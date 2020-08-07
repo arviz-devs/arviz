@@ -33,7 +33,7 @@ def plot_joint(
     }
     if ax is None:
         # Instantiate figure and grid
-        fig, _ = plt.subplots(0, 0, figsize=figsize, **backend_kwargs)
+        fig = plt.figure(figsize=figsize, **backend_kwargs)
         grid = plt.GridSpec(4, 4, hspace=0.1, wspace=0.1, figure=fig)
 
         # Set up main plot

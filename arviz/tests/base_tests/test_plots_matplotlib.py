@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from ...data import from_dict, load_arviz_data
-from ...stats import compare, loo, waic
+from ...stats import compare, loo, waic, hdi
 from ..helpers import (  # pylint: disable=unused-import
     eight_schools_params,
     models,
@@ -42,6 +42,7 @@ from ...plots import (
     plot_elpd,
     plot_loo_pit,
     plot_mcse,
+    plot_bpv,
 )
 from ...utils import _cov
 from ...numeric_utils import _fast_kde
@@ -88,6 +89,11 @@ def continuous_model():
 def fig_ax():
     fig, ax = plt.subplots(1, 1)
     return fig, ax
+
+
+@pytest.fixture(scope="module")
+def data_random():
+    return np.random.randint(1, 100, size=20)
 
 
 @pytest.mark.parametrize(
@@ -208,6 +214,13 @@ def test_plot_trace_invalid_varname_warning(models, kwargs):
 def test_plot_trace_bad_lines_value(models, bad_kwargs):
     with pytest.raises(ValueError, match="line-positions should be numeric"):
         plot_trace(models.model_1, **bad_kwargs)
+
+
+@pytest.mark.parametrize("prop", ["chain_prop", "compact_prop"])
+def test_plot_trace_futurewarning(models, prop):
+    with pytest.warns(FutureWarning, match=f"{prop} as a tuple.+deprecated"):
+        ax = plot_trace(models.model_1, **{prop: ("ls", ("-", "--"))})
+    assert ax.shape
 
 
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
@@ -331,6 +344,10 @@ def test_plot_joint_bad(models):
         },
         {"contour": False},
         {"contour": False, "pcolormesh_kwargs": {"cmap": "plasma"}},
+        {"is_circular": False},
+        {"is_circular": True},
+        {"is_circular": "radians"},
+        {"is_circular": "degrees"},
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
@@ -362,9 +379,28 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
     assert axes
 
 
-@pytest.mark.parametrize("kwargs", [{"kind": "hist"}, {"kind": "kde"}])
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"kind": "hist"},
+        {"kind": "kde"},
+        {"is_circular": False},
+        {"is_circular": False, "kind": "hist"},
+        {"is_circular": True},
+        {"is_circular": True, "kind": "hist"},
+        {"is_circular": "radians"},
+        {"is_circular": "radians", "kind": "hist"},
+        {"is_circular": "degrees"},
+        {"is_circular": "degrees", "kind": "hist"},
+    ],
+)
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
+    assert axes
+
+
+def test_plot_dist_hist(data_random):
+    axes = plot_dist(data_random, hist_kwargs=dict(bins=30))
     assert axes
 
 
@@ -847,14 +883,43 @@ def test_plot_compare_no_ic(models):
     "kwargs",
     [
         {"color": "0.5", "circular": True},
-        {"fill_kwargs": {"alpha": 0}},
+        {"hdi_data": True, "fill_kwargs": {"alpha": 0}},
         {"plot_kwargs": {"alpha": 0}},
         {"smooth_kwargs": {"window_length": 33, "polyorder": 5, "mode": "mirror"}},
-        {"smooth": False},
+        {"hdi_data": True, "smooth": False},
     ],
 )
 def test_plot_hdi(models, data, kwargs):
-    plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    hdi_data = kwargs.pop("hdi_data", None)
+    if hdi_data:
+        hdi_data = hdi(models.model_1.posterior["theta"])
+        ax = plot_hdi(data["y"], hdi_data=hdi_data, **kwargs)
+    else:
+        ax = plot_hdi(data["y"], models.model_1.posterior["theta"], **kwargs)
+    assert ax
+
+
+def test_plot_hdi_warning():
+    """Check using both y and hdi_data sends a warning."""
+    x_data = np.random.normal(0, 1, 100)
+    y_data = np.random.normal(2 + x_data * 0.5, 0.5, (1, 200, 100))
+    hdi_data = hdi(y_data)
+    with pytest.warns(UserWarning, match="Both y and hdi_data"):
+        ax = plot_hdi(x_data, y=y_data, hdi_data=hdi_data)
+    assert ax
+
+
+def test_plot_hdi_missing_arg_error():
+    """Check that both y and hdi_data missing raises an error."""
+    with pytest.raises(ValueError, match="One of {y, hdi_data"):
+        plot_hdi(np.arange(20))
+
+
+def test_plot_hdi_dataset_error(models):
+    """Check hdi_data as multiple variable Dataset raises an error."""
+    hdi_data = hdi(models.model_1)
+    with pytest.raises(ValueError, match="Only single variable Dataset"):
+        plot_hdi(np.arange(8), hdi_data=hdi_data)
 
 
 @pytest.mark.parametrize("limits", [(-10.0, 10.0), (-5, 5), (None, None)])
@@ -1250,3 +1315,18 @@ def test_plot_dist_comparison_different_vars():
         plot_dist_comparison(data, var_names="x")
     ax = plot_dist_comparison(data, var_names=[["x_hat"], ["x"]])
     assert np.all(ax)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"reference": "analytical"},
+        {"kind": "p_value"},
+        {"kind": "t_stat", "t_stat": "std"},
+        {"kind": "t_stat", "t_stat": 0.5, "bpv": True},
+    ],
+)
+def test_plot_bpv(models, kwargs):
+    axes = plot_bpv(models.model_1, **kwargs)
+    assert axes.shape

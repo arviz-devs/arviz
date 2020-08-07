@@ -8,4 +8,4 @@ import arviz as az
 
 idata = az.load_arviz_data("radon")
 
-ax = az.plot_ess(idata, var_names=["sigma_y"], kind="quantile", color="red", backend="bokeh")
+ax = az.plot_ess(idata, var_names=["sigma"], kind="quantile", color="red", backend="bokeh")

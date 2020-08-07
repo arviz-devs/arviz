@@ -1,7 +1,7 @@
 """Plot kde or histograms and values from MCMC samples."""
 from itertools import cycle
 import warnings
-from typing import Callable, List, Optional, Tuple, Any
+from typing import Callable, List, Optional, Tuple, Any, Mapping, Union
 
 import matplotlib.pyplot as plt
 
@@ -22,15 +22,15 @@ def plot_trace(
     filter_vars: Optional[str] = None,
     transform: Optional[Callable] = None,
     coords: Optional[CoordSpec] = None,
-    divergences: Optional[str] = "bottom",
+    divergences: Optional[str] = "auto",
     kind: Optional[str] = "trace",
     figsize: Optional[Tuple[float, float]] = None,
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
     compact: bool = False,
-    compact_prop: Optional[Tuple[str, Any]] = None,
+    compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
-    chain_prop: Optional[Tuple[str, Any]] = None,
+    chain_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     legend: bool = False,
     plot_kwargs: Optional[KwargSpec] = None,
     fill_kwargs: Optional[KwargSpec] = None,
@@ -80,13 +80,13 @@ def plot_trace(
         vertical lines on the density and horizontal lines on the trace.
     compact: bool, optional
         Plot multidimensional variables in a single plot.
-    compact_prop: tuple of (str, array_like), optional
+    compact_prop: str or dict {str: array_like}, optional
         Tuple containing the property name and the property values to distinguish diferent
         dimensions with compact=True
     combined: bool, optional
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
-    chain_prop: tuple of (str, array_like), optional
+    chain_prop: str or dict {str: array_like}, optional
         Tuple containing the property name and the property values to distinguish diferent chains
     legend: bool, optional
         Add a legend to the figure with the chain color code.
@@ -156,6 +156,8 @@ def plot_trace(
     if kind not in {"trace", "rank_vlines", "rank_bars"}:
         raise ValueError("The value of kind must be either trace, rank_vlines or rank_bars.")
 
+    if divergences == "auto":
+        divergences = "top" if rug else "bottom"
     if divergences:
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
@@ -186,7 +188,7 @@ def plot_trace(
     if not compact:
         if backend == "bokeh":
             chain_prop = (
-                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
                 if chain_prop is None
                 else chain_prop
             )
@@ -194,16 +196,17 @@ def plot_trace(
             chain_prop = "color" if chain_prop is None else chain_prop
     else:
         chain_prop = (
-            (
-                "line_dash" if backend == "bokeh" else "linestyle",
-                ("solid", "dotted", "dashed", "dashdot"),
-            )
+            {
+                "line_dash"
+                if backend == "bokeh"
+                else "linestyle": ("solid", "dotted", "dashed", "dashdot"),
+            }
             if chain_prop is None
             else chain_prop
         )
         if backend == "bokeh":
             compact_prop = (
-                ("line_color", plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                {"line_color": plt.rcParams["axes.prop_cycle"].by_key()["color"]}
                 if compact_prop is None
                 else compact_prop
             )
@@ -214,14 +217,26 @@ def plot_trace(
     # TODO: kind of related: move mpl specific code to backend and
     # define prop_cycle instead of only colors
     if isinstance(chain_prop, str):
-        chain_prop = (chain_prop, plt.rcParams["axes.prop_cycle"].by_key()[chain_prop])
-    chain_prop = (
-        chain_prop[0],
-        [prop for _, prop in zip(range(num_chain_props), cycle(chain_prop[1]))],
-    )
+        chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
+    if isinstance(chain_prop, tuple):
+        warnings.warn(
+            "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        chain_prop = {chain_prop[0]: chain_prop[1]}
+    chain_prop = {
+        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
+        for prop_name, props in chain_prop.items()
+    }
 
     if isinstance(compact_prop, str):
-        compact_prop = (compact_prop, plt.rcParams["axes.prop_cycle"].by_key()[compact_prop])
+        compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
+    if isinstance(compact_prop, tuple):
+        warnings.warn(
+            "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        compact_prop = {compact_prop[0]: compact_prop[1]}
 
     if compact:
         skip_dims = set(data.dims) - {"chain", "draw"}

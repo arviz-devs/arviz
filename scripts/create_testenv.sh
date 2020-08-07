@@ -16,6 +16,8 @@ EMCEE_VERSION=${EMCEE_VERSION:-latest}
 TF_VERSION=${TF_VERSION:-latest}
 PYMC3_VERSION=${PYMC3_VERSION:-latest}
 
+# Update Conda to include latest build channels
+conda update conda
 
 if [[ $* != *--global* ]]; then
     ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}_TF_${TF_VERSION}"

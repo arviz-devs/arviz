@@ -47,9 +47,9 @@ See Bayesian Data Analysis (Gelman et. al.) for more details.
 
 REMOTE_DATASETS = {
     "radon": RemoteFileMetadata(
-        filename="radon.nc",
-        url="http://ndownloader.figshare.com/files/13284311",
-        checksum="ee9d4644e498d45ab5163982fc74baf05efce5cfa87b11f8509f7b9acf471f09",
+        filename="radon_hierarchical.nc",
+        url="http://ndownloader.figshare.com/files/24067472",
+        checksum="a9b2b4adf1bf9c5728e5bdc97107e69c4fc8d8b7d213e9147233b57be8b4587b",
         description="""
 Radon is a radioactive gas that enters homes through contact points with the ground.
 It is a carcinogen that is the primary cause of lung cancer in non-smokers. Radon
@@ -60,7 +60,7 @@ model with a hierarchy over households within a county. The model includes estim
 (gamma) for contextual effects of the uranium per household.
 
 See Gelman and Hill (2006) for details on the example, or
-https://docs.pymc.io/notebooks/multilevel_modeling.html#Correlations-among-levels
+https://docs.pymc.io/notebooks/multilevel_modeling.html
 by Chris Fonnesbeck for details on this implementation.
 """,
     ),
@@ -126,6 +126,20 @@ latent weights ("w") and intercept, passed into a Bernoulli random variable.
 Five hundred data points, fit with PyMC3.
 
 True weights and intercept are included as deterministic variables.
+""",
+    ),
+    "glycan_torsion_angles": RemoteFileMetadata(
+        filename="glycan_torsion_angles.nc",
+        url="http://ndownloader.figshare.com/files/22882652",
+        checksum="4622621fe7a1d3075c18c4c34af8cc57c59eabbb3501b20c6e2d9c6c4737034c",
+        description="""
+Torsion angles phi and psi are critical for determining the three dimensional
+structure of bio-molecules. Combinations of phi and psi torsion angles that
+produce clashes between atoms in the bio-molecule result in high energy, unlikely structures.
+
+This model uses a Von Mises distribution to propose torsion angles for the
+structure of a glycan molecule (pdb id: 2LIQ), and a Potential to estimate
+the proposed structure's energy. Said Potential is bound by Boltzman's law.
 """,
     ),
 }

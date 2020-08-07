@@ -5,6 +5,7 @@
 figure.figsize: 7.2, 4.8
 figure.dpi: 100.0
 figure.facecolor: white
+figure.constrained_layout.use: True
 text.color: .15
 axes.labelcolor: .15
 legend.frameon: False
