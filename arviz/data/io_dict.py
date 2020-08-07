@@ -35,6 +35,7 @@ class DictConverter:
         coords=None,
         dims=None,
         pred_dims=None,
+        pred_coords=None,
         attrs=None,
     ):
         self.posterior = posterior
@@ -54,7 +55,13 @@ class DictConverter:
         self.warmup_log_likelihood = warmup_log_likelihood
         self.warmup_sample_stats = warmup_sample_stats
         self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
-        self.coords = coords
+        self.coords = (
+            coords
+            if pred_coords is None
+            else pred_coords
+            if coords is None
+            else {**coords, **pred_coords}
+        )
         self.dims = dims
         self.pred_dims = dims if pred_dims is None else pred_dims
         self.attrs = {} if attrs is None else attrs
@@ -287,6 +294,7 @@ def from_dict(
     coords=None,
     dims=None,
     pred_dims=None,
+    pred_coords=None,
     attrs=None,
 ):
     """Convert Dictionary data into an InferenceData object.
@@ -322,6 +330,8 @@ def from_dict(
         A mapping from variables to a list of coordinate names for the variable.
     pred_dims : dict[str, List(str)]
         A mapping from variables to a list of coordinate names for predictions.
+    pred_coords : dict[str, List(str)]
+        A mapping from variables to a list of coordinate values for predictions.
     attrs : dict
         A dictionary containing attributes for different groups.
 
@@ -350,5 +360,6 @@ def from_dict(
         coords=coords,
         dims=dims,
         pred_dims=pred_dims,
+        pred_coords=pred_coords,
         attrs=attrs,
     ).to_inference_data()

@@ -845,7 +845,8 @@ class TestDataDict:
             warmup_posterior_predictive=data.obj,
             predictions=data.obj,
             observed_data=eight_schools_params,
-            coords={"school": np.arange(8), "school_pred": np.arange(8),},
+            coords={"school": np.arange(8),},
+            pred_coords={"school_pred": np.arange(8),},
             dims={"theta": ["school"], "eta": ["school"]},
             pred_dims={"theta": ["school_pred"], "eta": ["school_pred"]},
             save_warmup=save_warmup,
@@ -871,7 +872,6 @@ class TestDataDict:
         self.check_var_names_coords_dims(inference_data.prior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats_prior)
 
-        print(inference_data.predictions.dims)
         pred_dims = inference_data.predictions.dims["school_pred"]
         assert pred_dims == 8
 
