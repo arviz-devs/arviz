@@ -332,7 +332,7 @@ def _extend_xr_method(func, doc=None, description=None, examples=None, see_also=
         method_name=func.__name__, custom_see_also=see_also  # pylint: disable=no-member
     )
     wrapped.__doc__ = (
-        description_default + examples + params + see_also_basic if doc is None else doc
+        description_default + params + examples + see_also_basic if doc is None else doc
     )
 
     return wrapped
