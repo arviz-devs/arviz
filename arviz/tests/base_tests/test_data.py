@@ -585,6 +585,63 @@ class TestInferenceData:
         assert escape(idata.__repr__()) in html
         xr.set_options(display_style=display_style)
 
+    def test_add_groups(self, data_random):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = data_random
+        idata.add_groups({"prior": {"a": data[..., 0], "b": data}})
+        assert "prior" in idata._groups  # pylint: disable=protected-access
+        assert isinstance(idata.prior, xr.Dataset)
+        assert hasattr(idata, "prior")
+
+        idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
+        assert "posterior_warmup" in idata._groups  # pylint: disable=protected-access
+        assert isinstance(idata.posterior_warmup, xr.Dataset)
+        assert hasattr(idata, "posterior_warmup")
+
+    def test_add_groups_warning(self, data_random):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = data_random
+        with pytest.warns(UserWarning, match="The group.+not defined in the InferenceData scheme"):
+            idata.add_groups({"new_group": idata.posterior})
+        with pytest.warns(UserWarning, match="the default dims.+will be added automatically"):
+            idata.add_groups(constant_data={"a": data[..., 0], "b": data})
+        assert idata.new_group.equals(idata.posterior)
+
+    def test_add_groups_error(self, data_random):
+        idata = data_random
+        with pytest.raises(ValueError, match="One of.+must be provided."):
+            idata.add_groups()
+        with pytest.raises(ValueError, match="Arguments.+xr.Dataset, xr.Dataarray or dicts"):
+            idata.add_groups({"new_group": "new_group"})
+        with pytest.raises(ValueError, match="group.+already exists"):
+            idata.add_groups({"posterior": idata.posterior})
+
+    def test_extend(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        idata.extend(idata2)
+        assert hasattr(idata, "prior")
+        assert hasattr(idata, "prior_predictive")
+        assert idata.prior.equals(idata2.prior)
+        assert not idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+        idata.extend(idata2, join="right")
+        assert idata.prior.equals(idata2.prior)
+        assert idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+    def test_extend_errors_warnings(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        with pytest.raises(ValueError, match="Extending.+InferenceData objects only."):
+            idata.extend("something")
+        with pytest.raises(ValueError, match="join must be either"):
+            idata.extend(idata2, join="outer")
+        idata2.add_groups(new_group=idata2.prior)
+        with pytest.warns(UserWarning):
+            idata.extend(idata2)
+
 
 class TestNumpyToDataArray:
     def test_1d_dataset(self):
