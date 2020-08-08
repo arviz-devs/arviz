@@ -319,10 +319,10 @@ def _extend_xr_method(func, doc=None, description=None, examples=None, see_also=
         If ``True``, modify the InferenceData object inplace,
         otherwise, return the modified copy.
     """
-    if not isinstance(see_also, str):
-        see_also = "\n".join(see_also)
-    elif see_also is None:
+    if see_also is None:
         see_also = ""
+    elif not isinstance(see_also, str):
+        see_also = "\n".join(see_also)
     see_also_basic = """
     See Also
     --------
