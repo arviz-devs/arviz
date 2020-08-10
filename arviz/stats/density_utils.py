@@ -157,7 +157,7 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
-        bw = bw_fun(x, grid_counts, x_std, x_range)
+        bw = bw_fun(x, grid_counts=grid_counts, x_std=x_std, x_range=x_range)
     else:
         raise ValueError(
             (
@@ -544,6 +544,7 @@ def _kde_linear(
     custom_lims=None,
     cumulative=False,
     grid_len=512,
+    **kwargs,  # pylint: disable=unused-argument
 ):
     """One dimensional density estimation for linear data.
 
@@ -647,7 +648,14 @@ def _kde_linear(
 
 
 def _kde_circular(
-    x, bw="taylor", bw_fct=1, bw_return=False, custom_lims=None, cumulative=False, grid_len=512,
+    x,
+    bw="taylor",
+    bw_fct=1,
+    bw_return=False,
+    custom_lims=None,
+    cumulative=False,
+    grid_len=512,
+    **kwargs,  # pylint: disable=unused-argument
 ):
     """One dimensional density estimation for circular data.
 
@@ -744,7 +752,8 @@ def _kde_circular(
         return grid, pdf
 
 
-def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
+# pylint: disable=unused-argument
+def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
     """Kernel density with convolution.
 
     One dimensional Gaussian kernel density estimation via
@@ -779,7 +788,7 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction)
     return grid, pdf
 
 
-def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction):
+def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **kwargs):
     """Compute Adaptive Kernel Density Estimation.
 
     One dimensional adaptive Gaussian kernel density estimation.
