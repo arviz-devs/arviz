@@ -46,7 +46,7 @@ jobs:
       conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
     
-   - script: |
+  - script: |
       ls -ahl
       env
       pwd
