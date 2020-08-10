@@ -2,11 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
-from ....kde_utils import _kde
-from ....numeric_utils import histogram, get_bins
-from ...plot_utils import make_label, _create_axes_grid, matplotlib_kwarg_dealiaser, _scale_fig_size
+from ....stats.density_utils import get_bins, histogram, kde
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_violin(
@@ -30,9 +29,21 @@ def plot_violin(
     show,
 ):
     """Matplotlib violin plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("sharex", sharex)
+    backend_kwargs.setdefault("sharey", sharey)
+    backend_kwargs.setdefault("squeeze", True)
 
     shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
     rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
@@ -41,16 +52,7 @@ def plot_violin(
     rug_kwargs.setdefault("linestyle", "")
 
     if ax is None:
-        fig, ax = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            sharex=sharex,
-            sharey=sharey,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        fig, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
         fig.set_constrained_layout(False)
         fig.subplots_adjust(wspace=0)
 
@@ -93,7 +95,7 @@ def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
             bw = "taylor"
         else:
             bw = "experimental"
-    x, density = _kde(val, circular=circular, bw=bw)
+    x, density = kde(val, circular=circular, bw=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])

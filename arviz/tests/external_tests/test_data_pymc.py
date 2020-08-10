@@ -1,18 +1,18 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name, protected-access, too-many-public-methods
 from sys import version_info
 from typing import Dict, Tuple
-import packaging
 
 import numpy as np
+import packaging
 import pandas as pd
 import pytest
 from numpy import ma
 
-from arviz import (
+from arviz import (  # pylint: disable=wrong-import-position
+    InferenceData,
     from_pymc3,
     from_pymc3_predictions,
-    InferenceData,
-)  # pylint: disable=wrong-import-position
+)
 
 from ..helpers import (  # pylint: disable=unused-import, wrong-import-position
     chains,

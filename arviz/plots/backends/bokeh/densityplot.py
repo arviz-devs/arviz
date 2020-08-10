@@ -2,22 +2,15 @@
 from collections import defaultdict
 from itertools import cycle
 
-from bokeh.models.annotations import Title, Legend
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models.annotations import Legend, Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-    calculate_point_estimate,
-    vectorized_to_hex,
-)
 from ....stats import hdi
-from ....numeric_utils import histogram, get_bins
-from ....kde_utils import _kde
+from ....stats.density_utils import get_bins, histogram, kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label, vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_density(
@@ -47,7 +40,7 @@ def plot_density(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
 
@@ -65,13 +58,12 @@ def plot_density(
     (figsize, _, _, _, line_width, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = _create_axes_grid(
+        ax = create_axes_grid(
             length_plotters,
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
-            backend="bokeh",
+            squeeze=True,
             backend_kwargs=backend_kwargs,
         )
     else:
@@ -148,7 +140,7 @@ def _d_helper(
         else:
             new_vec = vec
 
-        x, density = _kde(new_vec, circular=circular, bw=bw)
+        x, density = kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
         xmin, xmax = x[0], x[-1]
         ymin, ymax = density[0], density[-1]

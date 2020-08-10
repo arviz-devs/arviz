@@ -2,22 +2,21 @@
 from numbers import Number
 from typing import Optional
 
-from bokeh.models.annotations import Title
 import numpy as np
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
     _scale_fig_size,
-    format_sig_figs,
-    round_num,
     calculate_point_estimate,
+    format_sig_figs,
+    make_label,
+    round_num,
 )
-from ....stats import hdi
-from ....numeric_utils import get_bins
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_posterior(
@@ -54,14 +53,8 @@ def plot_posterior(
     (figsize, ax_labelsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)
@@ -246,7 +239,7 @@ def _plot_posterior_op(
             backend_kwargs={},
             show=False,
         )
-        hist, edges = np.histogram(values, density=True)
+        _, hist, edges = histogram(values, bins="auto")
     else:
         if bins is None:
             if values.dtype.kind == "i":
@@ -255,7 +248,7 @@ def _plot_posterior_op(
                 bins = "auto"
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "blue")
-        hist, edges = np.histogram(values, density=True, bins=bins)
+        _, hist, edges = histogram(values, bins=bins)
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )

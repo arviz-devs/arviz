@@ -1,7 +1,7 @@
 """Plot energy transition distribution in HMC inference."""
 from ..data import convert_to_dataset
-from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_energy(

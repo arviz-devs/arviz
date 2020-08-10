@@ -1,27 +1,26 @@
 # pylint: disable=redefined-outer-name
 import os
+
 import numpy as np
 import pytest
 from xarray.core.indexing import MemoryCachedArray
 
-
-from ...data import load_arviz_data, datasets
-from ...stats import compare
+from ...data import datasets, load_arviz_data
 from ...rcparams import (
-    rc_params,
-    rcParams,
-    rc_context,
     _make_validate_choice,
     _make_validate_choice_regex,
-    make_iterable_validator,
     _validate_float_or_none,
     _validate_positive_int_or_none,
     _validate_probability,
+    make_iterable_validator,
+    rc_context,
+    rc_params,
+    rcParams,
     read_rcfile,
 )
-
-
+from ...stats import compare
 from ..helpers import models  # pylint: disable=unused-import
+
 
 ### Test rcparams classes ###
 def test_rc_context_dict():

@@ -1,20 +1,14 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
-
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _scale_fig_size,
-    set_xticklabels,
-    color_from_dim,
-    matplotlib_kwarg_dealiaser,
-)
 from ....rcparams import rcParams
+from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_elpd(
@@ -42,7 +36,7 @@ def plot_elpd(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    backend_kwargs["constrained_layout"] = not xlabels
+    backend_kwargs.setdefault("constrained_layout", not xlabels)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
 
@@ -77,9 +71,10 @@ def plot_elpd(
             figsize, textsize, numvars - 1, numvars - 1
         )
         plot_kwargs.setdefault("s", markersize ** 2)
-
+        backend_kwargs.setdefault("figsize", figsize)
+        backend_kwargs["squeeze"] = True
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
@@ -135,6 +130,7 @@ def plot_elpd(
                 numvars - 1,
                 numvars - 1,
                 figsize=figsize,
+                squeeze=False,
                 constrained_layout=not xlabels,
                 sharey="row",
                 sharex="all",

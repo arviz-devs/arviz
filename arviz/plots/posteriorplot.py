@@ -1,13 +1,8 @@
 """Plot posterior densities."""
 from ..data import convert_to_dataset
-from .plot_utils import (
-    xarray_var_iter,
-    default_grid,
-    filter_plotters_list,
-    get_plotting_function,
-)
-from ..utils import _var_names, get_coords, credible_interval_warning
 from ..rcparams import rcParams
+from ..utils import _var_names, credible_interval_warning, get_coords
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
 def plot_posterior(

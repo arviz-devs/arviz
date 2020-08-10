@@ -1,10 +1,12 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
 import os
+
 import numpy as np
 import pytest
 
 from arviz import from_cmdstan
+
 from ..helpers import check_multiple_attrs
 
 

@@ -3,10 +3,9 @@
 import xarray as xr
 
 from ..data import InferenceData
-from ..numeric_utils import _fast_kde_2d
-from ..kde_utils import _kde
-from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
+from ..stats.density_utils import _fast_kde_2d, kde
+from .plot_utils import get_plotting_function
 
 
 def plot_kde(
@@ -22,6 +21,7 @@ def plot_kde(
     rotated=False,
     contour=True,
     fill_last=False,
+    figsize=None,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -76,6 +76,8 @@ def plot_kde(
         Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to False.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
@@ -245,7 +247,7 @@ def plot_kde(
             else:
                 bw = "experimental"
 
-        grid, density = _kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
+        grid, density = kde(values, circular, bw=bw, adaptive=adaptive, cumulative=cumulative)
         lower, upper = grid[0], grid[-1]
 
         if cumulative:
@@ -281,6 +283,7 @@ def plot_kde(
         rotated=rotated,
         contour=contour,
         fill_last=fill_last,
+        figsize=figsize,
         textsize=textsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,

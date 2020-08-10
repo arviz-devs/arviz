@@ -1,12 +1,11 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
-from ...plot_utils import _create_axes_grid, _scale_fig_size
-from ....numeric_utils import histogram, get_bins
-from ....kde_utils import _kde
+from ...plot_utils import _scale_fig_size
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_ppc(
@@ -44,13 +43,8 @@ def plot_ppc(
 
     (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
-        _, axes = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        axes = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         axes = np.atleast_2d(ax)
@@ -94,7 +88,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_x, pp_density = _kde(vals)
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:

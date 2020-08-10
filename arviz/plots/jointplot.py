@@ -2,12 +2,9 @@
 import warnings
 
 from ..data import convert_to_dataset
-from .plot_utils import (
-    xarray_var_iter,
-    get_plotting_function,
-)
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
+from .plot_utils import get_plotting_function, xarray_var_iter
 
 
 def plot_joint(

@@ -1,16 +1,12 @@
 """Matplotlib loopitplot."""
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgb, rgb_to_hsv, hsv_to_rgb, to_hex
 import numpy as np
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
 from xarray import DataArray
 
-
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _scale_fig_size,
-    matplotlib_kwarg_dealiaser,
-)
-from ....kde_utils import _kde
+from ....stats.density_utils import kde
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_loo_pit(
@@ -52,6 +48,11 @@ def plot_loo_pit(
     }
 
     (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
+    if ax is None:
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
     plot_kwargs["color"] = to_hex(color)
@@ -99,9 +100,6 @@ def plot_loo_pit(
         hdi_kwargs.setdefault("alpha", 0.35)
         hdi_kwargs.setdefault("label", "Uniform HDI")
 
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, **backend_kwargs)
-
     if ecdf:
         ax.plot(
             np.hstack((0, loo_pit, 1)), np.hstack((0, loo_pit - loo_pit_ecdf, 0)), **plot_kwargs
@@ -118,7 +116,7 @@ def plot_loo_pit(
             ax.axhspan(*hdi_odds, **hdi_kwargs)
         else:
             for idx in range(n_unif):
-                x_s, unif_density = _kde(unif[idx, :])
+                x_s, unif_density = kde(unif[idx, :])
                 x_ss[idx] = x_s
                 u_dens[idx] = unif_density
             ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)

@@ -6,13 +6,12 @@ import numpy as np
 import pytest
 
 from ...data import load_arviz_data
-from ..helpers import running_on_ci
 from ...rcparams import rcParams
 from ...stats import bfmi, geweke, mcse, rhat
 from ...stats.diagnostics import _mc_error, ks_summary
 from ...utils import Numba
+from ..helpers import running_on_ci
 from .test_diagnostics import data  # pylint: disable=unused-import
-
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
     (importlib.util.find_spec("numba") is None) & ~running_on_ci(),

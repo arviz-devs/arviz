@@ -2,13 +2,10 @@
 import numpy as np
 
 from ..data import convert_to_inference_data
-from .plot_utils import (
-    format_coords_as_labels,
-    get_plotting_function,
-)
-from ..stats import waic, loo, ELPDData
 from ..rcparams import rcParams
+from ..stats import ELPDData, loo, waic
 from ..utils import get_coords
+from .plot_utils import format_coords_as_labels, get_plotting_function
 
 
 def plot_elpd(

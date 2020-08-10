@@ -1,18 +1,17 @@
 """Bokeh energyplot."""
 from itertools import cycle
 
-import bokeh.plotting as bkp
+import numpy as np
 from bokeh.models import Label
 from bokeh.models.annotations import Legend
 from matplotlib.pyplot import rcParams as mpl_rcParams
-import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from .distplot import _histplot_bokeh_op
+from ....stats import bfmi as e_bfmi
 from ...kdeplot import plot_kde
 from ...plot_utils import _scale_fig_size, vectorized_to_hex
-from ....stats import bfmi as e_bfmi
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
+from .distplot import _histplot_bokeh_op
 
 
 def plot_energy(
@@ -36,7 +35,7 @@ def plot_energy(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi")),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -50,9 +49,7 @@ def plot_energy(
         legend = False
 
     if ax is None:
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(**backend_kwargs)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     _colors = [
         prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))

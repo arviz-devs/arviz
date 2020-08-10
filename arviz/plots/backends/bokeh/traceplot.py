@@ -1,20 +1,19 @@
 """Bokeh Traceplot."""
 import warnings
-
 from collections.abc import Iterable
 from itertools import cycle
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Dash, Span, DataRange1d
-from bokeh.models.annotations import Title
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models import ColumnDataSource, Dash, DataRange1d, Span
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...distplot import plot_dist
+from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
 from ...rankplot import plot_rank
-from ...plot_utils import xarray_var_iter, make_label, _scale_fig_size, _dealiase_sel_kwargs
+from .. import show_layout
+from . import backend_kwarg_defaults, dealiase_sel_kwargs
 
 
 def plot_trace(
@@ -142,14 +141,16 @@ def plot_trace(
 
     if axes is None:
         axes = []
+        backend_kwargs_copy = backend_kwargs.copy()
         for i in range(len(plotters)):
-            if i != 0:
+            if not i:
+                _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs_copy)]
+                backend_kwargs_copy.setdefault("x_range", _axes[1].x_range)
+            else:
                 _axes = [
                     bkp.figure(**backend_kwargs),
-                    bkp.figure(x_range=axes[0][1].x_range, **backend_kwargs),
+                    bkp.figure(**backend_kwargs_copy),
                 ]
-            else:
-                _axes = [bkp.figure(**backend_kwargs), bkp.figure(**backend_kwargs)]
             axes.append(_axes)
 
     axes = np.atleast_2d(axes)
@@ -366,7 +367,7 @@ def _plot_chains_bokeh(
                 x=x_name,
                 y=y_name,
                 source=cds,
-                **_dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+                **dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             )
             if marker:
                 ax_trace.circle(
@@ -375,7 +376,7 @@ def _plot_chains_bokeh(
                     source=cds,
                     radius=0.30,
                     alpha=0.5,
-                    **_dealiase_sel_kwargs({}, chain_prop, chain_idx)
+                    **dealiase_sel_kwargs({}, chain_prop, chain_idx)
                 )
         if not combined:
             rug_kwargs["cds"] = cds
@@ -386,7 +387,7 @@ def _plot_chains_bokeh(
                 ax=ax_density,
                 rug=rug,
                 hist_kwargs=hist_kwargs,
-                plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx),
+                plot_kwargs=dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx),
                 fill_kwargs=fill_kwargs,
                 rug_kwargs=rug_kwargs,
                 backend="bokeh",
@@ -410,7 +411,7 @@ def _plot_chains_bokeh(
             ax=ax_density,
             rug=rug,
             hist_kwargs=hist_kwargs,
-            plot_kwargs=_dealiase_sel_kwargs(plot_kwargs, chain_prop, -1),
+            plot_kwargs=dealiase_sel_kwargs(plot_kwargs, chain_prop, -1),
             fill_kwargs=fill_kwargs,
             rug_kwargs=rug_kwargs,
             backend="bokeh",

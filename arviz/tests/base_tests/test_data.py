@@ -1,39 +1,40 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
-from collections import namedtuple
 import os
+from collections import namedtuple
 from copy import deepcopy
+from html import escape
 from typing import Dict
 from urllib.parse import urlunsplit
-from html import escape
+
 import numpy as np
 import pytest
-
 import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
 from arviz import (
+    InferenceData,
+    clear_data_home,
     concat,
-    convert_to_inference_data,
     convert_to_dataset,
+    convert_to_inference_data,
     from_dict,
     from_netcdf,
-    to_netcdf,
-    load_arviz_data,
     list_datasets,
-    clear_data_home,
-    InferenceData,
+    load_arviz_data,
+    to_netcdf,
 )
-from ...data.base import generate_dims_coords, make_attrs, dict_to_dataset
-from ...data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
+
+from ...data.base import dict_to_dataset, generate_dims_coords, make_attrs
+from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
-    draws,
-    eight_schools_params,
     create_data_random,
     data_random,
+    draws,
+    eight_schools_params,
 )
 
 

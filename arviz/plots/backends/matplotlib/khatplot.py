@@ -2,20 +2,14 @@
 import warnings
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import to_rgba_array
 
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    set_xticklabels,
-    _scale_fig_size,
-    matplotlib_kwarg_dealiaser,
-    vectorized_to_hex,
-    color_from_dim,
-)
-from ....stats.stats_utils import histogram
+from ....stats.density_utils import histogram
+from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels, vectorized_to_hex
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_khat(
@@ -63,6 +57,9 @@ def plot_khat(
     (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
         figsize, textsize
     )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
     hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
@@ -103,7 +100,7 @@ def plot_khat(
     rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+        fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
     else:
         fig = ax.get_figure()
 

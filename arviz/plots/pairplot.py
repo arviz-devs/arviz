@@ -1,12 +1,13 @@
 """Plot a scatter, kde and/or hexbin of sampled parameters."""
 import warnings
-from typing import Optional, Union, List
+from typing import List, Optional, Union
+
 import numpy as np
 
 from ..data import convert_to_dataset, convert_to_inference_data
-from .plot_utils import xarray_to_ndarray, get_plotting_function
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
+from .plot_utils import get_plotting_function, xarray_to_ndarray
 
 
 def plot_pair(

@@ -3,15 +3,15 @@ import warnings
 from uuid import uuid4
 
 import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, CDSView, GroupFilter, Span
 import numpy as np
+from bokeh.models import CDSView, ColumnDataSource, GroupFilter, Span
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...kdeplot import plot_kde
-from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from ....rcparams import rcParams
+from ...distplot import plot_dist
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_pair(

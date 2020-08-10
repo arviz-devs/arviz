@@ -1,15 +1,18 @@
 """Stats-utility functions for ArviZ."""
-from collections.abc import Sequence
 import logging
 import warnings
-from copy import copy as _copy, deepcopy as _deepcopy
+from collections.abc import Sequence
+from copy import copy as _copy
+from copy import deepcopy as _deepcopy
 
 import numpy as np
 import pandas as pd
 from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
+
 from ..utils import conditional_jit, conditional_vect
+from .density_utils import histogram as _histogram
 
 _log = logging.getLogger(__name__)
 
@@ -467,7 +470,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
 
         if kind == "loo" and "pareto_k" in self:
             bins = np.asarray([-np.Inf, 0.5, 0.7, 1, np.Inf])
-            counts, *_ = histogram(self.pareto_k.values, bins)
+            counts, *_ = _histogram(self.pareto_k.values, bins)
             extended = POINTWISE_LOO_FMT.format(max(4, len(str(np.max(counts)))))
             extended = extended.format(
                 "Count", "Pct.", *[*counts, *(counts / np.sum(counts) * 100)]
@@ -515,33 +518,6 @@ def stats_variance_2d(data, ddof=0, axis=1):
         for i in range(b_b):
             var[i] = stats_variance_1d(data[:, i], ddof=ddof)
         return var
-
-
-@conditional_jit(cache=True)
-def histogram(data, bins, range_hist=None):
-    """Conditionally jitted histogram.
-
-    Parameters
-    ----------
-    data : array-like
-        Input data. Passed as first positional argument to ``np.histogram``.
-    bins : int or array-like
-        Passed as keyword argument ``bins`` to ``np.histogram``.
-    range_hist : (float, float), optional
-        Passed as keyword argument ``range`` to ``np.histogram``.
-
-    Returns
-    -------
-    hist : array
-        The number of counts per bin.
-    density : array
-        The density corresponding to each bin.
-    bin_edges : array
-        The edges of the bins used.
-    """
-    hist, bin_edges = np.histogram(data, bins=bins, range=range_hist)
-    hist_dens = hist / (hist.sum() * np.diff(bin_edges))
-    return hist, hist_dens, bin_edges
 
 
 @conditional_vect

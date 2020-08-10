@@ -1,21 +1,20 @@
 """Matplotlib Plot posterior densities."""
 from numbers import Number
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
+from ....stats.density_utils import get_bins
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
     _scale_fig_size,
-    format_sig_figs,
-    round_num,
     calculate_point_estimate,
-    matplotlib_kwarg_dealiaser,
+    format_sig_figs,
+    make_label,
+    round_num,
 )
-from ....numeric_utils import get_bins
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_posterior(
@@ -41,9 +40,20 @@ def plot_posterior(
     show,
 ):
     """Matplotlib posterior plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
         figsize, textsize, rows, cols
     )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
+
     if kind == "hist":
         kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
     else:
@@ -51,14 +61,7 @@ def plot_posterior(
     kwargs.setdefault("linewidth", _linewidth)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
     idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(

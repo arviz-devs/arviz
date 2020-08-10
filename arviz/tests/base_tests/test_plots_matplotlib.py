@@ -2,50 +2,51 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 import os
 from copy import deepcopy
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 from matplotlib import animation
 from pandas import DataFrame
 from scipy.stats import gaussian_kde
-import numpy as np
-import pytest
 
 from ...data import from_dict, load_arviz_data
-from ...stats import compare, loo, waic, hdi
-from ..helpers import (  # pylint: disable=unused-import
-    eight_schools_params,
-    models,
-    create_model,
-    multidim_models,
-    create_multidimensional_model,
-)
-from ...rcparams import rcParams, rc_context
+from ...stats.density_utils import kde as _kde
 from ...plots import (
+    plot_autocorr,
+    plot_bpv,
+    plot_compare,
     plot_density,
-    plot_trace,
+    plot_dist,
+    plot_dist_comparison,
+    plot_elpd,
     plot_energy,
     plot_ess,
-    plot_posterior,
-    plot_autocorr,
     plot_forest,
-    plot_parallel,
-    plot_pair,
+    plot_hdi,
     plot_joint,
-    plot_dist_comparison,
-    plot_ppc,
-    plot_violin,
-    plot_compare,
     plot_kde,
     plot_khat,
-    plot_hdi,
-    plot_dist,
-    plot_rank,
-    plot_elpd,
     plot_loo_pit,
     plot_mcse,
-    plot_bpv,
+    plot_pair,
+    plot_parallel,
+    plot_posterior,
+    plot_ppc,
+    plot_rank,
+    plot_trace,
+    plot_violin,
 )
+from ...rcparams import rc_context, rcParams
+from ...stats import compare, hdi, loo, waic
 from ...utils import _cov
-from ...kde_utils import _kde
+from ..helpers import (  # pylint: disable=unused-import
+    create_model,
+    create_multidimensional_model,
+    eight_schools_params,
+    models,
+    multidim_models,
+)
 
 rcParams["data.load"] = "eager"
 
@@ -115,15 +116,12 @@ def data_random():
 def test_plot_density_float(models, kwargs):
     obj = [getattr(models, model_fit) for model_fit in ["model_1", "model_2"]]
     axes = plot_density(obj, **kwargs)
-    if "ax" in kwargs:
-        assert axes.shape == (6, 3)
-    else:
-        assert axes.shape[0] >= 18
+    assert axes.shape == (6, 3)
 
 
 def test_plot_density_discrete(discrete_model):
     axes = plot_density(discrete_model, shade=0.9)
-    assert axes.shape[0] == 2
+    assert axes.size == 2
 
 
 def test_plot_density_no_subset():
@@ -131,7 +129,7 @@ def test_plot_density_no_subset():
     model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
     model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
     axes = plot_density([model_ab, model_bc])
-    assert axes.shape[0] == 3
+    assert axes.size == 3
 
 
 def test_plot_density_bad_kwargs(models):
@@ -247,7 +245,7 @@ def test_plot_forest(models, model_fits, args_expected):
     obj = [getattr(models, model_fit) for model_fit in model_fits]
     args, expected = args_expected
     axes = plot_forest(obj, **args)
-    assert axes.shape == (expected,)
+    assert axes.size == expected
 
 
 def test_plot_forest_rope_exception():
@@ -683,15 +681,23 @@ def test_non_linux_blit(models, monkeypatch, system, caplog):
     assert anim
 
 
-def test_plot_ppc_grid(models):
-    axes = plot_ppc(models.model_1, kind="scatter", flatten=[])
-    assert len(axes) == 8
-    axes = plot_ppc(models.model_1, kind="scatter", flatten=[], coords={"obs_dim": [1, 2, 3]})
-    assert len(axes) == 3
-    axes = plot_ppc(
-        models.model_1, kind="scatter", flatten=["obs_dim"], coords={"obs_dim": [1, 2, 3]}
-    )
-    assert len(axes) == 1
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"flatten": []},
+        {"flatten": [], "coords": {"obs_dim": [1, 2, 3]}},
+        {"flatten": ["obs_dim"], "coords": {"obs_dim": [1, 2, 3]}},
+    ],
+)
+def test_plot_ppc_grid(models, kwargs):
+    axes = plot_ppc(models.model_1, kind="scatter", **kwargs)
+    if not kwargs.get("flatten") and not kwargs.get("coords"):
+        assert axes.size == 8
+    elif not kwargs.get("flatten"):
+        assert axes.size == 3
+    else:
+        assert not isinstance(axes, np.ndarray)
+        assert np.ravel(axes).size == 1
 
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
@@ -710,7 +716,7 @@ def test_plot_ppc_ax(models, kind, fig_ax):
     """Test ax argument of plot_ppc."""
     _, ax = fig_ax
     axes = plot_ppc(models.model_1, kind=kind, ax=ax)
-    assert axes[0] is ax
+    assert np.asarray(axes).item(0) is ax
 
 
 @pytest.mark.skipif(
@@ -759,23 +765,25 @@ def test_plot_autocorr_short_chain():
 
 def test_plot_autocorr_uncombined(models):
     axes = plot_autocorr(models.model_1, combined=False)
-    assert axes.shape[0] == 1
+    assert axes.size
     max_subplots = (
         np.inf if rcParams["plot.max_subplots"] is None else rcParams["plot.max_subplots"]
     )
-    assert axes.shape[1] == min(72, max_subplots)
+    assert axes.size == min(72, max_subplots)
 
 
 def test_plot_autocorr_combined(models):
     axes = plot_autocorr(models.model_1, combined=True)
-    assert axes.shape[0] == 1
-    assert axes.shape[1] == 18
+    assert axes.size == 18
 
 
-@pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
+@pytest.mark.parametrize("var_names", (None, "mu", ["mu"], ["mu", "tau"]))
 def test_plot_autocorr_var_names(models, var_names):
     axes = plot_autocorr(models.model_1, var_names=var_names, combined=True)
-    assert axes.shape
+    if (isinstance(var_names, list) and len(var_names) == 1) or isinstance(var_names, str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
 
 
 @pytest.mark.parametrize(
@@ -791,7 +799,11 @@ def test_plot_autocorr_var_names(models, var_names):
 )
 def test_plot_rank(models, kwargs):
     axes = plot_rank(models.model_1, **kwargs)
-    assert axes.shape
+    var_names = kwargs.get("var_names", [])
+    if isinstance(var_names, str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
 
 
 @pytest.mark.parametrize(
@@ -822,7 +834,10 @@ def test_plot_rank(models, kwargs):
 )
 def test_plot_posterior(models, kwargs):
     axes = plot_posterior(models.model_1, **kwargs)
-    assert axes.shape
+    if isinstance(kwargs.get("var_names"), str):
+        assert not isinstance(axes, np.ndarray)
+    else:
+        assert axes.shape
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"point_estimate": "mode"}, {"bins": None, "kind": "hist"}])
@@ -843,7 +858,7 @@ def test_plot_posterior_bad(models):
 @pytest.mark.parametrize("point_estimate", ("mode", "mean", "median"))
 def test_plot_posterior_point_estimates(models, point_estimate):
     axes = plot_posterior(models.model_1, var_names=("mu", "tau"), point_estimate=point_estimate)
-    assert axes.shape == (2,)
+    assert axes.size == 2
 
 
 @pytest.mark.parametrize(
@@ -1331,4 +1346,4 @@ def test_plot_dist_comparison_different_vars():
 )
 def test_plot_bpv(models, kwargs):
     axes = plot_bpv(models.model_1, **kwargs)
-    assert axes.shape
+    assert not isinstance(axes, np.ndarray)

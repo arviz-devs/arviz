@@ -1,17 +1,13 @@
 """Bokeh mcseplot."""
+import numpy as np
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
-import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-)
 from ....stats.stats_utils import quantile as _quantile
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_mcse(
@@ -43,7 +39,7 @@ def plot_mcse(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
 
@@ -55,13 +51,8 @@ def plot_mcse(
     extra_kwargs.setdefault("alpha", 0.5)
 
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

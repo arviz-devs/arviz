@@ -1,13 +1,12 @@
 """Bokeh Distplot."""
-import bokeh.plotting as bkp
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
-from ...plot_utils import set_bokeh_circular_ticks_labels, vectorized_to_hex
-from ....numeric_utils import get_bins
+from ...plot_utils import _scale_fig_size, set_bokeh_circular_ticks_labels, vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_dist(
@@ -24,6 +23,8 @@ def plot_dist(
     quantiles,
     contour,
     fill_last,
+    figsize,
+    textsize,
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
@@ -35,7 +36,6 @@ def plot_dist(
     ax,
     backend_kwargs,
     show,
-    **kwargs  # pylint: disable=unused-argument
 ):
     """Bokeh distplot."""
     if backend_kwargs is None:
@@ -45,6 +45,8 @@ def plot_dist(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    figsize, *_ = _scale_fig_size(figsize, textsize)
 
     color = vectorized_to_hex(color)
 
@@ -58,10 +60,9 @@ def plot_dist(
             hist_kwargs.setdefault("legend_label", str(label))
 
     if ax is None:
-        if is_circular:
-            ax = bkp.figure(x_axis_type=None, y_axis_type=None)
-        else:
-            ax = bkp.figure(**backend_kwargs)
+        ax = create_axes_grid(
+            1, figsize=figsize, squeeze=True, polar=is_circular, backend_kwargs=backend_kwargs,
+        )
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
@@ -128,8 +129,9 @@ def _histplot_bokeh_op(values, values2, rotated, ax, hist_kwargs, is_circular):
     bins = hist_kwargs.pop("bins", None)
     if bins is None:
         bins = get_bins(values)
-    density = hist_kwargs.pop("density", True)
-    hist, edges = np.histogram(np.asarray(values).flatten(), density=density, bins=bins)
+    hist, hist_dens, edges = histogram(np.asarray(values).flatten(), bins=bins)
+    if hist_kwargs.pop("density", True):
+        hist = hist_dens
     if hist_kwargs.pop("cumulative", False):
         hist = np.cumsum(hist)
         hist /= hist[-1]

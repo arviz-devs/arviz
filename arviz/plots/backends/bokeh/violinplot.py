@@ -1,13 +1,12 @@
 """Bokeh Violinplot."""
-from bokeh.models.annotations import Title
 import numpy as np
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ....numeric_utils import histogram, get_bins
-from ....kde_utils import _kde
-from ...plot_utils import make_label, _create_axes_grid, _scale_fig_size
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_violin(
@@ -45,15 +44,13 @@ def plot_violin(
     rug_kwargs.setdefault("fill_alpha", 0.1)
     rug_kwargs.setdefault("line_alpha", 0.1)
     if ax is None:
-        _, ax = _create_axes_grid(
+        ax = create_axes_grid(
             len(plotters),
             rows,
             cols,
             sharex=sharex,
             sharey=sharey,
             figsize=figsize,
-            squeeze=False,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:
@@ -108,7 +105,7 @@ def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
             bw = "taylor"
         else:
             bw = "experimental"
-    x, density = _kde(val, circular=circular, bw=bw)
+    x, density = kde(val, circular=circular, bw=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])

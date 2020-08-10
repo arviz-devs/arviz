@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
 from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_parallel(
@@ -31,9 +31,10 @@ def plot_parallel(
     }
 
     figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
-
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     ax.plot(posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
 

@@ -1,15 +1,16 @@
 """Matplotlib pairplot."""
 import warnings
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import plot_kde
-from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, calculate_point_estimate, matplotlib_kwarg_dealiaser
 from ....rcparams import rcParams
+from ...distplot import plot_dist
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from . import backend_kwarg_defaults, backend_show, matplotlib_kwarg_dealiaser
 
 
 def plot_pair(
@@ -119,6 +120,7 @@ def plot_pair(
         (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
+        backend_kwargs.setdefault("figsize", figsize)
 
         marginal_kwargs.setdefault("plot_kwargs", {})
         marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
@@ -133,7 +135,7 @@ def plot_pair(
                 # Instantiate figure and grid
                 widths = [2, 2, 2, 1]
                 heights = [1.4, 2, 2, 2]
-                fig = plt.figure(figsize=figsize, **backend_kwargs)
+                fig = plt.figure(**backend_kwargs)
                 grid = plt.GridSpec(
                     4,
                     4,
@@ -160,7 +162,7 @@ def plot_pair(
                 ax_hist_x.tick_params(labelleft=False, labelbottom=False)
                 ax_hist_y.tick_params(labelleft=False, labelbottom=False)
             else:
-                fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
+                fig, ax = plt.subplots(numvars - 1, numvars - 1, **backend_kwargs)
         else:
             if marginals:
                 assert ax.shape == (numvars, numvars)
@@ -241,11 +243,11 @@ def plot_pair(
         (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, vars_to_plot, vars_to_plot
         )
-
+        backend_kwargs.setdefault("figsize", figsize)
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, figsize=figsize, **backend_kwargs,)
+            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, **backend_kwargs,)
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = infdata_group[i]

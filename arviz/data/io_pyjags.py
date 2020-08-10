@@ -1,15 +1,15 @@
 """Convert PyJAGS sample dictionaries to ArviZ inference data objects."""
+import typing as tp
 from collections import OrderedDict
 from collections.abc import Iterable
-import typing as tp
 
 import numpy as np
 import xarray
 
 from arviz.data.inference_data import InferenceData
 
-from .base import requires, dict_to_dataset
 from ..rcparams import rcParams
+from .base import dict_to_dataset, requires
 
 
 class PyJAGSConverter:

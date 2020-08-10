@@ -4,16 +4,10 @@ from itertools import cycle
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    _scale_fig_size,
-    calculate_point_estimate,
-)
-from ....numeric_utils import get_bins
-from ....kde_utils import _kde
+from ....stats.density_utils import get_bins, kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_density(
@@ -39,6 +33,14 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     if colors == "cycle":
         colors = [
             prop
@@ -53,18 +55,10 @@ def plot_density(
         figsize, textsize, rows, cols
     )
 
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", False)
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend="matplotlib",
-            backend_kwargs=backend_kwargs,
-        )
-    else:
-        ax = np.atleast_2d(ax)
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
@@ -91,8 +85,8 @@ def plot_density(
 
     if n_data > 1:
         for m_idx, label in enumerate(data_labels):
-            ax.item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax.item(0).legend(fontsize=xt_labelsize)
+            np.ravel(ax).item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
+        np.ravel(ax).item(0).legend(fontsize=xt_labelsize)
 
     if backend_show(show):
         plt.show()
@@ -157,7 +151,7 @@ def _d_helper(
         else:
             new_vec = vec
 
-        x, density = _kde(new_vec, circular=circular, bw=bw)
+        x, density = kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
         xmin, xmax = x[0], x[-1]
         ymin, ymax = density[0], density[-1]

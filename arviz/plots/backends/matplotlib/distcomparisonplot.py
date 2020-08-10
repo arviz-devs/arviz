@@ -2,10 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ...distplot import plot_dist
 from ...plot_utils import _scale_fig_size, make_label
-from . import backend_kwarg_defaults
+from . import backend_kwarg_defaults, backend_show
 
 
 def plot_dist_comparison(
@@ -24,6 +23,14 @@ def plot_dist_comparison(
     show,
 ):
     """Matplotlib Density Comparison plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
     if prior_kwargs is None:
         prior_kwargs = {}
 
@@ -37,6 +44,8 @@ def plot_dist_comparison(
         backend_kwargs = {}
 
     (figsize, _, _, _, linewidth, _) = _scale_fig_size(figsize, textsize, 2 * nvars, ngroups)
+
+    backend_kwargs.setdefault("figsize", figsize)
 
     posterior_kwargs.setdefault("plot_kwargs", dict())
     posterior_kwargs["plot_kwargs"]["color"] = posterior_kwargs["plot_kwargs"].get("color", "C0")
@@ -56,10 +65,9 @@ def plot_dist_comparison(
     observed_kwargs.setdefault("hist_kwargs", dict())
     observed_kwargs["hist_kwargs"].setdefault("alpha", 0.5)
 
-    backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
     if ax is None:
         axes = np.empty((nvars, ngroups + 1), dtype=object)
-        fig = plt.figure(**backend_kwargs, figsize=figsize)
+        fig = plt.figure(**backend_kwargs)
         gs = fig.add_gridspec(ncols=ngroups, nrows=nvars * 2)
         for i in range(nvars):
             for j in range(ngroups):

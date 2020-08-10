@@ -1,8 +1,8 @@
 """Summary plot for model comparison."""
 import numpy as np
 
-from .plot_utils import get_plotting_function
 from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_compare(

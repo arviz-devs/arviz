@@ -1,20 +1,18 @@
 """Utilities for plotting."""
-import warnings
-from typing import Dict, Any
-from itertools import product, tee
 import importlib
+import warnings
+from itertools import product, tee
+from typing import Any, Dict
 
-import packaging
-import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.cbook as cbook
+import numpy as np
+import packaging
+import xarray as xr
 from matplotlib.colors import to_hex
 from scipy.stats import mode
-import xarray as xr
 
-from ..kde_utils import _kde
 from ..rcparams import rcParams
+from ..stats.density_utils import kde
 
 KwargSpec = Dict[str, Any]
 
@@ -130,84 +128,6 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
         if extra == 0:
             return rows, cols
     return n_items // ideal + 1, ideal
-
-
-def _create_axes_grid(length_plotters, rows, cols, backend=None, backend_kwargs=None, **kwargs):
-    """Create figure and axes for grids with multiple plots.
-
-    Parameters
-    ----------
-    n_items : int
-        Number of panels required
-    rows : int
-        Number of rows
-    cols : int
-        Number of columns
-    backend: str, optional
-        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
-    backend_kwargs: dict, optional
-        kwargs for backend figure.
-
-    Returns
-    -------
-    fig : matplotlib figure
-    ax : matplotlib axes
-    """
-    if backend_kwargs is None:
-        backend_kwargs = {}
-
-    if backend is None:
-        backend = rcParams["plot.backend"]
-    backend = backend.lower()
-
-    if backend == "bokeh":
-        from bokeh.plotting import figure
-        from .backends.bokeh import backend_kwarg_defaults
-
-        backend_kwargs = {
-            **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
-            **backend_kwargs,
-        }
-        dpi = backend_kwargs.pop("dpi")
-        if "figsize" in kwargs:
-            figsize = kwargs["figsize"]
-            backend_kwargs.setdefault("width", int(figsize[0] * dpi / cols))
-            backend_kwargs.setdefault("height", int(figsize[1] * dpi / rows))
-
-        sharex = kwargs.get("sharex", False)
-        sharey = kwargs.get("sharey", False)
-        fig = None
-        ax = []
-        extra = (rows * cols) - length_plotters
-        for row in range(rows):
-            row_ax = []
-            for col in range(cols):
-                if (row == 0) and (col == 0) and (sharex or sharey):
-                    bokeh_ax = figure(**backend_kwargs)
-                    row_ax.append(bokeh_ax)
-                    if sharex:
-                        backend_kwargs["x_range"] = bokeh_ax.x_range
-                    if sharey:
-                        backend_kwargs["y_range"] = bokeh_ax.y_range
-                else:
-                    if row * cols + (col + 1) > length_plotters:
-                        row_ax.append(None)
-                    else:
-                        row_ax.append(figure(**backend_kwargs))
-            ax.append(row_ax)
-        ax = np.array(ax)
-    else:
-        from .backends.matplotlib import backend_kwarg_defaults
-
-        backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs, **kwargs}
-        fig, ax = plt.subplots(rows, cols, **backend_kwargs)
-        ax = np.ravel(ax)
-        extra = (rows * cols) - length_plotters
-        if extra:
-            for i in range(1, extra + 1):
-                ax[-i].set_axis_off()
-            ax = ax[:-extra]
-    return fig, ax
 
 
 def selection_to_string(selection):
@@ -654,7 +574,7 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
                     bw = "taylor"
                 else:
                     bw = "experimental"
-            x, density = _kde(values, circular=circular, bw=bw)
+            x, density = kde(values, circular=circular, bw=bw)
             point_value = x[np.argmax(density)]
         else:
             point_value = mode(values)[0][0]
@@ -662,50 +582,6 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         point_value = np.median(values)
 
     return point_value
-
-
-def matplotlib_kwarg_dealiaser(args, kind, backend="matplotlib"):
-    """De-aliase the kwargs passed to plots."""
-    if args is None:
-        return {}
-    matplotlib_kwarg_dealiaser_dict = {
-        "scatter": mpl.collections.PathCollection,
-        "plot": mpl.lines.Line2D,
-        "hist": mpl.patches.Patch,
-        "bar": mpl.patches.Rectangle,
-        "hexbin": mpl.collections.PolyCollection,
-        "fill_between": mpl.collections.PolyCollection,
-        "hlines": mpl.collections.LineCollection,
-        "text": mpl.text.Text,
-        "contour": mpl.contour.ContourSet,
-        "pcolormesh": mpl.collections.QuadMesh,
-    }
-    if backend == "matplotlib":
-        return cbook.normalize_kwargs(
-            args, getattr(matplotlib_kwarg_dealiaser_dict[kind], "_alias_map", {})
-        )
-    return args
-
-
-def _dealiase_sel_kwargs(kwargs, prop_dict, idx):
-    """Generate kwargs dict from kwargs and prop_dict.
-
-    Gets property at position ``idx`` for each property in prop_dict and adds it to
-    ``kwargs``. Values in prop_dict are dealiased and overwrite values in
-    kwargs with the same key .
-
-    Parameters
-    ----------
-    kwargs : dict
-    prop_dict : dict of {str : array_like}
-    idx : int
-    """
-    return {
-        **kwargs,
-        **matplotlib_kwarg_dealiaser(
-            {prop: props[idx] for prop, props in prop_dict.items()}, "plot"
-        ),
-    }
 
 
 def is_valid_quantile(value):
@@ -723,7 +599,7 @@ def sample_reference_distribution(dist, shape):
     densities = []
     dist_rvs = dist.rvs(size=shape)
     for idx in range(shape[1]):
-        x_s, density = _kde(dist_rvs[:, idx])
+        x_s, density = kde(dist_rvs[:, idx])
         x_ss.append(x_s)
         densities.append(density)
     return np.array(x_ss).T, np.array(densities).T
