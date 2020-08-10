@@ -1,9 +1,9 @@
 jobs:
 - job: BuildDocs
-  dependsOn:
-    - BaseTests
-    - ExternalTests
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  #dependsOn:
+  #  - BaseTests
+  #  - ExternalTests
+  #condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -42,8 +42,18 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-docs.txt
+      python -m pip install -e .
       conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
+    
+   - script: |
+      ls -ahl
+      env
+      pwd
+      gcc --version
+      python --version
+      python -c "import arviz;print(arviz);print(arviz__version__)"
+    displayName: 'Debug information2'
 
   - script: |
       python -msphinx -M clean doc doc/build
@@ -55,6 +65,6 @@ jobs:
       env
     displayName: 'Debug information 2'
 
-  - script: |
-      ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
-    displayName: 'Deploy docs'
+  #- script: |
+  #    ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
+  #  displayName: 'Deploy docs'
