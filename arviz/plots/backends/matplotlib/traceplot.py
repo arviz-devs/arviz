@@ -69,8 +69,8 @@ def plot_trace(
         vertical lines on the density and horizontal lines on the trace.
     circ_var_names : string, or list of strings
         List of circular variables to account for when plotting KDE.
-    circ_var_units : bool
-        Whether the variables in `circ_var_names` are in degrees or radians. Defaults to radians.
+    circ_var_units : str
+        Whether the variables in `circ_var_names` are in "degrees" or "radians".
     combined : bool
         Flag for combining multiple chains into a single line. If False (default), chains will be
         plotted separately.
@@ -177,7 +177,6 @@ def plot_trace(
     if figsize is None:
         figsize = (12, len(plotters) * 2)
 
-    backend_kwargs.setdefault("squeeze", False)
     backend_kwargs.setdefault("figsize", figsize)
 
     trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
@@ -201,7 +200,7 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     if axes is None:
-        fig = plt.figure(figsize=figsize, **backend_kwargs)
+        fig = plt.figure(**backend_kwargs)
         spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
 
     # Check the input for lines
@@ -229,8 +228,8 @@ def plot_trace(
 
             if len(value.shape) == 2:
                 if compact_prop:
-                    aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop, 0)
-                    aux_trace_kwargs = _dealiase_sel_kwargs(trace_kwargs, compact_prop, 0)
+                    aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop, 0)
+                    aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop, 0)
                 else:
                     aux_plot_kwargs = plot_kwargs
                     aux_trace_kwargs = trace_kwargs
@@ -251,6 +250,7 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                     rank_kwargs,
+                    is_circular,
                     circ_var_units,
                 )
 
@@ -271,10 +271,8 @@ def plot_trace(
                 }
                 handles = []
                 for sub_idx, label in zip(range(value.shape[2]), legend_labels):
-                    aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
-                    aux_trace_kwargs = _dealiase_sel_kwargs(
-                        trace_kwargs, compact_prop_iter, sub_idx
-                    )
+                    aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
+                    aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop_iter, sub_idx)
                     axes = _plot_chains_mpl(
                         axes,
                         idy,
@@ -291,6 +289,7 @@ def plot_trace(
                         fill_kwargs,
                         rug_kwargs,
                         rank_kwargs,
+                        is_circular,
                         circ_var_units,
                     )
                     if legend:
@@ -299,10 +298,10 @@ def plot_trace(
                                 [],
                                 [],
                                 label=label,
-                                **_dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
+                                **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
                             )
                         )
-                if legend:
+                if legend and idy == 0:
                     axes.legend(handles=handles, title=legend_title)
 
             if value[0].dtype.kind == "i":
@@ -407,7 +406,7 @@ def plot_trace(
                     [], [], label="combined", **dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
                 ),
             )
-        axes.legend(handles=handles, title="chain", loc="upper right")
+        axes.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
 
     if backend_show(show):
         plt.show()
@@ -431,17 +430,20 @@ def _plot_chains_mpl(
     fill_kwargs,
     rug_kwargs,
     rank_kwargs,
+    is_circular,
     circ_var_units,
 ):
+    if not is_circular:
+        circ_var_units = False
 
     for chain_idx, row in enumerate(value):
         if kind == "trace":
-            aux_kwargs = _dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+            aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             if idy == 1:
                 axes.plot(data.draw.values, row, **aux_kwargs)
 
         if not combined:
-            aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
+            aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
             if not idy:
                 axes = plot_dist(
                     values=row,
@@ -463,7 +465,7 @@ def _plot_chains_mpl(
         axes = plot_rank(data=value, kind="vlines", ax=axes, **rank_kwargs)
 
     if combined:
-        aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
+        aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
         if not idy:
             axes = plot_dist(
                 values=value.flatten(),

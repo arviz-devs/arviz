@@ -160,7 +160,7 @@ def test_plot_density_bad_kwargs(models):
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
         {"circ_var_names": ["mu"]},
-        {"degrees": True},
+        {"circ_var_units": "degrees"},
     ],
 )
 def test_plot_trace(models, kwargs):
@@ -179,8 +179,8 @@ def test_plot_trace_legend(compact, combined):
     axes = plot_trace(
         idata, var_names=["home", "atts_star"], compact=compact, combined=combined, legend=True
     )
-    assert axes.get_legend()
-    compact_legend = axes.get_legend()
+    assert axes.figure.axes[0].get_legend()
+    compact_legend = axes.figure.axes[2].get_legend()
     if compact:
         assert len(axes.figure.axes) == 4
         assert compact_legend
