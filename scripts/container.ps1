@@ -37,8 +37,8 @@ foreach ($arg in $args) {
 if ($build) {
   echo "Building Docker Image"
   # Build container for use of testing or notebook
-  docker build \
-      -t arviz \
+  docker build `
+      -t arviz `
       -f $SRC_DIR/scripts/Dockerfile `
       --build-arg SRC_DIR=. $SRC_DIR `
       --build-arg PYTHON_VERSION=${PYTHON_VERSION} `

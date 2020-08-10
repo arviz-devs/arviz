@@ -7,8 +7,8 @@ command -v conda >/dev/null 2>&1 || {
   exit 1;
 }
 
-# if no python specified, use Travis version, or else 3.7
-PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.7}}
+# if no python specified, use Travis version, or else 3.8
+PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.8}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
@@ -46,7 +46,7 @@ fi
 
 
 # Install ArviZ dependencies
-pip install --upgrade pip
+pip install --upgrade pip wheel
 
 # Pyro install with pip is ~511MB. These binaries are ~91MB, somehow, and do not
 # break the build. The link can be determined from the pytorch and the python version
@@ -57,13 +57,15 @@ else
 fi
 
 if [ "$PYSTAN_VERSION" = "latest" ]; then
+  pip --no-cache-dir install numpy cython
   pip --no-cache-dir install pystan
 else
   if [ "$PYSTAN_VERSION" = "preview" ]; then
     # try to skip other pre-releases than pystan
-    pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
+    pip --no-cache-dir install httpstan
     pip --no-cache-dir install --pre pystan
   else
+    pip --no-cache-dir install numpy cython
     pip --no-cache-dir install pystan==${PYSTAN_VERSION}
   fi
 fi
@@ -93,12 +95,12 @@ else
 fi
 
 
-#  Install editable using the setup.py
 pip install --no-cache-dir -r requirements.txt
 pip install --no-cache-dir -r requirements-dev.txt
 pip install --no-cache-dir -r requirements-docs.txt
 pip install --no-cache-dir -r requirements-external.txt
 pip install --no-cache-dir -r requirements-optional.txt
+
 
 conda install -y geckodriver firefox jupyterlab ipywidgets nodejs --channel conda-forge
 

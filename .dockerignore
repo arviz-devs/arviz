@@ -1,0 +1,7 @@
+**/Dockerfile
+**/container.ps1
+**/container.sh
+**/*.egg-info
+**/.pytest_cache
+**/__pycache__
+**/.git
