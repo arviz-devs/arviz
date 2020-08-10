@@ -1,18 +1,16 @@
 """Bokeh Densityplot."""
 from collections import defaultdict
+from itertools import cycle
 
-from bokeh.models.annotations import Title, Legend
+import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.models.annotations import Legend, Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    calculate_point_estimate,
-)
 from ....stats import hdi
-from ....numeric_utils import _fast_kde, histogram, get_bins
+from ....stats.density_utils import get_bins, histogram, kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label, vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_density(
@@ -21,17 +19,18 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    circular,
     figsize,
     length_plotters,
     rows,
     cols,
-    line_width,
-    markersize,
+    textsize,
     hdi_prob,
     point_estimate,
     hdi_markers,
     outline,
     shade,
+    n_data,
     data_labels,
     backend_kwargs,
     show,
@@ -41,18 +40,30 @@ def plot_density(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
 
+    if colors == "cycle":
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
+    elif isinstance(colors, str):
+        colors = [colors for _ in range(n_data)]
+    colors = vectorized_to_hex(colors)
+
+    (figsize, _, _, _, line_width, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
+
     if ax is None:
-        _, ax = _create_axes_grid(
+        ax = create_axes_grid(
             length_plotters,
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
-            backend="bokeh",
+            squeeze=True,
             backend_kwargs=backend_kwargs,
         )
     else:
@@ -80,6 +91,7 @@ def plot_density(
                 label,
                 colors[m_idx],
                 bw,
+                circular,
                 line_width,
                 markersize,
                 hdi_prob,
@@ -107,6 +119,7 @@ def _d_helper(
     vname,
     color,
     bw,
+    circular,
     line_width,
     markersize,
     hdi_prob,
@@ -127,11 +140,10 @@ def _d_helper(
         else:
             new_vec = vec
 
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        x, density = kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
+        xmin, xmax = x[0], x[-1]
+        ymin, ymax = density[0], density[-1]
 
         if outline:
             plotted.append(ax.line(x, density, line_color=color, line_width=line_width, **extra))
@@ -212,7 +224,7 @@ def _d_helper(
         plotted.append(ax.diamond(xmax, 0, line_color="black", fill_color=color, size=markersize))
 
     if point_estimate is not None:
-        est = calculate_point_estimate(point_estimate, vec, bw)
+        est = calculate_point_estimate(point_estimate, vec, bw, circular)
         plotted.append(ax.circle(est, 0, fill_color=color, line_color="black", size=markersize))
 
     _title = Title()

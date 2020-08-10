@@ -1,16 +1,16 @@
 """Matplotlib pairplot."""
-
 import warnings
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import NullFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import numpy as np
 
-from . import backend_kwarg_defaults, backend_show
-from ...kdeplot import plot_kde
-from ...distplot import plot_dist
-from ...plot_utils import _scale_fig_size, calculate_point_estimate
 from ....rcparams import rcParams
+from ...distplot import plot_dist
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from . import backend_kwarg_defaults, backend_show, matplotlib_kwarg_dealiaser
 
 
 def plot_pair(
@@ -20,9 +20,6 @@ def plot_pair(
     figsize,
     textsize,
     kind,
-    fill_last,  # pylint: disable=unused-argument
-    contour,  # pylint: disable=unused-argument
-    plot_kwargs,  # pylint: disable=unused-argument
     scatter_kwargs,
     kde_kwargs,
     hexbin_kwargs,
@@ -52,13 +49,34 @@ def plot_pair(
     }
     backend_kwargs.pop("constrained_layout")
 
+    scatter_kwargs = matplotlib_kwarg_dealiaser(scatter_kwargs, "scatter")
+
+    scatter_kwargs.setdefault("marker", ".")
+    scatter_kwargs.setdefault("lw", 0)
+    # Sets the default zorder higher than zorder of grid, which is 0.5
+    scatter_kwargs.setdefault("zorder", 0.6)
+
+    if kde_kwargs is None:
+        kde_kwargs = {}
+
     if hexbin_kwargs is None:
         hexbin_kwargs = {}
-
     hexbin_kwargs.setdefault("mincnt", 1)
 
+    divergences_kwargs = matplotlib_kwarg_dealiaser(divergences_kwargs, "plot")
+    divergences_kwargs.setdefault("marker", "o")
+    divergences_kwargs.setdefault("markeredgecolor", "k")
+    divergences_kwargs.setdefault("color", "C1")
+    divergences_kwargs.setdefault("lw", 0)
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+
+    point_estimate_kwargs = matplotlib_kwarg_dealiaser(point_estimate_kwargs, "fill_between")
+
     if kind != "kde":
-        kde_kwargs.setdefault("contourf_kwargs", {"alpha": 0})
+        kde_kwargs.setdefault("contourf_kwargs", {})
+        kde_kwargs["contourf_kwargs"].setdefault("alpha", 0)
         kde_kwargs.setdefault("contour_kwargs", {})
         kde_kwargs["contour_kwargs"].setdefault("colors", "k")
 
@@ -77,7 +95,7 @@ def plot_pair(
         difference = set(flat_var_names).difference(set(label))
 
         if difference:
-            warn = [dif.replace("\n", " ", 1) for dif in difference]
+            warn = [diff.replace("\n", " ", 1) for diff in difference]
             warnings.warn(
                 "Argument reference_values does not include reference value for: {}".format(
                     ", ".join(warn)
@@ -91,6 +109,9 @@ def plot_pair(
     reference_values_kwargs.setdefault("color", "C3")
     reference_values_kwargs.setdefault("marker", "o")
 
+    point_estimate_marker_kwargs = matplotlib_kwarg_dealiaser(
+        point_estimate_marker_kwargs, "scatter"
+    )
     point_estimate_marker_kwargs.setdefault("marker", "s")
     point_estimate_marker_kwargs.setdefault("color", "C1")
 
@@ -99,6 +120,7 @@ def plot_pair(
         (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
+        backend_kwargs.setdefault("figsize", figsize)
 
         marginal_kwargs.setdefault("plot_kwargs", {})
         marginal_kwargs["plot_kwargs"].setdefault("linewidth", linewidth)
@@ -113,7 +135,7 @@ def plot_pair(
                 # Instantiate figure and grid
                 widths = [2, 2, 2, 1]
                 heights = [1.4, 2, 2, 2]
-                fig = plt.figure(figsize=figsize, **backend_kwargs)
+                fig = plt.figure(**backend_kwargs)
                 grid = plt.GridSpec(
                     4,
                     4,
@@ -140,7 +162,7 @@ def plot_pair(
                 ax_hist_x.tick_params(labelleft=False, labelbottom=False)
                 ax_hist_y.tick_params(labelleft=False, labelbottom=False)
             else:
-                fig, ax = plt.subplots(numvars - 1, numvars - 1, figsize=figsize, **backend_kwargs)
+                fig, ax = plt.subplots(numvars - 1, numvars - 1, **backend_kwargs)
         else:
             if marginals:
                 assert ax.shape == (numvars, numvars)
@@ -221,11 +243,11 @@ def plot_pair(
         (figsize, ax_labelsize, _, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, vars_to_plot, vars_to_plot
         )
-
+        backend_kwargs.setdefault("figsize", figsize)
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, figsize=figsize, **backend_kwargs,)
+            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, **backend_kwargs,)
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = infdata_group[i]

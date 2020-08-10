@@ -1,15 +1,27 @@
 """Bokeh Parallel coordinates plot."""
-import bokeh.plotting as bkp
+import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.tickers import FixedTicker
-import numpy as np
 
-from . import backend_kwarg_defaults
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_parallel(
-    ax, diverging_mask, _posterior, var_names, figsize, backend_config, backend_kwargs, show
+    ax,
+    colornd,  # pylint: disable=unused-argument
+    colord,  # pylint: disable=unused-argument
+    shadend,  # pylint: disable=unused-argument
+    diverging_mask,
+    posterior,
+    textsize,
+    var_names,
+    legend,  # pylint: disable=unused-argument
+    figsize,
+    backend_kwargs,
+    backend_config,
+    show,
 ):
     """Bokeh parallel plot."""
     if backend_config is None:
@@ -27,16 +39,16 @@ def plot_parallel(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
-    if ax is None:
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(**backend_kwargs)
 
-    non_div = list(_posterior[:, ~diverging_mask].T)
+    figsize, *_ = _scale_fig_size(figsize, textsize, 1, 1)
+
+    if ax is None:
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+
+    non_div = list(posterior[:, ~diverging_mask].T)
     x_non_div = [list(range(len(non_div[0]))) for _ in range(len(non_div))]
 
     ax.multi_line(
@@ -44,7 +56,7 @@ def plot_parallel(
     )
 
     if np.any(diverging_mask):
-        div = list(_posterior[:, diverging_mask].T)
+        div = list(posterior[:, diverging_mask].T)
         x_non_div = [list(range(len(div[0]))) for _ in range(len(div))]
         ax.multi_line(x_non_div, div, color="lime", line_width=1, line_alpha=0.5)
 

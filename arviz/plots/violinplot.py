@@ -1,15 +1,8 @@
 """Plot posterior traces as violin plot."""
 from ..data import convert_to_dataset
-from .plot_utils import (
-    _scale_fig_size,
-    xarray_var_iter,
-    filter_plotters_list,
-    default_grid,
-    get_plotting_function,
-    matplotlib_kwarg_dealiaser,
-)
-from ..utils import _var_names, credible_interval_warning
 from ..rcparams import rcParams
+from ..utils import _var_names, credible_interval_warning
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
 def plot_violin(
@@ -21,7 +14,8 @@ def plot_violin(
     rug=False,
     hdi_prob=None,
     shade=0.35,
-    bw=4.5,
+    bw="default",
+    circular=False,
     sharex=True,
     sharey=True,
     figsize=None,
@@ -65,10 +59,16 @@ def plot_violin(
     shade: float
         Alpha blending value for the shaded area under the curve, between 0
         (no shade) and 1 (opaque). Defaults to 0
-    bw: float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default rule used by SciPy).
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: bool, optional.
+        If True, it interprets `values` is a circular variable measured in radians
+        and a circular KDE is used. Defaults to False.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
@@ -131,15 +131,7 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
-
     rows, cols = default_grid(len(plotters))
-
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-
-    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
@@ -160,10 +152,9 @@ def plot_violin(
         rug=rug,
         rug_kwargs=rug_kwargs,
         bw=bw,
+        textsize=textsize,
+        circular=circular,
         hdi_prob=hdi_prob,
-        linewidth=linewidth,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         quartiles=quartiles,
         backend_kwargs=backend_kwargs,
         show=show,
@@ -172,19 +163,6 @@ def plot_violin(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        violinplot_kwargs.pop("ax_labelsize")
-        violinplot_kwargs.pop("xt_labelsize")
-
-        rug_kwargs.setdefault("fill_alpha", 0.1)
-        rug_kwargs.setdefault("line_alpha", 0.1)
-
-    else:
-        rug_kwargs.setdefault("alpha", 0.1)
-        rug_kwargs.setdefault("marker", ".")
-        rug_kwargs.setdefault("linestyle", "")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_violin", "violinplot", backend)

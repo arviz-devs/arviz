@@ -1,14 +1,13 @@
 """Base IO code for all datasets. Heavily influenced by scikit-learn's implementation."""
-from collections import namedtuple
 import hashlib
 import itertools
 import os
 import shutil
+from collections import namedtuple
 from urllib.request import urlretrieve
 
-from .io_netcdf import from_netcdf
 from ..rcparams import rcParams
-
+from .io_netcdf import from_netcdf
 
 LocalFileMetadata = namedtuple("LocalFileMetadata", ["filename", "description"])
 

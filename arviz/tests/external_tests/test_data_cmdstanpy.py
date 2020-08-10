@@ -1,12 +1,13 @@
 # pylint: disable=redefined-outer-name
-from glob import glob
 import os
 import sys
+from glob import glob
+
 import numpy as np
 import pytest
 
-
 from arviz import from_cmdstanpy
+
 from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
@@ -42,7 +43,10 @@ class TestDataCmdStanPy:
 
         class Data:
             args = CmdStanArgs(
-                "dummy.stan", "dummy.exe", list(range(1, 5)), method_args=SamplerArgs()
+                "dummy.stan",
+                "dummy.exe",
+                list(range(1, 5)),
+                method_args=SamplerArgs(iter_sampling=100),
             )
             runset_obj = RunSet(args)
             runset_obj._csv_files = filepaths  # pylint: disable=protected-access

@@ -3,13 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_show
 from ....stats.stats_utils import quantile as _quantile
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    matplotlib_kwarg_dealiaser,
-)
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_mcse(
@@ -27,32 +23,55 @@ def plot_mcse(
     extra_methods,
     mean_mcse,
     sd_mcse,
-    text_x,
-    text_va,
+    textsize,
     text_kwargs,
     rug_kwargs,
     extra_kwargs,
     idata,
     rug_kind,
-    _markersize,
-    _linewidth,
-    xt_labelsize,
-    ax_labelsize,
-    titlesize,
     backend_kwargs,
     show,
 ):
     """Matplotlib mcseplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs.setdefault("linestyle", "none")
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
+    kwargs.setdefault("marker", "_" if errorbar else "o")
+    kwargs.setdefault("zorder", 3)
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+    extra_kwargs.setdefault("linestyle", "-")
+    extra_kwargs.setdefault("linewidth", _linewidth / 2)
+    extra_kwargs.setdefault("color", "k")
+    extra_kwargs.setdefault("alpha", 0.5)
+    text_x = None
+    text_va = None
+    if extra_methods:
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
+        text_x = text_kwargs.pop("x", 1)
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
+        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+        text_kwargs.setdefault("color", extra_kwargs["color"])
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            constrained_layout=True,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         if errorbar or rug:

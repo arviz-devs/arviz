@@ -2,38 +2,40 @@
 """ArviZ is a library for exploratory analysis of Bayesian models."""
 __version__ = "0.9.0"
 
-import os
 import logging
-from matplotlib.pyplot import style, register_cmap
-from matplotlib.colors import LinearSegmentedColormap
+import os
 
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.pyplot import register_cmap, style
+
+from .data import *
+from .plots import *
+from .plots import backends
+from .stats import *
+from .rcparams import rc_context, rcParams
+from .utils import Numba, interactive_backend
+from .wrappers import *
 
 # add ArviZ's styles to matplotlib's styles
-arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
-style.core.USER_LIBRARY_PATHS.append(arviz_style_path)
+_arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
+style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
 style.core.reload_library()
+
 
 # Configure logging before importing arviz internals
 _log = logging.getLogger("arviz")
 
 
 if not logging.root.handlers:
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-    handler.setFormatter(formatter)
+    _handler = logging.StreamHandler()
+    _formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    _handler.setFormatter(_formatter)
     _log.setLevel(logging.INFO)
-    _log.addHandler(handler)
+    _log.addHandler(_handler)
 
-from .rcparams import rcParams, rc_context
-from .data import *
-from .stats import *
-from .plots import *
-from .utils import Numba, interactive_backend
-from .plots import backends
-from .wrappers import *
 
 # adds perceptually uniform grey scale from colorcet
-linear_grey_10_95_c0 = [
+_linear_grey_10_95_c0 = [
     [0.10767, 0.1077, 0.1077],
     [0.11032, 0.11035, 0.11035],
     [0.11295, 0.11298, 0.11297],
@@ -298,5 +300,9 @@ def _mpl_cm(name, colorlist):
     register_cmap("cet_" + name, cmap=cmap)
 
 
-_mpl_cm("gray", linear_grey_10_95_c0)
-_mpl_cm("gray_r", list(reversed(linear_grey_10_95_c0)))
+_mpl_cm("gray", _linear_grey_10_95_c0)
+_mpl_cm("gray_r", list(reversed(_linear_grey_10_95_c0)))
+
+
+# clean namespace
+del os, logging, register_cmap, LinearSegmentedColormap

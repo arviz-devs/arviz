@@ -1,9 +1,8 @@
 """Forest plot."""
 from ..data import convert_to_dataset
-from .plot_utils import get_plotting_function
-from ..utils import _var_names, get_coords
 from ..rcparams import rcParams
-from ..utils import credible_interval_warning
+from ..utils import _var_names, credible_interval_warning, get_coords
+from .plot_utils import get_plotting_function
 
 
 def plot_forest(
@@ -213,15 +212,13 @@ def plot_forest(
         ess=ess,
         r_hat=r_hat,
         backend_kwargs=backend_kwargs,
+        backend_config=backend_config,
         show=show,
     )
 
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-        plot_forest_kwargs.update(backend_config=backend_config)
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_forest", "forestplot", backend)

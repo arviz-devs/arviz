@@ -3,12 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_show
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    matplotlib_kwarg_dealiaser,
-)
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_ess(
@@ -20,24 +16,18 @@ def plot_ess(
     sd_ess,
     idata,
     data,
-    text_x,
-    text_va,
     kind,
     extra_methods,
+    textsize,
     rows,
     cols,
     figsize,
     kwargs,
     extra_kwargs,
     text_kwargs,
-    _linewidth,
-    _markersize,
     n_samples,
     relative,
     min_ess,
-    xt_labelsize,
-    titlesize,
-    ax_labelsize,
     ylabel,
     rug,
     rug_kind,
@@ -47,16 +37,58 @@ def plot_ess(
     show,
 ):
     """Matplotlib ess plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
+    kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    _linestyle = "-" if kind == "evolution" else "none"
+    kwargs.setdefault("linestyle", _linestyle)
+    kwargs.setdefault("linewidth", _linewidth)
+    kwargs.setdefault("markersize", _markersize)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("zorder", 3)
+
+    extra_kwargs = matplotlib_kwarg_dealiaser(extra_kwargs, "plot")
+    if kind == "evolution":
+        extra_kwargs = {
+            **extra_kwargs,
+            **{key: item for key, item in kwargs.items() if key not in extra_kwargs},
+        }
+        kwargs.setdefault("label", "bulk")
+        extra_kwargs.setdefault("label", "tail")
+    else:
+        extra_kwargs.setdefault("linewidth", _linewidth / 2)
+        extra_kwargs.setdefault("color", "k")
+        extra_kwargs.setdefault("alpha", 0.5)
+    kwargs.setdefault("label", kind)
+
+    hline_kwargs = matplotlib_kwarg_dealiaser(hline_kwargs, "plot")
+    hline_kwargs.setdefault("linewidth", _linewidth)
+    hline_kwargs.setdefault("linestyle", "--")
+    hline_kwargs.setdefault("color", "gray")
+    hline_kwargs.setdefault("alpha", 0.7)
+    if extra_methods:
+        text_kwargs = matplotlib_kwarg_dealiaser(text_kwargs, "text")
+        text_x = text_kwargs.pop("x", 1)
+        text_kwargs.setdefault("fontsize", xt_labelsize * 0.7)
+        text_kwargs.setdefault("alpha", extra_kwargs["alpha"])
+        text_kwargs.setdefault("color", extra_kwargs["color"])
+        text_kwargs.setdefault("horizontalalignment", "right")
+        text_va = text_kwargs.pop("verticalalignment", None)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            constrained_layout=True,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)

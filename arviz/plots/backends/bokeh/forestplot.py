@@ -1,23 +1,23 @@
 # pylint: disable=all
 """Bokeh forestplot."""
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import cycle, tee
 
 import bokeh.plotting as bkp
+import matplotlib.pyplot as plt
+import numpy as np
 from bokeh.models import Band, ColumnDataSource, DataRange1d
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
-import matplotlib.pyplot as plt
-import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....rcparams import rcParams
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
-from ....numeric_utils import _fast_kde, histogram, get_bins
 from ....utils import conditional_jit
+from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def pairwise(iterable):
@@ -103,10 +103,10 @@ def plot_forest(
                 "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
             if i == 0:
-                ax = bkp.figure(**backend_kwargs,)
-                _y_range = ax.y_range
+                ax = bkp.figure(**backend_kwargs_i,)
+                backend_kwargs_i.setdefault("y_range", ax.y_range)
             else:
-                ax = bkp.figure(y_range=_y_range, **backend_kwargs,)
+                ax = bkp.figure(**backend_kwargs_i)
             axes.append(ax)
     else:
         axes = ax
@@ -570,9 +570,8 @@ class VarHandler:
                 _, density, x = histogram(values, bins=bins)
                 x = x[:-1]
             elif kind == "density":
-                density, lower, upper = _fast_kde(values)
+                x, density = kde(values)
                 density_q = density.cumsum() / density.sum()
-                x = np.linspace(lower, upper, len(density))
 
             xvals.append(x)
             pdfs.append(density)

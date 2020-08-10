@@ -1,16 +1,16 @@
 """Bokeh ELPDPlot."""
 import warnings
 
-import bokeh.plotting as bkp
-from bokeh.models.annotations import Title
-from bokeh.models import ColumnDataSource
 import bokeh.models.markers as mk
+import bokeh.plotting as bkp
 import numpy as np
+from bokeh.models import ColumnDataSource
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
+from ....rcparams import _validate_bokeh_marker, rcParams
+from ...plot_utils import _scale_fig_size, color_from_dim, vectorized_to_hex
 from .. import show_layout
-from ...plot_utils import _scale_fig_size
-from ....rcparams import rcParams, _validate_bokeh_marker
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_elpd(
@@ -21,11 +21,12 @@ def plot_elpd(
     figsize,
     textsize,
     plot_kwargs,
-    markersize,
     xlabels,
     coord_labels,
     xdata,
     threshold,
+    legend,  # pylint: disable=unused-argument
+    color,
     backend_kwargs,
     show,
 ):
@@ -37,7 +38,18 @@ def plot_elpd(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
-    dpi = backend_kwargs.pop("dpi")
+
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    plot_kwargs.setdefault("marker", rcParams["plot.bokeh.marker"])
+    if isinstance(color, str):
+        if color in pointwise_data[0].dims:
+            colors, _ = color_from_dim(pointwise_data[0], color)
+            plot_kwargs.setdefault("color", vectorized_to_hex(colors))
+    plot_kwargs.setdefault("color", vectorized_to_hex(color))
+
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
+
     if numvars == 2:
         (figsize, _, _, _, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
@@ -45,9 +57,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-            backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-            ax = bkp.figure(**backend_kwargs)
+            ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
@@ -75,6 +85,7 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
+            dpi = backend_kwargs.pop("dpi")
             ax = []
             for row in range(numvars - 1):
                 ax_row = []

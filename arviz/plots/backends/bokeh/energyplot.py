@@ -1,23 +1,28 @@
 """Bokeh energyplot."""
-import bokeh.plotting as bkp
+from itertools import cycle
+
+import numpy as np
 from bokeh.models import Label
 from bokeh.models.annotations import Legend
+from matplotlib.pyplot import rcParams as mpl_rcParams
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from .distplot import _histplot_bokeh_op
-from ...kdeplot import plot_kde
 from ....stats import bfmi as e_bfmi
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size, vectorized_to_hex
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
+from .distplot import _histplot_bokeh_op
 
 
 def plot_energy(
     ax,
-    series,
     energy,
     kind,
     bfmi,
     figsize,
-    line_width,
+    textsize,
+    fill_alpha,
+    fill_color,
     fill_kwargs,
     plot_kwargs,
     bw,
@@ -30,23 +35,49 @@ def plot_energy(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi")),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
+    fill_kwargs = {} if fill_kwargs is None else fill_kwargs
+    plot_kwargs = {} if plot_kwargs is None else plot_kwargs
+    plot_kwargs.setdefault("line_width", line_width)
+    if kind in {"hist", "histogram"}:
+        legend = False
+
     if ax is None:
-        backend_kwargs.setdefault("width", int(figsize[0] * dpi))
-        backend_kwargs.setdefault("height", int(figsize[1] * dpi))
-        ax = bkp.figure(**backend_kwargs)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+
+    _colors = [
+        prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
+    ]
+    if (fill_color[0].startswith("C") and len(fill_color[0]) == 2) and (
+        fill_color[1].startswith("C") and len(fill_color[1]) == 2
+    ):
+        fill_color = tuple([_colors[int(color[1:]) % 10] for color in fill_color])
+    elif fill_color[0].startswith("C") and len(fill_color[0]) == 2:
+        fill_color = tuple([_colors[int(fill_color[0][1:]) % 10]] + list(fill_color[1:]))
+    elif fill_color[1].startswith("C") and len(fill_color[1]) == 2:
+        fill_color = tuple(list(fill_color[1:]) + [_colors[int(fill_color[0][1:]) % 10]])
+
+    series = zip(
+        fill_alpha,
+        fill_color,
+        ("Marginal Energy", "Energy transition"),
+        (energy - energy.mean(), np.diff(energy)),
+    )
 
     labels = []
+
     if kind == "kde":
         for alpha, color, label, value in series:
             fill_kwargs["fill_alpha"] = alpha
-            fill_kwargs["fill_color"] = color
-            plot_kwargs["line_color"] = color
+            fill_kwargs["fill_color"] = vectorized_to_hex(color)
             plot_kwargs["line_alpha"] = alpha
-            plot_kwargs.setdefault("line_width", line_width)
+            plot_kwargs["line_color"] = vectorized_to_hex(color)
             _, glyph = plot_kde(
                 value,
                 bw=bw,
@@ -68,7 +99,7 @@ def plot_energy(
 
         for alpha, color, label, value in series:
             hist_kwargs["fill_alpha"] = alpha
-            hist_kwargs["fill_color"] = color
+            hist_kwargs["fill_color"] = vectorized_to_hex(color)
             hist_kwargs["line_color"] = None
             hist_kwargs["line_alpha"] = alpha
             _histplot_bokeh_op(

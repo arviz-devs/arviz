@@ -1,20 +1,20 @@
 """Matplotlib Plot posterior densities."""
-from typing import Optional
 from numbers import Number
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
+from ....stats.density_utils import get_bins
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    format_sig_figs,
-    round_num,
+    _scale_fig_size,
     calculate_point_estimate,
+    format_sig_figs,
+    make_label,
+    round_num,
 )
-from ....numeric_utils import get_bins
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_posterior(
@@ -25,31 +25,43 @@ def plot_posterior(
     figsize,
     plotters,
     bw,
+    circular,
     bins,
     kind,
     point_estimate,
     round_to,
     hdi_prob,
     multimodal,
+    textsize,
     ref_val,
     rope,
-    ax_labelsize,
-    xt_labelsize,
     kwargs,
-    titlesize,
     backend_kwargs,
     show,
 ):
     """Matplotlib posterior plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
+
+    if kind == "hist":
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
+    else:
+        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
+    kwargs.setdefault("linewidth", _linewidth)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
     idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(
@@ -59,6 +71,7 @@ def plot_posterior(
             selection,
             ax=ax_,
             bw=bw,
+            circular=circular,
             bins=bins,
             kind=kind,
             point_estimate=point_estimate,
@@ -87,6 +100,7 @@ def _plot_posterior_op(
     selection,
     ax,
     bw,
+    circular,
     linewidth,
     bins,
     kind,
@@ -97,7 +111,7 @@ def _plot_posterior_op(
     rope,
     ax_labelsize,
     xt_labelsize,
-    round_to: Optional[int] = None,
+    round_to=None,
     **kwargs,
 ):  # noqa: D202
     """Artist to draw posterior."""
@@ -196,7 +210,7 @@ def _plot_posterior_op(
     def display_point_estimate():
         if not point_estimate:
             return
-        point_value = calculate_point_estimate(point_estimate, values, bw)
+        point_value = calculate_point_estimate(point_estimate, values, bw, circular)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
@@ -261,6 +275,7 @@ def _plot_posterior_op(
         plot_kde(
             values,
             bw=bw,
+            circular=circular,
             fill_kwargs={"alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,

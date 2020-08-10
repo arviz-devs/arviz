@@ -1,39 +1,40 @@
 # pylint: disable=no-member, invalid-name, redefined-outer-name
 # pylint: disable=too-many-lines
-from collections import namedtuple
 import os
+from collections import namedtuple
 from copy import deepcopy
+from html import escape
 from typing import Dict
 from urllib.parse import urlunsplit
-from html import escape
+
 import numpy as np
 import pytest
-
 import xarray as xr
 from xarray.core.options import OPTIONS
 from xarray.testing import assert_identical
 
 from arviz import (
+    InferenceData,
+    clear_data_home,
     concat,
-    convert_to_inference_data,
     convert_to_dataset,
+    convert_to_inference_data,
     from_dict,
     from_netcdf,
-    to_netcdf,
-    load_arviz_data,
     list_datasets,
-    clear_data_home,
-    InferenceData,
+    load_arviz_data,
+    to_netcdf,
 )
-from ...data.base import generate_dims_coords, make_attrs, dict_to_dataset
-from ...data.datasets import REMOTE_DATASETS, LOCAL_DATASETS, RemoteFileMetadata
+
+from ...data.base import dict_to_dataset, generate_dims_coords, make_attrs
+from ...data.datasets import LOCAL_DATASETS, REMOTE_DATASETS, RemoteFileMetadata
 from ..helpers import (  # pylint: disable=unused-import
     chains,
     check_multiple_attrs,
-    draws,
-    eight_schools_params,
     create_data_random,
     data_random,
+    draws,
+    eight_schools_params,
 )
 
 
@@ -609,6 +610,63 @@ class TestInferenceData:
         html = idata._repr_html_()  # pylint: disable=protected-access
         assert escape(idata.__repr__()) in html
         xr.set_options(display_style=display_style)
+
+    def test_add_groups(self, data_random):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = data_random
+        idata.add_groups({"prior": {"a": data[..., 0], "b": data}})
+        assert "prior" in idata._groups  # pylint: disable=protected-access
+        assert isinstance(idata.prior, xr.Dataset)
+        assert hasattr(idata, "prior")
+
+        idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
+        assert "posterior_warmup" in idata._groups  # pylint: disable=protected-access
+        assert isinstance(idata.posterior_warmup, xr.Dataset)
+        assert hasattr(idata, "posterior_warmup")
+
+    def test_add_groups_warning(self, data_random):
+        data = np.random.normal(size=(4, 500, 8))
+        idata = data_random
+        with pytest.warns(UserWarning, match="The group.+not defined in the InferenceData scheme"):
+            idata.add_groups({"new_group": idata.posterior})
+        with pytest.warns(UserWarning, match="the default dims.+will be added automatically"):
+            idata.add_groups(constant_data={"a": data[..., 0], "b": data})
+        assert idata.new_group.equals(idata.posterior)
+
+    def test_add_groups_error(self, data_random):
+        idata = data_random
+        with pytest.raises(ValueError, match="One of.+must be provided."):
+            idata.add_groups()
+        with pytest.raises(ValueError, match="Arguments.+xr.Dataset, xr.Dataarray or dicts"):
+            idata.add_groups({"new_group": "new_group"})
+        with pytest.raises(ValueError, match="group.+already exists"):
+            idata.add_groups({"posterior": idata.posterior})
+
+    def test_extend(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        idata.extend(idata2)
+        assert hasattr(idata, "prior")
+        assert hasattr(idata, "prior_predictive")
+        assert idata.prior.equals(idata2.prior)
+        assert not idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+        idata.extend(idata2, join="right")
+        assert idata.prior.equals(idata2.prior)
+        assert idata.observed_data.equals(idata2.observed_data)
+        assert idata.prior_predictive.equals(idata2.prior_predictive)
+
+    def test_extend_errors_warnings(self, data_random):
+        idata = data_random
+        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        with pytest.raises(ValueError, match="Extending.+InferenceData objects only."):
+            idata.extend("something")
+        with pytest.raises(ValueError, match="join must be either"):
+            idata.extend(idata2, join="outer")
+        idata2.add_groups(new_group=idata2.prior)
+        with pytest.warns(UserWarning):
+            idata.extend(idata2)
 
 
 class TestNumpyToDataArray:

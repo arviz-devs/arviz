@@ -2,21 +2,21 @@
 from numbers import Number
 from typing import Optional
 
-from bokeh.models.annotations import Title
 import numpy as np
+from bokeh.models.annotations import Title
 
-from . import backend_kwarg_defaults
-from .. import show_layout
+from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    format_sig_figs,
-    round_num,
+    _scale_fig_size,
     calculate_point_estimate,
+    format_sig_figs,
+    make_label,
+    round_num,
 )
-from ....stats import hdi
-from ....numeric_utils import get_bins
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_posterior(
@@ -27,15 +27,16 @@ def plot_posterior(
     figsize,
     plotters,
     bw,
+    circular,
     bins,
     kind,
     point_estimate,
     round_to,
     hdi_prob,
     multimodal,
+    textsize,
     ref_val,
     rope,
-    ax_labelsize,
     kwargs,
     backend_kwargs,
     show,
@@ -48,15 +49,12 @@ def plot_posterior(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    (figsize, ax_labelsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)
@@ -71,12 +69,14 @@ def plot_posterior(
             selection,
             ax=ax_,
             bw=bw,
+            circular=circular,
             bins=bins,
             kind=kind,
             point_estimate=point_estimate,
             round_to=round_to,
             hdi_prob=hdi_prob,
             multimodal=multimodal,
+            linewidth=linewidth,
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
@@ -99,6 +99,7 @@ def _plot_posterior_op(
     selection,
     ax,
     bw,
+    circular,
     linewidth,
     bins,
     kind,
@@ -187,7 +188,7 @@ def _plot_posterior_op(
     def display_point_estimate(max_data):
         if not point_estimate:
             return
-        point_value = calculate_point_estimate(point_estimate, values, bw)
+        point_value = calculate_point_estimate(point_estimate, values, bw, circular)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
@@ -229,6 +230,7 @@ def _plot_posterior_op(
         plot_kde(
             values,
             bw=bw,
+            circular=circular,
             fill_kwargs={"fill_alpha": kwargs.pop("fill_alpha", 0)},
             plot_kwargs=kwargs,
             ax=ax,
@@ -237,7 +239,7 @@ def _plot_posterior_op(
             backend_kwargs={},
             show=False,
         )
-        hist, edges = np.histogram(values, density=True)
+        _, hist, edges = histogram(values, bins="auto")
     else:
         if bins is None:
             if values.dtype.kind == "i":
@@ -246,7 +248,7 @@ def _plot_posterior_op(
                 bins = "auto"
         kwargs.setdefault("align", "left")
         kwargs.setdefault("color", "blue")
-        hist, edges = np.histogram(values, density=True, bins=bins)
+        _, hist, edges = histogram(values, bins=bins)
         ax.quad(
             top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_alpha=0.35, line_alpha=0.35
         )

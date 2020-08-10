@@ -1,11 +1,11 @@
 """Bokeh Posterior predictive plot."""
 import numpy as np
 
-from . import backend_kwarg_defaults
+from ....stats.density_utils import get_bins, histogram, kde
+from ...kdeplot import plot_kde
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
-from ...kdeplot import plot_kde, _fast_kde
-from ...plot_utils import _create_axes_grid
-from ....numeric_utils import histogram, get_bins
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_ppc(
@@ -14,19 +14,22 @@ def plot_ppc(
     rows,
     cols,
     figsize,
+    animated,
     obs_plotters,
     pp_plotters,
     predictive_dataset,
     pp_sample_ix,
     kind,
     alpha,
-    linewidth,
+    textsize,
     mean,
     jitter,
     total_pp_samples,
-    markersize,
-    backend_kwargs,
+    legend,  # pylint: disable=unused-argument
+    group,  # pylint: disable=unused-argument
+    animation_kwargs,  # pylint: disable=unused-argument
     num_pp_samples,
+    backend_kwargs,
     show,
 ):
     """Bokeh ppc plot."""
@@ -37,14 +40,11 @@ def plot_ppc(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+
+    (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
-        _, axes = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        axes = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         axes = np.atleast_2d(ax)
@@ -55,6 +55,20 @@ def plot_ppc(
                     length_plotters, len(axes)
                 )
             )
+
+    if alpha is None:
+        if animated:
+            alpha = 1
+        else:
+            if kind.lower() == "scatter":
+                alpha = 0.7
+            else:
+                alpha = 0.2
+
+    if jitter is None:
+        jitter = 0.0
+    if jitter < 0.0:
+        raise ValueError("jitter must be >=0.")
 
     for i, ax_i in enumerate((item for item in axes.flatten() if item is not None)):
         var_name, _, obs_vals = obs_plotters[i]
@@ -74,8 +88,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_density, lower, upper = _fast_kde(vals)
-                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:

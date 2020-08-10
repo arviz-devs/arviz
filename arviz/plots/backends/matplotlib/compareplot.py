@@ -1,7 +1,8 @@
 """Matplotlib Compareplot."""
 import matplotlib.pyplot as plt
 
-from . import backend_kwarg_defaults, backend_show
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_compare(
@@ -13,11 +14,9 @@ def plot_compare(
     insample_dev,
     yticks_pos,
     yticks_labels,
-    linewidth,
     plot_kwargs,
     information_criterion,
-    ax_labelsize,
-    xt_labelsize,
+    textsize,
     step,
     backend_kwargs,
     show,
@@ -30,8 +29,17 @@ def plot_compare(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    if figsize is None:
+        figsize = (6, len(comp_df))
+
+    figsize, ax_labelsize, _, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize, 1, 1)
+
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     if plot_ic_diff:
         yticks_labels[0] = comp_df.index[0]

@@ -5,26 +5,26 @@ Modified from the seaborn project, which modified the mpld3 project.
 
 Also inspired in bokeh's bokeh_gallery sphinxext.
 """
+import glob
 import os
 import os.path as op
 import re
-import glob
+import shutil
 import token
 import tokenize
-import shutil
-
-from numpy import ndarray
 
 import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
-from matplotlib import image
-
 from bokeh.io import export_png
 from bokeh.layouts import gridplot
+from matplotlib import image
+from numpy import ndarray
+
 from arviz.rcparams import rc_context
+
+matplotlib.use("Agg")
+
+
 
 
 MPL_RST_TEMPLATE = """

@@ -108,14 +108,6 @@ jobs:
     displayName: 'Print packages'
 
   - script: |
-      pytest arviz/tests/helpers.py
-    displayName: 'precompile models'
-
-  - script: |
-      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
-    displayName: 'pytest'
-
-  - script: |
       python -m pylint arviz
     displayName: 'pylint'
 
@@ -126,6 +118,14 @@ jobs:
   - script: |
       python -m black --check arviz examples asv_benchmarks
     displayName: 'black'
+
+  - script: |
+      pytest arviz/tests/helpers.py
+    displayName: 'precompile models'
+
+  - script: |
+      python -m pytest arviz/tests/external_tests --cov arviz --cov-report=xml
+    displayName: 'pytest'
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()

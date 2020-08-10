@@ -1,6 +1,7 @@
 """Stats functions that require refitting the model."""
 import logging
 import warnings
+
 import numpy as np
 
 from .stats import loo

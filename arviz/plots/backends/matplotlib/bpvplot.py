@@ -1,17 +1,17 @@
 """Matplotib Bayesian p-value Posterior predictive plot."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy import stats
 
-from . import backend_show
+from ....stats.density_utils import kde
 from ...kdeplot import plot_kde
 from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    sample_reference_distribution,
+    _scale_fig_size,
     is_valid_quantile,
+    make_label,
+    sample_reference_distribution,
 )
-from ....numeric_utils import _fast_kde
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_bpv(
@@ -31,28 +31,52 @@ def plot_bpv(
     hdi_prob,
     color,
     figsize,
-    ax_labelsize,
-    markersize,
-    linewidth,
+    textsize,
     plot_ref_kwargs,
     backend_kwargs,
     show,
 ):
     """Matplotlib bpv plot."""
-    if ax is None:
-        _, axes = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
-        )
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    figsize, ax_labelsize, _, _, linewidth, markersize = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
+
+    if (kind == "u_value") and (reference == "analytical"):
+        plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "fill_between")
     else:
-        axes = np.ravel(ax)
-        if len(axes) != length_plotters:
+        plot_ref_kwargs = matplotlib_kwarg_dealiaser(plot_ref_kwargs, "plot")
+
+    if kind == "p_value" and reference == "analytical":
+        plot_ref_kwargs.setdefault("color", "k")
+        plot_ref_kwargs.setdefault("linestyle", "--")
+    else:
+        plot_ref_kwargs.setdefault("alpha", 0.1)
+        plot_ref_kwargs.setdefault("color", color)
+
+    if ax is None:
+        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
+    else:
+        axes = np.asarray(ax)
+        if axes.size < length_plotters:
             raise ValueError(
-                "Found {} variables to plot but {} axes instances. They must be equal.".format(
-                    length_plotters, len(axes)
-                )
+                (
+                    "Found {} variables to plot but {} axes instances. "
+                    "Axes instances must at minimum be equal to variables."
+                ).format(length_plotters, axes.size)
             )
 
-    for i, ax_i in enumerate(axes):
+    for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
 
@@ -61,8 +85,7 @@ def plot_bpv(
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
             ax_i.set_yticks([])
             if reference is not None:
@@ -81,8 +104,7 @@ def plot_bpv(
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-            tstat_pit_dens, xmin, xmax = _fast_kde(tstat_pit)
-            x_s = np.linspace(xmin, xmax, len(tstat_pit_dens))
+            x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":

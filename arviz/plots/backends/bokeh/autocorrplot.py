@@ -1,12 +1,12 @@
 """Bokeh Autocorrplot."""
+import numpy as np
 from bokeh.models import DataRange1d
 from bokeh.models.annotations import Title
-import numpy as np
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import _create_axes_grid, make_label
 from ....stats import autocorr
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_autocorr(
@@ -16,8 +16,8 @@ def plot_autocorr(
     figsize,
     rows,
     cols,
-    line_width,
     combined,
+    textsize,
     backend_config,
     backend_kwargs,
     show,
@@ -42,16 +42,16 @@ def plot_autocorr(
         **backend_kwargs,
     }
 
+    figsize, _, _, _, line_width, _ = _scale_fig_size(figsize, textsize, rows, cols)
+
     if axes is None:
-        _, axes = _create_axes_grid(
+        axes = create_axes_grid(
             len(plotters),
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             sharex=True,
             sharey=True,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

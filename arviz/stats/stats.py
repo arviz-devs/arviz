@@ -1,31 +1,30 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
-import warnings
 import logging
+import warnings
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
-from scipy.optimize import minimize
 import xarray as xr
+from scipy.optimize import minimize
 
-from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from .diagnostics import _multichain_statistics, _mc_error, ess
-from .stats_utils import (
-    make_ufunc as _make_ufunc,
-    wrap_xarray_ufunc as _wrap_xarray_ufunc,
-    logsumexp as _logsumexp,
-    ELPDData,
-    stats_variance_2d as svar,
-    _circular_standard_deviation,
-    get_log_likelihood as _get_log_likelihood,
-)
-from ..numeric_utils import _fast_kde, histogram, get_bins
-from ..utils import _var_names, Numba, _numba_var, get_coords, credible_interval_warning
+from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
+from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
+from .density_utils import get_bins as _get_bins
+from .density_utils import histogram as _histogram
+from .density_utils import kde as _kde
+from .diagnostics import _mc_error, _multichain_statistics, ess
+from .stats_utils import ELPDData, _circular_standard_deviation
+from .stats_utils import get_log_likelihood as _get_log_likelihood
+from .stats_utils import logsumexp as _logsumexp
+from .stats_utils import make_ufunc as _make_ufunc
+from .stats_utils import stats_variance_2d as svar
+from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 _log = logging.getLogger(__name__)
 
@@ -545,13 +544,13 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
         ary = ary[~np.isnan(ary)]
 
     if ary.dtype.kind == "f":
-        density, lower, upper = _fast_kde(ary)
+        bins, density = _kde(ary)
+        lower, upper = bins[0], bins[-1]
         range_x = upper - lower
         dx = range_x / len(density)
-        bins = np.linspace(lower, upper, len(density))
     else:
-        bins = get_bins(ary)
-        _, density, _ = histogram(ary, bins=bins)
+        bins = _get_bins(ary)
+        _, density, _ = _histogram(ary, bins=bins)
         dx = np.diff(bins)[0]
 
     density *= dx

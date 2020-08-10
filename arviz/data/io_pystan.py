@@ -1,15 +1,15 @@
 #  pylint: disable=too-many-instance-attributes
 """PyStan-specific conversion code."""
-from collections import OrderedDict
 import re
 import warnings
+from collections import OrderedDict
 
 import numpy as np
 import xarray as xr
 
-from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords, make_attrs
 from ..rcparams import rcParams
+from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
+from .inference_data import InferenceData
 
 
 class PyStanConverter:
@@ -778,7 +778,7 @@ def from_pystan(
     prior_model : stan.model.Model
         PyStan3 specific model object. Needed for automatic dtype parsing.
     save_warmup : bool
-        Save warmup iterations InferenceData object. If not defined, use default
+        Save warmup iterations into InferenceData object. If not defined, use default
         defined by the rcParams.
 
     Returns

@@ -1,16 +1,14 @@
 """Matplotlib ELPDPlot."""
 import warnings
 
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
-
-from . import backend_kwarg_defaults, backend_show
-from ...plot_utils import (
-    _scale_fig_size,
-    set_xticklabels,
-)
 from ....rcparams import rcParams
+from ...plot_utils import _scale_fig_size, color_from_dim, set_xticklabels
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_elpd(
@@ -21,13 +19,11 @@ def plot_elpd(
     figsize,
     textsize,
     plot_kwargs,
-    markersize,
     xlabels,
     coord_labels,
     xdata,
     threshold,
     legend,
-    handles,
     color,
     backend_kwargs,
     show,
@@ -40,16 +36,45 @@ def plot_elpd(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
-    backend_kwargs["constrained_layout"] = not xlabels
+    backend_kwargs.setdefault("constrained_layout", not xlabels)
+
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "scatter")
+
+    markersize = None
+
+    if isinstance(color, str):
+        if color in pointwise_data[0].dims:
+            colors, color_mapping = color_from_dim(pointwise_data[0], color)
+            cmap_name = plot_kwargs.pop("cmap", plt.rcParams["image.cmap"])
+            markersize = plot_kwargs.pop("s", plt.rcParams["lines.markersize"])
+            cmap = getattr(cm, cmap_name)
+            handles = [
+                Line2D(
+                    [], [], color=cmap(float_color), label=coord, ms=markersize, lw=0, **plot_kwargs
+                )
+                for coord, float_color in color_mapping.items()
+            ]
+            plot_kwargs.setdefault("cmap", cmap_name)
+            plot_kwargs.setdefault("s", markersize ** 2)
+            plot_kwargs.setdefault("c", colors)
+        else:
+            legend = False
+    else:
+        legend = False
+    plot_kwargs.setdefault("c", color)
+
+    # flatten data (data must be flattened after selecting, labeling and coloring)
+    pointwise_data = [pointwise.values.flatten() for pointwise in pointwise_data]
 
     if numvars == 2:
         (figsize, ax_labelsize, titlesize, xt_labelsize, _, markersize) = _scale_fig_size(
             figsize, textsize, numvars - 1, numvars - 1
         )
         plot_kwargs.setdefault("s", markersize ** 2)
-
+        backend_kwargs.setdefault("figsize", figsize)
+        backend_kwargs["squeeze"] = True
         if ax is None:
-            fig, ax = plt.subplots(figsize=figsize, **backend_kwargs)
+            fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)
@@ -105,6 +130,7 @@ def plot_elpd(
                 numvars - 1,
                 numvars - 1,
                 figsize=figsize,
+                squeeze=False,
                 constrained_layout=not xlabels,
                 sharey="row",
                 sharex="all",

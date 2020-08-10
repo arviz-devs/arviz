@@ -1,13 +1,14 @@
 """ArviZ rcparams. Based on matplotlib's implementation."""
-import sys
-import os
-from pathlib import Path
-import re
-import pprint
-import warnings
-import logging
 import locale
+import logging
+import os
+import pprint
+import re
+import sys
+import warnings
 from collections.abc import MutableMapping
+from pathlib import Path
+
 import numpy as np
 
 _log = logging.getLogger(__name__)

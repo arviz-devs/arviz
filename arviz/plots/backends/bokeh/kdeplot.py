@@ -3,16 +3,16 @@
 from collections.abc import Callable
 from numbers import Integral
 
-import bokeh.plotting as bkp
-from bokeh.models import ColumnDataSource, Dash, Range1d
 import matplotlib._contour as _contour
+import numpy as np
+from bokeh.models import ColumnDataSource, Dash, Range1d
 from matplotlib.cm import get_cmap
 from matplotlib.colors import rgb2hex
 from matplotlib.pyplot import rcParams as mpl_rcParams
-import numpy as np
 
-from . import backend_kwarg_defaults
+from ...plot_utils import _scale_fig_size
 from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_kde(
@@ -28,17 +28,22 @@ def plot_kde(
     values,
     values2,
     rug,
+    label,  # pylint: disable=unused-argument
     quantiles,
     rotated,
     contour,
     fill_last,
+    figsize,
+    textsize,  # pylint: disable=unused-argument
     plot_kwargs,
     fill_kwargs,
     rug_kwargs,
     contour_kwargs,
     contourf_kwargs,
     pcolormesh_kwargs,
+    is_circular,  # pylint: disable=unused-argument
     ax,
+    legend,  # pylint: disable=unused-argument
     backend_kwargs,
     show,
     return_glyph,
@@ -51,8 +56,11 @@ def plot_kde(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    figsize, *_ = _scale_fig_size(figsize, textsize)
+
     if ax is None:
-        ax = bkp.figure(**backend_kwargs)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     glyphs = []
     if values2 is None:

@@ -2,24 +2,23 @@
 import bokeh.plotting as bkp
 import numpy as np
 
-
-from . import backend_kwarg_defaults
-from .. import show_layout
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import make_label
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults
 
 
 def plot_joint(
     ax,
     figsize,
     plotters,
-    xt_labelsize,
     kind,
     contour,
     fill_last,
     joint_kwargs,
     gridsize,
+    textsize,
     marginal_kwargs,
     backend_kwargs,
     show,
@@ -33,6 +32,16 @@ def plot_joint(
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
+
+    figsize, *_, xt_labelsize, linewidth, _ = _scale_fig_size(figsize, textsize)
+
+    joint_kwargs = {} if joint_kwargs is None else joint_kwargs
+
+    if marginal_kwargs is None:
+        marginal_kwargs = {}
+    marginal_kwargs.setdefault("plot_kwargs", {})
+    marginal_kwargs["plot_kwargs"].setdefault("line_width", linewidth)
+
     if ax is None:
 
         backend_kwargs_join = backend_kwargs.copy()

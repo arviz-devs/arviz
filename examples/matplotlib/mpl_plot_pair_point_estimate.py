@@ -5,8 +5,8 @@ Point Estimate Pairplot
 _thumb: .2, .5
 """
 import matplotlib.pyplot as plt
-import arviz as az
 
+import arviz as az
 
 centered = az.load_arviz_data("centered_eight")
 

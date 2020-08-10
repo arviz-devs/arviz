@@ -1,17 +1,8 @@
 """Plot posterior densities."""
-from typing import Optional
-
 from ..data import convert_to_dataset
-from .plot_utils import (
-    xarray_var_iter,
-    _scale_fig_size,
-    default_grid,
-    filter_plotters_list,
-    get_plotting_function,
-    matplotlib_kwarg_dealiaser,
-)
-from ..utils import _var_names, get_coords, credible_interval_warning
 from ..rcparams import rcParams
+from ..utils import _var_names, credible_interval_warning, get_coords
+from .plot_utils import default_grid, filter_plotters_list, get_plotting_function, xarray_var_iter
 
 
 def plot_posterior(
@@ -24,13 +15,14 @@ def plot_posterior(
     textsize=None,
     hdi_prob=None,
     multimodal=False,
-    round_to: Optional[int] = None,
+    round_to=None,
     point_estimate="auto",
     group="posterior",
     rope=None,
     ref_val=None,
     kind="kde",
-    bw=4.5,
+    bw="default",
+    circular=False,
     bins=None,
     ax=None,
     backend=None,
@@ -86,10 +78,17 @@ def plot_posterior(
     kind: str
         Type of plot to display (kde or hist) For discrete variables this argument is ignored and
         a histogram is always used.
-    bw: float
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy). Only works if `kind == kde`.
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is. Only works if `kind == kde`.
+    circular: bool, optional
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
+        Only works if `kind == kde`.
     bins: integer or sequence or 'auto', optional
         Controls the number of bins, accepts the same keywords `matplotlib.hist()` does. Only works
         if `kind == hist`. If None (default) it will use `auto` for continuous variables and
@@ -220,15 +219,6 @@ def plot_posterior(
     length_plotters = len(plotters)
     rows, cols = default_grid(length_plotters)
 
-    (figsize, ax_labelsize, titlesize, xt_labelsize, _linewidth, _) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
-    if kind == "hist":
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "hist")
-    else:
-        kwargs = matplotlib_kwarg_dealiaser(kwargs, "plot")
-    kwargs.setdefault("linewidth", _linewidth)
-
     posteriorplot_kwargs = dict(
         ax=ax,
         length_plotters=length_plotters,
@@ -237,18 +227,17 @@ def plot_posterior(
         figsize=figsize,
         plotters=plotters,
         bw=bw,
+        circular=circular,
         bins=bins,
         kind=kind,
         point_estimate=point_estimate,
         round_to=round_to,
         hdi_prob=hdi_prob,
         multimodal=multimodal,
+        textsize=textsize,
         ref_val=ref_val,
         rope=rope,
-        ax_labelsize=ax_labelsize,
-        xt_labelsize=xt_labelsize,
         kwargs=kwargs,
-        titlesize=titlesize,
         backend_kwargs=backend_kwargs,
         show=show,
     )
@@ -256,11 +245,6 @@ def plot_posterior(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        posteriorplot_kwargs.pop("xt_labelsize")
-        posteriorplot_kwargs.pop("titlesize")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_posterior", "posteriorplot", backend)

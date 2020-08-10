@@ -1,16 +1,13 @@
 # pylint: disable=all
 """Bokeh ESS plots."""
-from bokeh.models import Dash, Span, ColumnDataSource
-from bokeh.models.annotations import Title, Legend
 import numpy as np
+from bokeh.models import ColumnDataSource, Dash, Span
+from bokeh.models.annotations import Legend, Title
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
+from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-)
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_ess(
@@ -22,24 +19,18 @@ def plot_ess(
     sd_ess,
     idata,
     data,
-    text_x,
-    text_va,
     kind,
     extra_methods,
+    textsize,
     rows,
     cols,
     figsize,
     kwargs,
     extra_kwargs,
     text_kwargs,
-    _linewidth,
-    _markersize,
     n_samples,
     relative,
     min_ess,
-    xt_labelsize,
-    titlesize,
-    ax_labelsize,
     ylabel,
     rug,
     rug_kind,
@@ -53,19 +44,15 @@ def plot_ess(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    (figsize, *_, _linewidth, _markersize) = _scale_fig_size(figsize, textsize, rows, cols)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            constrained_layout=True,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        ax = create_axes_grid(
+            len(plotters), rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

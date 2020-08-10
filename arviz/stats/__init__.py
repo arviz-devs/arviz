@@ -1,10 +1,10 @@
 # pylint: disable=wildcard-import
 """Statistical tests and diagnostics for ArviZ."""
-from .stats_utils import *
-from .stats_refitting import *
-from .stats import *
+from .density_utils import *
 from .diagnostics import *
-
+from .stats import *
+from .stats_refitting import *
+from .stats_utils import *
 
 __all__ = [
     "apply_test_function",
@@ -12,6 +12,7 @@ __all__ = [
     "compare",
     "hdi",
     "hpd",
+    "kde",
     "loo",
     "loo_pit",
     "psislw",

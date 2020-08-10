@@ -1,25 +1,27 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-
 import xarray as xr
-from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser
+
 from ..data import InferenceData
 from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_dist(
     values,
     values2=None,
-    color=None,
+    color="C0",
     kind="auto",
     cumulative=False,
     label=None,
     rotated=False,
     rug=False,
-    bw=4.5,
+    bw="default",
+    circular=False,
     quantiles=None,
     contour=True,
     fill_last=True,
+    figsize=None,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
@@ -59,10 +61,16 @@ def plot_dist(
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
-        rule of thumb (the default rule used by SciPy).
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to None.
@@ -70,6 +78,8 @@ def plot_dist(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize. Not implemented for bokeh backend.
@@ -161,20 +171,6 @@ def plot_dist(
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
 
-    if kind == "hist":
-        hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
-        hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("color", color)
-        hist_kwargs.setdefault("label", label)
-        hist_kwargs.setdefault("rwidth", 0.9)
-        hist_kwargs.setdefault("align", "left")
-        hist_kwargs.setdefault("density", True)
-
-        if rotated:
-            hist_kwargs.setdefault("orientation", "horizontal")
-        else:
-            hist_kwargs.setdefault("orientation", "vertical")
-
     dist_plot_args = dict(
         # User Facing API that can be simplified
         values=values,
@@ -186,9 +182,11 @@ def plot_dist(
         rotated=rotated,
         rug=rug,
         bw=bw,
+        circular=circular,
         quantiles=quantiles,
         contour=contour,
         fill_last=fill_last,
+        figsize=figsize,
         textsize=textsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,

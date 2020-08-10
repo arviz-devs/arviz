@@ -2,8 +2,8 @@
 import numpy as np
 import xarray as xr
 
-from .inference_data import InferenceData
 from .base import dict_to_dataset
+from .inference_data import InferenceData
 from .io_cmdstan import from_cmdstan
 from .io_cmdstanpy import from_cmdstanpy
 from .io_emcee import from_emcee

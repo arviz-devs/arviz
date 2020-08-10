@@ -1,16 +1,16 @@
 """Matplotlib traceplot."""
+import warnings
 from itertools import cycle
 
-import warnings
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import numpy as np
+from matplotlib.lines import Line2D
 
-from . import backend_kwarg_defaults, backend_show
+from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
+from ...plot_utils import _scale_fig_size, format_coords_as_labels, make_label
 from ...rankplot import plot_rank
-from ...plot_utils import _scale_fig_size, make_label, format_coords_as_labels, _dealiase_sel_kwargs
-from ....numeric_utils import get_bins
+from . import backend_kwarg_defaults, backend_show, dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 
 
 def plot_trace(
@@ -21,6 +21,7 @@ def plot_trace(
     figsize,
     rug,
     lines,
+    compact,
     compact_prop,
     combined,
     chain_prop,
@@ -35,6 +36,7 @@ def plot_trace(
     divergence_data,
     axes,
     backend_kwargs,
+    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Plot distribution (histogram or kernel density estimates) and sampled values.
@@ -125,6 +127,59 @@ def plot_trace(
 
     backend_kwargs = {**backend_kwarg_defaults(), **backend_kwargs}
 
+    if lines is None:
+        lines = ()
+
+    num_chain_props = len(data.chain) + 1 if combined else len(data.chain)
+    if not compact:
+        chain_prop = "color" if chain_prop is None else chain_prop
+    else:
+        chain_prop = (
+            {"linestyle": ("solid", "dotted", "dashed", "dashdot"),}
+            if chain_prop is None
+            else chain_prop
+        )
+        compact_prop = "color" if compact_prop is None else compact_prop
+
+    if isinstance(chain_prop, str):
+        chain_prop = {chain_prop: plt.rcParams["axes.prop_cycle"].by_key()[chain_prop]}
+    if isinstance(chain_prop, tuple):
+        warnings.warn(
+            "chain_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        chain_prop = {chain_prop[0]: chain_prop[1]}
+    chain_prop = {
+        prop_name: [prop for _, prop in zip(range(num_chain_props), cycle(props))]
+        for prop_name, props in chain_prop.items()
+    }
+
+    if isinstance(compact_prop, str):
+        compact_prop = {compact_prop: plt.rcParams["axes.prop_cycle"].by_key()[compact_prop]}
+    if isinstance(compact_prop, tuple):
+        warnings.warn(
+            "compact_prop as a tuple will be deprecated in a future warning, use a dict instead",
+            FutureWarning,
+        )
+        compact_prop = {compact_prop[0]: compact_prop[1]}
+
+    if figsize is None:
+        figsize = (12, len(plotters) * 2)
+
+    backend_kwargs.setdefault("squeeze", False)
+    backend_kwargs.setdefault("figsize", figsize)
+
+    trace_kwargs = matplotlib_kwarg_dealiaser(trace_kwargs, "plot")
+    trace_kwargs.setdefault("alpha", 0.35)
+
+    hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
+    hist_kwargs.setdefault("alpha", 0.35)
+
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
+    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "fill_between")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "scatter")
+    rank_kwargs = matplotlib_kwarg_dealiaser(rank_kwargs, "bar")
+
     textsize = plot_kwargs.pop("textsize", 10)
 
     figsize, _, titlesize, xt_labelsize, linewidth, _ = _scale_fig_size(
@@ -135,7 +190,7 @@ def plot_trace(
     plot_kwargs.setdefault("linewidth", linewidth)
 
     if axes is None:
-        _, axes = plt.subplots(len(plotters), 2, squeeze=False, figsize=figsize, **backend_kwargs)
+        _, axes = plt.subplots(len(plotters), 2, **backend_kwargs)
 
     axes = np.atleast_2d(axes)
     # Check the input for lines
@@ -158,8 +213,8 @@ def plot_trace(
 
         if len(value.shape) == 2:
             if compact_prop:
-                aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop, 0)
-                aux_trace_kwargs = _dealiase_sel_kwargs(trace_kwargs, compact_prop, 0)
+                aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop, 0)
+                aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop, 0)
             else:
                 aux_plot_kwargs = plot_kwargs
                 aux_trace_kwargs = trace_kwargs
@@ -197,8 +252,8 @@ def plot_trace(
             }
             handles = []
             for sub_idx, label in zip(range(value.shape[2]), legend_labels):
-                aux_plot_kwargs = _dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
-                aux_trace_kwargs = _dealiase_sel_kwargs(trace_kwargs, compact_prop_iter, sub_idx)
+                aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
+                aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop_iter, sub_idx)
                 _plot_chains_mpl(
                     axes,
                     idx,
@@ -222,7 +277,7 @@ def plot_trace(
                             [],
                             [],
                             label=label,
-                            **_dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
+                            **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
                         )
                     )
             if legend:
@@ -285,7 +340,7 @@ def plot_trace(
             if isinstance(vlines, (float, int)):
                 line_values = [vlines]
             else:
-                line_values = np.atleast_1d(vlines).ravel()
+                line_values = np.ravel(vlines)
                 if not np.issubdtype(line_values.dtype, np.number):
                     raise ValueError(
                         "line-positions should be numeric, found {}".format(line_values)
@@ -307,7 +362,7 @@ def plot_trace(
         legend_kwargs = trace_kwargs if combined else plot_kwargs
         handles = [
             Line2D(
-                [], [], label=chain_id, **_dealiase_sel_kwargs(legend_kwargs, chain_prop, chain_id)
+                [], [], label=chain_id, **dealiase_sel_kwargs(legend_kwargs, chain_prop, chain_id)
             )
             for chain_id in range(data.dims["chain"])
         ]
@@ -315,7 +370,7 @@ def plot_trace(
             handles.insert(
                 0,
                 Line2D(
-                    [], [], label="combined", **_dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
+                    [], [], label="combined", **dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
                 ),
             )
         axes[0, 0].legend(handles=handles, title="chain", loc="upper right")
@@ -345,11 +400,11 @@ def _plot_chains_mpl(
 ):
     for chain_idx, row in enumerate(value):
         if kind == "trace":
-            aux_kwargs = _dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
+            aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             axes[idx, 1].plot(data.draw.values, row, **aux_kwargs)
 
         if not combined:
-            aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
+            aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
             plot_dist(
                 values=row,
                 textsize=xt_labelsize,
@@ -369,7 +424,7 @@ def _plot_chains_mpl(
         plot_rank(data=value, kind="vlines", ax=axes[idx, 1], **rank_kwargs)
 
     if combined:
-        aux_kwargs = _dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
+        aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
         plot_dist(
             values=value.flatten(),
             textsize=xt_labelsize,

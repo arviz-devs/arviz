@@ -1,17 +1,15 @@
 """Matplotlib Posterior predictive plot."""
-import platform
 import logging
-from matplotlib import animation, get_backend
+import platform
+
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import animation, get_backend
 
-from . import backend_show
+from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-)
-from ....numeric_utils import _fast_kde, histogram, get_bins
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 _log = logging.getLogger(__name__)
 
@@ -29,21 +27,47 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
-    linewidth,
+    textsize,
     mean,
-    xt_labelsize,
-    ax_labelsize,
     jitter,
     total_pp_samples,
     legend,
     group,
-    markersize,
     animation_kwargs,
     num_pp_samples,
     backend_kwargs,
     show,
 ):
     """Matplotlib ppc plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    if animation_kwargs is None:
+        animation_kwargs = {}
+    if platform.system() == "Linux":
+        animation_kwargs.setdefault("blit", True)
+    else:
+        animation_kwargs.setdefault("blit", False)
+
+    if alpha is None:
+        if animated:
+            alpha = 1
+        else:
+            if kind.lower() == "scatter":
+                alpha = 0.7
+            else:
+                alpha = 0.2
+
+    if jitter is None:
+        jitter = 0.0
+    if jitter < 0.0:
+        raise ValueError("jitter must be >=0")
+
     if animated:
         try:
             shell = get_ipython().__class__.__name__
@@ -64,10 +88,13 @@ def plot_ppc(
                 "(e.g. to TkAgg)"
             )
 
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
     if ax is None:
-        fig, axes = _create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs
-        )
+        fig, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs)
     else:
         axes = np.ravel(ax)
         if len(axes) != length_plotters:
@@ -81,7 +108,7 @@ def plot_ppc(
             if not all([ax.get_figure() is fig for ax in axes]):
                 raise ValueError("All axes must be on the same figure for animation to work")
 
-    for i, ax_i in enumerate(axes):
+    for i, ax_i in enumerate(np.ravel(axes)[:length_plotters]):
         var_name, selection, obs_vals = obs_plotters[i]
         pp_var_name, _, pp_vals = pp_plotters[i]
         dtype = predictive_dataset[pp_var_name].dtype.kind
@@ -127,8 +154,7 @@ def plot_ppc(
             for vals in pp_sampled_vals:
                 vals = np.array([vals]).flatten()
                 if dtype == "f":
-                    pp_density, lower, upper = _fast_kde(vals)
-                    pp_x = np.linspace(lower, upper, len(pp_density))
+                    pp_x, pp_density = kde(vals)
                     pp_densities.append(pp_density)
                     pp_xs.append(pp_x)
                 else:
@@ -346,18 +372,13 @@ def _set_animation(
     if kind == "kde":
         length = len(pp_sampled_vals)
         if dtype == "f":
-            y_vals, lower, upper = _fast_kde(pp_sampled_vals[0])
-            x_vals = np.linspace(lower, upper, len(y_vals))
-
-            max_max = max([max(_fast_kde(pp_sampled_vals[i])[0]) for i in range(length)])
-
+            x_vals, y_vals = kde(pp_sampled_vals[0])
+            max_max = max([max(kde(pp_sampled_vals[i])[1]) for i in range(length)])
             ax.set_ylim(0, max_max)
-
             (line,) = ax.plot(x_vals, y_vals, **plot_kwargs)
 
             def animate(i):
-                y_vals, lower, upper = _fast_kde(pp_sampled_vals[i])
-                x_vals = np.linspace(lower, upper, len(y_vals))
+                x_vals, y_vals = kde(pp_sampled_vals[i])
                 line.set_data(x_vals, y_vals)
                 return line
 

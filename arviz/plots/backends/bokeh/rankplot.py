@@ -1,17 +1,14 @@
 """Bokeh rankplot."""
+import numpy as np
+import scipy.stats
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
-import numpy as np
-import scipy.stats
 
-from . import backend_kwarg_defaults
+from ....stats.density_utils import histogram
+from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
-from ...plot_utils import (
-    _create_axes_grid,
-    make_label,
-)
-from ....stats.stats_utils import histogram
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_rank(
@@ -37,16 +34,15 @@ def plot_rank(
         **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
+    figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
     if axes is None:
-        _, axes = _create_axes_grid(
+        axes = create_axes_grid(
             length_plotters,
             rows,
             cols,
             figsize=figsize,
-            squeeze=False,
             sharex=True,
             sharey=True,
-            backend="bokeh",
             backend_kwargs=backend_kwargs,
         )
     else:

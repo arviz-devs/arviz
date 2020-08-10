@@ -1,9 +1,12 @@
 """Matplotlib loopitplot."""
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import hsv_to_rgb, rgb_to_hsv, to_hex, to_rgb
+from xarray import DataArray
 
-from . import backend_kwarg_defaults, backend_show
-from ....numeric_utils import _fast_kde
+from ....stats.density_utils import kde
+from ...plot_utils import _scale_fig_size
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_loo_pit(
@@ -25,8 +28,11 @@ def plot_loo_pit(
     unif,
     plot_unif_kwargs,
     loo_pit_kde,
-    xt_labelsize,
     legend,
+    y_hat,
+    y,
+    color,
+    textsize,
     credible_interval,
     plot_kwargs,
     backend_kwargs,
@@ -40,8 +46,59 @@ def plot_loo_pit(
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    (figsize, _, _, xt_labelsize, linewidth, _) = _scale_fig_size(figsize, textsize, 1, 1)
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs["squeeze"] = True
+
     if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=figsize, **backend_kwargs)
+        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
+
+    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
+    plot_kwargs["color"] = to_hex(color)
+    plot_kwargs.setdefault("linewidth", linewidth * 1.4)
+    if isinstance(y, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y)
+    elif isinstance(y, DataArray) and y.name is not None:
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y.name)
+    elif isinstance(y_hat, str):
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat)
+    elif isinstance(y_hat, DataArray) and y_hat.name is not None:
+        label = ("{} LOO-PIT ECDF" if ecdf else "{} LOO-PIT").format(y_hat.name)
+    else:
+        label = "LOO-PIT ECDF" if ecdf else "LOO-PIT"
+
+    plot_kwargs.setdefault("label", label)
+    plot_kwargs.setdefault("zorder", 5)
+
+    plot_unif_kwargs = matplotlib_kwarg_dealiaser(plot_unif_kwargs, "plot")
+    light_color = rgb_to_hsv(to_rgb(plot_kwargs.get("color")))
+    light_color[1] /= 2  # pylint: disable=unsupported-assignment-operation
+    light_color[2] += (1 - light_color[2]) / 2  # pylint: disable=unsupported-assignment-operation
+    plot_unif_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+    plot_unif_kwargs.setdefault("alpha", 0.5)
+    plot_unif_kwargs.setdefault("linewidth", 0.6 * linewidth)
+
+    if ecdf:
+        n_data_points = loo_pit.size
+        plot_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
+        plot_unif_kwargs.setdefault("drawstyle", "steps-mid" if n_data_points < 100 else "default")
+
+        if ecdf_fill:
+            if fill_kwargs is None:
+                fill_kwargs = {}
+            fill_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+            fill_kwargs.setdefault("alpha", 0.5)
+            fill_kwargs.setdefault(
+                "step", "mid" if plot_kwargs["drawstyle"] == "steps-mid" else None
+            )
+            fill_kwargs.setdefault("label", "{:.3g}% credible interval".format(credible_interval))
+    elif use_hdi:
+        if hdi_kwargs is None:
+            hdi_kwargs = {}
+        hdi_kwargs.setdefault("color", to_hex(hsv_to_rgb(light_color)))
+        hdi_kwargs.setdefault("alpha", 0.35)
+        hdi_kwargs.setdefault("label", "Uniform HDI")
 
     if ecdf:
         ax.plot(
@@ -59,8 +116,7 @@ def plot_loo_pit(
             ax.axhspan(*hdi_odds, **hdi_kwargs)
         else:
             for idx in range(n_unif):
-                unif_density, xmin, xmax = _fast_kde(unif[idx, :])
-                x_s = np.linspace(xmin, xmax, len(unif_density))
+                x_s, unif_density = kde(unif[idx, :])
                 x_ss[idx] = x_s
                 u_dens[idx] = unif_density
             ax.plot(x_ss.T, u_dens.T, **plot_unif_kwargs)

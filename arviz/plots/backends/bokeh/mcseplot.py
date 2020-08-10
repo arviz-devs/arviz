@@ -1,16 +1,13 @@
 """Bokeh mcseplot."""
+import numpy as np
 from bokeh.models import ColumnDataSource, Dash, Span
 from bokeh.models.annotations import Title
-import numpy as np
 from scipy.stats import rankdata
 
-from . import backend_kwarg_defaults
-from .. import show_layout
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-)
 from ....stats.stats_utils import quantile as _quantile
+from ...plot_utils import _scale_fig_size, make_label
+from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_mcse(
@@ -24,15 +21,16 @@ def plot_mcse(
     rug,
     data,
     probs,
-    extra_kwargs,
+    kwargs,  # pylint: disable=unused-argument
     extra_methods,
     mean_mcse,
     sd_mcse,
+    textsize,
+    text_kwargs,  # pylint: disable=unused-argument
     rug_kwargs,
+    extra_kwargs,
     idata,
     rug_kind,
-    _markersize,
-    _linewidth,
     backend_kwargs,
     show,
 ):
@@ -41,17 +39,20 @@ def plot_mcse(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(),
         **backend_kwargs,
     }
+
+    (figsize, *_, _linewidth, _markersize) = _scale_fig_size(figsize, textsize, rows, cols)
+
+    extra_kwargs = {} if extra_kwargs is None else extra_kwargs
+    extra_kwargs.setdefault("linewidth", _linewidth / 2)
+    extra_kwargs.setdefault("color", "black")
+    extra_kwargs.setdefault("alpha", 0.5)
+
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            backend="bokeh",
-            backend_kwargs=backend_kwargs,
+        ax = create_axes_grid(
+            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)
@@ -76,7 +77,7 @@ def plot_mcse(
                 hline_mean = Span(
                     location=mean_mcse_i,
                     dimension="width",
-                    line_color="black",
+                    line_color=extra_kwargs["color"],
                     line_width=extra_kwargs["linewidth"] * 2,
                     line_alpha=extra_kwargs["alpha"],
                 )

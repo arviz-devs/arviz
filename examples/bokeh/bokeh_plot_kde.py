@@ -4,9 +4,10 @@ KDE Plot Bokeh
 
 _thumb: .2, .8
 """
-import arviz as az
 import bokeh.plotting as bkp
 import numpy as np
+
+import arviz as az
 
 data = az.load_arviz_data("centered_eight")
 

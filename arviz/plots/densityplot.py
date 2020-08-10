@@ -1,19 +1,10 @@
 """KDE and histogram plots for multiple variables."""
-from itertools import cycle
 import warnings
 
-import matplotlib.pyplot as plt
-
 from ..data import convert_to_dataset
-from .plot_utils import (
-    _scale_fig_size,
-    make_label,
-    xarray_var_iter,
-    default_grid,
-    get_plotting_function,
-)
 from ..rcparams import rcParams
 from ..utils import _var_names, credible_interval_warning
+from .plot_utils import default_grid, get_plotting_function, make_label, xarray_var_iter
 
 
 # pylint:disable-msg=too-many-function-args
@@ -29,7 +20,8 @@ def plot_density(
     outline=True,
     hdi_markers="",
     shade=0.0,
-    bw=4.5,
+    bw="default",
+    circular=False,
     figsize=None,
     textsize=None,
     ax=None,
@@ -81,10 +73,16 @@ def plot_density(
     shade : Optional[float]
         Alpha blending value for the shaded area under the curve, between 0 (no shade) and 1
         (opaque). Defaults to 0.
-    bw : Optional[float]
-        Bandwidth scaling factor for the KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule
-        of thumb (the default rule used by SciPy).
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
@@ -179,16 +177,6 @@ def plot_density(
             "does not match the number of models ({})".format(len(data_labels), n_data)
         )
 
-    if colors == "cycle":
-        colors = [
-            prop
-            for _, prop in zip(
-                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
-            )
-        ]
-    elif isinstance(colors, str):
-        colors = [colors for _ in range(n_data)]
-
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]
     else:
@@ -226,9 +214,11 @@ def plot_density(
         length_plotters = max_plots
     rows, cols = default_grid(length_plotters, max_cols=3)
 
-    (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
-        figsize, textsize, rows, cols
-    )
+    if bw == "default":
+        if circular:
+            bw = "taylor"
+        else:
+            bw = "experimental"
 
     plot_density_kwargs = dict(
         ax=ax,
@@ -236,14 +226,12 @@ def plot_density(
         to_plot=to_plot,
         colors=colors,
         bw=bw,
+        circular=circular,
         figsize=figsize,
         length_plotters=length_plotters,
         rows=rows,
         cols=cols,
-        titlesize=titlesize,
-        xt_labelsize=xt_labelsize,
-        linewidth=linewidth,
-        markersize=markersize,
+        textsize=textsize,
         hdi_prob=hdi_prob,
         point_estimate=point_estimate,
         hdi_markers=hdi_markers,
@@ -258,13 +246,6 @@ def plot_density(
     if backend is None:
         backend = rcParams["plot.backend"]
     backend = backend.lower()
-
-    if backend == "bokeh":
-
-        plot_density_kwargs["line_width"] = plot_density_kwargs.pop("linewidth")
-        plot_density_kwargs.pop("titlesize")
-        plot_density_kwargs.pop("xt_labelsize")
-        plot_density_kwargs.pop("n_data")
 
     # TODO: Add backend kwargs
     plot = get_plotting_function("plot_density", "densityplot", backend)

@@ -9,6 +9,7 @@ def plot_dist_comparison(
     dc_plotters,
     legend,
     groups,
+    textsize,
     prior_kwargs,
     posterior_kwargs,
     observed_kwargs,
@@ -17,5 +18,5 @@ def plot_dist_comparison(
 ):
     """Bokeh Density Comparison plot."""
     raise NotImplementedError(
-        "The bokeh backend is still under development. Use matplotlib bakend."
+        "The bokeh backend is still under development. Use matplotlib backend."
     )

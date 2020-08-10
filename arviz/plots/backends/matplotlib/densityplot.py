@@ -1,15 +1,13 @@
 """Matplotlib Densityplot."""
+from itertools import cycle
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
-from ...plot_utils import (
-    make_label,
-    _create_axes_grid,
-    calculate_point_estimate,
-)
-from ....numeric_utils import _fast_kde, get_bins
+from ....stats.density_utils import get_bins, kde
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_density(
@@ -18,14 +16,12 @@ def plot_density(
     to_plot,
     colors,
     bw,
+    circular,
     figsize,
     length_plotters,
     rows,
     cols,
-    titlesize,
-    xt_labelsize,
-    linewidth,
-    markersize,
+    textsize,
     hdi_prob,
     point_estimate,
     hdi_markers,
@@ -37,18 +33,32 @@ def plot_density(
     show,
 ):
     """Matplotlib densityplot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    if colors == "cycle":
+        colors = [
+            prop
+            for _, prop in zip(
+                range(n_data), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+            )
+        ]
+    elif isinstance(colors, str):
+        colors = [colors for _ in range(n_data)]
+
+    (figsize, _, titlesize, xt_labelsize, linewidth, markersize) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", False)
     if ax is None:
-        _, ax = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend="matplotlib",
-            backend_kwargs=backend_kwargs,
-        )
-    else:
-        ax = np.atleast_2d(ax)
+        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
@@ -60,6 +70,7 @@ def plot_density(
                 label,
                 colors[m_idx],
                 bw,
+                circular,
                 titlesize,
                 xt_labelsize,
                 linewidth,
@@ -74,8 +85,8 @@ def plot_density(
 
     if n_data > 1:
         for m_idx, label in enumerate(data_labels):
-            ax.item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
-        ax.item(0).legend(fontsize=xt_labelsize)
+            np.ravel(ax).item(0).plot([], label=label, c=colors[m_idx], markersize=markersize)
+        np.ravel(ax).item(0).legend(fontsize=xt_labelsize)
 
     if backend_show(show):
         plt.show()
@@ -88,6 +99,7 @@ def _d_helper(
     vname,
     color,
     bw,
+    circular,
     titlesize,
     xt_labelsize,
     linewidth,
@@ -109,10 +121,11 @@ def _d_helper(
         variable name
     color : str
         matplotlib color
-    bw : float
-        Bandwidth scaling factor. Should be larger than 0. The higher this number the smoother the
-        KDE will be. Defaults to 4.5 which is essentially the same as the Scott's rule of thumb
-        (the default used rule by SciPy).
+    bw: float or str, optional
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
     titlesize : float
         font size for title
     xt_labelsize : float
@@ -138,11 +151,10 @@ def _d_helper(
         else:
             new_vec = vec
 
-        density, xmin, xmax = _fast_kde(new_vec, bw=bw)
+        x, density = kde(new_vec, circular=circular, bw=bw)
         density *= hdi_prob
-        x = np.linspace(xmin, xmax, len(density))
-        ymin = density[0]
-        ymax = density[-1]
+        xmin, xmax = x[0], x[-1]
+        ymin, ymax = density[0], density[-1]
 
         if outline:
             ax.plot(x, density, color=color, lw=linewidth)

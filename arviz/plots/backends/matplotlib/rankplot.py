@@ -1,14 +1,11 @@
 """Matplotlib rankplot."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import scipy.stats
 
-from . import backend_show
-from ...plot_utils import (
-    _create_axes_grid,
-    make_label,
-)
-from ....stats.stats_utils import histogram
+from ....stats.density_utils import histogram
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_rank(
@@ -23,21 +20,23 @@ def plot_rank(
     colors,
     ref_line,
     labels,
-    ax_labelsize,
-    titlesize,
     backend_kwargs,
     show,
 ):
     """Matplotlib rankplot.."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    figsize, ax_labelsize, titlesize, _, _, _ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("squeeze", True)
     if axes is None:
-        _, axes = _create_axes_grid(
-            length_plotters,
-            rows,
-            cols,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)

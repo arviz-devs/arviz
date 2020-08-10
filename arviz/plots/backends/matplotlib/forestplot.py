@@ -1,17 +1,17 @@
 """Matplotlib forestplot."""
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import tee
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
 import numpy as np
+from matplotlib.colors import to_rgba
 
-from . import backend_kwarg_defaults, backend_show
 from ....stats import hdi
+from ....stats.density_utils import get_bins, histogram, kde
 from ....stats.diagnostics import _ess, _rhat
-from ....numeric_utils import _fast_kde, histogram, get_bins
-from ...plot_utils import _scale_fig_size, xarray_var_iter, make_label
 from ....utils import conditional_jit
+from ...plot_utils import _scale_fig_size, make_label, xarray_var_iter
+from . import backend_kwarg_defaults, backend_show
 
 
 def pairwise(iterable):
@@ -45,6 +45,7 @@ def plot_forest(
     ess,
     r_hat,
     backend_kwargs,
+    backend_config,  # pylint: disable=unused-argument
     show,
 ):
     """Matplotlib forest plot."""
@@ -517,9 +518,8 @@ class VarHandler:
                 density_q = density.cumsum() / density.sum()
                 x = x[:-1]
             elif kind == "density":
-                density, lower, upper = _fast_kde(values)
+                x, density = kde(values)
                 density_q = density.cumsum() / density.sum()
-                x = np.linspace(lower, upper, len(density))
 
             xvals.append(x)
             pdfs.append(density)

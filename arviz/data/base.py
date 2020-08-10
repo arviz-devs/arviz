@@ -1,14 +1,14 @@
 """Low level converters usually used by other functions."""
-from copy import deepcopy
-from typing import Dict, List, Any
 import datetime
-import warnings
 import functools
+import warnings
+from copy import deepcopy
+from typing import Any, Dict, List
+
 import pkg_resources
 import xarray as xr
 
-from .. import utils
-from .. import __version__
+from .. import __version__, utils
 
 CoordSpec = Dict[str, List[Any]]
 DimSpec = Dict[str, List[str]]

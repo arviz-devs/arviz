@@ -1,8 +1,9 @@
-from typing import Optional, List, overload, Iterable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, List, Optional, overload
+
+import xarray as xr
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
-import xarray as xr
 
 # pylint has some problems with stub files...
 # pylint: disable=unused-argument, multiple-statements

@@ -6,10 +6,10 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 from xarray import Dataset
 
-from ..stats import hdi
-from .plot_utils import get_plotting_function, matplotlib_kwarg_dealiaser, vectorized_to_hex
 from ..rcparams import rcParams
+from ..stats import hdi
 from ..utils import credible_interval_warning
+from .plot_utils import get_plotting_function
 
 
 def plot_hdi(
@@ -21,6 +21,7 @@ def plot_hdi(
     circular=False,
     smooth=True,
     smooth_kwargs=None,
+    figsize=None,
     fill_kwargs=None,
     plot_kwargs=None,
     hdi_kwargs=None,
@@ -56,6 +57,8 @@ def plot_hdi(
     smooth_kwargs : dict, optional
         Additional keywords modifying the Savitzky-Golay filter. See
         :func:`scipy:scipy.signal.savgol_filter` for details.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     fill_kwargs : dict, optional
         Keywords passed to :meth:`mpl:matplotlib.axes.Axes.fill_between`
         (use fill_kwargs={'alpha': 0} to disable fill) or to
@@ -112,13 +115,6 @@ def plot_hdi(
 
     if hdi_kwargs is None:
         hdi_kwargs = {}
-    plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")
-    plot_kwargs["color"] = vectorized_to_hex(plot_kwargs.get("color", color))
-    plot_kwargs.setdefault("alpha", 0)
-
-    fill_kwargs = matplotlib_kwarg_dealiaser(fill_kwargs, "fill_between")
-    fill_kwargs["color"] = vectorized_to_hex(fill_kwargs.get("color", color))
-    fill_kwargs.setdefault("alpha", 0.5)
 
     x = np.asarray(x)
     x_shape = x.shape
@@ -174,6 +170,8 @@ def plot_hdi(
         ax=ax,
         x_data=x_data,
         y_data=y_data,
+        color=color,
+        figsize=figsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         backend_kwargs=backend_kwargs,

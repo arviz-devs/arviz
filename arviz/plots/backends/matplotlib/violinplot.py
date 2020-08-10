@@ -2,10 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from . import backend_show
 from ....stats import hdi
-from ....numeric_utils import _fast_kde, histogram, get_bins
-from ...plot_utils import make_label, _create_axes_grid
+from ....stats.density_utils import get_bins, histogram, kde
+from ...plot_utils import _scale_fig_size, make_label
+from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
 
 
 def plot_violin(
@@ -21,26 +21,38 @@ def plot_violin(
     rug,
     rug_kwargs,
     bw,
+    textsize,
+    circular,
     hdi_prob,
-    linewidth,
-    ax_labelsize,
-    xt_labelsize,
     quartiles,
     backend_kwargs,
     show,
 ):
     """Matplotlib violin plot."""
+    if backend_kwargs is None:
+        backend_kwargs = {}
+
+    backend_kwargs = {
+        **backend_kwarg_defaults(),
+        **backend_kwargs,
+    }
+
+    (figsize, ax_labelsize, _, xt_labelsize, linewidth, _) = _scale_fig_size(
+        figsize, textsize, rows, cols
+    )
+    backend_kwargs.setdefault("figsize", figsize)
+    backend_kwargs.setdefault("sharex", sharex)
+    backend_kwargs.setdefault("sharey", sharey)
+    backend_kwargs.setdefault("squeeze", True)
+
+    shade_kwargs = matplotlib_kwarg_dealiaser(shade_kwargs, "hexbin")
+    rug_kwargs = matplotlib_kwarg_dealiaser(rug_kwargs, "plot")
+    rug_kwargs.setdefault("alpha", 0.1)
+    rug_kwargs.setdefault("marker", ".")
+    rug_kwargs.setdefault("linestyle", "")
+
     if ax is None:
-        fig, ax = _create_axes_grid(
-            len(plotters),
-            rows,
-            cols,
-            sharex=sharex,
-            sharey=sharey,
-            figsize=figsize,
-            squeeze=False,
-            backend_kwargs=backend_kwargs,
-        )
+        fig, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
         fig.set_constrained_layout(False)
         fig.subplots_adjust(wspace=0)
 
@@ -51,7 +63,7 @@ def plot_violin(
         if val[0].dtype.kind == "i":
             dens = cat_hist(val, rug, shade, ax_, **shade_kwargs)
         else:
-            dens = _violinplot(val, rug, shade, bw, ax_, **shade_kwargs)
+            dens = _violinplot(val, rug, shade, bw, circular, ax_, **shade_kwargs)
 
         if rug:
             rug_x = -np.abs(np.random.normal(scale=max(dens) / 3.5, size=len(val)))
@@ -76,10 +88,14 @@ def plot_violin(
     return ax
 
 
-def _violinplot(val, rug, shade, bw, ax, **shade_kwargs):
+def _violinplot(val, rug, shade, bw, circular, ax, **shade_kwargs):
     """Auxiliary function to plot violinplots."""
-    density, low_b, up_b = _fast_kde(val, bw=bw)
-    x = np.linspace(low_b, up_b, len(density))
+    if bw == "default":
+        if circular:
+            bw = "taylor"
+        else:
+            bw = "experimental"
+    x, density = kde(val, circular=circular, bw=bw)
 
     if not rug:
         x = np.concatenate([x, x[::-1]])
