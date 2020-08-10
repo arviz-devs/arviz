@@ -1,21 +1,35 @@
 """CmdStan-specific conversion code."""
-from collections import defaultdict
-from copy import deepcopy
-from glob import glob
-import linecache
-import os
 import logging
+import os
 import re
+from collections import defaultdict
+from glob import glob
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from .. import utils
+from ..rcparams import rcParams
+from .base import CoordSpec, DimSpec, dict_to_dataset, generate_dims_coords, requires
 from .inference_data import InferenceData
-from .base import requires, dict_to_dataset, generate_dims_coords
 
 _log = logging.getLogger(__name__)
+
+
+def check_glob(path, group, disable_glob):
+    """Find files with glob."""
+    if isinstance(path, str) and (not disable_glob):
+        path_glob = glob(path)
+        if path_glob:
+            path = sorted(path_glob)
+            msg = "\n".join(
+                "{}: {}".format(i, os.path.normpath(fpath)) for i, fpath in enumerate(path, 1)
+            )
+            len_p = len(path)
+            _log.info("glob found %d files for '%s':\n%s", len_p, group, msg)
+    return path
 
 
 class CmdStanConverter:
@@ -28,71 +42,48 @@ class CmdStanConverter:
         *,
         posterior=None,
         posterior_predictive=None,
+        predictions=None,
         prior=None,
         prior_predictive=None,
         observed_data=None,
         observed_data_var=None,
+        constant_data=None,
+        constant_data_var=None,
+        predictions_constant_data=None,
+        predictions_constant_data_var=None,
         log_likelihood=None,
         coords=None,
-        dims=None
+        dims=None,
+        disable_glob=False,
+        save_warmup=None,
     ):
-        if isinstance(posterior, str):
-            posterior_glob = glob(posterior)
-            if len(posterior_glob) > 1:
-                posterior = sorted(posterior_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(posterior, 1)
-                )
-                len_p = len(posterior)
-                _log.info("glob found %d files for 'posterior':\n%s", len_p, msg)
-        self.posterior_ = posterior
-        if isinstance(posterior_predictive, str):
-            posterior_predictive_glob = glob(posterior_predictive)
-            if len(posterior_predictive_glob) > 1:
-                posterior_predictive = sorted(posterior_predictive_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(posterior_predictive, 1)
-                )
-                len_pp = len(posterior_predictive)
-                _log.info("glob found %d files for 'posterior_predictive':\n%s", len_pp, msg)
-        if isinstance(prior, str):
-            prior_glob = glob(prior)
-            if len(prior_glob) > 1:
-                prior = sorted(prior_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path)) for i, path in enumerate(prior, 1)
-                )
-                len_p = len(prior)
-                _log.info("glob found %d files for 'prior':\n%s", len_p, msg)
-        if isinstance(prior_predictive, str):
-            prior_predictive_glob = glob(prior_predictive)
-            if len(prior_predictive_glob) > 1:
-                prior_predictive = sorted(prior_predictive_glob)
-                msg = "\n".join(
-                    "{}: {}".format(i, os.path.normpath(path))
-                    for i, path in enumerate(prior_predictive, 1)
-                )
-                len_pp = len(prior_predictive)
-                _log.info("glob found %d files for 'prior_predictive':\n%s", len_pp, msg)
-        self.posterior_predictive = posterior_predictive
-        self.prior_ = prior
-        self.prior_predictive = prior_predictive
+        self.posterior_ = check_glob(posterior, "posterior", disable_glob)
+        self.posterior_predictive = check_glob(
+            posterior_predictive, "posterior_predictive", disable_glob
+        )
+        self.predictions = check_glob(predictions, "predictions", disable_glob)
+        self.prior_ = check_glob(prior, "prior", disable_glob)
+        self.prior_predictive = check_glob(prior_predictive, "prior_predictive", disable_glob)
+        self.log_likelihood = check_glob(log_likelihood, "log_likelihood", disable_glob)
         self.observed_data = observed_data
         self.observed_data_var = observed_data_var
-        if isinstance(log_likelihood, (list, tuple)):
-            if len(log_likelihood) == 1:
-                log_likelihood = log_likelihood[0]
-        self.log_likelihood = log_likelihood
+        self.constant_data = constant_data
+        self.constant_data_var = constant_data_var
+        self.predictions_constant_data = predictions_constant_data
+        self.predictions_constant_data_var = predictions_constant_data_var
         self.coords = coords if coords is not None else {}
         self.dims = dims if dims is not None else {}
+
         self.posterior = None
         self.sample_stats = None
         self.prior = None
         self.sample_stats_prior = None
+        self.attrs = None
+        self.attrs_prior = None
 
-        # populate posterior and sample_Stats
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
+
+        # populate posterior and sample_stats
         self._parse_posterior()
         self._parse_prior()
 
@@ -102,21 +93,27 @@ class CmdStanConverter:
         paths = self.posterior_
         if isinstance(paths, str):
             paths = [paths]
+
         chain_data = []
         for path in paths:
-            parsed_output = _read_output(path)
-            for sample, sample_stats, config, adaptation, timing in parsed_output:
-                chain_data.append(
-                    {
-                        "sample": sample,
-                        "sample_stats": sample_stats,
-                        "configuration_info": config,
-                        "adaptation_info": adaptation,
-                        "timing_info": timing,
-                    }
-                )
-        self.posterior = [item["sample"] for item in chain_data]
-        self.sample_stats = [item["sample_stats"] for item in chain_data]
+            chain_data.append(_read_output(path))
+
+        self.posterior = (
+            [item["sample"] for item in chain_data],
+            [item["sample_warmup"] for item in chain_data],
+        )
+        self.sample_stats = (
+            [item["sample_stats"] for item in chain_data],
+            [item["sample_stats_warmup"] for item in chain_data],
+        )
+
+        attrs = {}
+        for item in chain_data:
+            for key, value in item["configuration_info"].items():
+                if key not in attrs:
+                    attrs[key] = []
+                attrs[key].append(value)
+        self.attrs = attrs
 
     @requires("prior_")
     def _parse_prior(self):
@@ -124,28 +121,34 @@ class CmdStanConverter:
         paths = self.prior_
         if isinstance(paths, str):
             paths = [paths]
+
         chain_data = []
         for path in paths:
-            parsed_output = _read_output(path)
-            for sample, sample_stats, config, adaptation, timing in parsed_output:
-                chain_data.append(
-                    {
-                        "sample": sample,
-                        "sample_stats": sample_stats,
-                        "configuration_info": config,
-                        "adaptation_info": adaptation,
-                        "timing_info": timing,
-                    }
-                )
-        self.prior = [item["sample"] for item in chain_data]
-        self.sample_stats_prior = [item["sample_stats"] for item in chain_data]
+            chain_data.append(_read_output(path))
+
+        self.prior = (
+            [item["sample"] for item in chain_data],
+            [item["sample_warmup"] for item in chain_data],
+        )
+        self.sample_stats_prior = (
+            [item["sample_stats"] for item in chain_data],
+            [item["sample_stats_warmup"] for item in chain_data],
+        )
+
+        attrs = {}
+        for item in chain_data:
+            for key, value in item["configuration_info"].items():
+                if key not in attrs:
+                    attrs[key] = []
+                attrs[key].append(value)
+        self.attrs_prior = attrs
 
     @requires("posterior")
     def posterior_to_xarray(self):
         """Extract posterior samples from output csv."""
-        columns = self.posterior[0].columns
+        columns = self.posterior[0][0].columns
 
-        # filter posterior_predictive and log_likelihood
+        # filter posterior_predictive, predictions and log_likelihood
         posterior_predictive = self.posterior_predictive
         if posterior_predictive is None or (
             isinstance(posterior_predictive, str) and posterior_predictive.lower().endswith(".csv")
@@ -162,16 +165,38 @@ class CmdStanConverter:
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
 
-        log_likelihood = self.log_likelihood
-        if log_likelihood is None:
-            log_likelihood = []
+        predictions = self.predictions
+        if predictions is None or (
+            isinstance(predictions, str) and predictions.lower().endswith(".csv")
+        ):
+            predictions = []
+        elif isinstance(predictions, str):
+            predictions = [col for col in columns if predictions == col.split(".")[0]]
         else:
-            log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+            predictions = [
+                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+            ]
 
-        invalid_cols = posterior_predictive + log_likelihood
+        log_likelihood = self.log_likelihood
+        if log_likelihood is None or (
+            isinstance(log_likelihood, str) and log_likelihood.lower().endswith(".csv")
+        ):
+            log_likelihood = []
+        elif isinstance(log_likelihood, str):
+            log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+        else:
+            log_likelihood = [
+                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+            ]
+
+        invalid_cols = posterior_predictive + predictions + log_likelihood
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_dataframes([item[valid_cols] for item in self.posterior])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        data = _unpack_dataframes([item[valid_cols] for item in self.posterior[0]])
+        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.posterior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
+        )
 
     @requires("posterior")
     @requires("sample_stats")
@@ -179,43 +204,7 @@ class CmdStanConverter:
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
-
-        sampler_params = self.sample_stats
-        log_likelihood = self.log_likelihood
-        if isinstance(log_likelihood, str):
-            log_likelihood_cols = [
-                col for col in self.posterior[0].columns if log_likelihood == col.split(".")[0]
-            ]
-            log_likelihood_vals = [item[log_likelihood_cols] for item in self.posterior]
-
-            # Add log_likelihood to sampler_params
-            for i, _ in enumerate(sampler_params):
-                # slice log_likelihood to keep dimensions
-                for col in log_likelihood_cols:
-                    col_ll = col.replace(log_likelihood, "log_likelihood")
-                    sampler_params[i][col_ll] = log_likelihood_vals[i][col]
-
-            # change dims and coords for log_likelihood if defined
-            if log_likelihood in dims:
-                dims["log_likelihood"] = dims.pop(log_likelihood)
-
-            log_likelihood_dims = np.array(
-                [list(map(int, col.split(".")[1:])) for col in log_likelihood_cols]
-            )
-            max_dims = log_likelihood_dims.max(0)
-            max_dims = max_dims if hasattr(max_dims, "__iter__") else (max_dims,)
-            default_dim_names, _ = generate_dims_coords(shape=max_dims, var_name=log_likelihood)
-            log_likelihood_dim_names, _ = generate_dims_coords(
-                shape=max_dims, var_name="log_likelihood"
-            )
-            for default_dim_name, log_likelihood_dim_name in zip(
-                default_dim_names, log_likelihood_dim_names
-            ):
-                if default_dim_name in coords:
-                    coords[log_likelihood_dim_name] = coords.pop(default_dim_name)
+        sampler_params, sampler_params_warmup = self.sample_stats
 
         for j, s_params in enumerate(sampler_params):
             rename_dict = {}
@@ -224,17 +213,27 @@ class CmdStanConverter:
                 name = re.sub("__$", "", key_)
                 name = "diverging" if name == "divergent" else name
                 rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
+                sampler_params_warmup[j][key] = sampler_params_warmup[j][key].astype(
+                    dtypes.get(key_)
+                )
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
+            sampler_params_warmup[j] = sampler_params_warmup[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
-        return dict_to_dataset(data, coords=coords, dims=dims)
+        data_warmup = _unpack_dataframes(sampler_params_warmup)
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+        )
 
     @requires("posterior")
     @requires("posterior_predictive")
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
         posterior_predictive = self.posterior_predictive
-        columns = self.posterior[0].columns
+
+        columns = self.posterior[0][0].columns
+
         if (
             isinstance(posterior_predictive, (tuple, list))
             and posterior_predictive[0].endswith(".csv")
@@ -242,11 +241,21 @@ class CmdStanConverter:
             if isinstance(posterior_predictive, str):
                 posterior_predictive = [posterior_predictive]
             chain_data = []
+            chain_data_warmup = []
+            attrs = {}
             for path in posterior_predictive:
                 parsed_output = _read_output(path)
-                for sample, *_ in parsed_output:
-                    chain_data.append(sample)
+                chain_data.append(parsed_output["sample"])
+                chain_data_warmup.append(parsed_output["sample_warmup"])
+
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+
             data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
+
         else:
             if isinstance(posterior_predictive, str):
                 posterior_predictive = [posterior_predictive]
@@ -255,15 +264,70 @@ class CmdStanConverter:
                 for col in columns
                 if any(item == col.split(".")[0] for item in posterior_predictive)
             ]
-            data = _unpack_dataframes([item[posterior_predictive_cols] for item in self.posterior])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+            data = _unpack_dataframes(
+                [item[posterior_predictive_cols] for item in self.posterior[0]]
+            )
+            data_warmup = _unpack_dataframes(
+                [item[posterior_predictive_cols] for item in self.posterior[1]]
+            )
+
+            attrs = None
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+        )
+
+    @requires("posterior")
+    @requires("predictions")
+    def predictions_to_xarray(self):
+        """Convert out of sample predictions samples to xarray."""
+        predictions = self.predictions
+
+        columns = self.posterior[0][0].columns
+
+        if (isinstance(predictions, (tuple, list)) and predictions[0].endswith(".csv")) or (
+            isinstance(predictions, str) and predictions.endswith(".csv")
+        ):
+            if isinstance(predictions, str):
+                predictions = [predictions]
+            chain_data = []
+            chain_data_warmup = []
+            attrs = {}
+            for path in predictions:
+                parsed_output = _read_output(path)
+                chain_data.append(parsed_output["sample"])
+                chain_data_warmup.append(parsed_output["sample_warmup"])
+
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
+        else:
+            if isinstance(predictions, str):
+                predictions = [predictions]
+            predictions_cols = [
+                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+            ]
+            data = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+            data_warmup = _unpack_dataframes([item[predictions_cols] for item in self.posterior[0]])
+
+            attrs = None
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+        )
 
     @requires("prior")
     def prior_to_xarray(self):
         """Convert prior samples to xarray."""
         # filter prior_predictive
         prior_predictive = self.prior_predictive
-        columns = self.prior[0].columns
+
+        columns = self.prior[0][0].columns
+
         if prior_predictive is None or (
             isinstance(prior_predictive, str) and prior_predictive.lower().endswith(".csv")
         ):
@@ -279,8 +343,14 @@ class CmdStanConverter:
 
         invalid_cols = prior_predictive
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_dataframes([item[valid_cols] for item in self.prior])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+        data = _unpack_dataframes([item[valid_cols] for item in self.prior[0]])
+        data_warmup = _unpack_dataframes([item[valid_cols] for item in self.prior[1]])
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
+            dict_to_dataset(
+                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
+            ),
+        )
 
     @requires("prior")
     @requires("sample_stats_prior")
@@ -288,11 +358,7 @@ class CmdStanConverter:
         """Extract sample_stats from fit."""
         dtypes = {"divergent__": bool, "n_leapfrog__": np.int64, "treedepth__": np.int64}
 
-        # copy dims and coords
-        dims = deepcopy(self.dims) if self.dims is not None else {}
-        coords = deepcopy(self.coords) if self.coords is not None else {}
-
-        sampler_params = self.sample_stats_prior
+        sampler_params, sampler_params_warmup = self.sample_stats_prior
         for j, s_params in enumerate(sampler_params):
             rename_dict = {}
             for key in s_params:
@@ -300,10 +366,18 @@ class CmdStanConverter:
                 name = re.sub("__$", "", key_)
                 name = "diverging" if name == "divergent" else name
                 rename_dict[key] = ".".join((name, *end))
-                sampler_params[j][key] = s_params[key].astype(dtypes.get(key))
+                sampler_params[j][key] = s_params[key].astype(dtypes.get(key_))
+                sampler_params_warmup[j][key] = sampler_params_warmup[j][key].astype(
+                    dtypes.get(key_)
+                )
             sampler_params[j] = sampler_params[j].rename(columns=rename_dict)
+            sampler_params_warmup[j] = sampler_params_warmup[j].rename(columns=rename_dict)
         data = _unpack_dataframes(sampler_params)
-        return dict_to_dataset(data, coords=coords, dims=dims)
+        data_warmup = _unpack_dataframes(sampler_params_warmup)
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -311,27 +385,46 @@ class CmdStanConverter:
         """Convert prior_predictive samples to xarray."""
         prior_predictive = self.prior_predictive
 
+        if self.prior[0][0].empty:
+            columns = self.prior[0][0].columns
+        else:
+            columns = self.prior[1][0].columns
+
         if (
             isinstance(prior_predictive, (tuple, list)) and prior_predictive[0].endswith(".csv")
         ) or (isinstance(prior_predictive, str) and prior_predictive.endswith(".csv")):
             if isinstance(prior_predictive, str):
                 prior_predictive = [prior_predictive]
             chain_data = []
+            chain_data_warmup = []
+            attrs = {}
             for path in prior_predictive:
                 parsed_output = _read_output(path)
-                for sample, *_ in parsed_output:
-                    chain_data.append(sample)
+                chain_data.append(parsed_output["sample"])
+                chain_data_warmup.append(parsed_output["sample_warmup"])
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
             data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
         else:
             if isinstance(prior_predictive, str):
                 prior_predictive = [prior_predictive]
             prior_predictive_cols = [
                 col
-                for col in self.prior[0].columns
+                for col in columns
                 if any(item == col.split(".")[0] for item in prior_predictive)
             ]
-            data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior])
-        return dict_to_dataset(data, coords=self.coords, dims=self.dims)
+            data = _unpack_dataframes([item[prior_predictive_cols] for item in self.prior[0]])
+            data_warmup = _unpack_dataframes(
+                [item[prior_predictive_cols] for item in self.prior[1]]
+            )
+            attrs = None
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+        )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -352,6 +445,87 @@ class CmdStanConverter:
             observed_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
         return xr.Dataset(data_vars=observed_data)
 
+    @requires("constant_data")
+    def constant_data_to_xarray(self):
+        """Convert constant data to xarray."""
+        constant_data_raw = _read_data(self.constant_data)
+        variables = self.constant_data_var
+        if isinstance(variables, str):
+            variables = [variables]
+        constant_data = {}
+        for key, vals in constant_data_raw.items():
+            if variables is not None and key not in variables:
+                continue
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=constant_data)
+
+    @requires("predictions_constant_data")
+    def predictions_constant_data_to_xarray(self):
+        """Convert predictions constant data to xarray."""
+        predictions_constant_data_raw = _read_data(self.predictions_constant_data)
+        variables = self.predictions_constant_data_var
+        if isinstance(variables, str):
+            variables = [variables]
+        predictions_constant_data = {}
+        for key, vals in predictions_constant_data_raw.items():
+            if variables is not None and key not in variables:
+                continue
+            vals = utils.one_de(vals)
+            val_dims = self.dims.get(key)
+            val_dims, coords = generate_dims_coords(
+                vals.shape, key, dims=val_dims, coords=self.coords
+            )
+            predictions_constant_data[key] = xr.DataArray(vals, dims=val_dims, coords=coords)
+        return xr.Dataset(data_vars=predictions_constant_data)
+
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert elementwise log_likelihood samples to xarray."""
+        log_likelihood = self.log_likelihood
+
+        columns = self.posterior[0][0].columns
+
+        if (isinstance(log_likelihood, (tuple, list)) and log_likelihood[0].endswith(".csv")) or (
+            isinstance(log_likelihood, str) and log_likelihood.endswith(".csv")
+        ):
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+
+            chain_data = []
+            chain_data_warmup = []
+            attrs = {}
+            for path in log_likelihood:
+                parsed_output = _read_output(path)
+                chain_data.append(parsed_output["sample"])
+                chain_data_warmup.append(parsed_output["sample_warmup"])
+                for key, value in parsed_output["configuration_info"].items():
+                    if key not in attrs:
+                        attrs[key] = []
+                    attrs[key].append(value)
+            data = _unpack_dataframes(chain_data)
+            data_warmup = _unpack_dataframes(chain_data_warmup)
+        else:
+            if isinstance(log_likelihood, str):
+                log_likelihood = [log_likelihood]
+            log_likelihood_cols = [
+                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+            ]
+            data = _unpack_dataframes([item[log_likelihood_cols] for item in self.posterior[0]])
+            data_warmup = _unpack_dataframes(
+                [item[log_likelihood_cols] for item in self.posterior[1]]
+            )
+            attrs = None
+        return (
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=attrs),
+        )
+
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -360,44 +534,91 @@ class CmdStanConverter:
         will not have those groups.
         """
         return InferenceData(
+            save_warmup=self.save_warmup,
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
+                "log_likelihood": self.log_likelihood_to_xarray(),
                 "posterior_predictive": self.posterior_predictive_to_xarray(),
                 "prior": self.prior_to_xarray(),
                 "sample_stats_prior": self.sample_stats_prior_to_xarray(),
                 "prior_predictive": self.prior_predictive_to_xarray(),
                 "observed_data": self.observed_data_to_xarray(),
-            }
+                "constant_data": self.constant_data_to_xarray(),
+                "predictions": self.predictions_to_xarray(),
+                "predictions_constant_data": self.predictions_constant_data_to_xarray(),
+            },
         )
 
 
 def _process_configuration(comments):
     """Extract sampling information."""
-    num_samples = None
-    num_warmup = None
-    save_warmup = None
-    for comment in comments:
+    results = {
+        "extra": [],
+        "stan_version": {},
+    }
+
+    comments_gen = iter(comments)
+
+    for comment in comments_gen:
         comment = comment.strip("#").strip()
         if comment.startswith("num_samples"):
-            num_samples = int(comment.strip("num_samples = ").strip("(Default)"))
+            results["num_samples"] = int(comment.strip("num_samples = ").strip("(Default)"))
         elif comment.startswith("num_warmup"):
-            num_warmup = int(comment.strip("num_warmup = ").strip("(Default)"))
+            results["num_warmup"] = int(comment.strip("num_warmup = ").strip("(Default)"))
         elif comment.startswith("save_warmup"):
-            save_warmup = bool(int(comment.strip("save_warmup = ").strip("(Default)")))
+            results["save_warmup"] = bool(int(comment.strip("save_warmup = ").strip("(Default)")))
         elif comment.startswith("thin"):
-            thin = int(comment.strip("thin = ").strip("(Default)"))
+            results["thin"] = int(comment.strip("thin = ").strip("(Default)"))
+        elif comment.startswith("stan_version_"):
+            key, val = comment.strip("stan_version_").split("=")
+            results["stan_version"][key.strip()] = val.strip()
+        elif comment.startswith("Step size"):
+            _, val = comment.split("=")
+            results["step_size"] = float(val.strip())
+        elif "inverse mass matrix" in comment:
+            comment = next(comments_gen).strip("#").strip()
+            results["inverse_mass_matrix"] = np.array(comment.split(","), dtype=float)
+        elif ("seconds" in comment) and any(
+            item in comment for item in ("(Warm-up)", "(Sampling)", "(Total)")
+        ):
+            value = (
+                comment.strip("Elapsed Time:")
+                .strip("seconds (Warm-up)")
+                .strip("seconds (Sampling)")
+                .strip("seconds (Total)")
+            )
+            key = (
+                "warmup_time_seconds"
+                if "(Warm-up)" in comment
+                else "sampling_time_seconds"
+                if "(Sampling)" in comment
+                else "total_time_seconds"
+            )
+            results[key] = float(value)
+        else:
+            results["extra"].append(comment)
 
-    return {
-        "num_samples": num_samples,
-        "num_warmup": num_warmup,
-        "save_warmup": save_warmup,
-        "thin": thin,
-    }
+    return results
+
+
+def _read_output_file(path):
+    comments = []
+
+    # read comments
+    with open(path, "rb") as f_obj:
+        for line in f_obj:
+            if line.startswith(b"#"):
+                comments.append(line.decode("utf-8").strip())
+
+    with open(path, "rb") as f_obj:
+        data = pd.read_csv(f_obj, comment="#")
+
+    return data, comments
 
 
 def _read_output(path):
-    """Read CmdStan output.csv.
+    """Read CmdStan output csv file.
 
     Parameters
     ----------
@@ -405,166 +626,36 @@ def _read_output(path):
 
     Returns
     -------
-    List[DataFrame, DataFrame, List[str], List[str], List[str]]
-        pandas.DataFrame
-            Sample data
-        pandas.DataFrame
-            Sample stats
-        List[str]
-            Configuration information
-        List[str]
-            Adaptation information
-        List[str]
-            Timing info
+    Dict[str, Any]
     """
-    chains = []
-    configuration_info = []
-    adaptation_info = []
-    timing_info = []
-    i = 0
-    # Read (first) configuration and adaption
-    with open(path, "r") as f_obj:
-        column_names = False
-        for i, line in enumerate(f_obj):
-            line = line.strip()
-            if line.startswith("#"):
-                if column_names:
-                    adaptation_info.append(line.strip())
-                else:
-                    configuration_info.append(line.strip())
-            elif not column_names:
-                column_names = True
-                pconf = _process_configuration(configuration_info)
-                if pconf["save_warmup"]:
-                    warmup_range = range(pconf["num_warmup"] // pconf["thin"])
-                    for _, _ in zip(warmup_range, f_obj):
-                        continue
-            else:
-                break
-
     # Read data
-    with open(path, "r") as f_obj:
-        df = pd.read_csv(f_obj, comment="#")
+    data, comments = _read_output_file(path)
 
-    # split dataframe if header found multiple times
-    if df.iloc[:, 0].dtype.kind == "O":
-        first_col = df.columns[0]
-        col_locations = first_col == df.loc[:, first_col]
-        col_locations = list(col_locations.loc[col_locations].index)
-        dfs = []
-        for idx, last_idx in zip(col_locations, [-1] + list(col_locations[:-1])):
-            df_ = deepcopy(df.loc[last_idx + 1 : idx - 1, :])
-            for col in df_.columns:
-                df_.loc[:, col] = pd.to_numeric(df_.loc[:, col])
-            if len(df_):
-                dfs.append(df_.reset_index(drop=True))
-            df = df.loc[idx + 1 :, :]
-        for col in df.columns:
-            df.loc[:, col] = pd.to_numeric(df.loc[:, col])
-        dfs.append(df)
-    else:
-        dfs = [df]
+    pconf = _process_configuration(comments)
 
-    for j, df in enumerate(dfs):
-        if j == 0:
-            # Read timing info (first) from the end of the file
-            line_num = i + df.shape[0] + 1
-            for k in range(5):
-                line = linecache.getline(path, line_num + k).strip()
-                if len(line):
-                    timing_info.append(line)
-            configuration_info_len = len(configuration_info)
-            adaptation_info_len = len(adaptation_info)
-            timing_info_len = len(timing_info)
-            num_of_samples = df.shape[0]
-            header_count = 1
-            last_line_num = (
-                configuration_info_len
-                + adaptation_info_len
-                + timing_info_len
-                + num_of_samples
-                + header_count
-            )
-        else:
-            # header location found in the dataframe (not first)
-            configuration_info = []
-            adaptation_info = []
-            timing_info = []
+    # split dataframe to warmup and draws
+    saved_warmup = pconf.get("save_warmup", 0) * pconf.get("num_warmup", 0) // pconf.get("thin", 1)
 
-            # line number for the next dataframe in csv
-            line_num = last_line_num + 1
+    data_warmup = data.iloc[:saved_warmup, :]
+    data = data.iloc[saved_warmup:, :]
 
-            # row ranges
-            config_start = line_num
-            config_end = config_start + configuration_info_len
+    # Split data to sample_stats and sample
+    sample_stats_columns = [col for col in data.columns if col.endswith("__")]
+    sample_columns = [col for col in data.columns if col not in sample_stats_columns]
 
-            # read configuration_info
-            for reading_line in range(config_start, config_end):
-                line = linecache.getline(path, reading_line)
-                if line.startswith("#"):
-                    configuration_info.append(line)
-                else:
-                    msg = (
-                        "Invalid input file. "
-                        "Header information missing from combined csv. "
-                        "Configuration: {}".format(path)
-                    )
-                    raise ValueError(msg)
+    sample_stats = data.loc[:, sample_stats_columns]
+    sample_data = data.loc[:, sample_columns]
 
-            pconf = _process_configuration(configuration_info)
-            warmup_rows = pconf["save_warmup"] * pconf["num_warmup"] // pconf["thin"]
-            adaption_start = config_end + 1 + warmup_rows
-            adaption_end = adaption_start + adaptation_info_len
-            # read adaptation_info
-            for reading_line in range(adaption_start, adaption_end):
-                line = linecache.getline(path, reading_line)
-                if line.startswith("#"):
-                    adaptation_info.append(line)
-                else:
-                    msg = (
-                        "Invalid input file. "
-                        "Header information missing from combined csv. "
-                        "Adaptation: {}".format(path)
-                    )
-                    raise ValueError(msg)
+    sample_stats_warmup = data_warmup.loc[:, sample_stats_columns]
+    sample_data_warmup = data_warmup.loc[:, sample_columns]
 
-            timing_start = adaption_end + len(df) - warmup_rows
-            timing_end = timing_start + timing_info_len
-            # read timing_info
-            raise_timing_error = False
-            for reading_line in range(timing_start, timing_end):
-                line = linecache.getline(path, reading_line)
-                if line.startswith("#"):
-                    timing_info.append(line)
-                else:
-                    raise_timing_error = True
-                    break
-            no_elapsed_time = not any("elapsed time" in row.lower() for row in timing_info)
-            if raise_timing_error or no_elapsed_time:
-                msg = (
-                    "Invalid input file. "
-                    "Header information missing from combined csv. "
-                    "Timing: {}".format(path)
-                )
-                raise ValueError(msg)
-
-            last_line_num = reading_line
-
-        # Remove warmup
-        if pconf["save_warmup"]:
-            saved_samples = pconf["num_samples"] // pconf["thin"]
-            df = df.iloc[-saved_samples:, :]
-
-        # Split data to sample_stats and sample
-        sample_stats_columns = [col for col in df.columns if col.endswith("__")]
-        sample_columns = [col for col in df.columns if col not in sample_stats_columns]
-
-        sample_stats = df.loc[:, sample_stats_columns]
-        sample_df = df.loc[:, sample_columns]
-
-        chains.append((sample_df, sample_stats, configuration_info, adaptation_info, timing_info))
-
-    return chains
+    return {
+        "sample": sample_data,
+        "sample_stats": sample_stats,
+        "sample_warmup": sample_data_warmup,
+        "sample_stats_warmup": sample_stats_warmup,
+        "configuration_info": pconf,
+    }
 
 
 def _process_data_var(string):
@@ -654,7 +745,8 @@ def _unpack_dataframes(dfs):
     sample = {}
     for key, cols_locs in col_groups.items():
         ndim = np.array([loc for _, loc in cols_locs]).max(0) + 1
-        sample[key] = utils.full((chains, draws, *ndim), np.nan)
+        dtype = dfs[0][cols_locs[0][0]].dtype
+        sample[key] = utils.full((chains, draws, *ndim), 0, dtype=dtype)
         for col, loc in cols_locs:
             for chain_id, df in enumerate(dfs):
                 draw = df[col].values
@@ -668,49 +760,70 @@ def _unpack_dataframes(dfs):
 
 
 def from_cmdstan(
-    posterior=None,
+    posterior: Optional[Union[str, List[str]]] = None,
     *,
-    posterior_predictive=None,
-    prior=None,
-    prior_predictive=None,
-    observed_data=None,
-    observed_data_var=None,
-    log_likelihood=None,
-    coords=None,
-    dims=None
-):
+    posterior_predictive: Optional[Union[str, List[str]]] = None,
+    predictions: Optional[Union[str, List[str]]] = None,
+    prior: Optional[Union[str, List[str]]] = None,
+    prior_predictive: Optional[Union[str, List[str]]] = None,
+    observed_data: Optional[str] = None,
+    observed_data_var: Optional[Union[str, List[str]]] = None,
+    constant_data: Optional[str] = None,
+    constant_data_var: Optional[Union[str, List[str]]] = None,
+    predictions_constant_data: Optional[str] = None,
+    predictions_constant_data_var: Optional[Union[str, List[str]]] = None,
+    log_likelihood: Optional[Union[str, List[str]]] = None,
+    coords: Optional[CoordSpec] = None,
+    dims: Optional[DimSpec] = None,
+    disable_glob: Optional[bool] = False,
+    save_warmup: Optional[bool] = None,
+) -> InferenceData:
     """Convert CmdStan data into an InferenceData object.
+
+    For a usage example read the
+    :doc:`Cookbook section on from_cmdstan </notebooks/InferenceDataCookbook>`
 
     Parameters
     ----------
-    posterior : List[str]
+    posterior : str or list of str, optional
         List of paths to output.csv files.
-        CSV file can be stacked csv containing all the chains
-
-            cat output*.csv > combined_output.csv
-
-    posterior_predictive : str, List[Str]
+    posterior_predictive : str or list of str, optional
         Posterior predictive samples for the fit. If endswith ".csv" assumes file.
-    prior : List[str]
+    predictions : str or list of str, optional
+        Out of sample predictions samples for the fit. If endswith ".csv" assumes file.
+    prior : str or list of str, optional
         List of paths to output.csv files
-        CSV file can be stacked csv containing all the chains.
-
-            cat output*.csv > combined_output.csv
-
-    prior_predictive : str, List[Str]
+    prior_predictive : str or list of str, optional
         Prior predictive samples for the fit. If endswith ".csv" assumes file.
-    observed_data : str
+    observed_data : str, optional
         Observed data used in the sampling. Path to data file in Rdump format.
-    observed_data_var : str, List[str]
+    observed_data_var : str or list of str, optional
         Variable(s) used for slicing observed_data. If not defined, all
         data variables are imported.
-    log_likelihood : str
+    constant_data : str, optional
+        Constant data used in the sampling. Path to data file in Rdump format.
+    constant_data_var : str or list of str, optional
+        Variable(s) used for slicing constant_data. If not defined, all
+        data variables are imported.
+    predictions_constant_data : str, optional
+        Constant data for predictions used in the sampling.
+        Path to data file in Rdump format.
+    predictions_constant_data_var : str or list of str, optional
+        Variable(s) used for slicing predictions_constant_data.
+        If not defined, all data variables are imported.
+    log_likelihood : str or list of str, optional
         Pointwise log_likelihood for the data.
-    coords : dict[str, iterable]
+    coords : dict of {str: array_like}, optional
         A dictionary containing the values that are used as index. The key
         is the name of the dimension, the values are the index values.
-    dims : dict[str, List(str)]
+    dims : dict of {str: list of str, optional
         A mapping from variables to a list of coordinate names for the variable.
+    disable_glob : bool
+        Don't use glob for string input. This means that all string input is
+        assumed to be variable names (samples) or a path (data).
+    save_warmup : bool
+        Save warmup iterations into InferenceData object, if found in the input files.
+        If not defined, use default defined by the rcParams.
 
     Returns
     -------
@@ -719,11 +832,18 @@ def from_cmdstan(
     return CmdStanConverter(
         posterior=posterior,
         posterior_predictive=posterior_predictive,
+        predictions=predictions,
         prior=prior,
         prior_predictive=prior_predictive,
         observed_data=observed_data,
         observed_data_var=observed_data_var,
+        constant_data=constant_data,
+        constant_data_var=constant_data_var,
+        predictions_constant_data=predictions_constant_data,
+        predictions_constant_data_var=predictions_constant_data_var,
         log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
+        disable_glob=disable_glob,
+        save_warmup=save_warmup,
     ).to_inference_data()

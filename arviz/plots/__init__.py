@@ -1,15 +1,17 @@
 """Plotting functions."""
 from .autocorrplot import plot_autocorr
+from .bpvplot import plot_bpv
 from .compareplot import plot_compare
 from .densityplot import plot_density
+from .distcomparisonplot import plot_dist_comparison
 from .distplot import plot_dist
 from .elpdplot import plot_elpd
 from .energyplot import plot_energy
 from .essplot import plot_ess
 from .forestplot import plot_forest
-from .hpdplot import plot_hpd
+from .hdiplot import plot_hdi, plot_hpd
 from .jointplot import plot_joint
-from .kdeplot import plot_kde, _fast_kde, _fast_kde_2d
+from .kdeplot import plot_kde
 from .khatplot import plot_khat
 from .loopitplot import plot_loo_pit
 from .mcseplot import plot_mcse
@@ -21,9 +23,9 @@ from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
 
-
 __all__ = [
     "plot_autocorr",
+    "plot_bpv",
     "plot_compare",
     "plot_density",
     "plot_dist",
@@ -31,11 +33,10 @@ __all__ = [
     "plot_energy",
     "plot_ess",
     "plot_forest",
+    "plot_hdi",
     "plot_hpd",
     "plot_joint",
     "plot_kde",
-    "_fast_kde",
-    "_fast_kde_2d",
     "plot_khat",
     "plot_loo_pit",
     "plot_mcse",
@@ -43,6 +44,7 @@ __all__ = [
     "plot_parallel",
     "plot_posterior",
     "plot_ppc",
+    "plot_dist_comparison",
     "plot_rank",
     "plot_trace",
     "plot_violin",

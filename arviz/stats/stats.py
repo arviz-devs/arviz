@@ -1,37 +1,37 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
-import warnings
 import logging
+import warnings
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import scipy.stats as st
-from scipy.optimize import minimize
 import xarray as xr
+from scipy.optimize import minimize
 
-from ..data import convert_to_inference_data, convert_to_dataset, InferenceData, CoordSpec, DimSpec
-from ..plots.kdeplot import _fast_kde
-from ..plots.plot_utils import get_bins
-from .diagnostics import _multichain_statistics, _mc_error, ess, _circular_standard_deviation
-from .stats_utils import (
-    make_ufunc as _make_ufunc,
-    wrap_xarray_ufunc as _wrap_xarray_ufunc,
-    logsumexp as _logsumexp,
-    ELPDData,
-    stats_variance_2d as svar,
-)
-from ..utils import _var_names, Numba, _numba_var
-from ..stats.stats_utils import histogram
+from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
+from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
+from .density_utils import get_bins as _get_bins
+from .density_utils import histogram as _histogram
+from .density_utils import kde as _kde
+from .diagnostics import _mc_error, _multichain_statistics, ess
+from .stats_utils import ELPDData, _circular_standard_deviation
+from .stats_utils import get_log_likelihood as _get_log_likelihood
+from .stats_utils import logsumexp as _logsumexp
+from .stats_utils import make_ufunc as _make_ufunc
+from .stats_utils import stats_variance_2d as svar
+from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
 _log = logging.getLogger(__name__)
 
 __all__ = [
     "apply_test_function",
     "compare",
+    "hdi",
     "hpd",
     "loo",
     "loo_pit",
@@ -43,28 +43,23 @@ __all__ = [
 
 
 def compare(
-    dataset_dict,
-    ic=None,
-    method="BB-pseudo-BMA",
-    b_samples=1000,
-    alpha=1,
-    seed=None,
-    scale="deviance",
+    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
 ):
-    r"""Compare models based on WAIC or LOO cross-validation.
+    r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
-    WAIC is the widely applicable information criterion, and LOO is leave-one-out
-    (LOO) cross-validation. Read more theory here - in a paper by some of the
-    leading authorities on model selection - dx.doi.org/10.1111/1467-9868.00353
+    LOO is leave-one-out (PSIS-LOO `loo`) cross-validation and
+    WAIC is the widely applicable information criterion.
+    Read more theory here - in a paper by some of the leading authorities
+    on model selection dx.doi.org/10.1111/1467-9868.00353
 
     Parameters
     ----------
-    dataset_dict : dict[str] -> InferenceData
+    dataset_dict: dict[str] -> InferenceData
         A dictionary of model names and InferenceData objects
-    ic : str
-        Information Criterion (WAIC or LOO) used to compare models. Defaults to
+    ic: str
+        Information Criterion (PSIS-LOO `loo` or WAIC `waic`) used to compare models. Defaults to
         ``rcParams["stats.information_criterion"]``.
-    method : str
+    method: str
         Method used to estimate the weights for each model. Available options are:
 
         - 'stacking' : stacking of predictive distributions.
@@ -77,44 +72,49 @@ def compare(
     b_samples: int
         Number of samples taken by the Bayesian bootstrap estimation.
         Only useful when method = 'BB-pseudo-BMA'.
-    alpha : float
+    alpha: float
         The shape parameter in the Dirichlet distribution used for the Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. When alpha=1 (default), the distribution is uniform
         on the simplex. A smaller alpha will keeps the final weights more away from 0 and 1.
-    seed : int or np.random.RandomState instance
+    seed: int or np.random.RandomState instance
         If int or RandomState, use it for seeding Bayesian bootstrap. Only
         useful when method = 'BB-pseudo-BMA'. Default None the global
         np.random state is used.
-    scale : str
+    scale: str
         Output scale for IC. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score (after Vehtari et al. (2017))
+        - `log` : (default) log-score (after Vehtari et al. (2017))
         - `negative_log` : -1 * (log-score)
+        - `deviance` : -2 * (log-score)
+
+        A higher log-score (or a lower deviance) indicates a model with better predictive
+        accuracy.
 
     Returns
     -------
     A DataFrame, ordered from best to worst model (measured by information criteria).
     The index reflects the key with which the models are passed to this function. The columns are:
-    rank : The rank-order of the models. 0 is the best.
-    IC : Information Criteria (WAIC or LOO).
-        Smaller IC indicates higher out-of-sample predictive fit ("better" model). Default WAIC.
-        If `scale == log` higher IC indicates higher out-of-sample predictive fit ("better" model).
-    pIC : Estimated effective number of parameters.
-    dIC : Relative difference between each IC (WAIC or LOO) and the lowest IC (WAIC or LOO).
-        It's always 0 for the top-ranked model.
+    rank: The rank-order of the models. 0 is the best.
+    IC: Information Criteria (PSIS-LOO `loo` or WAIC `waic`).
+        Higher IC indicates higher out-of-sample predictive fit ("better" model). Default LOO.
+        If `scale` is `deviance` or `negative_log` smaller IC indicates
+        higher out-of-sample predictive fit ("better" model).
+    pIC: Estimated effective number of parameters.
+    dIC: Relative difference between each IC (PSIS-LOO `loo` or WAIC `waic`)
+          and the lowest IC (PSIS-LOO `loo` or WAIC `waic`).
+          The top-ranked model is always 0.
     weight: Relative weight for each model.
         This can be loosely interpreted as the probability of each model (among the compared model)
         given the data. By default the uncertainty in the weights estimation is considered using
         Bayesian bootstrap.
-    SE : Standard error of the IC estimate.
+    SE: Standard error of the IC estimate.
         If method = BB-pseudo-BMA these values are estimated using Bayesian bootstrap.
-    dSE : Standard error of the difference in IC between each model and the top-ranked model.
+    dSE: Standard error of the difference in IC between each model and the top-ranked model.
         It's always 0 for the top-ranked model.
-    warning : A value of 1 indicates that the computation of the IC may not be reliable.
+    warning: A value of 1 indicates that the computation of the IC may not be reliable.
         This could be indication of WAIC/LOO starting to fail see
         http://arxiv.org/abs/1507.04544 for details.
-    scale : Scale used for the IC.
+    scale: Scale used for the IC.
 
     Examples
     --------
@@ -135,12 +135,23 @@ def compare(
 
         In [1]: az.compare(compare_dict, ic="loo", method="stacking", scale="log")
 
+    See Also
+    --------
+    loo : Compute the Pareto Smoothed importance sampling Leave One Out cross-validation.
+    waic : Compute the widely applicable information criterion.
+
     """
     names = list(dataset_dict.keys())
-    scale = scale.lower()
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if scale == "log":
         scale_value = 1
         ascending = False
+        warnings.warn(
+            "\nThe scale is now log by default. Use 'scale' argument or "
+            "'stats.ic_scale' rcParam if you rely on a specific value.\nA higher "
+            "log-score (or a lower deviance) indicates a model with better predictive "
+            "accuracy."
+        )
     else:
         if scale == "negative_log":
             scale_value = -1
@@ -149,25 +160,7 @@ def compare(
         ascending = True
 
     ic = rcParams["stats.information_criterion"] if ic is None else ic.lower()
-    if ic == "waic":
-        ic_func = waic
-        df_comp = pd.DataFrame(
-            index=names,
-            columns=[
-                "rank",
-                "waic",
-                "p_waic",
-                "d_waic",
-                "weight",
-                "se",
-                "dse",
-                "warning",
-                "waic_scale",
-            ],
-        )
-        scale_col = "waic_scale"
-
-    elif ic == "loo":
+    if ic == "loo":
         ic_func = loo
         df_comp = pd.DataFrame(
             index=names,
@@ -184,7 +177,23 @@ def compare(
             ],
         )
         scale_col = "loo_scale"
-
+    elif ic == "waic":
+        ic_func = waic
+        df_comp = pd.DataFrame(
+            index=names,
+            columns=[
+                "rank",
+                "waic",
+                "p_waic",
+                "d_waic",
+                "weight",
+                "se",
+                "dse",
+                "warning",
+                "waic_scale",
+            ],
+        )
+        scale_col = "waic_scale"
     else:
         raise NotImplementedError("The information criterion {} is not supported.".format(ic))
 
@@ -309,165 +318,314 @@ def _ic_matrix(ics, ic_i):
     return rows, cols, ic_i_val
 
 
-def hpd(ary, credible_interval=0.94, circular=False, multimodal=False):
-    """
-    Calculate highest posterior density (HPD) of array for given credible_interval.
+def hpd(
+    # pylint: disable=unused-argument
+    ary,
+    hdi_prob=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    group="posterior",
+    var_names=None,
+    filter_vars=None,
+    coords=None,
+    max_modes=10,
+    **kwargs,
+):
+    """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
+    # pylint: enable=unused-argument
+    warnings.warn(("hpd will be deprecated " "Please replace hdi"),)
+    return hdi(
+        ary,
+        hdi_prob,
+        circular,
+        multimodal,
+        skipna,
+        group,
+        var_names,
+        filter_vars,
+        coords,
+        max_modes,
+        **kwargs,
+    )
 
-    The HPD is the minimum width Bayesian credible interval (BCI).
+
+def hdi(
+    ary,
+    hdi_prob=None,
+    circular=False,
+    multimodal=False,
+    skipna=False,
+    group="posterior",
+    var_names=None,
+    filter_vars=None,
+    coords=None,
+    max_modes=10,
+    **kwargs,
+):
+    """
+    Calculate highest density interval (HDI) of array for given probability.
+
+    The HDI is the minimum width Bayesian credible interval (BCI).
 
     Parameters
     ----------
-    ary : Numpy array
-        An array containing posterior samples
-    credible_interval : float, optional
-        Credible interval to compute. Defaults to 0.94.
-    circular : bool, optional
-        Whether to compute the hpd taking into account `x` is a circular variable
+    ary: obj
+        object containing posterior samples.
+        Any object that can be converted to an az.InferenceData object.
+        Refer to documentation of az.convert_to_dataset for details.
+    hdi_prob: float, optional
+        HDI prob for which interval will be computed. Defaults to ``stats.hdi_prob`` rcParam.
+    circular: bool, optional
+        Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
-    multimodal : bool
-        If true it may compute more than one hpd interval if the distribution is multimodal and the
+    multimodal: bool, optional
+        If true it may compute more than one hdi interval if the distribution is multimodal and the
         modes are well separated.
+    skipna: bool, optional
+        If true ignores nan values when computing the hdi interval. Defaults to false.
+    group: str, optional
+        Specifies which InferenceData group should be used to calculate hdi.
+        Defaults to 'posterior'
+    var_names: list, optional
+        Names of variables to include in the hdi report. Prefix the variables by `~`
+        when you want to exclude them from the report: `["~beta"]` instead of `["beta"]`
+        (see `az.summary` for more details).
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: mapping, optional
+        Specifies the subset over to calculate hdi.
+    max_modes: int, optional
+        Specifies the maximum number of modes for multimodal case.
+    kwargs: dict, optional
+        Additional keywords passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
-    np.ndarray
+    np.ndarray or xarray.Dataset, depending upon input
         lower(s) and upper(s) values of the interval(s).
+
+    See Also
+    --------
+    plot_hdi : Plot HDI intervals for regression data.
+    xarray.Dataset.quantile : Calculate quantiles of array for given probabilities.
 
     Examples
     --------
-    Calculate the hpd of a Normal random variable:
+    Calculate the HDI of a Normal random variable:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: import numpy as np
            ...: data = np.random.normal(size=2000)
-           ...: az.hpd(data, credible_interval=.68)
+           ...: az.hdi(data, hdi_prob=.68)
+
+    Calculate the HDI of a dataset:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('centered_eight')
+           ...: az.hdi(data)
+
+    We can also calculate the HDI of some of the variables of dataset:
+
+    .. ipython::
+
+        In [1]: az.hdi(data, var_names=["mu", "theta"])
+
+    If we want to calculate the HDI over specified dimension of dataset,
+    we can pass `input_core_dims` by kwargs:
+
+    .. ipython::
+
+        In [1]: az.hdi(data, input_core_dims = [["chain"]])
+
+    We can also calculate the hdi over a particular selection over all groups:
+
+    .. ipython::
+
+        In [1]: az.hdi(data, coords={"chain":[0, 1, 3]}, input_core_dims = [["draw"]])
+
     """
-    if ary.ndim > 1:
-        hpd_array = np.array(
-            [
-                hpd(
-                    row,
-                    credible_interval=credible_interval,
-                    circular=circular,
-                    multimodal=multimodal,
-                )
-                for row in ary.T
-            ]
-        )
-        return hpd_array
-
-    if multimodal:
-        if ary.dtype.kind == "f":
-            density, lower, upper = _fast_kde(ary)
-            range_x = upper - lower
-            dx = range_x / len(density)
-            bins = np.linspace(lower, upper, len(density))
-        else:
-            bins = get_bins(ary)
-            density, _ = histogram(ary, bins=bins)
-            dx = np.diff(bins)[0]
-
-        density *= dx
-
-        idx = np.argsort(-density)
-        intervals = bins[idx][density[idx].cumsum() <= credible_interval]
-        intervals.sort()
-
-        intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
-
-        hpd_intervals = []
-        for interval in intervals_splitted:
-            if interval.size == 0:
-                hpd_intervals.append((bins[0], bins[0]))
-            else:
-                hpd_intervals.append((interval[0], interval[-1]))
-
-        hpd_intervals = np.array(hpd_intervals)
-
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
     else:
-        ary = ary.copy()
-        n = len(ary)
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
 
-        if circular:
-            mean = st.circmean(ary, high=np.pi, low=-np.pi)
-            ary = ary - mean
-            ary = np.arctan2(np.sin(ary), np.cos(ary))
+    func_kwargs = {
+        "hdi_prob": hdi_prob,
+        "skipna": skipna,
+        "out_shape": (max_modes, 2) if multimodal else (2,),
+    }
+    kwargs.setdefault("output_core_dims", [["hdi", "mode"] if multimodal else ["hdi"]])
+    if not multimodal:
+        func_kwargs["circular"] = circular
+    else:
+        func_kwargs["max_modes"] = max_modes
 
-        ary = np.sort(ary)
-        interval_idx_inc = int(np.floor(credible_interval * n))
-        n_intervals = n - interval_idx_inc
-        interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+    func = _hdi_multimodal if multimodal else _hdi
 
-        if len(interval_width) == 0:
-            raise ValueError(
-                "Too few elements for interval calculation. "
-                "Check that credible_interval meets condition 0 =< credible_interval < 1"
+    isarray = isinstance(ary, np.ndarray)
+    if isarray and ary.ndim <= 1:
+        func_kwargs.pop("out_shape")
+        hdi_data = func(ary, **func_kwargs)  # pylint: disable=unexpected-keyword-arg
+        return hdi_data[~np.isnan(hdi_data).all(axis=1), :] if multimodal else hdi_data
+
+    if isarray and ary.ndim == 2:
+        warnings.warn(
+            "hdi currently interprets 2d data as (draw, shape) but this will change in "
+            "a future release to (chain, draw) for coherence with other functions",
+            FutureWarning,
+        )
+        ary = np.expand_dims(ary, 0)
+
+    ary = convert_to_dataset(ary, group=group)
+    if coords is not None:
+        ary = get_coords(ary, coords)
+    var_names = _var_names(var_names, ary, filter_vars)
+    ary = ary[var_names] if var_names else ary
+
+    hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
+        {"hdi": hdi_coord}
+    )
+    hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
+    return hdi_data.x.values if isarray else hdi_data
+
+
+def _hdi(ary, hdi_prob, circular, skipna):
+    """Compute hpi over the flattened array."""
+    ary = ary.flatten()
+    if skipna:
+        nans = np.isnan(ary)
+        if not nans.all():
+            ary = ary[~nans]
+    n = len(ary)
+
+    if circular:
+        mean = st.circmean(ary, high=np.pi, low=-np.pi)
+        ary = ary - mean
+        ary = np.arctan2(np.sin(ary), np.cos(ary))
+
+    ary = np.sort(ary)
+    interval_idx_inc = int(np.floor(hdi_prob * n))
+    n_intervals = n - interval_idx_inc
+    interval_width = ary[interval_idx_inc:] - ary[:n_intervals]
+
+    if len(interval_width) == 0:
+        raise ValueError("Too few elements for interval calculation. ")
+
+    min_idx = np.argmin(interval_width)
+    hdi_min = ary[min_idx]
+    hdi_max = ary[min_idx + interval_idx_inc]
+
+    if circular:
+        hdi_min = hdi_min + mean
+        hdi_max = hdi_max + mean
+        hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
+        hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
+
+    hdi_interval = np.array([hdi_min, hdi_max])
+
+    return hdi_interval
+
+
+def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
+    """Compute HDI if the distribution is multimodal."""
+    ary = ary.flatten()
+    if skipna:
+        ary = ary[~np.isnan(ary)]
+
+    if ary.dtype.kind == "f":
+        bins, density = _kde(ary)
+        lower, upper = bins[0], bins[-1]
+        range_x = upper - lower
+        dx = range_x / len(density)
+    else:
+        bins = _get_bins(ary)
+        _, density, _ = _histogram(ary, bins=bins)
+        dx = np.diff(bins)[0]
+
+    density *= dx
+
+    idx = np.argsort(-density)
+    intervals = bins[idx][density[idx].cumsum() <= hdi_prob]
+    intervals.sort()
+
+    intervals_splitted = np.split(intervals, np.where(np.diff(intervals) >= dx * 1.1)[0] + 1)
+
+    hdi_intervals = np.full((max_modes, 2), np.nan)
+    for i, interval in enumerate(intervals_splitted):
+        if i == max_modes:
+            warnings.warn(
+                "found more modes than {0}, returning only the first {0} modes", max_modes
             )
+            break
+        if interval.size == 0:
+            hdi_intervals[i] = np.asarray([bins[0], bins[0]])
+        else:
+            hdi_intervals[i] = np.asarray([interval[0], interval[-1]])
 
-        min_idx = np.argmin(interval_width)
-        hdi_min = ary[min_idx]
-        hdi_max = ary[min_idx + interval_idx_inc]
-
-        if circular:
-            hdi_min = hdi_min + mean
-            hdi_max = hdi_max + mean
-            hdi_min = np.arctan2(np.sin(hdi_min), np.cos(hdi_min))
-            hdi_max = np.arctan2(np.sin(hdi_max), np.cos(hdi_max))
-
-        hpd_intervals = np.array([hdi_min, hdi_max])
-
-    return hpd_intervals
+    return np.array(hdi_intervals)
 
 
-def loo(data, pointwise=False, reff=None, scale="deviance"):
-    """Pareto-smoothed importance sampling leave-one-out cross-validation.
+def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
+    """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
-    Calculates leave-one-out (LOO) cross-validation for out of sample predictive model fit,
-    following Vehtari et al. (2017). Cross-validation is computed using Pareto-smoothed
-    importance sampling (PSIS).
+    Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
+    importance sampling leave-one-out cross-validation (PSIS-LOO-CV). Also calculates LOO's
+    standard error and the effective number of parameters. Read more theory here
+    https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1507.02646
 
     Parameters
     ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object. Refer to documentation
-        of az.convert_to_inference_data for details
-    pointwise : bool, optional
-        if True the pointwise predictive accuracy will be returned. Defaults to False
-    reff : float, optional
-        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by
-        the number of actual samples. Computed from trace by default.
-    scale : str
+    data: obj
+        Any object that can be converted to an az.InferenceData object. Refer to documentation of
+        az.convert_to_inference_data for details
+    pointwise: bool, optional
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
+    var_name : str, optional
+        The name of the variable in log_likelihood groups storing the pointwise log
+        likelihood data to use for loo computation.
+    reff: float, optional
+        Relative MCMC efficiency, `ess / n` i.e. number of effective samples divided by the number
+        of actual samples. Computed from trace by default.
+    scale: str
         Output scale for loo. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score (after Vehtari et al. (2017))
-        - `negative_log` : -1 * (log-score)
+        - `log` : (default) log-score
+        - `negative_log` : -1 * log-score
+        - `deviance` : -2 * log-score
 
-        A higher log-score (or a lower deviance) indicates a model with better predictive
-        accuracy.
+        A higher log-score (or a lower deviance or negative log_score) indicates a model with
+        better predictive accuracy.
 
     Returns
     -------
-    pandas.Series with the following rows:
-    loo : approximated Leave-one-out cross-validation
-    loo_se : standard error of loo
-    p_loo : effective number of parameters
-    shape_warn : bool
+    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    loo: approximated expected log pointwise predictive density (elpd)
+    loo_se: standard error of loo
+    p_loo: effective number of parameters
+    shape_warn: bool
         True if the estimated shape parameter of
         Pareto distribution is greater than 0.7 for one or more samples
-    loo_i : array of pointwise predictive accuracy, only if pointwise True
-    pareto_k : array of Pareto shape values, only if pointwise True
-    loo_scale : scale of the loo results
+    loo_i: array of pointwise predictive accuracy, only if pointwise True
+    pareto_k: array of Pareto shape values, only if pointwise True
+    loo_scale: scale of the loo results
 
-        The returned object has a custom print method that overrides pd.Series method. It is
-        specific to expected log pointwise predictive density (elpd) information criteria.
+        The returned object has a custom print method that overrides pd.Series method.
 
     Examples
     --------
-    Calculate the LOO-CV of a model:
+    Calculate LOO of a model:
 
     .. ipython::
 
@@ -475,40 +633,36 @@ def loo(data, pointwise=False, reff=None, scale="deviance"):
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.loo(data)
 
-    The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``IC_loo`` stands for information criteria, which is the
-    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    Calculate LOO of a model and return the pointwise values:
 
     .. ipython::
 
-        In [2]: az.loo(data, pointwise=True, scale="log")
-
+        In [2]: data_loo = az.loo(data, pointwise=True)
+           ...: data_loo.loo_i
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("posterior", "sample_stats"):
-        if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data!".format(group=group)
-            )
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    posterior = inference_data.posterior
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
+    pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
+
     log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
     shape = log_likelihood.shape
     n_samples = shape[-1]
     n_data_points = np.product(shape[:-1])
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
 
     if reff is None:
+        if not hasattr(inference_data, "posterior"):
+            raise TypeError("Must be able to extract a posterior group from data.")
+        posterior = inference_data.posterior
         n_chains = len(posterior.chain)
         if n_chains == 1:
             reff = 1.0
@@ -596,17 +750,33 @@ def psislw(log_weights, reff=1.0):
 
     Parameters
     ----------
-    log_weights : array
+    log_weights: array
         Array of size (n_observations, n_samples)
-    reff : float
+    reff: float
         relative MCMC efficiency, `ess / n`
 
     Returns
     -------
-    lw_out : array
+    lw_out: array
         Smoothed log weights
-    kss : array
+    kss: array
         Pareto tail indices
+
+    References
+    ----------
+    * Vehtari et al. (2015) see https://arxiv.org/abs/1507.02646
+
+    Examples
+    --------
+    Get Pareto smoothed importance sampling (PSIS) log weights:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data("centered_eight")
+           ...: log_likelihood = data.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+           ...: az.psislw(-log_likelihood, reff=0.8)
+
     """
     if hasattr(log_weights, "sample"):
         n_samples = len(log_weights.sample)
@@ -642,17 +812,17 @@ def _psislw(log_weights, cutoff_ind, cutoffmin, k_min=1.0 / 3):
 
     Parameters
     ----------
-    log_weights : array
+    log_weights: array
         Array of length n_observations
-    cutoff_ind : int
-    cutoffmin : float
-    k_min : float
+    cutoff_ind: int
+    cutoffmin: float
+    k_min: float
 
     Returns
     -------
-    lw_out : array
+    lw_out: array
         Smoothed log weights
-    kss : float
+    kss: float
         Pareto tail index
     """
     x = np.asarray(log_weights)
@@ -704,14 +874,14 @@ def _gpdfit(ary):
 
     Parameters
     ----------
-    ary : array
+    ary: array
         sorted 1D data array
 
     Returns
     -------
-    k : float
+    k: float
         estimated shape parameter
-    sigma : float
+    sigma: float
         estimated scale parameter
     """
     prior_bs = 3
@@ -778,9 +948,9 @@ def r2_score(y_true, y_pred):
 
     Parameters
     ----------
-    y_true : array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_true: array-like of shape = (n_samples) or (n_samples, n_outputs)
         Ground truth (correct) target values.
-    y_pred : array-like of shape = (n_samples) or (n_samples, n_outputs)
+    y_pred: array-like of shape = (n_samples) or (n_samples, n_outputs)
         Estimated target values.
 
     Returns
@@ -788,6 +958,19 @@ def r2_score(y_true, y_pred):
     Pandas Series with the following indices:
     r2: Bayesian R²
     r2_std: standard deviation of the Bayesian R².
+
+    Examples
+    --------
+    Calculate R² for Bayesian regression models :
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: data = az.load_arviz_data('regression1d')
+           ...: y_true = data.observed_data["y"].values
+           ...: y_pred = data.posterior_predictive.stack(sample=("chain", "draw"))["y"].values.T
+           ...: az.r2_score(y_true, y_pred)
+
     """
     _numba_flag = Numba.numba_flag
     if y_pred.ndim == 1:
@@ -804,33 +987,52 @@ def r2_score(y_true, y_pred):
 def summary(
     data,
     var_names: Optional[List[str]] = None,
+    filter_vars=None,
     fmt: str = "wide",
+    kind: str = "all",
     round_to=None,
     include_circ=None,
+    circ_var_names=None,
     stat_funcs=None,
     extend=True,
-    credible_interval=0.94,
+    hdi_prob=None,
     order="C",
-    index_origin=0,
+    index_origin=None,
+    skipna=False,
     coords: Optional[CoordSpec] = None,
     dims: Optional[DimSpec] = None,
+    credible_interval=None,
 ) -> Union[pd.DataFrame, xr.Dataset]:
     """Create a data frame with summary statistics.
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list
-        Names of variables to include in summary
-    include_circ : bool
-        Whether to include circular statistics
-    fmt : {'wide', 'long', 'xarray'}
+    var_names: list
+        Names of variables to include in summary. Prefix the variables by `~` when you
+        want to exclude them from the summary: `["~beta"]` instead of `["beta"]` (see
+        examples below).
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
-    round_to : int
+    kind: {'all', 'stats', 'diagnostics'}
+        Whether to include the `stats`: `mean`, `sd`, `hdi_3%`, `hdi_97%`, or the `diagnostics`:
+        `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and `r_hat`. Default to include `all` of
+        them.
+    round_to: int
         Number of decimals used to round results. Defaults to 2. Use "none" to return raw numbers.
-    stat_funcs : dict
+    include_circ: boolean
+        Whether to include circular statistics
+        deprecated: Please see circ_var_names
+    circ_var_names: list
+        A list of circular variables to compute circular stats for
+    stat_funcs: dict
         A list of functions or a dict of functions with function names as keys used to calculate
         statistics. By default, the mean, standard deviation, simulation standard error, and
         highest posterior density intervals are included.
@@ -838,27 +1040,33 @@ def summary(
         The functions will be given one argument, the samples for a variable as an nD array,
         The functions should be in the style of a ufunc and return a single number. For example,
         `np.mean`, or `scipy.stats.var` would both work.
-    extend : boolean
-        If True, use the statistics returned by `stat_funcs` in addition to, rather than in place
-        of, the default statistics. This is only meaningful when `stat_funcs` is not None.
-    credible_interval : float, optional
-        Credible interval to plot. Defaults to 0.94. This is only meaningful when `stat_funcs` is
+    extend: boolean
+        If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
+        of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
+    hdi_prob: float, optional
+        HDI interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
         None.
-    order : {"C", "F"}
+    order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
-    index_origin : int
-        If fmt is "wide, select n-based indexing for multivariate parameters. Defaults to 0.
+    index_origin: int
+        If fmt is "wide, select n-based indexing for multivariate parameters.
+        Defaults to rcParam data.index.origin, which is 0.
+    skipna: bool
+        If true ignores nan values when computing the summary statistics, it does not affect the
+        behaviour of the functions passed to ``stat_funcs``. Defaults to false.
     coords: Dict[str, List[Any]], optional
         Coordinates specification to be used if the ``fmt`` is ``'xarray'``.
     dims: Dict[str, List[str]], optional
         Dimensions specification for the variables to be used if the ``fmt`` is ``'xarray'``.
+    credible_interval: float, optional
+        deprecated: Please see hdi_prob
 
     Returns
     -------
     pandas.DataFrame or xarray.Dataset
         Return type dicated by `fmt` argument.
         Return value will contain summary statistics for each variable. Default statistics are:
-        `mean`, `sd`, `hpd_3%`, `hpd_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
+        `mean`, `sd`, `hdi_3%`, `hdi_97%`, `mcse_mean`, `mcse_sd`, `ess_bulk`, `ess_tail`, and
         `r_hat`.
         `r_hat` is only computed for traces with 2 or more chains.
 
@@ -869,6 +1077,21 @@ def summary(
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
            ...: az.summary(data, var_names=["mu", "tau"])
+
+    You can use `filter_vars` to select variables without having to specify all the exact
+    names. Use `filter_vars="like"` to select based on partial naming:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["the"], filter_vars="like")
+
+    Use `filter_vars="regex"` to select based on regular expressions, and prefix the variables
+    you want to exclude by `~`. Here, we exclude from the summary all the variables
+    starting with the letter t:
+
+    .. ipython::
+
+        In [1]: az.summary(data, var_names=["~^t"], filter_vars="regex")
 
     Other statistics can be calculated by passing a list of functions
     or a dictionary with key, function pairs.
@@ -896,26 +1119,42 @@ def summary(
            ...: )
 
     """
+    if include_circ:
+        warnings.warn(
+            "include_circ is deprecated and will be ignored. Use circ_var_names instead",
+            DeprecationWarning,
+        )
+
+    if credible_interval:
+        hdi_prob = credible_interval_warning(hdi_prob, hdi_prob)
+
     extra_args = {}  # type: Dict[str, Any]
     if coords is not None:
         extra_args["coords"] = coords
     if dims is not None:
         extra_args["dims"] = dims
+    if index_origin is None:
+        index_origin = rcParams["data.index_origin"]
+    if hdi_prob is None:
+        hdi_prob = rcParams["stats.hdi_prob"]
+    else:
+        if not 1 >= hdi_prob > 0:
+            raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
     posterior = convert_to_dataset(data, group="posterior", **extra_args)
-    var_names = _var_names(var_names, posterior)
+    var_names = _var_names(var_names, posterior, filter_vars)
     posterior = posterior if var_names is None else posterior[var_names]
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
-        raise TypeError("Invalid format: '{}'! Formatting options are: {}".format(fmt, fmt_group))
+        raise TypeError("Invalid format: '{}'. Formatting options are: {}".format(fmt, fmt_group))
 
     unpack_order_group = ("C", "F")
     if not isinstance(order, str) or (order.upper() not in unpack_order_group):
         raise TypeError(
-            "Invalid order: '{}'! Unpacking options are: {}".format(order, unpack_order_group)
+            "Invalid order: '{}'. Unpacking options are: {}".format(order, unpack_order_group)
         )
 
-    alpha = 1 - credible_interval
+    alpha = 1 - hdi_prob
 
     extra_metrics = []
     extra_metric_names = []
@@ -938,36 +1177,35 @@ def summary(
                 )
                 extra_metric_names.append(stat_func.__name__)
 
-    if extend:
-        mean = posterior.mean(dim=("chain", "draw"))
+    if extend and kind in ["all", "stats"]:
+        mean = posterior.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = posterior.std(dim=("chain", "draw"), ddof=1)
+        sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hpd_lower, hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
-            posterior,
-            kwargs=dict(credible_interval=credible_interval, multimodal=False),
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(2)),
-        )
+        hdi_post = hdi(posterior, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+        hdi_lower = hdi_post.sel(hdi="lower", drop=True)
+        hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
-    if include_circ:
+    if circ_var_names:
+        nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
             input_core_dims=(("chain", "draw"),),
         )
         _numba_flag = Numba.numba_flag
         func = None
         if _numba_flag:
             func = _circular_standard_deviation
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, skipna=skipna)
         else:
             func = st.circstd
+            kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
         circ_sd = xr.apply_ufunc(
             _make_ufunc(func),
             posterior,
-            kwargs=dict(high=np.pi, low=-np.pi),
+            kwargs=kwargs_circ_std,
             input_core_dims=(("chain", "draw"),),
         )
 
@@ -978,31 +1216,41 @@ def summary(
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hpd_lower, circ_hpd_higher = xr.apply_ufunc(
-            _make_ufunc(hpd, n_output=2),
-            posterior,
-            kwargs=dict(credible_interval=credible_interval, circular=True),
-            input_core_dims=(("chain", "draw"),),
-            output_core_dims=tuple([] for _ in range(2)),
-        )
+        circ_hdi = hdi(posterior, hdi_prob=hdi_prob, circular=True, skipna=skipna)
+        circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
+        circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
-    mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
-        _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-        posterior,
-        input_core_dims=(("chain", "draw"),),
-        output_core_dims=tuple([] for _ in range(7)),
-    )
+    if kind in ["all", "diagnostics"]:
+        mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
+            _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
+            posterior,
+            input_core_dims=(("chain", "draw"),),
+            output_core_dims=tuple([] for _ in range(7)),
+        )
 
     # Combine metrics
     metrics = []
     metric_names = []
     if extend:
-        metrics.extend(
-            (
+        metrics_names_ = (
+            "mean",
+            "sd",
+            "hdi_{:g}%".format(100 * alpha / 2),
+            "hdi_{:g}%".format(100 * (1 - alpha / 2)),
+            "mcse_mean",
+            "mcse_sd",
+            "ess_mean",
+            "ess_sd",
+            "ess_bulk",
+            "ess_tail",
+            "r_hat",
+        )
+        if kind == "all":
+            metrics_ = (
                 mean,
                 sd,
-                hpd_lower,
-                hpd_higher,
+                hdi_lower,
+                hdi_higher,
                 mcse_mean,
                 mcse_sd,
                 ess_mean,
@@ -1011,33 +1259,26 @@ def summary(
                 ess_tail,
                 r_hat,
             )
-        )
-        metric_names.extend(
-            (
-                "mean",
-                "sd",
-                "hpd_{:g}%".format(100 * alpha / 2),
-                "hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                "mcse_mean",
-                "mcse_sd",
-                "ess_mean",
-                "ess_sd",
-                "ess_bulk",
-                "ess_tail",
-                "r_hat",
-            )
-        )
-    if include_circ:
-        metrics.extend((circ_mean, circ_sd, circ_hpd_lower, circ_hpd_higher, circ_mcse))
-        metric_names.extend(
-            (
-                "circular_mean",
-                "circular_sd",
-                "circular_hpd_{:g}%".format(100 * alpha / 2),
-                "circular_hpd_{:g}%".format(100 * (1 - alpha / 2)),
-                "circular_mcse",
-            )
-        )
+        elif kind == "stats":
+            metrics_ = (mean, sd, hdi_lower, hdi_higher)
+            metrics_names_ = metrics_names_[:4]
+        elif kind == "diagnostics":
+            metrics_ = (mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat)
+            metrics_names_ = metrics_names_[4:]
+        metrics.extend(metrics_)
+        metric_names.extend(metrics_names_)
+
+    if circ_var_names:
+
+        if kind != "diagnostics":
+            for metric, circ_stat in zip(
+                # Replace only the first 5 statistics for their circular equivalent
+                metrics[:5],
+                (circ_mean, circ_sd, circ_hdi_lower, circ_hdi_higher, circ_mcse),
+            ):
+                for circ_var in circ_var_names:
+                    metric[circ_var] = circ_stat[circ_var]
+
     metrics.extend(extra_metrics)
     metric_names.extend(extra_metric_names)
     joined = (
@@ -1089,76 +1330,74 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=False, scale="deviance"):
-    """Calculate the widely available information criterion.
+def waic(data, pointwise=None, var_name=None, scale=None):
+    """Compute the widely applicable information criterion.
 
-    Also calculates the WAIC's standard error and the effective number of
-    parameters of the samples in trace from model. Read more theory here - in
-    a paper by some of the leading authorities on model selection
-    <dx.doi.org/10.1111/1467-9868.00353>
+    Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
+    WAIC's standard error and the effective number of parameters.
+    Read more theory here https://arxiv.org/abs/1507.04544 and here https://arxiv.org/abs/1004.2316
 
     Parameters
     ----------
-    data : obj
-        Any object that can be converted to an az.InferenceData object
-        Refer to documentation of az.convert_to_inference_data for details
-    pointwise : bool
-        if True the pointwise predictive accuracy will be returned.
-        Default False
-    scale : str
-        Output scale for loo. Available options are:
+    data: obj
+        Any object that can be converted to an az.InferenceData object. Refer to documentation of
+        ``az.convert_to_inference_data`` for details
+    pointwise: bool
+        If True the pointwise predictive accuracy will be returned. Defaults to
+        ``stats.ic_pointwise`` rcParam.
+    var_name : str, optional
+        The name of the variable in log_likelihood groups storing the pointwise log
+        likelihood data to use for waic computation.
+    scale: str
+        Output scale for WAIC. Available options are:
 
-        - `deviance` : (default) -2 * (log-score)
-        - `log` : 1 * log-score
-        - `negative_log` : -1 * (log-score)
+        - `log` : (default) log-score
+        - `negative_log` : -1 * log-score
+        - `deviance` : -2 * log-score
 
-        A higher log-score (or a lower deviance) indicates a model with better predictive
-        accuracy.
+        A higher log-score (or a lower deviance or negative log_score) indicates a model with
+        better predictive accuracy.
 
     Returns
     -------
-    Series with the following rows:
-    waic : widely available information criterion
-    waic_se : standard error of waic
-    p_waic : effective number parameters
-    var_warn : bool
-        True if posterior variance of the log predictive
-        densities exceeds 0.4
-    waic_i : and array of the pointwise predictive accuracy, only if pointwise True
-    waic_scale : scale of the waic results
+    ELPDData object (inherits from panda.Series) with the following row/attributes:
+    waic: approximated expected log pointwise predictive density (elpd)
+    waic_se: standard error of waic
+    p_waic: effective number parameters
+    var_warn: bool
+        True if posterior variance of the log predictive densities exceeds 0.4
+    waic_i: xarray.DataArray with the pointwise predictive accuracy, only if pointwise=True
+    waic_scale: scale of the reported waic results
 
-        The returned object has a custom print method that overrides pd.Series method. It is
-        specific to expected log pointwise predictive density (elpd) information criteria.
+        The returned object has a custom print method that overrides pd.Series method.
 
     Examples
     --------
-    Calculate the WAIC of a model:
+    Calculate WAIC of a model:
 
     .. ipython::
 
         In [1]: import arviz as az
            ...: data = az.load_arviz_data("centered_eight")
-           ...: az.waic(data, pointwise=True)
+           ...: az.waic(data)
 
-    The custom print method can be seen here, printing only the relevant information and
-    with a specific organization. ``IC_loo`` stands for information criteria, which is the
-    `deviance` scale, the `log` (and `negative_log`) correspond to ``elpd`` (and ``-elpd``)
+    Calculate WAIC of a model and return the pointwise values:
+
+    .. ipython::
+
+        In [2]: data_waic = az.waic(data, pointwise=True)
+           ...: data_waic.waic_i
     """
     inference_data = convert_to_inference_data(data)
-    for group in ("sample_stats",):
-        if not hasattr(inference_data, group):
-            raise TypeError(
-                "Must be able to extract a {group} group from data!".format(group=group)
-            )
-    if "log_likelihood" not in inference_data.sample_stats:
-        raise TypeError("Data must include log_likelihood in sample_stats")
-    log_likelihood = inference_data.sample_stats.log_likelihood
+    log_likelihood = _get_log_likelihood(inference_data, var_name=var_name)
+    scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
+    pointwise = rcParams["stats.ic_pointwise"] if pointwise is None else pointwise
 
-    if scale.lower() == "deviance":
+    if scale == "deviance":
         scale_value = -2
-    elif scale.lower() == "log":
+    elif scale == "log":
         scale_value = 1
-    elif scale.lower() == "negative_log":
+    elif scale == "negative_log":
         scale_value = -1
     else:
         raise TypeError('Valid scale values are "deviance", "log", "negative_log"')
@@ -1240,25 +1479,25 @@ def waic(data, pointwise=False, scale="deviance"):
 
 
 def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
-    """Compute leave one out (LOO) probability integral transform (PIT) values.
+    """Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     Parameters
     ----------
-    idata : InferenceData
+    idata: InferenceData
         InferenceData object.
-    y : array, DataArray or str
+    y: array, DataArray or str
         Observed data. If str, idata must be present and contain the observed data group
-    y_hat : array, DataArray or str
+    y_hat: array, DataArray or str
         Posterior predictive samples for ``y``. It must have the same shape as y plus an
         extra dimension at the end of size n_samples (chains and draws stacked). If str or
         None, idata must contain the posterior predictive group. If None, y_hat is taken
         equal to y, thus, y must be str too.
-    log_weights : array or DataArray
+    log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
 
     Returns
     -------
-    loo_pit : array or DataArray
+    loo_pit: array or DataArray
         Value of the LOO-PIT at each observed data point.
 
     Examples
@@ -1284,6 +1523,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
            ...: az.loo_pit(idata=data, y=T**2, y_hat=T_hat**2)
 
     """
+    y_str = ""
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
 
@@ -1300,6 +1540,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         elif y_hat is None:
             raise ValueError("y_hat cannot be None if y is not a str")
         if isinstance(y, str):
+            y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
             raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
@@ -1310,7 +1551,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
         if log_weights is None:
-            log_likelihood = idata.sample_stats.log_likelihood.stack(sample=("chain", "draw"))
+            if y_str:
+                try:
+                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                except TypeError:
+                    log_likelihood = _get_log_likelihood(idata)
+            else:
+                log_likelihood = _get_log_likelihood(idata)
+            log_likelihood = log_likelihood.stack(sample=("chain", "draw"))
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)
@@ -1390,50 +1638,50 @@ def apply_test_function(
 
     Parameters
     ----------
-    idata : InferenceData
+    idata: InferenceData
         InferenceData object on which to apply the test function. This function will add
         new variables to the InferenceData object to store the result without modifying the
         existing ones.
-    func : callable
+    func: callable
         Callable that calculates the test function. It must have the following call signature
         ``func(y, theta, *args, **kwargs)`` (where ``y`` is the observed data or posterior
         predictive and ``theta`` the model parameters) even if not all the arguments are
         used.
-    group : str, optional
+    group: str, optional
         Group on which to apply the test function. Can be observed_data, posterior_predictive
         or both.
-    var_names : dict group -> var_names, optional
+    var_names: dict group -> var_names, optional
         Mapping from group name to the variables to be passed to func. It can be a dict of
         strings or lists of strings. There is also the option of using ``both`` as key,
         in which case, the same variables are used in observed data and posterior predictive
         groups
-    pointwise : bool, optional
+    pointwise: bool, optional
         If True, apply the test function to each observation and sample, otherwise, apply
         test function to each sample.
-    out_data_shape, out_pp_shape : tuple, optional
+    out_data_shape, out_pp_shape: tuple, optional
         Output shape of the test function applied to the observed/posterior predictive data.
         If None, the default depends on the value of pointwise.
-    out_name_data, out_name_pp : str, optional
+    out_name_data, out_name_pp: str, optional
         Name of the variables to add to the observed_data and posterior_predictive datasets
         respectively. ``out_name_pp`` can be ``None``, in which case will be taken equal to
         ``out_name_data``.
-    func_args : sequence, optional
+    func_args: sequence, optional
         Passed as is to ``func``
-    func_kwargs : mapping, optional
+    func_kwargs: mapping, optional
         Passed as is to ``func``
-    wrap_data_kwargs, wrap_pp_kwargs : mapping, optional
+    wrap_data_kwargs, wrap_pp_kwargs: mapping, optional
         kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
         are used.
-    inplace : bool, optional
+    inplace: bool, optional
         If True, add the variables inplace, othewise, return a copy of idata with the variables
         added.
-    overwrite : bool, optional
+    overwrite: bool, optional
         Overwrite data in case ``out_name_data`` or ``out_name_pp`` are already variables in
         dataset. If ``None`` it will be the opposite of inplace.
 
     Returns
     -------
-    idata : InferenceData
+    idata: InferenceData
         Output InferenceData object. If ``inplace=True``, it is the same input object modified
         inplace.
 

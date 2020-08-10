@@ -1,12 +1,14 @@
 """Low level converters usually used by other functions."""
-from copy import deepcopy
-from typing import Dict, List, Any
 import datetime
+import functools
 import warnings
+from copy import deepcopy
+from typing import Any, Dict, List
+
 import pkg_resources
 import xarray as xr
 
-from .. import utils
+from .. import __version__, utils
 
 CoordSpec = Dict[str, List[Any]]
 DimSpec = Dict[str, List[str]]
@@ -18,7 +20,7 @@ class requires:  # pylint: disable=invalid-name
     If the decorator is called various times on the same function with different
     attributes, it will return None if one of them is missing. If instead a list
     of attributes is passed, it will return None if all attributes in the list are
-    missing. Both functionalities can be combines as desired.
+    missing. Both functionalities can be combined as desired.
     """
 
     def __init__(self, *props):
@@ -82,7 +84,7 @@ def generate_dims_coords(shape, var_name, dims=None, coords=None, default_dims=N
                 shape_len=len(shape),
                 defaults=",".join(default_dims) + ", " if default_dims is not None else "",
             ),
-            SyntaxWarning,
+            UserWarning,
         )
     if coords is None:
         coords = {}
@@ -142,7 +144,7 @@ def numpy_to_data_array(ary, *, var_name="data", coords=None, dims=None):
             "Passed array should have shape (chains, draws, *shape)".format(
                 n_chains=n_chains, n_samples=n_samples
             ),
-            SyntaxWarning,
+            UserWarning,
         )
 
     dims, coords = generate_dims_coords(
@@ -188,7 +190,7 @@ def dict_to_dataset(data, *, attrs=None, library=None, coords=None, dims=None):
 
     Examples
     --------
-    dict_to_dataset({'x': np.random.randn(4, 100), 'y', np.random.rand(4, 100)})
+    dict_to_dataset({'x': np.random.randn(4, 100), 'y': np.random.rand(4, 100)})
 
     """
     if dims is None:
@@ -215,7 +217,10 @@ def make_attrs(attrs=None, library=None):
     dict
         attrs
     """
-    default_attrs = {"created_at": datetime.datetime.utcnow().isoformat()}
+    default_attrs = {
+        "created_at": datetime.datetime.utcnow().isoformat(),
+        "arviz_version": __version__,
+    }
     if library is not None:
         library_name = library.__name__
         default_attrs["inference_library"] = library_name
@@ -230,3 +235,54 @@ def make_attrs(attrs=None, library=None):
     if attrs is not None:
         default_attrs.update(attrs)
     return default_attrs
+
+
+def _extend_xr_method(func):
+    """Make wrapper to extend methods from xr.Dataset to InferenceData Class."""
+
+    @functools.wraps(func)
+    def wrapped(self, *args, **kwargs):
+        _filter = kwargs.pop("filter_groups", None)
+        _groups = kwargs.pop("groups", None)
+        _inplace = kwargs.pop("inplace", False)
+
+        out = self if _inplace else deepcopy(self)
+
+        groups = self._group_names(_groups, _filter)  # pylint: disable=protected-access
+        for group in groups:
+            xr_data = getattr(out, group)
+            xr_data = func(xr_data, *args, **kwargs)  # pylint: disable=not-callable
+            setattr(out, group, xr_data)
+
+        return None if _inplace else out
+
+    description = """
+    This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
+    """.format(
+        method_name=func.__name__  # pylint: disable=no-member
+    )
+    params = """
+    Parameters
+    ----------
+    groups: str or list of str, optional
+        Groups where the selection is to be applied. Can either be group names
+        or metagroup names.
+    filter_groups: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret groups as the real group or metagroup names.
+        If "like", interpret groups as substrings of the real group or metagroup names.
+        If "regex", interpret groups as regular expressions on the real group or
+        metagroup names. A la `pandas.filter`.
+    inplace: bool, optional
+        If ``True``, modify the InferenceData object inplace,
+        otherwise, return the modified copy. 
+    """
+    see_also = """
+    See Also
+    --------
+    xarray.Dataset.{method_name}
+    """.format(
+        method_name=func.__name__  # pylint: disable=no-member
+    )
+    wrapped.__doc__ = description + params + see_also
+
+    return wrapped

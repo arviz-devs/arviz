@@ -2,15 +2,18 @@
 """Test helper functions."""
 import gzip
 import importlib
+import logging
 import os
 import pickle
 import sys
-import logging
-import pytest
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
+import pytest
+from _pytest.outcomes import Skipped
+from packaging.version import Version
 
-from ..data import from_dict
-
+from ..data import InferenceData, from_dict
 
 _log = logging.getLogger(__name__)
 
@@ -58,7 +61,9 @@ def create_model(seed=10):
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
         "max_depth": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, data["J"]),
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, data["J"]),
     }
     prior = {
         "mu": np.random.randn(nchains, ndraws) / 2,
@@ -75,6 +80,7 @@ def create_model(seed=10):
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
@@ -106,7 +112,9 @@ def create_multidimensional_model(seed=10):
     sample_stats = {
         "energy": np.random.randn(nchains, ndraws),
         "diverging": np.random.randn(nchains, ndraws) > 0.90,
-        "log_likelihood": np.random.randn(nchains, ndraws, ndim1, ndim2),
+    }
+    log_likelihood = {
+        "y": np.random.randn(nchains, ndraws, ndim1, ndim2),
     }
     prior = {
         "mu": np.random.randn(nchains, ndraws) / 2,
@@ -123,6 +131,7 @@ def create_multidimensional_model(seed=10):
         posterior=posterior,
         posterior_predictive=posterior_predictive,
         sample_stats=sample_stats,
+        log_likelihood=log_likelihood,
         prior=prior,
         prior_predictive=prior_predictive,
         sample_stats_prior=sample_stats_prior,
@@ -131,6 +140,31 @@ def create_multidimensional_model(seed=10):
         coords={"dim1": range(ndim1), "dim2": range(ndim2)},
     )
     return model
+
+
+def create_data_random(groups=None, seed=10):
+    """Create InferenceData object using random data."""
+    if groups is None:
+        groups = ["posterior", "sample_stats", "observed_data", "posterior_predictive"]
+    rng = np.random.default_rng(seed)
+    data = rng.normal(size=(4, 500, 8))
+    idata_dict = dict(
+        posterior={"a": data[..., 0], "b": data},
+        sample_stats={"a": data[..., 0], "b": data},
+        observed_data={"b": data[0, 0, :]},
+        posterior_predictive={"a": data[..., 0], "b": data},
+        prior={"a": data[..., 0], "b": data},
+        prior_predictive={"a": data[..., 0], "b": data},
+    )
+    idata = from_dict(**{group: ary for group, ary in idata_dict.items() if group in groups})
+    return idata
+
+
+@pytest.fixture()
+def data_random():
+    """Fixture containing InferenceData object using random data."""
+    idata = create_data_random()
+    return idata
 
 
 @pytest.fixture(scope="module")
@@ -157,16 +191,24 @@ def multidim_models():
     return Models()
 
 
-def check_multiple_attrs(test_dict, parent):
+def check_multiple_attrs(
+    test_dict: Dict[str, List[str]], parent: InferenceData
+) -> List[Union[str, Tuple[str, str]]]:
     """Perform multiple hasattr checks on InferenceData objects.
 
     It is thought to first check if the parent object contains a given dataset,
     and then (if present) check the attributes of the dataset.
 
-    Args
-    ----
-    test_dict: dict
-        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`
+    Given the ouput of the function, all missmatches between expectation and reality can
+    be retrieved: a single string indicates a group mismatch and a tuple of strings
+    ``(group, var)`` indicates a mismatch in the variable ``var`` of ``group``.
+
+    Parameters
+    ----------
+    test_dict: dict of {str : list of str}
+        Its structure should be `{dataset1_name: [var1, var2], dataset2_name: [var]}`.
+        A ``~`` at the beggining of a dataset or variable name indicates the name NOT
+        being present must be asserted.
     parent: InferenceData
         InferenceData object on which to check the attributes.
 
@@ -176,13 +218,36 @@ def check_multiple_attrs(test_dict, parent):
         List containing the failed checks. It will contain either the dataset_name or a
         tuple (dataset_name, var) for all non present attributes.
 
+    Examples
+    --------
+    The output below indicates that ``posterior`` group was expected but not found, and
+    variables ``a`` and ``b``:
+
+        ["posterior", ("prior", "a"), ("prior", "b")]
+
+    Another example could be the following:
+
+        [("posterior", "a"), "~observed_data", ("sample_stats", "~log_likelihood")]
+
+    In this case, the output indicates that variable ``a`` was not found in ``posterior``
+    as it was expected, however, in the other two cases, the preceding ``~`` (kept from the
+    input negation notation) indicates that ``observed_data`` group should not be present
+    but was found in the InferenceData and that ``log_likelihood`` variable was found
+    in ``sample_stats``, also against what was expected.
+
     """
     failed_attrs = []
     for dataset_name, attributes in test_dict.items():
-        if hasattr(parent, dataset_name):
+        if dataset_name.startswith("~"):
+            if hasattr(parent, dataset_name[1:]):
+                failed_attrs.append(dataset_name)
+        elif hasattr(parent, dataset_name):
             dataset = getattr(parent, dataset_name)
             for attribute in attributes:
-                if not hasattr(dataset, attribute):
+                if attribute.startswith("~"):
+                    if hasattr(dataset, attribute[1:]):
+                        failed_attrs.append((dataset_name, attribute))
+                elif not hasattr(dataset, attribute):
                     failed_attrs.append((dataset_name, attribute))
         else:
             failed_attrs.append(dataset_name)
@@ -284,12 +349,13 @@ def pyro_noncentered_schools(data, draws, chains):
     y = torch.from_numpy(data["y"]).float()
     sigma = torch.from_numpy(data["sigma"]).float()
 
-    nuts_kernel = NUTS(_pyro_noncentered_model)
+    nuts_kernel = NUTS(_pyro_noncentered_model, jit_compile=True, ignore_jit_warnings=True)
     posterior = MCMC(nuts_kernel, num_samples=draws, warmup_steps=draws, num_chains=chains)
     posterior.run(data["J"], sigma, y)
 
     # This block lets the posterior be pickled
     posterior.sampler = None
+    posterior.kernel.potential_fn = None
     return posterior
 
 
@@ -322,13 +388,17 @@ def numpyro_schools_model(data, draws, chains):
 
     # This block lets the posterior be pickled
     mcmc.sampler._sample_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._init_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._postprocess_fn = None  # pylint: disable=protected-access
+    mcmc.sampler._potential_fn = None  # pylint: disable=protected-access
+    mcmc._cache = {}  # pylint: disable=protected-access
     return mcmc
 
 
 def tfp_schools_model(num_schools, treatment_stddevs):
     """Non-centered eight schools model for tfp."""
-    import tensorflow_probability.python.edward2 as ed
     import tensorflow as tf
+    import tensorflow_probability.python.edward2 as ed
 
     if int(tf.__version__[0]) > 1:
         import tensorflow.compat.v1 as tf  # pylint: disable=import-error
@@ -349,9 +419,9 @@ def tfp_schools_model(num_schools, treatment_stddevs):
 
 def tfp_noncentered_schools(data, draws, chains):
     """Non-centered eight schools implementation for tfp."""
+    import tensorflow as tf
     import tensorflow_probability as tfp
     import tensorflow_probability.python.edward2 as ed
-    import tensorflow as tf
 
     if int(tf.__version__[0]) > 1:
         import tensorflow.compat.v1 as tf  # pylint: disable=import-error
@@ -430,13 +500,13 @@ def pystan_noncentered_schools(data, draws, chains):
         }
     """
     if pystan_version() == 2:
-        import pystan
+        import pystan  # pylint: disable=import-error
 
         stan_model = pystan.StanModel(model_code=schools_code)
         fit = stan_model.sampling(
             data=data,
-            iter=draws,
-            warmup=0,
+            iter=draws + 500,
+            warmup=500,
             chains=chains,
             check_hmc_diagnostics=False,
             control=dict(adapt_engaged=False),
@@ -446,7 +516,7 @@ def pystan_noncentered_schools(data, draws, chains):
 
         stan_model = stan.build(schools_code, data=data)
         fit = stan_model.sample(
-            num_chains=chains, num_samples=draws, num_warmup=0, save_warmup=False
+            num_chains=chains, num_samples=draws, num_warmup=500, save_warmup=False
         )
     return stan_model, fit
 
@@ -533,7 +603,71 @@ def pystan_version():
 
     """
     try:
-        import pystan
+        import pystan  # pylint: disable=import-error
+
+        version = int(pystan.__version__[0])
     except ImportError:
-        import stan as pystan  # pylint: disable=import-error
-    return int(pystan.__version__[0])
+        try:
+            import stan as pystan  # pylint: disable=import-error
+
+            version = int(pystan.__version__[0])
+        except ImportError:
+            version = None
+    return version
+
+
+def test_precompile_models(eight_schools_params, draws, chains):
+    """Precompile model files."""
+    load_cached_models(eight_schools_params, draws, chains)
+
+
+def running_on_ci() -> bool:
+    """Return True if running on CI machine."""
+    return os.environ.get("ARVIZ_CI_MACHINE") is not None
+
+
+def importorskip(
+    modname: str, minversion: Optional[str] = None, reason: Optional[str] = None
+) -> Any:
+    """Import and return the requested module ``modname``.
+
+        Doesn't allow skips on CI machine.
+        Borrowed and modified from ``pytest.importorskip``.
+    :param str modname: the name of the module to import
+    :param str minversion: if given, the imported module's ``__version__``
+        attribute must be at least this minimal version, otherwise the test is
+        still skipped.
+    :param str reason: if given, this reason is shown as the message when the
+        module cannot be imported.
+    :returns: The imported module. This should be assigned to its canonical
+        name.
+    Example::
+        docutils = pytest.importorskip("docutils")
+    """
+    # ARVIZ_CI_MACHINE is True if tests run on CI, where ARVIZ_CI_MACHINE env variable exists
+    ARVIZ_CI_MACHINE = running_on_ci()
+    if ARVIZ_CI_MACHINE:
+        import warnings
+
+        compile(modname, "", "eval")  # to catch syntaxerrors
+
+        with warnings.catch_warnings():
+            # make sure to ignore ImportWarnings that might happen because
+            # of existing directories with the same name we're trying to
+            # import but without a __init__.py file
+            warnings.simplefilter("ignore")
+            __import__(modname)
+        mod = sys.modules[modname]
+        if minversion is None:
+            return mod
+        verattr = getattr(mod, "__version__", None)
+        if minversion is not None:
+            if verattr is None or Version(verattr) < Version(minversion):
+                raise Skipped(
+                    "module %r has __version__ %r, required is: %r"
+                    % (modname, verattr, minversion),
+                    allow_module_level=True,
+                )
+        return mod
+    else:
+        return pytest.importorskip(modname=modname, minversion=minversion, reason=reason)

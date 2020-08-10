@@ -1,14 +1,20 @@
 """Utilities for plotting."""
+import importlib
 import warnings
 from itertools import product, tee
+from typing import Any, Dict
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
+import packaging
 import xarray as xr
+from matplotlib.colors import to_hex
+from scipy.stats import mode
 
-from ..utils import conditional_jit
 from ..rcparams import rcParams
+from ..stats.density_utils import kde
+
+KwargSpec = Dict[str, Any]
 
 
 def make_2d(ary):
@@ -88,70 +94,6 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
 
 
-def get_bins(values):
-    """
-    Automatically compute the number of bins for discrete variables.
-
-    Parameters
-    ----------
-    values = numpy array
-        values
-
-    Returns
-    -------
-    array with the bins
-
-    Notes
-    -----
-    Computes the width of the bins by taking the maximun of the Sturges and the Freedman-Diaconis
-    estimators. Acording to numpy `np.histogram` this provides good all around performance.
-
-    The Sturges is a very simplistic estimator based on the assumption of normality of the data.
-    This estimator has poor performance for non-normal data, which becomes especially obvious for
-    large data sets. The estimate depends only on size of the data.
-
-    The Freedman-Diaconis rule uses interquartile range (IQR) to estimate the binwidth.
-    It is considered a robusts version of the Scott rule as the IQR is less affected by outliers
-    than the standard deviation. However, the IQR depends on fewer points than the standard
-    deviation, so it is less accurate, especially for long tailed distributions.
-    """
-    x_min = values.min().astype(int)
-    x_max = values.max().astype(int)
-
-    # Sturges histogram bin estimator
-    bins_sturges = (x_max - x_min) / (np.log2(values.size) + 1)
-
-    # The Freedman-Diaconis histogram bin estimator.
-    iqr = np.subtract(*np.percentile(values, [75, 25]))  # pylint: disable=assignment-from-no-return
-    bins_fd = 2 * iqr * values.size ** (-1 / 3)
-
-    width = round(np.max([1, bins_sturges, bins_fd])).astype(int)
-
-    return np.arange(x_min, x_max + width + 1, width)
-
-
-def _sturges_formula(dataset, mult=1):
-    """Use Sturges' formula to determine number of bins.
-
-    See https://en.wikipedia.org/wiki/Histogram#Sturges'_formula
-    or https://doi.org/10.1080%2F01621459.1926.10502161
-
-    Parameters
-    ----------
-    dataset: xarray.DataSet
-        Must have the `draw` dimension
-
-    mult: float
-        Used to scale the number of bins up or down. Default is 1 for Sturges' formula.
-
-    Returns
-    -------
-    int
-        Number of bins to use
-    """
-    return int(np.ceil(mult * np.log2(dataset.draw.size)) + 1)
-
-
 def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     """Make a grid for subplots.
 
@@ -188,34 +130,6 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     return n_items // ideal + 1, ideal
 
 
-def _create_axes_grid(length_plotters, rows, cols, **kwargs):
-    """Create figure and axes for grids with multiple plots.
-
-    Parameters
-    ----------
-    n_items : int
-        Number of panels required
-    rows : int
-        Number of rows
-    cols : int
-        Number of columns
-
-    Returns
-    -------
-    fig : matplotlib figure
-    ax : matplotlib axes
-    """
-    kwargs.setdefault("constrained_layout", True)
-    fig, ax = plt.subplots(rows, cols, **kwargs)
-    ax = np.ravel(ax)
-    extra = (rows * cols) - length_plotters
-    if extra:
-        for i in range(1, extra + 1):
-            ax[-i].set_axis_off()
-        ax = ax[:-extra]
-    return fig, ax
-
-
 def selection_to_string(selection):
     """Convert dictionary of coordinates to a string for labels.
 
@@ -241,8 +155,9 @@ def make_label(var_name, selection, position="below"):
 
     selection : dict[Any] -> Any
         Coordinates of the variable
-    position : whether to position the coordinates' label "below" (default) or "beside" the name
-               of the variable
+    position : str
+        Whether to position the coordinates' label "below" (default) or "beside"
+        the name of the variable
 
     Returns
     -------
@@ -294,7 +209,6 @@ def round_num(n, round_to):
     return "{n:.{sig_figs}g}".format(n=n, sig_figs=sig_figs)
 
 
-@conditional_jit(forceobj=True)
 def purge_duplicates(list_in):
     """Remove duplicates from list while preserving order.
 
@@ -305,13 +219,19 @@ def purge_duplicates(list_in):
     Returns
     -------
     list
-        List of first occurences in order
+        List of first occurrences in order
     """
-    _list = []
-    for item in list_in:
-        if item not in _list:
-            _list.append(item)
-    return _list
+    # Algorithm taken from Stack Overflow,
+    # https://stackoverflow.com/questions/480214. Content by Georgy
+    # Skorobogatov (https://stackoverflow.com/users/7851470/georgy) and
+    # Markus Jarderot
+    # (https://stackoverflow.com/users/22364/markus-jarderot), licensed
+    # under CC-BY-SA 4.0.
+    # https://creativecommons.org/licenses/by-sa/4.0/.
+
+    seen = set()
+    seen_add = seen.add
+    return [x for x in list_in if not (x in seen or seen_add(x))]
 
 
 def _dims(data, var_name, skip_dims):
@@ -462,51 +382,6 @@ def xarray_to_ndarray(data, *, var_names=None, combined=True):
     return unpacked_var_names, unpacked_data
 
 
-def get_coords(data, coords):
-    """Subselects xarray DataSet or DataArray object to provided coords. Raises exception if fails.
-
-    Raises
-    ------
-    ValueError
-        If coords name are not available in data
-
-    KeyError
-        If coords dims are not available in data
-
-    Returns
-    -------
-    data: xarray
-        xarray.DataSet or xarray.DataArray object, same type as input
-    """
-    if not isinstance(data, (list, tuple)):
-        try:
-            return data.sel(**coords)
-
-        except ValueError:
-            invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
-
-        except KeyError as err:
-            raise KeyError(
-                (
-                    "Coords should follow mapping format {{coord_name:[dim1, dim2]}}. "
-                    "Check that coords structure is correct and"
-                    " dimensions are valid. {}"
-                ).format(err)
-            )
-    if not isinstance(coords, (list, tuple)):
-        coords = [coords] * len(data)
-    data_subset = []
-    for idx, (datum, coords_dict) in enumerate(zip(data, coords)):
-        try:
-            data_subset.append(get_coords(datum, coords_dict))
-        except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err))
-        except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err))
-    return data_subset
-
-
 def color_from_dim(dataarray, dim_name):
     """Return colors and color mapping of a DataArray using coord values as color code.
 
@@ -514,7 +389,7 @@ def color_from_dim(dataarray, dim_name):
     ----------
     dataarray : xarray.DataArray
     dim_name : str
-        dimension whose coordinates will be used as color code.
+    dimension whose coordinates will be used as color code.
 
     Returns
     -------
@@ -536,9 +411,43 @@ def color_from_dim(dataarray, dim_name):
     return colors, color_mapping
 
 
-def format_coords_as_labels(dataarray):
-    """Format 1d or multi-d dataarray coords as strings."""
-    coord_labels = dataarray.coords.to_index().values
+def vectorized_to_hex(c_values, keep_alpha=False):
+    """Convert a color (including vector of colors) to hex.
+
+    Parameters
+    ----------
+    c: Matplotlib color
+
+    keep_alpha: boolean
+        to select if alpha values should be kept in the final hex values.
+
+    Returns
+    -------
+    rgba_hex : vector of hex values
+    """
+    try:
+        hex_color = to_hex(c_values, keep_alpha)
+
+    except ValueError:
+        hex_color = [to_hex(color, keep_alpha) for color in c_values]
+    return hex_color
+
+
+def format_coords_as_labels(dataarray, skip_dims=None):
+    """Format 1d or multi-d dataarray coords as strings.
+
+    Parameters
+    ----------
+    dataarray : xarray.DataArray
+        DataArray whose coordinates will be converted to labels.
+    skip_dims : str of list_like, optional
+        Dimensions whose values should not be included in the labels
+    """
+    if skip_dims is None:
+        coord_labels = dataarray.coords.to_index()
+    else:
+        coord_labels = dataarray.coords.to_index().droplevel(skip_dims).drop_duplicates()
+    coord_labels = coord_labels.values
     if isinstance(coord_labels[0], tuple):
         fmt = ", ".join(["{}" for _ in coord_labels[0]])
         coord_labels[:] = [fmt.format(*x) for x in coord_labels]
@@ -571,7 +480,174 @@ def filter_plotters_list(plotters, plot_kind):
             "{max_plots} plots".format(
                 max_plots=max_plots, len_plotters=len(plotters), plot_kind=plot_kind
             ),
-            SyntaxWarning,
+            UserWarning,
         )
         return plotters[:max_plots]
     return plotters
+
+
+def get_plotting_function(plot_name, plot_module, backend):
+    """Return plotting function for correct backend."""
+    _backend = {
+        "mpl": "matplotlib",
+        "bokeh": "bokeh",
+        "matplotlib": "matplotlib",
+    }
+
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
+
+    try:
+        backend = _backend[backend]
+    except KeyError:
+        raise KeyError(
+            "Backend {} is not implemented. Try backend in {}".format(
+                backend, set(_backend.values())
+            )
+        )
+
+    if backend == "bokeh":
+        try:
+            import bokeh
+
+            assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
+
+        except (ImportError, AssertionError):
+            raise ImportError(
+                "'bokeh' backend needs Bokeh (1.4.0+) installed." " Please upgrade or install"
+            )
+
+    # Perform import of plotting method
+    # TODO: Convert module import to top level for all plots
+    module = importlib.import_module(
+        "arviz.plots.backends.{backend}.{plot_module}".format(
+            backend=backend, plot_module=plot_module
+        )
+    )
+
+    plotting_method = getattr(module, plot_name)
+
+    return plotting_method
+
+
+def calculate_point_estimate(point_estimate, values, bw="default", circular=False):
+    """Validate and calculate the point estimate.
+
+    Parameters
+    ----------
+    point_estimate : Optional[str]
+        Plot point estimate per variable. Values should be 'mean', 'median', 'mode' or None.
+        Defaults to 'auto' i.e. it falls back to default set in rcParams.
+    values : 1-d array
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
+
+    Returns
+    -------
+    point_value : float
+        best estimate of data distribution
+    """
+    point_value = None
+    if point_estimate == "auto":
+        point_estimate = rcParams["plot.point_estimate"]
+    elif point_estimate not in ("mean", "median", "mode", None):
+        raise ValueError(
+            "Point estimate should be 'mean', 'median', 'mode' or None, not {}".format(
+                point_estimate
+            )
+        )
+    if point_estimate == "mean":
+        point_value = values.mean()
+    elif point_estimate == "mode":
+        if isinstance(values[0], float):
+            if bw == "default":
+                if circular:
+                    bw = "taylor"
+                else:
+                    bw = "experimental"
+            x, density = kde(values, circular=circular, bw=bw)
+            point_value = x[np.argmax(density)]
+        else:
+            point_value = mode(values)[0][0]
+    elif point_estimate == "median":
+        point_value = np.median(values)
+
+    return point_value
+
+
+def is_valid_quantile(value):
+    """Check if value is a number between 0 and 1."""
+    try:
+        value = float(value)
+        return 0 < value < 1
+    except ValueError:
+        return False
+
+
+def sample_reference_distribution(dist, shape):
+    """Generate samples from a scipy distribution with a given shape."""
+    x_ss = []
+    densities = []
+    dist_rvs = dist.rvs(size=shape)
+    for idx in range(shape[1]):
+        x_s, density = kde(dist_rvs[:, idx])
+        x_ss.append(x_s)
+        densities.append(density)
+    return np.array(x_ss).T, np.array(densities).T
+
+
+def set_bokeh_circular_ticks_labels(ax, hist, labels):
+    """Place ticks and ticklabels on Bokeh's circular histogram."""
+    ticks = np.linspace(-np.pi, np.pi, len(labels), endpoint=False)
+    ax.annular_wedge(
+        x=0,
+        y=0,
+        inner_radius=0,
+        outer_radius=np.max(hist) * 1.1,
+        start_angle=ticks,
+        end_angle=ticks,
+        line_color="grey",
+    )
+
+    radii_circles = np.linspace(0, np.max(hist) * 1.1, 4)
+    ax.circle(0, 0, radius=radii_circles, fill_color=None, line_color="grey")
+
+    offset = np.max(hist * 1.05) * 0.15
+    ticks_labels_pos_1 = np.max(hist * 1.05)
+    ticks_labels_pos_2 = ticks_labels_pos_1 * np.sqrt(2) / 2
+
+    ax.text(
+        [
+            ticks_labels_pos_1 + offset,
+            ticks_labels_pos_2 + offset,
+            0,
+            -ticks_labels_pos_2 - offset,
+            -ticks_labels_pos_1 - offset,
+            -ticks_labels_pos_2 - offset,
+            0,
+            ticks_labels_pos_2 + offset,
+        ],
+        [
+            0,
+            ticks_labels_pos_2 + offset / 2,
+            ticks_labels_pos_1 + offset,
+            ticks_labels_pos_2 + offset / 2,
+            0,
+            -ticks_labels_pos_2 - offset,
+            -ticks_labels_pos_1 - offset,
+            -ticks_labels_pos_2 - offset,
+        ],
+        text=labels,
+        text_align="center",
+    )
+
+    return ax

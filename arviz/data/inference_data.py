@@ -1,13 +1,49 @@
+# pylint: disable=too-many-lines
 """Data structure for using netcdf groups with xarray."""
+import uuid
+import warnings
 from collections import OrderedDict
 from collections.abc import Sequence
-from copy import copy as ccopy, deepcopy
+from copy import copy as ccopy
+from copy import deepcopy
 from datetime import datetime
+from html import escape
+
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
+from xarray.core.options import OPTIONS
+from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
+from ..utils import HtmlTemplate, _subset_list
+from .base import _extend_xr_method, dict_to_dataset
+
+SUPPORTED_GROUPS = [
+    "posterior",
+    "posterior_predictive",
+    "predictions",
+    "log_likelihood",
+    "sample_stats",
+    "prior",
+    "prior_predictive",
+    "sample_stats_prior",
+    "observed_data",
+    "constant_data",
+    "predictions_constant_data",
+]
+
+WARMUP_TAG = "warmup_"
+
+SUPPORTED_GROUPS_WARMUP = [
+    "{}posterior".format(WARMUP_TAG),
+    "{}posterior_predictive".format(WARMUP_TAG),
+    "{}predictions".format(WARMUP_TAG),
+    "{}sample_stats".format(WARMUP_TAG),
+    "{}log_likelihood".format(WARMUP_TAG),
+]
+
+SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
 
 class InferenceData:
@@ -60,27 +96,86 @@ class InferenceData:
 
         """
         self._groups = []
-        for key, dataset in kwargs.items():
+        self._groups_warmup = []
+        save_warmup = kwargs.pop("save_warmup", False)
+        key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
+        for key in kwargs:
+            if key not in SUPPORTED_GROUPS_ALL:
+                key_list.append(key)
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(key), UserWarning
+                )
+        for key in key_list:
+            dataset = kwargs[key]
+            dataset_warmup = None
             if dataset is None:
                 continue
+            elif isinstance(dataset, (list, tuple)):
+                dataset, dataset_warmup = kwargs[key]
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
-                    '(argument "{}" was type "{}")'.format(key, type(dataset))
+                    "(argument '{}' was type '{}')".format(key, type(dataset))
                 )
-            setattr(self, key, dataset)
-            self._groups.append(key)
+            if not key.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, key, dataset)
+                    self._groups.append(key)
+            elif key.startswith(WARMUP_TAG):
+                if dataset:
+                    setattr(self, key, dataset)
+                    self._groups_warmup.append(key)
+            if save_warmup and dataset_warmup is not None:
+                if dataset_warmup:
+                    key = "{}{}".format(WARMUP_TAG, key)
+                    setattr(self, key, dataset_warmup)
+                    self._groups_warmup.append(key)
 
     def __repr__(self):
-        """Make string representation of object."""
-        return "Inference data with groups:\n\t> {options}".format(
+        """Make string representation of InferenceData object."""
+        msg = "Inference data with groups:\n\t> {options}".format(
             options="\n\t> ".join(self._groups)
         )
+        if self._groups_warmup:
+            msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
+        return msg
+
+    def _repr_html_(self):
+        """Make html representation of InferenceData object."""
+        display_style = OPTIONS["display_style"]
+        if display_style == "text":
+            html_repr = f"<pre>{escape(repr(self))}</pre>"
+        else:
+            elements = "".join(
+                [
+                    HtmlTemplate.element_template.format(
+                        group_id=group + str(uuid.uuid4()),
+                        group=group,
+                        xr_data=getattr(  # pylint: disable=protected-access
+                            self, group
+                        )._repr_html_(),
+                    )
+                    for group in self._groups_all
+                ]
+            )
+            formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                elements
+            )
+            css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
+            html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+        return html_repr
 
     def __delattr__(self, group):
         """Delete a group from the InferenceData object."""
-        self._groups.remove(group)
+        if group in self._groups:
+            self._groups.remove(group)
+        elif group in self._groups_warmup:
+            self._groups_warmup.remove(group)
         object.__delattr__(self, group)
+
+    @property
+    def _groups_all(self):
+        return self._groups + self._groups_warmup
 
     @staticmethod
     def from_netcdf(filename):
@@ -131,11 +226,12 @@ class InferenceData:
             Location of netcdf file
         """
         mode = "w"  # overwrite first, then append
-        if self._groups:  # check's whether a group is present or not.
+        if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
-                groups = self._groups
+                groups = self._groups_all
             else:
-                groups = [group for group in self._groups if group in groups]
+                groups = [group for group in self._groups_all if group in groups]
+
             for group in groups:
                 data = getattr(self, group)
                 kwargs = {}
@@ -153,28 +249,42 @@ class InferenceData:
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
-    def sel(self, inplace=False, **kwargs):
+    def sel(
+        self, groups=None, filter_groups=None, inplace=False, chain_prior=None, **kwargs,
+    ):
         """Perform an xarray selection on all groups.
 
-        Loops over all groups to perform Dataset.sel(key=item)
+        Loops groups to perform Dataset.sel(key=item)
         for every kwarg if key is a dimension of the dataset.
         One example could be performing a burn in cut on the InferenceData object
         or discarding a chain. The selection is performed on all relevant groups (like
         posterior, prior, sample stats) while non relevant groups like observed data are
-        omitted.
+        omitted. See :meth:`xarray.Dataset.sel <xarray:xarray.Dataset.sel>`
 
         Parameters
         ----------
-        inplace : bool
-            If True, modify the InferenceData object inplace, otherwise, return the modified copy.
-        **kwargs : mapping
-            It must be accepted by Dataset.sel()
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        chain_prior: bool, optional, deprecated
+            If ``False``, do not select prior related groups using ``chain`` dim.
+            Otherwise, use selection on ``chain`` if present. Default=False
+        **kwargs: mapping
+            It must be accepted by Dataset.sel().
 
         Returns
         -------
         InferenceData
             A new InferenceData object by default.
-            When `inplace==True` perform selection in place and return `None`
+            When `inplace==True` perform selection in-place and return `None`
 
         Examples
         --------
@@ -200,11 +310,637 @@ class InferenceData:
                ...: print(idata_subset.observed_data.coords)
 
         """
+        if chain_prior is not None:
+            warnings.warn(
+                "chain_prior has been deprecated. Use groups argument and "
+                "rcParams['data.metagroups'] instead.",
+                DeprecationWarning,
+            )
+        else:
+            chain_prior = False
+        groups = self._group_names(groups, filter_groups)
+
         out = self if inplace else deepcopy(self)
-        for group in self._groups:
+        for group in groups:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
+            if not chain_prior and "prior" in group:
+                valid_keys -= {"chain"}
             dataset = dataset.sel(**{key: kwargs[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def isel(
+        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+    ):
+        """Perform an xarray selection on all groups.
+
+        Loops groups to perform Dataset.isel(key=item)
+        for every kwarg if key is a dimension of the dataset.
+        One example could be performing a burn in cut on the InferenceData object
+        or discarding a chain. The selection is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray:xarray.Dataset.isel`
+
+        Parameters
+        ----------
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping
+            It must be accepted by :meth:`xarray:xarray.Dataset.isel`.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in-place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(kwargs.keys()).intersection(dataset.dims)
+            dataset = dataset.isel(**{key: kwargs[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def stack(
+        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
+    ):
+        """Perform an xarray stacking on all groups.
+
+        Stack any number of existing dimensions into a single new dimension.
+        Loops groups to perform Dataset.stack(key=value)
+        for every kwarg if value is a dimension of the dataset.
+        The selection is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray:xarray.Dataset.stack`
+
+        Parameters
+        ----------
+        dimensions: dict
+            Names of new dimensions, and the existing dimensions that they replace.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping
+            It must be accepted by :meth:`xarray:xarray.Dataset.stack`.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in-place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+
+        dimensions = {} if dimensions is None else dimensions
+        dimensions.update(kwargs)
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            kwarg_dict = {}
+            for key, value in dimensions.items():
+                if not set(value).difference(dataset.dims):
+                    kwarg_dict[key] = value
+            dataset = dataset.stack(**kwarg_dict)
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def unstack(self, dim=None, groups=None, filter_groups=None, inplace=False):
+        """Perform an xarray unstacking on all groups.
+
+        Unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
+        Loops groups to perform Dataset.unstack(key=value).
+        The selection is performed on all relevant groups (like posterior, prior,
+        sample stats) while non relevant groups like observed data are omitted.
+        See :meth:`xarray:xarray.Dataset.unstack`
+
+        Parameters
+        ----------
+        dim: Hashable or iterable of Hashable, optional
+            Dimension(s) over which to unstack. By default unstacks all MultiIndexes.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+        if isinstance(dim, str):
+            dim = [dim]
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_dims = set(dim).intersection(dataset.dims) if dim is not None else dim
+            dataset = dataset.unstack(dim=valid_dims)
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of variable and dimensions on all groups.
+
+        Loops groups to perform Dataset.rename(name_dict)
+        for every key in name_dict if key is a dimension/data_vars of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray:xarray.Dataset.rename`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current variable or dimension names
+            and whose values are the desired names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform renaming in-place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+        if "chain" in name_dict.keys() or "draw" in name_dict.keys():
+            raise KeyError("'chain' or 'draw' dimensions can't be renamed")
+        out = self if inplace else deepcopy(self)
+
+        for group in groups:
+            dataset = getattr(self, group)
+            expected_keys = list(dataset.data_vars) + list(dataset.dims)
+            valid_keys = set(name_dict.keys()).intersection(expected_keys)
+            dataset = dataset.rename({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename_vars(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of variable or coordinate names on all groups.
+
+        Loops groups to perform Dataset.rename_vars(name_dict)
+        for every key in name_dict if key is a variable or coordinate names of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray:xarray.Dataset.rename_vars`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current variable or coordinate names
+            and whose values are the desired names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object with renamed variables including coordinates by default.
+            When `inplace==True` perform renaming in-place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(name_dict.keys()).intersection(dataset.data_vars)
+            dataset = dataset.rename_vars({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def rename_dims(self, name_dict=None, groups=None, filter_groups=None, inplace=False):
+        """Perform xarray renaming of dimensions on all groups.
+
+        Loops groups to perform Dataset.rename_dims(name_dict)
+        for every key in name_dict if key is a dimension of the dataset.
+        The renaming is performed on all relevant groups (like
+        posterior, prior, sample stats) while non relevant groups like observed data are
+        omitted. See :meth:`xarray:xarray.Dataset.rename_dims`
+
+        Parameters
+        ----------
+        name_dict: dict
+            Dictionary whose keys are current dimension names and whose values are the desired
+            names.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object with renamed dimension by default.
+            When `inplace==True` perform renaming in-place and return `None`
+
+        """
+        groups = self._group_names(groups, filter_groups)
+        if "chain" in name_dict.keys() or "draw" in name_dict.keys():
+            raise KeyError("'chain' or 'draw' dimensions can't be renamed")
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            valid_keys = set(name_dict.keys()).intersection(dataset.dims)
+            dataset = dataset.rename_dims({key: name_dict[key] for key in valid_keys})
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def add_groups(self, group_dict=None, coords=None, dims=None, **kwargs):
+        """Add new groups to InferenceData object.
+
+        Parameters
+        ----------
+        group_dict: dict of {str : dict or xarray.Dataset}, optional
+            Groups to be added
+        coords : dict[str] -> ndarray
+            Coordinates for the dataset
+        dims : dict[str] -> list[str]
+            Dimensions of each variable. The keys are variable names, values are lists of
+            coordinates.
+        **kwargs: mapping
+            The keyword arguments form of group_dict. One of group_dict or kwargs must be provided.
+
+        See Also
+        --------
+        extend : Extend InferenceData with groups from another InferenceData.
+        concat : Concatenate InferenceData objects.
+        """
+        group_dict = either_dict_or_kwargs(group_dict, kwargs, "add_groups")
+        if not group_dict:
+            raise ValueError("One of group_dict or kwargs must be provided.")
+        repeated_groups = [group for group in group_dict.keys() if group in self._groups]
+        if repeated_groups:
+            raise ValueError("{} group(s) already exists.".format(repeated_groups))
+        for group, dataset in group_dict.items():
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "The group {} is not defined in the InferenceData scheme".format(group),
+                    UserWarning,
+                )
+            if dataset is None:
+                continue
+            elif isinstance(dataset, dict):
+                if (
+                    group in ("observed_data", "constant_data", "predictions_constant_data")
+                    or group not in SUPPORTED_GROUPS_ALL
+                ):
+                    warnings.warn(
+                        "the default dims 'chain' and 'draw' will be added automatically",
+                        UserWarning,
+                    )
+                dataset = dict_to_dataset(dataset, coords=coords, dims=dims)
+            elif isinstance(dataset, xr.DataArray):
+                if dataset.name is None:
+                    dataset.name = "x"
+                dataset = dataset.to_dataset()
+            elif not isinstance(dataset, xr.Dataset):
+                raise ValueError(
+                    "Arguments to add_groups() must be xr.Dataset, xr.Dataarray or dicts\
+                    (argument '{}' was type '{}')".format(
+                        group, type(dataset)
+                    )
+                )
+            if dataset:
+                setattr(self, group, dataset)
+                if group.startswith(WARMUP_TAG):
+                    self._groups_warmup.append(group)
+                else:
+                    self._groups.append(group)
+
+    def extend(self, other, join="left"):
+        """Extend InferenceData with groups from another InferenceData.
+
+        Parameters
+        ----------
+        other : InferenceData
+            InferenceData to be added
+        join : {'left', 'right'}, default 'left'
+            Defines how the two decide which group to keep when the same group is
+            present in both objects. 'left' will discard the group in ``other`` whereas 'right'
+            will keep the group in ``other`` and discard the one in ``self``.
+
+        See Also
+        --------
+        add_groups : Add new groups to InferenceData object.
+        concat : Concatenate InferenceData objects.
+
+        """
+        if not isinstance(other, InferenceData):
+            raise ValueError("Extending is possible between two InferenceData objects only.")
+        if join not in ("left", "right"):
+            raise ValueError("join must be either 'left' or 'right', found {}".format(join))
+        for group in other._groups_all:  # pylint: disable=protected-access
+            if hasattr(self, group):
+                if join == "left":
+                    continue
+            if group not in SUPPORTED_GROUPS_ALL:
+                warnings.warn(
+                    "{} group is not defined in the InferenceData scheme".format(group), UserWarning
+                )
+            dataset = getattr(other, group)
+            setattr(self, group, dataset)
+
+    set_index = _extend_xr_method(xr.Dataset.set_index)
+    get_index = _extend_xr_method(xr.Dataset.get_index)
+    reset_index = _extend_xr_method(xr.Dataset.reset_index)
+    set_coords = _extend_xr_method(xr.Dataset.set_coords)
+    reset_coords = _extend_xr_method(xr.Dataset.reset_coords)
+    assign = _extend_xr_method(xr.Dataset.assign)
+    assign_coords = _extend_xr_method(xr.Dataset.assign_coords)
+    sortby = _extend_xr_method(xr.Dataset.sortby)
+    chunk = _extend_xr_method(xr.Dataset.chunk)
+    unify_chunks = _extend_xr_method(xr.Dataset.unify_chunks)
+    load = _extend_xr_method(xr.Dataset.load)
+    compute = _extend_xr_method(xr.Dataset.compute)
+    persist = _extend_xr_method(xr.Dataset.persist)
+
+    mean = _extend_xr_method(xr.Dataset.mean)
+    median = _extend_xr_method(xr.Dataset.median)
+    min = _extend_xr_method(xr.Dataset.min)
+    max = _extend_xr_method(xr.Dataset.max)
+    cumsum = _extend_xr_method(xr.Dataset.cumsum)
+    sum = _extend_xr_method(xr.Dataset.sum)
+    quantile = _extend_xr_method(xr.Dataset.quantile)
+
+    def _group_names(self, groups, filter_groups=None):
+        """Handle expansion of group names input across arviz.
+
+        Parameters
+        ----------
+        groups: str, list of str or None
+            group or metagroup names.
+        idata: xarray.Dataset
+            Posterior data in an xarray
+        filter_groups: {None, "like", "regex"}, optional, default=None
+            If `None` (default), interpret groups as the real group or metagroup names.
+            If "like", interpret groups as substrings of the real group or metagroup names.
+            If "regex", interpret groups as regular expressions on the real group or
+            metagroup names. A la `pandas.filter`.
+
+        Returns
+        -------
+        groups: list
+        """
+        all_groups = self._groups_all
+        if groups is None:
+            return all_groups
+        if isinstance(groups, str):
+            groups = [groups]
+        sel_groups = []
+        metagroups = rcParams["data.metagroups"]
+        for group in groups:
+            if group[0] == "~":
+                sel_groups.extend(
+                    [f"~{item}" for item in metagroups[group[1:]] if item in all_groups]
+                    if group[1:] in metagroups
+                    else [group]
+                )
+            else:
+                sel_groups.extend(
+                    [item for item in metagroups[group] if item in all_groups]
+                    if group in metagroups
+                    else [group]
+                )
+
+        try:
+            group_names = _subset_list(sel_groups, all_groups, filter_items=filter_groups)
+        except KeyError as err:
+            msg = " ".join(("groups:", f"{err}", "in InferenceData"))
+            raise KeyError(msg)
+        return group_names
+
+    def map(self, fun, groups=None, filter_groups=None, inplace=False, args=None, **kwargs):
+        """Apply a function to multiple groups.
+
+        Applies ``fun`` groupwise to the selected ``InferenceData`` groups and overwrites the
+        group with the result of the function.
+
+        Parameters
+        ----------
+        fun : callable
+            Function to be applied to each group. Assumes the function is called as
+            ``fun(dataset, *args, **kwargs)``.
+        groups : str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        filter_groups : {None, "like", "regex"}, optional
+            If `None` (default), interpret var_names as the real variables names. If "like",
+            interpret var_names as substrings of the real variables names. If "regex",
+            interpret var_names as regular expressions on the real variables names. A la
+            `pandas.filter`.
+        inplace : bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        args : array_like, optional
+            Positional arguments passed to ``fun``.
+        **kwargs : mapping, optional
+            Keyword arguments passed to ``fun``.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        Examples
+        --------
+        Shift observed_data, prior_predictive and posterior_predictive.
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("non_centered_eight")
+               ...: idata_shifted_obs = idata.map(lambda x: x + 3, groups="observed_vars")
+               ...: print(idata_shifted_obs.observed_data)
+               ...: print(idata_shifted_obs.posterior_predictive)
+
+        Rename and update the coordinate values in both posterior and prior groups.
+
+        .. ipython::
+
+            In [1]: idata = az.load_arviz_data("radon")
+               ...: idata = idata.map(
+               ...:     lambda ds: ds.rename({"g_coef": "uranium_coefs"}).assign(
+               ...:         uranium_coefs=["intercept", "u_slope"]
+               ...:     ),
+               ...:     groups=["posterior", "prior"]
+               ...: )
+               ...: idata.posterior
+
+        Add extra coordinates to all groups containing observed variables
+
+        .. ipython::
+
+            In [1]: idata = az.load_arviz_data("rugby")
+               ...: home_team, away_team = np.array([
+               ...:     m.split() for m in idata.observed_data.match.values
+               ...: ]).T
+               ...: idata = idata.map(
+               ...:     lambda ds, **kwargs: ds.assign_coords(**kwargs),
+               ...:     groups="observed_vars",
+               ...:     home_team=("match", home_team),
+               ...:     away_team=("match", away_team),
+               ...: )
+               ...: print(idata.posterior_predictive)
+               ...: print(idata.observed_data)
+
+        """
+        if args is None:
+            args = []
+        groups = self._group_names(groups, filter_groups)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            dataset = fun(dataset, *args, **kwargs)
+            setattr(out, group, dataset)
+        if inplace:
+            return None
+        else:
+            return out
+
+    def _wrap_xarray_method(
+        self, method, groups=None, filter_groups=None, inplace=False, args=None, **kwargs
+    ):
+        """Extend and xarray.Dataset method to InferenceData object.
+
+        Parameters
+        ----------
+        method: str
+            Method to be extended. Must be a ``xarray.Dataset`` method.
+        groups: str or list of str, optional
+            Groups where the selection is to be applied. Can either be group names
+            or metagroup names.
+        inplace: bool, optional
+            If ``True``, modify the InferenceData object inplace,
+            otherwise, return the modified copy.
+        **kwargs: mapping, optional
+            Keyword arguments passed to the xarray Dataset method.
+
+        Returns
+        -------
+        InferenceData
+            A new InferenceData object by default.
+            When `inplace==True` perform selection in place and return `None`
+
+        Examples
+        --------
+        Compute the mean of `posterior_groups`:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("non_centered_eight")
+               ...: idata_means = idata._wrap_xarray_method("mean", groups="latent_vars")
+               ...: print(idata_means.posterior)
+               ...: print(idata_means.observed_data)
+
+        .. ipython::
+
+            In [1]: idata_stack = idata._wrap_xarray_method(
+               ...:     "stack",
+               ...:     groups=["posterior_groups", "prior_groups"],
+               ...:     sample=["chain", "draw"]
+               ...: )
+               ...: print(idata_stack.posterior)
+               ...: print(idata_stack.prior)
+               ...: print(idata_stack.observed_data)
+
+        """
+        if args is None:
+            args = []
+        groups = self._group_names(groups, filter_groups)
+
+        method = getattr(xr.Dataset, method)
+
+        out = self if inplace else deepcopy(self)
+        for group in groups:
+            dataset = getattr(self, group)
+            dataset = method(dataset, *args, **kwargs)
             setattr(out, group, dataset)
         if inplace:
             return None
@@ -246,6 +982,54 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
     InferenceData
         A new InferenceData object by default.
         When `inplace==True` merge args to first arg and return `None`
+
+    See Also
+    --------
+    add_groups : Add new groups to InferenceData object.
+    extend : Extend InferenceData with groups from another InferenceData.
+
+    Examples
+    --------
+    Use ``concat`` method to concatenate InferenceData objects. This will concatenates over
+    unique groups by default. We first create an ``InferenceData`` object:
+
+    .. ipython::
+
+        In [1]: import arviz as az
+           ...: import numpy as np
+           ...: data = {
+           ...:     "a": np.random.normal(size=(4, 100, 3)),
+           ...:     "b": np.random.normal(size=(4, 100)),
+           ...: }
+           ...: coords = {"a_dim": ["x", "y", "z"]}
+           ...: dataA = az.from_dict(data, coords=coords, dims={"a": ["a_dim"]})
+           ...: dataA
+
+    We have created an ``InferenceData`` object with default group 'posterior'. Now, we will
+    create another ``InferenceData`` object:
+
+    .. ipython::
+
+        In [1]: dataB = az.from_dict(prior=data, coords=coords, dims={"a": ["a_dim"]})
+           ...: dataB
+
+    We have created another ``InferenceData`` object with group 'prior'. Now, we will concatenate
+    these two ``InferenceData`` objects:
+
+    .. ipython::
+
+        In [1]: az.concat(dataA, dataB)
+
+    Now, we will concatenate over chain (or draw). It requires identical groups and variables.
+    Here we are concatenating two identical ``InferenceData`` objects over dimension chain:
+
+    .. ipython::
+
+        In [1]: az.concat(dataA, dataA, dim="chain")
+
+    It will create an ``InferenceData`` with the original group 'posterior'. In similar way,
+    we can also concatenate over draws.
+
     """
     # pylint: disable=undefined-loop-variable, too-many-nested-blocks
     if len(args) == 0:
@@ -286,63 +1070,69 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     if dim is None:
         arg0 = args[0]
-        arg0_groups = ccopy(arg0._groups)
+        arg0_groups = ccopy(arg0._groups_all)
         args_groups = dict()
         # check if groups are independent
         # Concat over unique groups
         for arg in args[1:]:
-            for group in arg._groups:
+            for group in arg._groups_all:
                 if group in args_groups or group in arg0_groups:
                     msg = (
                         "Concatenating overlapping groups is not supported unless `dim` is defined."
+                        " Valid dimensions are `chain` and `draw`. Alternatively, use extend to"
+                        " combine InferenceData with overlapping groups"
                     )
-                    msg += " Valid dimensions are `chain` and `draw`."
                     raise TypeError(msg)
-            group_data = getattr(arg, group)
-            args_groups[group] = deepcopy(group_data) if copy else group_data
+                group_data = getattr(arg, group)
+                args_groups[group] = deepcopy(group_data) if copy else group_data
         # add arg0 to args_groups if inplace is False
+        # otherwise it will merge args_groups to arg0
+        # inference data object
         if not inplace:
             for group in arg0_groups:
                 group_data = getattr(arg0, group)
                 args_groups[group] = deepcopy(group_data) if copy else group_data
 
-        basic_order = [
-            "posterior",
-            "posterior_predictive",
-            "sample_stats",
-            "prior",
-            "prior_predictive",
-            "sample_stats_prior",
-            "observed_data",
-        ]
-        other_groups = [group for group in args_groups if group not in basic_order]
+        other_groups = [group for group in args_groups if group not in SUPPORTED_GROUPS_ALL]
 
-        for group in basic_order + other_groups:
+        for group in SUPPORTED_GROUPS_ALL + other_groups:
             if group not in args_groups:
                 continue
             if inplace:
-                arg0._groups.append(group)
+                if group.startswith(WARMUP_TAG):
+                    arg0._groups_warmup.append(group)
+                else:
+                    arg0._groups.append(group)
                 setattr(arg0, group, args_groups[group])
             else:
                 inference_data_dict[group] = args_groups[group]
         if inplace:
             other_groups = [
-                group for group in arg0_groups if group not in basic_order
+                group for group in arg0_groups if group not in SUPPORTED_GROUPS_ALL
             ] + other_groups
-            sorted_groups = [group for group in basic_order + other_groups if group in arg0._groups]
+            sorted_groups = [
+                group for group in SUPPORTED_GROUPS + other_groups if group in arg0._groups
+            ]
             setattr(arg0, "_groups", sorted_groups)
+            sorted_groups_warmup = [
+                group
+                for group in SUPPORTED_GROUPS_WARMUP + other_groups
+                if group in arg0._groups_warmup
+            ]
+            setattr(arg0, "_groups_warmup", sorted_groups_warmup)
     else:
         arg0 = args[0]
-        arg0_groups = arg0._groups
+        arg0_groups = arg0._groups_all
         for arg in args[1:]:
             for group0 in arg0_groups:
-                if group0 not in arg._groups:
+                if group0 not in arg._groups_all:
                     if group0 == "observed_data":
                         continue
                     msg = "Mismatch between the groups."
                     raise TypeError(msg)
-            for group in arg._groups:
-                if group != "observed_data":
+            for group in arg._groups_all:
+                # handle data groups seperately
+                if group not in ["observed_data", "constant_data", "predictions_constant_data"]:
                     # assert that groups are equal
                     if group not in arg0_groups:
                         msg = "Mismatch between the groups."
@@ -434,7 +1224,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     else:
                         inference_data_dict[group] = concatenated_group
                 else:
-                    # observed_data
+                    # observed_data, "constant_data", "predictions_constant_data",
                     if group not in arg0_groups:
                         setattr(arg0, group, deepcopy(group_data) if copy else group_data)
                         arg0._groups.append(group)
@@ -452,7 +1242,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     for var in group_vars:
                         if var not in group0_vars:
                             var_data = getattr(group_data, var)
-                            arg0.observed_data[var] = var_data
+                            getattr(arg0, group)[var] = var_data
                         else:
                             var_data = getattr(group_data, var)
                             var0_data = getattr(group0_data, var)

@@ -14,14 +14,16 @@ Plots
     :toctree: generated/
 
     plot_autocorr
+    plot_bpv
     plot_compare
     plot_density
     plot_dist
+    plot_dist_comparison
     plot_elpd
     plot_energy
     plot_ess
     plot_forest
-    plot_hpd
+    plot_hdi
     plot_joint
     plot_kde
     plot_khat
@@ -45,6 +47,7 @@ Stats
 
     apply_test_function
     compare
+    hdi
     hpd
     loo
     loo_pit
@@ -86,14 +89,9 @@ Data
 ----
 
 .. autosummary::
-   :toctree: generated/
-   :template: class_members.rst
-
-   InferenceData
-
-.. autosummary::
     :toctree: generated/
 
+    InferenceData
     convert_to_inference_data
     load_arviz_data
     to_netcdf
@@ -103,10 +101,12 @@ Data
     from_dict
     from_emcee
     from_pymc3
+    from_pymc3_predictions
     from_pyro
     from_numpyro
     from_pystan
     from_tfp
+    from_pyjags
     concat
 
 Utils
@@ -114,7 +114,7 @@ Utils
 
 .. autosummary::
       :toctree: generated/
-      :template: class.rst
+      :template: class_no_members.rst
 
       Numba
       interactive_backend
@@ -124,6 +124,29 @@ rcParams
 
 .. autosummary::
    :toctree: generated/
-   :template: class.rst
+   :template: class_no_members.rst
 
    rc_context
+
+.. _wrappers_api:
+
+Wrappers
+--------
+Experimental feature
+
+.. autosummary::
+    :toctree: generated/
+
+    SamplingWrapper
+    PyStanSamplingWrapper
+
+.. _stats_refit_api:
+
+Stats (requiring refitting)
+---------------------------
+Experimental feature
+
+.. autosummary::
+    :toctree: generated/
+
+    reloo

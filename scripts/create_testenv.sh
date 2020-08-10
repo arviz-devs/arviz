@@ -7,14 +7,17 @@ command -v conda >/dev/null 2>&1 || {
   exit 1;
 }
 
-# if no python specified, use Travis version, or else 3.6
-PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.6}}
+# if no python specified, use Travis version, or else 3.7
+PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.7}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
 EMCEE_VERSION=${EMCEE_VERSION:-latest}
 TF_VERSION=${TF_VERSION:-latest}
+PYMC3_VERSION=${PYMC3_VERSION:-latest}
 
+# Update Conda to include latest build channels
+conda update conda
 
 if [[ $* != *--global* ]]; then
     ENVNAME="testenv_${PYTHON_VERSION}_PYSTAN_${PYSTAN_VERSION}_PYRO_${PYRO_VERSION}_EMCEE_${EMCEE_VERSION}_TF_${TF_VERSION}"
@@ -83,6 +86,21 @@ else
   pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
 fi
 
+if [ "$PYMC3_VERSION" = "latest" ]; then
+  pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
+else
+  pip --no-cache-dir install pymc3==${PYMC3_VERSION}
+fi
+
+
 #  Install editable using the setup.py
-pip install  --no-cache-dir -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 pip install --no-cache-dir -r requirements-dev.txt
+pip install --no-cache-dir -r requirements-docs.txt
+pip install --no-cache-dir -r requirements-external.txt
+pip install --no-cache-dir -r requirements-optional.txt
+
+conda install -y geckodriver firefox jupyterlab ipywidgets nodejs --channel conda-forge
+
+jupyter nbextension enable --py widgetsnbextension
+jupyter labextension install @jupyter-widgets/jupyterlab-manager

@@ -5,6 +5,7 @@
 figure.figsize: 7.2, 4.8
 figure.dpi: 100.0
 figure.facecolor: white
+figure.constrained_layout.use: True
 text.color: .15
 axes.labelcolor: .15
 legend.frameon: False
@@ -29,6 +30,7 @@ axes.facecolor: white
 axes.edgecolor: .8
 axes.linewidth: 1
 grid.color: .8
+image.cmap: viridis
 xtick.major.size: 0
 ytick.major.size: 0
 xtick.minor.size: 0

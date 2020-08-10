@@ -1,0 +1,41 @@
+# This style is based on Seaborn-white parameters, the main differences are
+# Default matplotlib font (no problem using Greek letters!)
+# Larger font size for several elements
+# Colorblind friendly color cycle
+figure.figsize: 7.2, 4.8
+figure.dpi: 100.0
+figure.facecolor: white
+figure.constrained_layout.use: True
+text.color: .15
+axes.labelcolor: .15
+legend.frameon: False
+legend.numpoints: 1
+legend.scatterpoints: 1
+xtick.direction: out
+ytick.direction: out
+xtick.color: .15
+ytick.color: .15
+axes.axisbelow: True
+lines.solid_capstyle: round
+
+axes.labelsize: 15
+axes.titlesize: 16
+xtick.labelsize: 14
+ytick.labelsize: 14
+legend.fontsize: 14
+
+axes.grid: False
+axes.facecolor: white
+axes.edgecolor: 0
+axes.linewidth: 1
+axes.spines.top: False
+axes.spines.right: False
+image.cmap: cet_gray #  perceptually uniform gray scale from colorcet (linear_grey_10_95_c0)
+xtick.major.size: 0
+ytick.major.size: 0
+xtick.minor.size: 0
+ytick.minor.size: 0
+
+# First 4 colors are from colorcet and the last one is the "ArviZ-blue"
+# [to_hex(_linear_grey_0_100_c0[i]) for i in np.linspace(0, 195, 4).astype(int)]
+axes.prop_cycle: cycler('color', ["000000", "4a4a4a", "7e7f7f", "b8b8b8", "2a2eec"])

@@ -1,28 +1,40 @@
+# pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-from .plot_utils import get_bins
+import xarray as xr
+
+from ..data import InferenceData
+from ..rcparams import rcParams
+from .plot_utils import get_plotting_function
 
 
 def plot_dist(
     values,
     values2=None,
-    color=None,
+    color="C0",
     kind="auto",
     cumulative=False,
     label=None,
     rotated=False,
     rug=False,
-    bw=4.5,
+    bw="default",
+    circular=False,
     quantiles=None,
     contour=True,
     fill_last=True,
+    figsize=None,
     textsize=None,
     plot_kwargs=None,
     fill_kwargs=None,
     rug_kwargs=None,
     contour_kwargs=None,
+    contourf_kwargs=None,
+    pcolormesh_kwargs=None,
     hist_kwargs=None,
+    is_circular=False,
     ax=None,
     backend=None,
+    backend_kwargs=None,
+    show=None,
     **kwargs
 ):
     """Plot distribution as histogram or kernel density estimates.
@@ -49,10 +61,16 @@ def plot_dist(
         Whether to rotate the 1D KDE plot 90 degrees.
     rug : bool
         If True adds a rugplot. Defaults to False. Ignored for 2D KDE
-    bw : float
-        Bandwidth scaling factor for 1D KDE. Should be larger than 0. The higher this number the
-        smoother the KDE will be. Defaults to 4.5 which is essentially the same as the Scott's
-        rule of thumb (the default rule used by SciPy).
+    bw: Optional[float or str]
+        If numeric, indicates the bandwidth and must be positive.
+        If str, indicates the method to estimate the bandwidth and must be
+        one of "scott", "silverman", "isj" or "experimental" when `circular` is False
+        and "taylor" (for now) when `circular` is True.
+        Defaults to "default" which means "experimental" when variable is not circular
+        and "taylor" when it is.
+    circular: Optional[bool]
+        If True, it interprets the values passed are from a circular variable measured in radians
+        and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
     quantiles : list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to None.
@@ -60,9 +78,11 @@ def plot_dist(
         If True plot the 2D KDE using contours, otherwise plot a smooth 2D KDE. Defaults to True.
     fill_last : bool
         If True fill the last contour of the 2D KDE plot. Defaults to True.
+    figsize : tuple
+        Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
-        on figsize.
+        on figsize. Not implemented for bokeh backend.
     plot_kwargs : dict
         Keywords passed to the pdf line of a 1D KDE.
     fill_kwargs : dict
@@ -74,38 +94,82 @@ def plot_dist(
         the lower the rugplot.
     contour_kwargs : dict
         Keywords passed to the contourplot. Ignored for 1D KDE.
+    contourf_kwargs : dict
+        Keywords passed to ax.contourf. Ignored for 1D KDE.
+    pcolormesh_kwargs : dict
+        Keywords passed to ax.pcolormesh. Ignored for 1D KDE.
     hist_kwargs : dict
         Keywords passed to the histogram.
-    ax : matplotlib axes
-    backend : str {"matplotlib", "bokeh"}
-        Select backend engine.
+    is_circular : {False, True, "radians", "degrees"}. Default False.
+        Select input type {"radians", "degrees"} for circular histogram or KDE plot. If True,
+        default input type is "radians".
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes : matplotlib axes or bokeh figures
+
+    Examples
+    --------
+    Plot an integer distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> import numpy as np
+        >>> import arviz as az
+        >>> a = np.random.poisson(4, 1000)
+        >>> az.plot_dist(a)
+
+    Plot a continuous distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> b = np.random.normal(0, 1, 1000)
+        >>> az.plot_dist(b)
+
+    Add a rug under the Gaussian distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True)
+
+    Segment into quantiles
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75])
+
+    Plot as the cumulative distribution
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
+    if isinstance(values, (InferenceData, xr.Dataset)):
+        raise ValueError(
+            "InferenceData or xarray.Dateset object detected,"
+            " use plot_posterior, plot_density or plot_pair"
+            " instead of plot_dist"
+        )
+
     if kind not in ["auto", "kde", "hist"]:
         raise TypeError('Invalid "kind":{}. Select from {{"auto","kde","hist"}}'.format(kind))
 
     if kind == "auto":
         kind = "hist" if values.dtype.kind == "i" else "kde"
-
-    if kind == "hist":
-        if hist_kwargs is None:
-            hist_kwargs = {}
-
-        hist_kwargs.setdefault("bins", get_bins(values))
-        hist_kwargs.setdefault("cumulative", cumulative)
-        hist_kwargs.setdefault("color", color)
-        hist_kwargs.setdefault("label", label)
-        hist_kwargs.setdefault("rwidth", 0.9)
-        hist_kwargs.setdefault("align", "left")
-        hist_kwargs.setdefault("density", True)
-
-        if rotated:
-            hist_kwargs.setdefault("orientation", "horizontal")
-        else:
-            hist_kwargs.setdefault("orientation", "vertical")
 
     dist_plot_args = dict(
         # User Facing API that can be simplified
@@ -118,35 +182,30 @@ def plot_dist(
         rotated=rotated,
         rug=rug,
         bw=bw,
+        circular=circular,
         quantiles=quantiles,
         contour=contour,
         fill_last=fill_last,
+        figsize=figsize,
         textsize=textsize,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         rug_kwargs=rug_kwargs,
         contour_kwargs=contour_kwargs,
+        contourf_kwargs=contourf_kwargs,
+        pcolormesh_kwargs=pcolormesh_kwargs,
         hist_kwargs=hist_kwargs,
         ax=ax,
+        backend_kwargs=backend_kwargs,
+        is_circular=is_circular,
+        show=show,
         **kwargs,
     )
 
-    if backend is None or backend.lower() in ("mpl", "matplotlib"):
-        from .backends.matplotlib.mpl_distplot import _plot_dist_mpl
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-        ax = _plot_dist_mpl(**dist_plot_args)
-    elif backend == "bokeh":
-        try:
-            import bokeh
-
-            assert bokeh.__version__ >= "1.4.0"
-        except (ImportError, AssertionError):
-            raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
-        from .backends.bokeh.bokeh_distplot import _plot_dist_bokeh
-
-        ax = _plot_dist_bokeh(**dist_plot_args)
-    else:
-        raise NotImplementedError(
-            'Backend {} not implemented. Use {{"matplotlib", "bokeh"}}'.format(backend)
-        )
+    plot = get_plotting_function("plot_dist", "distplot", backend)
+    ax = plot(**dist_plot_args)
     return ax

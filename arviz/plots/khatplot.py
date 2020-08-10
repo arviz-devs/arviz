@@ -1,26 +1,16 @@
 """Pareto tail indices plot."""
-import warnings
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba_array
-import matplotlib.cm as cm
 import numpy as np
 from xarray import DataArray
 
-from .plot_utils import (
-    _scale_fig_size,
-    get_coords,
-    color_from_dim,
-    format_coords_as_labels,
-    set_xticklabels,
-)
+from ..rcparams import rcParams
 from ..stats import ELPDData
-from ..stats.stats_utils import histogram
+from ..utils import get_coords
+from .plot_utils import format_coords_as_labels, get_plotting_function
 
 
 def plot_khat(
     khats,
-    color=None,
+    color="C0",
     xlabels=False,
     show_bins=False,
     bin_format="{1:.1f}%",
@@ -34,6 +24,9 @@ def plot_khat(
     markersize=None,
     ax=None,
     hlines_kwargs=None,
+    backend=None,
+    backend_kwargs=None,
+    show=None,
     **kwargs
 ):
     """
@@ -74,16 +67,22 @@ def plot_khat(
         markersize for scatter plot. Defaults to `None` in which case it will
         be chosen based on autoscaling for figsize.
     ax: axes, optional
-      Matplotlib axes
+        Matplotlib axes or bokeh figures.
     hlines_kwargs: dictionary, optional
-      Additional keywords passed to ax.hlines
+        Additional keywords passed to ax.hlines.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show : bool, optional
+        Call backend show function.
     kwargs :
-      Additional keywords passed to ax.scatter
+        Additional keywords passed to ax.scatter.
 
     Returns
     -------
-    ax : axes
-      Matplotlib axes.
+    axes : matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -106,42 +105,18 @@ def plot_khat(
         >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
         >>> az.plot_khat(khats, xlabels=True, annotate=True)
 
-    Use coord values to create color mapping
-
-    .. plot::
-        :context: close-figs
-
-        >>> az.plot_khat(loo_radon, color="observed_county", cmap="tab20")
-
     Use custom color scheme
 
     .. plot::
         :context: close-figs
 
-        >>> counties = radon.posterior.observed_county.values
+        >>> counties = radon.posterior.County[radon.constant_data.county_idx].values
         >>> colors = [
         ...     "blue" if county[-1] in ("A", "N") else "green" for county in counties
         ... ]
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
-    if hover_label and mpl.get_backend() not in mpl.rcsetup.interactive_bk:
-        hover_label = False
-        warnings.warn(
-            "hover labels are only available with interactive backends. To switch to an "
-            "interactive backend from ipython or jupyter, use `%matplotlib` there should be "
-            "no need to restart the kernel. For other cases, see "
-            "https://matplotlib.org/3.1.0/tutorials/introductory/usage.html#backends",
-            UserWarning,
-        )
-
-    if hlines_kwargs is None:
-        hlines_kwargs = {}
-    hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
-    hlines_kwargs.setdefault("alpha", 0.7)
-    hlines_kwargs.setdefault("zorder", -1)
-    hlines_kwargs.setdefault("color", "C1")
-
     if coords is None:
         coords = {}
 
@@ -169,137 +144,35 @@ def plot_khat(
     else:
         coord_labels = xdata.astype(str)
 
-    (figsize, ax_labelsize, _, xt_labelsize, linewidth, scaled_markersize) = _scale_fig_size(
-        figsize, textsize
+    plot_khat_kwargs = dict(
+        hover_label=hover_label,
+        hover_format=hover_format,
+        ax=ax,
+        figsize=figsize,
+        xdata=xdata,
+        khats=khats,
+        kwargs=kwargs,
+        annotate=annotate,
+        coord_labels=coord_labels,
+        show_bins=show_bins,
+        hlines_kwargs=hlines_kwargs,
+        xlabels=xlabels,
+        legend=legend,
+        color=color,
+        dims=dims,
+        textsize=textsize,
+        markersize=markersize,
+        n_data_points=n_data_points,
+        bin_format=bin_format,
+        backend_kwargs=backend_kwargs,
+        show=show,
     )
 
-    if markersize is None:
-        markersize = scaled_markersize ** 2  # s in scatter plot mus be markersize square
-        # for dots to have the same size
-    kwargs.setdefault("s", markersize)
-    kwargs.setdefault("marker", "+")
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-    if isinstance(color, str):
-        if color in dims:
-            colors, color_mapping = color_from_dim(khats, color)
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(colors)
-        else:
-            legend = False
-            rgba_c = to_rgba_array(np.full(n_data_points, color))
-    else:
-        legend = False
-        try:
-            rgba_c = to_rgba_array(color)
-        except ValueError:
-            cmap_name = kwargs.get("cmap", plt.rcParams["image.cmap"])
-            cmap = getattr(cm, cmap_name)
-            rgba_c = cmap(color)
-
-    if ax is None:
-        fig, ax = plt.subplots(figsize=figsize, constrained_layout=not xlabels)
-    else:
-        fig = ax.get_figure()
-
-    khats = khats if isinstance(khats, np.ndarray) else khats.values.flatten()
-    alphas = 0.5 + 0.2 * (khats > 0.5) + 0.3 * (khats > 1)
-    rgba_c[:, 3] = alphas
-    sc_plot = ax.scatter(xdata, khats, c=rgba_c, **kwargs)
-    if annotate:
-        idxs = xdata[khats > 1]
-        for idx in idxs:
-            ax.text(
-                idx,
-                khats[idx],
-                coord_labels[idx],
-                horizontalalignment="center",
-                verticalalignment="bottom",
-                fontsize=0.8 * xt_labelsize,
-            )
-
-    xmin, xmax = ax.get_xlim()
-    if show_bins:
-        xmax += n_data_points / 12
-    ylims1 = ax.get_ylim()
-    ax.hlines([0, 0.5, 0.7, 1], xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs)
-    ylims2 = ax.get_ylim()
-    ymin = min(ylims1[0], ylims2[0])
-    ymax = min(ylims1[1], ylims2[1])
-    if show_bins:
-        bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
-        bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
-        hist, _ = histogram(khats, bin_edges)
-        for idx, count in enumerate(hist):
-            ax.text(
-                (n_data_points - 1 + xmax) / 2,
-                np.mean(bin_edges[idx : idx + 2]),
-                bin_format.format(count, count / n_data_points * 100),
-                horizontalalignment="center",
-                verticalalignment="center",
-            )
-    ax.set_ylim(ymin, ymax)
-    ax.set_xlim(xmin, xmax)
-
-    ax.set_xlabel("Data Point", fontsize=ax_labelsize)
-    ax.set_ylabel(r"Shape parameter k", fontsize=ax_labelsize)
-    ax.tick_params(labelsize=xt_labelsize)
-    if xlabels:
-        set_xticklabels(ax, coord_labels)
-        fig.autofmt_xdate()
-        fig.tight_layout()
-    if legend:
-        ncols = len(color_mapping) // 6 + 1
-        for label, float_color in color_mapping.items():
-            ax.scatter([], [], c=[cmap(float_color)], label=label, **kwargs)
-        ax.legend(ncol=ncols, title=color)
-
-    if hover_label and mpl.get_backend() in mpl.rcsetup.interactive_bk:
-        _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format)
-
-    return ax
-
-
-def _make_hover_annotation(fig, ax, sc_plot, coord_labels, rgba_c, hover_format):
-    """Show data point label when hovering over it with mouse."""
-    annot = ax.annotate(
-        "",
-        xy=(0, 0),
-        xytext=(0, 0),
-        textcoords="offset points",
-        bbox=dict(boxstyle="round", fc="w", alpha=0.4),
-        arrowprops=dict(arrowstyle="->"),
-    )
-    annot.set_visible(False)
-    xmid = np.mean(ax.get_xlim())
-    ymid = np.mean(ax.get_ylim())
-    offset = 10
-
-    def update_annot(ind):
-
-        idx = ind["ind"][0]
-        pos = sc_plot.get_offsets()[idx]
-        annot_text = hover_format.format(idx, coord_labels[idx])
-        annot.xy = pos
-        annot.set_position(
-            (-offset if pos[0] > xmid else offset, -offset if pos[1] > ymid else offset)
-        )
-        annot.set_text(annot_text)
-        annot.get_bbox_patch().set_facecolor(rgba_c[idx])
-        annot.set_ha("right" if pos[0] > xmid else "left")
-        annot.set_va("top" if pos[1] > ymid else "bottom")
-
-    def hover(event):
-        vis = annot.get_visible()
-        if event.inaxes == ax:
-            cont, ind = sc_plot.contains(event)
-            if cont:
-                update_annot(ind)
-                annot.set_visible(True)
-                fig.canvas.draw_idle()
-            else:
-                if vis:
-                    annot.set_visible(False)
-                    fig.canvas.draw_idle()
-
-    fig.canvas.mpl_connect("motion_notify_event", hover)
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_khat", "khatplot", backend)
+    axes = plot(**plot_khat_kwargs)
+    return axes

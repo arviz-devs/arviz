@@ -18,14 +18,20 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import sphinx_bootstrap_theme
 import arviz
+import sphinx_bootstrap_theme
+from recommonmark.parser import CommonMarkParser
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+class CustomCommonMarkParser(CommonMarkParser):
+    def visit_document(self, node):
+        pass
 
 arviz.rcParams["data.load"] = "eager"
-
 
 # -- General configuration ------------------------------------------------
 
@@ -52,6 +58,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "matplotlib.sphinxext.plot_directive",
+    "bokeh.sphinxext.bokeh_plot",
     "numpydoc",
     "nbsphinx",
     "IPython.sphinxext.ipython_directive",
@@ -79,8 +86,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
+# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
@@ -93,9 +100,12 @@ author = "ArviZ devs"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
-# The short X.Y version.
-version = arviz.__version__
+branch_name = os.environ.get("BUILD_SOURCEBRANCHNAME", "")
+if branch_name == "master":
+    version = "dev"
+else:
+    # The short X.Y version.
+    version = arviz.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -180,7 +190,9 @@ html_favicon = "_static/favicon.ico"
 
 
 def setup(app):
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
+    app.add_source_suffix('.md', 'markdown')
+    app.add_source_parser(CustomCommonMarkParser)
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -252,6 +264,11 @@ epub_copyright = copyright
 epub_exclude_files = ["search.html"]
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-# intersphinx_mapping = {'https://docs.python.org/': None}
-
+# Example configuration for intersphinx
+intersphinx_mapping = {
+    "xarray": ("http://xarray.pydata.org/en/stable/", None),
+    "pymc3": ("https://docs.pymc.io/", None),
+    "mpl": ("https://matplotlib.org/", None),
+    "bokeh": ("https://docs.bokeh.org/en/latest/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+}

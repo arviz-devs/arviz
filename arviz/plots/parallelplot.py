@@ -1,17 +1,18 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
-import matplotlib.pyplot as plt
 import numpy as np
-
 from scipy.stats.mstats import rankdata
+
 from ..data import convert_to_dataset
-from .plot_utils import _scale_fig_size, xarray_to_ndarray, get_coords
-from ..utils import _var_names, _numba_var
+from ..rcparams import rcParams
 from ..stats.stats_utils import stats_variance_2d as svar
+from ..utils import _numba_var, _var_names, get_coords
+from .plot_utils import get_plotting_function, xarray_to_ndarray
 
 
 def plot_parallel(
     data,
     var_names=None,
+    filter_vars=None,
     coords=None,
     figsize=None,
     textsize=None,
@@ -21,45 +22,64 @@ def plot_parallel(
     shadend=0.025,
     ax=None,
     norm_method=None,
+    backend=None,
+    backend_config=None,
+    backend_kwargs=None,
+    show=None,
 ):
     """
     Plot parallel coordinates plot showing posterior points with and without divergences.
 
-    Described by https://arxiv.org/abs/1709.01449, suggested by Ari Hartikainen
+    Described by https://arxiv.org/abs/1709.01449
 
     Parameters
     ----------
-    data : obj
+    data: obj
         Any object that can be converted to an az.InferenceData object
         Refer to documentation of az.convert_to_dataset for details
-    var_names : list of variable names
-        Variables to be plotted, if None all variable are plotted. Can be used to change the order
-        of the plotted variables
-    coords : mapping, optional
+    var_names: list of variable names
+        Variables to be plotted, if `None` all variable are plotted. Can be used to change the order
+        of the plotted variables. Prefix the variables by `~` when you want to exclude
+        them from the plot.
+    filter_vars: {None, "like", "regex"}, optional, default=None
+        If `None` (default), interpret var_names as the real variables names. If "like",
+        interpret var_names as substrings of the real variables names. If "regex",
+        interpret var_names as regular expressions on the real variables names. A la
+        `pandas.filter`.
+    coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
-    figsize : tuple
+    figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
-    legend : bool
+    legend: bool
         Flag for plotting legend (defaults to True)
-    colornd : valid matplotlib color
+    colornd: valid matplotlib color
         color for non-divergent points. Defaults to 'k'
-    colord : valid matplotlib color
+    colord: valid matplotlib color
         color for divergent points. Defaults to 'C1'
-    shadend : float
+    shadend: float
         Alpha blending value for non-divergent points, between 0 (invisible) and 1 (opaque).
         Defaults to .025
-    ax : axes
-        Matplotlib axes.
-    norm_method : str
+    ax: axes, optional
+        Matplotlib axes or bokeh figures.
+    norm_method: str
         Method for normalizing the data. Methods include normal, minmax and rank.
         Defaults to none.
+    backend: str, optional
+        Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    backend_config: dict, optional
+        Currently specifies the bounds to use for bokeh axes. Defaults to value set in rcParams.
+    backend_kwargs: bool, optional
+        These are kwargs specific to the backend being used. For additional documentation
+        check the plotting method of the backend.
+    show: bool, optional
+        Call backend show function.
 
     Returns
     -------
-    ax : matplotlib axes
+    axes: matplotlib axes or bokeh figures
 
     Examples
     --------
@@ -91,7 +111,7 @@ def plot_parallel(
 
     # Get posterior draws and combine chains
     posterior_data = convert_to_dataset(data, group="posterior")
-    var_names = _var_names(var_names, posterior_data)
+    var_names = _var_names(var_names, posterior_data, filter_vars)
     var_names, _posterior = xarray_to_ndarray(
         get_coords(posterior_data, coords), var_names=var_names, combined=True
     )
@@ -116,24 +136,28 @@ def plot_parallel(
         else:
             raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
 
-    figsize, _, _, xt_labelsize, _, _ = _scale_fig_size(figsize, textsize, 1, 1)
+    parallel_kwargs = dict(
+        ax=ax,
+        colornd=colornd,
+        colord=colord,
+        shadend=shadend,
+        diverging_mask=diverging_mask,
+        posterior=_posterior,
+        textsize=textsize,
+        var_names=var_names,
+        legend=legend,
+        figsize=figsize,
+        backend_kwargs=backend_kwargs,
+        backend_config=backend_config,
+        show=show,
+    )
 
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    if backend is None:
+        backend = rcParams["plot.backend"]
+    backend = backend.lower()
 
-    ax.plot(_posterior[:, ~diverging_mask], color=colornd, alpha=shadend)
-
-    if np.any(diverging_mask):
-        ax.plot(_posterior[:, diverging_mask], color=colord, lw=1)
-
-    ax.tick_params(labelsize=textsize)
-    ax.set_xticks(range(len(var_names)))
-    ax.set_xticklabels(var_names)
-
-    if legend:
-        ax.plot([], color=colornd, label="non-divergent")
-        if np.any(diverging_mask):
-            ax.plot([], color=colord, label="divergent")
-        ax.legend(fontsize=xt_labelsize)
+    # TODO: Add backend kwargs
+    plot = get_plotting_function("plot_parallel", "parallelplot", backend)
+    ax = plot(**parallel_kwargs)
 
     return ax
