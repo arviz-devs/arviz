@@ -52,7 +52,7 @@ jobs:
       pwd
       gcc --version
       python --version
-      python -c "import arviz;print(arviz);print(arviz__version__)"
+      python -c "import arviz;print(arviz);print(arviz.__version__)"
     displayName: 'Debug information2'
 
   - script: |
