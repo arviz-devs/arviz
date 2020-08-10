@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.gridspec as gridspec
 import numpy as np
-from matplotlib.lines import Line2D
 
 from ....stats.density_utils import get_bins
 from ...distplot import plot_dist
