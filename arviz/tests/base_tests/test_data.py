@@ -35,6 +35,7 @@ from ..helpers import (  # pylint: disable=unused-import
     data_random,
     draws,
     eight_schools_params,
+    models,
 )
 
 
@@ -538,8 +539,8 @@ class TestInferenceData:
             dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior
         )
 
-    def test_to_dict(self, data_random):
-        idata = data_random
+    def test_to_dict(self, models):
+        idata = models.model_1
         test_data = from_dict(**idata.to_dict())
         assert test_data
         for group in idata._groups_all:  # pylint: disable=protected-access
