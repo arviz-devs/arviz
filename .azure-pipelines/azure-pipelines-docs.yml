@@ -42,6 +42,9 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-docs.txt
+      # install emcee
+      python -m pip install emcee
+      python -m pip install .
       conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
 
