@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
     dos2unix libgtk-3-dev libdbus-glib-1-dev libxt-dev jags && rm -rf /var/lib/apt/lists/*
 
 # Copy needed scripts
-COPY $SRC_DIR /opt/arviz/requirements*.txt
+COPY $SRC_DIR/requirements*.txt /opt/arviz/
 COPY $SRC_DIR/scripts /opt/arviz/scripts
 RUN find /opt/arviz/ -type f -print0 | xargs -0 dos2unix
 
@@ -60,5 +60,5 @@ RUN find /opt/arviz/ -type f -print0 | xargs -0 dos2unix
 RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
 
-#  Install editable using the setup.py
+# Install editable using the setup.py
 RUN /bin/bash -c "source /root/.bashrc" && pip install -e .
