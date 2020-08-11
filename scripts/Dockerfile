@@ -61,4 +61,4 @@ RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
 
 # Install editable using the setup.py
-RUN /bin/bash -c "source /root/.bashrc" && pip install -e .
+RUN /bin/bash -c "source /root/.bashrc && python -m pip install -e ."
