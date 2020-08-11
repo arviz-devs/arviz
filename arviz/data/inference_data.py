@@ -710,7 +710,7 @@ class InferenceData:
 
         Examples
         --------
-        Use ``stack`` to stack any number of existing dimensions into a single new dimension.. We first check the
+        Use ``stack`` to stack any number of existing dimensions into a single new dimension. We first check the
         original object:
 
         .. ipython::
@@ -727,15 +727,15 @@ class InferenceData:
                         "b1": np.arange(10),
                     }
                ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: dataset = from_dict(posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims)
-               ...: dataset
+               ...: idata = az.from_dict(posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims)
+               ...: idata
 
         In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
 
         .. ipython::
 
-            In [1]: dataset.stack(z=["c1", "c99"], inplace=True)
-               ...: dataset
+            In [1]: idata.stack(z=["c1", "c99"], inplace=True)
+               ...: idata
 
         See Also
         --------
