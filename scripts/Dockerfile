@@ -30,18 +30,19 @@ ENV LANG=C.UTF-8
 RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
     dos2unix libgtk-3-dev libdbus-glib-1-dev libxt-dev jags && rm -rf /var/lib/apt/lists/*
 
-
-# Copy requirements and environment installation scripts
-COPY $SRC_DIR/requirements.txt  /opt/arviz/
-COPY $SRC_DIR/requirements-dev.txt  /opt/arviz/
-COPY $SRC_DIR/requirements-docs.txt  /opt/arviz/
-COPY $SRC_DIR/requirements-external.txt  /opt/arviz/
-COPY $SRC_DIR/requirements-optional.txt  /opt/arviz/
-COPY $SRC_DIR/scripts/ /opt/arviz/scripts
+# Copy needed scripts
+COPY $SRC_DIR /opt/arviz/requirements*.txt
+COPY $SRC_DIR /opt/arviz/scripts
 RUN find /opt/arviz/ -type f -print0 | xargs -0 dos2unix
+
+# Clear any cached models from copied from host filesystem
+RUN rm -f arviz/tests/saved_models/*.pkl
+    RUN find -type d -name __pycache__ -exec rm -rf {} +
+
+# Change workdir
 WORKDIR /opt/arviz
 
-# Create conda environment. Defaults to Python 3.7
+# Create conda environment. Defaults to Python 3.8
 RUN ./scripts/create_testenv.sh
 
 # Set automatic conda activation in non interactive and shells
@@ -51,9 +52,13 @@ RUN echo ". /root/activate_conda.sh" > /root/.bashrc
 # Remove conda cache
 RUN conda clean --all
 
+# Copy ArviZ
 COPY $SRC_DIR /opt/arviz
 RUN find /opt/arviz/ -type f -print0 | xargs -0 dos2unix
 
 # Clear any cached models from copied from host filesystem
 RUN rm -f arviz/tests/saved_models/*.pkl
 RUN find -type d -name __pycache__ -exec rm -rf {} +
+
+#  Install editable using the setup.py
+RUN /bin/bash -c "source /root/.bashrc" && pip install -e .
