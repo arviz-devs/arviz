@@ -565,7 +565,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
-                "found more modes than {0}, returning only the first {0} modes", max_modes
+                "found more modes than {0}, returning only the first {0} modes".format(max_modes)
             )
             break
         if interval.size == 0:
