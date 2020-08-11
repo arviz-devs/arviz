@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y git build-essential pandoc vim ffmpeg \
 
 # Copy needed scripts
 COPY $SRC_DIR /opt/arviz/requirements*.txt
-COPY $SRC_DIR /opt/arviz/scripts
+COPY $SRC_DIR /opt/arviz
 RUN find /opt/arviz/ -type f -print0 | xargs -0 dos2unix
 
 # Clear any cached models from copied from host filesystem
