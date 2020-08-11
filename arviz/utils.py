@@ -403,7 +403,7 @@ def _cov_1d(x):
     return np.dot(x.T, x.conj()) / ddof
 
 
-@conditional_jit(cache=True, nopython=True)
+@conditional_jit(cache=True)
 def _cov(data):
     if data.ndim == 1:
         return _cov_1d(data)
