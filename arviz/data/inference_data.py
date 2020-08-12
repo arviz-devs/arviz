@@ -710,8 +710,24 @@ class InferenceData:
 
         Examples
         --------
-        Use ``stack`` to stack any number of existing dimensions into a single new dimension. We first check the
-        original object:
+        Use ``stack`` to stack any number of existing dimensions into a single new dimension.
+        We first check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: idata
+
+        In order to stack two dimensions ``chain`` and ``draw`` to ``sample``, we can use:
+
+        .. ipython::
+
+            In [1]: idata.stack(sample=["chain", "draw"], inplace=True)
+               ...: idata
+
+        We can also take the example of custom InferenceData object and perform stacking. We first
+        check the original object:
 
         .. ipython::
 
