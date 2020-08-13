@@ -40,6 +40,8 @@ jobs:
     displayName: 'Debug information'
 
   - script: |
+      python -m pip install --upgrade pip
+      python -m pip install wheel
       python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt

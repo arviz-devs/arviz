@@ -33,8 +33,8 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install wheel
+      python -m pip install --no-cache-dir -r requirements.txt
       python -m pip install twine
     displayName: 'Install requirements'
 

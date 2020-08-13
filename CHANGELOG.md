@@ -4,7 +4,9 @@
 ### New features
 * Added InferenceData dataset containing circular variables (#1265)
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). (#1266)
+* Added `to_dict` method for InferenceData object (#1223)
 * Ridgeplot is hdi aware. By default displays truncated densities at the specified `hdi_prop` level [#1348](https://github.com/arviz-devs/arviz/pull/#1348)
+
 
 ### Maintenance and fixes
 * plot_posterior: fix overlap of hdi and rope (#1263)

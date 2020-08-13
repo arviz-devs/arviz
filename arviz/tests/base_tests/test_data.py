@@ -35,6 +35,7 @@ from ..helpers import (  # pylint: disable=unused-import
     data_random,
     draws,
     eight_schools_params,
+    models,
 )
 
 
@@ -538,6 +539,32 @@ class TestInferenceData:
             dataset.stack(z=["c1", "c99"]).unstack(dim="z").posterior, dataset.posterior
         )
 
+    def test_to_dict(self, models):
+        idata = models.model_1
+        test_data = from_dict(**idata.to_dict())
+        assert test_data
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            xr_data = getattr(idata, group)
+            test_xr_data = getattr(test_data, group)
+            assert xr_data.equals(test_xr_data)
+
+    def test_to_dict_warmup(self):
+        idata = create_data_random(
+            groups=[
+                "posterior",
+                "sample_stats",
+                "observed_data",
+                "warmup_posterior",
+                "warmup_posterior_predictive",
+            ]
+        )
+        test_data = from_dict(**idata.to_dict(), save_warmup=True)
+        assert test_data
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            xr_data = getattr(idata, group)
+            test_xr_data = getattr(test_data, group)
+            assert xr_data.equals(test_xr_data)
+
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
         idata = load_arviz_data("centered_eight")
@@ -865,7 +892,7 @@ class TestDataDict:
         assert set(dataset.data_vars) == {"mu", "tau", "eta", "theta"}
         assert set(dataset.coords) == {"chain", "draw", "school"}
 
-    def get_inference_data(self, data, eight_schools_params):
+    def get_inference_data(self, data, eight_schools_params, save_warmup=False):
         return from_dict(
             posterior=data.obj,
             posterior_predictive=data.obj,
@@ -873,9 +900,15 @@ class TestDataDict:
             prior=data.obj,
             prior_predictive=data.obj,
             sample_stats_prior=data.obj,
+            warmup_posterior=data.obj,
+            warmup_posterior_predictive=data.obj,
+            predictions=data.obj,
             observed_data=eight_schools_params,
-            coords={"school": np.arange(8)},
+            coords={"school": np.arange(8),},
+            pred_coords={"school_pred": np.arange(8),},
             dims={"theta": ["school"], "eta": ["school"]},
+            pred_dims={"theta": ["school_pred"], "eta": ["school_pred"]},
+            save_warmup=save_warmup,
         )
 
     def test_inference_data(self, data, eight_schools_params):
@@ -897,6 +930,33 @@ class TestDataDict:
         self.check_var_names_coords_dims(inference_data.prior)
         self.check_var_names_coords_dims(inference_data.prior_predictive)
         self.check_var_names_coords_dims(inference_data.sample_stats_prior)
+
+        pred_dims = inference_data.predictions.dims["school_pred"]
+        assert pred_dims == 8
+
+    def test_inference_data_warmup(self, data, eight_schools_params):
+        inference_data = self.get_inference_data(data, eight_schools_params, save_warmup=True)
+        test_dict = {
+            "posterior": [],
+            "prior": [],
+            "sample_stats": [],
+            "posterior_predictive": [],
+            "prior_predictive": [],
+            "sample_stats_prior": [],
+            "observed_data": ["J", "y", "sigma"],
+            "warmup_posterior_predictive": [],
+            "warmup_posterior": [],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+        self.check_var_names_coords_dims(inference_data.posterior)
+        self.check_var_names_coords_dims(inference_data.posterior_predictive)
+        self.check_var_names_coords_dims(inference_data.sample_stats)
+        self.check_var_names_coords_dims(inference_data.prior)
+        self.check_var_names_coords_dims(inference_data.prior_predictive)
+        self.check_var_names_coords_dims(inference_data.sample_stats_prior)
+        self.check_var_names_coords_dims(inference_data.warmup_posterior)
+        self.check_var_names_coords_dims(inference_data.warmup_posterior_predictive)
 
     def test_inference_data_edge_cases(self):
         # create data

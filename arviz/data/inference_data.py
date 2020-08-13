@@ -2,7 +2,7 @@
 """Data structure for using netcdf groups with xarray."""
 import uuid
 import warnings
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from collections.abc import Sequence
 from copy import copy as ccopy
 from copy import deepcopy
@@ -244,6 +244,59 @@ class InferenceData:
             empty_netcdf_file = nc.Dataset(filename, mode="w", format="NETCDF4")
             empty_netcdf_file.close()
         return filename
+
+    def to_dict(self, groups=None, filter_groups=None):
+        """Convert InferenceData to a dictionary following xarray naming conventions.
+
+        Parameters
+        ----------
+        groups : list, optional
+            Write only these groups to netcdf file.
+
+        Returns
+        -------
+        dict
+            A dictionary containing all groups of InferenceData object.
+            When `data=False` return just the schema.
+        """
+        ret = defaultdict(dict)
+        attrs = None
+        if self._groups_all:  # check's whether a group is present or not.
+            if groups is None:
+                groups = self._group_names(groups, filter_groups)
+            else:
+                groups = [group for group in self._groups_all if group in groups]
+
+            for group in groups:
+                dataset = getattr(self, group)
+                data = {}
+                for var_name, dataarray in dataset.items():
+                    data[var_name] = dataarray.values
+                    dims = []
+                    for coord_name, coord_values in dataarray.coords.items():
+                        if coord_name not in ("chain", "draw") and not coord_name.startswith(
+                            var_name + "_dim_"
+                        ):
+                            dims.append(coord_name)
+                            ret["coords"][coord_name] = coord_values.values
+
+                    if group in ("predictions", "predictions_constant_data",):
+                        dims_key = "pred_dims"
+                    else:
+                        dims_key = "dims"
+                    if len(dims) > 0:
+                        ret[dims_key][var_name] = dims
+                    ret[group] = data
+                if attrs is None:
+                    attrs = dataset.attrs
+                elif attrs != dataset.attrs:
+                    warnings.warn(
+                        "The attributes are not same for all groups."
+                        " Considering only the first group `attrs`"
+                    )
+
+        ret["attrs"] = attrs
+        return ret
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
