@@ -10,16 +10,16 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_37_Latest:
-        python.version: 3.7
+      Python_38_Latest:
+        python.version: 3.8
         pystan.version: "latest"
         pymc3.version: "latest"
         pyro.version: "latest"
         pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
-      Python_37_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
-        python.version: 3.7
+      Python_38_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
+        python.version: 3.8
         pystan.version: "preview"
         pymc3.version: "github"
         pyro.version: 1.2
@@ -46,6 +46,7 @@ jobs:
       sudo apt-get update
       sudo apt-get install jags
       python -m pip install --upgrade pip
+      python -m pip install wheel
 
       if [ "$(pytorch.version)" = "latest" ]; then
           python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
@@ -58,7 +59,7 @@ jobs:
       else
           if [ "$(pystan.version)" = "preview" ]; then
               # try to skip other pre-releases than pystan
-              python -m pip --no-cache-dir install numpy uvloop marshmallow==3.0.0rc6 PyYAML
+              python -m pip --no-cache-dir install httpstan
               python -m pip --no-cache-dir install --pre pystan
           else
               python -m pip --no-cache-dir install pystan=="${pystan.version}"
