@@ -1,6 +1,7 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
 import xarray as xr
+import numpy as np
 
 from ..data import InferenceData
 from ..rcparams import rcParams
@@ -158,6 +159,8 @@ def plot_dist(
 
         >>> az.plot_dist(b, rug=True, quantiles=[.25, .5, .75], cumulative=True)
     """
+    values = np.asarray(values)
+
     if isinstance(values, (InferenceData, xr.Dataset)):
         raise ValueError(
             "InferenceData or xarray.Dateset object detected,"
