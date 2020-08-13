@@ -10,6 +10,7 @@ from datetime import datetime
 from html import escape
 
 import netCDF4 as nc
+import json
 import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
@@ -18,6 +19,7 @@ from xarray.core.utils import either_dict_or_kwargs
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list
 from .base import _extend_xr_method, dict_to_dataset
+from .io_dict import from_dict
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -245,6 +247,25 @@ class InferenceData:
             empty_netcdf_file.close()
         return filename
 
+    @staticmethod
+    def from_json(filename):
+        """Initialize object from a json file.
+
+        Parameters
+        ----------
+        filename : str
+            location of json file
+
+        Returns
+        -------
+        InferenceData object
+        """
+
+        with open(filename, "r") as file:
+            idata_dict = json.load(file.read())
+
+        return from_dict(**idata_dict, save_warmup=True)
+
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
 
@@ -297,6 +318,29 @@ class InferenceData:
 
         ret["attrs"] = attrs
         return ret
+
+    def to_json(self, filename, **kwargs):
+        """Write InferenceData to a json file.
+
+        Parameters
+        ----------
+        filename : str
+            Location to write to
+        kwargs : dict
+            kwargs passed to json.dumps()
+
+        Returns
+        -------
+        str
+            Location of json file
+        """
+        idata_dict = self.to_dict()
+        serialised_data = json.dumps(idata_dict, **kwargs)
+
+        with open(filename, "w") as file:
+            file.write(serialised_data)
+
+        return filename
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
