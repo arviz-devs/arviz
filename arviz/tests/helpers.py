@@ -155,8 +155,12 @@ def create_data_random(groups=None, seed=10):
         posterior_predictive={"a": data[..., 0], "b": data},
         prior={"a": data[..., 0], "b": data},
         prior_predictive={"a": data[..., 0], "b": data},
+        warmup_posterior={"a": data[..., 0], "b": data},
+        warmup_posterior_predictive={"a": data[..., 0], "b": data},
     )
-    idata = from_dict(**{group: ary for group, ary in idata_dict.items() if group in groups})
+    idata = from_dict(
+        **{group: ary for group, ary in idata_dict.items() if group in groups}, save_warmup=True
+    )
     return idata
 
 
