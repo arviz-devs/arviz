@@ -253,10 +253,10 @@ class PlotHandler:
 
         Parameters
         ----------
-        mult : float
-            How much to multiply height by. Set this to greater than 1 to have some overlap.
         hdi_prob : float
             Probability for the highest density interval. Defaults to 0.94
+        mult : float
+            How much to multiply height by. Set this to greater than 1 to have some overlap.
         linewidth : float
             Width of line on border of ridges
         markersize : float
@@ -266,6 +266,8 @@ class PlotHandler:
         ridgeplot_kind : string
             By default ("auto") continuous variables are plotted using KDEs and discrete ones using
             histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        ridgeplot_truncate: bool
+            Whether to truncate densities according to the value of hdi_prop. Defaults to True
         ridgeplot_quantiles: list
             Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
             Defaults to None.
@@ -277,7 +279,7 @@ class PlotHandler:
         zorder = 0
         for plotter in self.plotters.values():
             for x, y_min, y_max, hdi_, y_q, color in plotter.ridgeplot(
-                hdi_prob, mult, ridgeplot_kind, ridgeplot_truncate, ridgeplot_quantiles
+                hdi_prob, mult, ridgeplot_kind
             ):
                 if alpha == 0:
                     border = color
@@ -345,7 +347,7 @@ class PlotHandler:
         Parameters
         ----------
         hdi_prob : float
-            How wide each line should be
+            Probability for the highest density interval. Defaults to 0.94. Wide of each line.
         quartiles : bool
             Whether to mark quartiles
         xt_textsize : float
@@ -542,7 +544,7 @@ class VarHandler:
             ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
-    def ridgeplot(self, hdi_prob, mult, ridgeplot_kind, ridgeplot_truncate, ridgeplot_quantiles):
+    def ridgeplot(self, hdi_prob, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
         xvals, hdi_vals, yvals, pdfs, pdfs_q, colors = [], [], [], [], [], []
         for y, *_, values, color in self.iterator():

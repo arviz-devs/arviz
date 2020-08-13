@@ -38,8 +38,7 @@ def plot_forest(
 ):
     """Forest plot to compare HDI intervals from a number of distributions.
 
-    Generates a forest plot of 100*(hdi_prob)% HDI intervals from
-    a trace or list of traces.
+    Generates a forest plot of 100*(hdi_prob)% HDI intervals from a trace or list of traces.
 
     Parameters
     ----------
@@ -49,30 +48,28 @@ def plot_forest(
     kind: str
         Choose kind of plot for main axis. Supports "forestplot" or "ridgeplot"
     model_names: list[str], optional
-        List with names for the models in the list of data. Useful when
-        plotting more that one dataset
+        List with names for the models in the list of data. Useful when plotting more that one
+        dataset
     var_names: list[str], optional
-        List of variables to plot (defaults to None, which results in all
-        variables plotted) Prefix the variables by `~` when you want to exclude them
-        from the plot.
+        List of variables to plot (defaults to None, which results in all variables plotted)
+        Prefix the variables by `~` when you want to exclude them from the plot.
     filter_vars: {None, "like", "regex"}, optional, default=None
-        If `None` (default), interpret var_names as the real variables names. If "like",
-        interpret var_names as substrings of the real variables names. If "regex",
-        interpret var_names as regular expressions on the real variables names. A la
-        `pandas.filter`.
+        If `None` (default), interpret var_names as the real variables names. If "like", interpret
+        var_names as substrings of the real variables names. If "regex", interpret var_names as
+        regular expressions on the real variables names. A la `pandas.filter`.
     transform: callable
         Function to transform data (defaults to None i.e.the identity function)
     coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     combined: bool
-        Flag for combining multiple chains into a single chain. If False (default),
-        chains will be plotted separately.
+        Flag for combining multiple chains into a single chain. If False (default), chains will be
+        plotted separately.
     hdi_prob: float, optional
         Plots highest posterior density interval for chosen percentage of density. Defaults to 0.94.
     rope: tuple or dictionary of tuples
-        Lower and upper values of the Region Of Practical Equivalence. If a list with one
-        interval only is provided, the ROPE will be displayed across the y-axis. If more than one
-        interval is provided the length of the list should match the number of variables.
+        Lower and upper values of the Region Of Practical Equivalence. If a list with one interval
+        only is provided, the ROPE will be displayed across the y-axis. If more than one interval is
+        provided the length of the list should match the number of variables.
     quartiles: bool, optional
         Flag for plotting the interquartile range, in addition to the hdi_prob intervals.
         Defaults to True
@@ -82,9 +79,9 @@ def plot_forest(
         Flag for plotting the effective sample size. Defaults to False
     colors: list or string, optional
         list with valid matplotlib colors, one color per model. Alternative a string can be passed.
-        If the string is `cycle`, it will automatically chose a color per model from the
-        matplotlibs cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used
-        for all models. Defauls to 'cycle'.
+        If the string is `cycle`, it will automatically chose a color per model from the matplotlibs
+        cycle. If a single color is passed, eg 'k', 'C2', 'red' this color will be used for all
+        models. Defauls to 'cycle'.
     textsize: float
         Text size scaling factor for labels, titles and lines. If None it will be autoscaled based
         on figsize.
@@ -100,6 +97,8 @@ def plot_forest(
     ridgeplot_kind: string
         By default ("auto") continuous variables are plotted using KDEs and discrete ones using
         histograms. To override this use "hist" to plot histograms and "density" for KDEs
+    ridgeplot_truncate: bool
+        Whether to truncate densities according to the value of hdi_prop. Defaults to True
     ridgeplot_quantiles: list
         Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
         Defaults to None.
@@ -151,6 +150,22 @@ def plot_forest(
         >>>                            var_names=['theta'],
         >>>                            combined=True,
         >>>                            ridgeplot_overlap=3,
+        >>>                            colors='white',
+        >>>                            figsize=(9, 7))
+        >>> axes[0].set_title('Estimated theta for 8 schools model')
+
+    Ridgeplot non-truncated and with quantiles
+
+    .. plot::
+        :context: close-figs
+
+        >>> axes = az.plot_forest(non_centered_data,
+        >>>                            kind='ridgeplot',
+        >>>                            var_names=['theta'],
+        >>>                            combined=True,
+        >>>                            ridgeplot_truncate=False,
+        >>>                            ridgeplot_quantiles=[.25, .5, .75],
+        >>>                            ridgeplot_overlap=0.7,
         >>>                            colors='white',
         >>>                            figsize=(9, 7))
         >>> axes[0].set_title('Estimated theta for 8 schools model')
