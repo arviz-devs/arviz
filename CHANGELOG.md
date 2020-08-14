@@ -8,6 +8,7 @@
 * Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) (#1336)
 
 ### Maintenance and fixes
+* automatic conversion of list/tuple to numpy array in distplot (#1277)
 * plot_posterior: fix overlap of hdi and rope (#1263)
 * `plot_dist` bins argument error fixed (#1306)
 * improve handling of circular variables in `az.summary` (#1313)
