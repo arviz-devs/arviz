@@ -24,6 +24,8 @@ def plot_trace(
     figsize,
     rug,
     lines,
+    circ_var_names,  # pylint: disable=unused-argument
+    circ_var_units,  # pylint: disable=unused-argument
     compact,
     compact_prop,
     combined,

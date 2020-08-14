@@ -159,11 +159,13 @@ def test_plot_density_bad_kwargs(models):
         {"kind": "rank_bars"},
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
+        {"circ_var_names": ["mu"]},
+        {"circ_var_units": "degrees"},
     ],
 )
 def test_plot_trace(models, kwargs):
     axes = plot_trace(models.model_1, **kwargs)
-    assert axes.shape
+    assert axes.figure
 
 
 @pytest.mark.parametrize(
@@ -177,33 +179,33 @@ def test_plot_trace_legend(compact, combined):
     axes = plot_trace(
         idata, var_names=["home", "atts_star"], compact=compact, combined=combined, legend=True
     )
-    assert axes[0, 0].get_legend()
-    compact_legend = axes[1, 0].get_legend()
+    assert axes.figure.axes[0].get_legend()
+    compact_legend = axes.figure.axes[2].get_legend()
     if compact:
-        assert axes.shape == (2, 2)
+        assert len(axes.figure.axes) == 4
         assert compact_legend
     else:
-        assert axes.shape == (7, 2)
+        assert len(axes.figure.axes) == 14
         assert not compact_legend
 
 
 def test_plot_trace_discrete(discrete_model):
     axes = plot_trace(discrete_model)
-    assert axes.shape
+    assert axes.figure
 
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
         with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_trace(models.model_1)
-    assert axes.shape == (3, 2)
+    assert len(axes.figure.axes) == 6
 
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
     with pytest.warns(UserWarning, match="valid var.+should be provided"):
         axes = plot_trace(models.model_1, **kwargs)
-    assert axes.shape
+    assert axes.figure
 
 
 @pytest.mark.parametrize(
@@ -218,7 +220,7 @@ def test_plot_trace_bad_lines_value(models, bad_kwargs):
 def test_plot_trace_futurewarning(models, prop):
     with pytest.warns(FutureWarning, match=f"{prop} as a tuple.+deprecated"):
         ax = plot_trace(models.model_1, **{prop: ("ls", ("-", "--"))})
-    assert ax.shape
+    assert ax.figure
 
 
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
