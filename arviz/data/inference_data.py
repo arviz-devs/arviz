@@ -10,7 +10,6 @@ from datetime import datetime
 from html import escape
 
 import netCDF4 as nc
-import json
 import numpy as np
 import xarray as xr
 from xarray.core.options import OPTIONS
@@ -20,6 +19,12 @@ from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list
 from .base import _extend_xr_method, dict_to_dataset
 from .io_dict import from_dict
+
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    import json
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -261,7 +266,7 @@ class InferenceData:
         InferenceData object
         """
 
-        with open(filename, "r") as file:
+        with open(filename, "rb") as file:
             idata_dict = json.load(file.read())
 
         return from_dict(**idata_dict, save_warmup=True)
@@ -327,7 +332,7 @@ class InferenceData:
         filename : str
             Location to write to
         kwargs : dict
-            kwargs passed to json.dumps()
+            kwargs passed to json.dump()
 
         Returns
         -------
@@ -335,10 +340,9 @@ class InferenceData:
             Location of json file
         """
         idata_dict = self.to_dict()
-        serialised_data = json.dumps(idata_dict, **kwargs)
 
         with open(filename, "w") as file:
-            file.write(serialised_data)
+            json.dump(idata_dict, file, **kwargs)
 
         return filename
 
