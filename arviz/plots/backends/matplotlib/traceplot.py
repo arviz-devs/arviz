@@ -344,17 +344,31 @@ def plot_trace(
                             )
                             axes.set_ylim(ylims)
 
-                        axes.plot(
-                            values,
-                            np.zeros_like(values) + ylocs,
-                            marker="|",
-                            color="black",
-                            markeredgewidth=1.5,
-                            markersize=30,
-                            linestyle="None",
-                            alpha=trace_kwargs["alpha"],
-                            zorder=0.6,
-                        )
+                        if is_circular:
+                            tick = [axes.get_rmin() + axes.get_rmax() * 0.60, axes.get_rmax()]
+                            for val in values:
+                                axes.plot(
+                                    [val, val],
+                                    tick,
+                                    color="black",
+                                    markeredgewidth=1.5,
+                                    markersize=30,
+                                    alpha=trace_kwargs["alpha"],
+                                    zorder=0.6,
+                                )
+                        else:
+                            axes.plot(
+                                values,
+                                np.zeros_like(values) + ylocs,
+                                marker="|",
+                                color="black",
+                                markeredgewidth=1.5,
+                                markersize=30,
+                                linestyle="None",
+                                alpha=trace_kwargs["alpha"],
+                                zorder=0.6,
+                            )
+
                         axes.set_ylim(ylims)
 
             for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
