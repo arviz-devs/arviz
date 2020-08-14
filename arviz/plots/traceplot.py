@@ -19,6 +19,8 @@ def plot_trace(
     figsize: Optional[Tuple[float, float]] = None,
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
+    circ_var_names: Optional[List[str]] = None,
+    circ_var_units: bool = "radians",
     compact: bool = False,
     compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
@@ -70,6 +72,10 @@ def plot_trace(
     lines: list of tuple of (str, dict, array_like), optional
         List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
         vertical lines on the density and horizontal lines on the trace.
+    circ_var_names : str or list of str, optional
+        List of circular variables to account for when plotting KDE.
+    circ_var_units : str
+        Whether the variables in `circ_var_names` are in "degrees" or "radians".
     compact: bool, optional
         Plot multidimensional variables in a single plot.
     compact_prop: str or dict {str: array_like}, optional
@@ -201,6 +207,8 @@ def plot_trace(
         figsize=figsize,
         rug=rug,
         lines=lines,
+        circ_var_names=circ_var_names,
+        circ_var_units=circ_var_units,
         plot_kwargs=plot_kwargs,
         fill_kwargs=fill_kwargs,
         rug_kwargs=rug_kwargs,
