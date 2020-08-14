@@ -330,20 +330,6 @@ def plot_trace(
                             ylocs = ylims[0]
                         values = value[chain, div_idxs]
 
-                        if kind == "trace" and idy == 1:
-                            axes.plot(
-                                div_draws,
-                                np.zeros_like(div_idxs) + ylocs,
-                                marker="|",
-                                color="black",
-                                markeredgewidth=1.5,
-                                markersize=30,
-                                linestyle="None",
-                                alpha=hist_kwargs["alpha"],
-                                zorder=0.6,
-                            )
-                            axes.set_ylim(ylims)
-
                         if is_circular:
                             tick = [axes.get_rmin() + axes.get_rmax() * 0.60, axes.get_rmax()]
                             for val in values:
@@ -357,19 +343,32 @@ def plot_trace(
                                     zorder=0.6,
                                 )
                         else:
-                            axes.plot(
-                                values,
-                                np.zeros_like(values) + ylocs,
-                                marker="|",
-                                color="black",
-                                markeredgewidth=1.5,
-                                markersize=30,
-                                linestyle="None",
-                                alpha=trace_kwargs["alpha"],
-                                zorder=0.6,
-                            )
+                            if kind == "trace" and idy:
+                                axes.plot(
+                                    div_draws,
+                                    np.zeros_like(div_idxs) + ylocs,
+                                    marker="|",
+                                    color="black",
+                                    markeredgewidth=1.5,
+                                    markersize=30,
+                                    linestyle="None",
+                                    alpha=hist_kwargs["alpha"],
+                                    zorder=0.6,
+                                )
+                            else:
+                                axes.plot(
+                                    values,
+                                    np.zeros_like(values) + ylocs,
+                                    marker="|",
+                                    color="black",
+                                    markeredgewidth=1.5,
+                                    markersize=30,
+                                    linestyle="None",
+                                    alpha=trace_kwargs["alpha"],
+                                    zorder=0.6,
+                                )
 
-                        axes.set_ylim(ylims)
+                    axes.set_ylim(ylims)
 
             for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
                 if isinstance(vlines, (float, int)):
