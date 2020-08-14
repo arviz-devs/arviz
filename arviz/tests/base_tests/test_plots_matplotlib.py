@@ -96,9 +96,10 @@ def fig_ax():
 def data_random():
     return np.random.randint(1, 100, size=20)
 
+
 @pytest.fixture(scope="module")
 def data_list():
-    return list(range(11,31))
+    return list(range(11, 31))
 
 
 @pytest.mark.parametrize(
@@ -405,9 +406,11 @@ def test_plot_dist_hist(data_random):
     axes = plot_dist(data_random, hist_kwargs=dict(bins=30))
     assert axes
 
+
 def test_list_conversion(data_list):
     axes = plot_dist(data_list, hist_kwargs=dict(bins=30))
     assert axes
+
 
 @pytest.mark.parametrize(
     "kwargs",
