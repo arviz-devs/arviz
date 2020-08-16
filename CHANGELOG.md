@@ -14,7 +14,7 @@
 * improve handling of circular variables in `az.summary` (#1313)
 * Removed change of default warning in `ELPDData` string representation (#1321)
 * update `radon` example dataset to current InferenceData schema specification (#1320)
-* update `from_cmdstan` functionality and add warmup groups (#1330)
+* update `from_cmdstan` functionality and add warmup groups (#1330 and #1351)
 * restructure plotting code to be compatible with mpl>=3.3 (#1312)
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables
 via the argument `circular` (#1284).

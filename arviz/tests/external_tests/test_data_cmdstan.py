@@ -64,6 +64,7 @@ class TestDataCmdStan:
                 continue
             inference_data = self.get_inference_data(path)
             assert hasattr(inference_data, "sample_stats")
+            assert "comments" in inference_data.sample_stats.attrs
 
     def test_inference_data_shapes(self, paths):
         """Assert that shapes are transformed correctly"""
@@ -87,6 +88,7 @@ class TestDataCmdStan:
             Z_mean_true = np.array([1, 2, 3, 4])
             Z_mean = inference_data.posterior["Z"].mean(dim=dims).mean(axis=1)
             assert np.isclose(Z_mean, Z_mean_true, atol=7e-1).all()
+            assert "comments" in inference_data.posterior.attrs
 
     def test_inference_data_input_types1(self, paths, observed_data_paths):
         """Check input types
