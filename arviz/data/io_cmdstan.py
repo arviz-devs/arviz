@@ -561,32 +561,42 @@ def _process_configuration(comments):
     comments_gen = iter(comments)
 
     for comment in comments_gen:
-        comment = comment.strip("#").strip()
+        comment = re.sub(r"\s*#\s*", "", comment).strip()
         if comment.startswith("num_samples"):
-            results["num_samples"] = int(comment.strip("num_samples = ").strip("(Default)"))
+            results["num_samples"] = int(
+                re.sub(r"^\s*num_samples\s*=\s*|\s*(Default)\s*$", "", comment)
+            )
         elif comment.startswith("num_warmup"):
-            results["num_warmup"] = int(comment.strip("num_warmup = ").strip("(Default)"))
+            results["num_warmup"] = int(
+                re.sub(r"^\s*num_warmup\s*=\s*|\s*(Default)\s*$", "", comment)
+            )
         elif comment.startswith("save_warmup"):
-            results["save_warmup"] = bool(int(comment.strip("save_warmup = ").strip("(Default)")))
+            results["save_warmup"] = bool(
+                re.sub(r"^\s*save_warmup\s*=\s*|\s*(Default)\s*$", "", comment)
+            )
         elif comment.startswith("thin"):
-            results["thin"] = int(comment.strip("thin = ").strip("(Default)"))
+            results["thin"] = int(re.sub(r"^\s*thin\s*=\s*|\s*(Default)\s*$", "", comment))
         elif comment.startswith("stan_version_"):
-            key, val = comment.strip("stan_version_").split("=")
+            key, val = re.sub(r"^\s*stan_version_", "", comment).split("=")
             results["stan_version"][key.strip()] = val.strip()
         elif comment.startswith("Step size"):
             _, val = comment.split("=")
             results["step_size"] = float(val.strip())
         elif "inverse mass matrix" in comment:
-            comment = next(comments_gen).strip("#").strip()
+            comment = re.sub(r"^\s*#\s*", "", next(comments_gen)).strip()
             results["inverse_mass_matrix"] = np.array(comment.split(","), dtype=float)
         elif ("seconds" in comment) and any(
             item in comment for item in ("(Warm-up)", "(Sampling)", "(Total)")
         ):
-            value = (
-                comment.strip("Elapsed Time:")
-                .strip("seconds (Warm-up)")
-                .strip("seconds (Sampling)")
-                .strip("seconds (Total)")
+            value = re.sub(
+                (
+                    r"^\s*Elapsed\s*Time:\s*|"
+                    r"\s*seconds\s*(Warm-up)\s*|"
+                    r"\s*seconds\s*(Sampling)\s*|"
+                    r"\s*seconds\s*(Total)\s*"
+                ),
+                "",
+                comment,
             )
             key = (
                 "warmup_time_seconds"
