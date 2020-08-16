@@ -222,8 +222,8 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
         )
 
     @requires("posterior")
@@ -375,8 +375,10 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
+            dict_to_dataset(
+                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
+            ),
         )
 
     @requires("prior")
