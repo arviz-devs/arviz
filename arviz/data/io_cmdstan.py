@@ -554,7 +554,7 @@ class CmdStanConverter:
 def _process_configuration(comments):
     """Extract sampling information."""
     results = {
-        "comments_raw": "\n".join(comments),
+        "comments": "\n".join(comments),
         "stan_version": {},
     }
 
