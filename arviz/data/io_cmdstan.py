@@ -554,29 +554,15 @@ class CmdStanConverter:
 def _process_configuration(comments):
     """Extract sampling information."""
     results = {
-        "extra": [],
+        "comments_raw": "\n".join(comments),
         "stan_version": {},
     }
 
     comments_gen = iter(comments)
 
     for comment in comments_gen:
-        comment = re.sub(r"\s*#\s*", "", comment).strip()
-        if comment.startswith("num_samples"):
-            results["num_samples"] = int(
-                re.sub(r"^\s*num_samples\s*=\s*|\s*(Default)\s*$", "", comment)
-            )
-        elif comment.startswith("num_warmup"):
-            results["num_warmup"] = int(
-                re.sub(r"^\s*num_warmup\s*=\s*|\s*(Default)\s*$", "", comment)
-            )
-        elif comment.startswith("save_warmup"):
-            results["save_warmup"] = bool(
-                re.sub(r"^\s*save_warmup\s*=\s*|\s*(Default)\s*$", "", comment)
-            )
-        elif comment.startswith("thin"):
-            results["thin"] = int(re.sub(r"^\s*thin\s*=\s*|\s*(Default)\s*$", "", comment))
-        elif comment.startswith("stan_version_"):
+        comment = re.sub(r"^\s*#\s*|\s*(Default)\s*$", "", comment).strip()
+        if comment.startswith("stan_version_"):
             key, val = re.sub(r"^\s*stan_version_", "", comment).split("=")
             results["stan_version"][key.strip()] = val.strip()
         elif comment.startswith("Step size"):
@@ -590,7 +576,7 @@ def _process_configuration(comments):
         ):
             value = re.sub(
                 (
-                    r"^\s*Elapsed\s*Time:\s*|"
+                    r"^Elapsed\s*Time:\s*|"
                     r"\s*seconds\s*(Warm-up)\s*|"
                     r"\s*seconds\s*(Sampling)\s*|"
                     r"\s*seconds\s*(Total)\s*"
@@ -606,8 +592,22 @@ def _process_configuration(comments):
                 else "total_time_seconds"
             )
             results[key] = float(value)
-        else:
-            results["extra"].append(comment)
+        elif "=" in comment:
+            match_int = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+)$", comment)
+            match_float = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+\.[0-9]+)$", comment)
+            match_str = re.search(r"^(\S+)\s*=\s*(\S+)$", comment)
+            if match_int:
+                key, value = match_int.group(1), match_int.group(2)
+                if key == "save_warmup":
+                    results[key] = bool(value)
+                else:
+                    results[key] = int(value)
+            elif match_float:
+                key, value = match_float.group(1), match_float.group(2)
+                results[key] = float(value)
+            elif match_str:
+                key, value = match_str.group(1), match_str.group(2)
+                results[key] = value
 
     return results
 
