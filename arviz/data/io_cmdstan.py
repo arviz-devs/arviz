@@ -222,8 +222,8 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs),
+            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs),
         )
 
     @requires("posterior")
@@ -375,8 +375,10 @@ class CmdStanConverter:
         data = _unpack_dataframes(sampler_params)
         data_warmup = _unpack_dataframes(sampler_params_warmup)
         return (
-            dict_to_dataset(data, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, coords=self.coords, dims=self.dims),
+            dict_to_dataset(data, coords=self.coords, dims=self.dims, attrs=self.attrs_prior),
+            dict_to_dataset(
+                data_warmup, coords=self.coords, dims=self.dims, attrs=self.attrs_prior
+            ),
         )
 
     @requires("prior")
@@ -554,39 +556,35 @@ class CmdStanConverter:
 def _process_configuration(comments):
     """Extract sampling information."""
     results = {
-        "extra": [],
+        "comments": "\n".join(comments),
         "stan_version": {},
     }
 
     comments_gen = iter(comments)
 
     for comment in comments_gen:
-        comment = comment.strip("#").strip()
-        if comment.startswith("num_samples"):
-            results["num_samples"] = int(comment.strip("num_samples = ").strip("(Default)"))
-        elif comment.startswith("num_warmup"):
-            results["num_warmup"] = int(comment.strip("num_warmup = ").strip("(Default)"))
-        elif comment.startswith("save_warmup"):
-            results["save_warmup"] = bool(int(comment.strip("save_warmup = ").strip("(Default)")))
-        elif comment.startswith("thin"):
-            results["thin"] = int(comment.strip("thin = ").strip("(Default)"))
-        elif comment.startswith("stan_version_"):
-            key, val = comment.strip("stan_version_").split("=")
+        comment = re.sub(r"^\s*#\s*|\s*\(Default\)\s*$", "", comment).strip()
+        if comment.startswith("stan_version_"):
+            key, val = re.sub(r"^\s*stan_version_", "", comment).split("=")
             results["stan_version"][key.strip()] = val.strip()
         elif comment.startswith("Step size"):
             _, val = comment.split("=")
             results["step_size"] = float(val.strip())
         elif "inverse mass matrix" in comment:
-            comment = next(comments_gen).strip("#").strip()
+            comment = re.sub(r"^\s*#\s*", "", next(comments_gen)).strip()
             results["inverse_mass_matrix"] = np.array(comment.split(","), dtype=float)
         elif ("seconds" in comment) and any(
             item in comment for item in ("(Warm-up)", "(Sampling)", "(Total)")
         ):
-            value = (
-                comment.strip("Elapsed Time:")
-                .strip("seconds (Warm-up)")
-                .strip("seconds (Sampling)")
-                .strip("seconds (Total)")
+            value = re.sub(
+                (
+                    r"^Elapsed\s*Time:\s*|"
+                    r"\s*seconds\s*\(Warm-up\)\s*|"
+                    r"\s*seconds\s*\(Sampling\)\s*|"
+                    r"\s*seconds\s*\(Total\)\s*"
+                ),
+                "",
+                comment,
             )
             key = (
                 "warmup_time_seconds"
@@ -596,9 +594,25 @@ def _process_configuration(comments):
                 else "total_time_seconds"
             )
             results[key] = float(value)
-        else:
-            results["extra"].append(comment)
+        elif "=" in comment:
+            match_int = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+)$", comment)
+            match_float = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+\.[0-9]+)$", comment)
+            match_str = re.search(r"^(\S+)\s*=\s*(\S+)$", comment)
+            match_empty = re.search(r"^(\S+)\s*=\s*$", comment)
+            if match_int:
+                key, value = match_int.group(1), match_int.group(2)
+                results[key] = int(value)
+            elif match_float:
+                key, value = match_float.group(1), match_float.group(2)
+                results[key] = float(value)
+            elif match_str:
+                key, value = match_str.group(1), match_str.group(2)
+                results[key] = value
+            elif match_empty:
+                key = match_empty.group(1)
+                results[key] = None
 
+    results = {key: results[key] for key in sorted(results)}
     return results
 
 
