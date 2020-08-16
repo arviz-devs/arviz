@@ -99,9 +99,14 @@ class PyStanConverter:
         if stat_lp_warmup:
             data_warmup["lp"] = stat_lp_warmup["lp__"]
 
+        attrs = get_attrs(posterior)
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
+            dict_to_dataset(
+                data_warmup, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
         )
 
     @requires("posterior")
@@ -191,7 +196,10 @@ class PyStanConverter:
         stat_lp, _ = get_draws(prior, variables="lp__", warmup=False)
         data["lp"] = stat_lp["lp__"]
 
-        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs(prior)
+        return dict_to_dataset(
+            data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     @requires("prior_predictive")
