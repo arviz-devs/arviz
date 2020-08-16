@@ -10,5 +10,5 @@ line_length = 100
 skip = [
     "arviz/plots/backends/bokeh/__init__.py",
     "arviz/plots/backends/matplotlib/__init__.py", 
-    "arviz/__init__.py
+    "arviz/__init__.py"
 ]
