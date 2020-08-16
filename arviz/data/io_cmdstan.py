@@ -577,9 +577,9 @@ def _process_configuration(comments):
             value = re.sub(
                 (
                     r"^Elapsed\s*Time:\s*|"
-                    r"\s*seconds\s*(Warm-up)\s*|"
-                    r"\s*seconds\s*(Sampling)\s*|"
-                    r"\s*seconds\s*(Total)\s*"
+                    r"\s*seconds\s*\(Warm-up\)\s*|"
+                    r"\s*seconds\s*\(Sampling\)\s*|"
+                    r"\s*seconds\s*\(Total\)\s*"
                 ),
                 "",
                 comment,
