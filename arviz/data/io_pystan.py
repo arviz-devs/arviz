@@ -9,6 +9,7 @@ import numpy as np
 import xarray as xr
 
 from ..rcparams import rcParams
+from .. import _log
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
 
@@ -634,55 +635,60 @@ def get_sample_stats(fit, warmup=False):
 def get_attrs(fit):
     """Get attributes for PyStan fit object."""
     attrs = {}
-    for holder in fit.sim["samples"]:
-        metadata = deepcopy(holder.args)
-        metadata.setdefault("control", {})
-        if isinstance(metadata["init"], bytes):
-            metadata["init"] = metadata["init"].decode("utf-8")
-        else:
-            metadata["init"] = metadata["init"]
-        metadata["inits"] = np.array((holder.inits))
-        metadata["step_size"] = float(
-            re.search(
-                r"step\s*size\s*=\s*([0-9]+.?[0-9]+)\s*",
-                holder.adaptation_info,
-                flags=re.IGNORECASE,
-            ).group(1)
-        )
-        inv_metric_match = re.search(
-            r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
-        )
-        if inv_metric_match:
-            inv_metric_str = inv_metric_match.group(1)
-            if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
-                metric = "diag_e"
-                inv_metric = np.array(
-                    [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
-                )
+    try:
+        for holder in fit.sim["samples"]:
+            metadata = deepcopy(holder.args)
+            metadata.setdefault("control", {})
+            if isinstance(metadata["init"], bytes):
+                metadata["init"] = metadata["init"].decode("utf-8")
             else:
-                metric = "dense_e"
-                inv_metric = np.array(
-                    [
-                        list(map(float, item.split(",")))
-                        for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
-                    ]
-                )
-        else:
-            metric = "unit_e"
-            inv_metric = None
+                metadata["init"] = metadata["init"]
+            metadata["inits"] = np.array((holder.inits))
+            metadata["step_size"] = float(
+                re.search(
+                    r"step\s*size\s*=\s*([0-9]+.?[0-9]+)\s*",
+                    holder.adaptation_info,
+                    flags=re.IGNORECASE,
+                ).group(1)
+            )
+            inv_metric_match = re.search(
+                r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
+            )
+            if inv_metric_match:
+                inv_metric_str = inv_metric_match.group(1)
+                if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
+                    metric = "diag_e"
+                    inv_metric = np.array(
+                        [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
+                    )
+                else:
+                    metric = "dense_e"
+                    inv_metric = np.array(
+                        [
+                            list(map(float, item.split(",")))
+                            for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                        ]
+                    )
+            else:
+                metric = "unit_e"
+                inv_metric = None
 
-        if metric:
-            metadata["control"]["metric"] = metric
-            metadata["control"]["inv_metric"] = inv_metric
+            if metric:
+                metadata["control"]["metric"] = metric
+                metadata["control"]["inv_metric"] = inv_metric
 
-        metadata["adaption_info"] = holder.adaptation_info
+            metadata["adaption_info"] = holder.adaptation_info
 
-        for key, value in metadata.items():
-            if key not in attrs:
-                attrs[key] = []
-            attrs[key].append(value)
-
-    attrs["stan_code"] = fit.get_stancode()
+            for key, value in metadata.items():
+                if key not in attrs:
+                    attrs[key] = []
+                attrs[key].append(value)
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Failed to fetch metadata: %s", exp)
+    try:
+        attrs["stan_code"] = fit.get_stancode()
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Could not read stan_code from fit object: %s", exp)
     return attrs
 
 
