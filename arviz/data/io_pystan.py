@@ -644,32 +644,38 @@ def get_attrs(fit):
         metadata["inits"] = np.array((holder.inits))
         metadata["step_size"] = float(
             re.search(
-                r"step\s*size\s*=\s*([0-9]+.[0-9]+)\s*", holder.adaptation_info, flags=re.IGNORECASE
+                r"step\s*size\s*=\s*([0-9]+.?[0-9]+)\s*",
+                holder.adaptation_info,
+                flags=re.IGNORECASE,
             ).group(1)
         )
-        inv_metric_str = re.search(
+        inv_metric_match = re.search(
             r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
-        ).group(1)
-        if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
-            metric = "diag_e"
-            inv_metric = np.array([float(item) for item in inv_metric_str.strip(" #\n").split(",")])
-        elif "Elements of inverse mass matrix" in holder.adaptation_info:
-            metric = "dense_e"
-            inv_metric = np.array(
-                [
-                    list(map(float, item.split(",")))
-                    for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
-                ]
-            )
+        )
+        if inv_metric_match:
+            inv_metric_str = inv_metric_match.group(1)
+            if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
+                metric = "diag_e"
+                inv_metric = np.array(
+                    [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
+                )
+            else:
+                metric = "dense_e"
+                inv_metric = np.array(
+                    [
+                        list(map(float, item.split(",")))
+                        for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                    ]
+                )
         else:
-            metric = None
+            metric = "unit_e"
             inv_metric = None
 
         if metric:
             metadata["control"]["metric"] = metric
             metadata["control"]["inv_metric"] = inv_metric
 
-        metadata["Adaption_info"] = holder.adaptation_info
+        metadata["adaption_info"] = holder.adaptation_info
 
         for key, value in metadata.items():
             if key not in attrs:
