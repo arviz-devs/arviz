@@ -779,15 +779,15 @@ def get_attrs_stan3(fit, model=None):
     for key in ["num_chains", "num_samples", "num_thin", "num_warmup", "save_warmup"]:
         try:
             attrs[key] = getattr(fit, key)
-        except AttributeError:
-            _log.warning("Could not access attribute %s in fit object", key)
+        except AttributeError as exp:
+            _log.warning("Could not access attribute %s in fit object %s", key, exp)
 
     if model is not None:
         for key in ["model_name", "program_code", "random_seed"]:
             try:
-                attrs[key] = getattr(fit, key)
-            except AttributeError:
-                _log.warning("Could not access attribute %s in model object", key)
+                attrs[key] = getattr(model, key)
+            except AttributeError as exp:
+                _log.warning("Could not access attribute %s in model object %s", key, exp)
 
     return attrs
 
