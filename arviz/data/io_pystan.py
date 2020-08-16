@@ -3,11 +3,13 @@
 import re
 import warnings
 from collections import OrderedDict
+from copy import deepcopy
 
 import numpy as np
 import xarray as xr
 
 from ..rcparams import rcParams
+from .. import _log
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
 
@@ -74,10 +76,14 @@ class PyStanConverter:
         ignore = posterior_predictive + predictions + log_likelihood + ["lp__"]
 
         data, data_warmup = get_draws(posterior, ignore=ignore, warmup=self.save_warmup)
-
+        attrs = get_attrs(posterior)
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
+            dict_to_dataset(
+                data_warmup, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
         )
 
     @requires("posterior")
@@ -93,9 +99,14 @@ class PyStanConverter:
         if stat_lp_warmup:
             data_warmup["lp"] = stat_lp_warmup["lp__"]
 
+        attrs = get_attrs(posterior)
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
+            dict_to_dataset(
+                data_warmup, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
         )
 
     @requires("posterior")
@@ -170,7 +181,10 @@ class PyStanConverter:
         ignore = prior_predictive + ["lp__"]
 
         data, _ = get_draws(prior, ignore=ignore, warmup=False)
-        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs(prior)
+        return dict_to_dataset(
+            data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
@@ -182,7 +196,10 @@ class PyStanConverter:
         stat_lp, _ = get_draws(prior, variables="lp__", warmup=False)
         data["lp"] = stat_lp["lp__"]
 
-        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs(prior)
+        return dict_to_dataset(
+            data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -311,16 +328,23 @@ class PyStan3Converter:
         ignore = posterior_predictive + predictions + log_likelihood
 
         data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore)
-
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(posterior, model=posterior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from posterior."""
         posterior = self.posterior
+        posterior_model = self.posterior_model
         data = get_sample_stats_stan3(posterior, ignore="lp__")
         data["lp"] = get_sample_stats_stan3(posterior, variables="lp__")["lp"]
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+
+        attrs = get_attrs_stan3(posterior, model=posterior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("posterior")
     @requires("log_likelihood")
@@ -380,14 +404,21 @@ class PyStan3Converter:
         ignore = prior_predictive
 
         data = get_draws_stan3(prior, model=prior_model, ignore=ignore)
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(prior, model=prior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats_prior from prior."""
         prior = self.prior
+        prior_model = self.prior_model
         data = get_sample_stats_stan3(prior)
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(prior, model=prior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -623,6 +654,73 @@ def get_sample_stats(fit, warmup=False):
     return data, data_warmup
 
 
+def get_attrs(fit):
+    """Get attributes from PyStan fit object."""
+    attrs = {}
+
+    try:
+        attrs["args"] = [deepcopy(holder.args) for holder in fit.sim["samples"]]
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Failed to fetch args from fit: %s", exp)
+    if "args" in attrs:
+        for arg in attrs["args"]:
+            if isinstance(arg["init"], bytes):
+                arg["init"] = arg["init"].decode("utf-8")
+    try:
+        attrs["inits"] = np.array([holder.inits for holder in fit.sim["samples"]])
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Failed to fetch `args` from fit: %s", exp)
+
+    attrs["step_size"] = []
+    attrs["metric"] = []
+    attrs["inv_metric"] = []
+    for holder in fit.sim["samples"]:
+        try:
+            step_size = float(
+                re.search(
+                    r"step\s*size\s*=\s*([0-9]+.?[0-9]+)\s*",
+                    holder.adaptation_info,
+                    flags=re.IGNORECASE,
+                ).group(1)
+            )
+        except AttributeError:
+            step_size = np.nan
+        attrs["step_size"].append(step_size)
+
+        inv_metric_match = re.search(
+            r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
+        )
+        if inv_metric_match:
+            inv_metric_str = inv_metric_match.group(1)
+            if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
+                metric = "diag_e"
+                inv_metric = np.array(
+                    [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
+                )
+            else:
+                metric = "dense_e"
+                inv_metric = np.array(
+                    [
+                        list(map(float, item.split(",")))
+                        for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                    ]
+                )
+        else:
+            metric = "unit_e"
+            inv_metric = None
+
+        attrs["metric"].append(metric)
+        attrs["inv_metric"].append(inv_metric)
+
+    if not attrs["step_size"]:
+        del attrs["step_size"]
+
+    attrs["adaptation_info"] = fit.get_adaptation_info()
+    attrs["stan_code"] = fit.get_stancode()
+
+    return attrs
+
+
 def get_draws_stan3(fit, model=None, variables=None, ignore=None):
     """Extract draws from PyStan3 fit."""
     if ignore is None:
@@ -680,6 +778,25 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         data[name] = values
 
     return data
+
+
+def get_attrs_stan3(fit, model=None):
+    """Get attributes from PyStan3 fit and model object."""
+    attrs = {}
+    for key in ["num_chains", "num_samples", "num_thin", "num_warmup", "save_warmup"]:
+        try:
+            attrs[key] = getattr(fit, key)
+        except AttributeError as exp:
+            _log.warning("Failed to access attribute %s in fit object %s", key, exp)
+
+    if model is not None:
+        for key in ["model_name", "program_code", "random_seed"]:
+            try:
+                attrs[key] = getattr(model, key)
+            except AttributeError as exp:
+                _log.warning("Failed to access attribute %s in model object %s", key, exp)
+
+    return attrs
 
 
 def infer_dtypes(fit, model=None):

@@ -8,21 +8,16 @@
 * Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) (#1336)
 
 ### Maintenance and fixes
-* automatic conversion of list/tuple to numpy array in distplot (#1277)
-* plot_posterior: fix overlap of hdi and rope (#1263)
+* Automatic conversion of list/tuple to numpy array in distplot (#1277)
+* `plot_posterior` fix overlap of hdi and rope (#1263)
 * `plot_dist` bins argument error fixed (#1306)
-* improve handling of circular variables in `az.summary` (#1313)
+* Improve handling of circular variables in `az.summary` (#1313)
 * Removed change of default warning in `ELPDData` string representation (#1321)
-* update `radon` example dataset to current InferenceData schema specification (#1320)
-* update `from_cmdstan` functionality and add warmup groups (#1330 and #1351)
-* restructure plotting code to be compatible with mpl>=3.3 (#1312)
-* Replaced `_fast_kde()` with `kde()` which now also supports circular variables
-via the argument `circular` (#1284).
+* Update `radon` example dataset to current InferenceData schema specification (#1320)
+* Update `from_cmdstan` functionality and add warmup groups (#1330 and #1351)
+* Restructure plotting code to be compatible with mpl>=3.3 (#1312 and #1352)
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables via the argument `circular` (#1284).
-
-### Maintenance and fixes
-* plot_posterior: fix overlap of hdi and rope (#1263)
-* All the functions that used to call `_fast_kde`() now use `kde()` and have been updated to handle the new types returned (#1284).
+* Increased `from_pystan` attrs information content (#1353)
 
 ### Deprecation
 

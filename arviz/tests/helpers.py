@@ -612,9 +612,9 @@ def pystan_version():
         version = int(pystan.__version__[0])
     except ImportError:
         try:
-            import stan as pystan  # pylint: disable=import-error
+            import stan  # pylint: disable=import-error
 
-            version = int(pystan.__version__[0])
+            version = int(stan.__version__[0])
         except ImportError:
             version = None
     return version

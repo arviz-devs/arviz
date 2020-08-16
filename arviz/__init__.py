@@ -8,6 +8,11 @@ import os
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.pyplot import register_cmap, style
 
+
+# Configure logging before importing arviz internals
+_log = logging.getLogger("arviz")
+
+
 from .data import *
 from .plots import *
 from .plots import backends
@@ -20,10 +25,6 @@ from .wrappers import *
 _arviz_style_path = os.path.join(os.path.dirname(__file__), "plots", "styles")
 style.core.USER_LIBRARY_PATHS.append(_arviz_style_path)
 style.core.reload_library()
-
-
-# Configure logging before importing arviz internals
-_log = logging.getLogger("arviz")
 
 
 if not logging.root.handlers:

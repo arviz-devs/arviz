@@ -159,6 +159,12 @@ class TestDataPyStan:
         }
         fails = check_multiple_attrs(test_dict, inference_data2)
         assert not fails
+        assert any(
+            item in inference_data2.posterior.attrs for item in ["stan_code", "program_code"]
+        )
+        assert any(
+            item in inference_data2.sample_stats.attrs for item in ["stan_code", "program_code"]
+        )
         # inference_data 3
         test_dict = {
             "posterior_predictive": ["y_hat", "log_lik"],
