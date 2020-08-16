@@ -380,7 +380,7 @@ def _set_animation(
             def animate(i):
                 x_vals, y_vals = kde(pp_sampled_vals[i])
                 line.set_data(x_vals, y_vals)
-                return line
+                return (line,)
 
         else:
             vals = pp_sampled_vals[0]
@@ -407,7 +407,7 @@ def _set_animation(
         def animate(i):
             x_vals, y_vals = _empirical_cdf(pp_sampled_vals[i])
             line.set_data(x_vals, y_vals)
-            return line
+            return (line,)
 
     elif kind == "scatter":
         x_vals = pp_sampled_vals[0]
@@ -418,14 +418,14 @@ def _set_animation(
 
         def animate(i):
             line.set_xdata(np.ravel(pp_sampled_vals[i]))
-            return line
+            return (line,)
 
     def init():
         if kind != "scatter":
             line.set_data([], [])
         else:
             line.set_xdata([])
-        return line
+        return (line,)
 
     return animate, init
 
