@@ -561,7 +561,7 @@ def _process_configuration(comments):
     comments_gen = iter(comments)
 
     for comment in comments_gen:
-        comment = re.sub(r"^\s*#\s*|\s*(Default)\s*$", "", comment).strip()
+        comment = re.sub(r"^\s*#\s*|\s*\(Default\)\s*$", "", comment).strip()
         if comment.startswith("stan_version_"):
             key, val = re.sub(r"^\s*stan_version_", "", comment).split("=")
             results["stan_version"][key.strip()] = val.strip()
@@ -596,19 +596,21 @@ def _process_configuration(comments):
             match_int = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+)$", comment)
             match_float = re.search(r"^(\S+)\s*=\s*([-+]?[0-9]+\.[0-9]+)$", comment)
             match_str = re.search(r"^(\S+)\s*=\s*(\S+)$", comment)
+            match_empty = re.search(r"^(\S+)\s*=\s*$", comment)
             if match_int:
                 key, value = match_int.group(1), match_int.group(2)
-                if key == "save_warmup":
-                    results[key] = bool(value)
-                else:
-                    results[key] = int(value)
+                results[key] = int(value)
             elif match_float:
                 key, value = match_float.group(1), match_float.group(2)
                 results[key] = float(value)
             elif match_str:
                 key, value = match_str.group(1), match_str.group(2)
                 results[key] = value
+            elif match_empty:
+                key = match_empty.group(1)
+                results[key] = None
 
+    results = {key: results[key] for key in sorted(results)}
     return results
 
 
