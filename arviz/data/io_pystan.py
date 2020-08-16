@@ -3,6 +3,7 @@
 import re
 import warnings
 from collections import OrderedDict
+from copy import deepcopy
 
 import numpy as np
 import xarray as xr
@@ -74,10 +75,14 @@ class PyStanConverter:
         ignore = posterior_predictive + predictions + log_likelihood + ["lp__"]
 
         data, data_warmup = get_draws(posterior, ignore=ignore, warmup=self.save_warmup)
-
+        attrs = get_attrs(posterior)
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
+            dict_to_dataset(
+                data_warmup, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+            ),
         )
 
     @requires("posterior")
@@ -170,7 +175,10 @@ class PyStanConverter:
         ignore = prior_predictive + ["lp__"]
 
         data, _ = get_draws(prior, ignore=ignore, warmup=False)
-        return dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs(prior)
+        return dict_to_dataset(
+            data, library=self.pystan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
@@ -621,6 +629,55 @@ def get_sample_stats(fit, warmup=False):
             data_warmup[name] = values
 
     return data, data_warmup
+
+
+def get_attrs(fit):
+    """Get attributes for PyStan fit object."""
+    attrs = {}
+    for holder in fit.sim["samples"]:
+        metadata = deepcopy(holder.args)
+        metadata.setdefault("control", {})
+        if isinstance(metadata["init"], bytes):
+            metadata["init"] = metadata["init"].decode("utf-8")
+        else:
+            metadata["init"] = metadata["init"]
+        metadata["inits"] = np.array((holder.inits))
+        metadata["step_size"] = float(
+            re.search(
+                r"step\s*size\s*=\s*([0-9]+.[0-9]+)\s*", holder.adaptation_info, flags=re.IGNORECASE
+            ).group(1)
+        )
+        inv_metric_str = re.search(
+            r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
+        ).group(1)
+        if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
+            metric = "diag_e"
+            inv_metric = np.array([float(item) for item in inv_metric_str.strip(" #\n").split(",")])
+        elif "Elements of inverse mass matrix" in holder.adaptation_info:
+            metric = "dense_e"
+            inv_metric = np.array(
+                [
+                    list(map(float, item.split(",")))
+                    for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                ]
+            )
+        else:
+            metric = None
+            inv_metric = None
+
+        if metric:
+            metadata["control"]["metric"] = metric
+            metadata["control"]["inv_metric"] = inv_metric
+
+        metadata["Adaption_info"] = holder.adaptation_info
+
+        for key, value in metadata.items():
+            if key not in attrs:
+                attrs[key] = []
+            attrs[key].append(value)
+
+    attrs["stan_code"] = fit.get_stancode()
+    return attrs
 
 
 def get_draws_stan3(fit, model=None, variables=None, ignore=None):
