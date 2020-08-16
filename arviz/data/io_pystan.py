@@ -657,60 +657,67 @@ def get_sample_stats(fit, warmup=False):
 def get_attrs(fit):
     """Get attributes from PyStan fit object."""
     attrs = {}
+
     try:
-        for holder in fit.sim["samples"]:
-            metadata = deepcopy(holder.args)
-            metadata.setdefault("control", {})
-            if isinstance(metadata["init"], bytes):
-                metadata["init"] = metadata["init"].decode("utf-8")
-            else:
-                metadata["init"] = metadata["init"]
-            metadata["inits"] = np.array((holder.inits))
-            metadata["step_size"] = float(
+        attrs["args"] = [deepcopy(holder.args) for holder in fit.sim["samples"]]
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Failed to fetch args from fit: %s", exp)
+    if "args" in attrs:
+        for arg in attrs["args"]:
+            if isinstance(arg["init"], bytes):
+                arg["init"] = arg["init"].decode("utf-8")
+    try:
+        attrs["inits"] = np.array([holder.inits for holder in fit.sim["samples"]])
+    except Exception as exp:  # pylint: disable=broad-except
+        _log.warning("Failed to fetch `args` from fit: %s", exp)
+
+    attrs["step_size"] = []
+    attrs["metric"] = []
+    attrs["inv_metric"] = []
+    for holder in fit.sim["samples"]:
+        try:
+            step_size = float(
                 re.search(
                     r"step\s*size\s*=\s*([0-9]+.?[0-9]+)\s*",
                     holder.adaptation_info,
                     flags=re.IGNORECASE,
                 ).group(1)
             )
-            inv_metric_match = re.search(
-                r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
-            )
-            if inv_metric_match:
-                inv_metric_str = inv_metric_match.group(1)
-                if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
-                    metric = "diag_e"
-                    inv_metric = np.array(
-                        [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
-                    )
-                else:
-                    metric = "dense_e"
-                    inv_metric = np.array(
-                        [
-                            list(map(float, item.split(",")))
-                            for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
-                        ]
-                    )
+        except AttributeError:
+            step_size = np.nan
+        attrs["step_size"].append(step_size)
+
+        inv_metric_match = re.search(
+            r"mass matrix:\s*(.*)\s*$", holder.adaptation_info, flags=re.DOTALL
+        )
+        if inv_metric_match:
+            inv_metric_str = inv_metric_match.group(1)
+            if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
+                metric = "diag_e"
+                inv_metric = np.array(
+                    [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
+                )
             else:
-                metric = "unit_e"
-                inv_metric = None
+                metric = "dense_e"
+                inv_metric = np.array(
+                    [
+                        list(map(float, item.split(",")))
+                        for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                    ]
+                )
+        else:
+            metric = "unit_e"
+            inv_metric = None
 
-            if metric:
-                metadata["control"]["metric"] = metric
-                metadata["control"]["inv_metric"] = inv_metric
+        attrs["metric"].append(metric)
+        attrs["inv_metric"].append(inv_metric)
 
-            metadata["adaption_info"] = holder.adaptation_info
+    if not attrs["step_size"]:
+        del attrs["step_size"]
 
-            for key, value in metadata.items():
-                if key not in attrs:
-                    attrs[key] = []
-                attrs[key].append(value)
-    except Exception as exp:  # pylint: disable=broad-except
-        _log.warning("Failed to fetch metadata: %s", exp)
-    try:
-        attrs["stan_code"] = fit.get_stancode()
-    except Exception as exp:  # pylint: disable=broad-except
-        _log.warning("Could not read stan_code from fit object: %s", exp)
+    attrs["adaptation_info"] = fit.get_adaptation_info()
+    attrs["stan_code"] = fit.get_stancode()
+
     return attrs
 
 
@@ -780,14 +787,14 @@ def get_attrs_stan3(fit, model=None):
         try:
             attrs[key] = getattr(fit, key)
         except AttributeError as exp:
-            _log.warning("Could not access attribute %s in fit object %s", key, exp)
+            _log.warning("Failed to access attribute %s in fit object %s", key, exp)
 
     if model is not None:
         for key in ["model_name", "program_code", "random_seed"]:
             try:
                 attrs[key] = getattr(model, key)
             except AttributeError as exp:
-                _log.warning("Could not access attribute %s in model object %s", key, exp)
+                _log.warning("Failed to access attribute %s in model object %s", key, exp)
 
     return attrs
 
