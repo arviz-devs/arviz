@@ -320,16 +320,23 @@ class PyStan3Converter:
         ignore = posterior_predictive + predictions + log_likelihood
 
         data = get_draws_stan3(posterior, model=posterior_model, ignore=ignore)
-
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(posterior, model=posterior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
         """Extract sample_stats from posterior."""
         posterior = self.posterior
+        posterior_model = self.posterior_model
         data = get_sample_stats_stan3(posterior, ignore="lp__")
         data["lp"] = get_sample_stats_stan3(posterior, variables="lp__")["lp"]
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+
+        attrs = get_attrs_stan3(posterior, model=posterior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("posterior")
     @requires("log_likelihood")
@@ -389,14 +396,21 @@ class PyStan3Converter:
         ignore = prior_predictive
 
         data = get_draws_stan3(prior, model=prior_model, ignore=ignore)
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(prior, model=prior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
         """Extract sample_stats_prior from prior."""
         prior = self.prior
+        prior_model = self.prior_model
         data = get_sample_stats_stan3(prior)
-        return dict_to_dataset(data, library=self.stan, coords=self.coords, dims=self.dims)
+        attrs = get_attrs_stan3(prior, model=prior_model)
+        return dict_to_dataset(
+            data, library=self.stan, attrs=attrs, coords=self.coords, dims=self.dims
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -633,7 +647,7 @@ def get_sample_stats(fit, warmup=False):
 
 
 def get_attrs(fit):
-    """Get attributes for PyStan fit object."""
+    """Get attributes from PyStan fit object."""
     attrs = {}
     try:
         for holder in fit.sim["samples"]:
@@ -749,6 +763,25 @@ def get_sample_stats_stan3(fit, variables=None, ignore=None):
         data[name] = values
 
     return data
+
+
+def get_attrs_stan3(fit, model=None):
+    """Get attributes from PyStan3 fit and model object."""
+    attrs = {}
+    for key in ["num_chains", "num_samples", "num_thin", "num_warmup", "save_warmup"]:
+        try:
+            attrs[key] = getattr(fit, key)
+        except AttributeError:
+            _log.warning("Could not access attribute %s in fit object", key)
+
+    if model is not None:
+        for key in ["model_name", "program_code", "random_seed"]:
+            try:
+                attrs[key] = getattr(fit, key)
+            except AttributeError:
+                _log.warning("Could not access attribute %s in model object", key)
+
+    return attrs
 
 
 def infer_dtypes(fit, model=None):
