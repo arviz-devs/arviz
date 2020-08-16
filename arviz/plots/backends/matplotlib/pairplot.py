@@ -103,8 +103,7 @@ def plot_pair(
                 UserWarning,
             )
 
-    if reference_values_kwargs is None:
-        reference_values_kwargs = {}
+    reference_values_kwargs = matplotlib_kwarg_dealiaser(reference_values_kwargs, "plot")
 
     reference_values_kwargs.setdefault("color", "C3")
     reference_values_kwargs.setdefault("marker", "o")
