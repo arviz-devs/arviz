@@ -2,11 +2,13 @@
 
 from .converters import convert_to_inference_data
 from .io_dict import from_dict
+
 try:
     import ujson as json
 except ImportError:
     # Can't find ujson using json
     import json
+
 
 def from_json(filename):
     """Initialize object from a json file.
@@ -25,6 +27,7 @@ def from_json(filename):
         idata_dict = json.load(file)
 
     return from_dict(**idata_dict, save_warmup=True)
+
 
 def to_json(data, filename, *, group="posterior", coords=None, dims=None):
     """Save dataset as a json file.

@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 
 import pkg_resources
 import xarray as xr
+
 try:
     import ujson as json
 except ImportError:
@@ -293,23 +294,26 @@ def _extend_xr_method(func):
 
     return wrapped
 
+
 def _make_json_serializable(data: dict) -> dict:
     """Convert `data` with numpy.ndarray-like values to JSON-serializable form.
     Returns a new dictionary.
     """
-    ret=dict()
+    ret = dict()
     for key, value in data.items():
         try:
             json.dumps(value)
         except TypeError:
             pass
         else:
-            ret[key]=value
+            ret[key] = value
             continue
         if isinstance(value, dict):
             ret[key] = _make_json_serializable(value)
         elif isinstance(value, np.ndarray):
             ret[key] = np.asarray(value).tolist()
         else:
-            raise TypeError(f"Value associated with variable `{type(value)}` is not JSON serializable.")
+            raise TypeError(
+                f"Value associated with variable `{type(value)}` is not JSON serializable."
+            )
     return ret
