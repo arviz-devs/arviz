@@ -237,6 +237,15 @@ def test_plot_trace_futurewarning(models, prop):
         ({"var_names": "mu", "rope": (-1, 1)}, 1),
         ({"r_hat": True, "quartiles": False}, 2),
         ({"var_names": ["mu"], "colors": "C0", "ess": True, "combined": True}, 2),
+        (
+            {
+                "kind": "ridgeplot",
+                "ridgeplot_truncate": False,
+                "ridgeplot_quantiles": [0.25, 0.5, 0.75],
+            },
+            1,
+        ),
+        ({"kind": "ridgeplot", "r_hat": True, "ess": True}, 3),
         ({"kind": "ridgeplot", "r_hat": True, "ess": True}, 3),
         ({"kind": "ridgeplot", "r_hat": True, "ess": True, "ridgeplot_alpha": 0}, 3),
         (

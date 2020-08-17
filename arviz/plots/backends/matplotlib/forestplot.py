@@ -40,6 +40,7 @@ def plot_forest(
     ridgeplot_overlap,
     ridgeplot_alpha,
     ridgeplot_kind,
+    ridgeplot_truncate,
     ridgeplot_quantiles,
     textsize,
     ess,
@@ -96,10 +97,13 @@ def plot_forest(
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
+            hdi_prob,
             ridgeplot_overlap,
             linewidth,
+            markersize,
             ridgeplot_alpha,
             ridgeplot_kind,
+            ridgeplot_truncate,
             ridgeplot_quantiles,
             axes[0],
         )
@@ -233,20 +237,37 @@ class PlotHandler:
         )
         return ax
 
-    def ridgeplot(self, mult, linewidth, alpha, ridgeplot_kind, ridgeplot_quantiles, ax):
+    def ridgeplot(
+        self,
+        hdi_prob,
+        mult,
+        linewidth,
+        markersize,
+        alpha,
+        ridgeplot_kind,
+        ridgeplot_truncate,
+        ridgeplot_quantiles,
+        ax,
+    ):
         """Draw ridgeplot for each plotter.
 
         Parameters
         ----------
+        hdi_prob : float
+            Probability for the highest density interval.
         mult : float
             How much to multiply height by. Set this to greater than 1 to have some overlap.
         linewidth : float
             Width of line on border of ridges
+        markersize : float
+            Size of marker in center of forestplot line
         alpha : float
             Transparency of ridges
         ridgeplot_kind : string
             By default ("auto") continuous variables are plotted using KDEs and discrete ones using
             histograms. To override this use "hist" to plot histograms and "density" for KDEs
+        ridgeplot_truncate: bool
+            Whether to truncate densities according to the value of hdi_prop. Defaults to True
         ridgeplot_quantiles: list
             Quantiles in ascending order used to segment the KDE. Use [.25, .5, .75] for quartiles.
             Defaults to None.
@@ -257,39 +278,64 @@ class PlotHandler:
             alpha = 1.0
         zorder = 0
         for plotter in self.plotters.values():
-            for x, y_min, y_max, y_q, color in plotter.ridgeplot(mult, ridgeplot_kind):
+            for x, y_min, y_max, hdi_, y_q, color in plotter.ridgeplot(
+                hdi_prob, mult, ridgeplot_kind
+            ):
                 if alpha == 0:
                     border = color
                     facecolor = "None"
                 else:
                     border = "k"
-                    facecolor = to_rgba(color, alpha)
                 if x.dtype.kind == "i":
+                    if ridgeplot_truncate:
+                        facecolor = to_rgba(color, alpha)
+                        y_max = y_max[(x >= hdi_[0]) & (x <= hdi_[1])]
+                        x = x[(x >= hdi_[0]) & (x <= hdi_[1])]
+                    else:
+                        facecolor = [
+                            to_rgba(color, alpha) if ci else "None"
+                            for ci in ((x >= hdi_[0]) & (x <= hdi_[1]))
+                        ]
+                    y_min = np.ones_like(x) * y_min
                     ax.bar(
                         x,
                         y_max - y_min,
                         bottom=y_min,
                         linewidth=linewidth,
                         ec=border,
-                        fc=facecolor,
+                        color=facecolor,
+                        alpha=None,
                         zorder=zorder,
                     )
                 else:
-                    if ridgeplot_quantiles is not None:
-                        idx = [np.sum(y_q < quant) for quant in ridgeplot_quantiles]
-                        ax.fill_between(
-                            x,
-                            y_min,
-                            y_max,
-                            where=np.isin(x, x[idx], invert=True, assume_unique=True),
-                            alpha=alpha,
-                            color=color,
-                            zorder=zorder,
+                    tr_x = x[(x >= hdi_[0]) & (x <= hdi_[1])]
+                    tr_y_min = np.ones_like(tr_x) * y_min
+                    tr_y_max = y_max[(x >= hdi_[0]) & (x <= hdi_[1])]
+                    y_min = np.ones_like(x) * y_min
+                    if ridgeplot_truncate:
+                        ax.plot(
+                            tr_x, tr_y_max, "-", linewidth=linewidth, color=border, zorder=zorder
+                        )
+                        ax.plot(
+                            tr_x, tr_y_min, "-", linewidth=linewidth, color=border, zorder=zorder
                         )
                     else:
                         ax.plot(x, y_max, "-", linewidth=linewidth, color=border, zorder=zorder)
                         ax.plot(x, y_min, "-", linewidth=linewidth, color=border, zorder=zorder)
-                        ax.fill_between(x, y_min, y_max, alpha=alpha, color=color, zorder=zorder)
+                    ax.fill_between(
+                        tr_x, tr_y_max, tr_y_min, alpha=alpha, color=color, zorder=zorder
+                    )
+
+                if ridgeplot_quantiles is not None:
+                    quantiles = [x[np.sum(y_q < quant)] for quant in ridgeplot_quantiles]
+                    ax.plot(
+                        quantiles,
+                        np.ones_like(quantiles) * y_min[0],
+                        "d",
+                        mfc=border,
+                        mec=border,
+                        ms=markersize,
+                    )
                 zorder -= 1
         return ax
 
@@ -301,7 +347,7 @@ class PlotHandler:
         Parameters
         ----------
         hdi_prob : float
-            How wide each line should be
+            Probability for the highest density interval. Width of each line.
         quartiles : bool
             Whether to mark quartiles
         xt_textsize : float
@@ -498,14 +544,19 @@ class VarHandler:
             ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
             yield y, label, ntiles, color
 
-    def ridgeplot(self, mult, ridgeplot_kind):
+    def ridgeplot(self, hdi_prob, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""
-        xvals, yvals, pdfs, pdfs_q, colors = [], [], [], [], []
+        xvals, hdi_vals, yvals, pdfs, pdfs_q, colors = [], [], [], [], [], []
         for y, *_, values, color in self.iterator():
             yvals.append(y)
             colors.append(color)
             values = values.flatten()
             values = values[np.isfinite(values)]
+
+            if hdi_prob != 1:
+                hdi_ = hdi(values, hdi_prob, multimodal=False)
+            else:
+                hdi_ = min(values), max(values)
 
             if ridgeplot_kind == "auto":
                 kind = "hist" if np.all(np.mod(values, 1) == 0) else "density"
@@ -513,22 +564,21 @@ class VarHandler:
                 kind = ridgeplot_kind
 
             if kind == "hist":
-                bins = get_bins(values)
-                _, density, x = histogram(values, bins=bins)
-                density_q = density.cumsum() / density.sum()
+                _, density, x = histogram(values, bins=get_bins(values))
                 x = x[:-1]
             elif kind == "density":
                 x, density = kde(values)
-                density_q = density.cumsum() / density.sum()
+
+            density_q = density.cumsum() / density.sum()
 
             xvals.append(x)
             pdfs.append(density)
-            pdfs_q.append((density_q))
+            pdfs_q.append(density_q)
+            hdi_vals.append(hdi_)
 
         scaling = max(np.max(j) for j in pdfs)
-        for y, x, pdf, pdf_q, color in zip(yvals, xvals, pdfs, pdfs_q, colors):
-            y = y * np.ones_like(x)
-            yield x, y, mult * pdf / scaling + y, pdf_q, color
+        for y, x, hdi_val, pdf, pdf_q, color in zip(yvals, xvals, hdi_vals, pdfs, pdfs_q, colors):
+            yield x, y, mult * pdf / scaling + y, hdi_val, pdf_q, color
 
     def ess(self):
         """Get effective n data for the variable."""
