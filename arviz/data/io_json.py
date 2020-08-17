@@ -22,7 +22,6 @@ def from_json(filename):
     -------
     InferenceData object
     """
-
     with open(filename, "rb") as file:
         idata_dict = json.load(file)
 
