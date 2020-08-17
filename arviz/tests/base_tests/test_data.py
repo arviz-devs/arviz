@@ -20,6 +20,7 @@ from arviz import (
     convert_to_dataset,
     convert_to_inference_data,
     from_dict,
+    from_json,
     from_netcdf,
     list_datasets,
     load_arviz_data,
@@ -997,7 +998,6 @@ class TestDataDict:
         with pytest.warns(UserWarning):
             from_dict(posterior=bad_posterior_dict)
 
-
 class TestDataNetCDF:
     @pytest.fixture(scope="class")
     def data(self, draws, chains):
@@ -1107,6 +1107,23 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
         inference_data.to_netcdf(filepath)
         assert os.path.exists(filepath)
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
+
+class TestJSON:
+    def test_json_converters(self, models):
+        idata=models.model_1
+
+        filepath=os.path.realpath("test.json")
+        idata.to_json(filepath)
+
+        idata_copy = from_json("test.json")
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            xr_data = getattr(idata, group)
+            test_xr_data = getattr(idata_copy, group)
+            assert xr_data.equals(test_xr_data)
+
         os.remove(filepath)
         assert not os.path.exists(filepath)
 

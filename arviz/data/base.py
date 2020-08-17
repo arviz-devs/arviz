@@ -2,11 +2,17 @@
 import datetime
 import functools
 import warnings
+import numpy as np
 from copy import deepcopy
 from typing import Any, Dict, List
 
 import pkg_resources
 import xarray as xr
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    import json
 
 from .. import __version__, utils
 
@@ -286,3 +292,24 @@ def _extend_xr_method(func):
     wrapped.__doc__ = description + params + see_also
 
     return wrapped
+
+def _make_json_serializable(data: dict) -> dict:
+    """Convert `data` with numpy.ndarray-like values to JSON-serializable form.
+    Returns a new dictionary.
+    """
+    ret=dict()
+    for key, value in data.items():
+        try:
+            json.dumps(value)
+        except TypeError:
+            pass
+        else:
+            ret[key]=value
+            continue
+        if isinstance(value, dict):
+            ret[key] = _make_json_serializable(value)
+        elif isinstance(value, np.ndarray):
+            ret[key] = np.asarray(value).tolist()
+        else:
+            raise TypeError(f"Value associated with variable `{type(value)}` is not JSON serializable.")
+    return ret

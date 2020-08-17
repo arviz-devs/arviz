@@ -17,8 +17,7 @@ from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list
-from .base import _extend_xr_method, dict_to_dataset
-from .io_dict import from_dict
+from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
 
 try:
     import ujson as json
@@ -252,25 +251,6 @@ class InferenceData:
             empty_netcdf_file.close()
         return filename
 
-    @staticmethod
-    def from_json(filename):
-        """Initialize object from a json file.
-
-        Parameters
-        ----------
-        filename : str
-            location of json file
-
-        Returns
-        -------
-        InferenceData object
-        """
-
-        with open(filename, "rb") as file:
-            idata_dict = json.load(file.read())
-
-        return from_dict(**idata_dict, save_warmup=True)
-
     def to_dict(self, groups=None, filter_groups=None):
         """Convert InferenceData to a dictionary following xarray naming conventions.
 
@@ -339,7 +319,7 @@ class InferenceData:
         str
             Location of json file
         """
-        idata_dict = self.to_dict()
+        idata_dict = _make_json_serializable(self.to_dict())
 
         with open(filename, "w") as file:
             json.dump(idata_dict, file, **kwargs)
