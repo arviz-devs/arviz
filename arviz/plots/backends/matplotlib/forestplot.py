@@ -254,7 +254,7 @@ class PlotHandler:
         Parameters
         ----------
         hdi_prob : float
-            Probability for the highest density interval. Defaults to 0.94
+            Probability for the highest density interval.
         mult : float
             How much to multiply height by. Set this to greater than 1 to have some overlap.
         linewidth : float
@@ -347,7 +347,7 @@ class PlotHandler:
         Parameters
         ----------
         hdi_prob : float
-            Probability for the highest density interval. Defaults to 0.94. Wide of each line.
+            Probability for the highest density interval. Width of each line.
         quartiles : bool
             Whether to mark quartiles
         xt_textsize : float
