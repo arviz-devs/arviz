@@ -296,8 +296,7 @@ def _extend_xr_method(func):
 
 
 def _make_json_serializable(data: dict) -> dict:
-    """Convert `data` with numpy.ndarray-like values to JSON-serializable form. Returns a new dictionary.
-    """
+    """Convert `data` with numpy.ndarray-like values to JSON-serializable form."""
     ret = dict()
     for key, value in data.items():
         try:
