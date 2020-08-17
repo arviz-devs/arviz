@@ -2,11 +2,11 @@
 import datetime
 import functools
 import warnings
-import numpy as np
 from copy import deepcopy
 from typing import Any, Dict, List
 
 import pkg_resources
+import numpy as np
 import xarray as xr
 
 try:
