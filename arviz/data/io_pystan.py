@@ -8,8 +8,8 @@ from copy import deepcopy
 import numpy as np
 import xarray as xr
 
-from ..rcparams import rcParams
 from .. import _log
+from ..rcparams import rcParams
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
 
