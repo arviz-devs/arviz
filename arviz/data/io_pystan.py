@@ -604,7 +604,6 @@ def get_draws(fit, variables=None, ignore=None, warmup=False):
         data[var] = ary
         if warmup:
             data_warmup[var] = ary_warmup
-
     return data, data_warmup
 
 
@@ -667,7 +666,7 @@ def get_attrs(fit):
             if isinstance(arg["init"], bytes):
                 arg["init"] = arg["init"].decode("utf-8")
     try:
-        attrs["inits"] = np.array([holder.inits for holder in fit.sim["samples"]])
+        attrs["inits"] = [holder.inits for holder in fit.sim["samples"]]
     except Exception as exp:  # pylint: disable=broad-except
         _log.warning("Failed to fetch `args` from fit: %s", exp)
 
@@ -694,17 +693,13 @@ def get_attrs(fit):
             inv_metric_str = inv_metric_match.group(1)
             if "Diagonal elements of inverse mass matrix" in holder.adaptation_info:
                 metric = "diag_e"
-                inv_metric = np.array(
-                    [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
-                )
+                inv_metric = [float(item) for item in inv_metric_str.strip(" #\n").split(",")]
             else:
                 metric = "dense_e"
-                inv_metric = np.array(
-                    [
-                        list(map(float, item.split(",")))
-                        for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
-                    ]
-                )
+                inv_metric = [
+                    list(map(float, item.split(",")))
+                    for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
+                ]
         else:
             metric = "unit_e"
             inv_metric = None
