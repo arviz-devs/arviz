@@ -6,7 +6,6 @@ import pytest
 import xarray as xr
 
 from ...data import from_dict
-from ...stats.density_utils import get_bins
 from ...plots.backends.matplotlib import dealiase_sel_kwargs, matplotlib_kwarg_dealiaser
 from ...plots.plot_utils import (
     filter_plotters_list,
@@ -19,6 +18,7 @@ from ...plots.plot_utils import (
     xarray_var_iter,
 )
 from ...rcparams import rc_context
+from ...stats.density_utils import get_bins
 from ...utils import get_coords
 from ..helpers import running_on_ci
 

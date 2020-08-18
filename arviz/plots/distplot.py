@@ -1,7 +1,7 @@
 # pylint: disable=unexpected-keyword-arg
 """Plot distribution as histogram or kernel density estimates."""
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 from ..data import InferenceData
 from ..rcparams import rcParams

@@ -1221,7 +1221,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                             raise TypeError(msg)
 
                     # xr.concat
-                    concatenated_group = xr.concat((group_data, group0_data), dim=dim)
+                    concatenated_group = xr.concat((group0_data, group_data), dim=dim)
                     if reset_dim:
                         concatenated_group[dim] = range(concatenated_group[dim].size)
 
