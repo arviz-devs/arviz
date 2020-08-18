@@ -12,7 +12,6 @@ import xarray as xr
 try:
     import ujson as json
 except ImportError:
-    # Can't find ujson using json
     import json
 
 from .. import __version__, utils

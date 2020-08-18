@@ -22,7 +22,6 @@ from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
 try:
     import ujson as json
 except ImportError:
-    # Can't find ujson using json
     import json
 
 SUPPORTED_GROUPS = [
