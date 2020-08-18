@@ -25,8 +25,6 @@ from arviz.rcparams import rc_context
 matplotlib.use("Agg")
 
 
-
-
 MPL_RST_TEMPLATE = """
 .. _{sphinx_tag}:
 

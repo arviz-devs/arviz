@@ -27,9 +27,11 @@ from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 class CustomCommonMarkParser(CommonMarkParser):
     def visit_document(self, node):
         pass
+
 
 arviz.rcParams["data.load"] = "eager"
 
@@ -191,7 +193,7 @@ html_favicon = "_static/favicon.ico"
 
 def setup(app):
     app.add_css_file("custom.css")
-    app.add_source_suffix('.md', 'markdown')
+    app.add_source_suffix(".md", "markdown")
     app.add_source_parser(CustomCommonMarkParser)
 
 
