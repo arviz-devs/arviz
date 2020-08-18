@@ -1092,8 +1092,6 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     if len(args) == 1 and isinstance(args[0], Sequence):
         args = args[0]
-    elif len(args) == 1 and all(isinstance(arg, InferenceData) for arg in args[0]):
-        args = args[0]
 
     # assert that all args are InferenceData
     for i, arg in enumerate(args):
