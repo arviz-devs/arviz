@@ -12,6 +12,8 @@ except ImportError:
 def from_json(filename):
     """Initialize object from a json file.
 
+    It uses ujson, and uses json if it is not available.
+
     Parameters
     ----------
     filename : str
@@ -30,7 +32,9 @@ def from_json(filename):
 def to_json(idata, filename):
     """Save dataset as a json file.
 
-    WARNING: Only idempotent in case `data` is InferenceData
+    It uses ujson, and uses json if it is not available.
+
+    WARNING: Only idempotent in case `data` is InferenceData.
 
     Parameters
     ----------
