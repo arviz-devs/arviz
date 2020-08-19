@@ -330,10 +330,10 @@ class TestInferenceData:
         assert not fails
 
     def test_iter(self, models):
-        idata=models.model_1
+        idata = models.model_1
         for group, dataset in idata:
             assert dataset == getattr(idata, group)
-            assert  group in idata._groups_all # pylint: disable=protected-access
+            assert group in idata._groups_all  # pylint: disable=protected-access
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, data_random, inplace):

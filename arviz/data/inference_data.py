@@ -178,7 +178,7 @@ class InferenceData:
         return self._groups + self._groups_warmup
 
     def __iter__(self):
-        for group in self._groups_all: # pylint: disable=protected-access
+        for group in self._groups_all:  # pylint: disable=protected-access
             dataset = getattr(self, group)
             yield group, dataset
 
