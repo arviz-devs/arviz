@@ -177,6 +177,11 @@ class InferenceData:
     def _groups_all(self):
         return self._groups + self._groups_warmup
 
+    def __iter__(self):
+        for group in self._groups_all: # pylint: disable=protected-access
+            dataset = getattr(self, group)
+            yield group, dataset
+
     @staticmethod
     def from_netcdf(filename):
         """Initialize object from a netcdf file.
