@@ -59,11 +59,13 @@ class InferenceData:
     on ``InferenceData`` methods and their low level implementation.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, attrs=None, **kwargs):
         """Initialize InferenceData object from keyword xarray datasets.
 
         Parameters
         ----------
+        attrs : dict
+            sets global atrribute for InferenceData object.
         kwargs :
             Keyword arguments of xarray datasets
 
@@ -102,6 +104,7 @@ class InferenceData:
         """
         self._groups = []
         self._groups_warmup = []
+        self._attrs = dict(attrs) if attrs is not None else None
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
@@ -135,6 +138,17 @@ class InferenceData:
                     key = "{}{}".format(WARMUP_TAG, key)
                     setattr(self, key, dataset_warmup)
                     self._groups_warmup.append(key)
+
+    @property
+    def attrs(self):
+        """Dictionary of attributes of InferenceData object."""
+        if self._attrs is None:
+            self._attrs = {}
+        return self._attrs
+
+    @attrs.setter
+    def attrs(self, value):
+        self._attrs = dict(value)
 
     def __repr__(self):
         """Make string representation of InferenceData object."""
