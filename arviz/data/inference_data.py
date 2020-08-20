@@ -17,7 +17,12 @@ from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list
-from .base import _extend_xr_method, dict_to_dataset
+from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -297,6 +302,28 @@ class InferenceData:
 
         ret["attrs"] = attrs
         return ret
+
+    def to_json(self, filename, **kwargs):
+        """Write InferenceData to a json file.
+
+        Parameters
+        ----------
+        filename : str
+            Location to write to
+        kwargs : dict
+            kwargs passed to json.dump()
+
+        Returns
+        -------
+        str
+            Location of json file
+        """
+        idata_dict = _make_json_serializable(self.to_dict())
+
+        with open(filename, "w") as file:
+            json.dump(idata_dict, file, **kwargs)
+
+        return filename
 
     def __add__(self, other):
         """Concatenate two InferenceData objects."""

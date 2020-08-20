@@ -20,6 +20,7 @@ from arviz import (
     convert_to_dataset,
     convert_to_inference_data,
     from_dict,
+    from_json,
     from_netcdf,
     list_datasets,
     load_arviz_data,
@@ -1107,6 +1108,23 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
         inference_data.to_netcdf(filepath)
         assert os.path.exists(filepath)
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
+
+class TestJSON:
+    def test_json_converters(self, models):
+        idata = models.model_1
+
+        filepath = os.path.realpath("test.json")
+        idata.to_json(filepath)
+
+        idata_copy = from_json(filepath)
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            xr_data = getattr(idata, group)
+            test_xr_data = getattr(idata_copy, group)
+            assert xr_data.equals(test_xr_data)
+
         os.remove(filepath)
         assert not os.path.exists(filepath)
 
