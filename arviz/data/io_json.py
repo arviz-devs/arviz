@@ -12,7 +12,7 @@ except ImportError:
 def from_json(filename):
     """Initialize object from a json file.
 
-    It uses ujson, and uses json if it is not available.
+    Will use the faster `ujson` (https://github.com/ultrajson/ultrajson) if it is available.
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def from_json(filename):
 def to_json(idata, filename):
     """Save dataset as a json file.
 
-    Function utilizes ujson -module to accelerate the process if available.
+    Will use the faster `ujson` (https://github.com/ultrajson/ultrajson) if it is available.
 
     WARNING: Only idempotent in case `idata` is InferenceData.
 
