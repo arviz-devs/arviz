@@ -32,7 +32,7 @@ def from_json(filename):
 def to_json(idata, filename):
     """Save dataset as a json file.
 
-    It uses ujson, and uses json if it is not available.
+    Function utilizes ujson -module to accelerate the process if available.
 
     WARNING: Only idempotent in case `data` is InferenceData.
 
