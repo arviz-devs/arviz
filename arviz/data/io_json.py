@@ -34,7 +34,7 @@ def to_json(idata, filename):
 
     Function utilizes ujson -module to accelerate the process if available.
 
-    WARNING: Only idempotent in case `data` is InferenceData.
+    WARNING: Only idempotent in case `idata` is InferenceData.
 
     Parameters
     ----------
