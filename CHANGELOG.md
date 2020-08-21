@@ -20,6 +20,7 @@
 * Restructure plotting code to be compatible with mpl>=3.3 ([1312](https://github.com/arviz-devs/arviz/pull/1312) and [1352](https://github.com/arviz-devs/arviz/pull/1352))
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables via the argument `circular` ([1284](https://github.com/arviz-devs/arviz/pull/1284)).
 * Increased `from_pystan` attrs information content ([1353](https://github.com/arviz-devs/arviz/pull/1353))
+* Fixed xticks issue for `plot_trace` ([#1361](https://github.com/arviz-devs/arviz/pull/1361))
 
 ### Deprecation
 
