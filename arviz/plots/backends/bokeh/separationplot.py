@@ -1,5 +1,4 @@
 """Matplotlib separation plot"""
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ...plot_utils import _scale_fig_size
@@ -16,7 +15,6 @@ def plot_separation(
     figsize,
     textsize,
     color,
-    cmap,
     legend,  # pylint: disable=unused-argument
     ax,
     plot_kwargs,
@@ -35,14 +33,8 @@ def plot_separation(
         **backend_kwargs,
     }
 
-    if cmap:
-        cmap = plt.get_cmap(cmap).colors
-        negative_color, positive_color = cmap[-1], cmap[0]
-    else:
-        if color:
-            negative_color, positive_color = color[0], color[1]
-        else:
-            negative_color, positive_color = "peru", "maroon"
+    if not color:
+        color = "blue"
 
     figsize, *_ = _scale_fig_size(figsize, textsize)
     if isinstance(y_hat, str):
@@ -57,21 +49,29 @@ def plot_separation(
     widths = np.linspace(0, 1, len(y_hat_var))
     delta = np.diff(widths).mean()
 
-    backend_kwargs["x_range"] = (delta, 1.5)
+    backend_kwargs["x_range"] = (0, 1)
     backend_kwargs["y_range"] = (0, 1)
 
     if ax is None:
         ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     for i, width in enumerate(widths):
-        bar_color, tag = (negative_color, False) if y[i] == 0 else (positive_color, True)
+        tag = False if y[i] == 0 else True
         label = "Positive class" if tag else "Negative class"
-
-        ax.vbar(width, top=1, width=width, color=bar_color, legend_label=label, **plot_kwargs)
+        alpha = 0.3 if not tag else 1
+        ax.vbar(
+            width,
+            top=1,
+            width=delta,
+            color=color,
+            fill_alpha=alpha,
+            legend_label=label,
+            **plot_kwargs
+        )
 
     if y_hat_line:
         ax.line(
-            np.linspace(delta, 1.5, len(y_hat_var)),
+            np.linspace(0, 1, len(y_hat_var)),
             y_hat_var[idx],
             color="black",
             legend_label=label_line,
@@ -88,6 +88,8 @@ def plot_separation(
         )
 
     ax.axis.visible = False
+    ax.xgrid.grid_line_color = None
+    ax.ygrid.grid_line_color = None
 
     show_layout(ax, show)
 

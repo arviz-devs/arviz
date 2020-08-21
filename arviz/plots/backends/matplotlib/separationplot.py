@@ -15,7 +15,6 @@ def plot_separation(
     figsize,
     textsize,
     color,
-    cmap,
     legend,
     ax,
     plot_kwargs,
@@ -34,14 +33,8 @@ def plot_separation(
         **backend_kwargs,
     }
 
-    if cmap:
-        cmap = plt.get_cmap(cmap).colors
-        negative_color, positive_color = cmap[-1], cmap[0]
-    else:
-        if color:
-            negative_color, positive_color = color[0], color[1]
-        else:
-            negative_color, positive_color = "C1", "C3"
+    if not color:
+        color = "C0"
 
     (figsize, *_) = _scale_fig_size(figsize, textsize, 1, 1)
     backend_kwargs.setdefault("figsize", figsize)
@@ -60,17 +53,26 @@ def plot_separation(
         y = idata.observed_data[y].values[idx].ravel()
 
     widths = np.linspace(0, 1, len(y_hat_var))
+    delta = np.diff(widths).mean()
 
     for i, width in enumerate(widths):
-        bar_color, tag = (negative_color, False) if y[i] == 0 else (positive_color, True)
+        tag = False if y[i] == 0 else True
         label = "Positive class" if tag else "Negative class"
-        ax.bar(width, 1, width=width, color=bar_color, align="edge", label=label, **plot_kwargs)
-
-    delta = np.diff(widths).mean()
+        alpha = 0.3 if not tag else 1
+        ax.bar(
+            width,
+            1,
+            width=delta,
+            color=color,
+            align="edge",
+            label=label,
+            alpha=alpha,
+            **plot_kwargs
+        )
 
     if y_hat_line:
         ax.plot(
-            np.linspace(delta, 1.5, len(y_hat_var)),
+            np.linspace(0, 1, len(y_hat_var)),
             y_hat_var[idx],
             color="k",
             label=label_line,
@@ -90,7 +92,7 @@ def plot_separation(
 
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlim(delta, 1.5)
+    ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
 
     if backend_show(show):

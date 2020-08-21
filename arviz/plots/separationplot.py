@@ -12,7 +12,6 @@ def plot_separation(
     figsize=None,
     textsize=None,
     color=None,
-    cmap=None,
     legend=True,
     ax=None,
     plot_kwargs=None,
@@ -42,12 +41,9 @@ def plot_separation(
         If None, size is (8 + numvars, 8 + numvars)
     textsize: int, optional
         Text size for labels. If None it will be autoscaled based on figsize.
-    color : list or array_like, optional
-        The first color will be used to plot the negative class while the second color will
-        be assigned to the positive class.
-    cmap : str, optional
-        Colors for the separation plot will be taken from both ends of the color map
-        respectively.
+    color : str, optional
+        Color to assign to the postive class. The negative class will be plotted using the
+        same color and an `alpha=0.3` transparency.
     legend : bool, optional
         Show the legend of the figure.
     ax: axes, optional
@@ -81,7 +77,6 @@ def plot_separation(
         figsize=figsize,
         textsize=textsize,
         color=color,
-        cmap=cmap,
         legend=legend,
         ax=ax,
         plot_kwargs=plot_kwargs,
