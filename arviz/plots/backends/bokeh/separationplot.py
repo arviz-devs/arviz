@@ -61,8 +61,7 @@ def plot_separation(
     backend_kwargs["y_range"] = (0, 1)
 
     if ax is None:
-        ax = create_axes_grid(1, figsize=figsize, backend_kwargs=backend_kwargs,)
-        ax = ax.ravel()[0]
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
 
     for i, width in enumerate(widths):
         bar_color, tag = (negative_color, False) if y[i] == 0 else (positive_color, True)
