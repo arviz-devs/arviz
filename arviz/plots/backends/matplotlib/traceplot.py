@@ -303,10 +303,11 @@ def plot_trace(
                 if legend and idy == 0:
                     axes.legend(handles=handles, title=legend_title)
 
-            if value[0].dtype.kind == "i":
+            if value[0].dtype.kind == "i" and idy == 0:
                 xticks = get_bins(value)
                 axes.set_xticks(xticks[:-1])
-            axes.set_yticks([])
+            if not idy:
+                axes.set_yticks([])
             axes.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
             axes.tick_params(labelsize=xt_labelsize)
 
@@ -368,8 +369,6 @@ def plot_trace(
                                     zorder=0.6,
                                 )
 
-                    axes.set_ylim(ylims)
-
             for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
                 if isinstance(vlines, (float, int)):
                     line_values = [vlines]
@@ -379,7 +378,7 @@ def plot_trace(
                         raise ValueError(
                             "line-positions should be numeric, found {}".format(line_values)
                         )
-                if idy == 1:
+                if idy:
                     axes.hlines(
                         line_values,
                         xlims[0],
@@ -399,9 +398,8 @@ def plot_trace(
                         alpha=trace_kwargs["alpha"],
                     )
 
-        if kind == "trace":
+        if kind == "trace" and idy:
             axes.set_xlim(left=data.draw.min(), right=data.draw.max())
-            axes.set_ylim(*ylims)
 
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
@@ -423,7 +421,9 @@ def plot_trace(
     if backend_show(show):
         plt.show()
 
-    return axes
+    ax = np.array(axes.figure.axes).reshape(-1, 2)
+
+    return ax
 
 
 def _plot_chains_mpl(
@@ -451,7 +451,7 @@ def _plot_chains_mpl(
     for chain_idx, row in enumerate(value):
         if kind == "trace":
             aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
-            if idy == 1:
+            if idy:
                 axes.plot(data.draw.values, row, **aux_kwargs)
 
         if not combined:
@@ -471,9 +471,9 @@ def _plot_chains_mpl(
                     is_circular=circ_var_units,
                 )
 
-    if kind == "rank_bars" and idy == 1:
+    if kind == "rank_bars" and idy:
         axes = plot_rank(data=value, kind="bars", ax=axes, **rank_kwargs)
-    elif kind == "rank_vlines" and idy == 1:
+    elif kind == "rank_vlines" and idy:
         axes = plot_rank(data=value, kind="vlines", ax=axes, **rank_kwargs)
 
     if combined:
