@@ -105,17 +105,18 @@ def plot_bpv(
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             x_s, tstat_pit_dens = kde(tstat_pit)
-            ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
                     hdi = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
                     hdi_odds = (hdi / (1 - hdi), (1 - hdi) / hdi)
                     ax_i.axhspan(*hdi_odds, **plot_ref_kwargs)
+                    ax_i.axhline(1, color="w")
                 elif reference == "samples":
                     dist = stats.uniform(0, 1)
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
                     ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
+            ax_i.plot(x_s, tstat_pit_dens, color=color)
             ax_i.set_ylim(0, None)
             ax_i.set_xlim(0, 1)
         else:

@@ -100,8 +100,9 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(
                         dist, (n_ref, tstat_pit_dens.size,)
                     )
-                    for x_ss_i, u_dens_i in zip(x_ss.T, u_dens.T):
-                        ax_i.line(x_ss_i, u_dens_i, line_width=linewidth, **plot_ref_kwargs)
+                    ax_i.multi_line(
+                        list(x_ss.T), list(u_dens.T), line_width=linewidth, **plot_ref_kwargs
+                    )
 
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
@@ -121,14 +122,13 @@ def plot_bpv(
                             **plot_ref_kwargs,
                         )
                     )
-
+                    ax_i.line([0, 1], [1, 1], line_color="white")
                 elif reference == "samples":
                     dist = stats.uniform(0, 1)
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
                     for x_ss_i, u_dens_i in zip(x_ss.T, u_dens.T):
                         ax_i.line(x_ss_i, u_dens_i, line_width=linewidth, **plot_ref_kwargs)
-            # ax_i.set_ylim(0, None)
-            # ax_i.set_xlim(0, 1)
+            ax_i.line(0, 0)
         else:
             if t_stat in ["mean", "median", "std"]:
                 if t_stat == "mean":
