@@ -1157,6 +1157,21 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                 return args[0]
 
     current_time = str(datetime.now())
+    combined_attr = defaultdict(list)
+    for idata in args:
+        for key, val in idata.attrs.items():
+            combined_attr[key].append(val)
+
+    for key, val in combined_attr.items():
+        all_same = True
+        for indx in range(len(val)-1):
+            if val[indx] != val[indx+1]:
+                all_same = False
+                break;
+        if all_same:
+            combined_attr[key] = val[0]
+    if inplace:
+        setattr(args[0], '_attrs', dict(combined_attr))
 
     if not inplace:
         # Keep order for python 3.5
@@ -1396,5 +1411,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                         setattr(arg0, group, group0_data)
                     else:
                         inference_data_dict[group] = group0_data
+
+    inference_data_dict['attrs'] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
