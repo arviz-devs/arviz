@@ -56,7 +56,7 @@ def _var_names(var_names, data, filter_vars=None):
             var_names = _subset_list(var_names, all_vars, filter_items=filter_vars, warn=False)
         except KeyError as err:
             msg = " ".join(("var names:", f"{err}", "in dataset"))
-            raise KeyError(msg)
+            raise KeyError(msg) from err
     return var_names
 
 
@@ -225,7 +225,7 @@ class interactive_backend:  # pylint: disable=invalid-name
             raise ImportError(
                 "The exception below was risen while importing Ipython, this "
                 "context manager can only be used inside ipython sessions:\n{}".format(err)
-            )
+            ) from err
         self.ipython = get_ipython()
         if self.ipython is None:
             raise EnvironmentError("This context manager can only be used inside ipython sessions")
@@ -625,9 +625,9 @@ def get_coords(data, coords):
         try:
             return data.sel(**coords)
 
-        except ValueError:
+        except ValueError as err:
             invalid_coords = set(coords.keys()) - set(data.coords.keys())
-            raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords))
+            raise ValueError("Coords {} are invalid coordinate keys".format(invalid_coords)) from err
 
         except KeyError as err:
             raise KeyError(
@@ -636,7 +636,7 @@ def get_coords(data, coords):
                     "Check that coords structure is correct and"
                     " dimensions are valid. {}"
                 ).format(err)
-            )
+            ) from err
     if not isinstance(coords, (list, tuple)):
         coords = [coords] * len(data)
     data_subset = []
@@ -644,9 +644,9 @@ def get_coords(data, coords):
         try:
             data_subset.append(get_coords(datum, coords_dict))
         except ValueError as err:
-            raise ValueError("Error in data[{}]: {}".format(idx, err))
+            raise ValueError("Error in data[{}]: {}".format(idx, err)) from err
         except KeyError as err:
-            raise KeyError("Error in data[{}]: {}".format(idx, err))
+            raise KeyError("Error in data[{}]: {}".format(idx, err)) from err
     return data_subset
 
 
