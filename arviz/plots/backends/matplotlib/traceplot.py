@@ -37,7 +37,7 @@ def plot_trace(
     rank_kwargs,
     plotters,
     divergence_data,
-    axes,
+    ax,
     backend_kwargs,
     backend_config,  # pylint: disable=unused-argument
     show,
@@ -198,10 +198,6 @@ def plot_trace(
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
-    if axes is None:
-        fig = plt.figure(**backend_kwargs)
-        spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
-
     # Check the input for lines
     if lines is not None:
         all_var_names = set(plotter[0] for plotter in plotters)
@@ -216,14 +212,22 @@ def plot_trace(
                     invalid_var_names, all_var_names
                 )
             )
+
+    if ax is None:
+        fig = plt.figure(**backend_kwargs)
+        spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
+
     # pylint: disable=too-many-nested-blocks
     for idx, (var_name, selection, value) in enumerate(plotters):
         for idy in range(2):
             value = np.atleast_2d(value)
 
-            is_circular = var_name in circ_var_names and idy == 0
+            is_circular = var_name in circ_var_names and not idy
 
-            axes = fig.add_subplot(spec[idx, idy], polar=is_circular)
+            if ax is None:
+                axes = fig.add_subplot(spec[idx, idy], polar=is_circular)
+            else:
+                axes = ax[idx, idy]
 
             if len(value.shape) == 2:
                 if compact_prop:
@@ -418,10 +422,11 @@ def plot_trace(
             )
         axes.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
 
+    if ax is None:
+        ax = np.array(axes.figure.axes).reshape(-1, 2)
+
     if backend_show(show):
         plt.show()
-
-    ax = np.array(axes.figure.axes).reshape(-1, 2)
 
     return ax
 

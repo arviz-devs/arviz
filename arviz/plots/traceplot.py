@@ -224,7 +224,7 @@ def plot_trace(
         divergence_data=divergence_data,
         # skip_dims=skip_dims,
         plotters=plotters,
-        axes=ax,
+        ax=ax,
         backend_config=backend_config,
         backend_kwargs=backend_kwargs,
         show=show,
