@@ -449,7 +449,9 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             try:
                 constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
             except ValueError as err:
-                raise ValueError("Error translating constant_data variable %s: %s" % (name, err)) from err
+                raise ValueError(
+                    "Error translating constant_data variable %s: %s" % (name, err)
+                ) from err
         return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):

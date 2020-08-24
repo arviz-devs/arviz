@@ -470,7 +470,9 @@ def read_rcfile(fname):
                     config[key] = val
                 except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
-                    raise ValueError("Bad val {} on {}\n\t{}".format(val, error_details, str(verr))) from verr
+                    raise ValueError(
+                        "Bad val {} on {}\n\t{}".format(val, error_details, str(verr))
+                    ) from verr
 
         except UnicodeDecodeError:
             _log.warning(
