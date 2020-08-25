@@ -16,6 +16,7 @@ def plot_ppc(
     kind="kde",
     alpha=None,
     mean=True,
+    color="C0",
     figsize=None,
     textsize=None,
     data_pairs=None,
@@ -50,6 +51,8 @@ def plot_ppc(
         Defaults to 0.2 for kind = kde and cumulative, for scatter defaults to 0.7
     mean: bool
         Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
+    color: str
+        Valid matplotlib color. Defaults to C0
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -279,6 +282,7 @@ def plot_ppc(
         pp_sample_ix=pp_sample_ix,
         kind=kind,
         alpha=alpha,
+        color=color,
         jitter=jitter,
         textsize=textsize,
         mean=mean,

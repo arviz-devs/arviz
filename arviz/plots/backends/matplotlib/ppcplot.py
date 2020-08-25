@@ -27,6 +27,7 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
+    color,
     textsize,
     mean,
     jitter,
@@ -119,11 +120,11 @@ def plot_ppc(
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "kde":
-            plot_kwargs = {"color": "C5", "alpha": alpha, "linewidth": 0.5 * linewidth}
+            plot_kwargs = {"color": color, "alpha": alpha, "linewidth": 0.5 * linewidth}
             if dtype == "i":
                 plot_kwargs["drawstyle"] = "steps-pre"
             ax_i.plot(
-                [], color="C5", label="{} predictive {}".format(group.capitalize(), pp_var_name)
+                [], color=color, label="{} predictive {}".format(group.capitalize(), pp_var_name)
             )
 
             if dtype == "f":
@@ -191,9 +192,9 @@ def plot_ppc(
                     ax_i.plot(
                         new_x,
                         new_d.mean(0),
-                        color="C0",
+                        color=color,
                         linestyle="--",
-                        linewidth=linewidth,
+                        linewidth=linewidth * 1.5,
                         zorder=2,
                         label=label,
                     )
@@ -205,8 +206,8 @@ def plot_ppc(
                     ax_i.plot(
                         bin_edges,
                         hist,
-                        color="C0",
-                        linewidth=linewidth,
+                        color=color,
+                        linewidth=linewidth * 1.5,
                         label=label,
                         zorder=2,
                         linestyle="--",
@@ -244,15 +245,19 @@ def plot_ppc(
                     pp_densities[2 * idx + 1] = pp_density
 
                 ax_i.plot(
-                    *pp_densities, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
+                    *pp_densities,
+                    alpha=alpha,
+                    color=color,
+                    drawstyle=drawstyle,
+                    linewidth=linewidth
                 )
-            ax_i.plot([], color="C5", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot([], color=color, label="Posterior predictive {}".format(pp_var_name))
             if mean:
                 ax_i.plot(
                     *_empirical_cdf(pp_vals.flatten()),
-                    color="C0",
+                    color=color,
                     linestyle="--",
-                    linewidth=linewidth,
+                    linewidth=linewidth * 1.5,
                     drawstyle=drawstyle,
                     label="Posterior predictive mean {}".format(pp_var_name)
                 )
@@ -264,9 +269,9 @@ def plot_ppc(
                     plot_kde(
                         pp_vals.flatten(),
                         plot_kwargs={
-                            "color": "C0",
+                            "color": color,
                             "linestyle": "--",
-                            "linewidth": linewidth,
+                            "linewidth": linewidth * 1.5,
                             "zorder": 3,
                         },
                         label="Posterior predictive mean {}".format(pp_var_name),
@@ -281,8 +286,8 @@ def plot_ppc(
                     ax_i.plot(
                         bin_edges,
                         hist,
-                        color="C0",
-                        linewidth=linewidth,
+                        color=color,
+                        linewidth=linewidth * 1.5,
                         label="Posterior predictive mean {}".format(pp_var_name),
                         zorder=3,
                         linestyle="--",
@@ -303,7 +308,7 @@ def plot_ppc(
                 obs_vals,
                 obs_yvals,
                 "o",
-                color="C0",
+                color=color,
                 markersize=markersize,
                 alpha=alpha,
                 label="Observed {}".format(var_name),
@@ -326,10 +331,12 @@ def plot_ppc(
                     if jitter:
                         yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
                     ax_i.plot(
-                        vals, yvals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
+                        vals, yvals, "o", zorder=2, color=color, markersize=markersize, alpha=alpha
                     )
 
-            ax_i.plot([], "C5o", label="Posterior predictive {}".format(pp_var_name))
+            ax_i.plot(
+                [], color=color, marker="o", label="Posterior predictive {}".format(pp_var_name)
+            )
 
             ax_i.set_yticks([])
 
@@ -401,7 +408,7 @@ def _set_animation(
     elif kind == "cumulative":
         x_vals, y_vals = _empirical_cdf(pp_sampled_vals[0])
         (line,) = ax.plot(
-            x_vals, y_vals, alpha=alpha, color="C5", drawstyle=drawstyle, linewidth=linewidth
+            x_vals, y_vals, alpha=alpha, color=color, drawstyle=drawstyle, linewidth=linewidth
         )
 
         def animate(i):
@@ -413,7 +420,7 @@ def _set_animation(
         x_vals = pp_sampled_vals[0]
         y_vals = np.full_like(x_vals, height, dtype=np.float64)
         (line,) = ax.plot(
-            x_vals, y_vals, "o", zorder=2, color="C5", markersize=markersize, alpha=alpha
+            x_vals, y_vals, "o", zorder=2, color=color, markersize=markersize, alpha=alpha
         )
 
         def animate(i):
