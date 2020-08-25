@@ -220,7 +220,7 @@ def plot_ppc(
             drawstyle = "default" if dtype == "f" else "steps-pre"
             ax_i.plot(
                 *_empirical_cdf(obs_vals),
-                color="k",
+                color=color,
                 linewidth=linewidth,
                 label="Observed {}".format(var_name),
                 drawstyle=drawstyle,
@@ -320,6 +320,7 @@ def plot_ppc(
                     pp_sampled_vals,
                     ax_i,
                     kind=kind,
+                    color=color,
                     height=y_rows.mean() * 0.5,
                     markersize=markersize,
                 )
@@ -370,6 +371,7 @@ def _set_animation(
     dtype=None,
     kind="density",
     alpha=None,
+    color=None,
     drawstyle=None,
     linewidth=None,
     height=None,
