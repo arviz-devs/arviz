@@ -33,6 +33,7 @@ from ...plots import (
     plot_posterior,
     plot_ppc,
     plot_rank,
+    plot_separation,
     plot_trace,
     plot_violin,
 )
@@ -157,6 +158,22 @@ def test_plot_density_bad_kwargs(models):
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat_line": True},
+        {"expected_events": True},
+        {"y_hat_line_kwargs": {"linestyle": "dotted"}},
+        {"exp_events_kwargs": {"marker": "o"}},
+    ],
+)
+def test_plot_separation(kwargs):
+    idata = load_arviz_data("classification10d")
+    ax = plot_separation(idata=idata, y="outcome", **kwargs)
+    assert ax
 
 
 @pytest.mark.parametrize(

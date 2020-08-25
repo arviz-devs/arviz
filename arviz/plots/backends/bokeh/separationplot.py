@@ -1,9 +1,12 @@
-"""Matplotlib separation plot"""
+"""Bokeh separation plot."""
+import warnings
 import numpy as np
+import xarray as xr
 
+from ....data import InferenceData
 from ...plot_utils import _scale_fig_size
-from . import backend_kwarg_defaults, create_axes_grid
 from .. import show_layout
+from . import backend_kwarg_defaults, create_axes_grid
 
 
 def plot_separation(
@@ -18,6 +21,8 @@ def plot_separation(
     legend,  # pylint: disable=unused-argument
     ax,
     plot_kwargs,
+    y_hat_line_kwargs,
+    exp_events_kwargs,
     backend_kwargs,
     show,
 ):
@@ -28,63 +33,99 @@ def plot_separation(
     if plot_kwargs is None:
         plot_kwargs = {}
 
+    plot_kwargs.setdefault("color", "royalblue")
+    if color:
+        plot_kwargs["color"] = color
+
     backend_kwargs = {
         **backend_kwarg_defaults(),
         **backend_kwargs,
     }
 
-    if not color:
-        color = "blue"
+    if y_hat_line_kwargs is None:
+        y_hat_line_kwargs = {}
+
+    y_hat_line_kwargs.setdefault("color", "black")
+
+    if exp_events_kwargs is None:
+        exp_events_kwargs = {}
+
+    exp_events_kwargs.setdefault("color", "black")
 
     figsize, *_ = _scale_fig_size(figsize, textsize)
-    if isinstance(y_hat, str):
-        y_hat_var = idata.posterior_predictive[y_hat].values.mean(1).mean(0)
-        label_line = y_hat
 
-    idx = np.argsort(y_hat_var)
+    if idata is not None and not isinstance(idata, InferenceData):
+        raise ValueError("idata must be of type InferenceData or None")
 
-    if isinstance(y, str):
-        y = idata.observed_data[y].values[idx].ravel()
+    if idata is None:
+        if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat)):
+            raise ValueError(
+                "y and y_hat must be array or DataArray when idata is None "
+                "but they are of types {}".format([type(arg) for arg in (y, y_hat)])
+            )
+    else:
 
-    widths = np.linspace(0, 1, len(y_hat_var))
-    delta = np.diff(widths).mean()
+        if y_hat is None and isinstance(y, str):
+            label_y_hat = y
+            y_hat = y
+        elif y_hat is None:
+            raise ValueError("y_hat cannot be None if y is not a str")
+
+        if isinstance(y, str):
+            y = idata.observed_data[y].values
+        elif not isinstance(y, (np.ndarray, xr.DataArray)):
+            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+
+        if isinstance(y_hat, str):
+            label_y_hat = y_hat
+            y_hat = idata.posterior_predictive[y_hat].mean(axis=(1, 0)).values
+        elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
+            )
+
+    idx = np.argsort(y_hat)
+
+    if len(y) != len(y_hat):
+        warnings.warn(
+            "y and y_hat must be the same lenght", UserWarning,
+        )
+
+    locs = np.linspace(0, 1, len(y_hat))
+    width = np.diff(locs).mean()
 
     backend_kwargs["x_range"] = (0, 1)
     backend_kwargs["y_range"] = (0, 1)
 
     if ax is None:
-        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs)
 
-    for i, width in enumerate(widths):
-        tag = False if y[i] == 0 else True
-        label = "Positive class" if tag else "Negative class"
-        alpha = 0.3 if not tag else 1
+    for i, loc in enumerate(locs):
+        positive = not y[idx][i] == 0
+        label = "Positive class" if positive else "Negative class"
+        alpha = 1 if positive else 0.3
         ax.vbar(
-            width,
+            loc,
             top=1,
-            width=delta,
-            color=color,
+            width=width,
             fill_alpha=alpha,
             legend_label=label,
-            **plot_kwargs
+            line_alpha=alpha,
+            **plot_kwargs,
         )
 
     if y_hat_line:
         ax.line(
-            np.linspace(0, 1, len(y_hat_var)),
-            y_hat_var[idx],
-            color="black",
-            legend_label=label_line,
+            np.linspace(0, 1, len(y_hat)),
+            y_hat[idx],
+            legend_label=label_y_hat,
+            **y_hat_line_kwargs,
         )
 
     if expected_events:
-        expected_events = int(np.round(np.sum(y_hat_var)))
+        expected_events = int(np.round(np.sum(y_hat)))
         ax.triangle(
-            y_hat_var[idx][expected_events],
-            0,
-            color="black",
-            legend_label="Expected events",
-            **plot_kwargs
+            y_hat[idx][expected_events - 1], 0, legend_label="Expected events", **exp_events_kwargs,
         )
 
     ax.axis.visible = False

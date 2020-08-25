@@ -15,11 +15,12 @@ def plot_separation(
     legend=True,
     ax=None,
     plot_kwargs=None,
+    y_hat_line_kwargs=None,
+    exp_events_kwargs=None,
     backend=None,
     backend_kwargs=None,
     show=None,
 ):
-
     """Plot separation plot for discrete outcome models.
 
     Parameters
@@ -29,10 +30,8 @@ def plot_separation(
     y : array, DataArray or str
         Observed data. If str, idata must be present and contain the observed data group
     y_hat : array, DataArray or str
-        Posterior predictive samples for ``y``. It must have the same shape as y plus an
-        extra dimension at the end of size n_samples (chains and draws stacked). If str or
-        None, idata must contain the posterior predictive group. If None, y_hat is taken
-        equal to y, thus, y must be str too.
+        Posterior predictive samples for ``y``. It must have the same shape as y. If str or
+        None, idata must contain the posterior predictive group.
     y_hat_line : bool, optional
         Plot the sorted `y_hat` predictions.
     expected_events : bool, optional
@@ -49,7 +48,11 @@ def plot_separation(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
+        Additional keywords passed to ax.bar for separation plot.
+    y_hat_line_kwargs : dict, optional
         Additional keywords passed to ax.plot for `y_hat` line.
+    exp_events_kwargs : dict, optional
+        Additional keywords passed to ax.scatter for expected_events marker.
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
     backend_kwargs: bool, optional
@@ -66,6 +69,17 @@ def plot_separation(
     ----------
     * Greenhill, B. et al (2011) see https://doi.org/10.1111/j.1540-5907.2011.00525.x
 
+    Examples
+    --------
+    Separation plot for a logistic regression model.
+
+    .. plot::
+        :context: close-figs
+
+        >>> import arviz as az
+        >>> idata = az.load_arviz_data('classification10d')
+        >>> az.plot_separation(idata=idata, y='outcome', y_hat='outcome', figsize=(8, 1))
+
     """
 
     separation_kwargs = dict(
@@ -80,6 +94,8 @@ def plot_separation(
         legend=legend,
         ax=ax,
         plot_kwargs=plot_kwargs,
+        y_hat_line_kwargs=y_hat_line_kwargs,
+        exp_events_kwargs=exp_events_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )
