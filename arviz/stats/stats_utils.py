@@ -421,8 +421,8 @@ def get_log_likelihood(idata, var_name=None):
     else:
         try:
             log_likelihood = idata.log_likelihood[var_name]
-        except KeyError:
-            raise TypeError("No log likelihood data named {} found".format(var_name))
+        except KeyError as err:
+            raise TypeError("No log likelihood data named {} found".format(var_name)) from err
         return log_likelihood
 
 

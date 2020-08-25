@@ -162,5 +162,5 @@ def check_bokeh_version():
         import bokeh
 
         assert version.parse(bokeh.__version__) >= version.parse("1.4.0")
-    except (ImportError, AssertionError):
-        raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+    except (ImportError, AssertionError) as err:
+        raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.") from err

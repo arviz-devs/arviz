@@ -500,12 +500,12 @@ def get_plotting_function(plot_name, plot_module, backend):
 
     try:
         backend = _backend[backend]
-    except KeyError:
+    except KeyError as err:
         raise KeyError(
             "Backend {} is not implemented. Try backend in {}".format(
                 backend, set(_backend.values())
             )
-        )
+        ) from err
 
     if backend == "bokeh":
         try:
@@ -513,10 +513,10 @@ def get_plotting_function(plot_name, plot_module, backend):
 
             assert packaging.version.parse(bokeh.__version__) >= packaging.version.parse("1.4.0")
 
-        except (ImportError, AssertionError):
+        except (ImportError, AssertionError) as err:
             raise ImportError(
                 "'bokeh' backend needs Bokeh (1.4.0+) installed." " Please upgrade or install"
-            )
+            ) from err
 
     # Perform import of plotting method
     # TODO: Convert module import to top level for all plots

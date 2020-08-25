@@ -870,7 +870,7 @@ class InferenceData:
             group_names = _subset_list(sel_groups, all_groups, filter_items=filter_groups)
         except KeyError as err:
             msg = " ".join(("groups:", f"{err}", "in InferenceData"))
-            raise KeyError(msg)
+            raise KeyError(msg) from err
         return group_names
 
     def map(self, fun, groups=None, filter_groups=None, inplace=False, args=None, **kwargs):
