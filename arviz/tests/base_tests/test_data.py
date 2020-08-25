@@ -331,9 +331,27 @@ class TestInferenceData:
 
     def test_iter(self, models):
         idata = models.model_1
-        for group, dataset in idata:
-            assert dataset == getattr(idata, group)
-            assert group in idata._groups_all  # pylint: disable=protected-access
+        for group in idata:
+            assert group in idata._groups_all
+
+    def test_groups(self, models):
+        idata = models.model_1
+        for group in idata.groups():
+            assert group in idata._groups_all
+
+    def test_values(self, models):
+        idata = models.model_1
+        datasets = idata.values()
+        for group in idata.groups():
+            assert group in idata._groups_all
+            dataset = getattr(idata, group)
+            assert dataset in datasets
+
+    def test_items(self, models):
+        idata = models.model_1
+        for group, dataset in idata.items():
+            assert group in idata._groups_all
+            assert dataset.equals(getattr(idata, group))
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, data_random, inplace):

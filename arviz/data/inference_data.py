@@ -178,9 +178,23 @@ class InferenceData:
         return self._groups + self._groups_warmup
 
     def __iter__(self):
-        for group in self._groups_all:  # pylint: disable=protected-access
-            dataset = getattr(self, group)
-            yield group, dataset
+        for group in self._groups_all:
+            yield group
+
+    def groups(self):
+        return self._groups_all
+
+    def values(self):
+        datasets = []
+        for group in self._groups_all:
+            datasets.append(getattr(self, group))
+        return datasets
+
+    def items(self):
+        item = []
+        for group in self._groups_all:
+            item.append((group, getattr(self, group)))
+        return item
 
     @staticmethod
     def from_netcdf(filename):
