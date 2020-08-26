@@ -37,7 +37,7 @@ def plot_trace(
     rank_kwargs,
     plotters,
     divergence_data,
-    ax,
+    axes,
     backend_kwargs,
     backend_config,  # pylint: disable=unused-argument
     show,
@@ -145,7 +145,9 @@ def plot_trace(
         chain_prop = "color" if chain_prop is None else chain_prop
     else:
         chain_prop = (
-            {"linestyle": ("solid", "dotted", "dashed", "dashdot"),}
+            {
+                "linestyle": ("solid", "dotted", "dashed", "dashdot"),
+            }
             if chain_prop is None
             else chain_prop
         )
@@ -213,7 +215,7 @@ def plot_trace(
                 )
             )
 
-    if ax is None:
+    if axes is None:
         fig = plt.figure(**backend_kwargs)
         spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
 
@@ -224,10 +226,10 @@ def plot_trace(
 
             is_circular = var_name in circ_var_names and not idy
 
-            if ax is None:
-                axes = fig.add_subplot(spec[idx, idy], polar=is_circular)
+            if axes is None:
+                ax = fig.add_subplot(spec[idx, idy], polar=is_circular)
             else:
-                axes = ax[idx, idy]
+                ax = axes[idx, idy]
 
             if len(value.shape) == 2:
                 if compact_prop:
@@ -237,8 +239,8 @@ def plot_trace(
                     aux_plot_kwargs = plot_kwargs
                     aux_trace_kwargs = trace_kwargs
 
-                axes = _plot_chains_mpl(
-                    axes,
+                ax = _plot_chains_mpl(
+                    ax,
                     idy,
                     value,
                     data,
@@ -276,8 +278,8 @@ def plot_trace(
                 for sub_idx, label in zip(range(value.shape[2]), legend_labels):
                     aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
                     aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop_iter, sub_idx)
-                    axes = _plot_chains_mpl(
-                        axes,
+                    ax = _plot_chains_mpl(
+                        ax,
                         idy,
                         value[..., sub_idx],
                         data,
@@ -305,18 +307,18 @@ def plot_trace(
                             )
                         )
                 if legend and idy == 0:
-                    axes.legend(handles=handles, title=legend_title)
+                    ax.legend(handles=handles, title=legend_title)
 
             if value[0].dtype.kind == "i" and idy == 0:
                 xticks = get_bins(value)
-                axes.set_xticks(xticks[:-1])
+                ax.set_xticks(xticks[:-1])
             if not idy:
-                axes.set_yticks([])
-            axes.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
-            axes.tick_params(labelsize=xt_labelsize)
+                ax.set_yticks([])
+            ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
+            ax.tick_params(labelsize=xt_labelsize)
 
-            xlims = axes.get_xlim()
-            ylims = axes.get_ylim()
+            xlims = ax.get_xlim()
+            ylims = ax.get_ylim()
 
             if divergences:
                 div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
@@ -336,9 +338,9 @@ def plot_trace(
                         values = value[chain, div_idxs]
 
                         if is_circular:
-                            tick = [axes.get_rmin() + axes.get_rmax() * 0.60, axes.get_rmax()]
+                            tick = [ax.get_rmin() + ax.get_rmax() * 0.60, ax.get_rmax()]
                             for val in values:
-                                axes.plot(
+                                ax.plot(
                                     [val, val],
                                     tick,
                                     color="black",
@@ -349,7 +351,7 @@ def plot_trace(
                                 )
                         else:
                             if kind == "trace" and idy:
-                                axes.plot(
+                                ax.plot(
                                     div_draws,
                                     np.zeros_like(div_idxs) + ylocs,
                                     marker="|",
@@ -361,7 +363,7 @@ def plot_trace(
                                     zorder=0.6,
                                 )
                             else:
-                                axes.plot(
+                                ax.plot(
                                     values,
                                     np.zeros_like(values) + ylocs,
                                     marker="|",
@@ -383,7 +385,7 @@ def plot_trace(
                             "line-positions should be numeric, found {}".format(line_values)
                         )
                 if idy:
-                    axes.hlines(
+                    ax.hlines(
                         line_values,
                         xlims[0],
                         xlims[1],
@@ -393,7 +395,7 @@ def plot_trace(
                     )
 
                 else:
-                    axes.vlines(
+                    ax.vlines(
                         line_values,
                         ylims[0],
                         ylims[1],
@@ -403,7 +405,7 @@ def plot_trace(
                     )
 
         if kind == "trace" and idy:
-            axes.set_xlim(left=data.draw.min(), right=data.draw.max())
+            ax.set_xlim(left=data.draw.min(), right=data.draw.max())
 
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
@@ -420,15 +422,15 @@ def plot_trace(
                     [], [], label="combined", **dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
                 ),
             )
-        axes.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
+        ax.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
 
-    if ax is None:
-        ax = np.array(axes.figure.axes).reshape(-1, 2)
+    if axes is None:
+        axes = np.array(ax.figure.axes).reshape(-1, 2)
 
     if backend_show(show):
         plt.show()
 
-    return ax
+    return axes
 
 
 def _plot_chains_mpl(
