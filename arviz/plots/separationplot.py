@@ -1,4 +1,4 @@
-"""Plot separation plot for discrete outcome models."""
+"""Separation plot for discrete outcome models."""
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
@@ -21,7 +21,10 @@ def plot_separation(
     backend_kwargs=None,
     show=None,
 ):
-    """Plot separation plot for discrete outcome models.
+    """Separation plot for binary outcome models.
+
+    Model predictions are sorted and plotted using a color code according to
+    the observed data.
 
     Parameters
     ----------
@@ -81,7 +84,6 @@ def plot_separation(
         >>> az.plot_separation(idata=idata, y='outcome', y_hat='outcome', figsize=(8, 1))
 
     """
-
     separation_kwargs = dict(
         idata=idata,
         y=y,

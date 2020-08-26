@@ -33,7 +33,7 @@ def plot_separation(
     if plot_kwargs is None:
         plot_kwargs = {}
 
-    plot_kwargs.setdefault("color", "royalblue")
+    plot_kwargs.setdefault("color", "#2a2eec")
     if color:
         plot_kwargs["color"] = color
 
@@ -46,11 +46,13 @@ def plot_separation(
         y_hat_line_kwargs = {}
 
     y_hat_line_kwargs.setdefault("color", "black")
+    y_hat_line_kwargs.setdefault("line_width", 2)
 
     if exp_events_kwargs is None:
         exp_events_kwargs = {}
 
     exp_events_kwargs.setdefault("color", "black")
+    exp_events_kwargs.setdefault("size", 15)
 
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
@@ -102,16 +104,9 @@ def plot_separation(
 
     for i, loc in enumerate(locs):
         positive = not y[idx][i] == 0
-        label = "Positive class" if positive else "Negative class"
         alpha = 1 if positive else 0.3
         ax.vbar(
-            loc,
-            top=1,
-            width=width,
-            fill_alpha=alpha,
-            legend_label=label,
-            line_alpha=alpha,
-            **plot_kwargs,
+            loc, top=1, width=width, fill_alpha=alpha, line_alpha=alpha, **plot_kwargs,
         )
 
     if y_hat_line:

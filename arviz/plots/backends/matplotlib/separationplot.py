@@ -47,6 +47,8 @@ def plot_separation(
 
     exp_events_kwargs.setdefault("color", "k")
     exp_events_kwargs.setdefault("marker", "^")
+    exp_events_kwargs.setdefault("s", 100)
+    exp_events_kwargs.setdefault("zorder", 2)
 
     backend_kwargs = {
         **backend_kwarg_defaults(),
@@ -102,9 +104,8 @@ def plot_separation(
 
     for i, loc in enumerate(locs):
         positive = not y[idx][i] == 0
-        label = "Positive class" if positive else "Negative class"
         alpha = 1 if positive else 0.3
-        ax.bar(loc, 1, width=width, label=label, alpha=alpha, **plot_kwargs)
+        ax.bar(loc, 1, width=width, alpha=alpha, **plot_kwargs)
 
     if y_hat_line:
         ax.plot(np.linspace(0, 1, len(y_hat)), y_hat[idx], label=label_y_hat, **y_hat_line_kwargs)

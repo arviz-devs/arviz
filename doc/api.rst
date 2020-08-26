@@ -35,6 +35,7 @@ Plots
     plot_ppc
     plot_rank
     plot_trace
+    plot_separation
     plot_violin
 
 .. _stats_api:
