@@ -7,7 +7,7 @@
 * Added `to_dict` method for InferenceData object ([1223](https://github.com/arviz-devs/arviz/pull/1223))
 * Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) ([1336](https://github.com/arviz-devs/arviz/pull/1336))
 * Ridgeplot is hdi aware. By default displays truncated densities at the specified `hdi_prop` level ([1348](https://github.com/arviz-devs/arviz/pull/1348))
-* Added `plot_separation` ([1369](https://github.com/arviz-devs/arviz/pull/1359))
+* Added `plot_separation` ([1359](https://github.com/arviz-devs/arviz/pull/1359))
 
 
 ### Maintenance and fixes

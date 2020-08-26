@@ -90,7 +90,8 @@ def plot_separation(
 
     if len(y) != len(y_hat):
         warnings.warn(
-            "y and y_hat must be the same lenght", UserWarning,
+            "y and y_hat must be the same lenght",
+            UserWarning,
         )
 
     locs = np.linspace(0, 1, len(y_hat))
@@ -106,7 +107,12 @@ def plot_separation(
         positive = not y[idx][i] == 0
         alpha = 1 if positive else 0.3
         ax.vbar(
-            loc, top=1, width=width, fill_alpha=alpha, line_alpha=alpha, **plot_kwargs,
+            loc,
+            top=1,
+            width=width,
+            fill_alpha=alpha,
+            line_alpha=alpha,
+            **plot_kwargs,
         )
 
     if y_hat_line:
@@ -120,7 +126,10 @@ def plot_separation(
     if expected_events:
         expected_events = int(np.round(np.sum(y_hat)))
         ax.triangle(
-            y_hat[idx][expected_events - 1], 0, legend_label="Expected events", **exp_events_kwargs,
+            y_hat[idx][expected_events - 1],
+            0,
+            legend_label="Expected events",
+            **exp_events_kwargs,
         )
 
     ax.axis.visible = False

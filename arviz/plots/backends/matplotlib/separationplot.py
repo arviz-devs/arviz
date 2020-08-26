@@ -96,7 +96,8 @@ def plot_separation(
 
     if len(y) != len(y_hat):
         warnings.warn(
-            "y and y_hat must be the same lenght", UserWarning,
+            "y and y_hat must be the same lenght",
+            UserWarning,
         )
 
     locs = np.linspace(0, 1, len(y_hat))
