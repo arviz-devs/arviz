@@ -115,7 +115,7 @@ def plot_separation(
         expected_events = int(np.round(np.sum(y_hat)))
         ax.scatter(y_hat[idx][expected_events - 1], 0, label="Expected events", **exp_events_kwargs)
 
-    if legend:
+    if legend and expected_events or y_hat_line:
         handles, labels = plt.gca().get_legend_handles_labels()
         labels_dict = dict(zip(labels, handles))
         ax.legend(labels_dict.values(), labels_dict.keys())
