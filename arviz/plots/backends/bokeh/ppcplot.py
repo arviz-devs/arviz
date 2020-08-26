@@ -21,6 +21,7 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
+    color,  # pylint: disable=unused-argument
     textsize,
     mean,
     jitter,
