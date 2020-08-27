@@ -185,16 +185,12 @@ class InferenceData:
         return self._groups_all
 
     def values(self):
-        datasets = []
         for group in self._groups_all:
-            datasets.append(getattr(self, group))
-        return datasets
+            yield getattr(self, group)
 
     def items(self):
-        item = []
         for group in self._groups_all:
-            item.append((group, getattr(self, group)))
-        return item
+            yield (group, getattr(self, group))
 
     @staticmethod
     def from_netcdf(filename):
