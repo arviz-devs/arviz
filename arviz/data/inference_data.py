@@ -306,15 +306,9 @@ class InferenceData:
                     if len(dims) > 0:
                         ret[dims_key][var_name] = dims
                     ret[group] = data
-                if attrs is None:
-                    attrs = dataset.attrs
-                elif attrs != dataset.attrs:
-                    warnings.warn(
-                        "The attributes are not same for all groups."
-                        " Considering only the first group `attrs`"
-                    )
+                ret[group + "_attrs"] = dataset.attrs
 
-        ret["attrs"] = attrs
+        ret["attrs"] = self.attrs
         return ret
 
     def to_json(self, filename, **kwargs):
@@ -1164,14 +1158,14 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
 
     for key, val in combined_attr.items():
         all_same = True
-        for indx in range(len(val)-1):
-            if val[indx] != val[indx+1]:
+        for indx in range(len(val) - 1):
+            if val[indx] != val[indx + 1]:
                 all_same = False
-                break;
+                break
         if all_same:
             combined_attr[key] = val[0]
     if inplace:
-        setattr(args[0], '_attrs', dict(combined_attr))
+        setattr(args[0], "_attrs", dict(combined_attr))
 
     if not inplace:
         # Keep order for python 3.5
@@ -1412,6 +1406,6 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     else:
                         inference_data_dict[group] = group0_data
 
-    inference_data_dict['attrs'] = combined_attr
+    inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
