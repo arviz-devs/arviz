@@ -92,14 +92,24 @@ def plot_dist_comparison(
             if group.startswith("posterior")
             else observed_kwargs
         )
-        for idx2, (var, selection, data,) in enumerate(plotter):
+        for idx2, (
+            var,
+            selection,
+            data,
+        ) in enumerate(plotter):
             label = make_label(var, selection)
             label = f"{group} {label}"
             plot_dist(
-                data, label=label if legend else None, ax=axes[idx2, idx], **kwargs,
+                data,
+                label=label if legend else None,
+                ax=axes[idx2, idx],
+                **kwargs,
             )
             plot_dist(
-                data, label=label if legend else None, ax=axes[idx2, -1], **kwargs,
+                data,
+                label=label if legend else None,
+                ax=axes[idx2, -1],
+                **kwargs,
             )
 
     if backend_show(show):

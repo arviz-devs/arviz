@@ -100,7 +100,10 @@ def plot_khat(
     rgba_c = vectorized_to_hex(rgba_c)
 
     if ax is None:
-        fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
+        fig, ax = create_axes_grid(
+            1,
+            backend_kwargs=backend_kwargs,
+        )
     else:
         fig = ax.get_figure()
 

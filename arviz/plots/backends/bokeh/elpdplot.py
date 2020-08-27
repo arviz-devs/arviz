@@ -35,7 +35,9 @@ def plot_elpd(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
 
@@ -57,7 +59,12 @@ def plot_elpd(
         plot_kwargs.setdefault("s", markersize)
 
         if ax is None:
-            ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+            ax = create_axes_grid(
+                1,
+                figsize=figsize,
+                squeeze=True,
+                backend_kwargs=backend_kwargs,
+            )
         ydata = pointwise_data[0] - pointwise_data[1]
         _plot_atomic_elpd(
             ax, xdata, ydata, *models, threshold, coord_labels, xlabels, True, True, plot_kwargs
@@ -170,7 +177,10 @@ def _plot_atomic_elpd(
         for outlier in outliers:
             label = coord_labels[outlier]
             ax_.text(
-                x=np.asarray(outlier), y=np.asarray(ydata[outlier]), text=label, text_color="black",
+                x=np.asarray(outlier),
+                y=np.asarray(ydata[outlier]),
+                text=label,
+                text_color="black",
             )
     if ylabels_shown:
         ax_.yaxis.axis_label = "ELPD difference"

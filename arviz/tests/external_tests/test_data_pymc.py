@@ -552,7 +552,8 @@ class TestPyMC3WarmupHandling:
             assert idata.warmup_posterior.dims["draw"] == tune
 
     @pytest.mark.skipif(
-        hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
+        hasattr(pm.backends.base.SamplerReport, "n_draws"),
+        reason="requires pymc3 3.8 or lower",
     )
     def test_save_warmup_issue_1208_before_3_9(self):
         with pm.Model():

@@ -89,7 +89,9 @@ def plot_forest(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -104,7 +106,9 @@ def plot_forest(
                 "height", int(figsize[1] * (width_r / sum(width_ratios)) * dpi * 1.25)
             )
             if i == 0:
-                ax = bkp.figure(**backend_kwargs_i,)
+                ax = bkp.figure(
+                    **backend_kwargs_i,
+                )
                 backend_kwargs_i.setdefault("y_range", ax.y_range)
             else:
                 ax = bkp.figure(**backend_kwargs_i)
@@ -116,7 +120,12 @@ def plot_forest(
 
     if kind == "forestplot":
         plot_handler.forestplot(
-            hdi_prob, quartiles, linewidth, markersize, axes[0, 0], rope,
+            hdi_prob,
+            quartiles,
+            linewidth,
+            markersize,
+            axes[0, 0],
+            rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(
@@ -456,7 +465,10 @@ class PlotHandler:
                         [values[j], values[-(j + 1)]], [y, y], line_width=width, line_color=color
                     )
                 ax.circle(
-                    x=values[mid], y=y, size=markersize * 0.75, fill_color=color,
+                    x=values[mid],
+                    y=y,
+                    size=markersize * 0.75,
+                    fill_color=color,
                 )
         _title = Title()
         _title.text = "{:.1%} HDI".format(hdi_prob)
@@ -471,7 +483,11 @@ class PlotHandler:
             for y, ess, color in plotter.ess():
                 if ess is not None:
                     ax.circle(
-                        x=ess, y=y, fill_color=color, size=markersize, line_color="black",
+                        x=ess,
+                        y=y,
+                        fill_color=color,
+                        size=markersize,
+                        line_color="black",
                     )
                 if ess > max_ess:
                     max_ess = ess

@@ -36,7 +36,12 @@ def plot_rank(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs.setdefault("squeeze", True)
     if axes is None:
-        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
+        _, axes = create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
         ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
