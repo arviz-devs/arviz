@@ -216,8 +216,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 if var.name in self.log_likelihood
             ]
         try:
-            log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
-                len(trace.chains)
+            log_likelihood_dict = (
+                self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
+                    len(trace.chains)
+                )
             )
         except AttributeError as err:
             raise AttributeError(

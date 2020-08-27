@@ -61,7 +61,11 @@ def plot_dist(
 
     if ax is None:
         ax = create_axes_grid(
-            1, figsize=figsize, squeeze=True, polar=is_circular, backend_kwargs=backend_kwargs,
+            1,
+            figsize=figsize,
+            squeeze=True,
+            polar=is_circular,
+            backend_kwargs=backend_kwargs,
         )
 
     if kind == "auto":

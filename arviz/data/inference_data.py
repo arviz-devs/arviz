@@ -163,8 +163,10 @@ class InferenceData:
                     for group in self._groups_all
                 ]
             )
-            formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
-                elements
+            formatted_html_template = (
+                HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                    elements
+                )
             )
             css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
             html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
@@ -285,7 +287,10 @@ class InferenceData:
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
 
-                    if group in ("predictions", "predictions_constant_data",):
+                    if group in (
+                        "predictions",
+                        "predictions_constant_data",
+                    ):
                         dims_key = "pred_dims"
                     else:
                         dims_key = "dims"
@@ -330,7 +335,12 @@ class InferenceData:
         return concat(self, other, copy=True, inplace=False)
 
     def sel(
-        self, groups=None, filter_groups=None, inplace=False, chain_prior=None, **kwargs,
+        self,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        chain_prior=None,
+        **kwargs,
     ):
         """Perform an xarray selection on all groups.
 
@@ -414,7 +424,11 @@ class InferenceData:
             return out
 
     def isel(
-        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        **kwargs,
     ):
         """Perform an xarray selection on all groups.
 
@@ -462,7 +476,12 @@ class InferenceData:
             return out
 
     def stack(
-        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self,
+        dimensions=None,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        **kwargs,
     ):
         """Perform an xarray stacking on all groups.
 

@@ -64,7 +64,11 @@ def plot_bpv(
 
     if ax is None:
         axes = create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend_kwargs=backend_kwargs,
         )
     else:
         axes = np.atleast_2d(ax)
@@ -98,7 +102,11 @@ def plot_bpv(
                     ax_i.line(x, dens_ref, **plot_ref_kwargs)
                 elif reference == "samples":
                     x_ss, u_dens = sample_reference_distribution(
-                        dist, (n_ref, tstat_pit_dens.size,)
+                        dist,
+                        (
+                            n_ref,
+                            tstat_pit_dens.size,
+                        ),
                     )
                     ax_i.multi_line(
                         list(x_ss.T), list(u_dens.T), line_width=linewidth, **plot_ref_kwargs

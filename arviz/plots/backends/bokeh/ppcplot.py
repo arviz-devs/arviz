@@ -38,14 +38,20 @@ def plot_ppc(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
 
     (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
         axes = create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend_kwargs=backend_kwargs,
         )
     else:
         axes = np.atleast_2d(ax)
@@ -120,7 +126,11 @@ def plot_ppc(
                 _, hist, bin_edges = histogram(obs_vals, bins=bins)
                 hist = np.concatenate((hist[:1], hist))
                 ax_i.step(
-                    bin_edges, hist, line_color="black", line_width=linewidth, mode="center",
+                    bin_edges,
+                    hist,
+                    line_color="black",
+                    line_width=linewidth,
+                    mode="center",
                 )
 
             if mean:
@@ -161,7 +171,9 @@ def plot_ppc(
         elif kind == "cumulative":
             if dtype == "f":
                 ax_i.line(
-                    *_empirical_cdf(obs_vals), line_color="black", line_width=linewidth,
+                    *_empirical_cdf(obs_vals),
+                    line_color="black",
+                    line_width=linewidth,
                 )
             else:
                 ax_i.step(
@@ -229,7 +241,11 @@ def plot_ppc(
             if jitter:
                 obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
             ax_i.circle(
-                obs_vals, obs_yvals, fill_color="black", size=markersize, line_alpha=alpha,
+                obs_vals,
+                obs_yvals,
+                fill_color="black",
+                size=markersize,
+                line_alpha=alpha,
             )
 
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):

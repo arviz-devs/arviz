@@ -52,7 +52,11 @@ def plot_mcse(
 
     if ax is None:
         ax = create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)
@@ -139,7 +143,10 @@ def plot_mcse(
             else:
                 rug_x, rug_y = (
                     values / (len(mask) - 1),
-                    np.full_like(values, 0,),
+                    np.full_like(
+                        values,
+                        0,
+                    ),
                 )
 
                 hline = Span(

@@ -74,7 +74,9 @@ def create_axes_grid(
 
     if figsize is not None:
         backend_kwargs = {
-            **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+            **backend_kwarg_defaults(
+                ("dpi", "plot.bokeh.figure.dpi"),
+            ),
             **backend_kwargs,
         }
         dpi = backend_kwargs.pop("dpi")

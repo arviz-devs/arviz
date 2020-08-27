@@ -52,7 +52,11 @@ def plot_ess(
 
     if ax is None:
         ax = create_axes_grid(
-            len(plotters), rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
+            len(plotters),
+            rows,
+            cols,
+            figsize=figsize,
+            backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

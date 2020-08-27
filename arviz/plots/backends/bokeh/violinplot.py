@@ -34,7 +34,9 @@ def plot_violin(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
     (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)

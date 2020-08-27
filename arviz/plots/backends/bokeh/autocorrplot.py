@@ -30,7 +30,9 @@ def plot_autocorr(
     backend_config.setdefault("bounds_x_range", (0, len_y))
 
     backend_config = {
-        **backend_kwarg_defaults(("bounds_y_range", "plot.bokeh.bounds_y_range"),),
+        **backend_kwarg_defaults(
+            ("bounds_y_range", "plot.bokeh.bounds_y_range"),
+        ),
         **backend_config,
     }
 
@@ -38,7 +40,9 @@ def plot_autocorr(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
 

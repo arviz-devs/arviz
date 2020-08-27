@@ -46,7 +46,9 @@ def plot_posterior(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
 
@@ -54,7 +56,11 @@ def plot_posterior(
 
     if ax is None:
         ax = create_axes_grid(
-            length_plotters, rows, cols, figsize=figsize, backend_kwargs=backend_kwargs,
+            length_plotters,
+            rows,
+            cols,
+            figsize=figsize,
+            backend_kwargs=backend_kwargs,
         )
     else:
         ax = np.atleast_2d(ax)

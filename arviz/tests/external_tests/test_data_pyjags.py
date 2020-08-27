@@ -52,7 +52,8 @@ class TestDataPyJAGSWithoutEstimation:
         )
 
         assert verify_equality_of_numpy_values_dictionaries(
-            PYJAGS_POSTERIOR_DICT, pyjags_dict_from_arviz_dict_from_pyjags_dict,
+            PYJAGS_POSTERIOR_DICT,
+            pyjags_dict_from_arviz_dict_from_pyjags_dict,
         )
 
     def test_extract_samples_dictionary_from_arviz_inference_data(self):
@@ -66,7 +67,8 @@ class TestDataPyJAGSWithoutEstimation:
         )
 
         assert verify_equality_of_numpy_values_dictionaries(
-            arviz_samples_dict_from_pyjags_samples_dict, arviz_dict_from_idata_from_pyjags_dict,
+            arviz_samples_dict_from_pyjags_samples_dict,
+            arviz_dict_from_idata_from_pyjags_dict,
         )
 
     def test_roundtrip_from_pyjags_via_arviz_to_pyjags(self):
