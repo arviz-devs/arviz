@@ -80,7 +80,7 @@ def plot_separation(
 
         if isinstance(y_hat, str):
             label_y_hat = y_hat
-            y_hat = idata.posterior_predictive[y_hat].mean(axis=(1, 0)).values
+            y_hat = idata.posterior_predictive[y_hat].mean(dim=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
             raise ValueError(
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
