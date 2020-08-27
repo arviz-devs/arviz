@@ -1,4 +1,8 @@
 """Separation plot for discrete outcome models."""
+import numpy as np
+import xarray as xr
+
+from ..data import InferenceData
 from ..rcparams import rcParams
 from .plot_utils import get_plotting_function
 
@@ -11,7 +15,7 @@ def plot_separation(
     expected_events=False,
     figsize=None,
     textsize=None,
-    color=None,
+    color="C0",
     legend=True,
     ax=None,
     plot_kwargs=None,
@@ -51,7 +55,8 @@ def plot_separation(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
-        Additional keywords passed to :meth:`mpl:matplotlib.axes.Axes.bar` or :meth:`bokeh:bokeh.plotting.Figure.vbar` for separation plot.
+        Additional keywords passed to :meth:`mpl:matplotlib.axes.Axes.bar` or
+        :meth:`bokeh:bokeh.plotting.Figure.vbar` for separation plot.
     y_hat_line_kwargs : dict, optional
         Additional keywords passed to ax.plot for `y_hat` line.
     exp_events_kwargs : dict, optional
@@ -84,11 +89,41 @@ def plot_separation(
         >>> az.plot_separation(idata=idata, y='outcome', y_hat='outcome', figsize=(8, 1))
 
     """
+    if idata is not None and not isinstance(idata, InferenceData):
+        raise ValueError("idata must be of type InferenceData or None")
+
+    if idata is None:
+        if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat)):
+            raise ValueError(
+                "y and y_hat must be array or DataArray when idata is None "
+                "but they are of types {}".format([type(arg) for arg in (y, y_hat)])
+            )
+    else:
+
+        if y_hat is None and isinstance(y, str):
+            label_y_hat = y
+            y_hat = y
+        elif y_hat is None:
+            raise ValueError("y_hat cannot be None if y is not a str")
+
+        if isinstance(y, str):
+            y = idata.observed_data[y].values
+        elif not isinstance(y, (np.ndarray, xr.DataArray)):
+            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+
+        if isinstance(y_hat, str):
+            label_y_hat = y_hat
+            y_hat = idata.posterior_predictive[y_hat].mean(dim=("chain", "draw")).values
+        elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
+            raise ValueError(
+                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
+            )
+
     separation_kwargs = dict(
-        idata=idata,
         y=y,
         y_hat=y_hat,
         y_hat_line=y_hat_line,
+        label_y_hat=label_y_hat,
         expected_events=expected_events,
         figsize=figsize,
         textsize=textsize,
