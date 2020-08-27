@@ -51,7 +51,7 @@ def plot_separation(
     ax: axes, optional
         Matplotlib axes or bokeh figures.
     plot_kwargs : dict, optional
-        Additional keywords passed to ax.bar for separation plot.
+        Additional keywords passed to :meth:`mpl:matplotlib.axes.Axes.bar` or :meth:`bokeh:bokeh.plotting.Figure.vbar` for separation plot.
     y_hat_line_kwargs : dict, optional
         Additional keywords passed to ax.plot for `y_hat` line.
     exp_events_kwargs : dict, optional
