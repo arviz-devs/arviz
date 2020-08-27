@@ -163,10 +163,8 @@ class InferenceData:
                     for group in self._groups_all
                 ]
             )
-            formatted_html_template = (
-                HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
-                    elements
-                )
+            formatted_html_template = (  # pylint: disable=possibly-unused-variable
+                HtmlTemplate.html_template.format(elements)
             )
             css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
             html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
