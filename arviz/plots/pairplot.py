@@ -173,7 +173,8 @@ def plot_pair(
         raise ValueError((f"Plot type {kind} not recognized." "Plot type must be in {valid_kinds}"))
     if fill_last or contour:
         warnings.warn(
-            "fill_last and contour will be deprecated. Please use kde_kwargs", UserWarning,
+            "fill_last and contour will be deprecated. Please use kde_kwargs",
+            UserWarning,
         )
     if plot_kwargs:
         warnings.warn(

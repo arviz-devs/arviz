@@ -28,7 +28,10 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     backend_kwargs["squeeze"] = True
 
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(
+            1,
+            backend_kwargs=backend_kwargs,
+        )
 
     ax.plot(x_data, y_data, **plot_kwargs)
     ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)

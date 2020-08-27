@@ -74,7 +74,10 @@ def plot_elpd(
         backend_kwargs.setdefault("figsize", figsize)
         backend_kwargs["squeeze"] = True
         if ax is None:
-            fig, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
+            fig, ax = create_axes_grid(
+                1,
+                backend_kwargs=backend_kwargs,
+            )
 
         ydata = pointwise_data[0] - pointwise_data[1]
         ax.scatter(xdata, ydata, **plot_kwargs)

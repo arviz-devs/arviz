@@ -52,7 +52,12 @@ def plot_violin(
     rug_kwargs.setdefault("linestyle", "")
 
     if ax is None:
-        fig, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
+        fig, ax = create_axes_grid(
+            len(plotters),
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
         fig.set_constrained_layout(False)
         fig.subplots_adjust(wspace=0)
 

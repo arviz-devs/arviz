@@ -446,7 +446,10 @@ class TestInferenceData:
         args, result = args_res
         ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
         idata = InferenceData(
-            posterior=(ds, ds), sample_stats=(ds, ds), observed_data=ds, posterior_predictive=ds,
+            posterior=(ds, ds),
+            sample_stats=(ds, ds),
+            observed_data=ds,
+            posterior_predictive=ds,
         )
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
@@ -905,8 +908,12 @@ class TestDataDict:
             warmup_posterior_predictive=data.obj,
             predictions=data.obj,
             observed_data=eight_schools_params,
-            coords={"school": np.arange(8),},
-            pred_coords={"school_pred": np.arange(8),},
+            coords={
+                "school": np.arange(8),
+            },
+            pred_coords={
+                "school_pred": np.arange(8),
+            },
             dims={"theta": ["school"], "eta": ["school"]},
             pred_dims={"theta": ["school_pred"], "eta": ["school_pred"]},
             save_warmup=save_warmup,

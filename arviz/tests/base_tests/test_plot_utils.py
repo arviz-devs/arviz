@@ -215,9 +215,20 @@ def test_bokeh_import():
 @pytest.mark.parametrize(
     "params",
     [
-        {"input": ({"dashes": "-",}, "scatter"), "output": "linestyle",},
         {
-            "input": ({"mfc": "blue", "c": "blue", "line_width": 2}, "plot",),
+            "input": (
+                {
+                    "dashes": "-",
+                },
+                "scatter",
+            ),
+            "output": "linestyle",
+        },
+        {
+            "input": (
+                {"mfc": "blue", "c": "blue", "line_width": 2},
+                "plot",
+            ),
             "output": ("markerfacecolor", "color", "line_width"),
         },
         {"input": ({"ec": "blue", "fc": "black"}, "hist"), "output": ("edgecolor", "facecolor")},
@@ -296,7 +307,8 @@ bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disab
 
 
 @pytest.mark.skipif(
-    not (bokeh_installed | running_on_ci()), reason="test requires bokeh which is not installed",
+    not (bokeh_installed | running_on_ci()),
+    reason="test requires bokeh which is not installed",
 )
 def test_set_bokeh_circular_ticks_labels():
     """Assert the axes returned after placing ticks and tick labels for circular plots."""

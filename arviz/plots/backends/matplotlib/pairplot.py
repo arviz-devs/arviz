@@ -182,7 +182,10 @@ def plot_pair(
             plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs)
         if "hexbin" in kind:
             hexbin = ax.hexbin(
-                infdata_group[0], infdata_group[1], gridsize=gridsize, **hexbin_kwargs,
+                infdata_group[0],
+                infdata_group[1],
+                gridsize=gridsize,
+                **hexbin_kwargs,
             )
             ax.grid(False)
 
@@ -246,7 +249,11 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         if ax is None:
-            fig, ax = plt.subplots(vars_to_plot, vars_to_plot, **backend_kwargs,)
+            fig, ax = plt.subplots(
+                vars_to_plot,
+                vars_to_plot,
+                **backend_kwargs,
+            )
         hexbin_values = []
         for i in range(0, vars_to_plot):
             var1 = infdata_group[i]
@@ -272,7 +279,10 @@ def plot_pair(
                     if "kde" in kind:
 
                         plot_kde(
-                            var1, var2, ax=ax[j, i], **kde_kwargs,
+                            var1,
+                            var2,
+                            ax=ax[j, i],
+                            **kde_kwargs,
                         )
 
                     if "hexbin" in kind:
