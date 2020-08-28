@@ -89,6 +89,7 @@ def plot_separation(
         >>> az.plot_separation(idata=idata, y='outcome', y_hat='outcome', figsize=(8, 1))
 
     """
+    label_y_hat = "y_hat"
     if idata is not None and not isinstance(idata, InferenceData):
         raise ValueError("idata must be of type InferenceData or None")
 
