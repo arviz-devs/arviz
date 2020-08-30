@@ -320,6 +320,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         Select mcse method. Valid methods are:
         - "mean"
         - "sd"
+        - "median"
         - "quantile"
 
     prob : float
@@ -344,10 +345,15 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
     .. ipython::
 
-        In [1]: az.mcse(data, method="quantile", prob=.7)
+        In [1]: az.mcse(data, method="quantile", prob=0.7)
 
     """
-    methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
+    methods = {
+        "mean": _mcse_mean,
+        "sd": _mcse_sd,
+        "median": _mcse_median,
+        "quantile": _mcse_quantile,
+    }
     if method not in methods:
         raise TypeError(
             "mcse method {} not found. Valid methods are:\n{}".format(
