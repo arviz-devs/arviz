@@ -12,10 +12,10 @@ from ...plots.plot_utils import xarray_var_iter
 from ...rcparams import rcParams
 from ...stats import bfmi, ess, geweke, mcse, rhat
 from ...stats.diagnostics import (
-    _conv_quantile,
     _ess,
     _ess_quantile,
     _mc_error,
+    _mcse_quantile,
     _multichain_statistics,
     _rhat,
     _rhat_rank,
@@ -515,12 +515,12 @@ class TestDiagnostics:
         else:
             assert np.isnan(_mc_error(x))
 
-    @pytest.mark.parametrize("func", ("_conv_quantile", "_z_scale"))
+    @pytest.mark.parametrize("func", ("_mcse_quantile", "_z_scale"))
     def test_nan_behaviour(self, func):
         data = np.random.randn(100, 4)
         data[0, 0] = np.nan  #  pylint: disable=unsupported-assignment-operation
-        if func == "_conv_quantile":
-            assert np.isnan(_conv_quantile(data, 0.5)).all(None)
+        if func == "_mcse_quantile":
+            assert np.isnan(_mcse_quantile(data, 0.5)).all(None)
         else:
             assert not np.isnan(_z_scale(data)).all(None)
             assert not np.isnan(_z_scale(data)).any(None)

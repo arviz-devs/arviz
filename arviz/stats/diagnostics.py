@@ -811,26 +811,6 @@ def _ess_identity(ary, relative=False):
     return _ess(ary, relative=relative)
 
 
-def _conv_quantile(ary, prob):
-    """Return mcse, Q05, Q95, Seff."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan
-    ess = _ess_quantile(ary, prob)
-    probability = [0.1586553, 0.8413447, 0.05, 0.95]
-    with np.errstate(invalid="ignore"):
-        ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
-    sorted_ary = np.sort(ary.ravel())
-    size = sorted_ary.size
-    ppf_size = ppf * size - 1
-    th1 = sorted_ary[_rint(np.nanmax((ppf_size[0], 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf_size[1], size - 1)))]
-    mcse_quantile = (th2 - th1) / 2
-    th1 = sorted_ary[_rint(np.nanmax((ppf_size[2], 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf_size[3], size - 1)))]
-    return mcse_quantile, th1, th2, ess
-
-
 def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
     _numba_flag = Numba.numba_flag
@@ -862,13 +842,26 @@ def _mcse_sd(ary):
     return mcse_sd_value
 
 
+def _mcse_median(ary, prob):
+    """Compute the Markov Chain median error."""
+    return _mcse_quantile(ary, 0.5)
+
+
 def _mcse_quantile(ary, prob):
     """Compute the Markov Chain quantile error at quantile=prob."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    mcse_q, *_ = _conv_quantile(ary, prob)
-    return mcse_q
+    ess = _ess_quantile(ary, prob)
+    probability = [0.1586553, 0.8413447]
+    with np.errstate(invalid="ignore"):
+        ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
+    sorted_ary = np.sort(ary.ravel())
+    size = sorted_ary.size
+    ppf_size = ppf * size - 1
+    th1 = sorted_ary[int(np.floor(np.nanmax((ppf_size[0], 0))))]
+    th2 = sorted_ary[int(np.ceil(np.nanmin((ppf_size[1], size - 1))))]
+    return (th2 - th1) / 2
 
 
 def _mc_error(ary, batches=5, circular=False):
