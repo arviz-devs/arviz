@@ -535,6 +535,13 @@ def _bfmi(energy):
     return num / den
 
 
+def _backtransform_ranks(arr, c=3 / 8):
+    """Backtransformation of ranks."""
+    arr = np.asarray(arr)
+    size = arr.size
+    return (arr - c) / (size - 2 * c + 1)
+
+
 def _z_scale(ary):
     """Calculate z_scale.
 
@@ -549,7 +556,8 @@ def _z_scale(ary):
     ary = np.asarray(ary)
     size = ary.size
     rank = stats.rankdata(ary, method="average")
-    z = stats.norm.ppf((rank - 0.5) / size)
+    rank = _backtransform_ranks(rank)
+    z = stats.norm.ppf(rank)
     z = z.reshape(ary.shape)
     return z
 
