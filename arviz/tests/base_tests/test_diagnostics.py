@@ -350,7 +350,7 @@ class TestDiagnostics:
             ess_hat = ess(data, var_names=var_names, method=method, relative=relative)
         assert np.all(ess_hat.mu.values > n_low)  # This might break if the data is regenerated
 
-    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
+    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "median", "quantile"))
     def test_mcse_array(self, mcse_method):
         if mcse_method == "quantile":
             mcse_hat = mcse(np.random.randn(4, 100), method=mcse_method, prob=0.34)
@@ -362,7 +362,7 @@ class TestDiagnostics:
         with pytest.raises(TypeError):
             mcse(np.random.randn(2, 300, 10))
 
-    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
+    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "median", "quantile"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
     def test_mcse_dataset(self, data, mcse_method, var_names):
         if mcse_method == "quantile":
@@ -371,7 +371,7 @@ class TestDiagnostics:
             mcse_hat = mcse(data, var_names=var_names, method=mcse_method)
         assert mcse_hat  # This might break if the data is regenerated
 
-    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "quantile"))
+    @pytest.mark.parametrize("mcse_method", ("mean", "sd", "median", "quantile"))
     @pytest.mark.parametrize("chain", (None, 1, 2))
     @pytest.mark.parametrize("draw", (1, 2, 3, 4))
     @pytest.mark.parametrize("use_nan", (True, False))
