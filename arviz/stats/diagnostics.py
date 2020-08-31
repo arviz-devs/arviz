@@ -535,7 +535,7 @@ def _bfmi(energy):
     return num / den
 
 
-def _backtransform_ranks(arr, c=3 / 8):
+def _backtransform_ranks(arr, c=3 / 8):  # pylint: disable=invalid-name
     """Backtransformation of ranks.
 
     Parameters
@@ -570,7 +570,6 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
-    size = ary.size
     rank = stats.rankdata(ary, method="average")
     rank = _backtransform_ranks(rank)
     z = stats.norm.ppf(rank)
