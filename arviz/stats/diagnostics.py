@@ -536,7 +536,19 @@ def _bfmi(energy):
 
 
 def _backtransform_ranks(arr, c=3 / 8):
-    """Backtransformation of ranks."""
+    """Backtransformation of ranks.
+    
+    Parameters
+    ----------
+    arr : np.ndarray
+        Ranks array
+    c : float
+        Fractional offset. Defaults to c = 3/8 as recommended by Bloom (1985).
+    
+    Returns
+    -------
+    np.ndarray
+    """
     arr = np.asarray(arr)
     size = arr.size
     return (arr - c) / (size - 2 * c + 1)
