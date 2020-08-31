@@ -65,28 +65,28 @@ class TestDiagnostics:
         output <- matrix(ncol=17, nrow=length(names(data1))-4)
         j = 0
         for (i in 1:length(names(data1))) {
-          name = names(data1)[i]
-          ary = matrix(c(data1[,name], data2[,name]), 1000, 2)
-          if (!endsWith(name, "__"))
-            j <- j + 1
-          output[j,] <- c(
-            posterior::rhat(ary),
-            posterior::rhat_basic(ary, FALSE),
-            posterior::ess_bulk(ary),
-            posterior::ess_tail(ary),
-            posterior::ess_mean(ary),
-            posterior::ess_sd(ary),
-            posterior::ess_median(ary),
-            posterior::ess_basic(ary, FALSE),
-            posterior::ess_quantile(ary, 0.01),
-            posterior::ess_quantile(ary, 0.1),
-            posterior::ess_quantile(ary, 0.3),
-            posterior::mcse_mean(ary),
-            posterior::mcse_sd(ary),
-            posterior::mcse_median(ary),
-            posterior::mcse_quantile(ary, prob=0.01),
-            posterior::mcse_quantile(ary, prob=0.1),
-            posterior::mcse_quantile(ary, prob=0.3))
+            name = names(data1)[i]
+            ary = matrix(c(data1[,name], data2[,name]), 1000, 2)
+            if (!endsWith(name, "__"))
+                j <- j + 1
+                output[j,] <- c(
+                    posterior::rhat(ary),
+                    posterior::rhat_basic(ary, FALSE),
+                    posterior::ess_bulk(ary),
+                    posterior::ess_tail(ary),
+                    posterior::ess_mean(ary),
+                    posterior::ess_sd(ary),
+                    posterior::ess_median(ary),
+                    posterior::ess_basic(ary, FALSE),
+                    posterior::ess_quantile(ary, 0.01),
+                    posterior::ess_quantile(ary, 0.1),
+                    posterior::ess_quantile(ary, 0.3),
+                    posterior::mcse_mean(ary),
+                    posterior::mcse_sd(ary),
+                    posterior::mcse_median(ary),
+                    posterior::mcse_quantile(ary, prob=0.01),
+                    posterior::mcse_quantile(ary, prob=0.1),
+                    posterior::mcse_quantile(ary, prob=0.3))
         }
         df = data.frame(output, row.names = names(data1)[5:ncol(data1)])
         colnames(df) <- c("rhat_rank",
