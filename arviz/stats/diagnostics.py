@@ -871,7 +871,7 @@ def _mcse_sd(ary):
     return mcse_sd_value
 
 
-def _mcse_median(ary, prob):
+def _mcse_median(ary):
     """Compute the Markov Chain median error."""
     return _mcse_quantile(ary, 0.5)
 
