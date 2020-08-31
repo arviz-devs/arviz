@@ -54,38 +54,40 @@ class TestDiagnostics:
 
     def test_deterministic(self):
         """
-        Test algorithm against RStan monitor.R functions.
-        monitor.R :
-        https://github.com/stan-dev/rstan/blob/425d195565c4d9bcbcb8cccf513e140e6908ca62/rstan/rstan/R/monitor.R
+        Test algorithm against posterior (R) convergence functions.
+
+        posterior: https://github.com/stan-dev/posterior
         R code:
         ```
-        source('~/monitor.R')
+        library("posterior")
         data2 <- read.csv("blocker.2.csv", comment.char = "#")
         data1 <- read.csv("blocker.1.csv", comment.char = "#")
-        output <- matrix(ncol=15, nrow=length(names(data1))-4)
+        output <- matrix(ncol=17, nrow=length(names(data1))-4)
         j = 0
         for (i in 1:length(names(data1))) {
           name = names(data1)[i]
           ary = matrix(c(data1[,name], data2[,name]), 1000, 2)
           if (!endsWith(name, "__"))
-              j <- j + 1
-              output[j,] <- c(
-                rhat(ary),
-                rhat_rfun(ary),
-                ess_bulk(ary),
-                ess_tail(ary),
-                ess_mean(ary),
-                ess_sd(ary),
-                ess_rfun(ary),
-                ess_quantile(ary, 0.01),
-                ess_quantile(ary, 0.1),
-                ess_quantile(ary, 0.3),
-                mcse_mean(ary),
-                mcse_sd(ary),
-                mcse_quantile(ary, prob=0.01),
-                mcse_quantile(ary, prob=0.1),
-                mcse_quantile(ary, prob=0.3))
-            }
+            j <- j + 1
+          output[j,] <- c(
+            posterior::rhat(ary),
+            posterior::rhat_basic(ary, FALSE),
+            posterior::ess_bulk(ary),
+            posterior::ess_tail(ary),
+            posterior::ess_mean(ary),
+            posterior::ess_sd(ary),
+            posterior::ess_median(ary),
+            posterior::ess_basic(ary, FALSE),
+            posterior::ess_quantile(ary, 0.01),
+            posterior::ess_quantile(ary, 0.1),
+            posterior::ess_quantile(ary, 0.3),
+            posterior::mcse_mean(ary),
+            posterior::mcse_sd(ary),
+            posterior::mcse_median(ary),
+            posterior::mcse_quantile(ary, prob=0.01),
+            posterior::mcse_quantile(ary, prob=0.1),
+            posterior::mcse_quantile(ary, prob=0.3))
+        }
         df = data.frame(output, row.names = names(data1)[5:ncol(data1)])
         colnames(df) <- c("rhat_rank",
                           "rhat_raw",
@@ -93,24 +95,32 @@ class TestDiagnostics:
                           "ess_tail",
                           "ess_mean",
                           "ess_sd",
+                          "ess_median",
                           "ess_raw",
                           "ess_quantile01",
                           "ess_quantile10",
                           "ess_quantile30",
                           "mcse_mean",
                           "mcse_sd",
+                          "mcse_median",
                           "mcse_quantile01",
                           "mcse_quantile10",
                           "mcse_quantile30")
-        write.csv(df, "reference_values.csv")
+        write.csv(df, "reference_posterior.csv")
         ```
+        Reference file:
+
+        Created: 2020-08-31
+        System: Ubuntu 18.04.5 LTS
+        R version 4.0.2 (2020-06-22)
+        posterior 0.1.2
         """
         # download input files
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
         posterior = from_cmdstan(path)
-        reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_values.csv")
+        reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
         reference = pd.read_csv(reference_path, index_col=0).sort_index(axis=1).sort_index(axis=0)
         # test arviz functions
         funcs = {
@@ -120,12 +130,14 @@ class TestDiagnostics:
             "ess_tail": lambda x: ess(x, method="tail"),
             "ess_mean": lambda x: ess(x, method="mean"),
             "ess_sd": lambda x: ess(x, method="sd"),
+            "ess_median": lambda x: ess(x, method="median"),
             "ess_raw": lambda x: ess(x, method="identity"),
             "ess_quantile01": lambda x: ess(x, method="quantile", prob=0.01),
             "ess_quantile10": lambda x: ess(x, method="quantile", prob=0.1),
             "ess_quantile30": lambda x: ess(x, method="quantile", prob=0.3),
             "mcse_mean": lambda x: mcse(x, method="mean"),
             "mcse_sd": lambda x: mcse(x, method="sd"),
+            "mcse_median": lambda x: mcse(x, method="median"),
             "mcse_quantile01": lambda x: mcse(x, method="quantile", prob=0.01),
             "mcse_quantile10": lambda x: mcse(x, method="quantile", prob=0.1),
             "mcse_quantile30": lambda x: mcse(x, method="quantile", prob=0.3),
@@ -136,21 +148,26 @@ class TestDiagnostics:
                 key = key + ".{}".format(list(coord_dict.values())[0] + 1)
             results[key] = {func_name: func(vals) for func_name, func in funcs.items()}
         arviz_data = pd.DataFrame.from_dict(results).T.sort_index(axis=1).sort_index(axis=0)
+
         # check column names
         assert set(arviz_data.columns) == set(reference.columns)
+
         # check parameter names
         assert set(arviz_data.index) == set(reference.index)
+
         # check equality (rhat_rank has accuracy < 6e-5, atleast with this data, R vs Py)
         # this is due to numerical accuracy in calculation leading to rankdata
         # function, which scales minimal difference to larger scale
         # test first with numpy
         assert_array_almost_equal(reference, arviz_data, decimal=4)
+
         # then test manually (more strict)
         assert (abs(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 6e-5).all(None)
-        assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-14).all(None)
+        assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-8).all(None)
+
         not_rhat = [col for col in reference.columns if col != "rhat_rank"]
         assert (abs((reference[not_rhat] - arviz_data[not_rhat])).values < 1e-8).all(None)
-        assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-14).all(None)
+        assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-8).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))

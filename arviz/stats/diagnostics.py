@@ -537,18 +537,18 @@ def _bfmi(energy):
 
 def _backtransform_ranks(arr, c=3 / 8):
     """Backtransformation of ranks.
-    
+
     Parameters
     ----------
     arr : np.ndarray
         Ranks array
     c : float
         Fractional offset. Defaults to c = 3/8 as recommended by Blom (1958).
-    
+
     Returns
     -------
     np.ndarray
-    
+
     References
     ----------
     Blom, G. (1958). Statistical Estimates and Transformed Beta-Variables. Wiley; New York.
