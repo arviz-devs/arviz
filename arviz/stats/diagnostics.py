@@ -543,11 +543,15 @@ def _backtransform_ranks(arr, c=3 / 8):
     arr : np.ndarray
         Ranks array
     c : float
-        Fractional offset. Defaults to c = 3/8 as recommended by Bloom (1985).
+        Fractional offset. Defaults to c = 3/8 as recommended by Blom (1958).
     
     Returns
     -------
     np.ndarray
+    
+    References
+    ----------
+    Blom, G. (1958). Statistical Estimates and Transformed Beta-Variables. Wiley; New York.
     """
     arr = np.asarray(arr)
     size = arr.size
