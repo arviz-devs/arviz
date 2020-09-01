@@ -1,4 +1,5 @@
 """Separation plot for discrete outcome models."""
+import warnings
 import numpy as np
 import xarray as xr
 
@@ -120,6 +121,15 @@ def plot_separation(
                 "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
             )
 
+    if len(y) != len(y_hat):
+        warnings.warn(
+            "y and y_hat must be the same lenght",
+            UserWarning,
+        )
+
+    locs = np.linspace(0, 1, len(y_hat))
+    width = np.diff(locs).mean()
+
     separation_kwargs = dict(
         y=y,
         y_hat=y_hat,
@@ -130,6 +140,8 @@ def plot_separation(
         textsize=textsize,
         color=color,
         legend=legend,
+        locs=locs,
+        width=width,
         ax=ax,
         plot_kwargs=plot_kwargs,
         y_hat_line_kwargs=y_hat_line_kwargs,

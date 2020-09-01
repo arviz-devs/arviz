@@ -1,5 +1,4 @@
 """Bokeh separation plot."""
-import warnings
 import numpy as np
 
 from ...plot_utils import _scale_fig_size, vectorized_to_hex
@@ -17,6 +16,8 @@ def plot_separation(
     textsize,
     color,
     legend,  # pylint: disable=unused-argument
+    locs,
+    width,
     ax,
     plot_kwargs,
     y_hat_line_kwargs,
@@ -55,15 +56,6 @@ def plot_separation(
     figsize, *_ = _scale_fig_size(figsize, textsize)
 
     idx = np.argsort(y_hat)
-
-    if len(y) != len(y_hat):
-        warnings.warn(
-            "y and y_hat must be the same lenght",
-            UserWarning,
-        )
-
-    locs = np.linspace(0, 1, len(y_hat))
-    width = np.diff(locs).mean()
 
     backend_kwargs["x_range"] = (0, 1)
     backend_kwargs["y_range"] = (0, 1)

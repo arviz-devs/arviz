@@ -1,5 +1,4 @@
 """Matplotlib separation plot."""
-import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -17,6 +16,8 @@ def plot_separation(
     textsize,
     color,
     legend,
+    locs,
+    width,
     ax,
     plot_kwargs,
     y_hat_line_kwargs,
@@ -61,15 +62,6 @@ def plot_separation(
         _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
 
     idx = np.argsort(y_hat)
-
-    if len(y) != len(y_hat):
-        warnings.warn(
-            "y and y_hat must be the same lenght",
-            UserWarning,
-        )
-
-    locs = np.linspace(0, 1, len(y_hat))
-    width = np.diff(locs).mean()
 
     for i, loc in enumerate(locs):
         positive = not y[idx][i] == 0
