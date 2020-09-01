@@ -9,7 +9,7 @@ from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
 from ...plots.plot_utils import xarray_var_iter
-from ...rcparams import rcParams
+from ...rcparams import rc_context, rcParams
 from ...stats import bfmi, ess, geweke, mcse, rhat
 from ...stats.diagnostics import (
     _ess,
@@ -119,7 +119,8 @@ class TestDiagnostics:
         here = os.path.dirname(os.path.abspath(__file__))
         data_directory = os.path.join(here, "..", "saved_models")
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
-        posterior = from_cmdstan(path)
+        with rc_context(rc={"data.pandas_float_precision": "high"}):
+            posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
         reference = (
             pd.read_csv(reference_path, index_col=0, float_precision="high")
@@ -159,12 +160,12 @@ class TestDiagnostics:
         # check parameter names
         assert set(arviz_data.index) == set(reference.index)
 
-        # test absolute accuracy
-        assert (abs(reference - arviz_data).values < 1e-11).all(None)
-
         # show print with pytests '-s' tag
         np.set_printoptions(16)
         print(abs(reference - arviz_data).max())
+
+        # test absolute accuracy
+        assert (abs(reference - arviz_data).values < 1e-11).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
