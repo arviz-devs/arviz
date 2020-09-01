@@ -165,7 +165,7 @@ class TestDiagnostics:
         print(abs(reference - arviz_data).max())
 
         # test absolute accuracy
-        assert (abs(reference - arviz_data).values < 1e-11).all(None)
+        assert (abs(reference - arviz_data).values < 1e-8).all(None)
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
