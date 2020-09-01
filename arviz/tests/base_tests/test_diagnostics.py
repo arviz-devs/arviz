@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
+from numpy.testing import assert_almost_equal
 
 from ...data import from_cmdstan, load_arviz_data
 from ...plots.plot_utils import xarray_var_iter
@@ -121,7 +121,11 @@ class TestDiagnostics:
         path = os.path.join(data_directory, "stan_diagnostics", "blocker.[0-9].csv")
         posterior = from_cmdstan(path)
         reference_path = os.path.join(data_directory, "stan_diagnostics", "reference_posterior.csv")
-        reference = pd.read_csv(reference_path, index_col=0).sort_index(axis=1).sort_index(axis=0)
+        reference = (
+            pd.read_csv(reference_path, index_col=0, float_precision="high")
+            .sort_index(axis=1)
+            .sort_index(axis=0)
+        )
         # test arviz functions
         funcs = {
             "rhat_rank": lambda x: rhat(x, method="rank"),
@@ -155,19 +159,12 @@ class TestDiagnostics:
         # check parameter names
         assert set(arviz_data.index) == set(reference.index)
 
-        # check equality (rhat_rank has accuracy < 6e-5, atleast with this data, R vs Py)
-        # this is due to numerical accuracy in calculation leading to rankdata
-        # function, which scales minimal difference to larger scale
-        # test first with numpy
-        assert_array_almost_equal(reference, arviz_data, decimal=4)
+        # test absolute accuracy
+        assert (abs(reference - arviz_data).values < 1e-11).all(None)
 
-        # then test manually (more strict)
-        assert (abs(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 6e-5).all(None)
-        assert abs(np.median(reference["rhat_rank"] - arviz_data["rhat_rank"]) < 1e-8).all(None)
-
-        not_rhat = [col for col in reference.columns if col != "rhat_rank"]
-        assert (abs((reference[not_rhat] - arviz_data[not_rhat])).values < 1e-8).all(None)
-        assert abs(np.median(reference[not_rhat] - arviz_data[not_rhat]) < 1e-8).all(None)
+        # show print with pytests '-s' tag
+        np.set_printoptions(16)
+        print(abs(reference - arviz_data).max())
 
     @pytest.mark.parametrize("method", ("rank", "split", "folded", "z_scale", "identity"))
     @pytest.mark.parametrize("var_names", (None, "mu", ["mu", "tau"]))
