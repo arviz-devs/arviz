@@ -254,8 +254,7 @@ class ExampleGenerator:
         return self.docstring.strip().split("\n")[0].strip()
 
     def extract_docstring(self):
-        """ Extract a module-level docstring
-        """
+        """Extract a module-level docstring"""
         lines = open(self.filename).readlines()
         start_row = 0
         if lines[0].startswith("#!"):
