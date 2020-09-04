@@ -294,7 +294,7 @@ class TestDataPyMC3:
         model = pm.Model()
         with model:
             mu = pm.Normal("mu", 0, 1, shape=2)
-            sd_dist = pm.HalfNormal.dist(1.)
+            sd_dist = pm.HalfNormal.dist(1.0)
             chol, *_ = pm.LKJCholeskyCov("chol_cov", n=2, eta=1, sd_dist=sd_dist, compute_corr=True)
             pm.MvNormal("y", mu=mu, chol=chol, observed=data)
             trace = pm.sample(100, chains=2)
