@@ -51,7 +51,7 @@ class TestDataCmdStanPy:
             runset_obj = RunSet(args)
             runset_obj._csv_files = filepaths  # pylint: disable=protected-access
             obj = CmdStanMCMC(runset_obj)
-            obj._validate_csv_files()  # pylint: disable=protected-access
+            obj.validate_csv_files()  # pylint: disable=protected-access
             obj._assemble_sample()  # pylint: disable=protected-access
 
         return Data
