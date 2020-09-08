@@ -8,6 +8,7 @@ from scipy.optimize import brentq
 from scipy.signal import convolve, convolve2d, gaussian  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 from scipy.special import ive  # pylint: disable=no-name-in-module
+from scipy.integrate import simps # pylint: disable=no-name-in-module
 
 from ..utils import _cov, _dot, _stack, conditional_jit
 
@@ -640,7 +641,10 @@ def _kde_linear(
 
     if cumulative:
         pdf = pdf.cumsum() / pdf.sum()
-
+	
+    if grid[0] > x_min or grid[-1] < x_max:
+    	pdf = pdf / simps(pdf, grid)
+    	
     if bw_return:
         return grid, pdf, bw
     else:
