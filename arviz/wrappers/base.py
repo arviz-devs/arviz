@@ -1,5 +1,5 @@
 """Base class for sampling wrappers."""
-import numpy as np
+from xarray import apply_ufunc
 
 # from ..data import InferenceData
 from ..stats import wrap_xarray_ufunc as _wrap_xarray_ufunc
@@ -18,26 +18,57 @@ class SamplingWrapper:
     ----------
     model
         The model object used for sampling.
-    idata_orig: InferenceData, optional
+    idata_orig : InferenceData, optional
         Original InferenceData object.
-    log_like_fun: callable, optional
+    log_lik_fun : callable, optional
         For simple cases where the pointwise log likelihood is a Python function, this
         function will be used to calculate the log likelihood. Otherwise,
-        ``point_log_likelihood`` method must be implemented.
-    sample_kwargs: dict, optional
+        ``point_log_likelihood`` method must be implemented. It's callback must be
+        ``log_lik_fun(*args, **log_lik_kwargs)`` and will be called using
+        :func:`wrap_xarray_ufunc` or :func:`xarray:xarray.apply_ufunc` depending
+        on the value of `is_ufunc`.
+
+        For more details on ``args`` or ``log_lik_kwargs`` see the notes and
+        parameters ``posterior_vars`` and ``log_lik_kwargs``.
+    is_ufunc : bool, default True
+        If True, call ``log_lik_fun`` using :func:`xarray:xarray.apply_ufunc` otherwise
+        use :func:`wrap_xarray_ufunc`.
+    posterior_vars : list of str, optional
+        List of variable names to unpack as ``args`` for ``log_lik_fun``. Each string in
+        the list will be used to retrieve a DataArray from the Dataset in the posterior
+        group and passed to ``log_lik_fun``.
+    sample_kwargs : dict, optional
         Sampling kwargs are stored as class attributes for their usage in the ``sample``
         method.
-    idata_kwargs: dict, optional
+    idata_kwargs : dict, optional
         kwargs are stored as class attributes to be used in the ``get_inference_data`` method.
+    log_lik_kwargs : dict, optional
+        Keyword arguments passed to ``log_lik_fun``.
+    apply_ufunc_kwargs : dict, optional
+        Passed to :func:`xarray:xarray.apply_ufunc` or :func:`wrap_xarray_ufunc`.
+
 
     Warnings
     --------
     Sampling wrappers are an experimental feature in a very early stage. Please use them
     with caution.
+
+    Notes
+    -----
+    Example of ``log_like_fun`` usage.
     """
 
     def __init__(
-        self, model, idata_orig=None, log_like_fun=None, sample_kwargs=None, idata_kwargs=None
+        self,
+        model,
+        idata_orig=None,
+        log_lik_fun=None,
+        is_ufunc=True,
+        posterior_vars=None,
+        sample_kwargs=None,
+        idata_kwargs=None,
+        log_lik_kwargs=None,
+        apply_ufunc_kwargs=None,
     ):
         self.model = model
 
@@ -45,13 +76,17 @@ class SamplingWrapper:
         #     raise TypeError("idata_orig must be of InferenceData type or None")
         self.idata_orig = idata_orig
 
-        if log_like_fun is None or callable(log_like_fun):
-            self.log_like_fun = log_like_fun
+        if log_lik_fun is None or callable(log_lik_fun):
+            self.log_lik_fun = log_lik_fun
+            self.is_ufunc = is_ufunc
+            self.posterior_vars = posterior_vars
         else:
             raise TypeError("log_like_fun must be a callable object or None")
 
         self.sample_kwargs = {} if sample_kwargs is None else sample_kwargs
         self.idata_kwargs = {} if idata_kwargs is None else idata_kwargs
+        self.log_lik_kwargs = {} if log_lik_kwargs is None else log_lik_kwargs
+        self.apply_ufunc_kwargs = {} if apply_ufunc_kwargs is None else apply_ufunc_kwargs
 
     def sel_observations(self, idx):
         """Select a subset of the observations in idata_orig.
@@ -109,29 +144,6 @@ class SamplingWrapper:
         """
         raise NotImplementedError("get_inference_data method must be implemented for each subclass")
 
-    def point_log_likelihood(self, observation, parameters):
-        """Pointwise log likelihood function.
-
-        Parameters
-        ----------
-        observation
-            Pointwise observation on which to calculate the log likelihood
-        parameters
-            Parameters on which the log likelihood is conditioned.
-
-        Returns
-        -------
-        point_log_likelihood: float
-            Value of the log likelihood of ``observation`` given ``parameters``
-            according to ``self.model``
-        """
-        if self.log_like_fun is None:
-            raise NotImplementedError(
-                "If log_like_fun is None, point_log_likelihood method must "
-                "be implemented for each subclass"
-            )
-        return self.log_like_fun(observation, parameters)
-
     def log_likelihood__i(self, excluded_obs, idata__i):
         r"""Get the log likelilhood samples :math:`\log p_{post(-i)}(y_i)`.
 
@@ -141,9 +153,11 @@ class SamplingWrapper:
         Parameters
         ----------
         excluded_obs
-            Observations for which to calculate their log likelihood
+            Observations for which to calculate their log likelihood. The second item from
+            the tuple returned by `sel_observations` is passed as this argument.
         idata__i: InferenceData
-            Inference results of refitting the data excluding some observations.
+            Inference results of refitting the data excluding some observations. The
+            resutl of `get_inference_data` is used as this argument.
 
         Returns
         -------
@@ -151,16 +165,24 @@ class SamplingWrapper:
             Log likelihood of ``excluded_obs`` evaluated at each of the posterior samples
             stored in ``idata__i``.
         """
-        ndraws = idata__i.posterior.dims["draw"]
-        nchains = idata__i.posterior.dims["chain"]
-        log_like_idx = _wrap_xarray_ufunc(
-            lambda pars: self.point_log_likelihood(excluded_obs, pars),
-            idata__i.posterior.to_array(),
-            func_kwargs={"out": np.empty((nchains, ndraws))},
-            ufunc_kwargs={"n_dims": 1, "ravel": False},
-            input_core_dims=[["variable"]],
+        if self.log_lik_fun is None:
+            raise NotImplementedError(
+                "When `log_like_fun` is not set during class initialization "
+                "log_likelihood__i method must be overwritten"
+            )
+        posterior = idata__i.posterior
+        arys = (*excluded_obs, *[posterior[var_name] for var_name in self.posterior_vars])
+        if self.is_ufunc:
+            ufunc_applier = apply_ufunc
+        else:
+            ufunc_applier = _wrap_xarray_ufunc
+        log_lik_idx = ufunc_applier(
+            self.log_lik_fun,
+            *arys,
+            kwargs=self.log_lik_kwargs,
+            **self.apply_ufunc_kwargs,
         )
-        return log_like_idx
+        return log_lik_idx
 
     def _check_method_is_implemented(self, method, *args):
         """Check a given method is implemented."""
@@ -194,7 +216,6 @@ class SamplingWrapper:
             "get_inference_data",
         )
         supported_methods_2args = (
-            "point_log_likelihood",
             "log_likelihood__i",
         )
         supported_methods = [*supported_methods_1arg, *supported_methods_2args]
