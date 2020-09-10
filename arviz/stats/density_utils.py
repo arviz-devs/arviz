@@ -8,7 +8,6 @@ from scipy.optimize import brentq
 from scipy.signal import convolve, convolve2d, gaussian  # pylint: disable=no-name-in-module
 from scipy.sparse import coo_matrix
 from scipy.special import ive  # pylint: disable=no-name-in-module
-from scipy.integrate import simps # pylint: disable=no-name-in-module
 
 from ..utils import _cov, _dot, _stack, conditional_jit
 
@@ -358,7 +357,10 @@ def _check_custom_lims(custom_lims, x_min, x_max):
         )
 
     if not custom_lims[0] < custom_lims[1]:
-        raise AttributeError("`custom_lims[0]` must be smaller than `custom_lims[1]`.")
+        raise ValueError("`custom_lims[0]` must be smaller than `custom_lims[1]`.")
+    
+    if custom_lims[0] > x_min or custom_lims[1] < x_max:
+    	raise ValueError("Some observations are outside `custom_lims` boundaries.")
 
     return custom_lims
 
@@ -642,9 +644,6 @@ def _kde_linear(
     if cumulative:
         pdf = pdf.cumsum() / pdf.sum()
 	
-    if grid[0] > x_min or grid[-1] < x_max:
-    	pdf = pdf / simps(pdf, grid)
-    	
     if bw_return:
         return grid, pdf, bw
     else:
