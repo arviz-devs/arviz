@@ -71,9 +71,9 @@ def plot_violin(
             rug_x = -np.abs(np.random.normal(scale=max(dens) / 3.5, size=len(val)))
             ax_.scatter(rug_x, val, **rug_kwargs)
 
-        per = np.percentile(val, [25, 75, 50])
-        hdi_probs = hdi(val, hdi_prob, multimodal=False)
-
+        per = np.nanpercentile(val, [25, 75, 50])
+	hdi_probs = hdi(val, hdi_prob, multimodal=False, skipna=True)
+	
         if quartiles:
             ax_.line(
                 [0, 0], per[:2], line_width=linewidth * 3, line_color="black", line_cap="round"
