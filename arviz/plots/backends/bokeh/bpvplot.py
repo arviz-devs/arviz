@@ -85,6 +85,9 @@ def plot_bpv(
         pp_var_name, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
+        if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+            obs_vals = obs_vals + np.random.uniform(-1, 1, size=obs_vals.shape)
+            pp_vals = pp_vals + np.random.uniform(-1, 1, size=pp_vals.shape)
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
         if kind == "p_value":
@@ -119,8 +122,8 @@ def plot_bpv(
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
-                    hdi = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
-                    hdi_odds = (hdi / (1 - hdi), (1 - hdi) / hdi)
+                    hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
+                    hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
                     ax_i.add_layout(
                         BoxAnnotation(
                             bottom=hdi_odds[1],
