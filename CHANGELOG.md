@@ -27,6 +27,7 @@
 * Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 * Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389)
 * Fix multi rope for `plot_forest` ([#1390](https://github.com/arviz-devs/arviz/pull/1390))
+* Fix `plot_bpv` to work with discrete variables ([#1379](https://github.com/arviz-devs/arviz/pull/1379))
 
 ### Deprecation
 
