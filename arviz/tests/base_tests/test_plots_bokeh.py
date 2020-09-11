@@ -1034,3 +1034,14 @@ def test_plot_dist_comparison_warn(models):
 def test_plot_bpv(models, kwargs):
     axes = plot_bpv(models.model_1, backend="bokeh", show=False, **kwargs)
     assert axes.shape
+
+
+def test_plot_bpv_discrete():
+    fake = {"a": np.random.poisson(2.5, 1000)}
+    fake_model = from_dict(posterior_predictive=fake, observed_data=fake)
+    axes = plot_bpv(
+        fake_model,
+        backend="bokeh",
+        show=False,
+    )
+    assert axes.shape
