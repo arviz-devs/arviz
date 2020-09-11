@@ -82,8 +82,8 @@ def plot_bpv(
 
         obs_vals = obs_vals.flatten()
         if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-            obs_vals = obs_vals + np.random.uniform(-1, 1, size=obs_vals.shape)
-            pp_vals = pp_vals + np.random.uniform(-1, 1, size=pp_vals.shape)
+            obs_vals = obs_vals + np.random.uniform(-0.5, 0.5, size=obs_vals.shape)
+            pp_vals = pp_vals + np.random.uniform(-0.5, 0.5, size=pp_vals.shape)
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
         if kind == "p_value":
