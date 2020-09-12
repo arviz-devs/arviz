@@ -85,16 +85,20 @@ def plot_bpv(
         pp_var_name, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
-        if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-            obs_vals = obs_vals + np.random.uniform(-0.5, 0.5, size=obs_vals.shape)
-            pp_vals = pp_vals + np.random.uniform(-0.5, 0.5, size=pp_vals.shape)
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
         if kind == "p_value":
-            tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-            x_s, tstat_pit_dens = kde(tstat_pit)
-            ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
-            # ax_i.set_yticks([])
+            if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+                for i in range(n_ref):
+                    obs_vals = obs_vals + np.random.uniform(-0.01, 0.01, size=obs_vals.shape)
+                    pp_vals = pp_vals + np.random.uniform(-0.01, 0.01, size=pp_vals.shape)
+                    tstat_pit = np.mean(pp_vals <= obs_vals, axis=1)
+                    x_s, tstat_pit_dens = kde(tstat_pit)
+                    ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
+            else:
+                tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
+                x_s, tstat_pit_dens = kde(tstat_pit)
+                ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
                 if reference == "analytical":
@@ -116,9 +120,17 @@ def plot_bpv(
                     )
 
         elif kind == "u_value":
-            tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-            x_s, tstat_pit_dens = kde(tstat_pit)
-            ax_i.line(x_s, tstat_pit_dens, line_color=color)
+            if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+                for i in range(n_ref):
+                    obs_vals = obs_vals + np.random.uniform(-0.01, 0.01, size=obs_vals.shape)
+                    pp_vals = pp_vals + np.random.uniform(-0.01, 0.01, size=pp_vals.shape)
+                    tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
+                    x_s, tstat_pit_dens = kde(tstat_pit)
+                    ax_i.plot(x_s, tstat_pit_dens, color=color)
+            else:
+                tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
+                x_s, tstat_pit_dens = kde(tstat_pit)
+                ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size

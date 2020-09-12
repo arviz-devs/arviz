@@ -12,7 +12,7 @@ def plot_bpv(
     t_stat="median",
     bpv=True,
     plot_mean=True,
-    reference="samples",
+    reference="analytical",
     n_ref=100,
     hdi_prob=0.94,
     color="C0",
