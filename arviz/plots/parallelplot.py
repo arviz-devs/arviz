@@ -1,6 +1,6 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import numpy as np
-from scipy.stats.mstats import rankdata
+from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
