@@ -73,8 +73,7 @@ def plot_violin(
 
         per = np.nanpercentile(val, [25, 75, 50])
         hdi_probs = hdi(val, hdi_prob, multimodal=False, skipna=True)
-	
-	
+
         if quartiles:
             ax_.line(
                 [0, 0], per[:2], line_width=linewidth * 3, line_color="black", line_cap="round"
