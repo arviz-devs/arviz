@@ -56,9 +56,9 @@ jobs:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'doc/build/examples'
-      artifactName: 'arviz_doc_examples'
-    displayName: 'Publish the doc/build/examples'
+      pathtoPublish: 'doc/build'
+      artifactName: 'arviz_doc_build'
+    displayName: 'Publish the doc/build'
 
   - script: |
       ls -ahl
