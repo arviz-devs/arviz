@@ -3,7 +3,7 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -54,11 +54,25 @@ jobs:
       sphinx-build doc doc/build -b html
     displayName: 'Build a docs'
 
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'doc/build'
+      artifactName: 'arviz_doc_build'
+    displayName: 'Publish the doc/build'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'html'
+      artifactName: 'arviz_doc_html'
+    displayName: 'Publish the html'
+
   - script: |
       ls -ahl
+      ls -ahl doc
       env
     displayName: 'Debug information 2'
 
   - script: |
       ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
     displayName: 'Deploy docs'
+    if eq(variables['Build.SourceBranchName'], 'master')
