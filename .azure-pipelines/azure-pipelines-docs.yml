@@ -62,7 +62,7 @@ jobs:
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'html'
+      pathtoPublish: 'doc/html'
       artifactName: 'arviz_doc_html'
     displayName: 'Publish the html'
 
