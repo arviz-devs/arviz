@@ -13,6 +13,7 @@ def plot_bpv(
     bpv=True,
     plot_mean=True,
     reference="analytical",
+    mse=False,
     n_ref=100,
     hdi_prob=0.94,
     color="C0",
@@ -62,6 +63,9 @@ def plot_bpv(
         How to compute the distributions used as reference for u_values or p_values. Allowed values
         are "analytical" (default) and "samples". Use `None` to do not plot any reference.
         Defaults to "samples".
+    mse :bool
+        Show scaled mean square error between uniform distribution and marginal p_value
+        distribution. Defaults to False.
     n_ref : int, optional
         Number of reference distributions to sample when `reference=samples`. Defaults to 100.
     hdi_prob: float, optional
@@ -245,6 +249,7 @@ def plot_bpv(
         bpv=bpv,
         t_stat=t_stat,
         reference=reference,
+        mse=mse,
         n_ref=n_ref,
         hdi_prob=hdi_prob,
         plot_mean=plot_mean,

@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+from scipy.interpolate import CubicSpline
 
 from ....stats.density_utils import kde
 from ...kdeplot import plot_kde
@@ -27,6 +28,7 @@ def plot_bpv(
     bpv,
     plot_mean,
     reference,
+    mse,
     n_ref,
     hdi_prob,
     color,
@@ -86,18 +88,19 @@ def plot_bpv(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
+        if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+            x = np.linspace(0, 1, len(obs_vals))
+            csi = CubicSpline(x, obs_vals)
+            obs_vals = csi(np.linspace(0.001, 0.999, len(obs_vals)))
+
+            x = np.linspace(0, 1, len(pp_vals))
+            csi = CubicSpline(x, pp_vals)
+            pp_vals = csi(np.linspace(0.001, 0.999, len(pp_vals)))
+
         if kind == "p_value":
-            if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-                for i in range(n_ref):
-                    obs_vals = obs_vals + np.random.uniform(-0.01, 0.01, size=obs_vals.shape)
-                    pp_vals = pp_vals + np.random.uniform(-0.01, 0.01, size=pp_vals.shape)
-                    tstat_pit = np.mean(pp_vals <= obs_vals, axis=1)
-                    x_s, tstat_pit_dens = kde(tstat_pit)
-                    ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
-            else:
-                tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
-                x_s, tstat_pit_dens = kde(tstat_pit)
-                ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
+            tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
+            x_s, tstat_pit_dens = kde(tstat_pit)
+            ax_i.plot(x_s, tstat_pit_dens, linewidth=linewidth, color=color)
             ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
@@ -118,17 +121,9 @@ def plot_bpv(
                     ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
 
         elif kind == "u_value":
-            if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-                for i in range(n_ref):
-                    obs_vals = obs_vals + np.random.uniform(-0.01, 0.01, size=obs_vals.shape)
-                    pp_vals = pp_vals + np.random.uniform(-0.01, 0.01, size=pp_vals.shape)
-                    tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-                    x_s, tstat_pit_dens = kde(tstat_pit)
-                    ax_i.plot(x_s, tstat_pit_dens, color=color)
-            else:
-                tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
-                x_s, tstat_pit_dens = kde(tstat_pit)
-                ax_i.plot(x_s, tstat_pit_dens, color=color)
+            tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
+            x_s, tstat_pit_dens = kde(tstat_pit)
+            ax_i.plot(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
@@ -140,6 +135,9 @@ def plot_bpv(
                     dist = stats.uniform(0, 1)
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
                     ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
+            if mse:
+                ax_i.plot(0, 0, label=f"mse={np.mean((1 - tstat_pit_dens)**2) * 100:.2f}")
+                ax_i.legend()
 
             ax_i.set_ylim(0, None)
             ax_i.set_xlim(0, 1)
