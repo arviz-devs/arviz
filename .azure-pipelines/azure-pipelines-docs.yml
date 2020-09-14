@@ -75,4 +75,4 @@ jobs:
   - script: |
       ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
     displayName: 'Deploy docs'
-    if eq(variables['Build.SourceBranchName'], 'master')
+    condition: eq(variables['Build.SourceBranchName'], 'master')
