@@ -60,12 +60,6 @@ jobs:
       artifactName: 'arviz_doc_examples'
     displayName: 'Publish the doc/build/examples'
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: 'doc/html'
-      artifactName: 'arviz_doc_html'
-    displayName: 'Publish the html'
-
   - script: |
       ls -ahl
       ls -ahl doc
