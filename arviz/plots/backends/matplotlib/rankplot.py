@@ -44,7 +44,7 @@ def plot_rank(
         )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
-        ranks = scipy.stats.rankdata(var_data).reshape(var_data.shape)
+        ranks = scipy.stats.rankdata(var_data, method="average").reshape(var_data.shape)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):

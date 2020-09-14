@@ -115,7 +115,7 @@ def plot_mcse(
             _rug_kwargs.setdefault("angle", np.pi / 2)
 
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
+            values = rankdata(values, method="average")[mask]
             if errorbar:
                 rug_x, rug_y = (
                     values / (len(mask) - 1),
