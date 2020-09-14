@@ -358,9 +358,9 @@ def _check_custom_lims(custom_lims, x_min, x_max):
 
     if not custom_lims[0] < custom_lims[1]:
         raise ValueError("`custom_lims[0]` must be smaller than `custom_lims[1]`.")
-    
+
     if custom_lims[0] > x_min or custom_lims[1] < x_max:
-    	raise ValueError("Some observations are outside `custom_lims` boundaries.")
+        raise ValueError("Some observations are outside `custom_lims` boundaries.")
 
     return custom_lims
 
@@ -643,7 +643,7 @@ def _kde_linear(
 
     if cumulative:
         pdf = pdf.cumsum() / pdf.sum()
-	
+
     if bw_return:
         return grid, pdf, bw
     else:
