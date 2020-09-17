@@ -32,3 +32,8 @@ Contributors
 
 See the `GitHub contributor
 page <https://github.com/arviz-devs/arviz/graphs/contributors>`__
+
+
+Donations
+============
+ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate `here <https://numfocus.salsalabs.org/donate-to-arviz>`_.
