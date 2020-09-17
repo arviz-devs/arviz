@@ -225,9 +225,7 @@ def test_concat_dim(dim, copy, inplace, sequence, reset_dim):
         observed_data={"C": np.random.randn(100), "D": np.random.randn(2, 100)},
     )
     # basic case
-    assert (
-            concat(idata1, idata2, dim=dim, copy=copy, inplace=False, reset_dim=reset_dim) is not None
-    )
+    assert concat(idata1, idata2, dim=dim, copy=copy, inplace=False, reset_dim=reset_dim) is not None
     if sequence:
         new_idata = concat(
             (idata1, idata2, idata3), copy=copy, dim=dim, inplace=inplace, reset_dim=reset_dim
