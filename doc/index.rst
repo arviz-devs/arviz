@@ -65,10 +65,10 @@ also available. It provides built-in support for
 <https://github.com/StanJulia/StanSample.jl>`_ and `Stan.jl <https://github.com/StanJulia/Stan.jl>`_.
 
 
+ArviZ is a non-profit project under NumFOCUS umbrella. If you want to **support ArviZ financially**, you can donate `here <https://numfocus.salsalabs.org/donate-to-arviz>`_.
 
-If you use ArviZ and want to cite it please use |JOSS|
 
-Here is the citation in BibTeX format
+If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation in BibTeX format
 
 .. code:: bash
 
@@ -80,6 +80,7 @@ Here is the citation in BibTeX format
 	    doi = {10.21105/joss.01143},
 	    url = {http://joss.theoj.org/papers/10.21105/joss.01143},
     }
+
 
 .. toctree::
     :maxdepth: 1
