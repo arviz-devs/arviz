@@ -279,7 +279,6 @@ class InferenceData:
             When `data=False` return just the schema.
         """
         ret = defaultdict(dict)
-        attrs = None
         if self._groups_all:  # check's whether a group is present or not.
             if groups is None:
                 groups = self._group_names(groups, filter_groups)
