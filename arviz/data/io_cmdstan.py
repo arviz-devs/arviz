@@ -626,7 +626,9 @@ def _read_output_file(path):
                 comments.append(line.decode("utf-8").strip())
 
     with open(path, "rb") as f_obj:
-        data = pd.read_csv(f_obj, comment="#")
+        data = pd.read_csv(
+            f_obj, comment="#", float_precision=rcParams["data.pandas_float_precision"]
+        )
 
     return data, comments
 

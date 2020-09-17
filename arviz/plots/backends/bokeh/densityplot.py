@@ -105,7 +105,11 @@ def plot_density(
                 legend_items[axis_map[label]].append((data_label, plotted))
 
     for ax1, legend in legend_items.items():
-        legend = Legend(items=legend, location="center_right", orientation="horizontal",)
+        legend = Legend(
+            items=legend,
+            location="center_right",
+            orientation="horizontal",
+        )
         ax1.add_layout(legend, "above")
         ax1.legend.click_policy = "hide"
 

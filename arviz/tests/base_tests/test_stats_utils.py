@@ -273,7 +273,11 @@ def test_get_log_likelihood():
 
 
 def test_get_log_likelihood_warning():
-    idata = from_dict(sample_stats={"log_likelihood": np.random.normal(size=(4, 100, 6)),})
+    idata = from_dict(
+        sample_stats={
+            "log_likelihood": np.random.normal(size=(4, 100, 6)),
+        }
+    )
     with pytest.warns(DeprecationWarning):
         get_log_likelihood(idata)
 
@@ -291,7 +295,10 @@ def test_get_log_likelihood_no_var_name():
 
 def test_get_log_likelihood_no_group():
     idata = from_dict(
-        posterior={"a": np.random.normal(size=(4, 100)), "b": np.random.normal(size=(4, 100)),}
+        posterior={
+            "a": np.random.normal(size=(4, 100)),
+            "b": np.random.normal(size=(4, 100)),
+        }
     )
     with pytest.raises(TypeError, match="log likelihood not found"):
         get_log_likelihood(idata)
@@ -375,5 +382,6 @@ def test_circular_standard_deviation_1d(data):
     high = 8
     low = 4
     assert np.allclose(
-        _circular_standard_deviation(data, high=high, low=low), circstd(data, high=high, low=low),
+        _circular_standard_deviation(data, high=high, low=low),
+        circstd(data, high=high, low=low),
     )

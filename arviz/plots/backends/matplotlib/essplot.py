@@ -88,7 +88,12 @@ def plot_ess(
         text_va = text_kwargs.pop("verticalalignment", None)
 
     if ax is None:
-        _, ax = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(
+            len(plotters),
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
 
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         ax_.plot(xdata, x, **kwargs)

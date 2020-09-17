@@ -288,6 +288,29 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+    def test_mv_missing_data_model(self):
+        data = ma.masked_values([[1, 2], [2, 2], [-1, 4], [2, -1], [-1, -1]], value=-1)
+
+        model = pm.Model()
+        with model:
+            mu = pm.Normal("mu", 0, 1, shape=2)
+            sd_dist = pm.HalfNormal.dist(1.0)
+            chol, *_ = pm.LKJCholeskyCov("chol_cov", n=2, eta=1, sd_dist=sd_dist, compute_corr=True)
+            pm.MvNormal("y", mu=mu, chol=chol, observed=data)
+            trace = pm.sample(100, chains=2)
+
+        # make sure that data is really missing
+        (y_missing,) = model.missing_values
+        assert y_missing.tag.test_value.shape == (4,)
+        inference_data = from_pymc3(trace=trace, model=model)
+        test_dict = {
+            "posterior": ["mu", "chol_cov"],
+            "observed_data": ["y"],
+            "log_likelihood": ["y"],
+        }
+        fails = check_multiple_attrs(test_dict, inference_data)
+        assert not fails
+
     @pytest.mark.parametrize("log_likelihood", [True, False, ["y1"]])
     def test_multiple_observed_rv(self, log_likelihood):
         y1_data = np.random.randn(10)
@@ -552,7 +575,8 @@ class TestPyMC3WarmupHandling:
             assert idata.warmup_posterior.dims["draw"] == tune
 
     @pytest.mark.skipif(
-        hasattr(pm.backends.base.SamplerReport, "n_draws"), reason="requires pymc3 3.8 or lower",
+        hasattr(pm.backends.base.SamplerReport, "n_draws"),
+        reason="requires pymc3 3.8 or lower",
     )
     def test_save_warmup_issue_1208_before_3_9(self):
         with pm.Model():

@@ -28,7 +28,9 @@ def plot_joint(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")

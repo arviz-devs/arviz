@@ -56,7 +56,10 @@ def plot_kde(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(
+            1,
+            backend_kwargs=backend_kwargs,
+        )
 
     if values2 is None:
         plot_kwargs = matplotlib_kwarg_dealiaser(plot_kwargs, "plot")

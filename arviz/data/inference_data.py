@@ -17,7 +17,12 @@ from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list
-from .base import _extend_xr_method, dict_to_dataset
+from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
+
+try:
+    import ujson as json
+except ImportError:
+    import json
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -158,8 +163,8 @@ class InferenceData:
                     for group in self._groups_all
                 ]
             )
-            formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
-                elements
+            formatted_html_template = (  # pylint: disable=possibly-unused-variable
+                HtmlTemplate.html_template.format(elements)
             )
             css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
             html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
@@ -295,7 +300,10 @@ class InferenceData:
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
 
-                    if group in ("predictions", "predictions_constant_data",):
+                    if group in (
+                        "predictions",
+                        "predictions_constant_data",
+                    ):
                         dims_key = "pred_dims"
                     else:
                         dims_key = "dims"
@@ -313,12 +321,39 @@ class InferenceData:
         ret["attrs"] = attrs
         return ret
 
+    def to_json(self, filename, **kwargs):
+        """Write InferenceData to a json file.
+
+        Parameters
+        ----------
+        filename : str
+            Location to write to
+        kwargs : dict
+            kwargs passed to json.dump()
+
+        Returns
+        -------
+        str
+            Location of json file
+        """
+        idata_dict = _make_json_serializable(self.to_dict())
+
+        with open(filename, "w") as file:
+            json.dump(idata_dict, file, **kwargs)
+
+        return filename
+
     def __add__(self, other):
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
     def sel(
-        self, groups=None, filter_groups=None, inplace=False, chain_prior=None, **kwargs,
+        self,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        chain_prior=None,
+        **kwargs,
     ):
         """Perform an xarray selection on all groups.
 
@@ -402,7 +437,11 @@ class InferenceData:
             return out
 
     def isel(
-        self, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        **kwargs,
     ):
         """Perform an xarray selection on all groups.
 
@@ -450,7 +489,12 @@ class InferenceData:
             return out
 
     def stack(
-        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
+        self,
+        dimensions=None,
+        groups=None,
+        filter_groups=None,
+        inplace=False,
+        **kwargs,
     ):
         """Perform an xarray stacking on all groups.
 
@@ -858,7 +902,7 @@ class InferenceData:
             group_names = _subset_list(sel_groups, all_groups, filter_items=filter_groups)
         except KeyError as err:
             msg = " ".join(("groups:", f"{err}", "in InferenceData"))
-            raise KeyError(msg)
+            raise KeyError(msg) from err
         return group_names
 
     def map(self, fun, groups=None, filter_groups=None, inplace=False, args=None, **kwargs):

@@ -902,7 +902,8 @@ def from_pystan(
     if check_posterior or check_prior:
         if save_warmup:
             warnings.warn(
-                "save_warmup is not currently supported for PyStan3", UserWarning,
+                "save_warmup is not currently supported for PyStan3",
+                UserWarning,
             )
         return PyStan3Converter(
             posterior=posterior,

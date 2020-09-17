@@ -49,7 +49,12 @@ def plot_energy(
         legend = False
 
     if ax is None:
-        ax = create_axes_grid(1, figsize=figsize, squeeze=True, backend_kwargs=backend_kwargs,)
+        ax = create_axes_grid(
+            1,
+            figsize=figsize,
+            squeeze=True,
+            backend_kwargs=backend_kwargs,
+        )
 
     _colors = [
         prop for _, prop in zip(range(10), cycle(mpl_rcParams["axes.prop_cycle"].by_key()["color"]))
@@ -91,7 +96,12 @@ def plot_energy(
                 show=False,
                 return_glyph=True,
             )
-            labels.append((label, glyph,))
+            labels.append(
+                (
+                    label,
+                    glyph,
+                )
+            )
 
     elif kind in {"hist", "histogram"}:
         hist_kwargs = plot_kwargs.copy()
@@ -132,7 +142,11 @@ def plot_energy(
             ax.add_layout(bfmi_info)
 
     if legend and label is not None:
-        legend = Legend(items=labels, location="center_right", orientation="horizontal",)
+        legend = Legend(
+            items=labels,
+            location="center_right",
+            orientation="horizontal",
+        )
         ax.add_layout(legend, "above")
         ax.legend.click_policy = "hide"
 

@@ -34,6 +34,7 @@ Plots
     plot_posterior
     plot_ppc
     plot_rank
+    plot_separation
     plot_trace
     plot_violin
 

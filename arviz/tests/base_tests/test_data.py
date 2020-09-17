@@ -20,6 +20,7 @@ from arviz import (
     convert_to_dataset,
     convert_to_inference_data,
     from_dict,
+    from_json,
     from_netcdf,
     list_datasets,
     load_arviz_data,
@@ -469,7 +470,10 @@ class TestInferenceData:
         args, result = args_res
         ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
         idata = InferenceData(
-            posterior=(ds, ds), sample_stats=(ds, ds), observed_data=ds, posterior_predictive=ds,
+            posterior=(ds, ds),
+            sample_stats=(ds, ds),
+            observed_data=ds,
+            posterior_predictive=ds,
         )
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
@@ -928,8 +932,12 @@ class TestDataDict:
             warmup_posterior_predictive=data.obj,
             predictions=data.obj,
             observed_data=eight_schools_params,
-            coords={"school": np.arange(8),},
-            pred_coords={"school_pred": np.arange(8),},
+            coords={
+                "school": np.arange(8),
+            },
+            pred_coords={
+                "school_pred": np.arange(8),
+            },
             dims={"theta": ["school"], "eta": ["school"]},
             pred_dims={"theta": ["school_pred"], "eta": ["school_pred"]},
             save_warmup=save_warmup,
@@ -1131,6 +1139,23 @@ class TestDataNetCDF:
         assert not os.path.exists(filepath)
         inference_data.to_netcdf(filepath)
         assert os.path.exists(filepath)
+        os.remove(filepath)
+        assert not os.path.exists(filepath)
+
+
+class TestJSON:
+    def test_json_converters(self, models):
+        idata = models.model_1
+
+        filepath = os.path.realpath("test.json")
+        idata.to_json(filepath)
+
+        idata_copy = from_json(filepath)
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            xr_data = getattr(idata, group)
+            test_xr_data = getattr(idata_copy, group)
+            assert xr_data.equals(test_xr_data)
+
         os.remove(filepath)
         assert not os.path.exists(filepath)
 

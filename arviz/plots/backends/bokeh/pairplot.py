@@ -45,7 +45,9 @@ def plot_pair(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
 
@@ -287,7 +289,9 @@ def plot_pair(
                     var2_hexbin = infdata_group[j + marginals_offset]
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(
-                        var1_hexbin, var2_hexbin, **hexbin_kwargs,
+                        var1_hexbin,
+                        var2_hexbin,
+                        **hexbin_kwargs,
                     )
 
                 if divergences:
@@ -309,8 +313,16 @@ def plot_pair(
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
                     ax[j, i].square(pe_x, pe_y, **point_estimate_marker_kwargs)
 
-                    ax_hline = Span(location=pe_y, dimension="width", **point_estimate_kwargs,)
-                    ax_vline = Span(location=pe_x, dimension="height", **point_estimate_kwargs,)
+                    ax_hline = Span(
+                        location=pe_y,
+                        dimension="width",
+                        **point_estimate_kwargs,
+                    )
+                    ax_vline = Span(
+                        location=pe_x,
+                        dimension="height",
+                        **point_estimate_kwargs,
+                    )
                     ax[j, i].add_layout(ax_hline)
                     ax[j, i].add_layout(ax_vline)
 
@@ -320,13 +332,17 @@ def plot_pair(
 
                         pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
                         ax_pe_vline = Span(
-                            location=pe_last, dimension="height", **point_estimate_kwargs,
+                            location=pe_last,
+                            dimension="height",
+                            **point_estimate_kwargs,
                         )
                         ax[-1, -1].add_layout(ax_pe_vline)
 
                         if numvars == 2:
                             ax_pe_hline = Span(
-                                location=pe_last, dimension="width", **point_estimate_kwargs,
+                                location=pe_last,
+                                dimension="width",
+                                **point_estimate_kwargs,
                             )
                             ax[-1, -1].add_layout(ax_pe_hline)
 

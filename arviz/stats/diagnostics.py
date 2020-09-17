@@ -14,7 +14,6 @@ from .stats_utils import _circular_standard_deviation, _sqrt
 from .stats_utils import autocov as _autocov
 from .stats_utils import not_valid as _not_valid
 from .stats_utils import quantile as _quantile
-from .stats_utils import rint as _rint
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
@@ -321,6 +320,7 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
         Select mcse method. Valid methods are:
         - "mean"
         - "sd"
+        - "median"
         - "quantile"
 
     prob : float
@@ -345,10 +345,15 @@ def mcse(data, *, var_names=None, method="mean", prob=None):
 
     .. ipython::
 
-        In [1]: az.mcse(data, method="quantile", prob=.7)
+        In [1]: az.mcse(data, method="quantile", prob=0.7)
 
     """
-    methods = {"mean": _mcse_mean, "sd": _mcse_sd, "quantile": _mcse_quantile}
+    methods = {
+        "mean": _mcse_mean,
+        "sd": _mcse_sd,
+        "median": _mcse_median,
+        "quantile": _mcse_quantile,
+    }
     if method not in methods:
         raise TypeError(
             "mcse method {} not found. Valid methods are:\n{}".format(
@@ -530,6 +535,29 @@ def _bfmi(energy):
     return num / den
 
 
+def _backtransform_ranks(arr, c=3 / 8):  # pylint: disable=invalid-name
+    """Backtransformation of ranks.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Ranks array
+    c : float
+        Fractional offset. Defaults to c = 3/8 as recommended by Blom (1958).
+
+    Returns
+    -------
+    np.ndarray
+
+    References
+    ----------
+    Blom, G. (1958). Statistical Estimates and Transformed Beta-Variables. Wiley; New York.
+    """
+    arr = np.asarray(arr)
+    size = arr.size
+    return (arr - c) / (size - 2 * c + 1)
+
+
 def _z_scale(ary):
     """Calculate z_scale.
 
@@ -542,9 +570,9 @@ def _z_scale(ary):
     np.ndarray
     """
     ary = np.asarray(ary)
-    size = ary.size
     rank = stats.rankdata(ary, method="average")
-    z = stats.norm.ppf((rank - 0.5) / size)
+    rank = _backtransform_ranks(rank)
+    z = stats.norm.ppf(rank)
     z = z.reshape(ary.shape)
     return z
 
@@ -811,26 +839,6 @@ def _ess_identity(ary, relative=False):
     return _ess(ary, relative=relative)
 
 
-def _conv_quantile(ary, prob):
-    """Return mcse, Q05, Q95, Seff."""
-    ary = np.asarray(ary)
-    if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
-        return np.nan, np.nan, np.nan, np.nan
-    ess = _ess_quantile(ary, prob)
-    probability = [0.1586553, 0.8413447, 0.05, 0.95]
-    with np.errstate(invalid="ignore"):
-        ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
-    sorted_ary = np.sort(ary.ravel())
-    size = sorted_ary.size
-    ppf_size = ppf * size - 1
-    th1 = sorted_ary[_rint(np.nanmax((ppf_size[0], 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf_size[1], size - 1)))]
-    mcse_quantile = (th2 - th1) / 2
-    th1 = sorted_ary[_rint(np.nanmax((ppf_size[2], 0)))]
-    th2 = sorted_ary[_rint(np.nanmin((ppf_size[3], size - 1)))]
-    return mcse_quantile, th1, th2, ess
-
-
 def _mcse_mean(ary):
     """Compute the Markov Chain mean error."""
     _numba_flag = Numba.numba_flag
@@ -862,13 +870,26 @@ def _mcse_sd(ary):
     return mcse_sd_value
 
 
+def _mcse_median(ary):
+    """Compute the Markov Chain median error."""
+    return _mcse_quantile(ary, 0.5)
+
+
 def _mcse_quantile(ary, prob):
     """Compute the Markov Chain quantile error at quantile=prob."""
     ary = np.asarray(ary)
     if _not_valid(ary, shape_kwargs=dict(min_draws=4, min_chains=1)):
         return np.nan
-    mcse_q, *_ = _conv_quantile(ary, prob)
-    return mcse_q
+    ess = _ess_quantile(ary, prob)
+    probability = [0.1586553, 0.8413447]
+    with np.errstate(invalid="ignore"):
+        ppf = stats.beta.ppf(probability, ess * prob + 1, ess * (1 - prob) + 1)
+    sorted_ary = np.sort(ary.ravel())
+    size = sorted_ary.size
+    ppf_size = ppf * size - 1
+    th1 = sorted_ary[int(np.floor(np.nanmax((ppf_size[0], 0))))]
+    th2 = sorted_ary[int(np.ceil(np.nanmin((ppf_size[1], size - 1))))]
+    return (th2 - th1) / 2
 
 
 def _mc_error(ary, batches=5, circular=False):

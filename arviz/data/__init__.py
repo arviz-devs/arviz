@@ -8,6 +8,7 @@ from .io_cmdstanpy import from_cmdstanpy
 from .io_dict import from_dict
 from .io_emcee import from_emcee
 from .io_netcdf import from_netcdf, to_netcdf
+from .io_json import from_json
 from .io_numpyro import from_numpyro
 from .io_pyjags import from_pyjags
 from .io_pymc3 import from_pymc3, from_pymc3_predictions
@@ -33,6 +34,7 @@ __all__ = [
     "from_cmdstan",
     "from_cmdstanpy",
     "from_dict",
+    "from_json",
     "from_pyro",
     "from_numpyro",
     "from_tfp",

@@ -8,7 +8,16 @@ from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
 def plot_autocorr(
-    axes, plotters, max_lag, figsize, rows, cols, combined, textsize, backend_kwargs, show,
+    axes,
+    plotters,
+    max_lag,
+    figsize,
+    rows,
+    cols,
+    combined,
+    textsize,
+    backend_kwargs,
+    show,
 ):
     """Matplotlib autocorrplot."""
     if backend_kwargs is None:
@@ -29,7 +38,12 @@ def plot_autocorr(
     backend_kwargs.setdefault("squeeze", True)
 
     if axes is None:
-        _, axes = create_axes_grid(len(plotters), rows, cols, backend_kwargs=backend_kwargs,)
+        _, axes = create_axes_grid(
+            len(plotters),
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
 
     for (var_name, selection, x), ax in zip(plotters, np.ravel(axes)):
         x_prime = x

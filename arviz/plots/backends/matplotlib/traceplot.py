@@ -145,7 +145,9 @@ def plot_trace(
         chain_prop = "color" if chain_prop is None else chain_prop
     else:
         chain_prop = (
-            {"linestyle": ("solid", "dotted", "dashed", "dashdot"),}
+            {
+                "linestyle": ("solid", "dotted", "dashed", "dashdot"),
+            }
             if chain_prop is None
             else chain_prop
         )
@@ -198,10 +200,6 @@ def plot_trace(
     trace_kwargs.setdefault("linewidth", linewidth)
     plot_kwargs.setdefault("linewidth", linewidth)
 
-    if axes is None:
-        fig = plt.figure(**backend_kwargs)
-        spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
-
     # Check the input for lines
     if lines is not None:
         all_var_names = set(plotter[0] for plotter in plotters)
@@ -216,14 +214,22 @@ def plot_trace(
                     invalid_var_names, all_var_names
                 )
             )
+
+    if axes is None:
+        fig = plt.figure(**backend_kwargs)
+        spec = gridspec.GridSpec(ncols=2, nrows=len(plotters), figure=fig)
+
     # pylint: disable=too-many-nested-blocks
     for idx, (var_name, selection, value) in enumerate(plotters):
         for idy in range(2):
             value = np.atleast_2d(value)
 
-            is_circular = var_name in circ_var_names and idy == 0
+            is_circular = var_name in circ_var_names and not idy
 
-            axes = fig.add_subplot(spec[idx, idy], polar=is_circular)
+            if axes is None:
+                ax = fig.add_subplot(spec[idx, idy], polar=is_circular)
+            else:
+                ax = axes[idx, idy]
 
             if len(value.shape) == 2:
                 if compact_prop:
@@ -233,8 +239,8 @@ def plot_trace(
                     aux_plot_kwargs = plot_kwargs
                     aux_trace_kwargs = trace_kwargs
 
-                axes = _plot_chains_mpl(
-                    axes,
+                ax = _plot_chains_mpl(
+                    ax,
                     idy,
                     value,
                     data,
@@ -272,8 +278,8 @@ def plot_trace(
                 for sub_idx, label in zip(range(value.shape[2]), legend_labels):
                     aux_plot_kwargs = dealiase_sel_kwargs(plot_kwargs, compact_prop_iter, sub_idx)
                     aux_trace_kwargs = dealiase_sel_kwargs(trace_kwargs, compact_prop_iter, sub_idx)
-                    axes = _plot_chains_mpl(
-                        axes,
+                    ax = _plot_chains_mpl(
+                        ax,
                         idy,
                         value[..., sub_idx],
                         data,
@@ -301,17 +307,18 @@ def plot_trace(
                             )
                         )
                 if legend and idy == 0:
-                    axes.legend(handles=handles, title=legend_title)
+                    ax.legend(handles=handles, title=legend_title)
 
-            if value[0].dtype.kind == "i":
+            if value[0].dtype.kind == "i" and idy == 0:
                 xticks = get_bins(value)
-                axes.set_xticks(xticks[:-1])
-            axes.set_yticks([])
-            axes.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
-            axes.tick_params(labelsize=xt_labelsize)
+                ax.set_xticks(xticks[:-1])
+            if not idy:
+                ax.set_yticks([])
+            ax.set_title(make_label(var_name, selection), fontsize=titlesize, wrap=True, y=1)
+            ax.tick_params(labelsize=xt_labelsize)
 
-            xlims = axes.get_xlim()
-            ylims = axes.get_ylim()
+            xlims = ax.get_xlim()
+            ylims = ax.get_ylim()
 
             if divergences:
                 div_selection = {k: v for k, v in selection.items() if k in divergence_data.dims}
@@ -331,9 +338,9 @@ def plot_trace(
                         values = value[chain, div_idxs]
 
                         if is_circular:
-                            tick = [axes.get_rmin() + axes.get_rmax() * 0.60, axes.get_rmax()]
+                            tick = [ax.get_rmin() + ax.get_rmax() * 0.60, ax.get_rmax()]
                             for val in values:
-                                axes.plot(
+                                ax.plot(
                                     [val, val],
                                     tick,
                                     color="black",
@@ -344,7 +351,7 @@ def plot_trace(
                                 )
                         else:
                             if kind == "trace" and idy:
-                                axes.plot(
+                                ax.plot(
                                     div_draws,
                                     np.zeros_like(div_idxs) + ylocs,
                                     marker="|",
@@ -356,7 +363,7 @@ def plot_trace(
                                     zorder=0.6,
                                 )
                             else:
-                                axes.plot(
+                                ax.plot(
                                     values,
                                     np.zeros_like(values) + ylocs,
                                     marker="|",
@@ -368,8 +375,6 @@ def plot_trace(
                                     zorder=0.6,
                                 )
 
-                    axes.set_ylim(ylims)
-
             for _, _, vlines in (j for j in lines if j[0] == var_name and j[1] == selection):
                 if isinstance(vlines, (float, int)):
                     line_values = [vlines]
@@ -379,8 +384,8 @@ def plot_trace(
                         raise ValueError(
                             "line-positions should be numeric, found {}".format(line_values)
                         )
-                if idy == 1:
-                    axes.hlines(
+                if idy:
+                    ax.hlines(
                         line_values,
                         xlims[0],
                         xlims[1],
@@ -390,7 +395,7 @@ def plot_trace(
                     )
 
                 else:
-                    axes.vlines(
+                    ax.vlines(
                         line_values,
                         ylims[0],
                         ylims[1],
@@ -399,9 +404,8 @@ def plot_trace(
                         alpha=trace_kwargs["alpha"],
                     )
 
-        if kind == "trace":
-            axes.set_xlim(left=data.draw.min(), right=data.draw.max())
-            axes.set_ylim(*ylims)
+        if kind == "trace" and idy:
+            ax.set_xlim(left=data.draw.min(), right=data.draw.max())
 
     if legend:
         legend_kwargs = trace_kwargs if combined else plot_kwargs
@@ -418,7 +422,10 @@ def plot_trace(
                     [], [], label="combined", **dealiase_sel_kwargs(plot_kwargs, chain_prop, -1)
                 ),
             )
-        axes.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
+        ax.figure.axes[0].legend(handles=handles, title="chain", loc="upper right")
+
+    if axes is None:
+        axes = np.array(ax.figure.axes).reshape(-1, 2)
 
     if backend_show(show):
         plt.show()
@@ -451,7 +458,7 @@ def _plot_chains_mpl(
     for chain_idx, row in enumerate(value):
         if kind == "trace":
             aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
-            if idy == 1:
+            if idy:
                 axes.plot(data.draw.values, row, **aux_kwargs)
 
         if not combined:
@@ -471,9 +478,9 @@ def _plot_chains_mpl(
                     is_circular=circ_var_units,
                 )
 
-    if kind == "rank_bars" and idy == 1:
+    if kind == "rank_bars" and idy:
         axes = plot_rank(data=value, kind="bars", ax=axes, **rank_kwargs)
-    elif kind == "rank_vlines" and idy == 1:
+    elif kind == "rank_vlines" and idy:
         axes = plot_rank(data=value, kind="vlines", ax=axes, **rank_kwargs)
 
     if combined:
