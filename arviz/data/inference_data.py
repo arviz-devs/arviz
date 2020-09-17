@@ -188,16 +188,16 @@ class InferenceData:
             yield group
 
     def groups(self):
-        """Groups present in InferenceData object"""
+        """Return all groups present in InferenceData object."""
         return self._groups_all
 
     def values(self):
-        """Xarray Datasets present in InferenceData object"""
+        """Xarray Datasets present in InferenceData object."""
         for group in self._groups_all:
             yield getattr(self, group)
 
     def items(self):
-        """Groups and corresponding datasets present in InferenceData object"""
+        """Yield groups and corresponding datasets present in InferenceData object."""
         for group in self._groups_all:
             yield (group, getattr(self, group))
 
