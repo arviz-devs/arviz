@@ -370,6 +370,16 @@ def from_dict(
         A dictionary containing attributes for different groups.
     kwargs : dict
         A dictionary containing group attrs.
+        Accepted kwargs are:
+        - posterior_attrs, posterior_warmup_attrs : attrs for posterior group
+        - sample_stats_attrs, sample_stats_warmup_attrs : attrs for sample_stats group
+        - log_likelihood_attrs, log_likelihood_warmup_attrs : attrs for log_likelihood group
+        - posterior_predictive_attrs, posterior_predictive_warmup_attrs : attrs for
+                posterior_predictive group
+        - predictions_attrs, predictions_warmup_attrs : attrs for predictions group
+        - prior_attrs : attrs for prior group
+        - sample_stats_prior_attrs : attrs for sample_stats_prior group
+        - prior_predictive_attrs : attrs for prior_predictive group
 
     Returns
     -------
