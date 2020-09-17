@@ -127,11 +127,11 @@ def test_list_datasets():
     dataset_string = list_datasets()
     # make sure all the names of the data sets are in the dataset description
     for key in (
-            "centered_eight",
-            "non_centered_eight",
-            "test_remote",
-            "bad_checksum",
-            "test_unknown",
+        "centered_eight",
+        "non_centered_eight",
+        "test_remote",
+        "bad_checksum",
+        "test_unknown",
     ):
         assert key in dataset_string
 
@@ -225,7 +225,9 @@ def test_concat_dim(dim, copy, inplace, sequence, reset_dim):
         observed_data={"C": np.random.randn(100), "D": np.random.randn(2, 100)},
     )
     # basic case
-    assert concat(idata1, idata2, dim=dim, copy=copy, inplace=False, reset_dim=reset_dim) is not None
+    assert (
+        concat(idata1, idata2, dim=dim, copy=copy, inplace=False, reset_dim=reset_dim) is not None
+    )
     if sequence:
         new_idata = concat(
             (idata1, idata2, idata3), copy=copy, dim=dim, inplace=inplace, reset_dim=reset_dim
@@ -451,27 +453,24 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
     @pytest.mark.parametrize(
         "args_res",
         (
-                ([("posterior", "sample_stats")], ("posterior", "sample_stats")),
-                (["posterior", "like"], ("posterior", "warmup_posterior", "posterior_predictive")),
-                (["^posterior", "regex"], ("posterior", "posterior_predictive")),
-                (
-                        [("~^warmup", "~^obs"), "regex"],
-                        ("posterior", "sample_stats", "posterior_predictive"),
-                ),
-                (
-                        ["~observed_vars"],
-                        ("posterior", "sample_stats", "warmup_posterior", "warmup_sample_stats"),
-                ),
+            ([("posterior", "sample_stats")], ("posterior", "sample_stats")),
+            (["posterior", "like"], ("posterior", "warmup_posterior", "posterior_predictive")),
+            (["^posterior", "regex"], ("posterior", "posterior_predictive")),
+            (
+                [("~^warmup", "~^obs"), "regex"],
+                ("posterior", "sample_stats", "posterior_predictive"),
+            ),
+            (
+                ["~observed_vars"],
+                ("posterior", "sample_stats", "warmup_posterior", "warmup_sample_stats"),
+            ),
         ),
     )
     def test_group_names(self, args_res):
         args, result = args_res
         ds = dict_to_dataset({"a": np.random.normal(size=(3, 10))})
         idata = InferenceData(
-            posterior=(ds, ds),
-            sample_stats=(ds, ds),
-            observed_data=ds,
-            posterior_predictive=ds,
+            posterior=(ds, ds), sample_stats=(ds, ds), observed_data=ds, posterior_predictive=ds,
         )
         group_names = idata._group_names(*args)  # pylint: disable=protected-access
         assert np.all([name in result for name in group_names])
@@ -930,12 +929,8 @@ class TestDataDict:
             warmup_posterior_predictive=data.obj,
             predictions=data.obj,
             observed_data=eight_schools_params,
-            coords={
-                "school": np.arange(8),
-            },
-            pred_coords={
-                "school_pred": np.arange(8),
-            },
+            coords={"school": np.arange(8),},
+            pred_coords={"school_pred": np.arange(8),},
             dims={"theta": ["school"], "eta": ["school"]},
             pred_dims={"theta": ["school_pred"], "eta": ["school_pred"]},
             save_warmup=save_warmup,
