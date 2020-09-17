@@ -1423,6 +1423,7 @@ def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
                     else:
                         inference_data_dict[group] = group0_data
 
-    inference_data_dict["attrs"] = combined_attr
+    if not inplace:
+        inference_data_dict["attrs"] = combined_attr
 
     return None if inplace else InferenceData(**inference_data_dict)
