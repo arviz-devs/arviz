@@ -141,7 +141,7 @@ class InferenceData:
 
     @property
     def attrs(self):
-        """Dictionary of attributes of InferenceData object."""
+        """Attributes of InferenceData object."""
         if self._attrs is None:
             self._attrs = {}
         return self._attrs
