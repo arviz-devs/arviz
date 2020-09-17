@@ -183,17 +183,21 @@ class InferenceData:
         return self._groups + self._groups_warmup
 
     def __iter__(self):
+        """Iterate over groups in InferenceData object."""
         for group in self._groups_all:
             yield group
 
     def groups(self):
+        """Groups present in InferenceData object"""
         return self._groups_all
 
     def values(self):
+        """Xarray Datasets present in InferenceData object"""
         for group in self._groups_all:
             yield getattr(self, group)
 
     def items(self):
+        """Groups and corresponding datasets present in InferenceData object"""
         for group in self._groups_all:
             yield (group, getattr(self, group))
 
