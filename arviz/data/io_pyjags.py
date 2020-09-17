@@ -62,7 +62,12 @@ class PyJAGSConverter:
 
         return (
             dict_to_dataset(data, library=self.pyjags, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pyjags, coords=self.coords, dims=self.dims,),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pyjags,
+                coords=self.coords,
+                dims=self.dims,
+            ),
         )
 
     @requires("posterior")
@@ -187,7 +192,8 @@ def _split_pyjags_dict_in_warmup_and_actual_samples(
 
 
 def _convert_pyjags_dict_to_arviz_dict(
-    samples: tp.Mapping[str, np.ndarray], variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
+    samples: tp.Mapping[str, np.ndarray],
+    variable_names: tp.Optional[tp.Tuple[str, ...]] = None,
 ) -> tp.Mapping[str, np.ndarray]:
     """
     Convert a PyJAGS dictionary to an ArviZ dictionary.
@@ -227,7 +233,9 @@ def _convert_pyjags_dict_to_arviz_dict(
     return variable_name_to_samples_map
 
 
-def _extract_arviz_dict_from_inference_data(idata,) -> tp.Mapping[str, np.ndarray]:
+def _extract_arviz_dict_from_inference_data(
+    idata,
+) -> tp.Mapping[str, np.ndarray]:
     """
     Extract the samples dictionary from an ArviZ inference data object.
 

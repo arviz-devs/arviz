@@ -198,7 +198,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         """Compute log likelihood for each observed point."""
         log_like_val = utils.one_de(log_like_fun(point))
         if var.missing_values:
-            log_like_val = np.where(var.observations.mask, np.nan, log_like_val)
+            mask = var.observations.mask
+            if np.ndim(mask) > np.ndim(log_like_val):
+                mask = np.any(mask, axis=-1)
+            log_like_val = np.where(mask, np.nan, log_like_val)
         return log_like_val
 
     @requires("trace")
@@ -216,14 +219,16 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
                 if var.name in self.log_likelihood
             ]
         try:
-            log_likelihood_dict = self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
-                len(trace.chains)
+            log_likelihood_dict = (
+                self.pymc3.sampling._DefaultTrace(  # pylint: disable=protected-access
+                    len(trace.chains)
+                )
             )
-        except AttributeError:
+        except AttributeError as err:
             raise AttributeError(
                 "Installed version of ArviZ requires PyMC3>=3.8. Please upgrade with "
                 "`pip install pymc3>=3.8` or `conda install -c conda-forge pymc3>=3.8`."
-            )
+            ) from err
         for var, log_like_fun in cached:
             for chain in trace.chains:
                 log_like_chain = [
@@ -448,8 +453,10 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             coords = {key: xr.IndexVariable((key,), data=coords[key]) for key in val_dims}
             try:
                 constant_data[name] = xr.DataArray(vals, dims=val_dims, coords=coords)
-            except ValueError as e:  # pylint: disable=invalid-name
-                raise ValueError("Error translating constant_data variable %s: %s" % (name, e))
+            except ValueError as err:
+                raise ValueError(
+                    "Error translating constant_data variable %s: %s" % (name, err)
+                ) from err
         return xr.Dataset(data_vars=constant_data, attrs=make_attrs(library=self.pymc3))
 
     def to_inference_data(self):

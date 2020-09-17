@@ -61,7 +61,12 @@ def plot_posterior(
     kwargs.setdefault("linewidth", _linewidth)
 
     if ax is None:
-        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
     idx = 0
     for (var_name, selection, x), ax_ in zip(plotters, np.ravel(ax)):
         _plot_posterior_op(

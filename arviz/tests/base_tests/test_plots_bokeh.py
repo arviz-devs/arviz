@@ -29,6 +29,7 @@ from ...plots import (  # pylint: disable=wrong-import-position
     plot_posterior,
     plot_ppc,
     plot_rank,
+    plot_separation,
     plot_trace,
     plot_violin,
 )
@@ -99,8 +100,18 @@ def test_plot_density_discrete(discrete_model):
 
 def test_plot_density_no_subset():
     """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
-    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+            "b": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "b": np.random.normal(size=200),
+            "c": np.random.normal(size=200),
+        }
+    )
     axes = plot_density([model_ab, model_bc])
     assert axes.size == 3
 
@@ -120,6 +131,22 @@ def test_plot_density_bad_kwargs(models):
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2, backend="bokeh", show=False)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat_line": True},
+        {"expected_events": True},
+        {"y_hat_line_kwargs": {"linestyle": "dotted"}},
+        {"exp_events_kwargs": {"marker": "o"}},
+    ],
+)
+def test_plot_separation(kwargs):
+    idata = load_arviz_data("classification10d")
+    ax = plot_separation(idata=idata, y="outcome", backend="bokeh", show=False, **kwargs)
+    assert ax
 
 
 @pytest.mark.parametrize(

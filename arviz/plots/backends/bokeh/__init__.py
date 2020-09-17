@@ -74,7 +74,9 @@ def create_axes_grid(
 
     if figsize is not None:
         backend_kwargs = {
-            **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+            **backend_kwarg_defaults(
+                ("dpi", "plot.bokeh.figure.dpi"),
+            ),
             **backend_kwargs,
         }
         dpi = backend_kwargs.pop("dpi")
@@ -162,5 +164,5 @@ def check_bokeh_version():
         import bokeh
 
         assert version.parse(bokeh.__version__) >= version.parse("1.4.0")
-    except (ImportError, AssertionError):
-        raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.")
+    except (ImportError, AssertionError) as err:
+        raise ImportError("'bokeh' backend needs Bokeh (1.4.0+) installed.") from err

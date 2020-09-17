@@ -34,8 +34,8 @@ def _make_validate_choice(accepted_values, allow_none=False, typeof=str):
             return None
         try:
             value = typeof(value)
-        except (ValueError, TypeError):
-            raise ValueError("Could not convert to {}".format(typeof.__name__))
+        except (ValueError, TypeError) as err:
+            raise ValueError("Could not convert to {}".format(typeof.__name__)) from err
         if isinstance(value, str):
             value = value.lower()
 
@@ -95,8 +95,8 @@ def _validate_positive_int(value):
     """Validate value is a natural number."""
     try:
         value = int(value)
-    except ValueError:
-        raise ValueError("Could not convert to int")
+    except ValueError as err:
+        raise ValueError("Could not convert to int") from err
     if value > 0:
         return value
     else:
@@ -115,8 +115,8 @@ def _validate_float(value):
     """Validate value is a float."""
     try:
         value = float(value)
-    except ValueError:
-        raise ValueError("Could not convert to float")
+    except ValueError as err:
+        raise ValueError("Could not convert to float") from err
     return value
 
 
@@ -228,6 +228,10 @@ defaultParams = {  # pylint: disable=invalid-name
     "data.metagroups": (METAGROUPS, _validate_dict_of_lists),
     "data.index_origin": (0, _make_validate_choice({0, 1}, typeof=int)),
     "data.save_warmup": (False, _validate_boolean),
+    "data.pandas_float_precision": (
+        "high",
+        _make_validate_choice({"high", "round_trip"}, allow_none=True),
+    ),
     "plot.backend": ("matplotlib", _make_validate_choice({"matplotlib", "bokeh"})),
     "plot.max_subplots": (40, _validate_positive_int_or_none),
     "plot.point_estimate": (
@@ -297,13 +301,13 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             try:
                 cval = self.validate[key](val)
             except ValueError as verr:
-                raise ValueError("Key %s: %s" % (key, str(verr)))
+                raise ValueError("Key %s: %s" % (key, str(verr))) from verr
             dict.__setitem__(self, key, cval)
-        except KeyError:
+        except KeyError as err:
             raise KeyError(
                 "{} is not a valid rc parameter (see rcParams.keys() for "
                 "a list of valid parameters)".format(key)
-            )
+            ) from err
 
     def __getitem__(self, key):
         """Use dict getitem method."""
@@ -470,7 +474,9 @@ def read_rcfile(fname):
                     config[key] = val
                 except ValueError as verr:
                     error_details = _error_details_fmt % (line_no, line, fname)
-                    raise ValueError("Bad val {} on {}\n\t{}".format(val, error_details, str(verr)))
+                    raise ValueError(
+                        "Bad val {} on {}\n\t{}".format(val, error_details, str(verr))
+                    ) from verr
 
         except UnicodeDecodeError:
             _log.warning(

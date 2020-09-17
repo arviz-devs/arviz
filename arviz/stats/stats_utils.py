@@ -318,12 +318,6 @@ def logsumexp(ary, *, b=None, b_inv=None, axis=None, keepdims=False, out=None, c
     return out if out.shape else dtype(out)
 
 
-def rint(num):
-    """Round and change to ingeter."""
-    rnum = np.rint(num)  # pylint: disable=assignment-from-no-return
-    return int(rnum)
-
-
 def quantile(ary, q, axis=None, limit=None):
     """Use same quantile function as R (Type 7)."""
     if limit is None:
@@ -421,8 +415,8 @@ def get_log_likelihood(idata, var_name=None):
     else:
         try:
             log_likelihood = idata.log_likelihood[var_name]
-        except KeyError:
-            raise TypeError("No log likelihood data named {} found".format(var_name))
+        except KeyError as err:
+            raise TypeError("No log likelihood data named {} found".format(var_name)) from err
         return log_likelihood
 
 

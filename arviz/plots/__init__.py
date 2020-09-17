@@ -22,6 +22,7 @@ from .ppcplot import plot_ppc
 from .rankplot import plot_rank
 from .traceplot import plot_trace
 from .violinplot import plot_violin
+from .separationplot import plot_separation
 
 __all__ = [
     "plot_autocorr",
@@ -48,4 +49,5 @@ __all__ = [
     "plot_rank",
     "plot_trace",
     "plot_violin",
+    "plot_separation",
 ]

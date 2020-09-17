@@ -93,14 +93,14 @@ class TestDataCmdStan:
     def test_inference_data_input_types1(self, paths, observed_data_paths):
         """Check input types
 
-            posterior --> str, list of str
-            prior --> str, list of str
-            posterior_predictive --> str, variable in posterior
-            observed_data --> Rdump format
-            observed_data_var --> str, variable
-            log_likelihood --> str
-            coords --> one to many
-            dims --> one to many
+        posterior --> str, list of str
+        prior --> str, list of str
+        posterior_predictive --> str, variable in posterior
+        observed_data --> Rdump format
+        observed_data_var --> str, variable
+        log_likelihood --> str
+        coords --> one to many
+        dims --> one to many
         """
         for key, path in paths.items():
             if "eight" not in key:
@@ -147,8 +147,8 @@ class TestDataCmdStan:
     def test_inference_data_input_types2(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
 
-            posterior_predictive --> List[str], variable in posterior
-            observed_data_var --> List[str], variable
+        posterior_predictive --> List[str], variable in posterior
+        observed_data_var --> List[str], variable
         """
         for key, path in paths.items():
             if "eight" not in key:
@@ -193,9 +193,9 @@ class TestDataCmdStan:
     def test_inference_data_input_types3(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
 
-            posterior_predictive --> str, csv file
-            coords --> one to many + one to one (default dim)
-            dims --> one to many
+        posterior_predictive --> str, csv file
+        coords --> one to many + one to one (default dim)
+        dims --> one to many
         """
         for key, path in paths.items():
             if "eight" not in key:
@@ -231,8 +231,8 @@ class TestDataCmdStan:
     def test_inference_data_input_types4(self, paths):
         """Check input types (change, see earlier)
 
-            coords --> one to many + one to one (non-default dim)
-            dims --> one to many + one to one
+        coords --> one to many + one to one (non-default dim)
+        dims --> one to many + one to one
         """
 
         paths_ = paths["no_warmup"]
@@ -261,8 +261,8 @@ class TestDataCmdStan:
     def test_inference_data_input_types5(self, paths, observed_data_paths):
         """Check input types (change, see earlier)
 
-            posterior_predictive is None
-            prior_predictive is None
+        posterior_predictive is None
+        prior_predictive is None
         """
         for key, path in paths.items():
             if "eight" not in key:
@@ -297,7 +297,7 @@ class TestDataCmdStan:
     def test_inference_data_observed_data1(self, observed_data_paths):
         """Read Rdump, check shapes are correct
 
-            All variables
+        All variables
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(posterior=None, observed_data=path)
@@ -310,7 +310,7 @@ class TestDataCmdStan:
     def test_inference_data_observed_data2(self, observed_data_paths):
         """Read Rdump, check shapes are correct
 
-            One variable as str
+        One variable as str
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(
@@ -323,7 +323,7 @@ class TestDataCmdStan:
     def test_inference_data_observed_data3(self, observed_data_paths):
         """Read Rdump, check shapes are correct
 
-            One variable as a list
+        One variable as a list
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(
@@ -336,7 +336,7 @@ class TestDataCmdStan:
     def test_inference_data_observed_data4(self, observed_data_paths):
         """Read Rdump, check shapes are correct
 
-            Many variables as list
+        Many variables as list
         """
         path = observed_data_paths[1]
         inference_data = self.get_inference_data(

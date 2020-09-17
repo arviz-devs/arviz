@@ -33,6 +33,7 @@ from ...plots import (
     plot_posterior,
     plot_ppc,
     plot_rank,
+    plot_separation,
     plot_trace,
     plot_violin,
 )
@@ -131,8 +132,18 @@ def test_plot_density_discrete(discrete_model):
 
 def test_plot_density_no_subset():
     """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
-    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+            "b": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "b": np.random.normal(size=200),
+            "c": np.random.normal(size=200),
+        }
+    )
     axes = plot_density([model_ab, model_bc])
     assert axes.size == 3
 
@@ -147,6 +158,22 @@ def test_plot_density_bad_kwargs(models):
 
     with pytest.raises(ValueError):
         plot_density(obj, hdi_prob=2)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {},
+        {"y_hat_line": True},
+        {"expected_events": True},
+        {"y_hat_line_kwargs": {"linestyle": "dotted"}},
+        {"exp_events_kwargs": {"marker": "o"}},
+    ],
+)
+def test_plot_separation(kwargs):
+    idata = load_arviz_data("classification10d")
+    ax = plot_separation(idata=idata, y="outcome", **kwargs)
+    assert ax
 
 
 @pytest.mark.parametrize(
@@ -170,47 +197,49 @@ def test_plot_density_bad_kwargs(models):
 )
 def test_plot_trace(models, kwargs):
     axes = plot_trace(models.model_1, **kwargs)
-    assert axes.figure
+    assert axes.shape
 
 
 @pytest.mark.parametrize(
-    "compact", [True, False],
+    "compact",
+    [True, False],
 )
 @pytest.mark.parametrize(
-    "combined", [True, False],
+    "combined",
+    [True, False],
 )
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
     axes = plot_trace(
         idata, var_names=["home", "atts_star"], compact=compact, combined=combined, legend=True
     )
-    assert axes.figure.axes[0].get_legend()
-    compact_legend = axes.figure.axes[2].get_legend()
+    assert axes[0, 0].get_legend()
+    compact_legend = axes[1, 0].get_legend()
     if compact:
-        assert len(axes.figure.axes) == 4
+        assert axes.shape == (2, 2)
         assert compact_legend
     else:
-        assert len(axes.figure.axes) == 14
+        assert axes.shape == (7, 2)
         assert not compact_legend
 
 
 def test_plot_trace_discrete(discrete_model):
     axes = plot_trace(discrete_model)
-    assert axes.figure
+    assert axes.shape
 
 
 def test_plot_trace_max_subplots_warning(models):
     with pytest.warns(UserWarning):
         with rc_context(rc={"plot.max_subplots": 6}):
             axes = plot_trace(models.model_1)
-    assert len(axes.figure.axes) == 6
+    assert axes.shape == (3, 2)
 
 
 @pytest.mark.parametrize("kwargs", [{"var_names": ["mu", "tau"], "lines": [("hey", {}, [1])]}])
 def test_plot_trace_invalid_varname_warning(models, kwargs):
     with pytest.warns(UserWarning, match="valid var.+should be provided"):
         axes = plot_trace(models.model_1, **kwargs)
-    assert axes.figure
+    assert axes.shape
 
 
 @pytest.mark.parametrize(
@@ -225,7 +254,7 @@ def test_plot_trace_bad_lines_value(models, bad_kwargs):
 def test_plot_trace_futurewarning(models, prop):
     with pytest.warns(FutureWarning, match=f"{prop} as a tuple.+deprecated"):
         ax = plot_trace(models.model_1, **{prop: ("ls", ("-", "--"))})
-    assert ax.figure
+    assert ax.shape
 
 
 @pytest.mark.parametrize("model_fits", [["model_1"], ["model_1", "model_2"]])
@@ -1347,7 +1376,10 @@ def test_plot_dist_comparison(models, kwargs):
 
 def test_plot_dist_comparison_different_vars():
     data = from_dict(
-        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
+        posterior={
+            "x": np.random.randn(4, 100, 30),
+        },
+        prior={"x_hat": np.random.randn(4, 100, 30)},
     )
     with pytest.raises(KeyError):
         plot_dist_comparison(data, var_names="x")

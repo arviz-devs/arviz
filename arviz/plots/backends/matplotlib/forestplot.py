@@ -93,7 +93,14 @@ def plot_forest(
     axes = np.atleast_1d(axes)
     if kind == "forestplot":
         plot_handler.forestplot(
-            hdi_prob, quartiles, xt_labelsize, titlesize, linewidth, markersize, axes[0], rope,
+            hdi_prob,
+            quartiles,
+            xt_labelsize,
+            titlesize,
+            linewidth,
+            markersize,
+            axes[0],
+            rope,
         )
     elif kind == "ridgeplot":
         plot_handler.ridgeplot(

@@ -53,7 +53,9 @@ def plot_trace(
         backend_config = {}
 
     backend_config = {
-        **backend_kwarg_defaults(("bounds_y_range", "plot.bokeh.bounds_y_range"),),
+        **backend_kwarg_defaults(
+            ("bounds_y_range", "plot.bokeh.bounds_y_range"),
+        ),
         **backend_config,
     }
 
@@ -62,7 +64,9 @@ def plot_trace(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
     dpi = backend_kwargs.pop("dpi")
@@ -87,7 +91,9 @@ def plot_trace(
         )
     else:
         chain_prop = (
-            {"line_dash": ("solid", "dotted", "dashed", "dashdot"),}
+            {
+                "line_dash": ("solid", "dotted", "dashed", "dashdot"),
+            }
             if chain_prop is None
             else chain_prop
         )

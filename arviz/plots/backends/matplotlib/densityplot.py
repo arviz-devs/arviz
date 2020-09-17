@@ -58,7 +58,12 @@ def plot_density(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs.setdefault("squeeze", False)
     if ax is None:
-        _, ax = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
+        _, ax = create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
 
     axis_map = {label: ax_ for label, ax_ in zip(all_labels, np.ravel(ax))}
 
