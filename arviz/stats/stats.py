@@ -324,6 +324,7 @@ def hpd(
     filter_vars=None,
     coords=None,
     max_modes=10,
+    dask_kwargs=None,
     **kwargs,
 ):
     """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
@@ -342,6 +343,7 @@ def hpd(
         filter_vars,
         coords,
         max_modes,
+        dask_kwargs,
         **kwargs,
     )
 
@@ -357,6 +359,7 @@ def hdi(
     filter_vars=None,
     coords=None,
     max_modes=10,
+    dask_kwargs=None,
     **kwargs,
 ):
     """
@@ -397,6 +400,8 @@ def hdi(
         Specifies the subset over to calculate hdi.
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
     kwargs: dict, optional
         Additional keywords passed to :func:`~arviz.wrap_xarray_ufunc`.
 
@@ -490,7 +495,7 @@ def hdi(
     ary = ary[var_names] if var_names else ary
 
     hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
+    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs, **kwargs).assign_coords(
         {"hdi": hdi_coord}
     )
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
@@ -573,7 +578,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     return np.array(hdi_intervals)
 
 
-def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=None):
+def loo(data, pointwise=None, var_name=None, reff=None, scale=None):
     """Compute Pareto-smoothed importance sampling leave-one-out cross-validation (PSIS-LOO-CV).
 
     Estimates the expected log pointwise predictive density (elpd) using Pareto-smoothed
@@ -604,8 +609,6 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
-    dask_kwargs : dict, optional
-        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -672,7 +675,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
                 np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples
             )
 
-    log_weights, pareto_shape = psislw(-log_likelihood, reff, dask_kwargs=dask_kwargs)
+    log_weights, pareto_shape = psislw(-log_likelihood, reff)
     log_weights += log_likelihood
 
     warn_mg = False
@@ -689,7 +692,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
     ufunc_kwargs = {"n_dims": 1, "ravel": False}
     kwargs = {"input_core_dims": [["sample"]]}
     loo_lppd_i = scale_value * _wrap_xarray_ufunc(
-        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, dask_kwargs=dask_kwargs, **kwargs
+        _logsumexp, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs
     )
     loo_lppd = loo_lppd_i.values.sum()
     loo_lppd_se = (n_data_points * np.var(loo_lppd_i.values)) ** 0.5
@@ -700,7 +703,6 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
             log_likelihood,
             func_kwargs={"b_inv": n_samples},
             ufunc_kwargs=ufunc_kwargs,
-            dask_kwargs=dask_kwargs,
             **kwargs,
         ).values
     )
@@ -744,7 +746,7 @@ def loo(data, pointwise=None, var_name=None, reff=None, scale=None, dask_kwargs=
         )
 
 
-def psislw(log_weights, reff=1.0, dask_kwargs=None):
+def psislw(log_weights, reff=1.0):
     """
     Pareto smoothed importance sampling (PSIS).
 
@@ -754,8 +756,6 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
         Array of size (n_observations, n_samples)
     reff: float
         relative MCMC efficiency, `ess / n`
-    dask_kwargs : dict, optional
-        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -803,7 +803,6 @@ def psislw(log_weights, reff=1.0, dask_kwargs=None):
         log_weights,
         ufunc_kwargs=ufunc_kwargs,
         func_kwargs=func_kwargs,
-        dask_kwargs=dask_kwargs,
         **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
@@ -1509,7 +1508,7 @@ def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
         )
 
 
-def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, dask_kwargs=None):
+def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     """Compute leave one out (PSIS-LOO) probability integral transform (PIT) values.
 
     Parameters
@@ -1595,14 +1594,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, dask_kwargs=Non
             posterior = convert_to_dataset(idata, group="posterior")
             n_chains = len(posterior.chain)
             n_samples = len(log_likelihood.sample)
-            ess_p = ess(posterior, method="mean", dask_kwargs=dask_kwargs)
+            ess_p = ess(posterior, method="mean")
             # this mean is over all data variables
             reff = (
                 (np.hstack([ess_p[v].values.flatten() for v in ess_p.data_vars]).mean() / n_samples)
                 if n_chains > 1
                 else 1
             )
-            log_weights = psislw(-log_likelihood, reff=reff, dask_kwargs=dask_kwargs)[0].values
+            log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
                 "log_weights must be None or of types array or DataArray, not {}".format(
@@ -1642,7 +1641,6 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None, dask_kwargs=Non
         y_hat,
         log_weights,
         ufunc_kwargs=ufunc_kwargs,
-        dask_kwargs=dask_kwargs,
         **kwargs,
     )
 
