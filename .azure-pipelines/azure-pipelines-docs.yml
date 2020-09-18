@@ -64,6 +64,7 @@ jobs:
     inputs:
       pathtoPublish: 'doc/build'
       artifactName: 'arviz_doc_build'
+    condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
     displayName: 'Publish the doc/build'
 
   - script: |
@@ -74,5 +75,5 @@ jobs:
 
   - script: |
       ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
-    condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
+    condition: eq(variables['Build.SourceBranchName'], 'master')
     displayName: 'Deploy docs'
