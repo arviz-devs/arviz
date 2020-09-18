@@ -1,9 +1,9 @@
 jobs:
 - job: BuildDocs
-  #dependsOn:
-  #  - BaseTests
-  #  - ExternalTests
-  condition: or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')) #and(succeeded(), )
+  dependsOn:
+    - BaseTests
+    - ExternalTests
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')))
   pool:
     vmImage: 'ubuntu-latest'
   variables:
@@ -20,9 +20,10 @@ jobs:
   - script: |
       PRTitle=$(curl -s https://api.github.com/repos/arviz-devs/arviz/pulls/${PULLREQUESTNUMBER} | grep title | cut -d'"' -f4)
       echo "##vso[task.setvariable variable=PRTitle]${PRTitle}"
+      echo "PR title: ${PRTitle}"
     env:
       PULLREQUESTNUMBER: $(System.PullRequest.PullRequestNumber)
-    displayName: 'Read PR title to PRTitle'
+    displayName: 'Read PR title'
 
   - task: UsePythonVersion@0
     inputs:
@@ -58,14 +59,14 @@ jobs:
   - script: |
       python -msphinx -M clean doc doc/build
       sphinx-build doc doc/build -b html
-    displayName: 'Build a docs'
+    displayName: 'Build docs'
 
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: 'doc/build'
       artifactName: 'arviz_doc_build'
     condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
-    displayName: 'Publish the doc/build'
+    displayName: 'Upload docs'
 
   - script: |
       ls -ahl
