@@ -1,8 +1,8 @@
 jobs:
 - job: BuildDocs
-  dependsOn:
-    - BaseTests
-    - ExternalTests
+  #dependsOn:
+  #  - BaseTests
+  #  - ExternalTests
   condition: or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')) #and(succeeded(), )
   pool:
     vmImage: 'ubuntu-latest'
