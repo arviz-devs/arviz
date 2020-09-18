@@ -74,5 +74,5 @@ jobs:
 
   - script: |
       ghp-import -pfnr https://$(GH_USER):$(GH_TOKEN)@github.com/${BUILD_REPOSITORY_NAME}.git doc/build
-    condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variable['PRTitle'], '[doc]'), contains(variable['PRTitle'], '[docs]'), contains(variable['PRTitle'], '[viz]'), contains(variable['PRTitle'], '[plot]')))
+    condition: or(eq(variables['Build.SourceBranchName'], 'master'), or(contains(variables['PRTitle'], '[doc]'), contains(variables['PRTitle'], '[docs]'), contains(variables['PRTitle'], '[viz]'), contains(variables['PRTitle'], '[plot]')))
     displayName: 'Deploy docs'
