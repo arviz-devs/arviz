@@ -18,8 +18,8 @@ jobs:
 
   steps:
   - script: |
-      PRTitle=$(curl -s https://api.github.com/repos/arviz-devs/arviz/pulls/$(PULLREQUESTNUMBER) | grep title | cut -d'"' -f4)
-      echo "##vso[task.setvariable variable=PRTitle]$(PRTitle)"
+      PRTitle=$(curl -s https://api.github.com/repos/arviz-devs/arviz/pulls/${PULLREQUESTNUMBER} | grep title | cut -d'"' -f4)
+      echo "##vso[task.setvariable variable=PRTitle]${PRTitle}"
     env:
       PULLREQUESTNUMBER: $(System.PullRequest.PullRequestNumber)
     displayName: 'Read PR title to PRTitle'
