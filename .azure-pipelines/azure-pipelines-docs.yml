@@ -3,7 +3,7 @@ jobs:
   dependsOn:
     - BaseTests
     - ExternalTests
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')))
+  condition: or(eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Reason'], 'PullRequest')) #and(succeeded(), )
   pool:
     vmImage: 'ubuntu-latest'
   variables:
