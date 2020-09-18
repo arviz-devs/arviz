@@ -820,6 +820,10 @@ class InferenceData:
                 )
             dataset = getattr(other, group)
             setattr(self, group, dataset)
+            if group.startswith(WARMUP_TAG):
+                 self._groups_warmup.append(group)
+             else:
+                 self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index)
     get_index = _extend_xr_method(xr.Dataset.get_index)
