@@ -23,6 +23,8 @@
 * Increased `from_pystan` attrs information content ([1353](https://github.com/arviz-devs/arviz/pull/1353))
 * Allow `plot_trace` to return and accept axes ([#1361](https://github.com/arviz-devs/arviz/pull/1361))
 * Update diagnostics to be on par with posterior package ([#1366](https://github.com/arviz-devs/arviz/pull/1366))
+* Use method="average" in `scipy.stats.rankdata` ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 
 ### Deprecation
 
