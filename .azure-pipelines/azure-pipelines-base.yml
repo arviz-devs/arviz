@@ -53,7 +53,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines codecov
-    condition: eq(pypi.github, false)
+    condition: eq($(pypi.github), false)
     displayName: 'Install requirements'
   
   - script: |
@@ -64,7 +64,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --upgrade git+https://github.com/pydata/xarray.git
       python -m pip install pytest-azurepipelines codecov
-    condition: eq(pypi.github, true)
+    condition: eq($(pypi.github), true)
     displayName: 'Install requirements (pypi preview / github)'
 
   - script: |
