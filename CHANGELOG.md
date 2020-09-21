@@ -26,6 +26,7 @@
 * Use method="average" in `scipy.stats.rankdata` ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 * Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 * Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389)
+* Fix multi rope for `plot_forest` ([#1390](https://github.com/arviz-devs/arviz/pull/1390))
 
 ### Deprecation
 

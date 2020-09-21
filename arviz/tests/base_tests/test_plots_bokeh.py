@@ -490,7 +490,10 @@ def test_plot_ess_no_divergences(models):
         (
             {
                 "var_names": ["mu", "tau"],
-                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+                "rope": {
+                    "mu": [{"rope": (-0.1, 0.1)}],
+                    "theta": [{"school": "Choate", "rope": (0.2, 0.5)}],
+                },
             },
             1,
         ),
