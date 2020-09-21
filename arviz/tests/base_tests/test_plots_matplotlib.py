@@ -279,8 +279,11 @@ def test_plot_trace_futurewarning(models, prop):
         ({"kind": "ridgeplot", "r_hat": True, "ess": True, "ridgeplot_alpha": 0}, 3),
         (
             {
-                "var_names": ["mu", "tau"],
-                "rope": {"mu": [{"rope": (-0.1, 0.1)}], "tau": [{"rope": (0.2, 0.5)}]},
+                "var_names": ["mu", "theta"],
+                "rope": {
+                    "mu": [{"rope": (-0.1, 0.1)}],
+                    "theta": [{"school": "Choate", "rope": (0.2, 0.5)}],
+                },
             },
             1,
         ),

@@ -25,6 +25,7 @@
 * Update diagnostics to be on par with posterior package ([#1366](https://github.com/arviz-devs/arviz/pull/1366))
 * Use method="average" in `scipy.stats.rankdata` ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 * Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Fix multi rope for `plot_forest` ([#1390](https://github.com/arviz-devs/arviz/pull/1390))
 
 ### Deprecation
 
