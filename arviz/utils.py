@@ -696,5 +696,6 @@ class HtmlTemplate:
                   </div>
             </li>
             """
+    _, css_style = xr.core.formatting_html._load_static_files()  # pylint: disable=protected-access
     specific_style = ".xr-wrap{width:700px!important;}"
-    css_template = f"<style> {xr.core.formatting_html.CSS_STYLE}{specific_style} </style>"
+    css_template = f"<style> {css_style}{specific_style} </style>"
