@@ -53,7 +53,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines codecov
-    condition: and(succeeded(), eq(variables.PyPIGithub, true))
+    condition: and(succeeded(), eq(variables.PyPIGithub, false))
     displayName: 'Install requirements'
   
   - script: |
