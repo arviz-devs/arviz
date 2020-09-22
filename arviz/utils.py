@@ -673,16 +673,15 @@ def credible_interval_warning(credible_interval, hdi_prob):
     hdi_prob = credible_interval
     return hdi_prob
 
+
 @lru_cache(None)
 def _load_static_files():
     """Lazily load the resource files into memory the first time they are needed.
 
     Clone from xarray.core.formatted_html_template.
     """
-    return [
-        pkg_resources.resource_string("arviz", fname).decode("utf8")
-        for fname in STATIC_FILES
-    ]
+    return [pkg_resources.resource_string("arviz", fname).decode("utf8") for fname in STATIC_FILES]
+
 
 class HtmlTemplate:
     """Contain html templates for InferenceData repr."""
@@ -713,6 +712,7 @@ class HtmlTemplate:
     specific_style = ".xr-wrap{width:700px!important;}"
     css_template = f"<style> {css_style}{specific_style} </style>"
 
+
 def either_dict_or_kwargs(
     pos_kwargs,
     kw_kwargs,
@@ -721,13 +721,10 @@ def either_dict_or_kwargs(
     """Clone from xarray.core.utils."""
     if pos_kwargs is not None:
         if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
-            raise ValueError(
-                "the first argument to .%s must be a dictionary" % func_name
-            )
+            raise ValueError("the first argument to .%s must be a dictionary" % func_name)
         if kw_kwargs:
             raise ValueError(
-                "cannot specify both keyword and positional "
-                "arguments to .%s" % func_name
+                "cannot specify both keyword and positional " "arguments to .%s" % func_name
             )
         return pos_kwargs
     else:

@@ -147,6 +147,7 @@ class InferenceData:
         """Make html representation of InferenceData object."""
         try:
             from xarray.core.options import OPTIONS
+
             display_style = OPTIONS["display_style"]
             if display_style == "text":
                 html_repr = f"<pre>{escape(repr(self))}</pre>"
