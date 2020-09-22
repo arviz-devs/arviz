@@ -651,7 +651,7 @@ class TestInferenceData:
         idata = data_random
         idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
         idata.extend(idata2)
-        assert "prior" in idata._groups_all
+        assert "prior" in idata._groups_all  # pylint: disable=protected-access
         assert hasattr(idata, "prior")
         assert hasattr(idata, "prior_predictive")
         assert idata.prior.equals(idata2.prior)
