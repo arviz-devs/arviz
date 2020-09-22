@@ -677,7 +677,7 @@ def credible_interval_warning(credible_interval, hdi_prob):
 def _load_static_files():
     """Lazily load the resource files into memory the first time they are needed.
 
-    Function cloned from xarray.core.formatted_html_template.
+    Clone from xarray.core.formatted_html_template.
     """
     return [
         pkg_resources.resource_string("arviz", fname).decode("utf8")
@@ -718,7 +718,7 @@ def either_dict_or_kwargs(
     kw_kwargs,
     func_name,
 ):
-    """Function cloned from xarray.core.utils."""
+    """Clone from xarray.core.utils."""
     if pos_kwargs is not None:
         if not hasattr(pos_kwargs, "keys") and hasattr(pos_kwargs, "__getitem__"):
             raise ValueError(
