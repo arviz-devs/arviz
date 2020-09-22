@@ -9,7 +9,6 @@ from functools import lru_cache
 import matplotlib.pyplot as plt
 import numpy as np
 import pkg_resources
-import xarray as xr
 from numpy import newaxis
 
 from .rcparams import rcParams
