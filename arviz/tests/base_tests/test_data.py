@@ -625,7 +625,7 @@ class TestInferenceData:
         assert hasattr(idata, "prior")
 
         idata.add_groups(warmup_posterior={"a": data[..., 0], "b": data})
-        assert "warmup_posterior" in idata._groups  # pylint: disable=protected-access
+        assert "warmup_posterior" in idata._groups_all  # pylint: disable=protected-access
         assert isinstance(idata.warmup_posterior, xr.Dataset)
         assert hasattr(idata, "warmup_posterior")
 

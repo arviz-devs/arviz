@@ -29,6 +29,8 @@
 * Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
 * Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389)
 * Fix multi rope for `plot_forest` ([#1390](https://github.com/arviz-devs/arviz/pull/1390))
+* Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389))
+* `from_dict` will now store warmup groups even with the main group missing ([1386](https://github.com/arviz-devs/arviz/pull/1386))
 
 ### Deprecation
 
