@@ -70,7 +70,7 @@ class DictConverter:
         self.attrs.pop("arviz_version", None)
 
     def _init_dict(self, attr_name):
-        dict_or_none = getattr(self, attr_name, None)
+        dict_or_none = getattr(self, attr_name, {})
         return {} if dict_or_none is None else dict_or_none
 
     @requires(["posterior", f"{WARMUP_TAG}posterior"])
