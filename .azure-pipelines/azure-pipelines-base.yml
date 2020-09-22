@@ -12,19 +12,19 @@ jobs:
     matrix:
       Python_38_preview:
         python.version: 3.8
-        pypi.github: true
+        PyPIGithub: true
         name: "Python 3.8"
       Python_38:
         python.version: 3.8
-        pypi.github: false
+        PyPIGithub: false
         name: "Python 3.8"
       Python_37:
         python.version: 3.7
-        pypi.github: false
+        PyPIGithub: false
         name: "Python 3.7"
       Python_36:
         python.version: 3.6
-        pypi.github: false
+        PyPIGithub: false
         name: "Python 3.6"
 
   steps:
@@ -53,7 +53,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-optional.txt
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install pytest-azurepipelines codecov
-    condition: eq(variables.pypi.github, false)
+    condition: and(succeeded(), eq(variables.PyPIGithub, true))
     displayName: 'Install requirements'
   
   - script: |
@@ -64,7 +64,7 @@ jobs:
       python -m pip install --no-cache-dir -r requirements-dev.txt
       python -m pip install --upgrade git+https://github.com/pydata/xarray.git
       python -m pip install pytest-azurepipelines codecov
-    condition: eq(variables.pypi.github, true)
+    condition: and(succeeded(), eq(variables.PyPIGithub, true))
     displayName: 'Install requirements (pypi preview / github)'
 
   - script: |
