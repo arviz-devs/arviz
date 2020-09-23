@@ -94,9 +94,9 @@ def plot_bpv(
             csi = CubicSpline(x, obs_vals)
             obs_vals = csi(np.linspace(0.001, 0.999, len(obs_vals)))
 
-            x = np.linspace(0, 1, len(pp_vals))
-            csi = CubicSpline(x, pp_vals)
-            pp_vals = csi(np.linspace(0.001, 0.999, len(pp_vals)))
+            x = np.linspace(0, 1, pp_vals.shape[1])
+            csi = CubicSpline(x, pp_vals, axis=1)
+            pp_vals = csi(np.linspace(0.001, 0.999, pp_vals.shape[1]))
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)

@@ -35,7 +35,6 @@ def plot_bpv(
     """
     Plot Bayesian p-value for observed data and Posterior/Prior predictive.
 
-    For binary data other tests are preferred see for example `az.plot_separation`.
 
     Parameters
     ----------
