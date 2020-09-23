@@ -23,14 +23,15 @@
 * Restructure plotting code to be compatible with mpl>=3.3 ([1312](https://github.com/arviz-devs/arviz/pull/1312) and [1352](https://github.com/arviz-devs/arviz/pull/1352))
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables via the argument `circular` ([1284](https://github.com/arviz-devs/arviz/pull/1284)).
 * Increased `from_pystan` attrs information content ([1353](https://github.com/arviz-devs/arviz/pull/1353))
-* Allow `plot_trace` to return and accept axes ([#1361](https://github.com/arviz-devs/arviz/pull/1361))
-* Update diagnostics to be on par with posterior package ([#1366](https://github.com/arviz-devs/arviz/pull/1366))
-* Use method="average" in `scipy.stats.rankdata` ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
-* Add more `plot_parallel` examples ([#1380](https://github.com/arviz-devs/arviz/pull/1380))
-* Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389)
-* Fix multi rope for `plot_forest` ([#1390](https://github.com/arviz-devs/arviz/pull/1390))
-* Bump minimum xarray version to 0.16.1 ([#1389](https://github.com/arviz-devs/arviz/pull/1389))
+* Allow `plot_trace` to return and accept axes ([1361](https://github.com/arviz-devs/arviz/pull/1361))
+* Update diagnostics to be on par with posterior package ([1366](https://github.com/arviz-devs/arviz/pull/1366))
+* Use method="average" in `scipy.stats.rankdata` ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Add more `plot_parallel` examples ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389)
+* Fix multi rope for `plot_forest` ([1390](https://github.com/arviz-devs/arviz/pull/1390))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389))
 * `from_dict` will now store warmup groups even with the main group missing ([1386](https://github.com/arviz-devs/arviz/pull/1386))
+* increase robustness for repr_html handling ([1392](https://github.com/arviz-devs/arviz/pull/1392))
 
 ### Deprecation
 

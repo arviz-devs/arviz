@@ -6,7 +6,7 @@ import xarray as xr
 from .. import utils
 from ..rcparams import rcParams
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
-from .inference_data import InferenceData, WARMUP_TAG
+from .inference_data import WARMUP_TAG, InferenceData
 
 
 # pylint: disable=too-many-instance-attributes
