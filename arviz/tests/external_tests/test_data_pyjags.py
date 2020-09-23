@@ -2,9 +2,9 @@
 import typing as tp
 
 import numpy as np
+import pyjags
 import pytest
 
-import pyjags
 from arviz import InferenceData, from_pyjags, waic
 from arviz.data.io_pyjags import (
     _convert_arviz_dict_to_pyjags_dict,

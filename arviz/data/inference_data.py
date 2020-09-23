@@ -12,12 +12,10 @@ from html import escape
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-from xarray.core.options import OPTIONS
-from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
-from ..utils import HtmlTemplate, _subset_list
-from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
+from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
+from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
 try:
     import ujson as json
@@ -147,27 +145,32 @@ class InferenceData:
 
     def _repr_html_(self):
         """Make html representation of InferenceData object."""
-        display_style = OPTIONS["display_style"]
-        if display_style == "text":
+        try:
+            from xarray.core.options import OPTIONS
+
+            display_style = OPTIONS["display_style"]
+            if display_style == "text":
+                html_repr = f"<pre>{escape(repr(self))}</pre>"
+            else:
+                elements = "".join(
+                    [
+                        HtmlTemplate.element_template.format(
+                            group_id=group + str(uuid.uuid4()),
+                            group=group,
+                            xr_data=getattr(  # pylint: disable=protected-access
+                                self, group
+                            )._repr_html_(),
+                        )
+                        for group in self._groups_all
+                    ]
+                )
+                formatted_html_template = (  # pylint: disable=possibly-unused-variable
+                    HtmlTemplate.html_template.format(elements)
+                )
+                css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
+                html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+        except:  # pylint: disable=bare-except
             html_repr = f"<pre>{escape(repr(self))}</pre>"
-        else:
-            elements = "".join(
-                [
-                    HtmlTemplate.element_template.format(
-                        group_id=group + str(uuid.uuid4()),
-                        group=group,
-                        xr_data=getattr(  # pylint: disable=protected-access
-                            self, group
-                        )._repr_html_(),
-                    )
-                    for group in self._groups_all
-                ]
-            )
-            formatted_html_template = (  # pylint: disable=possibly-unused-variable
-                HtmlTemplate.html_template.format(elements)
-            )
-            css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
-            html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
         return html_repr
 
     def __delattr__(self, group):
@@ -181,6 +184,25 @@ class InferenceData:
     @property
     def _groups_all(self):
         return self._groups + self._groups_warmup
+
+    def __iter__(self):
+        """Iterate over groups in InferenceData object."""
+        for group in self._groups_all:
+            yield group
+
+    def groups(self):
+        """Return all groups present in InferenceData object."""
+        return self._groups_all
+
+    def values(self):
+        """Xarray Datasets present in InferenceData object."""
+        for group in self._groups_all:
+            yield getattr(self, group)
+
+    def items(self):
+        """Yield groups and corresponding datasets present in InferenceData object."""
+        for group in self._groups_all:
+            yield (group, getattr(self, group))
 
     @staticmethod
     def from_netcdf(filename):

@@ -5,8 +5,8 @@ import warnings
 from copy import deepcopy
 from typing import Any, Dict, List
 
-import pkg_resources
 import numpy as np
+import pkg_resources
 import xarray as xr
 
 try:
