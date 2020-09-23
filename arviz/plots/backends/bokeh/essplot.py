@@ -88,7 +88,7 @@ def plot_ess(
 
             values = data[var_name].sel(**selection).values.flatten()
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
+            values = rankdata(values, method="average")[mask]
             rug_space = np.max(x) * rug_kwargs.pop("space")
             rug_x, rug_y = values / (len(mask) - 1), np.zeros_like(values) - rug_space
 

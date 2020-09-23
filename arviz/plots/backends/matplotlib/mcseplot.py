@@ -124,7 +124,7 @@ def plot_mcse(
             rug_kwargs.setdefault("markersize", rug_kwargs.pop("ms", 2 * _markersize))
 
             mask = idata.sample_stats[rug_kind].values.flatten()
-            values = rankdata(values)[mask]
+            values = rankdata(values, method="average")[mask]
             y_min, y_max = ax_.get_ylim()
             y_min = y_min if errorbar else 0
             rug_space = (y_max - y_min) * rug_kwargs.pop("space")

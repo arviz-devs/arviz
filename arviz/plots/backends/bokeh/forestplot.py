@@ -266,22 +266,25 @@ class PlotHandler:
 
         return label_idxs()
 
-    def display_multiple_ropes(self, rope, ax, y, linewidth, rope_var):
+    def display_multiple_ropes(self, rope, ax, y, linewidth, var_name, selection):
         """Display ROPE when more than one interval is provided."""
-        vals = dict(rope[rope_var][0])["rope"]
-        ax.line(
-            vals,
-            (y + 0.05, y + 0.05),
-            line_width=linewidth * 2,
-            color=[
-                color
-                for _, color in zip(
-                    range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+        for sel in rope.get(var_name, []):
+            # pylint: disable=line-too-long
+            if all(k in selection and selection[k] == v for k, v in sel.items() if k != "rope"):
+                vals = sel["rope"]
+                ax.line(
+                    vals,
+                    (y + 0.05, y + 0.05),
+                    line_width=linewidth * 2,
+                    color=[
+                        color
+                        for _, color in zip(
+                            range(3), cycle(plt.rcParams["axes.prop_cycle"].by_key()["color"])
+                        )
+                    ][2],
+                    line_alpha=0.7,
                 )
-            ][2],
-            line_alpha=0.7,
-        )
-        return ax
+                return ax
 
     def ridgeplot(
         self,
@@ -452,9 +455,9 @@ class PlotHandler:
             qlist = [endpoint, 50, 100 - endpoint]
 
         for plotter in self.plotters.values():
-            for y, rope_var, values, color in plotter.treeplot(qlist, hdi_prob):
+            for y, selection, values, color in plotter.treeplot(qlist, hdi_prob):
                 if isinstance(rope, dict):
-                    self.display_multiple_ropes(rope, ax, y, linewidth, rope_var)
+                    self.display_multiple_ropes(rope, ax, y, linewidth, plotter.var_name, selection)
 
                 mid = len(values) // 2
                 param_iter = zip(
@@ -560,6 +563,7 @@ class VarHandler:
             skip_dims = set()
 
         label_dict = OrderedDict()
+        selection_list = []
         for name, grouped_datum in zip(self.model_names, grouped_data):
             for _, sub_data in grouped_datum:
                 datum_iter = xarray_var_iter(
@@ -569,6 +573,7 @@ class VarHandler:
                     reverse_selections=True,
                 )
                 for _, selection, values in datum_iter:
+                    selection_list.append(selection)
                     label = make_label(self.var_name, selection, position="beside")
                     if label not in label_dict:
                         label_dict[label] = OrderedDict()
@@ -577,14 +582,16 @@ class VarHandler:
                     label_dict[label][name].append(values)
 
         y = self.y_start
-        for label, model_data in label_dict.items():
+        for idx, (label, model_data) in enumerate(label_dict.items()):
             for model_name, value_list in model_data.items():
                 if model_name:
                     row_label = "{}: {}".format(model_name, label)
                 else:
                     row_label = label
                 for values in value_list:
-                    yield y, row_label, label, values, self.model_color[model_name]
+                    yield y, row_label, label, selection_list[idx], values, self.model_color[
+                        model_name
+                    ]
                     y += self.chain_offset
                 y += self.var_offset
             y += self.group_offset
@@ -592,7 +599,7 @@ class VarHandler:
     def labels_ticks_and_vals(self):
         """Get labels, ticks, values, and colors for the variable."""
         y_ticks = defaultdict(list)
-        for y, label, _, vals, color in self.iterator():
+        for y, label, _, _, vals, color in self.iterator():
             y_ticks[label].append((y, vals, color))
         labels, ticks, vals, colors = [], [], [], []
         for label, data in y_ticks.items():
@@ -604,10 +611,10 @@ class VarHandler:
 
     def treeplot(self, qlist, hdi_prob):
         """Get data for each treeplot for the variable."""
-        for y, _, label, values, color in self.iterator():
+        for y, _, _, selection, values, color in self.iterator():
             ntiles = np.percentile(values.flatten(), qlist)
             ntiles[0], ntiles[-1] = hdi(values.flatten(), hdi_prob, multimodal=False)
-            yield y, label, ntiles, color
+            yield y, selection, ntiles, color
 
     def ridgeplot(self, hdi_prob, mult, ridgeplot_kind):
         """Get data for each ridgeplot for the variable."""

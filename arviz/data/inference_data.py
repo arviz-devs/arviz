@@ -12,12 +12,10 @@ from html import escape
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
-from xarray.core.options import OPTIONS
-from xarray.core.utils import either_dict_or_kwargs
 
 from ..rcparams import rcParams
-from ..utils import HtmlTemplate, _subset_list
-from .base import _extend_xr_method, dict_to_dataset, _make_json_serializable
+from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
+from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
 try:
     import ujson as json
@@ -147,27 +145,32 @@ class InferenceData:
 
     def _repr_html_(self):
         """Make html representation of InferenceData object."""
-        display_style = OPTIONS["display_style"]
-        if display_style == "text":
+        try:
+            from xarray.core.options import OPTIONS
+
+            display_style = OPTIONS["display_style"]
+            if display_style == "text":
+                html_repr = f"<pre>{escape(repr(self))}</pre>"
+            else:
+                elements = "".join(
+                    [
+                        HtmlTemplate.element_template.format(
+                            group_id=group + str(uuid.uuid4()),
+                            group=group,
+                            xr_data=getattr(  # pylint: disable=protected-access
+                                self, group
+                            )._repr_html_(),
+                        )
+                        for group in self._groups_all
+                    ]
+                )
+                formatted_html_template = (  # pylint: disable=possibly-unused-variable
+                    HtmlTemplate.html_template.format(elements)
+                )
+                css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
+                html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
+        except:  # pylint: disable=bare-except
             html_repr = f"<pre>{escape(repr(self))}</pre>"
-        else:
-            elements = "".join(
-                [
-                    HtmlTemplate.element_template.format(
-                        group_id=group + str(uuid.uuid4()),
-                        group=group,
-                        xr_data=getattr(  # pylint: disable=protected-access
-                            self, group
-                        )._repr_html_(),
-                    )
-                    for group in self._groups_all
-                ]
-            )
-            formatted_html_template = (  # pylint: disable=possibly-unused-variable
-                HtmlTemplate.html_template.format(elements)
-            )
-            css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
-            html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
         return html_repr
 
     def __delattr__(self, group):
@@ -839,6 +842,10 @@ class InferenceData:
                 )
             dataset = getattr(other, group)
             setattr(self, group, dataset)
+            if group.startswith(WARMUP_TAG):
+                self._groups_warmup.append(group)
+            else:
+                self._groups.append(group)
 
     set_index = _extend_xr_method(xr.Dataset.set_index)
     get_index = _extend_xr_method(xr.Dataset.get_index)

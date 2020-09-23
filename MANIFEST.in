@@ -5,3 +5,4 @@ include LICENSE
 
 recursive-include arviz *.mplstyle
 recursive-include arviz *.nc
+recursive-include arviz/static *

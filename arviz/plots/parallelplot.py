@@ -1,6 +1,6 @@
 """Parallel coordinates plot showing posterior points with and without divergences marked."""
 import numpy as np
-from scipy.stats.mstats import rankdata
+from scipy.stats import rankdata
 
 from ..data import convert_to_dataset
 from ..rcparams import rcParams
@@ -132,7 +132,7 @@ def plot_parallel(
             for i in range(0, np.shape(min_elem)[0]):
                 _posterior[i, :] = ((_posterior[i, :]) - min_elem[i]) / (max_elem[i] - min_elem[i])
         elif norm_method == "rank":
-            _posterior = rankdata(_posterior, axis=1)
+            _posterior = rankdata(_posterior, axis=1, method="average")
         else:
             raise ValueError("{} is not supported. Use normal, minmax or rank.".format(norm_method))
 

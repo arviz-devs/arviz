@@ -20,9 +20,9 @@ from .parallelplot import plot_parallel
 from .posteriorplot import plot_posterior
 from .ppcplot import plot_ppc
 from .rankplot import plot_rank
+from .separationplot import plot_separation
 from .traceplot import plot_trace
 from .violinplot import plot_violin
-from .separationplot import plot_separation
 
 __all__ = [
     "plot_autocorr",

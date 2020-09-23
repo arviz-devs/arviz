@@ -648,10 +648,10 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         assert isinstance(idata.prior, xr.Dataset)
         assert hasattr(idata, "prior")
 
-        idata.add_groups(posterior_warmup={"a": data[..., 0], "b": data})
-        assert "posterior_warmup" in idata._groups  # pylint: disable=protected-access
-        assert isinstance(idata.posterior_warmup, xr.Dataset)
-        assert hasattr(idata, "posterior_warmup")
+        idata.add_groups(warmup_posterior={"a": data[..., 0], "b": data})
+        assert "warmup_posterior" in idata._groups_all  # pylint: disable=protected-access
+        assert isinstance(idata.warmup_posterior, xr.Dataset)
+        assert hasattr(idata, "warmup_posterior")
 
     def test_add_groups_warning(self, data_random):
         data = np.random.normal(size=(4, 500, 8))
@@ -673,8 +673,12 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
 
     def test_extend(self, data_random):
         idata = data_random
-        idata2 = create_data_random(groups=["prior", "prior_predictive", "observed_data"], seed=7)
+        idata2 = create_data_random(
+            groups=["prior", "prior_predictive", "observed_data", "warmup_posterior"], seed=7
+        )
         idata.extend(idata2)
+        assert "prior" in idata._groups_all  # pylint: disable=protected-access
+        assert "warmup_posterior" in idata._groups_all  # pylint: disable=protected-access
         assert hasattr(idata, "prior")
         assert hasattr(idata, "prior_predictive")
         assert idata.prior.equals(idata2.prior)

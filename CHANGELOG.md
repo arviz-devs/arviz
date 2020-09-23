@@ -8,6 +8,8 @@
 * Added `circ_var_names` argument to `plot_trace` allowing for circular traceplot (Matplotlib) ([1336](https://github.com/arviz-devs/arviz/pull/1336))
 * Ridgeplot is hdi aware. By default displays truncated densities at the specified `hdi_prop` level ([1348](https://github.com/arviz-devs/arviz/pull/1348))
 * Added `plot_separation` ([1359](https://github.com/arviz-devs/arviz/pull/1359))
+* Extended methods from `xr.Dataset` to `InferenceData` ([1254](https://github.com/arviz-devs/arviz/pull/1254))
+* Add `extend` and `add_groups` to `InferenceData` ([1300](https://github.com/arviz-devs/arviz/pull/1300) and [1386](https://github.com/arviz-devs/arviz/pull/1386))
 * Added `__iter__` method (`.items`) for InferenceData ([1356](https://github.com/arviz-devs/arviz/pull/1356))
 
 
@@ -22,8 +24,15 @@
 * Restructure plotting code to be compatible with mpl>=3.3 ([1312](https://github.com/arviz-devs/arviz/pull/1312) and [1352](https://github.com/arviz-devs/arviz/pull/1352))
 * Replaced `_fast_kde()` with `kde()` which now also supports circular variables via the argument `circular` ([1284](https://github.com/arviz-devs/arviz/pull/1284)).
 * Increased `from_pystan` attrs information content ([1353](https://github.com/arviz-devs/arviz/pull/1353))
-* Allow `plot_trace` to return and accept axes ([#1361](https://github.com/arviz-devs/arviz/pull/1361))
-* Update diagnostics to be on par with posterior package ([#1366](https://github.com/arviz-devs/arviz/pull/1366))
+* Allow `plot_trace` to return and accept axes ([1361](https://github.com/arviz-devs/arviz/pull/1361))
+* Update diagnostics to be on par with posterior package ([1366](https://github.com/arviz-devs/arviz/pull/1366))
+* Use method="average" in `scipy.stats.rankdata` ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Add more `plot_parallel` examples ([1380](https://github.com/arviz-devs/arviz/pull/1380))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389)
+* Fix multi rope for `plot_forest` ([1390](https://github.com/arviz-devs/arviz/pull/1390))
+* Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389))
+* `from_dict` will now store warmup groups even with the main group missing ([1386](https://github.com/arviz-devs/arviz/pull/1386))
+* increase robustness for repr_html handling ([1392](https://github.com/arviz-devs/arviz/pull/1392))
 
 ### Deprecation
 

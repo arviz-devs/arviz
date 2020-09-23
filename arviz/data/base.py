@@ -5,8 +5,8 @@ import warnings
 from copy import deepcopy
 from typing import Any, Dict, List
 
-import pkg_resources
 import numpy as np
+import pkg_resources
 import xarray as xr
 
 try:
@@ -245,6 +245,7 @@ def make_attrs(attrs=None, library=None):
 
 def _extend_xr_method(func):
     """Make wrapper to extend methods from xr.Dataset to InferenceData Class."""
+    # pydocstyle requires a non empty line
 
     @functools.wraps(func)
     def wrapped(self, *args, **kwargs):
@@ -280,7 +281,7 @@ def _extend_xr_method(func):
         metagroup names. A la `pandas.filter`.
     inplace: bool, optional
         If ``True``, modify the InferenceData object inplace,
-        otherwise, return the modified copy. 
+        otherwise, return the modified copy.
     """
     see_also = """
     See Also
