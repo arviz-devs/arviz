@@ -2,6 +2,15 @@
 
 ## v0.x.x Unreleased
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.10.0 (2020 Sep 24)
+### New features
 * Added InferenceData dataset containing circular variables ([1265](https://github.com/arviz-devs/arviz/pull/1265))
 * Added `is_circular` argument to `plot_dist` and `plot_kde` allowing for a circular histogram (Matplotlib, Bokeh) or 1D KDE plot (Matplotlib). ([1266](https://github.com/arviz-devs/arviz/pull/1266))
 * Added `to_dict` method for InferenceData object ([1223](https://github.com/arviz-devs/arviz/pull/1223))
@@ -12,7 +21,6 @@
 * Add `extend` and `add_groups` to `InferenceData` ([1300](https://github.com/arviz-devs/arviz/pull/1300) and [1386](https://github.com/arviz-devs/arviz/pull/1386))
 * Added `__iter__` method (`.items`) for InferenceData ([1356](https://github.com/arviz-devs/arviz/pull/1356))
 * Add support for discrete variables in `plot_bpv` ([#1379](https://github.com/arviz-devs/arviz/pull/1379))
-
 
 ### Maintenance and fixes
 * Automatic conversion of list/tuple to numpy array in distplot ([1277](https://github.com/arviz-devs/arviz/pull/1277))
@@ -34,10 +42,6 @@
 * Bump minimum xarray version to 0.16.1 ([1389](https://github.com/arviz-devs/arviz/pull/1389))
 * `from_dict` will now store warmup groups even with the main group missing ([1386](https://github.com/arviz-devs/arviz/pull/1386))
 * increase robustness for repr_html handling ([1392](https://github.com/arviz-devs/arviz/pull/1392))
-
-### Deprecation
-
-### Documentation
 
 ## v0.9.0 (2020 June 23)
 ### New features
