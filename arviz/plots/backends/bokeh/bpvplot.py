@@ -3,6 +3,7 @@ import numpy as np
 from bokeh.models import BoxAnnotation
 from bokeh.models.annotations import Title
 from scipy import stats
+from scipy.interpolate import CubicSpline
 
 from ....stats.density_utils import kde
 from ...kdeplot import plot_kde
@@ -29,6 +30,7 @@ def plot_bpv(
     bpv,
     plot_mean,
     reference,
+    mse,
     n_ref,
     hdi_prob,
     color,
@@ -87,11 +89,19 @@ def plot_bpv(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
+        if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
+            x = np.linspace(0, 1, len(obs_vals))
+            csi = CubicSpline(x, obs_vals)
+            obs_vals = csi(np.linspace(0.001, 0.999, len(obs_vals)))
+
+            x = np.linspace(0, 1, pp_vals.shape[1])
+            csi = CubicSpline(x, pp_vals, axis=1)
+            pp_vals = csi(np.linspace(0.001, 0.999, pp_vals.shape[1]))
+
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
             x_s, tstat_pit_dens = kde(tstat_pit)
             ax_i.line(x_s, tstat_pit_dens, line_width=linewidth, line_color=color)
-            # ax_i.set_yticks([])
             if reference is not None:
                 dist = stats.beta(obs_vals.size / 2, obs_vals.size / 2)
                 if reference == "analytical":
@@ -104,8 +114,8 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(
                         dist,
                         (
-                            n_ref,
                             tstat_pit_dens.size,
+                            n_ref,
                         ),
                     )
                     ax_i.multi_line(
@@ -115,12 +125,12 @@ def plot_bpv(
         elif kind == "u_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=0)
             x_s, tstat_pit_dens = kde(tstat_pit)
-            ax_i.line(x_s, tstat_pit_dens, line_color=color)
+            ax_i.line(x_s, tstat_pit_dens, color=color)
             if reference is not None:
                 if reference == "analytical":
                     n_obs = obs_vals.size
-                    hdi = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
-                    hdi_odds = (hdi / (1 - hdi), (1 - hdi) / hdi)
+                    hdi_ = stats.beta(n_obs / 2, n_obs / 2).ppf((1 - hdi_prob) / 2)
+                    hdi_odds = (hdi_ / (1 - hdi_), (1 - hdi_) / hdi_)
                     ax_i.add_layout(
                         BoxAnnotation(
                             bottom=hdi_odds[1],
@@ -136,6 +146,9 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(dist, (tstat_pit_dens.size, n_ref))
                     for x_ss_i, u_dens_i in zip(x_ss.T, u_dens.T):
                         ax_i.line(x_ss_i, u_dens_i, line_width=linewidth, **plot_ref_kwargs)
+            if mse:
+                ax_i.line(0, 0, legend_label=f"mse={np.mean((1 - tstat_pit_dens)**2) * 100:.2f}")
+
             ax_i.line(0, 0)
         else:
             if t_stat in ["mean", "median", "std"]:
