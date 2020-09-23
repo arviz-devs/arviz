@@ -316,7 +316,7 @@ def test_inference_concat_keeps_all_fields():
     assert not fails_c2
 
 
-class TestInferenceData:
+class TestInferenceData:  # pylint: disable=too-many-public-methods
     def test_addition(self):
         idata1 = from_dict(
             posterior={"A": np.random.randn(2, 10, 2), "B": np.random.randn(2, 10, 5, 2)}
@@ -329,6 +329,30 @@ class TestInferenceData:
         test_dict = {"posterior": ["A", "B"], "prior": ["C", "D"]}
         fails = check_multiple_attrs(test_dict, new_idata)
         assert not fails
+
+    def test_iter(self, models):
+        idata = models.model_1
+        for group in idata:
+            assert group in idata._groups_all  # pylint: disable=protected-access
+
+    def test_groups(self, models):
+        idata = models.model_1
+        for group in idata.groups():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+
+    def test_values(self, models):
+        idata = models.model_1
+        datasets = idata.values()
+        for group in idata.groups():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+            dataset = getattr(idata, group)
+            assert dataset in datasets
+
+    def test_items(self, models):
+        idata = models.model_1
+        for group, dataset in idata.items():
+            assert group in idata._groups_all  # pylint: disable=protected-access
+            assert dataset.equals(getattr(idata, group))
 
     @pytest.mark.parametrize("inplace", [True, False])
     def test_extend_xr_method(self, data_random, inplace):

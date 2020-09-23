@@ -185,6 +185,25 @@ class InferenceData:
     def _groups_all(self):
         return self._groups + self._groups_warmup
 
+    def __iter__(self):
+        """Iterate over groups in InferenceData object."""
+        for group in self._groups_all:
+            yield group
+
+    def groups(self):
+        """Return all groups present in InferenceData object."""
+        return self._groups_all
+
+    def values(self):
+        """Xarray Datasets present in InferenceData object."""
+        for group in self._groups_all:
+            yield getattr(self, group)
+
+    def items(self):
+        """Yield groups and corresponding datasets present in InferenceData object."""
+        for group in self._groups_all:
+            yield (group, getattr(self, group))
+
     @staticmethod
     def from_netcdf(filename):
         """Initialize object from a netcdf file.

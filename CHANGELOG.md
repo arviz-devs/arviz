@@ -10,6 +10,7 @@
 * Added `plot_separation` ([1359](https://github.com/arviz-devs/arviz/pull/1359))
 * Extended methods from `xr.Dataset` to `InferenceData` ([1254](https://github.com/arviz-devs/arviz/pull/1254))
 * Add `extend` and `add_groups` to `InferenceData` ([1300](https://github.com/arviz-devs/arviz/pull/1300) and [1386](https://github.com/arviz-devs/arviz/pull/1386))
+* Added `__iter__` method (`.items`) for InferenceData ([1356](https://github.com/arviz-devs/arviz/pull/1356))
 
 
 ### Maintenance and fixes
