@@ -6,7 +6,7 @@ import xarray as xr
 from .. import utils
 from ..rcparams import rcParams
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
-from .inference_data import InferenceData
+from .inference_data import InferenceData, WARMUP_TAG
 
 
 # pylint: disable=too-many-instance-attributes
@@ -69,11 +69,15 @@ class DictConverter:
         self.attrs.pop("created_at", None)
         self.attrs.pop("arviz_version", None)
 
-    @requires("posterior")
+    def _init_dict(self, attr_name):
+        dict_or_none = getattr(self, attr_name, {})
+        return {} if dict_or_none is None else dict_or_none
+
+    @requires(["posterior", f"{WARMUP_TAG}posterior"])
     def posterior_to_xarray(self):
         """Convert posterior samples to xarray."""
-        data = self.posterior
-        data_warmup = self.warmup_posterior if self.warmup_posterior is not None else {}
+        data = self._init_dict("posterior")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}posterior")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -95,11 +99,11 @@ class DictConverter:
             ),
         )
 
-    @requires("sample_stats")
+    @requires(["sample_stats", f"{WARMUP_TAG}sample_stats"])
     def sample_stats_to_xarray(self):
         """Convert sample_stats samples to xarray."""
-        data = self.sample_stats
-        data_warmup = self.warmup_sample_stats if self.warmup_sample_stats is not None else {}
+        data = self._init_dict("sample_stats")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}sample_stats")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.sample_stats is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -122,11 +126,11 @@ class DictConverter:
             ),
         )
 
-    @requires("log_likelihood")
+    @requires(["log_likelihood", f"{WARMUP_TAG}log_likelihood"])
     def log_likelihood_to_xarray(self):
         """Convert log_likelihood samples to xarray."""
-        data = self.log_likelihood
-        data_warmup = self.warmup_log_likelihood if self.warmup_log_likelihood is not None else {}
+        data = self._init_dict("log_likelihood")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}log_likelihood")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.log_likelihood is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -141,13 +145,11 @@ class DictConverter:
             ),
         )
 
-    @requires("posterior_predictive")
+    @requires(["posterior_predictive", f"{WARMUP_TAG}posterior_predictive"])
     def posterior_predictive_to_xarray(self):
         """Convert posterior_predictive samples to xarray."""
-        data = self.posterior_predictive
-        data_warmup = (
-            self.warmup_posterior_predictive if self.warmup_posterior_predictive is not None else {}
-        )
+        data = self._init_dict("posterior_predictive")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}posterior_predictive")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.posterior_predictive is not a dictionary")
         if not isinstance(data_warmup, dict):
@@ -162,11 +164,11 @@ class DictConverter:
             ),
         )
 
-    @requires("predictions")
+    @requires(["predictions", f"{WARMUP_TAG}predictions"])
     def predictions_to_xarray(self):
         """Convert predictions to xarray."""
-        data = self.predictions
-        data_warmup = self.warmup_predictions if self.warmup_predictions is not None else {}
+        data = self._init_dict("predictions")
+        data_warmup = self._init_dict(f"{WARMUP_TAG}predictions")
         if not isinstance(data, dict):
             raise TypeError("DictConverter.predictions is not a dictionary")
         if not isinstance(data_warmup, dict):
