@@ -114,8 +114,8 @@ def plot_bpv(
                     x_ss, u_dens = sample_reference_distribution(
                         dist,
                         (
-                            n_ref,
                             tstat_pit_dens.size,
+                            n_ref,
                         ),
                     )
                     ax_i.plot(x_ss, u_dens, linewidth=linewidth, **plot_ref_kwargs)
