@@ -1038,7 +1038,7 @@ def test_plot_bpv(models, kwargs):
 
 def test_plot_bpv_discrete():
     fake_obs = {"a": np.random.poisson(2.5, 100)}
-    fake_pp = {"a": np.random.poisson(2.5, (10, 100))}
+    fake_pp = {"a": np.random.poisson(2.5, (1, 10, 100))}
     fake_model = from_dict(posterior_predictive=fake_pp, observed_data=fake_obs)
     axes = plot_bpv(
         fake_model,
