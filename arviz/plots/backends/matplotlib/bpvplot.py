@@ -88,7 +88,6 @@ def plot_bpv(
         obs_vals = obs_vals.flatten()
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
-        print(obs_vals.shape, pp_vals.shape)
         if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
             x = np.linspace(0, 1, len(obs_vals))
             csi = CubicSpline(x, obs_vals)
