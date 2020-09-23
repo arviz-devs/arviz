@@ -87,7 +87,8 @@ def plot_bpv(
         pp_var_name, _, pp_vals = pp_plotters[i]
 
         obs_vals = obs_vals.flatten()
-        pp_vals = pp_vals.reshape(total_pp_samples, -1)
+        if pp_vals.ndim > 2:
+            pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
         if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
             x = np.linspace(0, 1, len(obs_vals))
