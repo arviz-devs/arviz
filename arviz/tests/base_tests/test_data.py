@@ -587,11 +587,88 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             ]
         )
         test_data = from_dict(**idata.to_dict(), save_warmup=True)
-        assert test_data
+        assert not test_data.empty
         for group in idata._groups_all:  # pylint: disable=protected-access
             xr_data = getattr(idata, group)
             test_xr_data = getattr(test_data, group)
             assert xr_data.equals(test_xr_data)
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        (
+            {
+                "groups": "posterior",
+                "include_coords": True,
+                "include_index": True,
+                "index_origin": 0,
+            },
+            {
+                "groups": ["posterior", "sample_stats"],
+                "include_coords": False,
+                "include_index": True,
+                "index_origin": 0,
+            },
+            {
+                "groups": "posterior_groups",
+                "include_coords": True,
+                "include_index": False,
+                "index_origin": 1,
+            },
+        ),
+    )
+    def test_to_dataframe(self, kwargs):
+        idata = from_dict(
+            posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            sample_stats={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            observed_data={"a": np.random.randn(3, 4, 5), "b": np.random.randn(4)},
+        )
+        test_data = idata.to_dataframe(**kwargs)
+        assert not test_data.empty
+        groups = kwargs.get("groups", idata._groups_all)
+        for group in idata._groups_all:  # pylint: disable=protected-access
+            if "data" in group:
+                continue
+            assert test_data.shape == (
+                (4 * 100, 3 * 4 * 5 + 1 + 2)
+                if groups == "posterior"
+                else (4 * 100, (3 * 4 * 5 + 1) * 2 + 2)
+            )
+            if groups == "posterior":
+                if kwargs.get("include_coords", True) and kwargs.get("include_index", True):
+                    assert any(
+                        "[{},".format(kwargs.get("index_origin", 0)) in item[0]
+                        for item in test_data.columns
+                        if isinstance(item, tuple)
+                    )
+                if kwargs.get("include_coords", True):
+                    assert any(isinstance(item, tuple) for item in test_data.columns)
+                else:
+                    assert not any(isinstance(item, tuple) for item in test_data.columns)
+            else:
+                if not kwargs.get("include_index", True):
+                    assert all(
+                        item in test_data.columns
+                        for item in (("posterior", "a", 1, 1, 1), ("posterior", "b"))
+                    )
+            assert all(item in test_data.columns for item in ("chain", "draw"))
+
+    def test_to_dataframe_bad(self):
+        idata = from_dict(
+            posterior={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            sample_stats={"a": np.random.randn(4, 100, 3, 4, 5), "b": np.random.randn(4, 100)},
+            observed_data={"a": np.random.randn(3, 4, 5), "b": np.random.randn(4)},
+        )
+        with pytest.raises(TypeError):
+            idata.to_dataframe(index_origin=2)
+
+        with pytest.raises(TypeError):
+            idata.to_dataframe(include_coords=False, include_index=False)
+
+        with pytest.raises(ValueError):
+            idata.to_dataframe(groups=["observed_data"])
+
+        with pytest.raises(ValueError):
+            idata.to_dataframe(groups=["invalid_group"])
 
     @pytest.mark.parametrize("use", (None, "args", "kwargs"))
     def test_map(self, use):
