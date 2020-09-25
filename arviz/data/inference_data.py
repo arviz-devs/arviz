@@ -191,6 +191,7 @@ class InferenceData:
             yield group
 
     def __getitem__(self, key):
+        """Get item by key."""
         if key not in self._groups_all:
             raise KeyError(key)
         return getattr(self, key)
@@ -413,7 +414,7 @@ class InferenceData:
         if not include_coords and not include_index:
             raise TypeError("Both include_coords and include_index can not be False.")
         if index_origin not in [0, 1]:
-            raise TypeError(f"index_origin must be 0 or 1, saw {index_origin}")
+            raise TypeError("index_origin must be 0 or 1, saw {}".format(index_origin))
         if groups is None:
             groups = list(filter(lambda x: "data" not in x, self._groups_all))
         elif groups == "posterior_groups":
@@ -447,7 +448,11 @@ class InferenceData:
             raise ValueError("Cannot transform data groups to dataframe")
 
         if not all(group in self._groups_all for group in groups):
-            raise ValueError(f"Invalid groups: {[g for g in group if g not in self._groups_all]}")
+            raise ValueError(
+                "Invalid groups: {}".format(
+                    [group for group in groups if group in self._groups_all]
+                )
+            )
 
         dfs = {}
         for group in groups:
@@ -474,10 +479,12 @@ class InferenceData:
                                 idxs.append(coords_to_idx[coordname][coorditem])
                             if include_coords:
                                 tuple_columns.append(
-                                    (f"{name}[{','.join(map(str, idxs))}]", *coords)
+                                    ("{}[{}]".format(name, ",".join(map(str, idxs))), *coords)
                                 )
                             else:
-                                tuple_columns.append(f"{name}[{','.join(map(str, idxs))}]")
+                                tuple_columns.append(
+                                    "{}[{}]".format(name, ",".join(map(str, idxs)))
+                                )
                         else:
                             tuple_columns.append((name, *coords))
 
