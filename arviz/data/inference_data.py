@@ -453,7 +453,6 @@ class InferenceData:
         for group in groups:
             dataset = self[group]
             df = None
-            index_origin = 1
             coords_to_idx = {
                 name: dict(map(reversed, enumerate(dataset.coords[name].values, index_origin)))
                 for name in list(filter(lambda x: x not in ("chain", "draw"), dataset.coords))
