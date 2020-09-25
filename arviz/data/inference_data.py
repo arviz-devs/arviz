@@ -301,7 +301,7 @@ class InferenceData:
         ret = defaultdict(dict)
         attrs = None
         if self._groups_all:  # check's whether a group is present or not.
-            if groups is None or filter_groups is not None:
+            if groups is None:
                 groups = self._group_names(groups, filter_groups)
             else:
                 groups = [group for group in self._groups_all if group in groups]
