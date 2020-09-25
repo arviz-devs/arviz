@@ -301,7 +301,7 @@ def _make_json_serializable(data: dict) -> dict:
     for key, value in data.items():
         try:
             json.dumps(value)
-        except TypeError:
+        except (TypeError, OverflowError):
             pass
         else:
             ret[key] = value
