@@ -624,7 +624,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         )
         test_data = idata.to_dataframe(**kwargs)
         assert not test_data.empty
-        groups = kwargs.get("groups", idata._groups_all)
+        groups = kwargs.get("groups", idata._groups_all)  # pylint: disable=protected-access
         for group in idata._groups_all:  # pylint: disable=protected-access
             if "data" in group:
                 continue
