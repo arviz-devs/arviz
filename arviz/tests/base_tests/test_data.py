@@ -587,7 +587,7 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
             ]
         )
         test_data = from_dict(**idata.to_dict(), save_warmup=True)
-        assert not test_data
+        assert test_data
         for group in idata._groups_all:  # pylint: disable=protected-access
             xr_data = getattr(idata, group)
             test_xr_data = getattr(test_data, group)
