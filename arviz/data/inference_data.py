@@ -390,6 +390,8 @@ class InferenceData:
         Data groups ("observed_data", "constant_data", "predictions_constant_data") are
         skipped implicitly.
 
+        Raises TypeError if no valid groups are found.
+
         Parameters
         ----------
         groups: str or list of str, optional
@@ -421,10 +423,15 @@ class InferenceData:
         if index_origin not in [0, 1]:
             raise TypeError("index_origin must be 0 or 1, saw {}".format(index_origin))
 
-        groups = list(filter(lambda x: "data" not in x, self._group_names(groups, filter_groups)))
+        group_names = list(
+            filter(lambda x: "data" not in x, self._group_names(groups, filter_groups))
+        )
+
+        if not group_names:
+            raise TypeError("No valid groups found: {}".format(groups))
 
         dfs = {}
-        for group in groups:
+        for group in group_names:
             dataset = self[group]
             df = None
             coords_to_idx = {
@@ -478,10 +485,8 @@ class InferenceData:
             dfs, *dfs_tail = list(dfs.values())
             for df in dfs_tail:
                 dfs = dfs.merge(df, how="outer", copy=False)
-        elif len(dfs) == 1:
-            (dfs,) = dfs.values()
         else:
-            dfs = pd.DataFrame()
+            (dfs,) = dfs.values()
         return dfs
 
     def __add__(self, other):
