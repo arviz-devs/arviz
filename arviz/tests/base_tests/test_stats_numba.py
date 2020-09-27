@@ -15,7 +15,7 @@ from ..helpers import (  # pylint: disable=unused-import
 from .test_stats import centered_eight, non_centered_eight  # pylint: disable=unused-import
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) & ~running_on_ci(),
+    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
     reason="test requires numba which is not installed",
 )
 

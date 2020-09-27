@@ -12,7 +12,7 @@ from ..helpers import running_on_ci
 from .test_utils import utils_with_numba_import_fail  # pylint: disable=unused-import
 
 pytestmark = pytest.mark.skipif(  # pylint: disable=invalid-name
-    (importlib.util.find_spec("numba") is None) & ~running_on_ci(),
+    (importlib.util.find_spec("numba") is None) and not running_on_ci(),
     reason="test requires numba which is not installed",
 )
 
