@@ -1,6 +1,6 @@
 """Pyro-specific conversion code."""
 import logging
-from typing import Optional
+from typing import Callable, Optional
 import warnings
 
 import numpy as np
@@ -19,7 +19,7 @@ class PyroConverter:
 
     # pylint: disable=too-many-instance-attributes
 
-    model = None  # type: Optional[callable]
+    model = None  # type: Optional[Callable]
     nchains = None  # type: int
     ndraws = None  # type: int
 

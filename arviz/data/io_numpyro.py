@@ -1,6 +1,6 @@
 """NumPyro-specific conversion code."""
 import logging
-from typing import Optional
+from typing import Callable, Optional
 
 import numpy as np
 import xarray as xr
@@ -17,7 +17,7 @@ class NumPyroConverter:
 
     # pylint: disable=too-many-instance-attributes
 
-    model = None  # type: Optional[callable]
+    model = None  # type: Optional[Callable]
     nchains = None  # type: int
     ndraws = None  # type: int
 
