@@ -1,5 +1,6 @@
 """Pyro-specific conversion code."""
 import logging
+from typing import Optional
 import warnings
 
 import numpy as np
