@@ -418,44 +418,8 @@ class InferenceData:
             index_origin = rcParams["data.index_origin"]
         if index_origin not in [0, 1]:
             raise TypeError("index_origin must be 0 or 1, saw {}".format(index_origin))
-        if groups is None:
-            groups = list(filter(lambda x: "data" not in x, self._groups_all))
-        elif groups == "posterior_groups":
-            groups = [
-                group
-                for group in (
-                    "posterior",
-                    "posterior_predictive",
-                    "predictions",
-                    "log_likelihood",
-                    "sample_stats",
-                )
-                if group in self._groups_all
-            ]
-        elif groups == "prior_groups":
-            groups = [
-                group
-                for group in ("prior", "prior_predictive", "sample_stats_prior")
-                if group in self._groups_all
-            ]
 
-        if isinstance(groups, str):
-            groups = list(
-                filter(lambda x: "data" not in x, self._group_names(groups, filter_groups))
-            )
-
-        if any(
-            group in ["observed_data", "constant_data", "predictions_constant_data"]
-            for group in groups
-        ):
-            raise ValueError("Cannot transform data groups to dataframe")
-
-        if not all(group in self._groups_all for group in groups):
-            raise ValueError(
-                "Invalid groups: {}".format(
-                    [group for group in groups if group in self._groups_all]
-                )
-            )
+        groups = list(filter(lambda x: "data" not in x, self._group_names(groups, filter_groups)))
 
         dfs = {}
         for group in groups:
@@ -471,7 +435,7 @@ class InferenceData:
                     levels = [
                         idx
                         for idx, dim in enumerate(data_array.dims)
-                        if dim not in set(["chain", "draw"])
+                        if dim not in ("chain", "draw")
                     ]
                     dataframe = dataframe.unstack(level=levels)
                     tuple_columns = []
