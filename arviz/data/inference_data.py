@@ -385,8 +385,10 @@ class InferenceData:
         This returns dataframe in a "wide" -format, where each item in ndimensional array is
         unpacked. To access "tidy" -format, use xarray functionality found for each dataset.
 
-        In case of a duplicate keys when combining multiple groups, function adds
-        group identification to the var name.
+        In case of a multiple groups, function adds a group identification to the var name.
+
+        Data groups ("observed_data", "constant_data", "predictions_constant_data") are
+        skipped implicitly.
 
         Parameters
         ----------
@@ -476,8 +478,10 @@ class InferenceData:
             dfs, *dfs_tail = list(dfs.values())
             for df in dfs_tail:
                 dfs = dfs.merge(df, how="outer", copy=False)
-        else:
+        elif len(dfs) == 1:
             (dfs,) = dfs.values()
+        else:
+            dfs = pd.DataFrame()
         return dfs
 
     def __add__(self, other):
