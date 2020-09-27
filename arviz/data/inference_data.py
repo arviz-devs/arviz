@@ -378,7 +378,7 @@ class InferenceData:
         filter_groups=None,
         include_coords=True,
         include_index=True,
-        index_origin=0,
+        index_origin=None,
     ):
         """Convert InferenceData to a pandas DataFrame following xarray naming conventions.
 
@@ -402,8 +402,9 @@ class InferenceData:
             Add coordinate values to column name (tuple).
         include_index: bool
             Add index information for multidimensional arrays.
-        index_origin: {0, 1}
+        index_origin: {0, 1}, optional
             Starting index  for multidimensional objects. 0- or 1-based.
+            Defaults to rcParams["data.index_origin"].
 
         Returns
         -------
@@ -413,6 +414,8 @@ class InferenceData:
         # pylint: disable=too-many-nested-blocks
         if not include_coords and not include_index:
             raise TypeError("Both include_coords and include_index can not be False.")
+        if index_origin is None:
+            index_origin = rcParams["data.index_origin"]
         if index_origin not in [0, 1]:
             raise TypeError("index_origin must be 0 or 1, saw {}".format(index_origin))
         if groups is None:
