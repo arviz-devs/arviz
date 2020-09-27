@@ -664,7 +664,8 @@ class TestInferenceData:  # pylint: disable=too-many-public-methods
         with pytest.raises(TypeError):
             idata.to_dataframe(include_coords=False, include_index=False)
 
-        assert idata.to_dataframe(groups=["observed_data"]).empty
+        with pytest.raises(TypeError):
+            idata.to_dataframe(groups=["observed_data"])
 
         with pytest.raises(KeyError):
             idata.to_dataframe(groups=["invalid_group"])
