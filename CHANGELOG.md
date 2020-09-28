@@ -2,6 +2,8 @@
 
 ## v0.x.x Unreleased
 ### New features
+* Added `to_dataframe` method to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
+* Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 
 ### Maintenance and fixes
 
