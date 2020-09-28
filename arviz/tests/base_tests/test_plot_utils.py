@@ -23,6 +23,10 @@ from ...utils import get_coords
 from ..helpers import running_on_ci
 
 
+# Check if Bokeh is installed
+bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
+
+
 @pytest.mark.parametrize(
     "value, default, expected",
     [
@@ -200,7 +204,7 @@ def test_filter_plotter_list_warning():
 
 
 @pytest.mark.skipif(
-    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_bokeh_import():
@@ -278,7 +282,7 @@ def test_mpl_dealiase_sel_kwargs():
 
 
 @pytest.mark.skipif(
-    (importlib.util.find_spec("bokeh") is None) & ~running_on_ci(),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_bokeh_dealiase_sel_kwargs():
@@ -302,12 +306,8 @@ def test_bokeh_dealiase_sel_kwargs():
     assert res["line_color"] == "red"
 
 
-# Check if Bokeh is installed
-bokeh_installed = importlib.util.find_spec("bokeh") is not None  # pylint: disable=invalid-name
-
-
 @pytest.mark.skipif(
-    not (bokeh_installed | running_on_ci()),
+    not (bokeh_installed or running_on_ci()),
     reason="test requires bokeh which is not installed",
 )
 def test_set_bokeh_circular_ticks_labels():
