@@ -112,8 +112,24 @@ def test_plot_density_no_subset():
             "c": np.random.normal(size=200),
         }
     )
-    axes = plot_density([model_ab, model_bc])
+    axes = plot_density([model_ab, model_bc], backend="bokeh", show=False)
     assert axes.size == 3
+
+
+def test_plot_density_one_var():
+    """Test plot_density works when there is only one variable (#1401)."""
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "a": np.random.normal(size=200),
+        }
+    )
+    axes = plot_density([model_ab, model_bc], backend="bokeh", show=False)
+    assert axes.size == 1
 
 
 def test_plot_density_bad_kwargs(models):
