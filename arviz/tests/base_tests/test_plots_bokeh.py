@@ -112,7 +112,7 @@ def test_plot_density_no_subset():
             "c": np.random.normal(size=200),
         }
     )
-    axes = plot_density([model_ab, model_bc])
+    axes = plot_density([model_ab, model_bc], backend="bokeh", show=False)
     assert axes.size == 3
 
 
