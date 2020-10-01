@@ -279,9 +279,11 @@ would then have to wait 3 months to be considered again.
 
 #### Current Core Contributors
 * Oriol Abril-Pla (@OriolAbril)
+* Agustina Arroyuelo (@agustinaarroyuelo)
 * Alex Andorra (@AlexAndorra)
 * Seth Axen (@sethaxen)
 * Colin Carroll (@ColCarroll)
+* Piyush Gautam (@percygautam)
 * Robert P. Goldman (@rpgoldman)
 * Ari Hartikainen (@ahartikainen)
 * Ravin Kumar (@canyon289)
