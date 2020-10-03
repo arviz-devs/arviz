@@ -40,20 +40,28 @@ Moreover, each group contains the following attributes:
 Samples from the posterior distribution p(theta|y).
 
 ### `sample_stats`
-Information and diagnostics for each `posterior` sample, provided by the inference backend. It may vary depending on the algorithm used by the backend (i.e. an affine invariant sampler has no energy associated). The name convention used for `sample_stats` variables is the following:
-* `lp`: (unnormalized) log probability for sample
-* `step_size`: the step size used for this sample
-* `step_size_bar`: the current best known step-size
-* `tune`: boolean variable indicating if the sampler is tuning or sampling
-* `depth`: HMC-NUTS only, the depth of the tree that was used to generate this sample
-* `tree_size`: HMC-NUTS only, the number of leafs of the sampling tree, when the sample was accepted
-* `n_leapfrog`: HMC-NUTS only, number of steps selected in each iteration to traverse the posterior
-* `mean_tree_accept`: HMC-NUTS only, the mean acceptance probability for the tree that generated this sample
-* `diverging`: HMC-NUTS only, boolean variable indicating divergent transitions
-* `energy`: HMC-NUTS only, the energy at the point in phase-space where the sample was accepted
-* `energy_error`: HMC-NUTS only, the difference in energy between the start and the end of the trajectory
-* `max_energy_error`: HMC-NUTS only, the maximum difference in energy along the whole trajectory
-* `accept/accept_stat`: acceptance probability for each sampler, when multiple samplers are used
+Information and diagnostics for each `posterior` sample, provided by the inference
+backend. It may vary depending on the algorithm used by the backend (i.e. an affine
+invariant sampler has no energy associated). Therefore none of this parameters
+should be assumed to be present in the `sample_stats` group. The convention
+below serves to ensure that _if_ a variable is present with one of these names
+it will correspond to the definition included here.
+
+The name convention used for `sample_stats` variables is the following:
+
+* `lp`: The log posterior density (up to an additive constant).
+* `acceptance_rate`: The average acceptance probabilities of all possible samples in the proposed tree.
+* `step_size`: The current integration step size.
+* `step_size_nom`: The nominal integration step size. The `step_size` may differ from this, for example if the step size is jittered. Should only be present if `step_size` is also present and it varies between samples (i.e. step size is jittered).
+* `tree_depth`: The number of tree doublings in the balanced binary tree.
+* `n_steps`: The number of leapfrog steps computed.
+* `diverging`: (boolean) Indicates the presence of leapfrog transitions with large energy deviation from starting and subsequent termination of the trajectory.
+* `energy`: The value of the Hamiltonian energy for the accepted proposal (up to an
+additive constant).
+* `energy_error`: The difference in the Hamiltonian energy between the initial point and
+the accepted proposal.
+* `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
+
 
 ### `log_likelihood`
 Pointwise log likelihood data. Samples should match with `posterior` ones and its variables
