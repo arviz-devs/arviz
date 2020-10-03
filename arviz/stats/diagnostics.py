@@ -63,7 +63,13 @@ def bfmi(data):
 
 
 def ess(
-    data, *, var_names=None, method="bulk", relative=False, prob=None, dask_kwargs=None,
+    data,
+    *,
+    var_names=None,
+    method="bulk",
+    relative=False,
+    prob=None,
+    dask_kwargs=None,
 ):
     r"""Calculate estimate of the effective sample size (ess).
 

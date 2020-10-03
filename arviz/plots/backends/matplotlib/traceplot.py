@@ -145,7 +145,9 @@ def plot_trace(
         chain_prop = "color" if chain_prop is None else chain_prop
     else:
         chain_prop = (
-            {"linestyle": ("solid", "dotted", "dashed", "dashdot"),}
+            {
+                "linestyle": ("solid", "dotted", "dashed", "dashdot"),
+            }
             if chain_prop is None
             else chain_prop
         )
