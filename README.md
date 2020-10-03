@@ -8,7 +8,7 @@
 [![Powered by NumFOCUS](https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org)
 # ArviZ
 
-ArviZ (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
+**ArviZ** (pronounced "AR-_vees_") is a Python package for exploratory analysis of Bayesian models.
 Includes functions for posterior analysis, data storage, model checking, comparison and diagnostics.
 
 ### ArviZ in other languages
