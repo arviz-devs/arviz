@@ -732,7 +732,13 @@ def either_dict_or_kwargs(
 
 
 class Dask:
-    """Class to toggle Dask states."""
+    """Class to toggle Dask states.
+
+    Warnings
+    --------
+    Dask integration is an experimental feature still in progress. It can already be used
+    but it doesn't work with all stats nor diagnostics yet.
+    """
 
     dask_flag = False
     dask_kwargs = None
