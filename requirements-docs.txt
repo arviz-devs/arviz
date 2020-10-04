@@ -1,11 +1,9 @@
 ghp-import
 ipython
-nbsphinx
 numpydoc
 pydocstyle
 Sphinx>=1.8.3
-sphinx-bootstrap-theme
 pydata_sphinx_theme
-sphinx-gallery
 selenium
-recommonmark
+myst-parser
+myst-nb

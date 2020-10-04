@@ -1,5 +1,3 @@
-{{ header }}
-
 .. currentmodule:: arviz
 
 .. _api:

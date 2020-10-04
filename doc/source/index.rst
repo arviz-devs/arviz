@@ -27,8 +27,8 @@ ArviZ is a Python package for exploratory analysis of Bayesian models. Includes 
 
 The goal is to provide backend-agnostic tools for diagnostics and visualizations of Bayesian inference in Python,
 by first converting inference data into `xarray <https://xarray.pydata.org/en/stable/>`_ objects.
-See :doc:`here <notebooks/XarrayforArviZ>` for more on xarray and ArviZ usage
-and :doc:`here <schema/schema>` for more on ``InferenceData`` structure
+See :ref:`here <xarray_for_arviz>` for more on xarray and ArviZ usage
+and :ref:`here <schema>` for more on ``InferenceData`` structure
 and specification.
 
 
@@ -85,13 +85,12 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
 .. toctree::
     :maxdepth: 1
 
-    Quickstart<notebooks/Introduction>
+    getting_started/index
     Example Gallery<examples/index>
-    Cookbook<notebooks/InferenceDataCookbook>
-    notebooks/index
+    user_guide/index
     api/index
     usage
-    developer_guide
+    contributing/index
     about
 
 

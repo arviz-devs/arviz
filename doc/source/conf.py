@@ -21,20 +21,12 @@ import os
 import re
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
-import sphinx_bootstrap_theme
-from recommonmark.parser import CommonMarkParser
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
-class CustomCommonMarkParser(CommonMarkParser):
-    def visit_document(self, node):
-        pass
 
 
 arviz.rcParams["data.load"] = "eager"
+arviz.Numba.disable_numba()
 
 # -- General configuration ------------------------------------------------
 
@@ -63,10 +55,10 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "bokeh.sphinxext.bokeh_plot",
     "numpydoc",
-    "nbsphinx",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
+    "myst_nb",
 ]
 
 # ipython directive configuration
@@ -86,11 +78,10 @@ numpydoc_show_class_members = False
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
 
-# The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-source_suffix = [".rst", ".md"]
-# source_suffix = ".rst"
+# MyST related params
+jupyter_execute_notebooks = "off"
+myst_heading_anchors = 3
+
 
 # The master toctree document.
 master_doc = "index"
@@ -204,10 +195,10 @@ header = f"""\
 html_context = {"header": header}
 
 
-def setup(app):
-    app.add_css_file("custom.css")
-    app.add_source_suffix(".md", "markdown")
-    app.add_source_parser(CustomCommonMarkParser)
+# def setup(app):
+    # app.add_css_file("custom.css")
+    # app.add_source_suffix(".md", "markdown")
+    # app.add_source_parser(CustomCommonMarkParser)
 
 
 # -- Options for LaTeX output ---------------------------------------------

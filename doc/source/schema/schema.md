@@ -1,3 +1,4 @@
+(schema)=
 # InferenceData schema specification
 The `InferenceData` schema scheme defines a data structure compatible with [NetCDF](https://www.unidata.ucar.edu/software/netcdf/) having 3 goals in mind: usefulness in the analysis of Bayesian inference results, reproducibility of Bayesian inference analysis and interoperability between different inference backends and programming languages.
 
@@ -11,33 +12,6 @@ Currently there are 2 beta implementations of this design:
 * [ArviZ.jl](https://github.com/arviz-devs/ArviZ.jl) in Julia which integrates with:
   - [CmdStan.jl](https://github.com/StanJulia/CmdStan.jl), [StanSample.jl](https://github.com/StanJulia/StanSample.jl) and [Stan.jl](https://github.com/StanJulia/Stan.jl)
   - [Turing.jl](https://turing.ml/dev/) and indirectly any package using [MCMCChains.jl](https://github.com/TuringLang/MCMCChains.jl) to store results
-
-## Contents
-
-<ol class="simple">
-  <li><a class="reference internal" href="#terminology">Terminology</a></li>
- <li><a class="reference internal" href="#current-design">Current Design</a>
-  <ol>
-    <li><a class="reference internal" href="#posterior">posterior</a></li>
-    <li><a class="reference internal" href="#sample-stats">sample_stats</a></li>
-    <li><a class="reference internal" href="#log-likelihood">log_likelihood</a></li>
-    <li><a class="reference internal" href="#posterior-predictive">posterior_predictive</a></li>
-    <li><a class="reference internal" href="#observed-data">observed_data</a></li>
-    <li><a class="reference internal" href="#constant-data">constant_data</a></li>
-    <li><a class="reference internal" href="#prior">prior</a></li>
-    <li><a class="reference internal" href="#sample-stats-prior">sample_stats_prior</a></li>
-    <li><a class="reference internal" href="#prior-predictive">prior_predictive</a></li>
-    <li><a class="reference internal" href="#predictions">predictions</a>
-    <li><a class="reference internal" href="#predictions-constant-data">predictions_constant_data</a>
-  </ol>
- </li>
- <li><a class="reference internal" href="#planned-features">Planned Features</a>
-  <ol>
-    <li><a class="reference internal" href="#sampler-parameters">Sampler parameters</a>
-  </ol>
- </li>
- <li><a class="reference internal" href="#examples">Examples</a></li>
-</ol>
 
 ## Terminology
 The terminology used in this specification is based on [xarray's terminology](http://xarray.pydata.org/en/stable/terminology.html), however, no xarray knowledge is assumed in this description. There are also some extensions particular to  the InferenceData case.
@@ -98,7 +72,7 @@ Model constants, data included in the model which is not modeled as a random var
 Samples from the prior distribution p(theta). Samples need not match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
 ### `sample_stats_prior`
-Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in [`sample_stats`](#sample_stats).
+Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in [`sample_stats`](#sample-stats).
 
 ### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.
@@ -117,6 +91,10 @@ Parameters of the sampling algorithm and sampling backend to be used for analysi
 
 ## Examples
 In order to clarify the definitions above, an example of `InferenceData` generation for a 1D linear regression is available in several programming languages and probabilistic programming frameworks. This particular inference task has been chosen because it is widely well known while still being useful and it also allows to populate all the fields in the `InferenceData` object.
-* Python
-  - [PyMC3 example](PyMC3_schema_example)
-  - [PyStan example](PyStan_schema_example)
+
+### Python
+
+```{toctree}
+PyMC3 example <PyMC3_schema_example>
+PyStan example <PyStan_schema_example>
+```

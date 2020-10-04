@@ -9,7 +9,7 @@ class PyStanSamplingWrapper(SamplingWrapper):
 
     See the documentation on  :class:`~arviz.SamplingWrapper` for a more detailed
     description. An example of ``PyStanSamplingWrapper`` usage can be found
-    in the :doc:`pystan_refitting <../notebooks/pystan_refitting>`.
+    in the :ref:`pystan_refitting` notebook.
 
     Warnings
     --------

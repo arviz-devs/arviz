@@ -70,8 +70,11 @@ saved_animations/
 .mypy_cache
 
 # Stan file
-doc/notebooks/*.stan
+doc/getting_started/*.stan
 
 # eight-schools files
-doc/notebooks/eight_school*
-doc/notebooks/sample_data/
+doc/source/getting_started/eight_school*
+doc/source/getting_started/sample_data/
+
+# MyST related
+doc/jupyter_execute

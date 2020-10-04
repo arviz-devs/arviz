@@ -5,6 +5,6 @@ User Guide
 
 .. toctree::
 
-    Numba
-    XarrayforArviZ
-    ../schema/schema
+  data_structures
+  computation
+  sampling_wrappers
