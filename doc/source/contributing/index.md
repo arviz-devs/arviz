@@ -1,3 +1,4 @@
+(contributing_docs)=
 # Contributing
 
 ```{toctree}
