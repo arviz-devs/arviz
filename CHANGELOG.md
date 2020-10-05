@@ -15,6 +15,7 @@
 ### Deprecation
 
 ### Documentation
+* Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 
 ## v0.10.0 (2020 Sep 24)
 ### New features
