@@ -146,12 +146,6 @@ def compare(
     if scale == "log":
         scale_value = 1
         ascending = False
-        warnings.warn(
-            "\nThe scale is now log by default. Use 'scale' argument or "
-            "'stats.ic_scale' rcParam if you rely on a specific value.\nA higher "
-            "log-score (or a lower deviance) indicates a model with better predictive "
-            "accuracy."
-        )
     else:
         if scale == "negative_log":
             scale_value = -1
