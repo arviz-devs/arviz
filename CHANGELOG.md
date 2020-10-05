@@ -4,7 +4,7 @@
 ### New features
 * Added `to_dataframe` method to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 * Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
-* Added group argument for summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
+* Added group argument to summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
 
 ### Maintenance and fixes
 
