@@ -324,6 +324,7 @@ def hpd(
     filter_vars=None,
     coords=None,
     max_modes=10,
+    dask_kwargs=None,
     **kwargs,
 ):
     """Pending deprecation. Please refer to :func:`~arviz.hdi`."""
@@ -342,6 +343,7 @@ def hpd(
         filter_vars,
         coords,
         max_modes,
+        dask_kwargs,
         **kwargs,
     )
 
@@ -357,6 +359,7 @@ def hdi(
     filter_vars=None,
     coords=None,
     max_modes=10,
+    dask_kwargs=None,
     **kwargs,
 ):
     """
@@ -397,6 +400,8 @@ def hdi(
         Specifies the subset over to calculate hdi.
     max_modes: int, optional
         Specifies the maximum number of modes for multimodal case.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
     kwargs: dict, optional
         Additional keywords passed to :func:`~arviz.wrap_xarray_ufunc`.
 
@@ -490,9 +495,9 @@ def hdi(
     ary = ary[var_names] if var_names else ary
 
     hdi_coord = xr.DataArray(["lower", "higher"], dims=["hdi"], attrs=dict(hdi_prob=hdi_prob))
-    hdi_data = _wrap_xarray_ufunc(func, ary, func_kwargs=func_kwargs, **kwargs).assign_coords(
-        {"hdi": hdi_coord}
-    )
+    hdi_data = _wrap_xarray_ufunc(
+        func, ary, func_kwargs=func_kwargs, dask_kwargs=dask_kwargs, **kwargs
+    ).assign_coords({"hdi": hdi_coord})
     hdi_data = hdi_data.dropna("mode", how="all") if multimodal else hdi_data
     return hdi_data.x.values if isarray else hdi_data
 
@@ -794,7 +799,11 @@ def psislw(log_weights, reff=1.0):
     ufunc_kwargs = {"n_dims": 1, "n_output": 2, "ravel": False, "check_shape": False}
     kwargs = {"input_core_dims": [["sample"]], "output_core_dims": [["sample"], []]}
     log_weights, pareto_shape = _wrap_xarray_ufunc(
-        _psislw, log_weights, ufunc_kwargs=ufunc_kwargs, func_kwargs=func_kwargs, **kwargs
+        _psislw,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        func_kwargs=func_kwargs,
+        **kwargs,
     )
     if isinstance(log_weights, xr.DataArray):
         log_weights = log_weights.rename("log_weights").rename(sample="sample")
@@ -1348,7 +1357,7 @@ def summary(
     return summary_df
 
 
-def waic(data, pointwise=None, var_name=None, scale=None):
+def waic(data, pointwise=None, var_name=None, scale=None, dask_kwargs=None):
     """Compute the widely applicable information criterion.
 
     Estimates the expected log pointwise predictive density (elpd) using WAIC. Also calculates the
@@ -1375,6 +1384,8 @@ def waic(data, pointwise=None, var_name=None, scale=None):
 
         A higher log-score (or a lower deviance or negative log_score) indicates a model with
         better predictive accuracy.
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -1432,6 +1443,7 @@ def waic(data, pointwise=None, var_name=None, scale=None):
         log_likelihood,
         func_kwargs={"b_inv": n_samples},
         ufunc_kwargs=ufunc_kwargs,
+        dask_kwargs=dask_kwargs,
         **kwargs,
     )
 
@@ -1512,6 +1524,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         equal to y, thus, y must be str too.
     log_weights: array or DataArray
         Smoothed log_weights. It must have the same shape as ``y_hat``
+    dask_kwargs : dict, optional
+        Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
 
     Returns
     -------
@@ -1621,7 +1635,14 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
     }
     ufunc_kwargs = {"n_dims": 1}
 
-    return _wrap_xarray_ufunc(_loo_pit, y, y_hat, log_weights, ufunc_kwargs=ufunc_kwargs, **kwargs)
+    return _wrap_xarray_ufunc(
+        _loo_pit,
+        y,
+        y_hat,
+        log_weights,
+        ufunc_kwargs=ufunc_kwargs,
+        **kwargs,
+    )
 
 
 def _loo_pit(y, y_hat, log_weights):
@@ -1688,7 +1709,7 @@ def apply_test_function(
     func_kwargs: mapping, optional
         Passed as is to ``func``
     wrap_data_kwargs, wrap_pp_kwargs: mapping, optional
-        kwargs passed to ``az.stats.wrap_xarray_ufunc``. By default, some suitable input_core_dims
+        kwargs passed to :func:`~arviz.wrap_xarray_ufunc`. By default, some suitable input_core_dims
         are used.
     inplace: bool, optional
         If True, add the variables inplace, othewise, return a copy of idata with the variables

@@ -729,3 +729,52 @@ def either_dict_or_kwargs(
         return pos_kwargs
     else:
         return kw_kwargs
+
+
+class Dask:
+    """Class to toggle Dask states.
+
+    Warnings
+    --------
+    Dask integration is an experimental feature still in progress. It can already be used
+    but it doesn't work with all stats nor diagnostics yet.
+    """
+
+    dask_flag = False
+    dask_kwargs = None
+
+    @classmethod
+    def enable_dask(cls, dask_kwargs=None):
+        """To enable Dask.
+
+        Parameters
+        ----------
+        dask_kwargs : dict
+            Dask related kwargs passed to :func:`~arviz.wrap_xarray_ufunc`.
+        """
+        cls.dask_flag = True
+        cls.dask_kwargs = dask_kwargs
+
+    @classmethod
+    def disable_dask(cls):
+        """To disable Dask."""
+        cls.dask_flag = False
+        cls.dask_kwargs = None
+
+
+def conditional_dask(func):
+    """Conditionally pass dask kwargs to `wrap_xarray_ufunc`."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if Dask.dask_flag:
+            user_kwargs = kwargs.pop("dask_kwargs", None)
+            if user_kwargs is None:
+                user_kwargs = {}
+            default_kwargs = Dask.dask_kwargs
+            return func(dask_kwargs={**default_kwargs, **user_kwargs}, *args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper
