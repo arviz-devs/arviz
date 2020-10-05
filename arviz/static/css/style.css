@@ -66,6 +66,10 @@ body.vscode-dark {
   grid-template-columns: 150px auto auto 1fr 20px 20px;
 }
 
+.xr-sections.group-sections {
+  grid-template-columns: auto;
+}
+
 .xr-section-item {
   display: contents;
 }
