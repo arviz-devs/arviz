@@ -6,6 +6,7 @@
 * Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 
 ### Maintenance and fixes
+* prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
 
 ### Deprecation
 
