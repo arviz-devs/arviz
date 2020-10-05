@@ -61,43 +61,53 @@ class CmdStanPyConverter:
             posterior_predictive = []
         elif isinstance(posterior_predictive, str):
             posterior_predictive = [
-                col for col in columns if posterior_predictive == col.split(".")[0]
+                col for col in columns if posterior_predictive == col.split("[")[0].split(".")[0]
             ]
         else:
             posterior_predictive = [
                 col
                 for col in columns
-                if any(item == col.split(".")[0] for item in posterior_predictive)
+                if any(item == col.split("[")[0].split(".")[0] for item in posterior_predictive)
             ]
 
         predictions = self.predictions
         if predictions is None:
             predictions = []
         elif isinstance(predictions, str):
-            predictions = [col for col in columns if predictions == col.split(".")[0]]
+            predictions = [col for col in columns if predictions == col.split("[")[0].split(".")[0]]
         else:
             predictions = [
-                col for col in columns if any(item == col.split(".")[0] for item in predictions)
+                col
+                for col in columns
+                if any(item == col.split("[")[0].split(".")[0] for item in predictions)
             ]
 
         log_likelihood = self.log_likelihood
         if log_likelihood is None:
             log_likelihood = []
         elif isinstance(log_likelihood, str):
-            log_likelihood = [col for col in columns if log_likelihood == col.split(".")[0]]
+            log_likelihood = [
+                col for col in columns if log_likelihood == col.split("[")[0].split(".")[0]
+            ]
         else:
             log_likelihood = [
-                col for col in columns if any(item == col.split(".")[0] for item in log_likelihood)
+                col
+                for col in columns
+                if any(item == col.split("[")[0].split(".")[0] for item in log_likelihood)
             ]
 
-        invalid_cols = (
+        invalid_cols = set(
             posterior_predictive
             + predictions
             + log_likelihood
             + [col for col in columns if col.endswith("__")]
         )
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -107,7 +117,11 @@ class CmdStanPyConverter:
 
         columns = self.posterior.column_names
         valid_cols = [col for col in columns if col.endswith("__")]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
 
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
@@ -125,8 +139,15 @@ class CmdStanPyConverter:
 
         if isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
-        valid_cols = [col for col in columns if col.split(".")[0] in set(posterior_predictive)]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        posterior_predictive = set(posterior_predictive)
+        valid_cols = [
+            col for col in columns if col.split("[")[0].split(".")[0] in posterior_predictive
+        ]
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -138,8 +159,13 @@ class CmdStanPyConverter:
 
         if isinstance(predictions, str):
             predictions = [predictions]
-        valid_cols = [col for col in columns if col.split(".")[0] in set(predictions)]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        predictions = set(predictions)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in set(predictions)]
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -153,14 +179,23 @@ class CmdStanPyConverter:
         if prior_predictive is None:
             prior_predictive = []
         elif isinstance(prior_predictive, str):
-            prior_predictive = [col for col in columns if prior_predictive == col.split(".")[0]]
+            prior_predictive = [
+                col for col in columns if prior_predictive == col.split("[")[0].split(".")[0]
+            ]
         else:
             prior_predictive = [
-                col for col in columns if col.split(".")[0] in set(prior_predictive)
+                col for col in columns if col.split("[")[0].split(".")[0] in set(prior_predictive)
             ]
 
-        valid_cols = [col for col in columns if col not in set(prior_predictive)]
-        data = _unpack_frame(self.prior.sample, columns, valid_cols)
+        invalid_cols = set(prior_predictive + [col for col in columns if col.endswith("__")])
+
+        valid_cols = [col for col in columns if col not in invalid_cols]
+
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -174,7 +209,11 @@ class CmdStanPyConverter:
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
-        data = _unpack_frame(self.prior.sample, columns, valid_cols)
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
             name = re.sub("__$", "", s_param_)
@@ -191,8 +230,13 @@ class CmdStanPyConverter:
 
         if isinstance(prior_predictive, str):
             prior_predictive = [prior_predictive]
-        valid_cols = [col for col in columns if col.split(".")[0] in set(prior_predictive)]
-        data = _unpack_frame(self.prior.sample, columns, valid_cols)
+        prior_predictive = set(prior_predictive)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in prior_predictive]
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("observed_data")
@@ -245,8 +289,13 @@ class CmdStanPyConverter:
 
         if isinstance(log_likelihood, str):
             log_likelihood = [log_likelihood]
-        valid_cols = [col for col in columns if col.split(".")[0] in set(log_likelihood)]
-        data = _unpack_frame(self.posterior.sample, columns, valid_cols)
+        log_likelihood = set(log_likelihood)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood]
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
@@ -293,8 +342,12 @@ def _unpack_frame(data, columns, valid_cols):
     column_locs = defaultdict(list)
     # iterate flat column names
     for i, col in enumerate(columns):
-        # parse parameter names e.g. X.1.2 --> X, (1,2)
-        col_base, *col_tail = col.split(".")
+        if "." in col:
+            # parse parameter names e.g. X.1.2 --> X, (1,2)
+            col_base, *col_tail = col.split(".")
+        else:
+            # parse parameter names e.g. X[1,2] --> X, (1,2)
+            col_base, *col_tail = col.replace("]", "").replace("[", ",").split(",")
         if len(col_tail):
             # gather nD array locations
             column_groups[col_base].append(tuple(map(int, col_tail)))
@@ -308,7 +361,7 @@ def _unpack_frame(data, columns, valid_cols):
     valid_base_cols = []
     # get list of parameters for extraction (basename) X.1.2 --> X
     for col in valid_cols:
-        base_col, *_ = col.split(".")
+        base_col = col.split("[")[0].split(".")[0]
         if base_col not in valid_base_cols:
             valid_base_cols.append(base_col)
 

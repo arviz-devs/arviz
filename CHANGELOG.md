@@ -7,6 +7,8 @@
 
 ### Maintenance and fixes
 * prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
+* Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409))
+* prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
 
 ### Deprecation
 
