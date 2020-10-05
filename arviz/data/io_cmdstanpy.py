@@ -97,7 +97,11 @@ class CmdStanPyConverter:
             + [col for col in columns if col.endswith("__")]
         )
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_frame(self.posterior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -107,7 +111,11 @@ class CmdStanPyConverter:
 
         columns = self.posterior.column_names
         valid_cols = [col for col in columns if col.endswith("__")]
-        data = _unpack_frame(self.posterior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
 
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
@@ -126,7 +134,11 @@ class CmdStanPyConverter:
         if isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
         valid_cols = [col for col in columns if col.split(".")[0] in set(posterior_predictive)]
-        data = _unpack_frame(self.posterior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("posterior")
@@ -139,7 +151,11 @@ class CmdStanPyConverter:
         if isinstance(predictions, str):
             predictions = [predictions]
         valid_cols = [col for col in columns if col.split(".")[0] in set(predictions)]
-        data = _unpack_frame(self.posterior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -163,7 +179,11 @@ class CmdStanPyConverter:
 
         valid_cols = [col for col in columns if col not in invalid_cols]
 
-        data = _unpack_frame(self.prior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("prior")
@@ -177,7 +197,11 @@ class CmdStanPyConverter:
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
-        data = _unpack_frame(self.prior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
             name = re.sub("__$", "", s_param_)
@@ -195,7 +219,11 @@ class CmdStanPyConverter:
         if isinstance(prior_predictive, str):
             prior_predictive = [prior_predictive]
         valid_cols = [col for col in columns if col.split(".")[0] in set(prior_predictive)]
-        data = _unpack_frame(self.prior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     @requires("observed_data")
@@ -249,7 +277,11 @@ class CmdStanPyConverter:
         if isinstance(log_likelihood, str):
             log_likelihood = [log_likelihood]
         valid_cols = [col for col in columns if col.split(".")[0] in set(log_likelihood)]
-        data = _unpack_frame(self.posterior.draws(), columns, valid_cols)
+        data = _unpack_frame(
+            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+            columns,
+            valid_cols,
+        )
         return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
 
     def to_inference_data(self):
