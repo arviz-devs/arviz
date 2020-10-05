@@ -72,7 +72,7 @@ Model constants, data included in the model which is not modeled as a random var
 Samples from the prior distribution p(theta). Samples need not match `posterior` samples. However, this group will still follow the convention on `chain` and `draw` as first dimensions. It should have matching variables with the `posterior` group.
 
 ### `sample_stats_prior`
-Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in [`sample_stats`](#sample-stats).
+Information and diagnostics for the samples in the `prior` group, provided by the inference backend. It may vary depending on the algorithm used by the backend. Variable names follow the same convention defined in `sample_stats`.
 
 ### `prior_predictive`
 Samples from the prior predictive distribution. Samples should match `prior` samples and each variable should have a counterpart in `posterior_predictive`/`observed_data`.

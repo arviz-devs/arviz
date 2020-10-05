@@ -241,7 +241,7 @@ class ExampleGenerator:
             name = re.findall(regex, file.read())
         apitext = name[0] if name else ""
         return (
-            ":obj:`~arviz.{apitext}`".format(apitext=apitext)
+            ":func:`~arviz.{apitext}`".format(apitext=apitext)
             if apitext
             else "No API Documentation available"
         )

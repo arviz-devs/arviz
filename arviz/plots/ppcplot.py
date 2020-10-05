@@ -153,12 +153,23 @@ def plot_ppc(
         >>> az.plot_ppc(data, kind='cumulative')
 
     Use the coords and flatten parameters to plot selected variable dimensions
-    across multiple plots.
+    across multiple plots. We will now modify the dimension `obs_id` to contain
+    indicate the name of the county where the measure was taken. The change has to
+    be done on both ``posterior_predictive`` and ``observed_data`` groups, which is
+    why we will use :meth:`~arviz.InferenceData.map` to apply the same function to
+    both groups. Afterwards, we will select the counties to be plotted with the
+    ``coords`` arg.
 
     .. plot::
         :context: close-figs
 
-        >>> az.plot_ppc(data, coords={'observed_county': ['ANOKA', 'BELTRAMI']}, flatten=[])
+        >>> observed_county = data.posterior["County"][data.constant_data["county_idx"]]
+        >>> data = data.map(
+        ...     lambda ds, obs_county: ds.assign_coords(obs_id=obs_county),
+        ...     args=[observed_county],
+        ...     groups="observed_vars"
+        ... )
+        >>> az.plot_ppc(data, coords={'obs_id': ['ANOKA', 'BELTRAMI']}, flatten=[])
 
     Plot the overlay using a stacked scatter plot that is particularly useful
     when the sample sizes are small.
@@ -167,7 +178,7 @@ def plot_ppc(
         :context: close-figs
 
         >>> az.plot_ppc(data, kind='scatter', flatten=[],
-        >>>             coords={'observed_county': ['AITKIN', 'BELTRAMI']})
+        >>>             coords={'obs_id': ['AITKIN', 'BELTRAMI']})
 
     Plot random posterior predictive sub-samples.
 
