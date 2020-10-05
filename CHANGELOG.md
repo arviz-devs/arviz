@@ -6,6 +6,7 @@
 * Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 
 ### Maintenance and fixes
+* Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409))
 
 ### Deprecation
 
