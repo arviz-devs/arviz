@@ -179,9 +179,10 @@ def indent(s, N=4):
 class ExampleGenerator:
     """Tools for generating an example page from a file"""
 
-    def __init__(self, filename, target_dir, backend):
+    def __init__(self, filename, target_dir, backend, thumb_dir):
         self.filename = filename
         self.target_dir = target_dir
+        self.thumb_dir = thumb_dir
         self.backend = backend
         self.thumbloc = 0.5, 0.5
         self.extract_docstring()
@@ -240,7 +241,7 @@ class ExampleGenerator:
             name = re.findall(regex, file.read())
         apitext = name[0] if name else ""
         return (
-            "`{apitext} <../../generated/arviz.{apitext}>`_".format(apitext=apitext)
+            ":obj:`~arviz.{apitext}`".format(apitext=apitext)
             if apitext
             else "No API Documentation available"
         )
@@ -297,7 +298,7 @@ class ExampleGenerator:
     def exec_file(self):
         print("running {0}".format(self.filename))
 
-        thumbfile = op.join("example_thumbs", self.thumbfilename)
+        thumbfile = op.join(self.thumb_dir, self.thumbfilename)
         cx, cy = self.thumbloc
         pngfile = op.join(self.target_dir, self.pngfilename)
         plt.close("all")
@@ -347,7 +348,7 @@ class ExampleGenerator:
 def main(app):
     working_dir = os.getcwd()
     os.chdir(app.builder.srcdir)
-    static_dir = op.join(app.builder.srcdir, "_static")
+    static_dir = op.join(app.builder.srcdir, "..", "build", "_static")
     target_dir_orig = op.join(app.builder.srcdir, "examples")
 
     backends = ("matplotlib", "bokeh")
@@ -355,9 +356,9 @@ def main(app):
     toctrees_contents = ""
     for backend_i, backend in enumerate(backends):
         target_dir = op.join(target_dir_orig, backend)
-        image_dir = op.join(app.builder.srcdir, "examples", backend, "_images")
+        image_dir = op.join(target_dir, "_images")
         thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
-        source_dir = op.abspath(op.join(app.builder.srcdir, "..", "examples", backend))
+        source_dir = op.abspath(op.join(app.builder.srcdir, "..", "..", "examples", backend))
         if not op.exists(static_dir):
             os.makedirs(static_dir)
 
@@ -383,7 +384,7 @@ def main(app):
         files = sorted(glob.glob(op.join(source_dir, "*.py")))
         for filename in files:
 
-            ex = ExampleGenerator(filename, target_dir, backend)
+            ex = ExampleGenerator(filename, target_dir, backend, thumb_dir)
 
             shutil.copyfile(filename, op.join(target_dir, ex.pyfilename))
             output = RST_TEMPLATES[backend].format(
@@ -415,6 +416,7 @@ def main(app):
                 examples_source=source_dir,
             )
         )
+    shutil.copytree(thumb_dir, static_dir, dirs_exist_ok=True)
 
     os.chdir(working_dir)
 
