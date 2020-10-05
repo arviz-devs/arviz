@@ -57,8 +57,8 @@ jobs:
     displayName: 'Install requirements'
 
   - script: |
-      python -msphinx -M clean doc doc/build
-      sphinx-build doc doc/build -b html
+      python -msphinx -M clean doc/source doc/build
+      sphinx-build doc/source doc/build -b html
     displayName: 'Build docs'
 
   - task: PublishBuildArtifacts@1
