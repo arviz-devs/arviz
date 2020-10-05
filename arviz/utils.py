@@ -691,7 +691,7 @@ class HtmlTemplate:
               <div class='xr-header'>
                 <div class="xr-obj-type">arviz.InferenceData</div>
               </div>
-              <ul class="xr-sections">
+              <ul class="xr-sections group-sections">
               {}
               </ul>
             </div>
