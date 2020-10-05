@@ -192,11 +192,45 @@ def test_compare_different_size(centered_eight, non_centered_eight):
         compare(model_dict, ic="waic", method="stacking")
 
 
+def test_summary_ndarray():
+    array = np.random.randn(4, 100, 2)
+    summary_df = summary(array)
+    assert summary_df.shape
+
+
 @pytest.mark.parametrize("var_names_expected", ((None, 10), ("mu", 1), (["mu", "tau"], 2)))
 def test_summary_var_names(centered_eight, var_names_expected):
     var_names, expected = var_names_expected
     summary_df = summary(centered_eight, var_names=var_names)
     assert len(summary_df.index) == expected
+
+
+@pytest.mark.parametrize("missing_groups", (None, "posterior", "prior"))
+def test_summary_groups(centered_eight, missing_groups):
+    if missing_groups == "posterior":
+        centered_eight = deepcopy(centered_eight)
+        del centered_eight.posterior
+    elif missing_groups == "prior":
+        centered_eight = deepcopy(centered_eight)
+        del centered_eight.posterior
+        del centered_eight.prior
+    if missing_groups == "prior":
+        with pytest.warns(UserWarning):
+            summary_df = summary(centered_eight)
+    else:
+        summary_df = summary(centered_eight)
+    assert summary_df.shape
+
+
+def test_summary_group_argument(centered_eight):
+    summary_df_posterior = summary(centered_eight, group="posterior")
+    summary_df_prior = summary(centered_eight, group="prior")
+    assert list(summary_df_posterior.index) != list(summary_df_prior.index)
+
+
+def test_summary_wrong_group(centered_eight):
+    with pytest.raises(TypeError, match=r"InferenceData does not contain group: InvalidGroup"):
+        summary(centered_eight, group="InvalidGroup")
 
 
 METRICS_NAMES = [
