@@ -441,8 +441,8 @@ def hdi(
 
         In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    By default, ``hdi`` is calculated over the ``chain`` and ``draw`` dimensions. We can use the 
-    ``input_core_dims`` argument of :func:`~arviz.wrap_xarray_ufunc` to change this. In this example 
+    By default, ``hdi`` is calculated over the ``chain`` and ``draw`` dimensions. We can use the
+    ``input_core_dims`` argument of :func:`~arviz.wrap_xarray_ufunc` to change this. In this example
     we calculate the HDI also over the ``school`` dimension:
 
     .. ipython::
