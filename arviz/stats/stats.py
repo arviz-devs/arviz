@@ -990,6 +990,7 @@ def summary(
     data,
     var_names: Optional[List[str]] = None,
     filter_vars=None,
+    group=None,
     fmt: str = "wide",
     kind: str = "all",
     round_to=None,
@@ -1021,6 +1022,9 @@ def summary(
         interpret var_names as substrings of the real variables names. If "regex",
         interpret var_names as regular expressions on the real variables names. A la
         `pandas.filter`.
+    group: str
+        Select a group for summary. Defaults to "posterior", "prior" or first group
+        in that order, depending what groups exists.
     fmt: {'wide', 'long', 'xarray'}
         Return format is either pandas.DataFrame {'wide', 'long'} or xarray.Dataset {'xarray'}.
     kind: {'all', 'stats', 'diagnostics'}
@@ -1142,9 +1146,25 @@ def summary(
     else:
         if not 1 >= hdi_prob > 0:
             raise ValueError("The value of hdi_prob should be in the interval (0, 1]")
-    posterior = convert_to_dataset(data, group="posterior", **extra_args)
-    var_names = _var_names(var_names, posterior, filter_vars)
-    posterior = posterior if var_names is None else posterior[var_names]
+
+    if isinstance(data, InferenceData):
+        if group is None:
+            if not data._groups_all:
+                raise TypeError("InferenceData does not contain any groups")
+            if "posterior" in data:
+                dataset = data["posterior"]
+            elif "prior" in data:
+                dataset = data["prior"]
+            else:
+                warnings.warn(f"Selecting first found group: {data._groups_all[0]}")
+                dataset = data[data._groups_all[0]]
+        else:
+            if group not in data._groups_all:
+                raise TypeError(f"InferenceData does not contain group: {group}")
+    else:
+        dataset = convert_to_dataset(data, group="posterior", **extra_args)
+    var_names = _var_names(var_names, dataset, filter_vars)
+    dataset = dataset if var_names is None else dataset[var_names]
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
@@ -1166,7 +1186,7 @@ def summary(
             for stat_func_name, stat_func in stat_funcs.items():
                 extra_metrics.append(
                     xr.apply_ufunc(
-                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                        _make_ufunc(stat_func), dataset, input_core_dims=(("chain", "draw"),)
                     )
                 )
                 extra_metric_names.append(stat_func_name)
@@ -1174,17 +1194,17 @@ def summary(
             for stat_func in stat_funcs:
                 extra_metrics.append(
                     xr.apply_ufunc(
-                        _make_ufunc(stat_func), posterior, input_core_dims=(("chain", "draw"),)
+                        _make_ufunc(stat_func), dataset, input_core_dims=(("chain", "draw"),)
                     )
                 )
                 extra_metric_names.append(stat_func.__name__)
 
     if extend and kind in ["all", "stats"]:
-        mean = posterior.mean(dim=("chain", "draw"), skipna=skipna)
+        mean = dataset.mean(dim=("chain", "draw"), skipna=skipna)
 
-        sd = posterior.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
+        sd = dataset.std(dim=("chain", "draw"), ddof=1, skipna=skipna)
 
-        hdi_post = hdi(posterior, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
+        hdi_post = hdi(dataset, hdi_prob=hdi_prob, multimodal=False, skipna=skipna)
         hdi_lower = hdi_post.sel(hdi="lower", drop=True)
         hdi_higher = hdi_post.sel(hdi="higher", drop=True)
 
@@ -1192,7 +1212,7 @@ def summary(
         nan_policy = "omit" if skipna else "propagate"
         circ_mean = xr.apply_ufunc(
             _make_ufunc(st.circmean),
-            posterior,
+            dataset,
             kwargs=dict(high=np.pi, low=-np.pi, nan_policy=nan_policy),
             input_core_dims=(("chain", "draw"),),
         )
@@ -1206,26 +1226,26 @@ def summary(
             kwargs_circ_std = dict(high=np.pi, low=-np.pi, nan_policy=nan_policy)
         circ_sd = xr.apply_ufunc(
             _make_ufunc(func),
-            posterior,
+            dataset,
             kwargs=kwargs_circ_std,
             input_core_dims=(("chain", "draw"),),
         )
 
         circ_mcse = xr.apply_ufunc(
             _make_ufunc(_mc_error),
-            posterior,
+            dataset,
             kwargs=dict(circular=True),
             input_core_dims=(("chain", "draw"),),
         )
 
-        circ_hdi = hdi(posterior, hdi_prob=hdi_prob, circular=True, skipna=skipna)
+        circ_hdi = hdi(dataset, hdi_prob=hdi_prob, circular=True, skipna=skipna)
         circ_hdi_lower = circ_hdi.sel(hdi="lower", drop=True)
         circ_hdi_higher = circ_hdi.sel(hdi="higher", drop=True)
 
     if kind in ["all", "diagnostics"]:
         mcse_mean, mcse_sd, ess_mean, ess_sd, ess_bulk, ess_tail, r_hat = xr.apply_ufunc(
             _make_ufunc(_multichain_statistics, n_output=7, ravel=False),
-            posterior,
+            dataset,
             input_core_dims=(("chain", "draw"),),
             output_core_dims=tuple([] for _ in range(7)),
         )
