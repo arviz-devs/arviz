@@ -441,12 +441,13 @@ def hdi(
 
         In [1]: az.hdi(data, var_names=["mu", "theta"])
 
-    If we want to calculate the HDI over specified dimension of dataset,
-    we can pass `input_core_dims` by kwargs:
+    By default, ``hdi`` is calculated over the ``chain`` and ``draw`` dimensions. We can use the 
+    ``input_core_dims`` argument of :func:`~arviz.wrap_xarray_ufunc` to change this. In this example 
+    we calculate the HDI also over the ``school`` dimension:
 
     .. ipython::
 
-        In [1]: az.hdi(data, input_core_dims = [["chain"]])
+        In [1]: az.hdi(data, input_core_dims = [["chain","draw", "school"]])
 
     We can also calculate the hdi over a particular selection over all groups:
 

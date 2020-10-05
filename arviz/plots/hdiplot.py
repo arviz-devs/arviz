@@ -100,7 +100,10 @@ def plot_hdi(
         >>> y_data = np.random.normal(2 + x_data * 0.5, 0.5, (2, 50, 100))
         >>> az.plot_hdi(x_data, y_data)
 
-    Precalculate HDI interval per chain and plot separately:
+    ``plot_hdi`` can also be given precalculated values with the argument ``hdi_data``. This example 
+    shows how to use :func:`~arviz.hdi` to precalculate the values and pass these values to ``plot_hdi``. 
+    Similarly to an example in ``hdi`` we are using the ``input_core_dims`` argument of :func:`~arviz.wrap_xarray_ufunc` 
+    to manually define the dimensions over which to calculate the HDI.
 
     .. plot::
         :context: close-figs
