@@ -96,7 +96,7 @@ class CmdStanPyConverter:
                 if any(item == col.split("[")[0].split(".")[0] for item in log_likelihood)
             ]
 
-        invalid_cols = (
+        invalid_cols = set(
             posterior_predictive
             + predictions
             + log_likelihood
@@ -139,8 +139,9 @@ class CmdStanPyConverter:
 
         if isinstance(posterior_predictive, str):
             posterior_predictive = [posterior_predictive]
+        posterior_predictive = set(posterior_predictive)
         valid_cols = [
-            col for col in columns if col.split("[")[0].split(".")[0] in set(posterior_predictive)
+            col for col in columns if col.split("[")[0].split(".")[0] in posterior_predictive
         ]
         data = _unpack_frame(
             self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
@@ -158,6 +159,7 @@ class CmdStanPyConverter:
 
         if isinstance(predictions, str):
             predictions = [predictions]
+        predictions = set(predictions)
         valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in set(predictions)]
         data = _unpack_frame(
             self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
@@ -185,7 +187,7 @@ class CmdStanPyConverter:
                 col for col in columns if col.split("[")[0].split(".")[0] in set(prior_predictive)
             ]
 
-        invalid_cols = prior_predictive + [col for col in columns if col.endswith("__")]
+        invalid_cols = set(prior_predictive + [col for col in columns if col.endswith("__")])
 
         valid_cols = [col for col in columns if col not in invalid_cols]
 
@@ -228,9 +230,8 @@ class CmdStanPyConverter:
 
         if isinstance(prior_predictive, str):
             prior_predictive = [prior_predictive]
-        valid_cols = [
-            col for col in columns if col.split("[")[0].split(".")[0] in set(prior_predictive)
-        ]
+        prior_predictive = set(prior_predictive)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in prior_predictive]
         data = _unpack_frame(
             self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
             columns,
@@ -288,9 +289,8 @@ class CmdStanPyConverter:
 
         if isinstance(log_likelihood, str):
             log_likelihood = [log_likelihood]
-        valid_cols = [
-            col for col in columns if col.split("[")[0].split(".")[0] in set(log_likelihood)
-        ]
+        log_likelihood = set(log_likelihood)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood]
         data = _unpack_frame(
             self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
             columns,
