@@ -1149,22 +1149,19 @@ def summary(
 
     if isinstance(data, InferenceData):
         if group is None:
-            if not data._groups_all:  # pylint: disable=protected-access
+            if not data.groups():
                 raise TypeError("InferenceData does not contain any groups")
             if "posterior" in data:
                 dataset = data["posterior"]
             elif "prior" in data:
                 dataset = data["prior"]
             else:
-                warnings.warn(
-                    "Selecting first found group: {}".format(
-                        data._groups_all[0]  # pylint: disable=protected-access
-                    )
-                )
-                dataset = data[data._groups_all[0]]  # pylint: disable=protected-access
+                warnings.warn("Selecting first found group: {}".format(data.groups()[0]))
+                dataset = data[data.groups()[0]]
         else:
-            if group not in data._groups_all:  # pylint: disable=protected-access
+            if group not in data.groups():
                 raise TypeError(f"InferenceData does not contain group: {group}")
+            dataset = data[group]
     else:
         dataset = convert_to_dataset(data, group="posterior", **extra_args)
     var_names = _var_names(var_names, dataset, filter_vars)
