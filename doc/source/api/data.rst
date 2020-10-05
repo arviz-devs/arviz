@@ -5,35 +5,38 @@
 Data
 ----
 
-Converters
-..........
+Inference library converters
+............................
 
 .. autosummary::
    :toctree: generated/
 
-   convert_to_inference_data
-   dict_to_dataset
    from_cmdstan
    from_cmdstanpy
-   from_dict
    from_emcee
+   from_numpyro
+   from_pyjags
    from_pymc3
    from_pymc3_predictions
    from_pyro
-   from_numpyro
    from_pystan
    from_tfp
-   from_pyjags
 
 
-Input/Output
-............
+IO / General conversion
+.......................
 
 .. autosummary::
-   :toctree: generated/
+  :toctree: generated/
 
-   from_netcdf
-   to_netcdf
+  convert_to_inference_data
+  convert_to_dataset
+  dict_to_dataset
+  from_dict
+  from_json
+  from_netcdf
+  to_netcdf
+
 
 General functions
 .................

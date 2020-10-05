@@ -9,9 +9,11 @@ Plots
     :toctree: generated/
 
     plot_autocorr
+    plot_bpv
     plot_compare
     plot_density
     plot_dist
+    plot_dist_comparison
     plot_elpd
     plot_energy
     plot_ess
@@ -27,5 +29,6 @@ Plots
     plot_posterior
     plot_ppc
     plot_rank
+    plot_separation
     plot_trace
     plot_violin

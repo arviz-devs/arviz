@@ -163,12 +163,8 @@ def plot_ppc(
     .. plot::
         :context: close-figs
 
-        >>> observed_county = data.posterior["County"][data.constant_data["county_idx"]]
-        >>> data = data.map(
-        ...     lambda ds, obs_county: ds.assign_coords(obs_id=obs_county),
-        ...     args=[observed_county],
-        ...     groups="observed_vars"
-        ... )
+        >>> obs_county = data.posterior["County"][data.constant_data["county_idx"]]
+        >>> data = data.assign_coords(obs_id=obs_county, groups="observed_vars")
         >>> az.plot_ppc(data, coords={'obs_id': ['ANOKA', 'BELTRAMI']}, flatten=[])
 
     Plot the overlay using a stacked scatter plot that is particularly useful
