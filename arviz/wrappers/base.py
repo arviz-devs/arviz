@@ -157,7 +157,7 @@ class SamplingWrapper:
             the tuple returned by `sel_observations` is passed as this argument.
         idata__i: InferenceData
             Inference results of refitting the data excluding some observations. The
-            resutl of `get_inference_data` is used as this argument.
+            result of `get_inference_data` is used as this argument.
 
         Returns
         -------
