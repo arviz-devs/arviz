@@ -215,9 +215,7 @@ class SamplingWrapper:
             "sample",
             "get_inference_data",
         )
-        supported_methods_2args = (
-            "log_likelihood__i",
-        )
+        supported_methods_2args = ("log_likelihood__i",)
         supported_methods = [*supported_methods_1arg, *supported_methods_2args]
         bad_methods = [method for method in methods if method not in supported_methods]
         if bad_methods:
