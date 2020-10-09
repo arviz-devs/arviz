@@ -14,14 +14,6 @@ ArviZ: Exploratory analysis of Bayesian models
 .. |NumFocus| image:: https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A
    :target: https://www.numfocus.org/
 
-.. raw:: html
-
-
-    <div style="clear: both"></div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-6">
-
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
 
@@ -84,6 +76,7 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
 
 .. toctree::
     :maxdepth: 1
+    :hidden:
 
     getting_started/index
     Example Gallery<examples/index>
@@ -92,80 +85,6 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
     usage
     contributing/index
     about
-
-
-.. raw:: html
-
-    </div>
-    <div class="col-md-6">
-        <div class="container-fluid hidden-xs hidden-sm">
-            <a href="examples/matplotlib/mpl_plot_pair.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_pair_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_forest.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_forest_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_density.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_density_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_energy.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_energy_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_posterior.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_posterior_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_kde_2d.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_kde_2d_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_forest_ridge.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_forest_ridge_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_parallel.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_parallel_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_trace.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_trace_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_joint.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_joint_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_ppc.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_ppc_thumb.png">
-            </div>
-            </a>
-            <a href="examples/matplotlib/mpl_plot_autocorr.html">
-            <div class="col-md-3 thumbnail">
-                <img src="_static/mpl_plot_autocorr_thumb.png">
-            </div>
-            </a>
-        </div>
-    </div>
-
-    </div>
-    </div>
-    </div>
-
 
 .. |Build Status| image:: https://dev.azure.com/ArviZ/ArviZ/_apis/build/status/arviz-devs.arviz?branchName=master
    :target: https://dev.azure.com/ArviZ/ArviZ/_build/latest?definitionId=1&branchName=master
