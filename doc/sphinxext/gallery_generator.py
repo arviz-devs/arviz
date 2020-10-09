@@ -416,7 +416,6 @@ def main(app):
                 examples_source=source_dir,
             )
         )
-    shutil.copytree(thumb_dir, static_dir, dirs_exist_ok=True)
 
     os.chdir(working_dir)
 

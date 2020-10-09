@@ -28,7 +28,7 @@ def to_cds(
 ):
     """Transform data to ColumnDataSource (CDS) compatible with Bokeh.
 
-    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_`to separate var_name
+    Uses `_ARVIZ_GROUP_` and `_ARVIZ_CDS_SELECTION_` to separate var_name
     from group and dimensions in CDS columns.
 
     Parameters
@@ -41,10 +41,12 @@ def to_cds(
     groups : str or list of str, optional
         Select groups for CDS. Default groups are {"posterior_groups", "prior_groups",
         "posterior_groups_warmup"}
-            - posterior_groups: posterior, posterior_predictive, sample_stats
-            - prior_groups: prior, prior_predictive, sample_stats_prior
-            - posterior_groups_warmup: warmup_posterior, warmup_posterior_predictive,
-                                       warmup_sample_stats
+
+        - posterior_groups: posterior, posterior_predictive, sample_stats
+        - prior_groups: prior, prior_predictive, sample_stats_prior
+        - posterior_groups_warmup: warmup_posterior, warmup_posterior_predictive,
+          warmup_sample_stats
+
     ignore_groups : str or list of str, optional
         Ignore specific groups from CDS.
     dimension : str, or list of str, optional
@@ -54,25 +56,31 @@ def to_cds(
     var_name_format : str or tuple of tuple of string, optional
         Select column name format for non-scalar input.
         Predefined options are {"brackets", "underscore", "cds"}
+
             "brackets":
-                - add_group_info == False: theta[0,0]
-                - add_group_info == True: theta_posterior[0,0]
+                - add_group_info == False: ``theta[0,0]``
+                - add_group_info == True: ``theta_posterior[0,0]``
             "underscore":
-                - add_group_info == False: theta_0_0
-                - add_group_info == True: theta_posterior_0_0_
+                - add_group_info == False: ``theta_0_0``
+                - add_group_info == True: ``theta_posterior_0_0_``
             "cds":
-                - add_group_info == False: theta_ARVIZ_CDS_SELECTION_0_0
-                - add_group_info == True: theta_ARVIZ_GROUP_posterior__ARVIZ_CDS_SELECTION_0_0
+                - add_group_info == False: ``theta_ARVIZ_CDS_SELECTION_0_0``
+                - add_group_info == True: ``theta_ARVIZ_GROUP_posterior__ARVIZ_CDS_SELECTION_0_0``
             tuple:
                 Structure:
-                    tuple: (dim_info, group_info)
-                        dim_info: (str: `.join` separator,
-                                   str: dim_separator_start,
-                                   str: dim_separator_end)
-                        group_info: (str: group separator start, str: group separator end)
+
+                    - tuple: (dim_info, group_info)
+
+                        - dim_info: (str: `.join` separator,
+                          str: dim_separator_start,
+                          str: dim_separator_end)
+                        - group_info: (str: group separator start, str: group separator end)
+
                 Example: ((",", "[", "]"), ("_", ""))
-                    - add_group_info == False: theta[0,0]
-                    - add_group_info == True: theta_posterior[0,0]
+
+                    - add_group_info == False: ``theta[0,0]``
+                    - add_group_info == True: ``theta_posterior[0,0]``
+
     index_origin : int, optional
         Start parameter indices from `index_origin`. Either 0 or 1.
 

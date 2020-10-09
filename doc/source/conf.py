@@ -39,7 +39,7 @@ arviz.Numba.disable_numba()
 # ones.
 sys.path.insert(0, os.path.abspath("../sphinxext"))
 
-thumb_directory = "../example_thumbs"
+thumb_directory = "example_thumbs"
 if not os.path.isdir(thumb_directory):
     os.mkdir(thumb_directory)
 
@@ -77,6 +77,7 @@ numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
+#
 
 # MyST related params
 jupyter_execute_notebooks = "off"
@@ -132,26 +133,11 @@ html_theme = "pydata_sphinx_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
-# html_theme_options = {
-#     "source_link_position": "footer",
-#     "navbar_title": " ",
-#     "globaltoc_depth": 0,
-#     "bootswatch_theme": "paper",
-#     "navbar_pagenav": False,
-#     "navbar_sidebarrel": False,
-#     "navbar_links": [
-#         ("Gallery", "examples/index"),
-#         ("Quickstart", "notebooks/Introduction"),
-#         ("Cookbook", "notebooks/InferenceDataCookbook"),
-#         ("InferenceData", "notebooks/XarrayforArviZ"),
-#         ("Numba", "notebooks/Numba"),
-#         ("API", "api"),
-#         ("Usage", "usage"),
-#         ("About", "about"),
-#     ],
-# }
 
+html_theme_options = {
+  "github_url": "https://github.com/arviz-devs/arviz",
+  "twitter_url": "https://twitter.com/arviz_devs",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
