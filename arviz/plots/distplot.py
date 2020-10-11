@@ -163,7 +163,7 @@ def plot_dist(
 
     if isinstance(values, (InferenceData, xr.Dataset)):
         raise ValueError(
-            "InferenceData or xarray.Dateset object detected,"
+            "InferenceData or xarray.Dataset object detected,"
             " use plot_posterior, plot_density or plot_pair"
             " instead of plot_dist"
         )
