@@ -11,6 +11,7 @@
 * Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409))
 * prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
 * Remove left out warning about default IC scale in `compare` ([1412](https://github.com/arviz-devs/arviz/pull/1412))
+* Fixed a typo found in an error message raised in `distplot.py` ([1414](https://github.com/arviz-devs/arviz/pull/1414))
 
 ### Deprecation
 
