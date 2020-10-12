@@ -774,11 +774,13 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
 
     grid = (grid_edges[1:] + grid_edges[:-1]) / 2
 
-    if not np.isfinite(bw) or bw <= 0:
+    if not np.isfinite(bw):
         warnings.warn("Something failed when estimating the bandwidth. Please check your data")
-        bw = 1
+        bw = 0
 
     kernel_n = int(bw * 2 * np.pi)
+    if kernel_n == 0:
+        kernel_n = 1
 
     kernel = gaussian(kernel_n, bw)
 
