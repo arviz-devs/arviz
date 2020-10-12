@@ -771,11 +771,15 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
     bw /= bin_width
 
     # See: https://stackoverflow.com/questions/2773606/gaussian-filter-in-matlab
+
+    grid = (grid_edges[1:] + grid_edges[:-1]) / 2
+
+    if not np.isfinite(bw) or bw <= 0:
+        warnings.warn("Something failed when estimating the bandwidth. Please check your data")
+        bw = 1
+
     kernel_n = int(bw * 2 * np.pi)
 
-    # Temporal fix?
-    if kernel_n == 0:
-        kernel_n = 1
     kernel = gaussian(kernel_n, bw)
 
     if bound_correction:
@@ -787,7 +791,6 @@ def _kde_convolution(x, bw, grid_edges, grid_counts, grid_len, bound_correction,
         pdf = convolve(f, kernel, mode="same", method="direct")
         pdf /= bw * (2 * np.pi) ** 0.5
 
-    grid = (grid_edges[1:] + grid_edges[:-1]) / 2
     return grid, pdf
 
 
