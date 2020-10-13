@@ -98,7 +98,7 @@ def _create_test_data():
         shutil.move(path, new_path)
         fit_files["cmdstanpy_eight_schools_warmup"].append(new_path)
     path = Path(stan_file)
-    os.remove(str(path.parent / (path.stem + ".exe" if platform.system() == "Windows" else "")))
+    os.remove(str(path.parent / (path.stem + (".exe" if platform.system() == "Windows" else ""))))
     os.remove(str(path.parent / (path.stem + ".hpp")))
     return fit_files
 
