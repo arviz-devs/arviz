@@ -8,6 +8,7 @@ import numpy as np
 import xarray as xr
 
 from .. import utils
+from ..rcparams import rcParams
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
 
@@ -32,7 +33,8 @@ class CmdStanPyConverter:
         predictions_constant_data=None,
         log_likelihood=None,
         coords=None,
-        dims=None
+        dims=None,
+        save_warmup=None,
     ):
         self.posterior = posterior
         self.posterior_predictive = posterior_predictive
@@ -45,6 +47,8 @@ class CmdStanPyConverter:
         self.log_likelihood = log_likelihood
         self.coords = coords
         self.dims = dims
+
+        self.save_warmup = rcParams["data.save_warmup"] if save_warmup is None else save_warmup
 
         import cmdstanpy  # pylint: disable=import-error
 
@@ -103,12 +107,19 @@ class CmdStanPyConverter:
             + [col for col in columns if col.endswith("__")]
         )
         valid_cols = [col for col in columns if col not in invalid_cols]
-        data = _unpack_frame(
-            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+        data, data_warmup = _unpack_frame(
+            self.posterior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("posterior")
     def sample_stats_to_xarray(self):
@@ -117,10 +128,11 @@ class CmdStanPyConverter:
 
         columns = self.posterior.column_names
         valid_cols = [col for col in columns if col.endswith("__")]
-        data = _unpack_frame(
-            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+        data, data_warmup = _unpack_frame(
+            self.posterior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
 
         for s_param in list(data.keys()):
@@ -128,7 +140,14 @@ class CmdStanPyConverter:
             name = re.sub("__$", "", s_param_)
             name = "diverging" if name == "divergent" else name
             data[name] = data.pop(s_param).astype(dtypes.get(s_param, float))
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+            if data_warmup:
+                data_warmup[name] = data_warmup.pop(s_param).astype(dtypes.get(s_param, float))
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("posterior")
     @requires("posterior_predictive")
@@ -143,12 +162,19 @@ class CmdStanPyConverter:
         valid_cols = [
             col for col in columns if col.split("[")[0].split(".")[0] in posterior_predictive
         ]
-        data = _unpack_frame(
-            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+        data, data_warmup = _unpack_frame(
+            self.posterior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("posterior")
     @requires("predictions")
@@ -161,12 +187,44 @@ class CmdStanPyConverter:
             predictions = [predictions]
         predictions = set(predictions)
         valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in set(predictions)]
-        data = _unpack_frame(
-            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
+        data, data_warmup = _unpack_frame(
+            self.posterior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
+
+    @requires("posterior")
+    @requires("log_likelihood")
+    def log_likelihood_to_xarray(self):
+        """Convert elementwise log likelihood samples to xarray."""
+        log_likelihood = self.log_likelihood
+        columns = self.posterior.column_names
+
+        if isinstance(log_likelihood, str):
+            log_likelihood = [log_likelihood]
+        log_likelihood = set(log_likelihood)
+        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood]
+        data, data_warmup = _unpack_frame(
+            self.posterior,
+            columns,
+            valid_cols,
+            self.save_warmup,
+        )
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("prior")
     def prior_to_xarray(self):
@@ -191,12 +249,19 @@ class CmdStanPyConverter:
 
         valid_cols = [col for col in columns if col not in invalid_cols]
 
-        data = _unpack_frame(
-            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+        data, data_warmup = _unpack_frame(
+            self.prior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("prior")
     def sample_stats_prior_to_xarray(self):
@@ -209,17 +274,24 @@ class CmdStanPyConverter:
         dims = deepcopy(self.dims) if self.dims is not None else {}
         coords = deepcopy(self.coords) if self.coords is not None else {}
 
-        data = _unpack_frame(
-            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+        data, data_warmup = _unpack_frame(
+            self.prior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
+
         for s_param in list(data.keys()):
             s_param_, *_ = s_param.split(".")
             name = re.sub("__$", "", s_param_)
             name = "diverging" if name == "divergent" else name
             data[name] = data.pop(s_param).astype(dtypes.get(s_param, float))
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims)
+            if data_warmup:
+                data_warmup[name] = data_warmup.pop(s_param).astype(dtypes.get(s_param, float))
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=coords, dims=dims),
+            dict_to_dataset(data_warmup, library=self.cmdstanpy, coords=coords, dims=dims),
+        )
 
     @requires("prior")
     @requires("prior_predictive")
@@ -232,12 +304,19 @@ class CmdStanPyConverter:
             prior_predictive = [prior_predictive]
         prior_predictive = set(prior_predictive)
         valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in prior_predictive]
-        data = _unpack_frame(
-            self.prior.draws() if hasattr(self.prior, "draws") else self.prior.sample,
+        data, data_warmup = _unpack_frame(
+            self.prior,
             columns,
             valid_cols,
+            self.save_warmup,
         )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
+
+        return (
+            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims
+            ),
+        )
 
     @requires("observed_data")
     def observed_data_to_xarray(self):
@@ -280,24 +359,6 @@ class CmdStanPyConverter:
             data_vars=predictions_constant_data, attrs=make_attrs(library=self.cmdstanpy)
         )
 
-    @requires("posterior")
-    @requires("log_likelihood")
-    def log_likelihood_to_xarray(self):
-        """Convert elementwise log likelihood samples to xarray."""
-        log_likelihood = self.log_likelihood
-        columns = self.posterior.column_names
-
-        if isinstance(log_likelihood, str):
-            log_likelihood = [log_likelihood]
-        log_likelihood = set(log_likelihood)
-        valid_cols = [col for col in columns if col.split("[")[0].split(".")[0] in log_likelihood]
-        data = _unpack_frame(
-            self.posterior.draws() if hasattr(self.posterior, "draws") else self.posterior.sample,
-            columns,
-            valid_cols,
-        )
-        return dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims)
-
     def to_inference_data(self):
         """Convert all available data to an InferenceData object.
 
@@ -306,6 +367,7 @@ class CmdStanPyConverter:
         will not have those groups.
         """
         return InferenceData(
+            save_warmup=self.save_warmup,
             **{
                 "posterior": self.posterior_to_xarray(),
                 "sample_stats": self.sample_stats_to_xarray(),
@@ -318,25 +380,41 @@ class CmdStanPyConverter:
                 "constant_data": self.constant_data_to_xarray(),
                 "predictions_constant_data": self.predictions_constant_data_to_xarray(),
                 "log_likelihood": self.log_likelihood_to_xarray(),
-            }
+            },
         )
 
 
-def _unpack_frame(data, columns, valid_cols):
-    """Transform a list of pandas.DataFrames to dictionary containing ndarrays.
+def _unpack_frame(fit, columns, valid_cols, save_warmup):
+    """Transform fit to dictionary containing ndarrays.
 
     Parameters
     ----------
-    data : np.ndarray
-    columns : list
-    valid_cols : list
+    data: cmdstanpy.CmdStanMCMC
+    columns: list
+    valid_cols: list
+    save_warmup: bool
 
     Returns
     -------
     dict
         key, values pairs. Values are formatted to shape = (chains, draws, *shape)
     """
+    if save_warmup and not fit._save_warmup:  # pylint: disable=protected-access
+        save_warmup = False
+    if hasattr(fit, "draws"):
+        data = fit.draws(inc_warmup=save_warmup)
+        if save_warmup:
+            num_warmup = fit._draws_warmup  # pylint: disable=protected-access
+            data_warmup = data[:num_warmup]
+            data = data[num_warmup:]
+    else:
+        data = fit.sample
+        if save_warmup:
+            data_warmup = fit.warmup[: data.shape[0]]
+
     draws, chains, *_ = data.shape
+    if save_warmup:
+        draws_warmup, *_ = data_warmup.shape
 
     column_groups = defaultdict(list)
     column_locs = defaultdict(list)
@@ -358,6 +436,7 @@ def _unpack_frame(data, columns, valid_cols):
         # gather parameter dimensions (assumes dense arrays)
         dims[colname] = tuple(np.array(col_dims).max(0))
     sample = {}
+    sample_warmup = {}
     valid_base_cols = []
     # get list of parameters for extraction (basename) X.1.2 --> X
     for col in valid_cols:
@@ -371,17 +450,23 @@ def _unpack_frame(data, columns, valid_cols):
         shape_location = column_groups.get(key, None)
         if ndim is not None:
             sample[key] = np.full((chains, draws, *ndim), np.nan)
+            if save_warmup:
+                sample_warmup[key] = np.full((chains, draws_warmup, *ndim), np.nan)
         if shape_location is None:
             # reorder draw, chain -> chain, draw
             (i,) = column_locs[key]
             sample[key] = np.swapaxes(data[..., i], 0, 1)
+            if save_warmup:
+                sample_warmup[key] = np.swapaxes(data_warmup[..., i], 0, 1)
         else:
             for i, shape_loc in zip(column_locs[key], shape_location):
                 # location to insert extracted array
                 shape_loc = tuple([Ellipsis] + [j - 1 for j in shape_loc])
                 # reorder draw, chain -> chain, draw and insert to ndarray
                 sample[key][shape_loc] = np.swapaxes(data[..., i], 0, 1)
-    return sample
+                if save_warmup:
+                    sample_warmup[key][shape_loc] = np.swapaxes(data_warmup[..., i], 0, 1)
+    return sample, sample_warmup
 
 
 def from_cmdstanpy(
@@ -396,7 +481,8 @@ def from_cmdstanpy(
     predictions_constant_data=None,
     log_likelihood=None,
     coords=None,
-    dims=None
+    dims=None,
+    save_warmup=None,
 ):
     """Convert CmdStanPy data into an InferenceData object.
 
@@ -428,6 +514,9 @@ def from_cmdstanpy(
         is the name of the dimension, the values are the index values.
     dims : dict of str or list of str
         A mapping from variables to a list of coordinate names for the variable.
+    save_warmup : bool
+        Save warmup iterations into InferenceData object, if found in the input files.
+        If not defined, use default defined by the rcParams.
 
     Returns
     -------
@@ -445,4 +534,5 @@ def from_cmdstanpy(
         log_likelihood=log_likelihood,
         coords=coords,
         dims=dims,
+        save_warmup=save_warmup,
     ).to_inference_data()
