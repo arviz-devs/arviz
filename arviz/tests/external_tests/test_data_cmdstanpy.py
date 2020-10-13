@@ -24,6 +24,7 @@ def _create_test_data():
 
     This function is needed when test data needs to be updated.
     """
+    import platform
     import shutil
     from pathlib import Path
 
@@ -96,6 +97,9 @@ def _create_test_data():
         new_path = path.parent / ("cmdstanpy_eight_schools_warmup-" + num + path.suffix)
         shutil.move(path, new_path)
         fit_files["cmdstanpy_eight_schools_warmup"].append(new_path)
+    path = Path(stan_file)
+    os.remove(str(path.parent / (path.stem + ".exe" if platform.system() == "Windows" else "")))
+    os.remove(str(path.parent / (path.stem + ".hpp")))
     return fit_files
 
 
