@@ -13,6 +13,11 @@ from ..rcparams import rcParams
 from .base import dict_to_dataset, generate_dims_coords, make_attrs, requires
 from .inference_data import InferenceData
 
+try:
+    import ujson as json
+except ImportError:
+    # Can't find ujson using json
+    import json
 
 class PyStanConverter:
     """Encapsulate PyStan specific logic."""
@@ -665,10 +670,13 @@ def get_attrs(fit):
         for arg in attrs["args"]:
             if isinstance(arg["init"], bytes):
                 arg["init"] = arg["init"].decode("utf-8")
+        attrs["args"] = json.dumps(attrs["args"])
     try:
         attrs["inits"] = [holder.inits for holder in fit.sim["samples"]]
     except Exception as exp:  # pylint: disable=broad-except
         _log.warning("Failed to fetch `args` from fit: %s", exp)
+    else:
+        attrs["inits"] = json.dumps(attrs["inits"])
 
     attrs["step_size"] = []
     attrs["metric"] = []
@@ -700,6 +708,7 @@ def get_attrs(fit):
                     list(map(float, item.split(",")))
                     for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
                 ]
+            inv_metric = json.dumps(inv_metric)
         else:
             metric = "unit_e"
             inv_metric = None
