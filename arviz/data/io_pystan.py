@@ -708,13 +708,13 @@ def get_attrs(fit):
                     list(map(float, item.split(",")))
                     for item in re.sub(r"#\s", "", inv_metric_str).splitlines()
                 ]
-            inv_metric = json.dumps(inv_metric)
         else:
             metric = "unit_e"
             inv_metric = None
 
         attrs["metric"].append(metric)
         attrs["inv_metric"].append(inv_metric)
+    attrs["inv_metric"] = json.dumps(attrs["inv_metric"])
 
     if not attrs["step_size"]:
         del attrs["step_size"]
