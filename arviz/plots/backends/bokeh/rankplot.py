@@ -23,17 +23,36 @@ def plot_rank(
     colors,
     ref_line,
     labels,
+    ref_line_kwargs,
+    bar_kwargs,
+    vlines_kwargs,
+    marker_vlines_kwargs,
     backend_kwargs,
     show,
 ):
     """Bokeh rank plot."""
+    if ref_line_kwargs is None:
+        ref_line_kwargs = {}
+    ref_line_kwargs.setdefault("line_dash", "dashed")
+    ref_line_kwargs.setdefault("line_color", "black")
+
+    if bar_kwargs is None:
+        bar_kwargs = {}
+    bar_kwargs.setdefault("line_color", "white")
+
+    if vlines_kwargs is None:
+        vlines_kwargs = {}
+    vlines_kwargs.setdefault("line_width", 2)
+    vlines_kwargs.setdefault("line_dash", "solid")
+
+    if marker_vlines_kwargs is None:
+        marker_vlines_kwargs = {}
+
     if backend_kwargs is None:
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(
-            ("dpi", "plot.bokeh.figure.dpi"),
-        ),
+        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
         **backend_kwargs,
     }
     figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)
@@ -62,6 +81,7 @@ def plot_rank(
         gap = 1
         width = bin_ary[1] - bin_ary[0]
 
+        bar_kwargs.setdefault("width", width)
         # Center the bins
         bin_ary = (bin_ary[1:] + bin_ary[:-1]) / 2
 
@@ -74,34 +94,30 @@ def plot_rank(
                     x=bin_ary,
                     top=y_ticks[-1] + counts,
                     bottom=y_ticks[-1],
-                    width=width,
                     fill_color=colors[idx],
-                    line_color="white",
+                    **bar_kwargs,
                 )
                 if ref_line:
-                    hline = Span(
-                        location=y_ticks[-1] + counts.mean(), line_dash="dashed", line_color="black"
-                    )
+                    hline = Span(location=y_ticks[-1] + counts.mean(), **ref_line_kwargs)
                     ax.add_layout(hline)
             if labels:
                 ax.yaxis.axis_label = "Chain"
         elif kind == "vlines":
             ymin = np.full(len(all_counts), all_counts.mean())
             for idx, counts in enumerate(all_counts):
-                ax.circle(bin_ary, counts, fill_color=colors[idx], line_color=colors[idx])
-
+                ax.circle(
+                    bin_ary,
+                    counts,
+                    fill_color=colors[idx],
+                    line_color=colors[idx],
+                    **marker_vlines_kwargs,
+                )
                 x_locations = [(bin, bin) for bin in bin_ary]
                 y_locations = [(ymin[idx], counts_) for counts_ in counts]
-                ax.multi_line(
-                    x_locations,
-                    y_locations,
-                    line_dash="solid",
-                    line_color=colors[idx],
-                    line_width=3,
-                )
+                ax.multi_line(x_locations, y_locations, line_color=colors[idx], **vlines_kwargs)
 
             if ref_line:
-                hline = Span(location=all_counts.mean(), line_dash="dashed", line_color="black")
+                hline = Span(location=all_counts.mean(), **ref_line_kwargs)
                 ax.add_layout(hline)
 
         if labels:
