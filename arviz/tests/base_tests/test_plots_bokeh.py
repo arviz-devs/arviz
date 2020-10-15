@@ -100,16 +100,34 @@ def test_plot_density_discrete(discrete_model):
 
 def test_plot_density_no_subset():
     """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
-    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+            "b": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "b": np.random.normal(size=200),
+            "c": np.random.normal(size=200),
+        }
+    )
     axes = plot_density([model_ab, model_bc], backend="bokeh", show=False)
     assert axes.size == 3
 
 
 def test_plot_density_one_var():
     """Test plot_density works when there is only one variable (#1401)."""
-    model_ab = from_dict({"a": np.random.normal(size=200),})
-    model_bc = from_dict({"a": np.random.normal(size=200),})
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "a": np.random.normal(size=200),
+        }
+    )
     axes = plot_density([model_ab, model_bc], backend="bokeh", show=False)
     assert axes.size == 1
 
@@ -1049,5 +1067,9 @@ def test_plot_bpv_discrete():
     fake_obs = {"a": np.random.poisson(2.5, 100)}
     fake_pp = {"a": np.random.poisson(2.5, (1, 10, 100))}
     fake_model = from_dict(posterior_predictive=fake_pp, observed_data=fake_obs)
-    axes = plot_bpv(fake_model, backend="bokeh", show=False,)
+    axes = plot_bpv(
+        fake_model,
+        backend="bokeh",
+        show=False,
+    )
     assert axes.shape

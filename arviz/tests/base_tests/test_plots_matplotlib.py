@@ -132,8 +132,18 @@ def test_plot_density_discrete(discrete_model):
 
 def test_plot_density_no_subset():
     """Test plot_density works when variables are not subset of one another (#1093)."""
-    model_ab = from_dict({"a": np.random.normal(size=200), "b": np.random.normal(size=200),})
-    model_bc = from_dict({"b": np.random.normal(size=200), "c": np.random.normal(size=200),})
+    model_ab = from_dict(
+        {
+            "a": np.random.normal(size=200),
+            "b": np.random.normal(size=200),
+        }
+    )
+    model_bc = from_dict(
+        {
+            "b": np.random.normal(size=200),
+            "c": np.random.normal(size=200),
+        }
+    )
     axes = plot_density([model_ab, model_bc])
     assert axes.size == 3
 
@@ -191,10 +201,12 @@ def test_plot_trace(models, kwargs):
 
 
 @pytest.mark.parametrize(
-    "compact", [True, False],
+    "compact",
+    [True, False],
 )
 @pytest.mark.parametrize(
-    "combined", [True, False],
+    "combined",
+    [True, False],
 )
 def test_plot_trace_legend(compact, combined):
     idata = load_arviz_data("rugby")
@@ -1378,7 +1390,10 @@ def test_plot_dist_comparison(models, kwargs):
 
 def test_plot_dist_comparison_different_vars():
     data = from_dict(
-        posterior={"x": np.random.randn(4, 100, 30),}, prior={"x_hat": np.random.randn(4, 100, 30)},
+        posterior={
+            "x": np.random.randn(4, 100, 30),
+        },
+        prior={"x_hat": np.random.randn(4, 100, 30)},
     )
     with pytest.raises(KeyError):
         plot_dist_comparison(data, var_names="x")

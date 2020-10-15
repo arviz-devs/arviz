@@ -52,7 +52,9 @@ def plot_rank(
         backend_kwargs = {}
 
     backend_kwargs = {
-        **backend_kwarg_defaults(("dpi", "plot.bokeh.figure.dpi"),),
+        **backend_kwarg_defaults(
+            ("dpi", "plot.bokeh.figure.dpi"),
+        ),
         **backend_kwargs,
     }
     figsize, *_ = _scale_fig_size(figsize, None, rows=rows, cols=cols)

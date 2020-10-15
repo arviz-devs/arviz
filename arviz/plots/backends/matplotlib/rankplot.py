@@ -58,7 +58,12 @@ def plot_rank(
     backend_kwargs.setdefault("figsize", figsize)
     backend_kwargs.setdefault("squeeze", True)
     if axes is None:
-        _, axes = create_axes_grid(length_plotters, rows, cols, backend_kwargs=backend_kwargs,)
+        _, axes = create_axes_grid(
+            length_plotters,
+            rows,
+            cols,
+            backend_kwargs=backend_kwargs,
+        )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
         ranks = scipy.stats.rankdata(var_data, method="average").reshape(var_data.shape)
@@ -79,7 +84,11 @@ def plot_rank(
             for idx, counts in enumerate(all_counts):
                 y_ticks.append(idx * gap)
                 ax.bar(
-                    bin_ary, counts, bottom=y_ticks[-1], color=colors[idx], **bar_kwargs,
+                    bin_ary,
+                    counts,
+                    bottom=y_ticks[-1],
+                    color=colors[idx],
+                    **bar_kwargs,
                 )
                 if ref_line:
                     ax.axhline(y=y_ticks[-1] + counts.mean(), **ref_line_kwargs)
