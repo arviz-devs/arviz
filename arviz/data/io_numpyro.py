@@ -304,7 +304,7 @@ def from_numpyro(
     """Convert NumPyro data into an InferenceData object.
 
     For a usage example read the
-    :doc:`Cookbook section on from_numpyro </notebooks/InferenceDataCookbook>`
+    :ref:`Cookbook section on from_numpyro <cookbook>`
 
     Parameters
     ----------

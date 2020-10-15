@@ -446,9 +446,9 @@ def hdi(
 
     .. ipython::
 
-        In [1]: az.hdi(data, input_core_dims = [["chain","draw", "school"]])
+        In [1]: az.hdi(data, var_names="theta", input_core_dims = [["chain","draw", "school"]])
 
-    We can also calculate the hdi over a particular selection over all groups:
+    We can also calculate the hdi over a particular selection:
 
     .. ipython::
 
