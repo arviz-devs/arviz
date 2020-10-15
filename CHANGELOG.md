@@ -17,6 +17,9 @@
 ### Deprecation
 
 ### Documentation
+* Reorganize documentation and change sphinx theme ([1406](https://github.com/arviz-devs/arviz/pull/1406))
+* Switch to [MyST](https://myst-parser.readthedocs.io/en/latest/) and [MyST-NB](https://myst-nb.readthedocs.io/en/latest/index.html)
+  for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 
 ## v0.10.0 (2020 Sep 24)
