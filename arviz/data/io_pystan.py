@@ -19,6 +19,7 @@ except ImportError:
     # Can't find ujson using json
     import json
 
+
 class PyStanConverter:
     """Encapsulate PyStan specific logic."""
 
