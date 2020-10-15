@@ -17,10 +17,9 @@ ArviZ: Exploratory analysis of Bayesian models
 .. raw:: html
 
 
-    <div style="clear: both"></div>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-6">
+    <div class="container-xl">
+      <div class="row">
+        <div class="col-md-6">
 
 
 ArviZ is a Python package for exploratory analysis of Bayesian models. Includes functions for posterior analysis, data storage, sample diagnostics, model checking, and comparison.
@@ -99,71 +98,100 @@ If you use ArviZ and want to **cite** it please use |JOSS|. Here is the citation
 
     </div>
     <div class="col-md-6">
-        <div class="container-fluid hidden-xs hidden-sm">
+      <div class="container">
+        <div class="row">
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_pair.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_pair_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_forest.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_forest_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_density.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_density_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_energy.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_energy_thumb.png">
             </div>
             </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_posterior.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_posterior_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_kde_2d.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_kde_2d_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_forest_ridge.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_forest_ridge_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_parallel.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_parallel_thumb.png">
             </div>
             </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_trace.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_trace_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_joint.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_joint_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_ppc.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_ppc_thumb.png">
             </div>
             </a>
+            </div>
+            <div class="col">
             <a href="examples/matplotlib/mpl_plot_autocorr.html">
-            <div class="col-md-3 img-thumbnail">
+            <div class="img-thumbnail">
                 <img src="_static/mpl_plot_autocorr_thumb.png">
             </div>
             </a>
+            </div>
         </div>
+      </div>
     </div>
 
-    </div>
     </div>
     </div>
 
