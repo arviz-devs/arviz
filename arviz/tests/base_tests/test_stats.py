@@ -587,6 +587,15 @@ def test_loo_pit_multidim(multidim_models, args):
     assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
 
 
+def test_loo_pit_multi_lik():
+    idata = load_arviz_data("radon")
+    idata.log_likelihood["by_county"] = (
+        idata.log_likelihood["y"].groupby(idata.constant_data["county_idx"]).sum()
+    )
+    loo_pit_data = loo_pit(idata, y="y")
+    assert np.all((loo_pit_data >= 0) & (loo_pit_data <= 1))
+
+
 @pytest.mark.parametrize("input_type", ["idataarray", "idatanone_ystr", "yarr_yhatnone"])
 def test_loo_pit_bad_input(centered_eight, input_type):
     """Test incompatible input combinations."""

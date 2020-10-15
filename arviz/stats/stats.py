@@ -1585,7 +1585,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         if log_weights is None:
             if y_str:
                 try:
-                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                    log_likelihood = _get_log_likelihood(idata, var_name=y_str)
                 except TypeError:
                     log_likelihood = _get_log_likelihood(idata)
             else:
