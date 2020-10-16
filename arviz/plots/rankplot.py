@@ -137,6 +137,13 @@ def plot_rank(
         >>> az.plot_rank(centered_data, var_names="mu", kind='vlines', ax=ax[0])
         >>> az.plot_rank(noncentered_data, var_names="mu", kind='vlines', ax=ax[1])
 
+    Change the aesthetics using kwargs
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_rank(noncentered_data, var_names="mu", kind="vlines",
+        >>>              vlines_kwargs={'lw':0}, marker_vlines_kwargs={'lw':3});
     """
     if transform is not None:
         data = transform(data)
