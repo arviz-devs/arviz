@@ -30,6 +30,7 @@ def plot_ppc(
     color,
     textsize,
     mean,
+    observed,
     jitter,
     total_pp_samples,
     legend,
@@ -126,29 +127,29 @@ def plot_ppc(
             ax_i.plot(
                 [], color=color, label="{} predictive {}".format(group.capitalize(), pp_var_name)
             )
-
-            if dtype == "f":
-                plot_kde(
-                    obs_vals,
-                    label="Observed {}".format(var_name),
-                    plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
-                    fill_kwargs={"alpha": 0},
-                    ax=ax_i,
-                    legend=legend,
-                )
-            else:
-                bins = get_bins(obs_vals)
-                _, hist, bin_edges = histogram(obs_vals, bins=bins)
-                hist = np.concatenate((hist[:1], hist))
-                ax_i.plot(
-                    bin_edges,
-                    hist,
-                    label="Observed {}".format(var_name),
-                    color="k",
-                    linewidth=linewidth,
-                    zorder=3,
-                    drawstyle=plot_kwargs["drawstyle"],
-                )
+            if observed:
+                if dtype == "f":
+                    plot_kde(
+                        obs_vals,
+                        label="Observed {}".format(var_name),
+                        plot_kwargs={"color": "k", "linewidth": linewidth, "zorder": 3},
+                        fill_kwargs={"alpha": 0},
+                        ax=ax_i,
+                        legend=legend,
+                    )
+                else:
+                    bins = get_bins(obs_vals)
+                    _, hist, bin_edges = histogram(obs_vals, bins=bins)
+                    hist = np.concatenate((hist[:1], hist))
+                    ax_i.plot(
+                        bin_edges,
+                        hist,
+                        label="Observed {}".format(var_name),
+                        color="k",
+                        linewidth=linewidth,
+                        zorder=3,
+                        drawstyle=plot_kwargs["drawstyle"],
+                    )
 
             pp_densities = []
             pp_xs = []
@@ -218,14 +219,15 @@ def plot_ppc(
 
         elif kind == "cumulative":
             drawstyle = "default" if dtype == "f" else "steps-pre"
-            ax_i.plot(
-                *_empirical_cdf(obs_vals),
-                color=color,
-                linewidth=linewidth,
-                label="Observed {}".format(var_name),
-                drawstyle=drawstyle,
-                zorder=3
-            )
+            if observed:
+                ax_i.plot(
+                    *_empirical_cdf(obs_vals),
+                    color="k",
+                    linewidth=linewidth,
+                    label="Observed {}".format(var_name),
+                    drawstyle=drawstyle,
+                    zorder=3
+                )
             if animated:
                 animate, init = _set_animation(
                     pp_sampled_vals,
@@ -301,19 +303,22 @@ def plot_ppc(
             scale_low = 0
             scale_high = jitter_scale * jitter
 
-            obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
-            if jitter:
-                obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
-            ax_i.plot(
-                obs_vals,
-                obs_yvals,
-                "o",
-                color=color,
-                markersize=markersize,
-                alpha=alpha,
-                label="Observed {}".format(var_name),
-                zorder=4,
-            )
+            if observed:
+                obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
+                if jitter:
+                    obs_yvals += np.random.uniform(
+                        low=scale_low, high=scale_high, size=len(obs_vals)
+                    )
+                ax_i.plot(
+                    obs_vals,
+                    obs_yvals,
+                    "o",
+                    color="k",
+                    markersize=markersize,
+                    alpha=alpha,
+                    label="Observed {}".format(var_name),
+                    zorder=4,
+                )
 
             if animated:
                 animate, init = _set_animation(
