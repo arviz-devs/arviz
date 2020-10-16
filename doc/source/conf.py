@@ -149,6 +149,12 @@ html_static_path = ["_static", thumb_directory]
 # to template names.
 # html_sidebars = {}
 
+# use additional pages to add a 404 page
+html_additional_pages = {
+    '404': '404.html',
+}
+
+
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -167,25 +173,6 @@ html_logo = "_static/logo.png"
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 html_favicon = "_static/favicon.ico"
-
-header = f"""\
-.. currentmodule:: arviz
-.. ipython:: python
-   :suppress:
-   import numpy as np
-   np.random.seed(123456)
-   np.set_printoptions(precision=4, suppress=True)
-"""
-
-
-html_context = {"header": header}
-
-
-# def setup(app):
-    # app.add_css_file("custom.css")
-    # app.add_source_suffix(".md", "markdown")
-    # app.add_source_parser(CustomCommonMarkParser)
-
 
 # -- Options for LaTeX output ---------------------------------------------
 
