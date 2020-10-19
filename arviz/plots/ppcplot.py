@@ -52,8 +52,8 @@ def plot_ppc(
         Defaults to 0.2 for kind = kde and cumulative, for scatter defaults to 0.7
     mean: bool
         Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
-    mean: bool
-        Whether or not to plot the observed data. Defaults to True
+    observed: bool, default True
+        Whether or not to plot the observed data.
     color: str
         Valid matplotlib color. Defaults to C0
     figsize: tuple
