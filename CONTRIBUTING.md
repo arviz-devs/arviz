@@ -9,6 +9,8 @@ There are 4 main ways of contributing to the ArviZ project (in descending order 
 * Contributing or improving the documentation (`docs`) or examples (`arviz/examples`)
 * Submitting issues related to bugs or desired enhancements
 
+This doc plus extra guidance is also available on [ArviZ documentation](https://arviz-devs.github.io/arviz/contributing/index.html)
+
 # Opening issues
 
 We appreciate being notified of problems with the existing ArviZ code. We prefer that issues be filed the on [Github Issue Tracker](https://github.com/arviz-devs/arviz/issues), rather than on social media or by direct email to the developers.
@@ -80,7 +82,7 @@ If changes are made to a method documented in the
 [ArviZ API Guide](https://numpydoc.readthedocs.io/en/latest/format.html)
 please consider adding inline documentation examples.
 `az.plot_posterior` is a particularly
-[good example](https://arviz-devs.github.io/arviz/generated/arviz.plot_posterior.html#arviz.plot_posterior).
+[good example](https://arviz-devs.github.io/arviz/api/generated/arviz.plot_posterior.html#arviz.plot_posterior).
 
 
 ## Steps

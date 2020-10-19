@@ -59,6 +59,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
     "myst_nb",
+    'notfound.extension',
 ]
 
 # ipython directive configuration
@@ -153,6 +154,8 @@ html_static_path = ["_static", thumb_directory]
 html_additional_pages = {
     '404': '404.html',
 }
+# configure notfound extension to not add any prefix to the urls
+notfound_urls_prefix = "/arviz/"
 
 
 # -- Options for HTMLHelp output ------------------------------------------

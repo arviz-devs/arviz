@@ -17,7 +17,7 @@ ArviZ also has a Julia wrapper available [ArviZ.jl](https://arviz-devs.github.io
 ## Documentation
 
 The ArviZ documentation can be found in the [official docs](https://arviz-devs.github.io/arviz/index.html).
-First time users may find the [quickstart](https://arviz-devs.github.io/arviz/notebooks/Introduction.html)
+First time users may find the [quickstart](https://arviz-devs.github.io/arviz/getting_started/Introduction.html)
 to be helpful. Additional guidance can be found in the
 [usage documentation](https://arviz-devs.github.io/arviz/usage.html).
 
