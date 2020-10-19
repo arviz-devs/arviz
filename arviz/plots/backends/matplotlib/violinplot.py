@@ -88,7 +88,7 @@ def plot_violin(
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.grid(None, axis="x")
         if current_col != 0:
-            ax_.spines['left'].set_visible(False)
+            ax_.spines["left"].set_visible(False)
             ax_.yaxis.set_ticks_position("none")
         current_col += 1
         if current_col == cols:

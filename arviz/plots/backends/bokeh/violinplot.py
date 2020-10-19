@@ -4,7 +4,7 @@ from bokeh.models.annotations import Title
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size, make_label, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -42,6 +42,7 @@ def plot_violin(
     (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     shade_kwargs = {} if shade_kwargs is None else shade_kwargs
+    shade_kwargs["color"] = vectorized_to_hex(shade_kwargs["color"])
     rug_kwargs = {} if rug_kwargs is None else rug_kwargs
     rug_kwargs.setdefault("fill_alpha", 0.1)
     rug_kwargs.setdefault("line_alpha", 0.1)
