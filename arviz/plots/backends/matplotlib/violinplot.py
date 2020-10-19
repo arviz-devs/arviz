@@ -63,6 +63,7 @@ def plot_violin(
 
     ax = np.atleast_1d(ax)
 
+    current_col = 0
     for (var_name, selection, x), ax_ in zip(plotters, ax.flatten()):
         val = x.flatten()
         if val[0].dtype.kind == "i":
@@ -82,10 +83,16 @@ def plot_violin(
         ax_.plot([0, 0], hdi_probs, lw=linewidth, color="k", solid_capstyle="round")
         ax_.plot(0, per[-1], "wo", ms=linewidth * 1.5)
 
-        ax_.set_xlabel(make_label(var_name, selection), fontsize=ax_labelsize)
+        ax_.set_title(make_label(var_name, selection), fontsize=ax_labelsize)
         ax_.set_xticks([])
         ax_.tick_params(labelsize=xt_labelsize)
         ax_.grid(None, axis="x")
+        if current_col != 0:
+            ax_.spines['left'].set_visible(False)
+            ax_.yaxis.set_ticks_position("none")
+        current_col += 1
+        if current_col == cols:
+            current_col = 0
 
     if backend_show(show):
         plt.show()
