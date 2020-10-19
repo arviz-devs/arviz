@@ -4,7 +4,7 @@ from bokeh.models.annotations import Title
 
 from ....stats import hdi
 from ....stats.density_utils import get_bins, histogram, kde
-from ...plot_utils import _scale_fig_size, make_label, vectorized_to_hex
+from ...plot_utils import _scale_fig_size, make_label
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
