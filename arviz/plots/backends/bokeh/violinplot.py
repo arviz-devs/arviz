@@ -42,7 +42,6 @@ def plot_violin(
     (figsize, *_, linewidth, _) = _scale_fig_size(figsize, textsize, rows, cols)
 
     shade_kwargs = {} if shade_kwargs is None else shade_kwargs
-    shade_kwargs["color"] = vectorized_to_hex(shade_kwargs["color"])
     rug_kwargs = {} if rug_kwargs is None else rug_kwargs
     rug_kwargs.setdefault("fill_alpha", 0.1)
     rug_kwargs.setdefault("line_alpha", 0.1)
