@@ -15,7 +15,7 @@ _log = logging.getLogger("arviz")
 
 from .data import *
 from .plots import *
-from .plots import backends
+from .plots.backends import *
 from .stats import *
 from .rcparams import rc_context, rcParams
 from .utils import Numba, Dask, interactive_backend

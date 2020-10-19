@@ -110,7 +110,7 @@ please consider adding inline documentation examples.
    $ pip install -r requirements-dev.txt
    ```
 
-Alternatively, there is a script to create a docker environment for development.  See: [Developing in Docker](#Developing-in-Docker).
+Alternatively, there is a script to create a docker environment for development.  See: [Developing in Docker](#developing-in-docker).
 
 Note: Building the documentation locally requires saving Bokeh plots as
 images. To do this, bokeh needs some [extra dependencies](https://docs.bokeh.org/en/latest/docs/user_guide/export.html#exporting-plots)
@@ -151,7 +151,7 @@ We recommend that your contribution complies with the following guidelines befor
 * Please prefix the title of incomplete contributions with `[WIP]` (to indicate a work in progress). WIPs may be useful to (1) indicate you are working on something to avoid duplicated work, (2) request broad review of functionality or API, or (3) seek collaborators.
 
 * All other tests pass when everything is rebuilt from scratch.  See
-[Developing in Docker](#Developing-in-Docker) for information on running the test suite locally.
+[Developing in Docker](#developing-in-docker) for information on running the test suite locally.
 
 * When adding additional functionality, provide at least one example script or Jupyter Notebook in the ``arviz/examples/`` folder. Have a look at other examples for reference. Examples should demonstrate why the new functionality is useful in practice and, if possible, compare it to other methods available in ArviZ.
 
@@ -288,4 +288,4 @@ To run the **benchmark tests** do the following:
     $ cd arviz
     $ asv run
 
-#### This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)
+**This guide was derived from the [scikit-learn guide to contributing](https://github.com/scikit-learn/scikit-learn/blob/master/CONTRIBUTING.md)**

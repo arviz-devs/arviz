@@ -53,7 +53,7 @@ class InferenceData:
     """Container for inference data storage using xarray.
 
     For a detailed introduction to ``InferenceData`` objects and their usage, see
-    :doc:`/notebooks/XarrayforArviZ`. This page provides help and documentation
+    :ref:`xarray_for_arviz`. This page provides help and documentation
     on ``InferenceData`` methods and their low level implementation.
     """
 

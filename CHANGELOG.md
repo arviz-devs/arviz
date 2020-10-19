@@ -6,17 +6,22 @@
 * Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 * Added group argument to summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
 * Add `ref_line`, `bar`, `vlines` and `marker_vlines` kwargs to `plot_rank` ([1419](https://github.com/arviz-devs/arviz/pull/1419))
+* Add observed argument to (un)plot observed data in `plot_ppc` ([1422](https://github.com/arviz-devs/arviz/pull/1422))
 
 ### Maintenance and fixes
 * prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
-* Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409) and [1416](https://github.com/arviz-devs/arviz/pull/1416))
-* prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
+* Updated CmdStanPy interface ([1409](https://github.com/arviz-devs/arviz/pull/1409))
 * Remove left out warning about default IC scale in `compare` ([1412](https://github.com/arviz-devs/arviz/pull/1412))
 * Fixed a typo found in an error message raised in `distplot.py` ([1414](https://github.com/arviz-devs/arviz/pull/1414))
+* Fix typo in `loo_pit` extraction of log likelihood ([1418](https://github.com/arviz-devs/arviz/pull/1418))
+* Have `from_pystan` store attrs as strings to allow netCDF storage ([1417](https://github.com/arviz-devs/arviz/pull/1417))
 
 ### Deprecation
 
 ### Documentation
+* Reorganize documentation and change sphinx theme ([1406](https://github.com/arviz-devs/arviz/pull/1406))
+* Switch to [MyST](https://myst-parser.readthedocs.io/en/latest/) and [MyST-NB](https://myst-nb.readthedocs.io/en/latest/index.html)
+  for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 
 ## v0.10.0 (2020 Sep 24)

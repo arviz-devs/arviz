@@ -585,7 +585,8 @@ def test_plot_pair_shapes(marginals, max_subplots):
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
 @pytest.mark.parametrize("animated", [False, True])
-def test_plot_ppc(models, kind, alpha, animated):
+@pytest.mark.parametrize("observed", [True, False])
+def test_plot_ppc(models, kind, alpha, animated, observed):
     if animation and not animation.writers.is_available("ffmpeg"):
         pytest.skip("matplotlib animations within ArviZ require ffmpeg")
     animation_kwargs = {"blit": False}
@@ -593,6 +594,7 @@ def test_plot_ppc(models, kind, alpha, animated):
         models.model_1,
         kind=kind,
         alpha=alpha,
+        observed=observed,
         animated=animated,
         animation_kwargs=animation_kwargs,
         random_seed=3,

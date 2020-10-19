@@ -21,19 +21,12 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import arviz
-import sphinx_bootstrap_theme
-from recommonmark.parser import CommonMarkParser
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
-class CustomCommonMarkParser(CommonMarkParser):
-    def visit_document(self, node):
-        pass
 
 
 arviz.rcParams["data.load"] = "eager"
+arviz.Numba.disable_numba()
 
 # -- General configuration ------------------------------------------------
 
@@ -44,7 +37,7 @@ arviz.rcParams["data.load"] = "eager"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-sys.path.insert(0, os.path.abspath("sphinxext"))
+sys.path.insert(0, os.path.abspath("../sphinxext"))
 
 thumb_directory = "example_thumbs"
 if not os.path.isdir(thumb_directory):
@@ -62,10 +55,10 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "bokeh.sphinxext.bokeh_plot",
     "numpydoc",
-    "nbsphinx",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "gallery_generator",
+    "myst_nb",
 ]
 
 # ipython directive configuration
@@ -83,13 +76,13 @@ autosummary_generate = True
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
-
-# The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
+templates_path = ["../_templates"]
 #
-source_suffix = [".rst", ".md"]
-# source_suffix = ".rst"
+
+# MyST related params
+jupyter_execute_notebooks = "off"
+myst_heading_anchors = 3
+
 
 # The master toctree document.
 master_doc = "index"
@@ -121,7 +114,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
+exclude_patterns = ["_build", "build", "Thumbs.db", ".DS_Store", "notebooks/.ipynb_checkpoints"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -135,41 +128,32 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "bootstrap"
+html_theme = "pydata_sphinx_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
-html_theme_options = {
-    "source_link_position": "footer",
-    "navbar_title": " ",
-    "globaltoc_depth": 0,
-    "bootswatch_theme": "paper",
-    "navbar_pagenav": False,
-    "navbar_sidebarrel": False,
-    "navbar_links": [
-        ("Gallery", "examples/index"),
-        ("Quickstart", "notebooks/Introduction"),
-        ("Cookbook", "notebooks/InferenceDataCookbook"),
-        ("InferenceData", "notebooks/XarrayforArviZ"),
-        ("Numba", "notebooks/Numba"),
-        ("API", "api"),
-        ("Usage", "usage"),
-        ("About", "about"),
-    ],
-}
 
+html_theme_options = {
+  "github_url": "https://github.com/arviz-devs/arviz",
+  "twitter_url": "https://twitter.com/arviz_devs",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_static_path = ["_static", thumb_directory]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 # html_sidebars = {}
+
+# use additional pages to add a 404 page
+html_additional_pages = {
+    '404': '404.html',
+}
+
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -189,13 +173,6 @@ html_logo = "_static/logo.png"
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 html_favicon = "_static/favicon.ico"
-
-
-def setup(app):
-    app.add_css_file("custom.css")
-    app.add_source_suffix(".md", "markdown")
-    app.add_source_parser(CustomCommonMarkParser)
-
 
 # -- Options for LaTeX output ---------------------------------------------
 

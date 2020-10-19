@@ -876,9 +876,16 @@ def test_plot_violin_discrete(discrete_model):
 
 @pytest.mark.parametrize("kind", ["kde", "cumulative", "scatter"])
 @pytest.mark.parametrize("alpha", [None, 0.2, 1])
-def test_plot_ppc(models, kind, alpha):
+@pytest.mark.parametrize("observed", [True, False])
+def test_plot_ppc(models, kind, alpha, observed):
     axes = plot_ppc(
-        models.model_1, kind=kind, alpha=alpha, random_seed=3, backend="bokeh", show=False
+        models.model_1,
+        kind=kind,
+        alpha=alpha,
+        observed=observed,
+        random_seed=3,
+        backend="bokeh",
+        show=False,
     )
     assert axes
 

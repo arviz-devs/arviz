@@ -30,10 +30,18 @@ License
 Contributors
 ============
 
-See the `GitHub contributor
-page <https://github.com/arviz-devs/arviz/graphs/contributors>`__
+See the :ref:`Contributing
+page <contributing_docs>`
+
+Project governance
+==================
+
+Both the project `code of conduct <https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md>`_
+and its `governance <https://github.com/arviz-devs/arviz/blob/master/GOVERNANCE.md>`_ can be found
+at GitHub.
+
 
 
 Donations
-============
+=========
 ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate `here <https://numfocus.salsalabs.org/donate-to-arviz>`_.

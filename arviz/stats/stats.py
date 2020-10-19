@@ -446,9 +446,9 @@ def hdi(
 
     .. ipython::
 
-        In [1]: az.hdi(data, input_core_dims = [["chain","draw", "school"]])
+        In [1]: az.hdi(data, var_names="theta", input_core_dims = [["chain","draw", "school"]])
 
-    We can also calculate the hdi over a particular selection over all groups:
+    We can also calculate the hdi over a particular selection:
 
     .. ipython::
 
@@ -1585,7 +1585,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         if log_weights is None:
             if y_str:
                 try:
-                    log_likelihood = _get_log_likelihood(idata, var_name=y)
+                    log_likelihood = _get_log_likelihood(idata, var_name=y_str)
                 except TypeError:
                     log_likelihood = _get_log_likelihood(idata)
             else:
