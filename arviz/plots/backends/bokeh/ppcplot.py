@@ -3,7 +3,8 @@ import numpy as np
 
 from ....stats.density_utils import get_bins, histogram, kde
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size
+from ...plot_utils import _scale_fig_size, vectorized_to_hex
+
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -21,9 +22,10 @@ def plot_ppc(
     pp_sample_ix,
     kind,
     alpha,
-    color,  # pylint: disable=unused-argument
+    color,
     textsize,
     mean,
+    observed,
     jitter,
     total_pp_samples,
     legend,  # pylint: disable=unused-argument
@@ -43,6 +45,8 @@ def plot_ppc(
         ),
         **backend_kwargs,
     }
+
+    color = vectorized_to_hex(color)
 
     (figsize, *_, linewidth, markersize) = _scale_fig_size(figsize, textsize, rows, cols)
     if ax is None:
@@ -88,7 +92,7 @@ def plot_ppc(
         pp_sampled_vals = pp_vals[pp_sample_ix]
 
         if kind == "kde":
-            plot_kwargs = {"line_color": "red", "line_alpha": alpha, "line_width": 0.5 * linewidth}
+            plot_kwargs = {"line_color": color, "line_alpha": alpha, "line_width": 0.5 * linewidth}
 
             pp_densities = []
             pp_xs = []
@@ -111,27 +115,28 @@ def plot_ppc(
                 for x_s, y_s in zip(pp_xs, pp_densities):
                     ax_i.step(x_s, y_s, **plot_kwargs)
 
-            if dtype == "f":
-                plot_kde(
-                    obs_vals,
-                    plot_kwargs={"line_color": "black", "line_width": linewidth},
-                    fill_kwargs={"alpha": 0},
-                    ax=ax_i,
-                    backend="bokeh",
-                    backend_kwargs={},
-                    show=False,
-                )
-            else:
-                bins = get_bins(obs_vals)
-                _, hist, bin_edges = histogram(obs_vals, bins=bins)
-                hist = np.concatenate((hist[:1], hist))
-                ax_i.step(
-                    bin_edges,
-                    hist,
-                    line_color="black",
-                    line_width=linewidth,
-                    mode="center",
-                )
+            if observed:
+                if dtype == "f":
+                    plot_kde(
+                        obs_vals,
+                        plot_kwargs={"line_color": "black", "line_width": linewidth},
+                        fill_kwargs={"alpha": 0},
+                        ax=ax_i,
+                        backend="bokeh",
+                        backend_kwargs={},
+                        show=False,
+                    )
+                else:
+                    bins = get_bins(obs_vals)
+                    _, hist, bin_edges = histogram(obs_vals, bins=bins)
+                    hist = np.concatenate((hist[:1], hist))
+                    ax_i.step(
+                        bin_edges,
+                        hist,
+                        line_color="black",
+                        line_width=linewidth,
+                        mode="center",
+                    )
 
             if mean:
                 if dtype == "f":
@@ -147,7 +152,7 @@ def plot_ppc(
                     ax_i.line(
                         new_x,
                         new_d.mean(0),
-                        color="blue",
+                        color=color,
                         line_dash="dashed",
                         line_width=linewidth,
                     )
@@ -159,7 +164,7 @@ def plot_ppc(
                     ax_i.step(
                         bin_edges,
                         hist,
-                        line_color="blue",
+                        line_color=color,
                         line_width=linewidth,
                         line_dash="dashed",
                         mode="center",
@@ -169,19 +174,22 @@ def plot_ppc(
             ax_i.yaxis.major_label_text_font_size = "0pt"
 
         elif kind == "cumulative":
-            if dtype == "f":
-                ax_i.line(
-                    *_empirical_cdf(obs_vals),
-                    line_color="black",
-                    line_width=linewidth,
-                )
-            else:
-                ax_i.step(
-                    *_empirical_cdf(obs_vals),
-                    line_color="black",
-                    line_width=linewidth,
-                    mode="center",
-                )
+            if observed:
+                if dtype == "f":
+                    glyph = ax_i.line(
+                        *_empirical_cdf(obs_vals),
+                        line_color="black",
+                        line_width=linewidth,
+                    )
+                    glyph.level = "overlay"
+
+                else:
+                    ax_i.step(
+                        *_empirical_cdf(obs_vals),
+                        line_color="black",
+                        line_width=linewidth,
+                        mode="center",
+                    )
             pp_densities = np.empty((2 * len(pp_sampled_vals), pp_sampled_vals[0].size))
             for idx, vals in enumerate(pp_sampled_vals):
                 vals = np.array([vals]).flatten()
@@ -192,13 +200,13 @@ def plot_ppc(
                 list(pp_densities[::2]),
                 list(pp_densities[1::2]),
                 line_alpha=alpha,
-                line_color="pink",
+                line_color=color,
                 line_width=linewidth,
             )
             if mean:
                 ax_i.line(
                     *_empirical_cdf(pp_vals.flatten()),
-                    color="blue",
+                    color=color,
                     line_dash="dashed",
                     line_width=linewidth,
                 )
@@ -209,7 +217,7 @@ def plot_ppc(
                     plot_kde(
                         pp_vals.flatten(),
                         plot_kwargs={
-                            "line_color": "blue",
+                            "line_color": color,
                             "line_dash": "dashed",
                             "line_width": linewidth,
                         },
@@ -226,7 +234,7 @@ def plot_ppc(
                     ax_i.step(
                         bin_edges,
                         hist,
-                        color="blue",
+                        color=color,
                         line_width=linewidth,
                         line_dash="dashed",
                         mode="center",
@@ -237,23 +245,27 @@ def plot_ppc(
             scale_low = 0
             scale_high = jitter_scale * jitter
 
-            obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
-            if jitter:
-                obs_yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(obs_vals))
-            ax_i.circle(
-                obs_vals,
-                obs_yvals,
-                fill_color="black",
-                size=markersize,
-                line_alpha=alpha,
-            )
+            if observed:
+                obs_yvals = np.zeros_like(obs_vals, dtype=np.float64)
+                if jitter:
+                    obs_yvals += np.random.uniform(
+                        low=scale_low, high=scale_high, size=len(obs_vals)
+                    )
+                glyph = ax_i.circle(
+                    obs_vals,
+                    obs_yvals,
+                    fill_color="black",
+                    size=markersize,
+                    line_alpha=alpha,
+                )
+                glyph.level = "overlay"
 
             for vals, y in zip(pp_sampled_vals, y_rows[1:]):
                 vals = np.ravel(vals)
                 yvals = np.full_like(vals, y, dtype=np.float64)
                 if jitter:
                     yvals += np.random.uniform(low=scale_low, high=scale_high, size=len(vals))
-                ax_i.circle(vals, yvals, fill_color="red", size=markersize, fill_alpha=alpha)
+                ax_i.scatter(vals, yvals, fill_color=color, size=markersize, fill_alpha=alpha)
 
             ax_i.yaxis.major_tick_line_color = None
             ax_i.yaxis.minor_tick_line_color = None

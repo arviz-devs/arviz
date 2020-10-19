@@ -16,6 +16,7 @@ def plot_ppc(
     kind="kde",
     alpha=None,
     mean=True,
+    observed=True,
     color="C0",
     figsize=None,
     textsize=None,
@@ -51,6 +52,8 @@ def plot_ppc(
         Defaults to 0.2 for kind = kde and cumulative, for scatter defaults to 0.7
     mean: bool
         Whether or not to plot the mean posterior/prior predictive distribution. Defaults to True
+    observed: bool, default True
+        Whether or not to plot the observed data.
     color: str
         Valid matplotlib color. Defaults to C0
     figsize: tuple
@@ -205,7 +208,7 @@ def plot_ppc(
         if animated:
             raise TypeError("Animation option is only supported with matplotlib backend.")
 
-    observed = data.observed_data
+    observed_data = data.observed_data
 
     if group == "posterior":
         predictive_dataset = data.posterior_predictive
@@ -213,8 +216,8 @@ def plot_ppc(
         predictive_dataset = data.prior_predictive
 
     if var_names is None:
-        var_names = list(observed.data_vars)
-    var_names = _var_names(var_names, observed, filter_vars)
+        var_names = list(observed_data.data_vars)
+    var_names = _var_names(var_names, observed_data, filter_vars)
     pp_var_names = [data_pairs.get(var, var) for var in var_names]
     pp_var_names = _var_names(pp_var_names, predictive_dataset, filter_vars)
 
@@ -223,7 +226,7 @@ def plot_ppc(
     elif flatten_pp is None:
         flatten_pp = flatten
     if flatten is None:
-        flatten = list(observed.dims.keys())
+        flatten = list(observed_data.dims.keys())
 
     if coords is None:
         coords = {}
@@ -251,12 +254,15 @@ def plot_ppc(
     pp_sample_ix = np.random.choice(total_pp_samples, size=num_pp_samples, replace=False)
 
     for key in coords.keys():
-        coords[key] = np.where(np.in1d(observed[key], coords[key]))[0]
+        coords[key] = np.where(np.in1d(observed_data[key], coords[key]))[0]
 
     obs_plotters = filter_plotters_list(
         list(
             xarray_var_iter(
-                observed.isel(coords), skip_dims=set(flatten), var_names=var_names, combined=True
+                observed_data.isel(coords),
+                skip_dims=set(flatten),
+                var_names=var_names,
+                combined=True,
             )
         ),
         "plot_ppc",
@@ -293,6 +299,7 @@ def plot_ppc(
         jitter=jitter,
         textsize=textsize,
         mean=mean,
+        observed=observed,
         total_pp_samples=total_pp_samples,
         legend=legend,
         group=group,
