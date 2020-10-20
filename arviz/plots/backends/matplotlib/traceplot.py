@@ -467,9 +467,8 @@ def _plot_chains_mpl(
                 axes.plot(data.draw.values, row, **aux_kwargs)
                 if circ_units_trace == "degrees":
                     y_tick_locs = axes.get_yticks()
-                    y_tick_labels_deg = np.rad2deg(y_tick_locs)
-                    labels = [i + 2 * 180 if i < 0 else i for i in y_tick_labels_deg]
-                    axes.set_yticklabels([f"{i:.0f}°" for i in labels])
+                    y_tick_labels = [i + 2 * 180 if i < 0 else i for i in np.rad2deg(y_tick_locs)]
+                    axes.set_yticklabels([f"{i:.0f}°" for i in y_tick_labels])
 
         if not combined:
             aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
