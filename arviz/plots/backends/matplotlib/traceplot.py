@@ -460,6 +460,9 @@ def _plot_chains_mpl(
     circ_units_trace,
 ):
 
+    if not circular:
+        circ_var_units = False
+
     for chain_idx, row in enumerate(value):
         if kind == "trace":
             aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
