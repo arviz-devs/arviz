@@ -85,14 +85,14 @@ def plot_kde(
 
             if is_circular == "radians":
                 labels = [
-                    r"0",
-                    r"π/4",
-                    r"π/2",
-                    r"3π/4",
-                    r"π",
-                    r"5π/4",
-                    r"3π/2",
-                    r"7π/4",
+                    "0",
+                    f"{np.pi/4:.2f}",
+                    f"{np.pi/2:.2f}",
+                    f"{3*np.pi/4:.2f}",
+                    f"{np.pi:.2f}",
+                    f"{-3*np.pi/4:.2f}",
+                    f"{-np.pi/2:.2f}",
+                    f"{-np.pi/4:.2f}",
                 ]
 
                 ax.set_xticklabels(labels)
@@ -130,7 +130,7 @@ def plot_kde(
                 fill_x,
                 fill_y,
                 where=np.isin(fill_x, fill_x[idx], invert=True, assume_unique=True),
-                **fill_kwargs
+                **fill_kwargs,
             )
         else:
             fill_kwargs.setdefault("alpha", 0)

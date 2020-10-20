@@ -224,10 +224,14 @@ def plot_trace(
         for idy in range(2):
             value = np.atleast_2d(value)
 
-            is_circular = var_name in circ_var_names and not idy
+            circular = var_name in circ_var_names and not idy
+            if var_name in circ_var_names and idy:
+                circ_units_trace = circ_var_units
+            else:
+                circ_units_trace = False
 
             if axes is None:
-                ax = fig.add_subplot(spec[idx, idy], polar=is_circular)
+                ax = fig.add_subplot(spec[idx, idy], polar=circular)
             else:
                 ax = axes[idx, idy]
 
@@ -255,8 +259,9 @@ def plot_trace(
                     fill_kwargs,
                     rug_kwargs,
                     rank_kwargs,
-                    is_circular,
+                    circular,
                     circ_var_units,
+                    circ_units_trace,
                 )
 
             else:
@@ -294,8 +299,9 @@ def plot_trace(
                         fill_kwargs,
                         rug_kwargs,
                         rank_kwargs,
-                        is_circular,
+                        circular,
                         circ_var_units,
+                        circ_units_trace,
                     )
                     if legend:
                         handles.append(
@@ -303,7 +309,7 @@ def plot_trace(
                                 [],
                                 [],
                                 label=label,
-                                **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0)
+                                **dealiase_sel_kwargs(aux_plot_kwargs, chain_prop, 0),
                             )
                         )
                 if legend and idy == 0:
@@ -337,7 +343,7 @@ def plot_trace(
                             ylocs = ylims[0]
                         values = value[chain, div_idxs]
 
-                        if is_circular:
+                        if circular:
                             tick = [ax.get_rmin() + ax.get_rmax() * 0.60, ax.get_rmax()]
                             for val in values:
                                 ax.plot(
@@ -449,17 +455,21 @@ def _plot_chains_mpl(
     fill_kwargs,
     rug_kwargs,
     rank_kwargs,
-    is_circular,
+    circular,
     circ_var_units,
+    circ_units_trace,
 ):
-    if not is_circular:
-        circ_var_units = False
 
     for chain_idx, row in enumerate(value):
         if kind == "trace":
             aux_kwargs = dealiase_sel_kwargs(trace_kwargs, chain_prop, chain_idx)
             if idy:
                 axes.plot(data.draw.values, row, **aux_kwargs)
+                if circ_units_trace == "degrees":
+                    y_tick_locs = axes.get_yticks()
+                    y_tick_labels_deg = np.rad2deg(y_tick_locs)
+                    labels = [i + 2 * 180 if i < 0 else i for i in y_tick_labels_deg]
+                    axes.set_yticklabels([f"{i:.0f}°" for i in labels])
 
         if not combined:
             aux_kwargs = dealiase_sel_kwargs(plot_kwargs, chain_prop, chain_idx)
@@ -476,6 +486,7 @@ def _plot_chains_mpl(
                     backend="matplotlib",
                     show=False,
                     is_circular=circ_var_units,
+                    circular=circular,
                 )
 
     if kind == "rank_bars" and idy:
@@ -498,5 +509,6 @@ def _plot_chains_mpl(
                 backend="matplotlib",
                 show=False,
                 is_circular=circ_var_units,
+                circular=circular,
             )
     return axes
