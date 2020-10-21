@@ -155,7 +155,7 @@ class PyroConverter:
                     "Check your model vectorization or set log_likelihood=False"
                 )
                 return None
-        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims)
+        return dict_to_dataset(data, library=self.pyro, coords=self.coords, dims=self.dims, skip_event_dims=True)
 
     def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
         """Convert posterior_predictive or prediction samples to xarray."""
