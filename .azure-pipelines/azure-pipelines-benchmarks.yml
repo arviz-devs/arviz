@@ -6,8 +6,8 @@ jobs:
   strategy:
     matrix:
       Python_38:
-        python.version: 3.8
-        name: "Python 3.8 - benchmarks"
+        python.version: 3.9
+        name: "Python 3.9 - benchmarks"
 
   steps:
 
