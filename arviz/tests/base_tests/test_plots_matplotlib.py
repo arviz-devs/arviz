@@ -192,7 +192,7 @@ def test_plot_separation(kwargs):
         {"lines": [("mu", {}, [1, 2])]},
         {"lines": [("mu", {}, 8)]},
         {"circ_var_names": ["mu"]},
-        {"circ_var_units": "degrees"},
+        {"circ_var_names": ["mu"], "circ_var_units": "degrees"},
     ],
 )
 def test_plot_trace(models, kwargs):
