@@ -12,9 +12,9 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_38:
-        python.version: 3.8
-        name: "Python 3.8 - wheel"
+      Python_39:
+        python.version: 3.9
+        name: "Python 3.9 - wheel"
 
   steps:
 
