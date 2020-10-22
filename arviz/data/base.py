@@ -210,8 +210,9 @@ def dict_to_dataset(
         coordinates.
     skip_event_dims : bool
         If True, cut extra dims whenever present to match the shape of the data.
-        Necessary for PPLs who have the same name in both observed data and log
-        likelihood groups share variable names to account for their different shapes.
+        Necessary for PPLs which have the same name in both observed data and log
+        likelihood groups, to account for their different shapes when observations are 
+        multivariate.
 
     Returns
     -------
