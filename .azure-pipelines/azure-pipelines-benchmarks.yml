@@ -5,7 +5,7 @@ jobs:
   timeoutInMinutes: 360
   strategy:
     matrix:
-      Python_38:
+      Python_39:
         python.version: 3.9
         name: "Python 3.9 - benchmarks"
 
