@@ -14,10 +14,10 @@ jobs:
         python.version: 3.9
         PyPIGithub: false
         name: "Python 3.9"
-      Python_38_preview:
-        python.version: 3.8
+      Python_39_preview:
+        python.version: 3.9
         PyPIGithub: true
-        name: "Python 3.8"
+        name: "Python 3.9"
       Python_38:
         python.version: 3.8
         PyPIGithub: false
@@ -26,10 +26,6 @@ jobs:
         python.version: 3.7
         PyPIGithub: false
         name: "Python 3.7"
-      Python_36:
-        python.version: 3.6
-        PyPIGithub: false
-        name: "Python 3.6"
 
   steps:
   - task: UsePythonVersion@0
