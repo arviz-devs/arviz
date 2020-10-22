@@ -83,6 +83,13 @@ def generate_dims_coords(
         dims = []
     if skip_event_dims is None:
         skip_event_dims = False
+
+    if coords is None:
+        coords = {}
+
+    coords = deepcopy(coords)
+    dims = deepcopy(dims)
+
     ndims = len([dim for dim in dims if dim not in default_dims])
     if ndims > len(shape):
         if skip_event_dims:
@@ -101,13 +108,13 @@ def generate_dims_coords(
                 ),
                 UserWarning,
             )
-
-    if coords is None:
-        coords = {}
-
-    coords = deepcopy(coords)
-    dims = deepcopy(dims)
-
+    if skip_event_dims:
+        # this is needed in case the reduction keeps the dimension with size 1
+        for i, (dim, dim_size) in enumerate(zip(dims, shape)):
+            print(f"{i}, dim: {dim}, {dim_size} =? {len(coords.get(dim, []))}")
+            if (dim in coords) and (dim_size != len(coords[dim])):
+                dims = dims[:i]
+                break
 
     for idx, dim_len in enumerate(shape):
         if (len(dims) < idx + 1) or (dims[idx] is None):
