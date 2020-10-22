@@ -163,7 +163,9 @@ class NumPyroConverter:
             for obs_name, log_like in log_likelihood_dict.items():
                 shape = (self.nchains, self.ndraws) + log_like.shape[1:]
                 data[obs_name] = np.reshape(log_like.copy(), shape)
-        return dict_to_dataset(data, library=self.numpyro, dims=self.dims, coords=self.coords, skip_event_dims=True)
+        return dict_to_dataset(
+            data, library=self.numpyro, dims=self.dims, coords=self.coords, skip_event_dims=True
+        )
 
     def translate_posterior_predictive_dict_to_xarray(self, dct, dims):
         """Convert posterior_predictive or prediction samples to xarray."""

@@ -318,8 +318,16 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             except TypeError:
                 warnings.warn(warn_msg)
         return (
-            dict_to_dataset(data, library=self.pymc3, dims=self.dims, coords=self.coords, skip_event_dims=True),
-            dict_to_dataset(data_warmup, library=self.pymc3, dims=self.dims, coords=self.coords, skip_event_dims=True),
+            dict_to_dataset(
+                data, library=self.pymc3, dims=self.dims, coords=self.coords, skip_event_dims=True
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pymc3,
+                dims=self.dims,
+                coords=self.coords,
+                skip_event_dims=True,
+            ),
         )
 
     def translate_posterior_predictive_dict_to_xarray(self, dct) -> xr.Dataset:

@@ -220,9 +220,19 @@ class CmdStanPyConverter:
         )
 
         return (
-            dict_to_dataset(data, library=self.cmdstanpy, coords=self.coords, dims=self.dims, skip_event_dims=True),
             dict_to_dataset(
-                data_warmup, library=self.cmdstanpy, coords=self.coords, dims=self.dims, skip_event_dims=True
+                data,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                skip_event_dims=True,
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.cmdstanpy,
+                coords=self.coords,
+                dims=self.dims,
+                skip_event_dims=True,
             ),
         )
 
