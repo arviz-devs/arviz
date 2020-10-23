@@ -24,6 +24,10 @@ def plot_rank(
     figsize=None,
     ax=None,
     backend=None,
+    ref_line_kwargs=None,
+    bar_kwargs=None,
+    vlines_kwargs=None,
+    marker_vlines_kwargs=None,
     backend_kwargs=None,
     show=None,
 ):
@@ -80,6 +84,18 @@ def plot_rank(
         its own array of plot areas (and return it).
     backend: str, optional
         Select plotting backend {"matplotlib","bokeh"}. Default "matplotlib".
+    ref_line_kwargs : dict, optional
+        Reference line keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.axhline` or
+        :meth:`bokeh:bokeh.model.Span`.
+    bar_kwargs : dict, optional
+        Bars keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.bar` or
+        :meth:`bokeh:bokeh.plotting.figure.Figure.vbar`.
+    vlines_kwargs : dict, optional
+        Vlines keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.vlines` or
+        :meth:`bokeh:bokeh.plotting.figure.Figure.multi_line`.
+    marker_vlines_kwargs : dict, optional
+        Marker for the vlines keyword arguments, passed to :meth:`mpl:matplotlib.axes.Axes.plot` or
+        :meth:`bokeh:bokeh.plotting.figure.Figure.circle`.
     backend_kwargs: bool, optional
         These are kwargs specific to the backend being used. For additional documentation
         check the plotting method of the backend.
@@ -121,6 +137,13 @@ def plot_rank(
         >>> az.plot_rank(centered_data, var_names="mu", kind='vlines', ax=ax[0])
         >>> az.plot_rank(noncentered_data, var_names="mu", kind='vlines', ax=ax[1])
 
+    Change the aesthetics using kwargs
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_rank(noncentered_data, var_names="mu", kind="vlines",
+        >>>              vlines_kwargs={'lw':0}, marker_vlines_kwargs={'lw':3});
     """
     if transform is not None:
         data = transform(data)
@@ -161,6 +184,10 @@ def plot_rank(
         colors=colors,
         ref_line=ref_line,
         labels=labels,
+        ref_line_kwargs=ref_line_kwargs,
+        bar_kwargs=bar_kwargs,
+        vlines_kwargs=vlines_kwargs,
+        marker_vlines_kwargs=marker_vlines_kwargs,
         backend_kwargs=backend_kwargs,
         show=show,
     )

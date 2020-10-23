@@ -1030,8 +1030,19 @@ def test_plot_posterior_point_estimates(models, point_estimate):
         {"var_names": "mu"},
         {"var_names": ("mu", "tau"), "coords": {"theta_dim_0": [0, 1]}},
         {"var_names": "mu", "ref_line": True},
+        {
+            "var_names": "mu",
+            "ref_line_kwargs": {"line_width": 2, "line_color": "red"},
+            "bar_kwargs": {"width": 50},
+        },
         {"var_names": "mu", "ref_line": False},
         {"var_names": "mu", "kind": "vlines"},
+        {
+            "var_names": "mu",
+            "kind": "vlines",
+            "vlines_kwargs": {"line_width": 0},
+            "marker_vlines_kwargs": {"radius": 20},
+        },
     ],
 )
 def test_plot_rank(models, kwargs):
