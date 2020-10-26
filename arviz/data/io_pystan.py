@@ -143,8 +143,16 @@ class PyStanConverter:
         }
 
         return (
-            dict_to_dataset(data, library=self.pystan, coords=self.coords, dims=self.dims),
-            dict_to_dataset(data_warmup, library=self.pystan, coords=self.coords, dims=self.dims),
+            dict_to_dataset(
+                data, library=self.pystan, coords=self.coords, dims=self.dims, skip_event_dims=True
+            ),
+            dict_to_dataset(
+                data_warmup,
+                library=self.pystan,
+                coords=self.coords,
+                dims=self.dims,
+                skip_event_dims=True,
+            ),
         )
 
     @requires("posterior")

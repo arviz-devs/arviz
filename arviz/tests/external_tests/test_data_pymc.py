@@ -532,6 +532,24 @@ class TestDataPyMC3:
         fails = check_multiple_attrs(test_dict, inference_data)
         assert not fails
 
+    def test_multivariate_observations(self):
+        coords = {"direction": ["x", "y", "z"], "experiment": np.arange(20)}
+        data = np.random.multinomial(20, [0.2, 0.3, 0.5], size=20)
+        with pm.Model(coords=coords):
+            p = pm.Beta("p", 1, 1, shape=(3,))
+            pm.Multinomial("y", 20, p, dims=("experiment", "direction"), observed=data)
+            idata = pm.sample(draws=50, tune=100, return_inferencedata=True)
+        test_dict = {
+            "posterior": ["p"],
+            "sample_stats": ["lp"],
+            "log_likelihood": ["y"],
+            "observed_data": ["y"],
+        }
+        fails = check_multiple_attrs(test_dict, idata)
+        assert not fails
+        assert "direction" not in idata.log_likelihood.dims
+        assert "direction" in idata.observed_data.dims
+
 
 class TestPyMC3WarmupHandling:
     @pytest.mark.skipif(

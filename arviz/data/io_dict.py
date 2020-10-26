@@ -138,10 +138,20 @@ class DictConverter:
 
         return (
             dict_to_dataset(
-                data, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                skip_event_dims=True,
             ),
             dict_to_dataset(
-                data_warmup, library=None, coords=self.coords, dims=self.dims, attrs=self.attrs
+                data_warmup,
+                library=None,
+                coords=self.coords,
+                dims=self.dims,
+                attrs=self.attrs,
+                skip_event_dims=True,
             ),
         )
 

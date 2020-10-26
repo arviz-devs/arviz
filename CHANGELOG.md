@@ -7,7 +7,9 @@
 * Added group argument to summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
 * Add `ref_line`, `bar`, `vlines` and `marker_vlines` kwargs to `plot_rank` ([1419](https://github.com/arviz-devs/arviz/pull/1419))
 * Add observed argument to (un)plot observed data in `plot_ppc` ([1422](https://github.com/arviz-devs/arviz/pull/1422))
+* Add support for named dims and coordinates with multivariate observations ([1429](https://github.com/arviz-devs/arviz/pull/1429))
 * Add skipna argument to `plot_posterior` ([1432](https://github.com/arviz-devs/arviz/pull/1432))
+
 
 ### Maintenance and fixes
 * prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
