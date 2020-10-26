@@ -1,6 +1,7 @@
 """Bokeh rankplot."""
 import numpy as np
 import scipy.stats
+from scipy.interpolate import CubicSpline
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
@@ -74,6 +75,16 @@ def plot_rank(
     for ax, (var_name, selection, var_data) in zip(
         (item for item in axes.flatten() if item is not None), plotters
     ):
+        if var_data.dtype.kind == "i":
+            var_data_shape = var_data.shape
+            var_data = var_data.flatten()
+            min_var_data, max_var_data = min(var_data), max(var_data)
+            x = np.linspace(min_var_data, max_var_data, len(var_data))
+            csi = CubicSpline(x, var_data)
+            var_data = csi(
+                np.linspace(min_var_data + 0.001, max_var_data - 0.001, len(var_data))
+            ).reshape(var_data_shape)
+
         ranks = scipy.stats.rankdata(var_data, method="average").reshape(var_data.shape)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
