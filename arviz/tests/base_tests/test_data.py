@@ -160,6 +160,20 @@ def test_dims_coords_extra_dims():
     assert len(coords["xy"]) == 20
 
 
+@pytest.mark.parametrize("shape", [(4, 20), (4, 20, 1)])
+def test_dims_coords_skip_event_dims(shape):
+    coords = {"x": np.arange(4), "y": np.arange(20), "z": np.arange(5)}
+    dims, coords = generate_dims_coords(
+        shape, "name", dims=["x", "y", "z"], coords=coords, skip_event_dims=True
+    )
+    assert "x" in dims
+    assert "y" in dims
+    assert "z" not in dims
+    assert len(coords["x"]) == 4
+    assert len(coords["y"]) == 20
+    assert "z" not in coords
+
+
 def test_make_attrs():
     extra_attrs = {"key": "Value"}
     attrs = make_attrs(attrs=extra_attrs)
@@ -896,6 +910,14 @@ def test_dict_to_dataset():
 
     assert set(dataset.a.coords) == {"chain", "draw"}
     assert set(dataset.b.coords) == {"chain", "draw", "c"}
+
+
+def test_dict_to_dataset_event_dims_error():
+    datadict = {"a": np.random.randn(1, 100, 10)}
+    coords = {"b": np.arange(10), "c": ["x", "y", "z"]}
+    msg = "different number of dimensions on data and dims"
+    with pytest.raises(ValueError, match=msg):
+        convert_to_dataset(datadict, coords=coords, dims={"a": ["b", "c"]})
 
 
 def test_convert_to_dataset_idempotent():
