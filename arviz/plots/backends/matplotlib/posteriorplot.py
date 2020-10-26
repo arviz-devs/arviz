@@ -32,6 +32,7 @@ def plot_posterior(
     round_to,
     hdi_prob,
     multimodal,
+    skipna,
     textsize,
     ref_val,
     rope,
@@ -83,6 +84,7 @@ def plot_posterior(
             round_to=round_to,
             hdi_prob=hdi_prob,
             multimodal=multimodal,
+            skipna=skipna,
             ref_val=ref_val,
             rope=rope,
             ax_labelsize=ax_labelsize,
@@ -112,6 +114,7 @@ def _plot_posterior_op(
     point_estimate,
     hdi_prob,
     multimodal,
+    skipna,
     ref_val,
     rope,
     ax_labelsize,
@@ -215,7 +218,7 @@ def _plot_posterior_op(
     def display_point_estimate():
         if not point_estimate:
             return
-        point_value = calculate_point_estimate(point_estimate, values, bw, circular)
+        point_value = calculate_point_estimate(point_estimate, values, bw, circular, skipna)
         sig_figs = format_sig_figs(point_value, round_to)
         point_text = "{point_estimate}={point_value:.{sig_figs}g}".format(
             point_estimate=point_estimate, point_value=point_value, sig_figs=sig_figs
@@ -231,7 +234,9 @@ def _plot_posterior_op(
     def display_hdi():
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
+        hdi_probs = hdi(
+            values, hdi_prob=hdi_prob, multimodal=multimodal, skipna=skipna
+        )  # type: np.ndarray
 
         for hdi_i in np.atleast_2d(hdi_probs):
             ax.plot(
