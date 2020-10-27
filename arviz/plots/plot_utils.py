@@ -656,7 +656,7 @@ def set_bokeh_circular_ticks_labels(ax, hist, labels):
 
 
 def compute_ranks(ary):
-    """Computes ranks for continuos and discrete variables"""
+    """Compute ranks for continuos and discrete variables."""
     if ary.dtype.kind == "i":
         ary_shape = ary.shape
         ary = ary.flatten()
