@@ -558,7 +558,6 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
     point_value : float
         best estimate of data distribution
     """
-    print("ski", skipna)
     point_value = None
     if point_estimate == "auto":
         point_estimate = rcParams["plot.point_estimate"]
