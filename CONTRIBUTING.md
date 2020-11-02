@@ -280,7 +280,7 @@ This will output something similar to `http://(<docker container id> or <ip>):88
 The documentation can be build with Docker by running `./scripts/container.sh
 --docs`. The docker image contains by default all dependencies needed
 for building the documentation. After having build the docs in the Docker
-container, they can be checked at `doc/build`.
+container, they can be checked at `doc/build` and viewed in the browser from `doc/build/index.html`. To rebuild the docs re-run `./scripts/container.sh --docs` after making changes.
 
 ## Running the benchmark tests
 

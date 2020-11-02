@@ -35,7 +35,7 @@ fi
 if [[ $* == *--docs* ]]; then
     echo "Build docs with sphinx"
     docker run  --mount type=bind,source="$(pwd)",target=/opt/arviz --name arviz_sphinx --rm arviz:latest bash -c \
-    "if [ -d ./doc/build ]; then python -msphinx -M clean doc doc/build; fi && sphinx-build doc doc/build -b html"
+    "if [ -d ./doc/build ]; then python -msphinx -M clean doc/source doc/build; fi && sphinx-build doc/source doc/build -b html"
     echo "Successful build. Find html docs in doc/build directory"
 fi
 
