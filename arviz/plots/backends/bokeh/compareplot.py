@@ -105,8 +105,16 @@ def plot_compare(
         ax.multi_line(err_xs, err_ys, line_color=plot_kwargs.get("color_ic", "black"))
 
     if insample_dev:
+        scale = comp_df[f"{information_criterion}_scale"][0]
+        p_ic = comp_df[f"p_{information_criterion}"]
+        if scale == "log":
+            correction = p_ic
+        elif scale == "negative_log":
+            correction = -p_ic
+        elif scale == "deviance":
+            correction = -(2 * p_ic)
         ax.circle(
-            comp_df[information_criterion] - (2 * comp_df["p_" + information_criterion]),
+            comp_df[information_criterion] + correction,
             yticks_pos[::2],
             line_color=plot_kwargs.get("color_insample_dev", "black"),
             fill_color=plot_kwargs.get("color_insample_dev", "black"),
