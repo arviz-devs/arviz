@@ -326,16 +326,6 @@ def test_plot_compare(models, kwargs):
     assert axes
 
 
-def test_plot_compare_manual(models):
-    """Test compare plot without scale column"""
-    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
-
-    # remove "scale" column
-    del model_compare["loo_scale"]
-    axes = plot_compare(model_compare, backend="bokeh", show=False)
-    assert axes
-
-
 def test_plot_compare_no_ic(models):
     """Check exception is raised if model_compare doesn't contain a valid information criterion"""
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
