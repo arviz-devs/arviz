@@ -140,31 +140,29 @@ def _get_bw(x, bw, grid_counts=None, x_std=None, x_range=None):
             (
                 "`bw` must not be of type `bool`.\n"
                 "Expected a positive numeric or one of the following strings:\n"
-                "{}."
-            ).format(list(_BW_METHODS_LINEAR.keys()))
+                f"{list(_BW_METHODS_LINEAR.keys())}."
+            )
         )
     if isinstance(bw, (int, float)):
         if bw < 0:
-            raise ValueError("Numeric `bw` must be positive.\nInput: {:.4f}.".format(bw))
+            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
     elif isinstance(bw, str):
         bw_lower = bw.lower()
 
         if bw_lower not in _BW_METHODS_LINEAR.keys():
             raise ValueError(
-                (
-                    "Unrecognized bandwidth method.\n" "Input is: {}.\n" "Expected one of: {}."
-                ).format(bw_lower, list(_BW_METHODS_LINEAR.keys()))
+                "Unrecognized bandwidth method.\n"
+                f"Input is: {bw_lower}.\n"
+                f"Expected one of: {list(_BW_METHODS_LINEAR.keys())}."
             )
 
         bw_fun = _BW_METHODS_LINEAR[bw_lower]
         bw = bw_fun(x, grid_counts=grid_counts, x_std=x_std, x_range=x_range)
     else:
         raise ValueError(
-            (
-                "Unrecognized `bw` argument.\n"
-                "Expected a positive numeric or one of the following strings:\n"
-                "{}."
-            ).format(list(_BW_METHODS_LINEAR.keys()))
+            "Unrecognized `bw` argument.\n"
+            "Expected a positive numeric or one of the following strings:\n"
+            f"{list(_BW_METHODS_LINEAR.keys())}."
         )
     return bw
 
@@ -330,14 +328,12 @@ def _check_custom_lims(custom_lims, x_min, x_max):
     """
     if not isinstance(custom_lims, (list, tuple)):
         raise TypeError(
-            (
-                "`custom_lims` must be a numeric list or tuple of length 2.\n"
-                "Not an object of {}."
-            ).format(type(custom_lims))
+            "`custom_lims` must be a numeric list or tuple of length 2.\n"
+            f"Not an object of {type(custom_lims)}."
         )
 
     if len(custom_lims) != 2:
-        raise AttributeError("`len(custom_lims)` must be 2, not {}.".format(len(custom_lims)))
+        raise AttributeError(f"`len(custom_lims)` must be 2, not {len(custom_lims)}.")
 
     any_bool = any(isinstance(i, bool) for i in custom_lims)
     if any_bool:
@@ -612,12 +608,10 @@ def _kde_linear(
 
     # Check `bw_fct` is numeric and positive
     if not isinstance(bw_fct, (int, float, np.integer, np.floating)):
-        raise TypeError(
-            "`bw_fct` must be a positive number, not an object of {}.".format(type(bw_fct))
-        )
+        raise TypeError(f"`bw_fct` must be a positive number, not an object of {type(bw_fct)}.")
 
     if bw_fct <= 0:
-        raise ValueError("`bw_fct` must be a positive number, not {}.".format(bw_fct))
+        raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
 
     # Preliminary calculations
     x_len = len(x)
@@ -705,26 +699,24 @@ def _kde_circular(
 
     # Check `bw_fct` is numeric and positive
     if not isinstance(bw_fct, (int, float, np.integer, np.floating)):
-        raise TypeError(
-            "`bw_fct` must be a positive number, not an object of {}.".format(type(bw_fct))
-        )
+        raise TypeError(f"`bw_fct` must be a positive number, not an object of {type(bw_fct)}.")
 
     if bw_fct <= 0:
-        raise ValueError("`bw_fct` must be a positive number, not {}.".format(bw_fct))
+        raise ValueError(f"`bw_fct` must be a positive number, not {bw_fct}.")
 
     # Determine bandwidth
     if isinstance(bw, bool):
         raise ValueError(
-            ("`bw` can't be of type `bool`.\n" "Expected a positive numeric or 'taylor'")
+            "`bw` can't be of type `bool`.\n" "Expected a positive numeric or 'taylor'"
         )
     if isinstance(bw, (int, float)):
         if bw < 0:
-            raise ValueError("Numeric `bw` must be positive.\nInput: {:.4f}.".format(bw))
+            raise ValueError(f"Numeric `bw` must be positive.\nInput: {bw:.4f}.")
     if isinstance(bw, str):
         if bw == "taylor":
             bw = _bw_taylor(x)
         else:
-            raise ValueError(("`bw` must be a positive numeric or `taylor`, not {}".format(bw)))
+            raise ValueError(f"`bw` must be a positive numeric or `taylor`, not {bw}")
     bw *= bw_fct
 
     # Determine grid

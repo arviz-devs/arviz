@@ -129,8 +129,8 @@ def make_ufunc(
                 n_dims_out = -len(out_shape)
         elif check_shape:
             if out.shape != arys[-1].shape[:-n_dims]:
-                msg = "Shape incorrect for `out`: {}.".format(out.shape)
-                msg += " Correct shape is {}".format(arys[-1].shape[:-n_dims])
+                msg = f"Shape incorrect for `out`: {out.shape}."
+                msg += f" Correct shape is {arys[-1].shape[:-n_dims]}"
                 raise TypeError(msg)
         for idx in np.ndindex(out.shape[:n_dims_out]):
             arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
@@ -156,10 +156,10 @@ def make_ufunc(
                     raise_error = True
             else:
                 raise_error = True
-                out_shape = "not tuple, type={}".format(type(out))
+                out_shape = "not tuple, type={type(out)}"
             if raise_error:
-                msg = "Shapes incorrect for `out`: {}.".format(out_shape)
-                msg += " Correct shapes are {}".format(correct_shape)
+                msg = f"Shapes incorrect for `out`: {out_shape}."
+                msg += f" Correct shapes are {correct_shape}"
                 raise TypeError(msg)
         for idx in np.ndindex(element_shape):
             arys_idx = [ary[idx].ravel() if ravel else ary[idx] for ary in arys]
@@ -185,7 +185,7 @@ def wrap_xarray_ufunc(
     func_args=None,
     func_kwargs=None,
     dask_kwargs=None,
-    **kwargs
+    **kwargs,
 ):
     """Wrap make_ufunc with xarray.apply_ufunc.
 
@@ -258,13 +258,13 @@ def update_docstring(ufunc, func, n_output=1):
     ufunc.__doc__ += "\n\n"
     input_core_dims = 'tuple(("chain", "draw") for _ in range(n_args))'
     if n_output > 1:
-        output_core_dims = " tuple([] for _ in range({}))".format(n_output)
-        msg = "xr.apply_ufunc(ufunc, dataset, input_core_dims={}, output_core_dims={})"
-        ufunc.__doc__ += msg.format(input_core_dims, output_core_dims)
+        output_core_dims = f" tuple([] for _ in range({n_output}))"
+        msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims}, output_core_dims={ output_core_dims})"
+        ufunc.__doc__ += msg
     else:
         output_core_dims = ""
-        msg = "xr.apply_ufunc(ufunc, dataset, input_core_dims={})"
-        ufunc.__doc__ += msg.format(input_core_dims)
+        msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims})"
+        ufunc.__doc__ += msg
     ufunc.__doc__ += "\n\n"
     ufunc.__doc__ += "For example: np.std(data, ddof=1) --> n_args=2"
     if docstring:
@@ -395,8 +395,7 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
 
         min_chains = shape_kwargs.get("min_chains", 2)
         min_draws = shape_kwargs.get("min_draws", 4)
-        error_msg = "Shape validation failed: input_shape: {}, minimum_shape: (chains={}, draws={})"
-        error_msg = error_msg.format(shape, min_chains, min_draws)
+        error_msg = f"Shape validation failed: input_shape: {shape}, minimum_shape: (chains={min_chains}, draws={min_draws})"
 
         chain_error = ((min_chains > 1) and (len(shape) < 2)) or (shape[0] < min_chains)
         draw_error = ((len(shape) < 2) and (shape[0] < min_draws)) or (
@@ -423,14 +422,14 @@ def get_log_likelihood(idata, var_name=None):
         var_names = list(idata.log_likelihood.data_vars)
         if len(var_names) > 1:
             raise TypeError(
-                "Found several log likelihood arrays {}, var_name cannot be None".format(var_names)
+                f"Found several log likelihood arrays {var_names}, var_name cannot be None"
             )
         return idata.log_likelihood[var_names[0]]
     else:
         try:
             log_likelihood = idata.log_likelihood[var_name]
         except KeyError as err:
-            raise TypeError("No log likelihood data named {} found".format(var_name)) from err
+            raise TypeError(f"No log likelihood data named {var_name} found") from err
         return log_likelihood
 
 
@@ -461,7 +460,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
         if kind not in ("loo", "waic"):
             raise ValueError("Invalid ELPDData object")
 
-        scale_str = SCALE_DICT[self["{}_scale".format(kind)]]
+        scale_str = SCALE_DICT[self[f"{kind}_scale"]]
         padding = len(scale_str) + len(kind) + 1
         base = BASE_FMT.format(padding, padding - 2)
         base = base.format(
@@ -470,7 +469,7 @@ class ELPDData(pd.Series):  # pylint: disable=too-many-ancestors
             scale=scale_str,
             n_samples=self.n_samples,
             n_points=self.n_data_points,
-            *self.values
+            *self.values,
         )
 
         if self.warning:
