@@ -1617,7 +1617,8 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
 
     if y_hat.shape != log_weights.shape:
         raise ValueError(
-            f"y_hat and log_weights must have the same shape but have shapes {y_hat.shape,} and {log_weights.shape}"
+            "y_hat and log_weights must have the same shape but have shapes "
+            f"{y_hat.shape,} and {log_weights.shape}"
         )
 
     kwargs = {
@@ -1782,7 +1783,8 @@ def apply_test_function(
             raise ValueError(f"InferenceData object must have {grp} group")
         if not overwrite and out_name_group in getattr(out, grp).data_vars:
             raise ValueError(
-                f"Should overwrite: {out_name_group} variable present in group {grp}, but overwrite is False"
+                f"Should overwrite: {out_name_group} variable present in group {grp},"
+                " but overwrite is False"
             )
         var_names.setdefault(
             grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names

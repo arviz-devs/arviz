@@ -259,7 +259,8 @@ def update_docstring(ufunc, func, n_output=1):
     input_core_dims = 'tuple(("chain", "draw") for _ in range(n_args))'
     if n_output > 1:
         output_core_dims = f" tuple([] for _ in range({n_output}))"
-        msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims}, output_core_dims={ output_core_dims})"
+        msg = f"xr.apply_ufunc(ufunc, dataset, input_core_dims={input_core_dims}, "
+        msg += f"output_core_dims={ output_core_dims})"
         ufunc.__doc__ += msg
     else:
         output_core_dims = ""
@@ -395,7 +396,8 @@ def not_valid(ary, check_nan=True, check_shape=True, nan_kwargs=None, shape_kwar
 
         min_chains = shape_kwargs.get("min_chains", 2)
         min_draws = shape_kwargs.get("min_draws", 4)
-        error_msg = f"Shape validation failed: input_shape: {shape}, minimum_shape: (chains={min_chains}, draws={min_draws})"
+        error_msg = f"Shape validation failed: input_shape: {shape}, "
+        error_msg += f"minimum_shape: (chains={min_chains}, draws={min_draws})"
 
         chain_error = ((min_chains > 1) and (len(shape) < 2)) or (shape[0] < min_chains)
         draw_error = ((len(shape) < 2) and (shape[0] < min_draws)) or (
