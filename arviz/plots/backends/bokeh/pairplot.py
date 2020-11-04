@@ -9,14 +9,14 @@ from bokeh.models import CDSView, ColumnDataSource, GroupFilter, Span
 from ....rcparams import rcParams
 from ...distplot import plot_dist
 from ...kdeplot import plot_kde
-from ...plot_utils import _scale_fig_size, calculate_point_estimate
+from ...plot_utils import _scale_fig_size, calculate_point_estimate, vectorized_to_hex
 from .. import show_layout
 from . import backend_kwarg_defaults
 
 
 def plot_pair(
     ax,
-    infdata_group,
+    plotters,
     numvars,
     figsize,
     textsize,
@@ -28,7 +28,7 @@ def plot_pair(
     colorbar,  # pylint: disable=unused-argument
     divergences,
     diverging_mask,
-    divergences_kwargs,  # pylint: disable=unused-argument
+    divergences_kwargs,
     flat_var_names,
     backend_kwargs,
     marginal_kwargs,
@@ -123,8 +123,17 @@ def plot_pair(
     if reference_values_kwargs is None:
         reference_values_kwargs = {}
 
-    reference_values_kwargs.setdefault("line_color", "red")
-    reference_values_kwargs.setdefault("line_width", 5)
+    reference_values_kwargs.setdefault("line_color", "black")
+    reference_values_kwargs.setdefault("fill_color", vectorized_to_hex("C2"))
+    reference_values_kwargs.setdefault("line_width", 1)
+    reference_values_kwargs.setdefault("size", 10)
+
+    if divergences_kwargs is None:
+        divergences_kwargs = {}
+    divergences_kwargs.setdefault("line_color", "black")
+    divergences_kwargs.setdefault("fill_color", vectorized_to_hex("C1"))
+    divergences_kwargs.setdefault("line_width", 1)
+    divergences_kwargs.setdefault("size", 10)
 
     dpi = backend_kwargs.pop("dpi")
     max_plots = (
@@ -151,17 +160,18 @@ def plot_pair(
     if point_estimate_marker_kwargs is None:
         point_estimate_marker_kwargs = {}
 
-    point_estimate_marker_kwargs.setdefault("line_width", markersize)
-    point_estimate_kwargs.setdefault("line_color", "orange")
-    point_estimate_kwargs.setdefault("line_width", 3)
+    point_estimate_marker_kwargs.setdefault("size", markersize)
+    point_estimate_marker_kwargs.setdefault("color", "black")
+    point_estimate_kwargs.setdefault("line_color", "black")
+    point_estimate_kwargs.setdefault("line_width", 2)
     point_estimate_kwargs.setdefault("line_dash", "solid")
 
     tmp_flat_var_names = None
     if len(flat_var_names) == len(list(set(flat_var_names))):
-        source_dict = dict(zip(flat_var_names, [list(post) for post in infdata_group]))
+        source_dict = dict(zip(flat_var_names, [list(post[-1].flatten()) for post in plotters]))
     else:
         tmp_flat_var_names = ["{}__{}".format(name, str(uuid4())) for name in flat_var_names]
-        source_dict = dict(zip(tmp_flat_var_names, [list(post) for post in infdata_group]))
+        source_dict = dict(zip(tmp_flat_var_names, [list(post[-1].flatten()) for post in plotters]))
     if divergences:
         divergenve_name = "divergences_{}".format(str(uuid4()))
         source_dict[divergenve_name] = np.array(diverging_mask).astype(bool).astype(int).astype(str)
@@ -250,7 +260,7 @@ def plot_pair(
 
             if j == i and marginals:
                 rotate = numvars == 2 and j == 1
-                var1_dist = infdata_group[i]
+                var1_dist = plotters[i][-1].flatten()
                 plot_dist(
                     var1_dist,
                     ax=ax[j, i],
@@ -272,8 +282,8 @@ def plot_pair(
                         ax[j, i].circle(var1, var2, source=source)
 
                 if "kde" in kind:
-                    var1_kde = infdata_group[i]
-                    var2_kde = infdata_group[j + marginals_offset]
+                    var1_kde = plotters[i][-1].flatten()
+                    var2_kde = plotters[j + marginals_offset][-1].flatten()
                     plot_kde(
                         var1_kde,
                         var2_kde,
@@ -285,8 +295,8 @@ def plot_pair(
                     )
 
                 if "hexbin" in kind:
-                    var1_hexbin = infdata_group[i]
-                    var2_hexbin = infdata_group[j + marginals_offset]
+                    var1_hexbin = plotters[i][-1].flatten()
+                    var2_hexbin = plotters[j + marginals_offset][-1].flatten()
                     ax[j, i].grid.visible = False
                     ax[j, i].hexbin(
                         var1_hexbin,
@@ -298,17 +308,14 @@ def plot_pair(
                     ax[j, i].circle(
                         var1,
                         var2,
-                        line_color="black",
-                        fill_color="orange",
-                        line_width=1,
-                        size=10,
                         source=source,
                         view=source_div,
+                        **divergences_kwargs,
                     )
 
                 if point_estimate:
-                    var1_pe = infdata_group[i]
-                    var2_pe = infdata_group[j]
+                    var1_pe = plotters[i][-1].flatten()
+                    var2_pe = plotters[j][-1].flatten()
                     pe_x = calculate_point_estimate(point_estimate, var1_pe)
                     pe_y = calculate_point_estimate(point_estimate, var2_pe)
                     ax[j, i].square(pe_x, pe_y, **point_estimate_marker_kwargs)
@@ -330,7 +337,7 @@ def plot_pair(
 
                         ax[j - 1, i].add_layout(ax_vline)
 
-                        pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
+                        pe_last = calculate_point_estimate(point_estimate, plotters[-1][-1])
                         ax_pe_vline = Span(
                             location=pe_last,
                             dimension="height",
