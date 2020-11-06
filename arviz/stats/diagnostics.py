@@ -171,9 +171,7 @@ def ess(
     }
 
     if method not in methods:
-        raise TypeError(
-            "ess method {} not found. Valid methods are:\n{}".format(method, "\n    ".join(methods))
-        )
+        raise TypeError(f"ess method {method} not found. Valid methods are:\n{', '.join(methods)}")
     ess_func = methods[method]
 
     if (method == "quantile") and prob is None:
@@ -293,9 +291,7 @@ def rhat(data, *, var_names=None, method="rank", dask_kwargs=None):
     }
     if method not in methods:
         raise TypeError(
-            "R-hat method {} not found. Valid methods are:\n{}".format(
-                method, "\n    ".join(methods)
-            )
+            f"R-hat method {method} not found. Valid methods are:\n{', '.join(methods)}"
         )
     rhat_func = methods[method]
 

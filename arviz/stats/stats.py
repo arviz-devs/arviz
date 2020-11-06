@@ -189,14 +189,14 @@ def compare(
         )
         scale_col = "waic_scale"
     else:
-        raise NotImplementedError("The information criterion {} is not supported.".format(ic))
+        raise NotImplementedError(f"The information criterion {ic} is not supported.")
 
     if method.lower() not in ["stacking", "bb-pseudo-bma", "pseudo-bma"]:
-        raise ValueError("The method {}, to compute weights, is not supported.".format(method))
+        raise ValueError(f"The method {method}, to compute weights, is not supported.")
 
-    ic_se = "{}_se".format(ic)
-    p_ic = "p_{}".format(ic)
-    ic_i = "{}_i".format(ic)
+    ic_se = f"{ic}_se"
+    p_ic = f"p_{ic}"
+    ic_i = f"{ic}_i"
 
     ics = pd.DataFrame()
     names = []
@@ -568,7 +568,7 @@ def _hdi_multimodal(ary, hdi_prob, skipna, max_modes):
     for i, interval in enumerate(intervals_splitted):
         if i == max_modes:
             warnings.warn(
-                "found more modes than {0}, returning only the first {0} modes".format(max_modes)
+                f"found more modes than {max_modes}, returning only the first {max_modes} modes"
             )
             break
         if interval.size == 0:
@@ -1161,7 +1161,7 @@ def summary(
             elif "prior" in data:
                 dataset = data["prior"]
             else:
-                warnings.warn("Selecting first found group: {}".format(data.groups()[0]))
+                warnings.warn(f"Selecting first found group: {data.groups()[0]}")
                 dataset = data[data.groups()[0]]
         else:
             if group not in data.groups():
@@ -1174,13 +1174,11 @@ def summary(
 
     fmt_group = ("wide", "long", "xarray")
     if not isinstance(fmt, str) or (fmt.lower() not in fmt_group):
-        raise TypeError("Invalid format: '{}'. Formatting options are: {}".format(fmt, fmt_group))
+        raise TypeError(f"Invalid format: '{fmt}'. Formatting options are: {fmt_group}")
 
     unpack_order_group = ("C", "F")
     if not isinstance(order, str) or (order.upper() not in unpack_order_group):
-        raise TypeError(
-            "Invalid order: '{}'. Unpacking options are: {}".format(order, unpack_order_group)
-        )
+        raise TypeError(f"Invalid order: '{order}'. Unpacking options are: {unpack_order_group}")
 
     alpha = 1 - hdi_prob
 
@@ -1263,8 +1261,8 @@ def summary(
         metrics_names_ = (
             "mean",
             "sd",
-            "hdi_{:g}%".format(100 * alpha / 2),
-            "hdi_{:g}%".format(100 * (1 - alpha / 2)),
+            f"hdi_{100 * alpha / 2:g}%",
+            f"hdi_{100 * (1 - alpha / 2):g}%",
             "mcse_mean",
             "mcse_sd",
             "ess_mean",
@@ -1324,7 +1322,7 @@ def summary(
                         idx = tuple(idx[::-1])
                     ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
                     key_index = ",".join(map(str, (i + index_origin for i in idx)))
-                    key = "{}[{}]".format(var_name, key_index)
+                    key = f"{var_name}[{key_index}]"
                     data_dict[key] = ser
                 df = pd.DataFrame.from_dict(data_dict, orient="index")
                 df = df.loc[list(data_dict.keys())]
@@ -1564,7 +1562,7 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         if not all(isinstance(arg, (np.ndarray, xr.DataArray)) for arg in (y, y_hat, log_weights)):
             raise ValueError(
                 "all 3 y, y_hat and log_weights must be array or DataArray when idata is None "
-                "but they are of types {}".format([type(arg) for arg in (y, y_hat, log_weights)])
+                f"but they are of types {[type(arg) for arg in (y, y_hat, log_weights)]}"
             )
 
     else:
@@ -1576,13 +1574,11 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             y_str = y
             y = idata.observed_data[y].values
         elif not isinstance(y, (np.ndarray, xr.DataArray)):
-            raise ValueError("y must be of types array, DataArray or str, not {}".format(type(y)))
+            raise ValueError(f"y must be of types array, DataArray or str, not {type(y)}")
         if isinstance(y_hat, str):
             y_hat = idata.posterior_predictive[y_hat].stack(sample=("chain", "draw")).values
         elif not isinstance(y_hat, (np.ndarray, xr.DataArray)):
-            raise ValueError(
-                "y_hat must be of types array, DataArray or str, not {}".format(type(y_hat))
-            )
+            raise ValueError(f"y_hat must be of types array, DataArray or str, not {type(y_hat)}")
         if log_weights is None:
             if y_str:
                 try:
@@ -1605,28 +1601,25 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
             log_weights = psislw(-log_likelihood, reff=reff)[0].values
         elif not isinstance(log_weights, (np.ndarray, xr.DataArray)):
             raise ValueError(
-                "log_weights must be None or of types array or DataArray, not {}".format(
-                    type(log_weights)
-                )
+                f"log_weights must be None or of types array or DataArray, not {type(log_weights)}"
             )
 
     if len(y.shape) + 1 != len(y_hat.shape):
         raise ValueError(
-            "y_hat must have 1 more dimension than y, but y_hat has {} dims and y has "
-            "{} dims".format(len(y.shape), len(y_hat.shape))
+            f"y_hat must have 1 more dimension than y, but y_hat has {len(y.shape)} dims and y has "
+            f"{len(y_hat.shape)} dims"
         )
 
     if y.shape != y_hat.shape[:-1]:
         raise ValueError(
-            "y has shape: {} which should be equal to y_hat shape (omitting the last "
-            "dimension): {}".format(y.shape, y_hat.shape)
+            f"y has shape: {y.shape} which should be equal to y_hat shape (omitting the last "
+            f"dimension): {y_hat.shape}"
         )
 
     if y_hat.shape != log_weights.shape:
         raise ValueError(
-            "y_hat and log_weights must have the same shape but have shapes {} and {}".format(
-                y_hat.shape, log_weights.shape
-            )
+            "y_hat and log_weights must have the same shape but have shapes "
+            f"{y_hat.shape,} and {log_weights.shape}"
         )
 
     kwargs = {
@@ -1750,9 +1743,7 @@ def apply_test_function(
 
     valid_groups = ("observed_data", "posterior_predictive", "both")
     if group not in valid_groups:
-        raise ValueError(
-            "Invalid group argument. Must be one of {} not {}.".format(valid_groups, group)
-        )
+        raise ValueError(f"Invalid group argument. Must be one of {valid_groups} not {group}.")
     if overwrite is None:
         overwrite = not inplace
 
@@ -1790,19 +1781,18 @@ def apply_test_function(
         out_name_group = out_name_data if grp == "observed_data" else out_name_pp
         wrap_group_kwargs = wrap_data_kwargs if grp == "observed_data" else wrap_pp_kwargs
         if not hasattr(out, grp):
-            raise ValueError("InferenceData object must have {} group".format(grp))
+            raise ValueError(f"InferenceData object must have {grp} group")
         if not overwrite and out_name_group in getattr(out, grp).data_vars:
             raise ValueError(
-                "Should overwrite: {} variable present in group {}, but overwrite is False".format(
-                    out_name_group, grp
-                )
+                f"Should overwrite: {out_name_group} variable present in group {grp},"
+                " but overwrite is False"
             )
         var_names.setdefault(
             grp, list(getattr(out, grp).data_vars) if both_var_names is None else both_var_names
         )
         in_group = getattr(out, grp)[var_names[grp]]
         if isinstance(in_group, xr.Dataset):
-            in_group = in_group.to_array(dim="{}_var".format(grp)).squeeze()
+            in_group = in_group.to_array(dim=f"{grp}_var").squeeze()
 
         if pointwise:
             out_group_shape = in_group.shape if out_group_shape is None else out_group_shape
