@@ -1013,6 +1013,14 @@ def test_plot_posterior_point_estimates(models, point_estimate):
     assert axes.shape == (1, 2)
 
 
+def test_plot_posterior_skipna():
+    sample = np.linspace(0, 1)
+    sample[:10] = np.nan
+    plot_posterior({"a": sample}, backend="bokeh", show=False, skipna=True)
+    with pytest.raises(ValueError):
+        plot_posterior({"a": sample}, backend="bokeh", show=False, skipna=False)
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [

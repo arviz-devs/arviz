@@ -34,6 +34,7 @@ def plot_posterior(
     round_to,
     hdi_prob,
     multimodal,
+    skipna,
     textsize,
     ref_val,
     rope,
@@ -82,6 +83,7 @@ def plot_posterior(
             round_to=round_to,
             hdi_prob=hdi_prob,
             multimodal=multimodal,
+            skipna=skipna,
             linewidth=linewidth,
             ref_val=ref_val,
             rope=rope,
@@ -112,6 +114,7 @@ def _plot_posterior_op(
     point_estimate,
     hdi_prob,
     multimodal,
+    skipna,
     ref_val,
     rope,
     ax_labelsize,
@@ -205,7 +208,9 @@ def _plot_posterior_op(
     def display_hdi(max_data):
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
-        hdi_probs = hdi(values, hdi_prob=hdi_prob, multimodal=multimodal)  # type: np.ndarray
+        hdi_probs = hdi(
+            values, hdi_prob=hdi_prob, multimodal=multimodal, skipna=skipna
+        )  # type: np.ndarray
 
         for hdi_i in np.atleast_2d(hdi_probs):
             ax.line(
@@ -230,6 +235,9 @@ def _plot_posterior_op(
         ax.yaxis.major_label_text_font_size = "0pt"
         ax.xgrid.grid_line_color = None
         ax.ygrid.grid_line_color = None
+
+    if skipna:
+        values = values[~np.isnan(values)]
 
     if kind == "kde" and values.dtype.kind == "f":
         kwargs.setdefault("line_width", linewidth)

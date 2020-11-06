@@ -374,16 +374,17 @@ def hdi(
         Any object that can be converted to an az.InferenceData object.
         Refer to documentation of az.convert_to_dataset for details.
     hdi_prob: float, optional
-        HDI prob for which interval will be computed. Defaults to ``stats.hdi_prob`` rcParam.
+        Prob for which the highest density interval will be computed. Defaults to
+        ``stats.hdi_prob`` rcParam.
     circular: bool, optional
         Whether to compute the hdi taking into account `x` is a circular variable
         (in the range [-np.pi, np.pi]) or not. Defaults to False (i.e non-circular variables).
         Only works if multimodal is False.
     multimodal: bool, optional
-        If true it may compute more than one hdi interval if the distribution is multimodal and the
+        If true it may compute more than one hdi if the distribution is multimodal and the
         modes are well separated.
     skipna: bool, optional
-        If true ignores nan values when computing the hdi interval. Defaults to false.
+        If true ignores nan values when computing the hdi. Defaults to false.
     group: str, optional
         Specifies which InferenceData group should be used to calculate hdi.
         Defaults to 'posterior'
@@ -412,7 +413,7 @@ def hdi(
 
     See Also
     --------
-    plot_hdi : Plot HDI intervals for regression data.
+    plot_hdi : Plot highest density intervals for regression data.
     xarray.Dataset.quantile : Calculate quantiles of array for given probabilities.
 
     Examples
@@ -1054,8 +1055,8 @@ def summary(
         If True, use the statistics returned by ``stat_funcs`` in addition to, rather than in place
         of, the default statistics. This is only meaningful when ``stat_funcs`` is not None.
     hdi_prob: float, optional
-        HDI interval to compute. Defaults to 0.94. This is only meaningful when ``stat_funcs`` is
-        None.
+        Highest density interval to compute. Defaults to 0.94. This is only meaningful when
+        ``stat_funcs`` is None.
     order: {"C", "F"}
         If fmt is "wide", use either C or F unpacking order. Defaults to C.
     index_origin: int
