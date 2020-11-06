@@ -15,7 +15,7 @@ from . import backend_kwarg_defaults, backend_show, matplotlib_kwarg_dealiaser
 
 def plot_pair(
     ax,
-    infdata_group,
+    plotters,
     numvars,
     figsize,
     textsize,
@@ -73,6 +73,7 @@ def plot_pair(
         marginal_kwargs = {}
 
     point_estimate_kwargs = matplotlib_kwarg_dealiaser(point_estimate_kwargs, "fill_between")
+    point_estimate_kwargs.setdefault("color", "k")
 
     if kind != "kde":
         kde_kwargs.setdefault("contourf_kwargs", {})
@@ -105,14 +106,15 @@ def plot_pair(
 
     reference_values_kwargs = matplotlib_kwarg_dealiaser(reference_values_kwargs, "plot")
 
-    reference_values_kwargs.setdefault("color", "C3")
+    reference_values_kwargs.setdefault("color", "C2")
+    reference_values_kwargs.setdefault("markeredgecolor", "k")
     reference_values_kwargs.setdefault("marker", "o")
 
     point_estimate_marker_kwargs = matplotlib_kwarg_dealiaser(
         point_estimate_marker_kwargs, "scatter"
     )
     point_estimate_marker_kwargs.setdefault("marker", "s")
-    point_estimate_marker_kwargs.setdefault("color", "C1")
+    point_estimate_marker_kwargs.setdefault("color", "k")
 
     # pylint: disable=too-many-nested-blocks
     if numvars == 2:
@@ -127,8 +129,8 @@ def plot_pair(
         point_estimate_marker_kwargs.setdefault("s", markersize + 50)
 
         # Flatten data
-        x = infdata_group[0].flatten()
-        y = infdata_group[1].flatten()
+        x = plotters[0][-1].flatten()
+        y = plotters[1][-1].flatten()
         if ax is None:
             if marginals:
                 # Instantiate figure and grid
@@ -177,13 +179,13 @@ def plot_pair(
                 ax = np.atleast_2d(ax)[0, 0]
 
         if "scatter" in kind:
-            ax.plot(infdata_group[0], infdata_group[1], **scatter_kwargs)
+            ax.plot(x, y, **scatter_kwargs)
         if "kde" in kind:
-            plot_kde(infdata_group[0], infdata_group[1], ax=ax, **kde_kwargs)
+            plot_kde(x, y, ax=ax, **kde_kwargs)
         if "hexbin" in kind:
             hexbin = ax.hexbin(
-                infdata_group[0],
-                infdata_group[1],
+                x,
+                y,
                 gridsize=gridsize,
                 **hexbin_kwargs,
             )
@@ -195,8 +197,8 @@ def plot_pair(
 
         if divergences:
             ax.plot(
-                infdata_group[0][diverging_mask],
-                infdata_group[1][diverging_mask],
+                x[diverging_mask],
+                y[diverging_mask],
                 **divergences_kwargs,
             )
 
@@ -256,10 +258,10 @@ def plot_pair(
             )
         hexbin_values = []
         for i in range(0, vars_to_plot):
-            var1 = infdata_group[i]
+            var1 = plotters[i][-1].flatten()
 
             for j in range(0, vars_to_plot):
-                var2 = infdata_group[j + not_marginals]
+                var2 = plotters[j + not_marginals][-1].flatten()
                 if i > j:
                     if ax[j, i].get_figure() is not None:
                         ax[j, i].remove()
@@ -312,7 +314,7 @@ def plot_pair(
 
                         if marginals:
                             ax[j - 1, i].axvline(pe_x, **point_estimate_kwargs)
-                            pe_last = calculate_point_estimate(point_estimate, infdata_group[-1])
+                            pe_last = calculate_point_estimate(point_estimate, plotters[-1][-1])
                             ax[-1, -1].axvline(pe_last, **point_estimate_kwargs)
 
                         ax[j, i].scatter(pe_x, pe_y, **point_estimate_marker_kwargs)

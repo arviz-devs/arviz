@@ -9,6 +9,8 @@
 * Add observed argument to (un)plot observed data in `plot_ppc` ([1422](https://github.com/arviz-devs/arviz/pull/1422))
 * Add support for named dims and coordinates with multivariate observations ([1429](https://github.com/arviz-devs/arviz/pull/1429))
 * Add support for discrete variables in rank plots ([1433](https://github.com/arviz-devs/arviz/pull/1433))
+* Add skipna argument to `plot_posterior` ([1432](https://github.com/arviz-devs/arviz/pull/1432))
+
 
 ### Maintenance and fixes
 * prevent wrapping group names in InferenceData repr_html ([1407](https://github.com/arviz-devs/arviz/pull/1407))
@@ -19,6 +21,8 @@
 * Have `from_pystan` store attrs as strings to allow netCDF storage ([1417](https://github.com/arviz-devs/arviz/pull/1417))
 * Remove ticks and spines in `plot_violin`  ([1426 ](https://github.com/arviz-devs/arviz/pull/1426))
 * Use circular KDE function and fix tick labels in circular `plot_trace` ([1428](https://github.com/arviz-devs/arviz/pull/1428))
+*  Fix `pair_plot` for mixed discrete and continuous variables ([1434](https://github.com/arviz-devs/arviz/pull/1434))
+* Fix in-sample deviance in `plot_compare` ([1435](https://github.com/arviz-devs/arviz/pull/1435))
 
 ### Deprecation
 

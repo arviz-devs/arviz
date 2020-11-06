@@ -533,7 +533,7 @@ def get_plotting_function(plot_name, plot_module, backend):
     return plotting_method
 
 
-def calculate_point_estimate(point_estimate, values, bw="default", circular=False):
+def calculate_point_estimate(point_estimate, values, bw="default", circular=False, skipna=False):
     """Validate and calculate the point estimate.
 
     Parameters
@@ -552,6 +552,8 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
     circular: Optional[bool]
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
+    skipna=True,
+        If true ignores nan values when computing the hdi. Defaults to false.
 
     Returns
     -------
@@ -568,7 +570,10 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
             )
         )
     if point_estimate == "mean":
-        point_value = values.mean()
+        if skipna:
+            point_value = np.nanmean(values)
+        else:
+            point_value = np.mean(values)
     elif point_estimate == "mode":
         if isinstance(values[0], float):
             if bw == "default":
@@ -581,7 +586,10 @@ def calculate_point_estimate(point_estimate, values, bw="default", circular=Fals
         else:
             point_value = mode(values)[0][0]
     elif point_estimate == "median":
-        point_value = np.median(values)
+        if skipna:
+            point_value = np.nanmedian(values)
+        else:
+            point_value = np.median(values)
 
     return point_value
 

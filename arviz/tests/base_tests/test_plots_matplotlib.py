@@ -927,6 +927,14 @@ def test_plot_posterior_point_estimates(models, point_estimate):
     assert axes.size == 2
 
 
+def test_plot_posterior_skipna():
+    sample = np.linspace(0, 1)
+    sample[:10] = np.nan
+    plot_posterior({"a": sample}, skipna=True)
+    with pytest.raises(ValueError):
+        plot_posterior({"a": sample}, skipna=False)
+
+
 @pytest.mark.parametrize(
     "kwargs", [{"insample_dev": False}, {"plot_standard_error": False}, {"plot_ic_diff": False}]
 )
@@ -934,16 +942,6 @@ def test_plot_compare(models, kwargs):
     model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
 
     axes = plot_compare(model_compare, **kwargs)
-    assert axes
-
-
-def test_plot_compare_manual(models):
-    """Test compare plot without scale column"""
-    model_compare = compare({"Model 1": models.model_1, "Model 2": models.model_2})
-
-    # remove "scale" column
-    del model_compare["loo_scale"]
-    axes = plot_compare(model_compare)
     assert axes
 
 

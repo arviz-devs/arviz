@@ -15,6 +15,7 @@ def plot_posterior(
     textsize=None,
     hdi_prob=None,
     multimodal=False,
+    skipna=False,
     round_to=None,
     point_estimate="auto",
     group="posterior",
@@ -61,6 +62,8 @@ def plot_posterior(
     multimodal: bool
         If true (default) it may compute more than one credible interval if the distribution is
         multimodal and the modes are well separated.
+    skipna : bool
+        If true ignores nan values when computing the hdi and point estimates. Defaults to false.
     round_to: int, optional
         Controls formatting of floats. Defaults to 2 or the integer part, whichever is bigger.
     point_estimate: Optional[str]
@@ -234,6 +237,7 @@ def plot_posterior(
         round_to=round_to,
         hdi_prob=hdi_prob,
         multimodal=multimodal,
+        skipna=skipna,
         textsize=textsize,
         ref_val=ref_val,
         rope=rope,

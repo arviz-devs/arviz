@@ -4,10 +4,15 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ..data import convert_to_dataset, convert_to_inference_data
+from ..data import convert_to_dataset
 from ..rcparams import rcParams
 from ..utils import _var_names, get_coords
-from .plot_utils import get_plotting_function, xarray_to_ndarray
+from .plot_utils import (
+    get_plotting_function,
+    xarray_to_ndarray,
+    filter_plotters_list,
+    xarray_var_iter,
+)
 
 
 def plot_pair(
@@ -187,12 +192,13 @@ def plot_pair(
         coords = {}
 
     # Get posterior draws and combine chains
-    data = convert_to_inference_data(data)
-    grouped_data = convert_to_dataset(data, group=group)
-    var_names = _var_names(var_names, grouped_data, filter_vars)
-    flat_var_names, infdata_group = xarray_to_ndarray(
-        get_coords(grouped_data, coords), var_names=var_names, combined=True
+    dataset = convert_to_dataset(data, group=group)
+    var_names = _var_names(var_names, dataset, filter_vars)
+    plotters = filter_plotters_list(
+        list(xarray_var_iter(get_coords(dataset, coords), var_names=var_names, combined=True)),
+        "plot_pair",
     )
+    flat_var_names = [plotter[0] for plotter in plotters]
 
     divergent_data = None
     diverging_mask = None
@@ -224,7 +230,7 @@ def plot_pair(
             )
 
     if gridsize == "auto":
-        gridsize = int(len(infdata_group[0]) ** 0.35)
+        gridsize = int(dataset.dims["draw"] ** 0.35)
 
     numvars = len(flat_var_names)
 
@@ -233,7 +239,7 @@ def plot_pair(
 
     pairplot_kwargs = dict(
         ax=ax,
-        infdata_group=infdata_group,
+        plotters=plotters,
         numvars=numvars,
         figsize=figsize,
         textsize=textsize,
