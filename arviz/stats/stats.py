@@ -43,7 +43,7 @@ __all__ = [
 
 
 def compare(
-    dataset_dict, ic=None, method="BB-pseudo-BMA", b_samples=1000, alpha=1, seed=None, scale=None
+    dataset_dict, ic=None, method="stacking", b_samples=1000, alpha=1, seed=None, scale=None
 ):
     r"""Compare models based on PSIS-LOO `loo` or WAIC `waic` cross-validation.
 
@@ -62,8 +62,8 @@ def compare(
     method: str
         Method used to estimate the weights for each model. Available options are:
 
-        - 'stacking' : stacking of predictive distributions.
-        - 'BB-pseudo-BMA' : (default) pseudo-Bayesian Model averaging using Akaike-type
+        - 'stacking' : (default) stacking of predictive distributions.
+        - 'BB-pseudo-BMA' : pseudo-Bayesian Model averaging using Akaike-type
           weighting. The weights are stabilized using the Bayesian bootstrap.
         - 'pseudo-BMA': pseudo-Bayesian Model averaging using Akaike-type
           weighting, without Bootstrap stabilization (not recommended).
@@ -141,6 +141,10 @@ def compare(
     waic : Compute the widely applicable information criterion.
 
     """
+    warnings.warn(
+        "The default method used to estimate the weights for each model,"
+        "has changed from BB-pseudo-BMA to stacking"
+    )
     names = list(dataset_dict.keys())
     scale = rcParams["stats.ic_scale"] if scale is None else scale.lower()
     if scale == "log":
@@ -210,7 +214,7 @@ def compare(
     if method.lower() == "stacking":
         rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
         exp_ic_i = np.exp(ic_i_val / scale_value)
-        last_col = cols - 1
+        km1 = cols - 1
 
         def w_fuller(weights):
             return np.concatenate((weights, [max(1.0 - np.sum(weights), 0.0)]))
@@ -224,18 +228,16 @@ def compare(
 
         def gradient(weights):
             w_full = w_fuller(weights)
-            grad = np.zeros(last_col)
-            for k in range(last_col - 1):
+            grad = np.zeros(km1)
+            for k in range(km1):
                 for i in range(rows):
-                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, last_col]) / np.dot(
-                        exp_ic_i[i], w_full
-                    )
+                    grad[k] += (exp_ic_i[i, k] - exp_ic_i[i, km1]) / np.dot(exp_ic_i[i], w_full)
             return -grad
 
-        theta = np.full(last_col, 1.0 / cols)
-        bounds = [(0.0, 1.0) for _ in range(last_col)]
+        theta = np.full(km1, 1.0 / cols)
+        bounds = [(0.0, 1.0) for _ in range(km1)]
         constraints = [
-            {"type": "ineq", "fun": lambda x: 1.0 - np.sum(x)},
+            {"type": "ineq", "fun": lambda x: -np.sum(x) + 1.0},
             {"type": "ineq", "fun": np.sum},
         ]
 
@@ -255,7 +257,7 @@ def compare(
         z_bs = np.zeros_like(weights)
         for i in range(b_samples):
             z_b = np.dot(b_weighting[i], ic_i_val)
-            u_weights = np.exp((z_b - np.min(z_b)) / scale_value)
+            u_weights = np.exp((z_b - np.max(z_b)) / scale_value)
             z_bs[i] = z_b  # pylint: disable=unsupported-assignment-operation
             weights[i] = u_weights / np.sum(u_weights)
 
