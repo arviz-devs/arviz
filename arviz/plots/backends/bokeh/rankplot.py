@@ -1,12 +1,12 @@
 """Bokeh rankplot."""
 import numpy as np
-import scipy.stats
+
 from bokeh.models import Span
 from bokeh.models.annotations import Title
 from bokeh.models.tickers import FixedTicker
 
 from ....stats.density_utils import histogram
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size, make_label, compute_ranks
 from .. import show_layout
 from . import backend_kwarg_defaults, create_axes_grid
 
@@ -74,7 +74,7 @@ def plot_rank(
     for ax, (var_name, selection, var_data) in zip(
         (item for item in axes.flatten() if item is not None), plotters
     ):
-        ranks = scipy.stats.rankdata(var_data, method="average").reshape(var_data.shape)
+        ranks = compute_ranks(var_data)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):

@@ -9,7 +9,9 @@ import numpy as np
 import packaging
 import xarray as xr
 from matplotlib.colors import to_hex
-from scipy.stats import mode
+from scipy.stats import mode, rankdata
+from scipy.interpolate import CubicSpline
+
 
 from ..rcparams import rcParams
 from ..stats.density_utils import kde
@@ -659,3 +661,17 @@ def set_bokeh_circular_ticks_labels(ax, hist, labels):
     )
 
     return ax
+
+
+def compute_ranks(ary):
+    """Compute ranks for continuos and discrete variables."""
+    if ary.dtype.kind == "i":
+        ary_shape = ary.shape
+        ary = ary.flatten()
+        min_ary, max_ary = min(ary), max(ary)
+        x = np.linspace(min_ary, max_ary, len(ary))
+        csi = CubicSpline(x, ary)
+        ary = csi(np.linspace(min_ary + 0.001, max_ary - 0.001, len(ary))).reshape(ary_shape)
+    ranks = rankdata(ary, method="average").reshape(ary.shape)
+
+    return ranks

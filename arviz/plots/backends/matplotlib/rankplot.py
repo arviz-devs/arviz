@@ -1,10 +1,9 @@
 """Matplotlib rankplot."""
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats
 
 from ....stats.density_utils import histogram
-from ...plot_utils import _scale_fig_size, make_label
+from ...plot_utils import _scale_fig_size, make_label, compute_ranks
 from . import backend_kwarg_defaults, backend_show, create_axes_grid
 
 
@@ -66,7 +65,7 @@ def plot_rank(
         )
 
     for ax, (var_name, selection, var_data) in zip(np.ravel(axes), plotters):
-        ranks = scipy.stats.rankdata(var_data, method="average").reshape(var_data.shape)
+        ranks = compute_ranks(var_data)
         bin_ary = np.histogram_bin_edges(ranks, bins=bins, range=(0, ranks.size))
         all_counts = np.empty((len(ranks), len(bin_ary) - 1))
         for idx, row in enumerate(ranks):
