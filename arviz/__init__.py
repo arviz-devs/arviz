@@ -10,6 +10,8 @@ from matplotlib.pyplot import register_cmap, style
 
 
 class Logger(logging.Logger):
+    """Override Logger to avoid repeated messages."""
+
     def __init__(self, name, level=logging.NOTSET):
         super().__init__(name=name, level=level)
         self.cache = []
