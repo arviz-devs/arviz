@@ -9,18 +9,17 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.pyplot import register_cmap, style
 
 
-# Configure logging before importing arviz internals
 class Logger(logging.Logger):
     def __init__(self, name, level=logging.NOTSET):
         super().__init__(name=name, level=level)
         self.cache = []
 
-    def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=False):
+    def _log(self, level, msg, *args, **kwargs):  # pylint: disable=W0221
         msg_hash = hash(msg)
         if msg_hash in self.cache:
             return
         self.cache.append(msg_hash)
-        super()._log(level, msg, args, exc_info, extra, stack_info)
+        super()._log(level, msg, *args, **kwargs)
 
 
 _log = Logger("arviz")
