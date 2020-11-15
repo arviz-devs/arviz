@@ -14,7 +14,9 @@ class Logger(logging.Logger):
         super().__init__(name=name, level=level)
         self.cache = []
 
-    def _log(self, level, msg, *args, **kwargs):  # pylint: disable=W0221
+    def _log(
+        self, level, msg, *args, **kwargs
+    ):  # pylint: disable=signature-differs, arguments-differ
         msg_hash = hash(msg)
         if msg_hash in self.cache:
             return
