@@ -1,5 +1,4 @@
 """Stats-utility functions for ArviZ."""
-import logging
 import warnings
 from collections.abc import Sequence
 from copy import copy as _copy
@@ -11,10 +10,10 @@ from scipy.fftpack import next_fast_len
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
+from arviz import _log
 from ..utils import conditional_jit, conditional_vect, conditional_dask
 from .density_utils import histogram as _histogram
 
-_log = logging.getLogger(__name__)
 
 __all__ = ["autocorr", "autocov", "ELPDData", "make_ufunc", "wrap_xarray_ufunc"]
 
