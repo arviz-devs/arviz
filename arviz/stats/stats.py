@@ -1,6 +1,5 @@
 # pylint: disable=too-many-lines
 """Statistical functions in ArviZ."""
-import logging
 import warnings
 from collections import OrderedDict
 from copy import deepcopy
@@ -12,6 +11,7 @@ import scipy.stats as st
 import xarray as xr
 from scipy.optimize import minimize
 
+from arviz import _log
 from ..data import CoordSpec, DimSpec, InferenceData, convert_to_dataset, convert_to_inference_data
 from ..rcparams import rcParams
 from ..utils import Numba, _numba_var, _var_names, credible_interval_warning, get_coords
@@ -26,7 +26,6 @@ from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
 
-_log = logging.getLogger(__name__)
 
 __all__ = [
     "apply_test_function",
@@ -1132,6 +1131,8 @@ def summary(
            ...: )
 
     """
+    _log.cache = []
+
     if include_circ:
         warnings.warn(
             "include_circ is deprecated and will be ignored. Use circ_var_names instead",
