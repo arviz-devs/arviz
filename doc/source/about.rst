@@ -44,4 +44,4 @@ at GitHub.
 
 Donations
 =========
-ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate `here <https://numfocus.salsalabs.org/donate-to-arviz>`_.
+ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate `here <https://numfocus.org/donate-to-arviz>`_.
