@@ -209,7 +209,7 @@ def _plot_posterior_op(
         # np.ndarray with 2 entries, min and max
         # pylint: disable=line-too-long
         hdi_probs = hdi(
-            values, hdi_prob=hdi_prob, multimodal=multimodal, skipna=skipna
+            values, hdi_prob=hdi_prob, circular=circular, multimodal=multimodal, skipna=skipna
         )  # type: np.ndarray
 
         for hdi_i in np.atleast_2d(hdi_probs):
