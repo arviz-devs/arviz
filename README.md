@@ -187,7 +187,7 @@ ArviZ wishes to maintain a positive community. Additional details
 can be found in the [Code of Conduct](https://github.com/arviz-devs/arviz/blob/master/CODE_OF_CONDUCT.md)
 
 ## Donations
-ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.salsalabs.org/donate-to-arviz).
+ArviZ is a non-profit project under NumFOCUS umbrella. If you want to support ArviZ financially, you can donate [here](https://numfocus.org/donate-to-arviz).
 
 ## Sponsors
 [![NumFOCUS](https://i0.wp.com/numfocus.org/wp-content/uploads/2019/06/AffiliatedProject.png)](https://numfocus.org)
