@@ -26,6 +26,7 @@
 * Fix in-sample deviance in `plot_compare` ([1435](https://github.com/arviz-devs/arviz/pull/1435))
 * Fix computation of weights in compare ([1438](https://github.com/arviz-devs/arviz/pull/1438))
 * Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442)) 
+* Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
 
 ### Deprecation
 
