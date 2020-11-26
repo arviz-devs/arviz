@@ -16,6 +16,8 @@ RemoteFileMetadata = namedtuple(
 )
 _DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_datasets")
 
+# Models for local datasets are located at https://github.com/arviz-devs/arviz_example_data
+
 LOCAL_DATASETS = {
     "centered_eight": LocalFileMetadata(
         filename=os.path.join(_DATASET_DIR, "centered_eight.nc"),
