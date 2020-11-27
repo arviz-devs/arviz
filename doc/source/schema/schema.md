@@ -42,14 +42,14 @@ Samples from the posterior distribution p(theta|y).
 ### `sample_stats`
 Information and diagnostics for each `posterior` sample, provided by the inference
 backend. It may vary depending on the algorithm used by the backend (i.e. an affine
-invariant sampler has no energy associated). Therefore none of this parameters
+invariant sampler has no energy associated). Therefore none of these parameters
 should be assumed to be present in the `sample_stats` group. The convention
 below serves to ensure that _if_ a variable is present with one of these names
 it will correspond to the definition included here.
 
 The name convention used for `sample_stats` variables is the following:
 
-* `lp`: The log posterior density (up to an additive constant).
+* `lp`: The joint log posterior density for the model (up to an additive constant).
 * `acceptance_rate`: The average acceptance probabilities of all possible samples in the proposed tree.
 * `step_size`: The current integration step size.
 * `step_size_nom`: The nominal integration step size. The `step_size` may differ from this, for example if the step size is jittered. Should only be present if `step_size` is also present and it varies between samples (i.e. step size is jittered).
