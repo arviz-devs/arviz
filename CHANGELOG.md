@@ -27,6 +27,7 @@
 * Fix computation of weights in compare ([1438](https://github.com/arviz-devs/arviz/pull/1438))
 * Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442)) 
 * Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
+* Automatically get the current axes instance for `plt_kde` and `plot_dist` ([1452](https://github.com/arviz-devs/arviz/pull/1452))
 
 ### Deprecation
 

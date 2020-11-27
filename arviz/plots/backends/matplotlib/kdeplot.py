@@ -58,9 +58,9 @@ def plot_kde(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        figManager = _pylab_helpers.Gcf.get_active()
-        if figManager is not None:
-            ax = figManager.canvas.figure.gca()
+        fig_manager = _pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            ax = fig_manager.canvas.figure.gca()
         else:
             _, ax = create_axes_grid(
                 1,
