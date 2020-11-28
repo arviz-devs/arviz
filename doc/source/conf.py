@@ -249,6 +249,7 @@ epub_exclude_files = ["search.html"]
 # Example configuration for intersphinx
 intersphinx_mapping = {
     "xarray": ("http://xarray.pydata.org/en/stable/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "pymc3": ("https://docs.pymc.io/", None),
     "mpl": ("https://matplotlib.org/", None),
     "bokeh": ("https://docs.bokeh.org/en/latest/", None),

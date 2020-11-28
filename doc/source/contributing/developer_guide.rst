@@ -88,7 +88,14 @@ using::
   :meth:`mpl:matplotlib.axes.Axes.plot`
 
 The `intersphinx_mappings`
-defined for ArviZ can be seen in `conf.py <https://github.com/arviz-devs/arviz/blob/master/doc/conf.py>`_
+defined for ArviZ can be seen in `conf.py <https://github.com/arviz-devs/arviz/blob/master/doc/conf.py>`_.
+Moreover, the intersphinx key is optional. Thus, the pattern to get sphinx to generate links is::
+
+  :type_id:`(intersphinx_key:)object_id`
+
+with the part between brackets being optional. See the docstring on
+:meth:`~arviz.InferenceData.to_dataframe` and
+`its source <https://arviz-devs.github.io/arviz/_modules/arviz/data/inference_data.html#InferenceData.to_dataframe>`_ for an example.
 
 Referencing ArviZ objects
 """""""""""""""""""""""""

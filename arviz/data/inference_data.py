@@ -380,7 +380,7 @@ class InferenceData:
         include_index=True,
         index_origin=None,
     ):
-        """Convert InferenceData to a pandas DataFrame following xarray naming conventions.
+        """Convert InferenceData to a pandas :class:`pandas.DataFrame` following xarray naming conventions.
 
         This returns dataframe in a "wide" -format, where each item in ndimensional array is
         unpacked. To access "tidy" -format, use xarray functionality found for each dataset.
