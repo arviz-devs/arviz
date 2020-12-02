@@ -1,5 +1,6 @@
 emcee
 pyjags
+theano-pymc @ git+https://github.com/pymc-devs/Theano-PyMC
 pymc3 @ git+https://github.com/pymc-devs/pymc3
 pystan
 cmdstanpy
