@@ -15,8 +15,6 @@ jobs:
         pystan.version: "latest"
         cmdstanpy.version: "latest"
         pymc3.version: "latest"
-        pyro.version: "latest"
-        pytorch.version: "latest"
         emcee.version: "latest"
         name: "External latest"
 
@@ -25,10 +23,7 @@ jobs:
         pystan.version: 2.19.1.1
         cmdstanpy.version: 0.9.67
         pymc3.version: "github"
-        pyro.version: 1.2
-        pytorch.version: 1.4
         emcee.version: 2
-        tensorflow.version: 1
         name: "External special"
 
   steps:
@@ -50,12 +45,6 @@ jobs:
       sudo apt-get install jags
       python -m pip install --upgrade pip
       python -m pip install wheel
-
-      if [ "$(pytorch.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install torch -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      else
-          python -m pip --no-cache-dir install torch=="$(pytorch.version)" -f https://download.pytorch.org/whl/cpu/torch_stable.html
-      fi
 
       if [ "$(pystan.version)" = "latest" ]; then
           python -m pip --no-cache-dir install pystan
@@ -93,6 +82,7 @@ jobs:
       fi
 
       grep -Ev '^pystan|^cmdstanpy|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
+
     displayName: 'Install packages'
 
   - script: |
