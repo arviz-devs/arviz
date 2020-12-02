@@ -8,7 +8,7 @@ command -v conda >/dev/null 2>&1 || {
 }
 
 # if no python specified, use Travis version, or else 3.9
-PYTHON_VERSION=${PYTHON_VERSION:-${TRAVIS_PYTHON_VERSION:-3.9}}
+PYTHON_VERSION=${PYTHON_VERSION:-${CI_PYTHON_VERSION:-3.9}}
 PYSTAN_VERSION=${PYSTAN_VERSION:-latest}
 PYTORCH_VERSION=${PYTORCH_VERSION:-latest}
 PYRO_VERSION=${PYRO_VERSION:-latest}
