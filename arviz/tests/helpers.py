@@ -586,7 +586,8 @@ def load_cached_models(eight_schools_data, draws, chains, libs=None):
         )
 
         path = os.path.join(data_directory, fname)
-        if not os.path.exists(path):
+        # if not os.path.exists(path):
+        if True:
             with gzip.open(path, "wb") as buff:
                 _log.info("Generating and caching %s", fname)
                 pickle.dump(func(eight_schools_data, draws, chains), buff)
