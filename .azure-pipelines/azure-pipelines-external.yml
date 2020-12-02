@@ -87,7 +87,7 @@ jobs:
       if [ "$(pymc3.version)" = "github" ]; then
           python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
       else
-          python -m pip --no-cache-dir install pymc3
+            true
       fi
 
       python -m pip install --no-cache-dir -r requirements-external.txt
