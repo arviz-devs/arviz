@@ -91,7 +91,6 @@ jobs:
       fi
 
       grep -Ev '^pystan|^pyro|^emcee|^pymc3|^tensorflow' requirements-external.txt | xargs python -m pip install
-      python -m pip install tensorflow tensorflow-probability
     displayName: 'Install packages'
 
   - script: |
