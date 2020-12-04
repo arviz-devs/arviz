@@ -82,7 +82,7 @@ jobs:
       if [ "$(tensorflow.version)" = "latest" ]; then
           python -m pip --no-cache-dir install tensorflow tensorflow_probability
       else
-          python -m pip --no-cache-dir install tensorflow==1.14 tensorflow_probability==0.7
+          python -m pip --no-cache-dir install "tensorflow<2" "tensorflow_probability<0.9"
       fi
 
       if [ "$(pymc3.version)" = "github" ]; then
