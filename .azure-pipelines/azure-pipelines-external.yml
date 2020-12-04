@@ -19,6 +19,7 @@ jobs:
         emcee.version: "latest"
         tensorflow.version: "latest"
         name: "External latest"
+
       Python_38_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
         python.version: 3.8
         pystan.version: "preview"
