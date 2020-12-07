@@ -18,6 +18,7 @@ def plot_ppc(
     mean=True,
     observed=True,
     color="C0",
+    grid=None,
     figsize=None,
     textsize=None,
     data_pairs=None,
@@ -56,6 +57,9 @@ def plot_ppc(
         Whether or not to plot the observed data.
     color: str
         Valid matplotlib color. Defaults to C0
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -280,7 +284,7 @@ def plot_ppc(
             ),
         )
     ]
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     ppcplot_kwargs = dict(
         ax=ax,

@@ -11,6 +11,7 @@ def plot_autocorr(
     filter_vars=None,
     max_lag=None,
     combined=False,
+    grid=None,
     figsize=None,
     textsize=None,
     ax=None,
@@ -42,6 +43,9 @@ def plot_autocorr(
     combined: bool
         Flag for combining multiple chains into a single chain. If False (default), chains will be
         plotted separately.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
         Note this is not used if ax is supplied.
@@ -109,7 +113,7 @@ def plot_autocorr(
     plotters = filter_plotters_list(
         list(xarray_var_iter(data, var_names, combined)), "plot_autocorr"
     )
-    rows, cols = default_grid(len(plotters))
+    rows, cols = default_grid(len(plotters), grid=grid)
 
     autocorr_plot_args = dict(
         axes=ax,

@@ -17,6 +17,7 @@ def plot_ess(
     relative=False,
     coords=None,
     figsize=None,
+    grid=None,
     textsize=None,
     rug=False,
     rug_kind="diverging",
@@ -54,6 +55,9 @@ def plot_ess(
         Show relative ess in plot ``ress = ess / N``.
     coords: dict, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -242,7 +246,7 @@ def plot_ess(
         list(xarray_var_iter(ess_dataset, var_names=var_names, skip_dims={"ess_dim"})), "plot_ess"
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     if extra_methods:
         mean_ess = ess(data, var_names=var_names, method="mean", relative=relative)

@@ -96,7 +96,7 @@ def _scale_fig_size(figsize, textsize, rows=1, cols=1):
     return (width, height), ax_labelsize, titlesize, xt_labelsize, linewidth, markersize
 
 
-def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
+def default_grid(n_items, grid=None, max_cols=4, min_cols=3):  # noqa: D202
     """Make a grid for subplots.
 
     Tries to get as close to sqrt(n_items) x sqrt(n_items) as it can,
@@ -106,6 +106,8 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
     ----------
     n_items : int
         Number of panels required
+    grid : tuple
+        Number of rows and columns
     max_cols : int
         Maximum number of columns, inclusive
     min_cols : int
@@ -117,19 +119,28 @@ def default_grid(n_items, max_cols=4, min_cols=3):  # noqa: D202
         Rows and columns, so that rows * columns >= n_items
     """
 
-    def in_bounds(val):
-        return np.clip(val, min_cols, max_cols)
+    if grid is None:
 
-    if n_items <= max_cols:
-        return 1, n_items
-    ideal = in_bounds(round(n_items ** 0.5))
+        def in_bounds(val):
+            return np.clip(val, min_cols, max_cols)
 
-    for offset in (0, 1, -1, 2, -2):
-        cols = in_bounds(ideal + offset)
-        rows, extra = divmod(n_items, cols)
-        if extra == 0:
-            return rows, cols
-    return n_items // ideal + 1, ideal
+        if n_items <= max_cols:
+            return 1, n_items
+        ideal = in_bounds(round(n_items ** 0.5))
+
+        for offset in (0, 1, -1, 2, -2):
+            cols = in_bounds(ideal + offset)
+            rows, extra = divmod(n_items, cols)
+            if extra == 0:
+                return rows, cols
+        return n_items // ideal + 1, ideal
+    else:
+        rows, cols = grid
+        if rows * cols < n_items:
+            raise ValueError("The number of rows times columns is less than the number of subplots")
+        if (rows * cols) - n_items >= cols:
+            warnings.warn("The number of rows times columns is larger than necessary")
+        return rows, cols
 
 
 def selection_to_string(selection):

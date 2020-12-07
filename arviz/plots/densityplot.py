@@ -22,6 +22,7 @@ def plot_density(
     shade=0.0,
     bw="default",
     circular=False,
+    grid=None,
     figsize=None,
     textsize=None,
     ax=None,
@@ -83,6 +84,9 @@ def plot_density(
     circular: Optional[bool]
         If True, it interprets the values passed are from a circular variable measured in radians
         and a circular KDE is used. Only valid for 1D KDE. Defaults to False.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize : Optional[Tuple[int, int]]
         Figure size. If None it will be defined automatically.
     textsize: Optional[float]
@@ -212,7 +216,7 @@ def plot_density(
             for plotters in to_plot
         ]
         length_plotters = max_plots
-    rows, cols = default_grid(length_plotters, max_cols=3)
+    rows, cols = default_grid(length_plotters, grid=grid, max_cols=3)
 
     if bw == "default":
         if circular:

@@ -21,6 +21,7 @@ def plot_rank(
     colors="cycle",
     ref_line=True,
     labels=True,
+    grid=None,
     figsize=None,
     ax=None,
     backend=None,
@@ -64,7 +65,7 @@ def plot_rank(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     bins: None or passed to np.histogram
         Binning strategy used for histogram. By default uses twice the result of Sturges' formula.
-        See `np.histogram` documenation for, other available arguments.
+        See `np.histogram` documentation for, other available arguments.
     kind: string
         If bars (defaults), ranks are represented as stacked histograms (one per chain). If vlines
         ranks are represented as vertical lines above or below `ref_line`.
@@ -76,7 +77,10 @@ def plot_rank(
     ref_line: boolean
         Whether to include a dashed line showing where a uniform distribution would lie
     labels: bool
-        wheter to plot or not the x and y labels, defaults to True
+        whether to plot or not the x and y labels, defaults to True
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     ax: numpy array-like of matplotlib axes or bokeh figures, optional
@@ -159,7 +163,7 @@ def plot_rank(
     if bins is None:
         bins = _sturges_formula(posterior_data, mult=2)
 
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     chains = len(posterior_data.chain)
     if colors == "cycle":
