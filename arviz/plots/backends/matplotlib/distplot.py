@@ -1,5 +1,6 @@
 """Matplotlib distplot."""
 import matplotlib.pyplot as plt
+from matplotlib import _pylab_helpers
 import numpy as np
 
 from ....stats.density_utils import get_bins
@@ -53,7 +54,14 @@ def plot_dist(
     backend_kwargs["subplot_kw"].setdefault("polar", is_circular)
 
     if ax is None:
-        _, ax = create_axes_grid(1, backend_kwargs=backend_kwargs)
+        fig_manager = _pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            ax = fig_manager.canvas.figure.gca()
+        else:
+            _, ax = create_axes_grid(
+                1,
+                backend_kwargs=backend_kwargs,
+            )
 
     if kind == "hist":
         hist_kwargs = matplotlib_kwarg_dealiaser(hist_kwargs, "hist")
