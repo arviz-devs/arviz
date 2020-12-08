@@ -27,6 +27,7 @@
 * Fix computation of weights in compare ([1438](https://github.com/arviz-devs/arviz/pull/1438))
 * Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442)) 
 * Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
+* Add grid argument to manually specify the number of rows and columns ([1459](https://github.com/arviz-devs/arviz/pull/1459))
 
 ### Deprecation
 

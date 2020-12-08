@@ -121,6 +121,13 @@ def plot_density(
         >>> non_centered = az.load_arviz_data('non_centered_eight')
         >>> az.plot_density([centered, non_centered])
 
+    Plot variables in a 4x5 grid
+
+    .. plot::
+        :context: close-figs
+
+        >>> az.plot_density([centered, non_centered], grid=(4, 5))
+
     Plot subset variables by specifying variable name exactly
 
     .. plot::
