@@ -1,5 +1,6 @@
 """Matplotlib hdiplot."""
 import matplotlib.pyplot as plt
+from matplotlib import _pylab_helpers
 
 from ...plot_utils import _scale_fig_size, vectorized_to_hex
 from . import backend_kwarg_defaults, backend_show, create_axes_grid, matplotlib_kwarg_dealiaser
@@ -28,10 +29,14 @@ def plot_hdi(ax, x_data, y_data, color, figsize, plot_kwargs, fill_kwargs, backe
     backend_kwargs["squeeze"] = True
 
     if ax is None:
-        _, ax = create_axes_grid(
-            1,
-            backend_kwargs=backend_kwargs,
-        )
+        fig_manager = _pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            ax = fig_manager.canvas.figure.gca()
+        else:
+            _, ax = create_axes_grid(
+                1,
+                backend_kwargs=backend_kwargs,
+            )
 
     ax.plot(x_data, y_data, **plot_kwargs)
     ax.fill_between(x_data, y_data[:, 0], y_data[:, 1], **fill_kwargs)

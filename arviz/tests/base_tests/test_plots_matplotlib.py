@@ -398,7 +398,9 @@ def test_plot_joint_bad(models):
 )
 def test_plot_kde(continuous_model, kwargs):
     axes = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
+    axes1 = plot_kde(continuous_model["x"], continuous_model["y"], **kwargs)
     assert axes
+    assert axes is axes1
 
 
 @pytest.mark.parametrize("shape", [(8,), (8, 8), (8, 8, 8)])
@@ -442,7 +444,9 @@ def test_plot_kde_cumulative(continuous_model, kwargs):
 )
 def test_plot_dist(continuous_model, kwargs):
     axes = plot_dist(continuous_model["x"], **kwargs)
+    axes1 = plot_dist(continuous_model["x"], **kwargs)
     assert axes
+    assert axes is axes1
 
 
 def test_plot_dist_hist(data_random):
