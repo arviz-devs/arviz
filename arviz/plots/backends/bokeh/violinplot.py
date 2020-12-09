@@ -58,7 +58,6 @@ def plot_violin(
     else:
         ax = np.atleast_2d(ax)
 
-    current_col = 0
     for (var_name, selection, x), ax_ in zip(
         plotters, (item for item in ax.flatten() if item is not None)
     ):
@@ -96,15 +95,6 @@ def plot_violin(
         ax_.xaxis.major_tick_line_color = None
         ax_.xaxis.minor_tick_line_color = None
         ax_.xaxis.major_label_text_font_size = "0pt"
-        if current_col != 0:
-            ax_.xaxis.major_label_text_font_size = "0pt"
-            ax_.yaxis.major_label_text_font_size = "0pt"
-            ax_.yaxis.major_tick_line_color = None
-            ax_.yaxis.minor_tick_line_color = None
-            ax_.yaxis.axis_line_color = None
-        current_col += 1
-        if current_col == cols:
-            current_col = 0
 
     show_layout(ax, show)
 
