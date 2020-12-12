@@ -18,6 +18,7 @@ def plot_violin(
     circular=False,
     sharex=True,
     sharey=True,
+    grid=None,
     figsize=None,
     textsize=None,
     ax=None,
@@ -69,6 +70,9 @@ def plot_violin(
     circular: bool, optional.
         If True, it interprets `values` is a circular variable measured in radians
         and a circular KDE is used. Defaults to False.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: int
@@ -131,7 +135,7 @@ def plot_violin(
         list(xarray_var_iter(data, var_names=var_names, combined=True)), "plot_violin"
     )
 
-    rows, cols = default_grid(len(plotters))
+    rows, cols = default_grid(len(plotters), grid=grid)
 
     if hdi_prob is None:
         hdi_prob = rcParams["stats.hdi_prob"]

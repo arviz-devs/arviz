@@ -28,6 +28,8 @@
 * Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442)) 
 * Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
 * Automatically get the current axes instance for `plt_kde`, `plot_dist` and `plot_hdi` ([1452](https://github.com/arviz-devs/arviz/pull/1452))
+* Add grid argument to manually specify the number of rows and columns ([1459](https://github.com/arviz-devs/arviz/pull/1459))
+
 
 ### Deprecation
 

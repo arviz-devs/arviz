@@ -17,6 +17,7 @@ def plot_bpv(
     n_ref=100,
     hdi_prob=0.94,
     color="C0",
+    grid=None,
     figsize=None,
     textsize=None,
     data_pairs=None,
@@ -74,6 +75,9 @@ def plot_bpv(
         0.94.
     color : str
         Matplotlib color
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize : tuple
         Figure size. If None it will be defined automatically.
     textsize : float
@@ -235,7 +239,7 @@ def plot_bpv(
             ),
         )
     ]
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     bpvplot_kwargs = dict(
         ax=ax,

@@ -15,6 +15,7 @@ def plot_mcse(
     filter_vars=None,
     coords=None,
     errorbar=False,
+    grid=None,
     figsize=None,
     textsize=None,
     extra_methods=False,
@@ -49,6 +50,9 @@ def plot_mcse(
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
     errorbar: bool, optional
         Plot quantile value +/- mcse instead of plotting mcse.
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple, optional
         Figure size. If None it will be defined automatically.
     textsize: float, optional
@@ -128,7 +132,7 @@ def plot_mcse(
         "plot_mcse",
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     if extra_methods:
         mean_mcse = mcse(data, var_names=var_names, method="mean")

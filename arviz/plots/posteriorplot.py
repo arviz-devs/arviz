@@ -11,6 +11,7 @@ def plot_posterior(
     filter_vars=None,
     transform=None,
     coords=None,
+    grid=None,
     figsize=None,
     textsize=None,
     hdi_prob=None,
@@ -51,6 +52,9 @@ def plot_posterior(
         Function to transform data (defaults to None i.e.the identity function)
     coords: mapping, optional
         Coordinates of var_names to be plotted. Passed to `Dataset.sel`
+    grid : tuple
+        Number of rows and columns. Defaults to None, the rows and columns are
+        automatically inferred.
     figsize: tuple
         Figure size. If None it will be defined automatically.
     textsize: float
@@ -220,7 +224,7 @@ def plot_posterior(
         "plot_posterior",
     )
     length_plotters = len(plotters)
-    rows, cols = default_grid(length_plotters)
+    rows, cols = default_grid(length_plotters, grid=grid)
 
     posteriorplot_kwargs = dict(
         ax=ax,
