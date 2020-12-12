@@ -17,7 +17,6 @@ jobs:
         pyro.version: "latest"
         pytorch.version: "latest"
         emcee.version: "latest"
-        tensorflow.version: "latest"
         name: "External latest"
 
       Python_38_PyStan_3_PyMC3_gh_Pyro_1_Emcee_2_TF_1:
@@ -80,19 +79,13 @@ jobs:
           python -m pip --no-cache-dir install "emcee<3"
       fi
 
-      if [ "$(tensorflow.version)" = "latest" ]; then
-          python -m pip --no-cache-dir install tensorflow tensorflow_probability
-      else
-          python -m pip --no-cache-dir install "tensorflow==1.15" "tensorflow_probability<0.9"
-      fi
-
       if [ "$(pymc3.version)" = "github" ]; then
           python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
       else
           python -m pip --no-cache-dir install pymc3
       fi
 
-      grep -Ev '^pystan|^pyro|^emcee|^pymc3|^tensorflow' requirements-external.txt | xargs python -m pip install
+      grep -Ev '^pystan|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
     displayName: 'Install packages'
 
   - script: |
