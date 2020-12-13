@@ -394,6 +394,7 @@ def test_plot_joint_bad(models):
         {"is_circular": True},
         {"is_circular": "radians"},
         {"is_circular": "degrees"},
+        {"adaptive": True}
     ],
 )
 def test_plot_kde(continuous_model, kwargs):
