@@ -849,18 +849,6 @@ def _kde_adaptive(x, bw, grid_edges, grid_counts, grid_len, bound_correction, **
     return grid, pdf
 
 
-def _fast_kde(x, cumulative=False, bw=4.5, xmin=None, xmax=None):  # pylint: disable=unused-argument
-    """Kernel Density Estimate, Deprecated."""
-    if not (xmin is None and xmax is None):
-        custom_lims = (xmin, xmax)
-    else:
-        custom_lims = None
-    grid, pdf = kde(x, cumulative=cumulative, bw=bw, custom_lims=custom_lims)
-
-    warnings.warn("_fast_kde() has been replaced by kde() in stats.density_utils.py", FutureWarning)
-    return grid, pdf
-
-
 def _fast_kde_2d(x, y, gridsize=(128, 128), circular=False):
     """
     2D fft-based Gaussian kernel density estimate (KDE).
