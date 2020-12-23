@@ -80,7 +80,7 @@ jobs:
       fi
 
       if [ "$(pymc3.version)" = "github" ]; then
-          # Pip installation is failing for some reason. This is the asme thing
+          # Pip installation is failing for some reason. This is the same thing
           git clone https://github.com/pymc-devs/pymc3
           pip install $PWD/pymc3
           # python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3
