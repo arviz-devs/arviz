@@ -21,7 +21,7 @@ def plot_trace(
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
     circ_var_names: Optional[List[str]] = None,
     circ_var_units: bool = "radians",
-    compact: bool = False,
+    compact: bool = True,
     compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
     chain_prop: Optional[Union[str, Mapping[str, Any]]] = None,
