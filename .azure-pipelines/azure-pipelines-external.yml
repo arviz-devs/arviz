@@ -83,7 +83,7 @@ jobs:
           python -m pip --no-cache-dir install git+https://github.com/pymc-devs/pymc3
       else
           python -m pip --no-cache-dir -v --log log.txt install pymc3
-          less logs.txt
+          cat logs.txt
       fi
 
       grep -Ev '^pystan|^pyro|^emcee|^pymc3' requirements-external.txt | xargs python -m pip install
