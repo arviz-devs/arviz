@@ -80,8 +80,10 @@ jobs:
       fi
 
       if [ "$(pymc3.version)" = "github" ]; then
-          python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3
-          cat log.txt
+          git clone https://github.com/pymc-devs/pymc3
+          pip install $PWD/pymc3
+          # python -m pip --no-cache-dir --log log.txt install git+https://github.com/pymc-devs/pymc3
+          # cat log.txt
       else
           python -m pip --no-cache-dir install pymc3
       fi
