@@ -368,7 +368,7 @@ def plot_trace(
                                     alpha=hist_kwargs["alpha"],
                                     zorder=0.6,
                                 )
-                            else:
+                            elif not idy:
                                 ax.plot(
                                     values,
                                     np.zeros_like(values) + ylocs,

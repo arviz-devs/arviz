@@ -338,10 +338,11 @@ def plot_trace(
                     else:
                         y_div_trace = value.min()
                     glyph_density = Dash(x="y", y=0.0, **div_density_kwargs)
-                    glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
+                    if kind == "trace":
+                        glyph_trace = Dash(x="x", y=y_div_trace, **div_trace_kwargs)
+                        axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
                     axes[idx, 0].add_glyph(tmp_cds, glyph_density)
-                    axes[idx, 1].add_glyph(tmp_cds, glyph_trace)
 
     show_layout(axes, show)
 
