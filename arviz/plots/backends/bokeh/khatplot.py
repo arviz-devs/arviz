@@ -137,13 +137,6 @@ def plot_khat(
     ax.xaxis.axis_label = "Data Point"
     ax.yaxis.axis_label = "Shape parameter k"
 
-    if ymin > 0:
-        ax.y_range._property_values["start"] = -0.02  # pylint: disable=protected-access
-    if ymax < 1:
-        ax.y_range._property_values["end"] = 1.02  # pylint: disable=protected-access
-    elif ymax > 1 & annotate:
-        ax.y_range._property_values["end"] = 1.1 * ymax  # pylint: disable=protected-access
-
     show_layout(ax, show)
 
     return ax
