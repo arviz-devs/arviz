@@ -172,6 +172,7 @@ def compare(
                 "warning",
                 "loo_scale",
             ],
+            dtype=np.float,
         )
         scale_col = "loo_scale"
     elif ic == "waic":
@@ -189,6 +190,7 @@ def compare(
                 "warning",
                 "waic_scale",
             ],
+            dtype=np.float,
         )
         scale_col = "waic_scale"
     else:
@@ -293,6 +295,8 @@ def compare(
                 res[scale_col],
             )
 
+    df_comp["rank"] = df_comp["rank"].astype(int)
+    df_comp["warning"] = df_comp["warning"].astype(bool)
     return df_comp.sort_values(by=ic, ascending=ascending)
 
 
