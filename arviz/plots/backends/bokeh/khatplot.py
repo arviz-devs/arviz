@@ -21,7 +21,7 @@ def plot_khat(
     xdata,
     khats,
     kwargs,
-    annotate,
+    threshold,
     coord_labels,
     show_bins,
     hlines_kwargs,  # pylint: disable=unused-argument
@@ -103,21 +103,10 @@ def plot_khat(
             fill_alpha=alphas,
         )
 
-    if annotate:
-        idxs = xdata[khats > 1]
+    if threshold is not None:
+        idxs = xdata[khats > threshold]
         for idx in idxs:
             ax.text(x=[idx], y=[khats[idx]], text=[coord_labels[idx]])
-
-    for hline in [0, 0.5, 0.7, 1]:
-        _hline = Span(
-            location=hline,
-            dimension="width",
-            line_color="grey",
-            line_width=line_width,
-            line_dash="dashed",
-        )
-
-        ax.renderers.append(_hline)
 
     ymin = min(khats)
     ymax = max(khats)
@@ -134,6 +123,17 @@ def plot_khat(
                 text=[bin_format.format(count, count / n_data_points * 100)],
             )
         ax.x_range._property_values["end"] = xmax + 1  # pylint: disable=protected-access
+        for hline in [0, 0.5, 0.7, 1]:
+            _hline = Span(
+                location=hline,
+                dimension="width",
+                line_color="grey",
+                line_width=line_width,
+                line_dash="dashed",
+            )
+
+        ax.renderers.append(_hline)
+
     ax.xaxis.axis_label = "Data Point"
     ax.yaxis.axis_label = "Shape parameter k"
 

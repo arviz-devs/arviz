@@ -1,4 +1,6 @@
 """Pareto tail indices plot."""
+import logging
+
 import numpy as np
 from xarray import DataArray
 
@@ -6,6 +8,8 @@ from ..rcparams import rcParams
 from ..stats import ELPDData
 from ..utils import get_coords
 from .plot_utils import format_coords_as_labels, get_plotting_function
+
+_log = logging.getLogger(__name__)
 
 
 def plot_khat(
@@ -15,6 +19,7 @@ def plot_khat(
     show_bins=False,
     bin_format="{1:.1f}%",
     annotate=False,
+    threshold=None,
     hover_label=False,
     hover_format="{1}",
     figsize=None,
@@ -46,8 +51,9 @@ def plot_khat(
         Show the number of khats which fall in each bin.
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
-    annotate : bool, optional
-        Show the labels of k values larger than 1.
+    threshold : float, optional
+        Show the labels of k values larger than threshold. Defaults to `None`,
+        no observations will be highlighted.
     hover_label : bool, optional
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
         backend.
@@ -103,7 +109,7 @@ def plot_khat(
 
         >>> centered_eight = az.load_arviz_data("centered_eight")
         >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
-        >>> az.plot_khat(khats, xlabels=True, annotate=True)
+        >>> az.plot_khat(khats, xlabels=True, threshold=1)
 
     Use custom color scheme
 
@@ -117,6 +123,10 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
+    if annotate:
+        _log.warn("annotate will be deprecated, please use threshold instead")
+        threshold = annotate
+
     if coords is None:
         coords = {}
 
@@ -152,7 +162,7 @@ def plot_khat(
         xdata=xdata,
         khats=khats,
         kwargs=kwargs,
-        annotate=annotate,
+        threshold=threshold,
         coord_labels=coord_labels,
         show_bins=show_bins,
         hlines_kwargs=hlines_kwargs,
