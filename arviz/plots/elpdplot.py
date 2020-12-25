@@ -1,4 +1,5 @@
 """Plot pointwise elpd estimations of inference data."""
+from copy import deepcopy
 import numpy as np
 
 from ..data import convert_to_inference_data
@@ -115,6 +116,7 @@ def plot_elpd(
     ic_fun = loo if ic == "loo" else waic
 
     # Make sure all object are ELPDData
+    compare_dict = deepcopy(compare_dict)
     for k, item in compare_dict.items():
         if not isinstance(item, ELPDData):
             compare_dict[k] = ic_fun(convert_to_inference_data(item), pointwise=True, scale=scale)
