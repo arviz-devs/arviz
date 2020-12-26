@@ -23,8 +23,9 @@ def plot_khat(
     kwargs,
     threshold,
     coord_labels,
+    show_hlines,
     show_bins,
-    hlines_kwargs,  # pylint: disable=unused-argument
+    hlines_kwargs,
     xlabels,  # pylint: disable=unused-argument
     legend,  # pylint: disable=unused-argument
     color,
@@ -48,6 +49,10 @@ def plot_khat(
     }
 
     (figsize, *_, line_width, _) = _scale_fig_size(figsize, textsize)
+
+    if hlines_kwargs is None:
+        hlines_kwargs = {}
+    hlines_kwargs.setdefault("hlines", [0, 0.5, 0.7, 1])
 
     cmap = None
     if isinstance(color, str):
@@ -108,6 +113,17 @@ def plot_khat(
         for idx in idxs:
             ax.text(x=[idx], y=[khats[idx]], text=[coord_labels[idx]])
 
+    if show_hlines:
+        for hline in hlines_kwargs.pop("hlines"):
+            _hline = Span(
+                location=hline,
+                dimension="width",
+                line_color="grey",
+                line_width=line_width,
+                line_dash="dashed",
+            )
+            ax.renderers.append(_hline)
+
     ymin = min(khats)
     ymax = max(khats)
     xmax = len(khats)
@@ -123,19 +139,16 @@ def plot_khat(
                 text=[bin_format.format(count, count / n_data_points * 100)],
             )
         ax.x_range._property_values["end"] = xmax + 1  # pylint: disable=protected-access
-        for hline in [0, 0.5, 0.7, 1]:
-            _hline = Span(
-                location=hline,
-                dimension="width",
-                line_color="grey",
-                line_width=line_width,
-                line_dash="dashed",
-            )
-
-        ax.renderers.append(_hline)
 
     ax.xaxis.axis_label = "Data Point"
     ax.yaxis.axis_label = "Shape parameter k"
+
+    if ymin > 0:
+        ax.y_range._property_values["start"] = -0.02  # pylint: disable=protected-access
+    if ymax < 1:
+        ax.y_range._property_values["end"] = 1.02  # pylint: disable=protected-access
+    elif ymax > 1 & threshold:
+        ax.y_range._property_values["end"] = 1.1 * ymax  # pylint: disable=protected-access
 
     show_layout(ax, show)
 

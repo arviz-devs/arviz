@@ -22,6 +22,7 @@ def plot_khat(
     kwargs,
     threshold,
     coord_labels,
+    show_hlines,
     show_bins,
     hlines_kwargs,
     xlabels,
@@ -61,6 +62,7 @@ def plot_khat(
     backend_kwargs["squeeze"] = True
 
     hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
+    hlines_kwargs.setdefault("hlines", [0, 0.5, 0.7, 1])
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -128,6 +130,12 @@ def plot_khat(
     ylims2 = ax.get_ylim()
     ymin = min(ylims1[0], ylims2[0])
     ymax = min(ylims1[1], ylims2[1])
+
+    if show_hlines:
+        ax.hlines(
+            hlines_kwargs.pop("hlines"), xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs
+        )
+
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
@@ -140,7 +148,6 @@ def plot_khat(
                 horizontalalignment="center",
                 verticalalignment="center",
             )
-        ax.hlines([0, 0.5, 0.7, 1], xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs)
 
     ax.set_xlabel("Data Point", fontsize=ax_labelsize)
     ax.set_ylabel(r"Shape parameter k", fontsize=ax_labelsize)

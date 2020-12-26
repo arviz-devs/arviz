@@ -16,6 +16,7 @@ def plot_khat(
     khats,
     color="C0",
     xlabels=False,
+    show_hlines=False,
     show_bins=False,
     bin_format="{1:.1f}%",
     annotate=False,
@@ -47,8 +48,10 @@ def plot_khat(
         otherwise, it will be interpreted as a list of the dims to be used for the color code
     xlabels : bool, optional
         Use coords as xticklabels
+    show_hlines : bool, optional
+        Show the horizontal lines, by default at the values [0, 0.5, 0.7, 1].
     show_bins : bool, optional
-        Show the number of khats which fall in each bin.
+        Show the percentage of khats falling in each bin, as delimited by hlines.
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
     threshold : float, optional
@@ -124,7 +127,7 @@ def plot_khat(
 
     """
     if annotate:
-        _log.warn("annotate will be deprecated, please use threshold instead")
+        _log.warning("annotate will be deprecated, please use threshold instead")
         threshold = annotate
 
     if coords is None:
@@ -164,6 +167,7 @@ def plot_khat(
         kwargs=kwargs,
         threshold=threshold,
         coord_labels=coord_labels,
+        show_hlines=show_hlines,
         show_bins=show_bins,
         hlines_kwargs=hlines_kwargs,
         xlabels=xlabels,
