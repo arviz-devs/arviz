@@ -175,15 +175,18 @@ def plot_loo_pit(
                 )
     else:
         if use_hdi:
-            ax.add_layout(
-                BoxAnnotation(
-                    bottom=hdi_odds[1],
-                    top=hdi_odds[0],
-                    fill_alpha=hdi_kwargs.pop("alpha"),
-                    fill_color=hdi_kwargs.pop("color"),
-                    **hdi_kwargs
-                )
+            patch = BoxAnnotation(
+                bottom=hdi_odds[1],
+                top=hdi_odds[0],
+                fill_alpha=hdi_kwargs.pop("alpha"),
+                fill_color=hdi_kwargs.pop("color"),
+                **hdi_kwargs
             )
+            patch.level = "underlay"
+            ax.add_layout(patch)
+
+            # Adds horizontal reference line
+            ax.line([0, 1], [1, 1], line_color="white", line_width=1.5)
         else:
             for idx in range(n_unif):
                 x_s, unif_density = kde(unif[idx, :])
@@ -202,6 +205,9 @@ def plot_loo_pit(
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
 
+    # Sets xlim(0, 1)
+    ax.line(0, 0)
+    ax.line(1, 0)
     show_layout(ax, show)
 
     return ax
