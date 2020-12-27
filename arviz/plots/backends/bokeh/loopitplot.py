@@ -184,7 +184,7 @@ def plot_loo_pit(
             )
             patch.level = "underlay"
             ax.add_layout(patch)
-            
+
             # Adds horizontal reference line
             ax.line([0, 1], [1, 1], line_color="white", line_width=1.5)
         else:
@@ -204,7 +204,7 @@ def plot_loo_pit(
             line_alpha=plot_kwargs.get("alpha", 1.0),
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
-    
+
     # Adds horizontal reference line
     ax.line(0, 0)
     ax.line(1, 0)
