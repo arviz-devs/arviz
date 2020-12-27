@@ -114,6 +114,8 @@ def plot_loo_pit(
         u_dens = np.empty((n_unif, len(loo_pit_kde)))
         if use_hdi:
             ax.axhspan(*hdi_odds, **hdi_kwargs)
+            
+            # Adds horizontal reference line
             ax.axhline(1, color="w", zorder=1)
         else:
             for idx in range(n_unif):
