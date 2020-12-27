@@ -205,7 +205,7 @@ def plot_loo_pit(
             line_width=plot_kwargs.get("linewidth", 3.0),
         )
 
-    # Adds horizontal reference line
+    # Sets xlim(0, 1)
     ax.line(0, 0)
     ax.line(1, 0)
     show_layout(ax, show)
