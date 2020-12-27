@@ -1138,7 +1138,12 @@ def test_plot_elpd_one_model(models):
         {"color": "obs_dim", "legend": True, "hover_label": True},
         {"color": "blue", "coords": {"obs_dim": slice(2, 4)}},
         {"color": np.random.uniform(size=8), "show_bins": True},
-        {"color": np.random.uniform(size=(8, 3)), "show_bins": True, "annotate": True},
+        {
+            "color": np.random.uniform(size=(8, 3)),
+            "show_bins": True,
+            "show_hlines": True,
+            "threshold": 1,
+        },
     ],
 )
 @pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
@@ -1165,7 +1170,12 @@ def test_plot_khat(models, input_type, kwargs):
         {"color": "dim2", "legend": True, "hover_label": True},
         {"color": "blue", "coords": {"dim2": slice(2, 4)}},
         {"color": np.random.uniform(size=35), "show_bins": True},
-        {"color": np.random.uniform(size=(35, 3)), "show_bins": True, "annotate": True},
+        {
+            "color": np.random.uniform(size=(35, 3)),
+            "show_bins": True,
+            "show_hlines": True,
+            "threshold": 1,
+        },
     ],
 )
 @pytest.mark.parametrize("input_type", ["elpd_data", "data_array", "array"])
@@ -1187,9 +1197,9 @@ def test_plot_khat_multidim(multidim_models, input_type, kwargs):
     assert axes
 
 
-def test_plot_khat_annotate():
+def test_plot_khat_threshold():
     khats = np.array([0, 0, 0.6, 0.6, 0.8, 0.9, 0.9, 2, 3, 4, 1.5])
-    axes = plot_khat(khats, annotate=True)
+    axes = plot_khat(khats, threshold=1)
     assert axes
 
 
