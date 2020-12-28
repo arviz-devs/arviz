@@ -1,4 +1,6 @@
 """Pareto tail indices plot."""
+import logging
+
 import numpy as np
 from xarray import DataArray
 
@@ -7,14 +9,18 @@ from ..stats import ELPDData
 from ..utils import get_coords
 from .plot_utils import format_coords_as_labels, get_plotting_function
 
+_log = logging.getLogger(__name__)
+
 
 def plot_khat(
     khats,
     color="C0",
     xlabels=False,
+    show_hlines=False,
     show_bins=False,
     bin_format="{1:.1f}%",
     annotate=False,
+    threshold=None,
     hover_label=False,
     hover_format="{1}",
     figsize=None,
@@ -42,12 +48,15 @@ def plot_khat(
         otherwise, it will be interpreted as a list of the dims to be used for the color code
     xlabels : bool, optional
         Use coords as xticklabels
+    show_hlines : bool, optional
+        Show the horizontal lines, by default at the values [0, 0.5, 0.7, 1].
     show_bins : bool, optional
-        Show the number of khats which fall in each bin.
+        Show the percentage of khats falling in each bin, as delimited by hlines.
     bin_format : str, optional
         The string is used as formatting guide calling ``bin_format.format(count, pct)``.
-    annotate : bool, optional
-        Show the labels of k values larger than 1.
+    threshold : float, optional
+        Show the labels of k values larger than threshold. Defaults to `None`,
+        no observations will be highlighted.
     hover_label : bool, optional
         Show the datapoint label when hovering over it with the mouse. Requires an interactive
         backend.
@@ -103,7 +112,7 @@ def plot_khat(
 
         >>> centered_eight = az.load_arviz_data("centered_eight")
         >>> khats = az.loo(centered_eight, pointwise=True).pareto_k
-        >>> az.plot_khat(khats, xlabels=True, annotate=True)
+        >>> az.plot_khat(khats, xlabels=True, threshold=1)
 
     Use custom color scheme
 
@@ -117,6 +126,10 @@ def plot_khat(
         >>> az.plot_khat(loo_radon, color=colors)
 
     """
+    if annotate:
+        _log.warning("annotate will be deprecated, please use threshold instead")
+        threshold = annotate
+
     if coords is None:
         coords = {}
 
@@ -152,8 +165,9 @@ def plot_khat(
         xdata=xdata,
         khats=khats,
         kwargs=kwargs,
-        annotate=annotate,
+        threshold=threshold,
         coord_labels=coord_labels,
+        show_hlines=show_hlines,
         show_bins=show_bins,
         hlines_kwargs=hlines_kwargs,
         xlabels=xlabels,

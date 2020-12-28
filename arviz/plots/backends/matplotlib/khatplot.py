@@ -20,8 +20,9 @@ def plot_khat(
     xdata,
     khats,
     kwargs,
-    annotate,
+    threshold,
     coord_labels,
+    show_hlines,
     show_bins,
     hlines_kwargs,
     xlabels,
@@ -61,6 +62,7 @@ def plot_khat(
     backend_kwargs["squeeze"] = True
 
     hlines_kwargs = matplotlib_kwarg_dealiaser(hlines_kwargs, "hlines")
+    hlines_kwargs.setdefault("hlines", [0, 0.5, 0.7, 1])
     hlines_kwargs.setdefault("linestyle", [":", "-.", "--", "-"])
     hlines_kwargs.setdefault("alpha", 0.7)
     hlines_kwargs.setdefault("zorder", -1)
@@ -109,8 +111,8 @@ def plot_khat(
 
     sc_plot = ax.scatter(xdata, khats, c=rgba_c, **kwargs)
 
-    if annotate:
-        idxs = xdata[khats > 1]
+    if threshold is not None:
+        idxs = xdata[khats > threshold]
         for idx in idxs:
             ax.text(
                 idx,
@@ -125,10 +127,15 @@ def plot_khat(
     if show_bins:
         xmax += n_data_points / 12
     ylims1 = ax.get_ylim()
-    ax.hlines([0, 0.5, 0.7, 1], xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs)
     ylims2 = ax.get_ylim()
     ymin = min(ylims1[0], ylims2[0])
     ymax = min(ylims1[1], ylims2[1])
+
+    if show_hlines:
+        ax.hlines(
+            hlines_kwargs.pop("hlines"), xmin=xmin, xmax=xmax, linewidth=linewidth, **hlines_kwargs
+        )
+
     if show_bins:
         bin_edges = np.array([ymin, 0.5, 0.7, 1, ymax])
         bin_edges = bin_edges[(bin_edges >= ymin) & (bin_edges <= ymax)]
@@ -141,8 +148,6 @@ def plot_khat(
                 horizontalalignment="center",
                 verticalalignment="center",
             )
-    ax.set_ylim(ymin, ymax)
-    ax.set_xlim(xmin, xmax)
 
     ax.set_xlabel("Data Point", fontsize=ax_labelsize)
     ax.set_ylabel(r"Shape parameter k", fontsize=ax_labelsize)
