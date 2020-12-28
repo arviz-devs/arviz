@@ -42,6 +42,9 @@ Open an issue ticket for the issue and state that you'll be solving the issue wi
 ### In the event of a conflict
 In the event of two or more people working on the same issue, the general precedence will go to the person who first commented in the issue. If no comments it will go to the first person to submit a PR for review. Each situation will differ though, and the core contributors will make the best judgement call if needed.
 
+### If the issue ticket has someone assigned to it
+If the issue is assigned then precedence goes to the assignee. However if there has been no activity for 2 weeks from assignment date the ticket is open for all again and can be unassigned.
+
 ## Making the pull request
 The preferred workflow for contributing to ArviZ is to fork
 the [GitHub repository](https://github.com/arviz-devs/arviz/), clone it to your local machine, and develop on a feature branch.
