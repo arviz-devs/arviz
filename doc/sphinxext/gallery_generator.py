@@ -13,6 +13,8 @@ import shutil
 import token
 import tokenize
 
+from typing import Optional
+
 import matplotlib
 import matplotlib.pyplot as plt
 from bokeh.io import export_png
@@ -101,7 +103,7 @@ INDEX_TEMPLATE = """
         filter:alpha(opacity=100); /* For IE8 and earlier */
     }}
 
-    .figure span {{
+    span.figure-label {{
         position: absolute;
         display: inline;
         left: 0;
@@ -127,10 +129,24 @@ INDEX_TEMPLATE = """
     }}
 
     .caption {{
-        position: absolue;
+        position: absolute;
         width: 180px;
         top: 170px;
         text-align: center !important;
+    }}
+
+    .figure .gallery-figure-title p {{
+        position: relative;
+        top: 170px;
+        color: black;
+        visibility: visible;
+        text-align: center !important;
+        line-height: normal;
+    }}
+    .figure .gallery-figure-title span {{
+        top: 170px;
+        position: relative;
+        visibility: visible;
     }}
     </style>
 
@@ -143,16 +159,33 @@ Example gallery
 
 """
 
+CONTENTS_ENTRY_TEMPLATE = (
+    ".. raw:: html\n\n"
+    "    <div class='figure align-center'>\n"
+    "    <a href=./{0}/{1}>\n"
+    "    <img src=../_static/{2}>\n"
+    "    <span class='figure-label'>\n"
+    "    <p>{3}</p>\n"
+    "    </span>\n"
+    '    <span class="gallery-figure-title">\n'
+    "      <p>{4}</p>\n"
+    "    </span>\n"
+    "    </a>\n"
+    "    </div>\n\n"
+    "\n\n"
+    ""
+)
+
 
 def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, border=4):
-    baseout, extout = op.splitext(thumbfile)
+    # baseout, extout = op.splitext(thumbfile)
 
     im = image.imread(infile)
     rows, cols = im.shape[:2]
     size = min(rows, cols)
     if size == cols:
         xslice = slice(0, size)
-        ymin = min(max(0, int(cx * rows - size // 2)), rows - size)
+        ymin = min(max(0, int(cy * rows - size // 2)), rows - size)
         yslice = slice(ymin, ymin + size)
     else:
         yslice = slice(0, size)
@@ -179,6 +212,8 @@ def indent(s, N=4):
 class ExampleGenerator:
     """Tools for generating an example page from a file"""
 
+    _title: Optional[str]
+
     def __init__(self, filename, target_dir, backend, thumb_dir):
         self.filename = filename
         self.target_dir = target_dir
@@ -201,6 +236,12 @@ class ExampleGenerator:
             print("skipping {0}".format(self.filename))
 
     @property
+    def title(self) -> str:
+        if self._title is not None:
+            return self._title
+        return self.modulename
+
+    @property
     def dirname(self):
         return op.split(self.filename)[0]
 
@@ -209,7 +250,7 @@ class ExampleGenerator:
         return op.split(self.filename)[1]
 
     @property
-    def modulename(self):
+    def modulename(self) -> str:
         return op.splitext(self.fname)[0]
 
     @property
@@ -282,20 +323,41 @@ class ExampleGenerator:
             break
 
         thumbloc = None
-        for i, line in enumerate(docstring.split("\n")):
+        title: Optional[str] = None
+        ex_title: str = ""
+        for line in docstring.split("\n"):
+            # capture the first non-empty line of the docstring as title
+            if ex_title == "":
+                ex_title = line
             m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
             if m:
                 thumbloc = float(m.group(1)), float(m.group(2))
-                break
+                if thumbloc and title:
+                    break
+            m = re.match(r"^_example_title: (.*)$", line)
+            if m:
+                title = m.group(1)
+                if thumbloc and title:
+                    break
+        assert ex_title != ""
         if thumbloc is not None:
             self.thumbloc = thumbloc
             docstring = "\n".join([l for l in docstring.split("\n") if not l.startswith("_thumb")])
 
+        if title is not None:
+            docstring = "\n".join(
+                [l for l in docstring.split("\n") if not l.startswith("_example_title")]
+            )
+        else:
+            title = ex_title
+        self._title = title
+
         self.docstring = docstring
         self.short_desc = first_par
-        self.end_line = erow + 1 + start_row
+        self.end_line = erow + 1 + start_row  # pylint: disable=undefined-loop-variable
 
     def exec_file(self):
+        # pylint: disable=exec-used
         print("running {0}".format(self.filename))
 
         thumbfile = op.join(self.thumb_dir, self.thumbfilename)
@@ -329,19 +391,9 @@ class ExampleGenerator:
     def toctree_entry(self):
         return "   ./%s\n\n" % op.join(self.backend, op.splitext(self.htmlfilename)[0])
 
-    def contents_entry(self):
-        return (
-            ".. raw:: html\n\n"
-            "    <div class='figure align-center'>\n"
-            "    <a href=./{0}/{1}>\n"
-            "    <img src=../_static/{2}>\n"
-            "    <span class='figure-label'>\n"
-            "    <p>{3}</p>\n"
-            "    </span>\n"
-            "    </a>\n"
-            "    </div>\n\n"
-            "\n\n"
-            "".format(self.backend, self.htmlfilename, self.thumbfilename, self.sphinxtag)
+    def contents_entry(self) -> str:
+        return CONTENTS_ENTRY_TEMPLATE.format(
+            self.backend, self.htmlfilename, self.thumbfilename, self.sphinxtag, self.title
         )
 
 
