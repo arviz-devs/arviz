@@ -35,7 +35,7 @@ def plot_khat(
     show=None,
     **kwargs
 ):
-    """
+    r"""
     Plot Pareto tail indices for diagnosing convergence.
 
     Parameters
@@ -43,9 +43,11 @@ def plot_khat(
     khats : ELPDData cointaining Pareto shapes information or array of
         Pareto tail indices.
     color : str or array_like, optional
-        Colors of the scatter plot, if color is a str all dots will have the same color,
-        if it is the size of the observations, each dot will have the specified color,
-        otherwise, it will be interpreted as a list of the dims to be used for the color code
+        Colors of the scatter plot, if color is a str all dots will
+        have the same color, if it is the size of the observations,
+        each dot will have the specified color, otherwise, it will be
+        interpreted as a list of the dims to be used for the color
+        code
     xlabels : bool, optional
         Use coords as xticklabels
     show_hlines : bool, optional
