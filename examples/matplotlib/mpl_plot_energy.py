@@ -3,6 +3,7 @@ Energy Plot
 ===========
 
 _thumb: .7, .5
+_example_title: Plot energy
 """
 import matplotlib.pyplot as plt
 

@@ -3,6 +3,7 @@ LOO-PIT ECDF Plot
 =================
 
 _thumb: .5, .7
+_example_title: Plot LOO predictive check
 """
 import matplotlib.pyplot as plt
 

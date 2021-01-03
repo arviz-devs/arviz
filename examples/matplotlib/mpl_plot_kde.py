@@ -3,6 +3,7 @@ KDE Plot
 ========
 
 _thumb: .2, .8
+_example_title: Plot Kernel Density Estimation (KDE)
 """
 import matplotlib.pyplot as plt
 import numpy as np
