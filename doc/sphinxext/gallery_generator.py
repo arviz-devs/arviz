@@ -178,7 +178,6 @@ CONTENTS_ENTRY_TEMPLATE = (
 
 
 def create_thumbnail(infile, thumbfile, width=275, height=275, cx=0.5, cy=0.5, border=4):
-    # baseout, extout = op.splitext(thumbfile)
 
     im = image.imread(infile)
     rows, cols = im.shape[:2]
@@ -220,6 +219,7 @@ class ExampleGenerator:
         self.thumb_dir = thumb_dir
         self.backend = backend
         self.thumbloc = 0.5, 0.5
+        self._title = None
         self.extract_docstring()
         with open(filename, "r") as fid:
             self.filetext = fid.read()
@@ -326,19 +326,20 @@ class ExampleGenerator:
         title: Optional[str] = None
         ex_title: str = ""
         for line in docstring.split("\n"):
-            # capture the first non-empty line of the docstring as title
-            if ex_title == "":
-                ex_title = line
+            # we've found everything we need...
+            if thumbloc and title and ex_title != "":
+                break
             m = re.match(r"^_thumb: (\.\d+),\s*(\.\d+)", line)
             if m:
                 thumbloc = float(m.group(1)), float(m.group(2))
-                if thumbloc and title:
-                    break
+                continue
             m = re.match(r"^_example_title: (.*)$", line)
             if m:
                 title = m.group(1)
-                if thumbloc and title:
-                    break
+                continue
+            # capture the first non-empty line of the docstring as title
+            if ex_title == "":
+                ex_title = line
         assert ex_title != ""
         if thumbloc is not None:
             self.thumbloc = thumbloc
