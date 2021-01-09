@@ -10,7 +10,6 @@ from datetime import datetime
 from html import escape
 import sys
 from typing import (
-    TYPE_CHECKING,
     Any,
     Iterable,
     Iterator,
@@ -32,19 +31,17 @@ from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
 from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
+if sys.version_info[:2] >= (3, 9):
+    # As of 3.9, collections.abc types support generic parameters themselves.
+    from collections.abc import ItemsView, ValuesView
+else:
+    # These typing imports are deprecated in 3.9, and moved to collections.abc instead.
+    from typing import ItemsView, ValuesView
+
 try:
     import ujson as json
 except ImportError:
     import json
-
-if TYPE_CHECKING:
-    _python_major_minor = sys.version_info[:2]
-    if _python_major_minor >= (3, 9):
-        # As of 3.9, collections.abc types support generic parameters themselves.
-        from collections.abc import ItemsView, ValuesView
-    else:
-        # These typing imports are deprecated in 3.9, and moved to collections.abc instead.
-        from typing import ItemsView, ValuesView
 
 
 SUPPORTED_GROUPS = [
