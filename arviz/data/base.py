@@ -12,7 +12,9 @@ import xarray as xr
 try:
     import ujson as json
 except ImportError:
-    import json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 
 from .. import __version__, utils
 

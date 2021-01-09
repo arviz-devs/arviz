@@ -20,7 +20,9 @@ from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 try:
     import ujson as json
 except ImportError:
-    import json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 
 SUPPORTED_GROUPS = [
     "posterior",
