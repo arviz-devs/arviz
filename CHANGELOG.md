@@ -25,13 +25,13 @@
 * Fix `pair_plot` for mixed discrete and continuous variables ([1434](https://github.com/arviz-devs/arviz/pull/1434))
 * Fix in-sample deviance in `plot_compare` ([1435](https://github.com/arviz-devs/arviz/pull/1435))
 * Fix computation of weights in compare ([1438](https://github.com/arviz-devs/arviz/pull/1438))
-* Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442)) 
+* Avoid repeated warning in summary ([1442](https://github.com/arviz-devs/arviz/pull/1442))
 * Fix hdi failure with boolean array ([1444](https://github.com/arviz-devs/arviz/pull/1444))
 * Automatically get the current axes instance for `plt_kde`, `plot_dist` and `plot_hdi` ([1452](https://github.com/arviz-devs/arviz/pull/1452))
 * Add grid argument to manually specify the number of rows and columns ([1459](https://github.com/arviz-devs/arviz/pull/1459))
 * Switch to `compact=True` by default in our plots ([1468](https://github.com/arviz-devs/arviz/issues/1468))
 * `plot_elpd`, avoid modifying the input dict ([1477](https://github.com/arviz-devs/arviz/issues/1477))
-* Do not plot divergences in `plot_trace` when `kind=rank_vlines` or `kind=rank_bars` ([1476](https://github.com/arviz-devs/arviz/issues/1476)) 
+* Do not plot divergences in `plot_trace` when `kind=rank_vlines` or `kind=rank_bars` ([1476](https://github.com/arviz-devs/arviz/issues/1476))
 
 
 ### Deprecation
@@ -42,6 +42,10 @@
 * Switch to [MyST](https://myst-parser.readthedocs.io/en/latest/) and [MyST-NB](https://myst-nb.readthedocs.io/en/latest/index.html)
   for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
+* Add documentation pages about experimental `SamplingWrapper`s usage ([1373](https://github.com/arviz-devs/arviz/pull/1373))
+
+### Experimental
+* Modified `SamplingWrapper` base API ([1373](https://github.com/arviz-devs/arviz/pull/1373))
 
 ## v0.10.0 (2020 Sep 24)
 ### New features
