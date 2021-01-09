@@ -241,7 +241,7 @@ def check_multiple_attrs(
     in ``sample_stats``, also against what was expected.
 
     """
-    failed_attrs = []
+    failed_attrs: List[Union[str, Tuple[str, str]]] = []
     for dataset_name, attributes in test_dict.items():
         if dataset_name.startswith("~"):
             if hasattr(parent, dataset_name[1:]):
