@@ -8,9 +8,24 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
+import sys
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import netCDF4 as nc
 import numpy as np
+from typing_extensions import Literal
 import xarray as xr
 
 from ..rcparams import rcParams
@@ -21,6 +36,16 @@ try:
     import ujson as json
 except ImportError:
     import json
+
+if TYPE_CHECKING:
+    _python_major_minor = sys.version_info[:2]
+    if _python_major_minor >= (3, 9):
+        # As of 3.9, collections.abc types support generic parameters themselves.
+        from collections.abc import ItemsView, ValuesView
+    else:
+        # These typing imports are deprecated in 3.9, and moved to collections.abc instead.
+        from typing import ItemsView, ValuesView
+
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -48,8 +73,10 @@ SUPPORTED_GROUPS_WARMUP = [
 
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
+InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
-class InferenceData:
+
+class InferenceData(Mapping[str, xr.Dataset]):
     """Container for inference data storage using xarray.
 
     For a detailed introduction to ``InferenceData`` objects and their usage, see
@@ -57,7 +84,9 @@ class InferenceData:
     on ``InferenceData`` methods and their low level implementation.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self, **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]]
+    ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
 
         Parameters
@@ -98,8 +127,8 @@ class InferenceData:
             In [1]: idata.posterior
 
         """
-        self._groups = []
-        self._groups_warmup = []
+        self._groups: List[str] = []
+        self._groups_warmup: List[str] = []
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
@@ -114,7 +143,7 @@ class InferenceData:
             if dataset is None:
                 continue
             elif isinstance(dataset, (list, tuple)):
-                dataset, dataset_warmup = kwargs[key]
+                dataset, dataset_warmup = dataset
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
@@ -134,7 +163,7 @@ class InferenceData:
                     setattr(self, key, dataset_warmup)
                     self._groups_warmup.append(key)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Make string representation of InferenceData object."""
         msg = "Inference data with groups:\n\t> {options}".format(
             options="\n\t> ".join(self._groups)
@@ -143,7 +172,7 @@ class InferenceData:
             msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
         return msg
 
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         """Make html representation of InferenceData object."""
         try:
             from xarray.core.options import OPTIONS
@@ -173,7 +202,7 @@ class InferenceData:
             html_repr = f"<pre>{escape(repr(self))}</pre>"
         return html_repr
 
-    def __delattr__(self, group):
+    def __delattr__(self, group: str) -> None:
         """Delete a group from the InferenceData object."""
         if group in self._groups:
             self._groups.remove(group)
@@ -182,36 +211,103 @@ class InferenceData:
         object.__delattr__(self, group)
 
     @property
-    def _groups_all(self):
+    def _groups_all(self) -> List[str]:
         return self._groups + self._groups_warmup
 
-    def __iter__(self):
+    def __len__(self) -> int:
+        """Return the number of groups in this InferenceData object."""
+        return len(self._groups_all)
+
+    def __iter__(self) -> Iterator[str]:
         """Iterate over groups in InferenceData object."""
         for group in self._groups_all:
             yield group
 
-    def __getitem__(self, key):
+    def __contains__(self, key: object) -> bool:
+        """Return True if the named item is present, and False otherwise."""
+        return key in self._groups_all
+
+    def __getitem__(self, key: str) -> xr.Dataset:
         """Get item by key."""
         if key not in self._groups_all:
             raise KeyError(key)
         return getattr(self, key)
 
-    def groups(self):
+    def groups(self) -> List[str]:
         """Return all groups present in InferenceData object."""
         return self._groups_all
 
-    def values(self):
-        """Xarray Datasets present in InferenceData object."""
-        for group in self._groups_all:
-            yield getattr(self, group)
+    class InferenceDataValuesView(ValuesView[xr.Dataset]):
+        """ValuesView implementation for InferenceData, to allow it to implement Mapping."""
 
-    def items(self):
-        """Yield groups and corresponding datasets present in InferenceData object."""
-        for group in self._groups_all:
-            yield (group, getattr(self, group))
+        def __init__(self, parent: "InferenceData") -> None:
+            """Create a new InferenceDataValuesView from an InferenceData object."""
+            self.parent = parent
+
+        def __len__(self) -> int:
+            """Return the number of groups in the parent InferenceData."""
+            return len(self.parent._groups_all)
+
+        def __iter__(self) -> Iterator[xr.Dataset]:
+            """Iterate through the Xarray datasets present in the InferenceData object."""
+            parent = self.parent
+            for group in parent._groups_all:
+                yield getattr(parent, group)
+
+        def __contains__(self, key: object) -> bool:
+            """Return True if the given Xarray dataset is one of the values, and False otherwise."""
+            if not isinstance(key, xr.Dataset):
+                return False
+
+            for dataset in self:
+                if dataset.equals(key):
+                    return True
+
+            return False
+
+    def values(self) -> "InferenceData.InferenceDataValuesView":
+        """Return a view over the Xarray Datasets present in the InferenceData object."""
+        return InferenceData.InferenceDataValuesView(self)
+
+    class InferenceDataItemsView(ItemsView[str, xr.Dataset]):
+        """ItemsView implementation for InferenceData, to allow it to implement Mapping."""
+
+        def __init__(self, parent: "InferenceData") -> None:
+            """Create a new InferenceDataItemsView from an InferenceData object."""
+            self.parent = parent
+
+        def __len__(self) -> int:
+            """Return the number of groups in the parent InferenceData."""
+            return len(self.parent._groups_all)
+
+        def __iter__(self) -> Iterator[Tuple[str, xr.Dataset]]:
+            """Iterate through the groups and corresponding Xarray datasets in the InferenceData."""
+            parent = self.parent
+            for group in parent._groups_all:
+                yield group, getattr(parent, group)
+
+        def __contains__(self, key: object) -> bool:
+            """Return True if the (group, dataset) tuple is present, and False otherwise."""
+            parent = self.parent
+            if not isinstance(key, tuple) or len(key) != 2:
+                return False
+
+            group, dataset = key
+            if group not in parent._groups_all:
+                return False
+
+            if not isinstance(dataset, xr.Dataset):
+                return False
+
+            existing_dataset = getattr(parent, group)
+            return existing_dataset.equals(dataset)
+
+    def items(self) -> "InferenceData.InferenceDataItemsView":
+        """Return a view over the groups and datasets present in the InferenceData object."""
+        return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename):
+    def from_netcdf(filename: str) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
@@ -240,7 +336,9 @@ class InferenceData:
                     groups[group] = data
         return InferenceData(**groups)
 
-    def to_netcdf(self, filename, compress=True, groups=None):
+    def to_netcdf(
+        self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
+    ) -> str:
         """Write InferenceData to file using netcdf4.
 
         Parameters
@@ -489,18 +587,18 @@ class InferenceData:
             (dfs,) = dfs.values()
         return dfs
 
-    def __add__(self, other):
+    def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
     def sel(
-        self,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        chain_prior=None,
-        **kwargs,
-    ):
+        self: InferenceDataT,
+        groups: Optional[Union[str, List[str]]] = None,
+        filter_groups: Optional[Literal["like", "regex"]] = None,
+        inplace: bool = False,
+        chain_prior: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> Optional[InferenceDataT]:
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.sel(key=item)
@@ -567,10 +665,10 @@ class InferenceData:
             )
         else:
             chain_prior = False
-        groups = self._group_names(groups, filter_groups)
+        group_names = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
-        for group in groups:
+        for group in group_names:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             if not chain_prior and "prior" in group:
@@ -583,12 +681,12 @@ class InferenceData:
             return out
 
     def isel(
-        self,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        **kwargs,
-    ):
+        self: InferenceDataT,
+        groups: Optional[Union[str, List[str]]] = None,
+        filter_groups: Optional[Literal["like", "regex"]] = None,
+        inplace: bool = False,
+        **kwargs: Any,
+    ) -> Optional[InferenceDataT]:
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.isel(key=item)
@@ -621,10 +719,10 @@ class InferenceData:
             When `inplace==True` perform selection in-place and return `None`
 
         """
-        groups = self._group_names(groups, filter_groups)
+        group_names = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
-        for group in groups:
+        for group in group_names:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             dataset = dataset.isel(**{key: kwargs[key] for key in valid_keys})
@@ -1008,7 +1106,11 @@ class InferenceData:
     sum = _extend_xr_method(xr.Dataset.sum)
     quantile = _extend_xr_method(xr.Dataset.quantile)
 
-    def _group_names(self, groups, filter_groups=None):
+    def _group_names(
+        self,
+        groups: Optional[Union[str, List[str]]],
+        filter_groups: Optional[Literal["like", "regex"]] = None,
+    ) -> List[str]:
         """Handle expansion of group names input across arviz.
 
         Parameters
@@ -1208,6 +1310,69 @@ class InferenceData:
             return None
         else:
             return out
+
+
+@overload
+def concat(
+    *args,
+    dim: Optional[str] = None,
+    copy: bool = True,
+    inplace: Literal[True],
+    reset_dim: bool = True,
+) -> None:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    *args,
+    dim: Optional[str] = None,
+    copy: bool = True,
+    inplace: Literal[False],
+    reset_dim: bool = True,
+) -> InferenceData:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: Literal[False],
+    reset_dim: bool = True,
+) -> InferenceData:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: Literal[True],
+    reset_dim: bool = True,
+) -> None:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: bool = False,
+    reset_dim: bool = True,
+) -> Optional[InferenceData]:
+    """Overload definition, see below for docstring."""
+    ...
 
 
 # pylint: disable=protected-access, inconsistent-return-statements
