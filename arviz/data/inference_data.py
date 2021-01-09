@@ -10,6 +10,7 @@ from datetime import datetime
 from html import escape
 import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
     Iterable,
     Iterator,
@@ -24,7 +25,6 @@ from typing import (
 
 import netCDF4 as nc
 import numpy as np
-from typing_extensions import Literal
 import xarray as xr
 
 from ..rcparams import rcParams
@@ -37,6 +37,9 @@ if sys.version_info[:2] >= (3, 9):
 else:
     # These typing imports are deprecated in 3.9, and moved to collections.abc instead.
     from typing import ItemsView, ValuesView
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 try:
     import ujson as json
@@ -591,7 +594,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     def sel(
         self: InferenceDataT,
         groups: Optional[Union[str, List[str]]] = None,
-        filter_groups: Optional[Literal["like", "regex"]] = None,
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
         inplace: bool = False,
         chain_prior: Optional[bool] = None,
         **kwargs: Any,
@@ -680,7 +683,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     def isel(
         self: InferenceDataT,
         groups: Optional[Union[str, List[str]]] = None,
-        filter_groups: Optional[Literal["like", "regex"]] = None,
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
         inplace: bool = False,
         **kwargs: Any,
     ) -> Optional[InferenceDataT]:
@@ -1106,7 +1109,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
     def _group_names(
         self,
         groups: Optional[Union[str, List[str]]],
-        filter_groups: Optional[Literal["like", "regex"]] = None,
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
     ) -> List[str]:
         """Handle expansion of group names input across arviz.
 
@@ -1314,7 +1317,7 @@ def concat(
     *args,
     dim: Optional[str] = None,
     copy: bool = True,
-    inplace: Literal[True],
+    inplace: "Literal[True]",
     reset_dim: bool = True,
 ) -> None:
     """Overload definition, see below for docstring."""
@@ -1326,7 +1329,7 @@ def concat(
     *args,
     dim: Optional[str] = None,
     copy: bool = True,
-    inplace: Literal[False],
+    inplace: "Literal[False]",
     reset_dim: bool = True,
 ) -> InferenceData:
     """Overload definition, see below for docstring."""
@@ -1339,7 +1342,7 @@ def concat(
     dim: Optional[str] = None,
     *,
     copy: bool = True,
-    inplace: Literal[False],
+    inplace: "Literal[False]",
     reset_dim: bool = True,
 ) -> InferenceData:
     """Overload definition, see below for docstring."""
@@ -1352,7 +1355,7 @@ def concat(
     dim: Optional[str] = None,
     *,
     copy: bool = True,
-    inplace: Literal[True],
+    inplace: "Literal[True]",
     reset_dim: bool = True,
 ) -> None:
     """Overload definition, see below for docstring."""
