@@ -3,7 +3,7 @@
 import warnings
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -25,6 +25,9 @@ from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
 from .stats_utils import stats_variance_2d as svar
 from .stats_utils import wrap_xarray_ufunc as _wrap_xarray_ufunc
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 
 __all__ = [
@@ -1001,15 +1004,15 @@ def summary(
     var_names: Optional[List[str]] = None,
     filter_vars=None,
     group=None,
-    fmt: str = "wide",
-    kind: str = "all",
+    fmt: "Literal['wide', 'long', 'xarray']" = "wide",
+    kind: "Literal['all', 'stats', 'diagnostics']" = "all",
     round_to=None,
     include_circ=None,
     circ_var_names=None,
     stat_funcs=None,
     extend=True,
     hdi_prob=None,
-    order="C",
+    order: "Literal['C', 'F']" = "C",
     index_origin=None,
     skipna=False,
     coords: Optional[CoordSpec] = None,
@@ -1187,6 +1190,10 @@ def summary(
     if not isinstance(order, str) or (order.upper() not in unpack_order_group):
         raise TypeError(f"Invalid order: '{order}'. Unpacking options are: {unpack_order_group}")
 
+    kind_group = ("all", "stats", "diagnostics")
+    if not isinstance(kind, str) or kind not in kind_group:
+        raise TypeError(f"Invalid kind: '{kind}'. Kind options are: {kind_group}")
+
     alpha = 1 - hdi_prob
 
     extra_metrics = []
@@ -1262,10 +1269,11 @@ def summary(
         )
 
     # Combine metrics
-    metrics = []
-    metric_names = []
+    metrics: List[xr.Dataset] = []
+    metric_names: List[str] = []
     if extend:
-        metrics_names_ = (
+        metrics_: Tuple[xr.Dataset, ...]
+        metrics_names_: Tuple[str, ...] = (
             "mean",
             "sd",
             f"hdi_{100 * alpha / 2:g}%",
@@ -1302,7 +1310,6 @@ def summary(
         metric_names.extend(metrics_names_)
 
     if circ_var_names:
-
         if kind != "diagnostics":
             for metric, circ_stat in zip(
                 # Replace only the first 5 statistics for their circular equivalent
@@ -1322,12 +1329,12 @@ def summary(
         dfs = []
         for var_name, values in joined.data_vars.items():
             if len(values.shape[1:]):
-                metric = list(values.metric.values)
+                index_metric = list(values.metric.values)
                 data_dict = OrderedDict()
                 for idx in np.ndindex(values.shape[1:] if order == "C" else values.shape[1:][::-1]):
                     if order == "F":
                         idx = tuple(idx[::-1])
-                    ser = pd.Series(values[(Ellipsis, *idx)].values, index=metric)
+                    ser = pd.Series(values[(Ellipsis, *idx)].values, index=index_metric)
                     key_index = ",".join(map(str, (i + index_origin for i in idx)))
                     key = f"{var_name}[{key_index}]"
                     data_dict[key] = ser
