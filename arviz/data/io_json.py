@@ -6,7 +6,9 @@ try:
     import ujson as json
 except ImportError:
     # Can't find ujson using json
-    import json
+    # mypy struggles with conditional imports expressed as catching ImportError:
+    # https://github.com/python/mypy/issues/1153
+    import json  # type: ignore
 
 
 def from_json(filename):
