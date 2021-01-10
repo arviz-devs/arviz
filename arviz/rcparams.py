@@ -283,7 +283,7 @@ defaultParams = {  # pylint: disable=invalid-name
 }
 
 
-class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
+class RcParams(dict):
     """Class to contain ArviZ default parameters.
 
     It is implemented as a dict with validation when setting items.
@@ -292,7 +292,8 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     validate = {key: validate_fun for key, (_, validate_fun) in defaultParams.items()}
 
     # validate values on the way in
-    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, *args, **kwargs):
+        super().__init__()
         self.update(*args, **kwargs)
 
     def __setitem__(self, key, val):
@@ -308,10 +309,6 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
                 "{} is not a valid rc parameter (see rcParams.keys() for "
                 "a list of valid parameters)".format(key)
             ) from err
-
-    def __getitem__(self, key):
-        """Use dict getitem method."""
-        return dict.__getitem__(self, key)
 
     def __delitem__(self, key):
         """Raise TypeError if someone ever tries to delete a key from RcParams."""
@@ -341,18 +338,6 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             ""
         )
 
-    def items(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.items(self)
-
-    def keys(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.keys(self)
-
-    def values(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.values(self)
-
     def __repr__(self):
         """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__
@@ -368,10 +353,6 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     def __iter__(self):
         """Yield sorted list of keys."""
         yield from sorted(dict.__iter__(self))
-
-    def __len__(self):
-        """Use dict len method."""
-        return dict.__len__(self)
 
     def find_all(self, pattern):
         """
