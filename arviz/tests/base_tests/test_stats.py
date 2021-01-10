@@ -332,13 +332,19 @@ def test_summary_skip_nan(centered_eight):
 
 @pytest.mark.parametrize("fmt", [1, "bad_fmt"])
 def test_summary_bad_fmt(centered_eight, fmt):
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="Invalid format"):
         summary(centered_eight, fmt=fmt)
+
+
+@pytest.mark.parametrize("kind", [1, "bad_kind"])
+def test_summary_bad_kind(centered_eight, kind):
+    with pytest.raises(TypeError, match="Invalid kind"):
+        summary(centered_eight, kind=kind)
 
 
 @pytest.mark.parametrize("order", [1, "bad_order"])
 def test_summary_bad_unpack_order(centered_eight, order):
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="Invalid order"):
         summary(centered_eight, order=order)
 
 
