@@ -385,7 +385,7 @@ class RcParams(MutableMapping):
 
     def copy(self):
         """Get a copy of the RcParams object."""
-        return {k: dict.__getitem__(self, k) for k in self}
+        return dict(self._underlying_storage)
 
 
 def get_arviz_rcfile():
