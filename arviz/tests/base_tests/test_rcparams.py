@@ -114,7 +114,9 @@ def test_rctemplate_updated():
         key for key in rc_defaults.keys() if key not in rc_pars_template
     ]
     assert all([value == rc_pars_template[key] for key, value in rc_defaults.items()]), [
-        key for key, value in rc_defaults.items() if value != rc_pars_template[key]
+        (key, value, rc_pars_template[key])
+        for key, value in rc_defaults.items()
+        if value != rc_pars_template[key]
     ]
 
 
