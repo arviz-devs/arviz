@@ -6,7 +6,6 @@ import pprint
 import re
 import sys
 import warnings
-from collections.abc import MutableMapping
 from pathlib import Path
 
 import numpy as np
