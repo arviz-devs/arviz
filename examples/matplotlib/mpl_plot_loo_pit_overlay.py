@@ -3,7 +3,7 @@ LOO-PIT Overlay Plot
 ====================
 
 _thumb: .5, .7
-_example_title: Plot LOO overlayed on <i>some damn thing</i>.
+_example_title: Plot LOO overlaid on uniform distributions to assess convergence.
 """
 import matplotlib.pyplot as plt
 
