@@ -3,7 +3,7 @@ LOO-PIT Overlay Plot
 ====================
 
 _thumb: .5, .7
-_example_title: Plot LOO overlaid on uniform distributions to assess convergence.
+_example_title: Plot LOO-PIT KDE overlaid on KDEs of uniform samples to assess predictive calibration.
 """
 import matplotlib.pyplot as plt
 
