@@ -65,7 +65,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         dims: Optional[Dims] = None,
         model=None,
         save_warmup: Optional[bool] = None,
-        density_dist_obs: Optional[bool] = True,
+        density_dist_obs: bool = True,
     ):
         import pymc3
         import theano
@@ -506,7 +506,7 @@ def from_pymc3(
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None,
     save_warmup: Optional[bool] = None,
-    density_dist_obs: Optional[bool] = True,
+    density_dist_obs: bool = True,
 ) -> InferenceData:
     """Convert pymc3 data into an InferenceData object.
 
