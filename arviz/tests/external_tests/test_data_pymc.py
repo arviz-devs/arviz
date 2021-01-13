@@ -357,7 +357,8 @@ class TestDataPyMC3:
         assert not fails
         assert inference_data.observed_data.value.dtype.kind == "f"
 
-    def test_multiobservedrv_to_observed_data(self):
+    @pytest.mark.parametrize("multiobs", (True, False))
+    def test_multiobservedrv_to_observed_data(self, multiobs):
         # fake regression data, with weights (W)
         np.random.seed(2019)
         N = 100
@@ -379,16 +380,18 @@ class TestDataPyMC3:
                 "y_logp", weighted_normal, observed={"y": Y, "w": W}
             )
             trace = pm.sample(20, tune=20)
-            idata = from_pymc3(trace)
+            idata = from_pymc3(trace, density_dist_obs=multiobs)
+        multiobs_str = "" if multiobs else "~"
         test_dict = {
             "posterior": ["a", "b", "sigma"],
             "sample_stats": ["lp"],
             "log_likelihood": ["y_logp"],
-            "observed_data": ["y", "w"],
+            f"{multiobs_str}observed_data": ["y", "w"],
         }
         fails = check_multiple_attrs(test_dict, idata)
         assert not fails
-        assert idata.observed_data.y.dtype.kind == "f"
+        if multiobs:
+            assert idata.observed_data.y.dtype.kind == "f"
 
     def test_single_observation(self):
         with pm.Model():
