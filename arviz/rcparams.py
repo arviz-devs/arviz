@@ -8,6 +8,7 @@ import sys
 import warnings
 from collections.abc import MutableMapping
 from pathlib import Path
+from typing import Any, Dict
 
 import numpy as np
 
@@ -283,7 +284,7 @@ defaultParams = {  # pylint: disable=invalid-name
 }
 
 
-class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
+class RcParams(MutableMapping):
     """Class to contain ArviZ default parameters.
 
     It is implemented as a dict with validation when setting items.
@@ -292,7 +293,9 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
     validate = {key: validate_fun for key, (_, validate_fun) in defaultParams.items()}
 
     # validate values on the way in
-    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, *args, **kwargs):
+        self._underlying_storage: Dict[str, Any] = {}
+        super().__init__()
         self.update(*args, **kwargs)
 
     def __setitem__(self, key, val):
@@ -302,7 +305,7 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
                 cval = self.validate[key](val)
             except ValueError as verr:
                 raise ValueError("Key %s: %s" % (key, str(verr))) from verr
-            dict.__setitem__(self, key, cval)
+            self._underlying_storage[key] = cval
         except KeyError as err:
             raise KeyError(
                 "{} is not a valid rc parameter (see rcParams.keys() for "
@@ -310,8 +313,8 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             ) from err
 
     def __getitem__(self, key):
-        """Use dict getitem method."""
-        return dict.__getitem__(self, key)
+        """Use underlying dict's getitem method."""
+        return self._underlying_storage[key]
 
     def __delitem__(self, key):
         """Raise TypeError if someone ever tries to delete a key from RcParams."""
@@ -341,37 +344,29 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
             ""
         )
 
-    def items(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.items(self)
-
-    def keys(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.keys(self)
-
-    def values(self):
-        """Explicit use of MutableMapping attributes."""
-        return MutableMapping.values(self)
-
     def __repr__(self):
         """Customize repr of RcParams objects."""
         class_name = self.__class__.__name__
         indent = len(class_name) + 1
-        repr_split = pprint.pformat(dict(self), indent=1, width=80 - indent).split("\n")
+        repr_split = pprint.pformat(
+            self._underlying_storage,
+            indent=1,
+            width=80 - indent,
+        ).split("\n")
         repr_indented = ("\n" + " " * indent).join(repr_split)
         return "{}({})".format(class_name, repr_indented)
 
     def __str__(self):
         """Customize str/print of RcParams objects."""
-        return "\n".join(map("{0[0]:<22}: {0[1]}".format, sorted(self.items())))
+        return "\n".join(map("{0[0]:<22}: {0[1]}".format, sorted(self._underlying_storage.items())))
 
     def __iter__(self):
         """Yield sorted list of keys."""
-        yield from sorted(dict.__iter__(self))
+        yield from sorted(self._underlying_storage.keys())
 
     def __len__(self):
-        """Use dict len method."""
-        return dict.__len__(self)
+        """Use underlying dict's len method."""
+        return len(self._underlying_storage)
 
     def find_all(self, pattern):
         """
@@ -390,7 +385,7 @@ class RcParams(MutableMapping, dict):  # pylint: disable=too-many-ancestors
 
     def copy(self):
         """Get a copy of the RcParams object."""
-        return {k: dict.__getitem__(self, k) for k in self}
+        return dict(self._underlying_storage)
 
 
 def get_arviz_rcfile():
