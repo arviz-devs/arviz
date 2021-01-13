@@ -63,6 +63,7 @@ additive constant).
 * `energy_error`: The difference in the Hamiltonian energy between the initial point and
 the accepted proposal.
 * `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
+* `int_time`: The total integration time (static HMC sampler)
 
 
 ### `log_likelihood`
