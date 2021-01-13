@@ -562,7 +562,8 @@ class InferenceData:
 
         See Also
         --------
-        xarray.Dataset.sel : Returns a new dataset with each array indexed by tick labels along the specified dimension(s).
+        xarray.Dataset.sel : Returns a new dataset with each array indexed by tick labels along
+            the specified dimension(s).
         isel : Returns a new dataset with each array indexed along the specified dimension(s).
         """
         if chain_prior is not None:
@@ -651,8 +652,10 @@ class InferenceData:
 
         See Also
         --------
-        xarray.Dataset.isel : Returns a new dataset with each array indexed along the specified dimension(s).
-        sel : Returns a new dataset with each array indexed by tick labels along the specified dimension(s).
+        xarray.Dataset.isel : Returns a new dataset with each array indexed along the specified
+            dimension(s).
+        sel : Returns a new dataset with each array indexed by tick labels along the specified
+            dimension(s).
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -743,7 +746,9 @@ class InferenceData:
                         "b1": np.arange(10),
                     }
                ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: idata = az.from_dict(posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims)
+               ...: idata = az.from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
                ...: idata
 
         In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
@@ -809,8 +814,8 @@ class InferenceData:
 
         Examples
         --------
-        Use ``unstack`` to unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
-        We first stack two dimensions ``c1`` and ``c99`` to ``z``:
+        Use ``unstack`` to unstack existing dimensions corresponding to MultiIndexes into
+        multiple new dimensions. We first stack two dimensions ``c1`` and ``c99`` to ``z``:
 
         .. ipython::
 
@@ -826,7 +831,9 @@ class InferenceData:
                         "b1": np.arange(10),
                     }
                ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: dataset = from_dict(posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims)
+               ...: dataset = from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
                ...: dataset.stack(z=["c1", "c99"], inplace=True)
                ...: dataset
 
@@ -839,7 +846,8 @@ class InferenceData:
 
         See Also
         --------
-        xarray.Dataset.unstack : Unstack existing dimensions corresponding to MultiIndexes into multiple new dimensions.
+        xarray.Dataset.unstack : Unstack existing dimensions corresponding to MultiIndexes into
+            multiple new dimensions.
         stack : Perform an xarray stacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -910,7 +918,8 @@ class InferenceData:
         See Also
         --------
         xarray.Dataset.rename : Returns a new object with renamed variables and dimensions.
-        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of InferenceData object.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of
+            an InferenceData object.
         rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -964,8 +973,8 @@ class InferenceData:
 
         Examples
         --------
-        Use ``rename_vars`` to renaming of variable and coordinates on all groups of the InferenceData
-        object. We first check the data variables of original object:
+        Use ``rename_vars`` to renaming of variable and coordinates on all groups of the
+        InferenceData object. We first check the data variables of original object:
 
         .. ipython::
 
@@ -984,8 +993,10 @@ class InferenceData:
 
         See Also
         --------
-        xarray.Dataset.rename_vars : Returns a new object with renamed variables including coordinates.
-        rename : Perform xarray renaming of variable and dimensions on all groups of InferenceData object.
+        xarray.Dataset.rename_vars : Returns a new object with renamed variables including
+            coordinates.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
         rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
@@ -1056,8 +1067,10 @@ class InferenceData:
         See Also
         --------
         xarray.Dataset.rename_dims : Returns a new object with renamed dimensions only.
-        rename : Perform xarray renaming of variable and dimensions on all groups of InferenceData object.
-        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of InferenceData object.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups
+            of an InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
