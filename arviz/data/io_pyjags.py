@@ -18,16 +18,18 @@ class PyJAGSConverter:
     def __init__(
         self,
         *,
-        posterior: tp.Optional[tp.Dict[str, np.ndarray]] = None,
+        posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
         prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
-        log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
+        log_likelihood: tp.Optional[tp.Mapping[str, str]] = None,
         coords=None,
         dims=None,
         save_warmup: bool = None,
         warmup_iterations: int = 0
     ):
+        self.posterior: tp.Optional[tp.Mapping[str, np.ndarray]]
+        self.log_likelihood: tp.Optional[tp.Dict[str, str]]
         if log_likelihood is not None and posterior is not None:
-            self.posterior = posterior.copy()  # create a shallow copy of the dictionary
+            posterior_copy = dict(posterior)  # create a shallow copy of the dictionary
 
             if isinstance(log_likelihood, str):
                 log_likelihood = [log_likelihood]
@@ -35,9 +37,10 @@ class PyJAGSConverter:
                 log_likelihood = {name: name for name in log_likelihood}
 
             self.log_likelihood = {
-                obs_var_name: self.posterior.pop(log_like_name)
+                obs_var_name: posterior_copy.pop(log_like_name)
                 for obs_var_name, log_like_name in log_likelihood.items()
             }
+            self.posterior = posterior_copy
         else:
             self.posterior = posterior
             self.log_likelihood = None
@@ -73,16 +76,28 @@ class PyJAGSConverter:
     @requires("posterior")
     def posterior_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
         """Extract posterior samples from fit."""
+        if self.posterior is None:
+            # This should be impossible because of @requires above.
+            raise AssertionError("self.posterior was unexpectedly None. This is a bug.")
+
         return self._pyjags_samples_to_xarray(self.posterior)
 
     @requires("prior")
     def prior_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
         """Extract posterior samples from fit."""
+        if self.prior is None:
+            # This should be impossible because of @requires above.
+            raise AssertionError("self.prior was unexpectedly None. This is a bug.")
+
         return self._pyjags_samples_to_xarray(self.prior)
 
     @requires("log_likelihood")
     def log_likelihood_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
         """Extract log likelihood samples from fit."""
+        if self.log_likelihood is None:
+            # This should be impossible because of @requires above.
+            raise AssertionError("self.log_likelihood was unexpectedly None. This is a bug.")
+
         return self._pyjags_samples_to_xarray(self.log_likelihood)
 
     def to_inference_data(self):
@@ -125,7 +140,7 @@ def get_draws(
     -------
     A tuple of two samples dictionaries in ArviZ format
     """
-    data_warmup = OrderedDict()
+    data_warmup: tp.Mapping[str, np.ndarray] = OrderedDict()
 
     if variables is None:
         variables = list(pyjags_samples.keys())
@@ -302,7 +317,7 @@ def _convert_arviz_dict_to_pyjags_dict(
 def from_pyjags(
     posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
     prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
-    log_likelihood: tp.Optional[tp.Dict[str, str]] = None,
+    log_likelihood: tp.Optional[tp.Mapping[str, str]] = None,
     coords=None,
     dims=None,
     save_warmup=None,
