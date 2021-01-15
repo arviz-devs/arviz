@@ -7,6 +7,7 @@ from copy import deepcopy as _deepcopy
 import numpy as np
 import pandas as pd
 from scipy.fftpack import next_fast_len
+from scipy.interpolate import CubicSpline
 from scipy.stats.mstats import mquantiles
 from xarray import apply_ufunc
 
@@ -554,3 +555,18 @@ def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, a
     c_c = np.cos(ang).mean(axis=axis)
     r_r = np.hypot(s_s, c_c)
     return ((high - low) / 2.0 / np.pi) * np.sqrt(-2 * np.log(r_r))
+
+
+def smooth_data(obs_vals, pp_vals):
+    """
+    Helper function to smooth discrete data in plot_pbv, loo_pit and plot_loo_pit.
+    """
+    x = np.linspace(0, 1, len(obs_vals))
+    csi = CubicSpline(x, obs_vals)
+    obs_vals = csi(np.linspace(0.01, 0.99, len(obs_vals)))
+
+    x = np.linspace(0, 1, pp_vals.shape[1])
+    csi = CubicSpline(x, pp_vals, axis=1)
+    pp_vals = csi(np.linspace(0.01, 0.99, pp_vals.shape[1]))
+
+    return obs_vals, pp_vals

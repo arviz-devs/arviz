@@ -19,7 +19,7 @@ from .density_utils import get_bins as _get_bins
 from .density_utils import histogram as _histogram
 from .density_utils import kde as _kde
 from .diagnostics import _mc_error, _multichain_statistics, ess
-from .stats_utils import ELPDData, _circular_standard_deviation
+from .stats_utils import ELPDData, _circular_standard_deviation, smooth_data
 from .stats_utils import get_log_likelihood as _get_log_likelihood
 from .stats_utils import logsumexp as _logsumexp
 from .stats_utils import make_ufunc as _make_ufunc
@@ -1635,6 +1635,9 @@ def loo_pit(idata=None, *, y=None, y_hat=None, log_weights=None):
         "join": "left",
     }
     ufunc_kwargs = {"n_dims": 1}
+
+    if y.dtype.kind == "i" or y_hat.dtype.kind == "i":
+        y, y_hat = smooth_data(y, y_hat)
 
     return _wrap_xarray_ufunc(
         _loo_pit,
