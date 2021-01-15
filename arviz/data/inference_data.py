@@ -1209,6 +1209,10 @@ class InferenceData:
         else:
             return out
 
+    def copy(self) -> 'InferenceData':
+        """Return a fresh copy of the ``InferenceData`` object."""
+        return deepcopy(self)
+
 
 # pylint: disable=protected-access, inconsistent-return-statements
 def concat(*args, dim=None, copy=True, inplace=False, reset_dim=True):
