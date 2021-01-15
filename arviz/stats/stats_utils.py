@@ -558,9 +558,7 @@ def _circular_standard_deviation(samples, high=2 * np.pi, low=0, skipna=False, a
 
 
 def smooth_data(obs_vals, pp_vals):
-    """
-    Helper function to smooth discrete data in plot_pbv, loo_pit and plot_loo_pit.
-    """
+    """Smooth data, helper function for discrete data in plot_pbv, loo_pit and plot_loo_pit."""
     x = np.linspace(0, 1, len(obs_vals))
     csi = CubicSpline(x, obs_vals)
     obs_vals = csi(np.linspace(0.01, 0.99, len(obs_vals)))
