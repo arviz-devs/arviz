@@ -3,6 +3,7 @@
 ======
 
 _thumb: .1, .8
+_example_title: Plot KDE in two dimensions
 """
 import matplotlib.pyplot as plt
 import numpy as np

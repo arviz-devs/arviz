@@ -2,7 +2,7 @@
 Separation Plot
 ===============
 
-_thumb: .2, .8
+_thumb: .5, .5
 """
 import matplotlib.pyplot as plt
 

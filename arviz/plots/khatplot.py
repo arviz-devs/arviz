@@ -35,17 +35,19 @@ def plot_khat(
     show=None,
     **kwargs
 ):
-    """
-    Plot Pareto tail indices.
+    r"""
+    Plot Pareto tail indices for diagnosing convergence.
 
     Parameters
     ----------
-    khats : ELPDData cointaining pareto shapes information or array
+    khats : ELPDData cointaining Pareto shapes information or array of
         Pareto tail indices.
     color : str or array_like, optional
-        Colors of the scatter plot, if color is a str all dots will have the same color,
-        if it is the size of the observations, each dot will have the specified color,
-        otherwise, it will be interpreted as a list of the dims to be used for the color code
+        Colors of the scatter plot, if color is a str all dots will
+        have the same color, if it is the size of the observations,
+        each dot will have the specified color, otherwise, it will be
+        interpreted as a list of the dims to be used for the color
+        code
     xlabels : bool, optional
         Use coords as xticklabels
     show_hlines : bool, optional
@@ -125,6 +127,25 @@ def plot_khat(
         ... ]
         >>> az.plot_khat(loo_radon, color=colors)
 
+    Notes
+    -----
+    The Generalized Pareto distribution (GPD) may be used to diagnose
+    convergence rates for importance sampling.  GPD has parameters
+    offset, scale, and shape. The shape parameter is usually denoted
+    with ``k``. ``k`` also tells how many finite moments the
+    distribution has. The pre-asymptotic convergence rate of
+    importance sampling can be estimated based on the fractional
+    number of finite moments of the importance ratio distribution. GPD
+    is fitted to the largest importance ratios and the estimated shape
+    parameter ``k``, i.e., ``\hat{k}` can then be used as a diagnostic
+    (most importantly if ``\hat{k} > 0.7``, then the convergence rate
+    is impractically low). See [1]_.
+
+    References
+    ----------
+    ..[1] Vehtari, A., Simpson, D., Gelman, A., Yao, Y., Gabry, J.,
+    2019. Pareto Smoothed Importance Sampling. arXiv:1507.02646
+    [stat].
     """
     if annotate:
         _log.warning("annotate will be deprecated, please use threshold instead")

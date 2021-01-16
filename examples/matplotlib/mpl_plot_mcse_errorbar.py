@@ -3,6 +3,7 @@ Quantile MCSE Errobar Plot
 ==========================
 
 _thumb: .6, .4
+_example_title: Quantile MCSE plot with errobars
 """
 import matplotlib.pyplot as plt
 

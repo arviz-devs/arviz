@@ -3,6 +3,7 @@ Matplotlib styles
 =================
 
 _thumb: .8, .8
+_example_title: Matplotlib styles for ArviZ
 """
 import matplotlib.pyplot as plt
 import numpy as np

@@ -3,6 +3,7 @@ Joint Plot
 ==========
 
 _thumb: .5, .8
+_example_title: Plot joint distribution
 """
 import matplotlib.pyplot as plt
 

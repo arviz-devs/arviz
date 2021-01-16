@@ -3,6 +3,7 @@ Autocorrelation Plot
 ====================
 
 _thumb: .8, .8
+_example_title: Autocorrelation plot
 """
 import matplotlib.pyplot as plt
 
