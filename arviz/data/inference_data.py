@@ -1209,7 +1209,7 @@ class InferenceData:
         else:
             return out
 
-    def copy(self) -> 'InferenceData':
+    def copy(self) -> "InferenceData":
         """Return a fresh copy of the ``InferenceData`` object."""
         return deepcopy(self)
 
