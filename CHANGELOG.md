@@ -32,6 +32,8 @@
 * Switch to `compact=True` by default in our plots ([1468](https://github.com/arviz-devs/arviz/issues/1468))
 * `plot_elpd`, avoid modifying the input dict ([1477](https://github.com/arviz-devs/arviz/issues/1477))
 * Do not plot divergences in `plot_trace` when `kind=rank_vlines` or `kind=rank_bars` ([1476](https://github.com/arviz-devs/arviz/issues/1476))
+* Allow ignoring `observed` argument of `pymc3.DensityDist` in `from_pymc3` ([1495](https://github.com/arviz-devs/arviz/pull/1495))
+* Make `from_pymc3` compatible with theano-pymc 1.1.0 ([1495](https://github.com/arviz-devs/arviz/pull/1495))
 
 
 ### Deprecation
@@ -44,6 +46,8 @@
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 * Add documentation pages about experimental `SamplingWrapper`s usage ([1373](https://github.com/arviz-devs/arviz/pull/1373))
 * Show example titles in gallery page ([1484](https://github.com/arviz-devs/arviz/pull/1484))
+* Add `sample_stats` naming convention to the InferenceData schema ([1063](https://github.com/arviz-devs/arviz/pull/1063))
+* Extend api documentation about `InferenceData` methods ([1338](https://github.com/arviz-devs/arviz/pull/1338))
 
 ### Experimental
 * Modified `SamplingWrapper` base API ([1373](https://github.com/arviz-devs/arviz/pull/1373))

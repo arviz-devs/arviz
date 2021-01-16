@@ -40,18 +40,31 @@ Moreover, each group contains the following attributes:
 Samples from the posterior distribution p(theta|y).
 
 ### `sample_stats`
-Information and diagnostics for each `posterior` sample, provided by the inference backend. It may vary depending on the algorithm used by the backend (i.e. an affine invariant sampler has no energy associated). The name convention used for `sample_stats` variables is the following:
-* `lp`: (unnormalized) log probability for sample
-* `step_size`
-* `step_size_bar`
-* `tune`: boolean variable indicating if the sampler is tuning or sampling
-* `depth`:
-* `tree_size`:
-* `mean_tree_accept`:
-* `diverging`: HMC-NUTS only, boolean variable indicating divergent transitions
-* `energy`: HMC-NUTS only
-* `energy_error`
-* `max_energy_error`
+Information and diagnostics for each `posterior` sample, provided by the inference
+backend. It may vary depending on the algorithm used by the backend (i.e. an affine
+invariant sampler has no energy associated). Therefore none of these parameters
+should be assumed to be present in the `sample_stats` group. The convention
+below serves to ensure that _if_ a variable is present with one of these names
+it will correspond to the definition included here.
+
+The name convention used for `sample_stats` variables is the following:
+
+* `lp`: The joint log posterior density for the model (up to an additive constant).
+* `acceptance_rate`: The average acceptance probabilities of all possible samples in the proposed tree.
+* `step_size`: The current integration step size.
+* `step_size_nom`: The nominal integration step size. The `step_size` may differ from this, for example if the step size is jittered. Should only be present if `step_size` is also present and it varies between samples (i.e. step size is jittered).
+* `tree_depth`: The number of tree doublings in the balanced binary tree.
+* `n_steps`: The number of leapfrog steps computed. It is related to `tree_depth` with `n_steps <=
+  2^tree_dept`.
+* `diverging`: (boolean) Indicates the presence of leapfrog transitions with large energy deviation
+  from starting and subsequent termination of the trajectory. "large" is defined as `max_energy_error` going over a threshold.
+* `energy`: The value of the Hamiltonian energy for the accepted proposal (up to an
+additive constant).
+* `energy_error`: The difference in the Hamiltonian energy between the initial point and
+the accepted proposal.
+* `max_energy_error`: The maximum absolute difference in Hamiltonian energy between the initial point and all possible samples in the proposed tree.
+* `int_time`: The total integration time (static HMC sampler)
+
 
 ### `log_likelihood`
 Pointwise log likelihood data. Samples should match with `posterior` ones and its variables
