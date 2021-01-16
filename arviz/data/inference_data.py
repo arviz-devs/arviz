@@ -1511,6 +1511,10 @@ class InferenceData(Mapping[str, xr.Dataset]):
         else:
             return out
 
+    def copy(self) -> "InferenceData":
+        """Return a fresh copy of the ``InferenceData`` object."""
+        return deepcopy(self)
+
 
 @overload
 def concat(
