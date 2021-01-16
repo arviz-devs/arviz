@@ -276,8 +276,23 @@ def make_attrs(attrs=None, library=None):
     return default_attrs
 
 
-def _extend_xr_method(func):
-    """Make wrapper to extend methods from xr.Dataset to InferenceData Class."""
+def _extend_xr_method(func, doc="", description="", examples="", see_also=""):
+    """Make wrapper to extend methods from xr.Dataset to InferenceData Class.
+
+    Parameters
+    ----------
+    func : callable
+        An xr.Dataset function
+    doc : str
+        docstring for the func
+    description : str
+        the description of the func to be added in docstring
+    examples : str
+        the examples of the func to be added in docstring
+    see_also : str, list
+        the similar methods of func to be included in See Also section of docstring
+
+    """
     # pydocstyle requires a non empty line
 
     @functools.wraps(func)
@@ -296,10 +311,11 @@ def _extend_xr_method(func):
 
         return None if _inplace else out
 
-    description = """
-    This method is extended from xarray.Dataset methods. For more info see :meth:`xarray:xarray.Dataset.{method_name}`
+    description_default = """{method_name} method is extended from xarray.Dataset methods.
+    
+    {description}For more info see :meth:`xarray:xarray.Dataset.{method_name}`
     """.format(
-        method_name=func.__name__  # pylint: disable=no-member
+        description=description, method_name=func.__name__  # pylint: disable=no-member
     )
     params = """
     Parameters
@@ -316,14 +332,20 @@ def _extend_xr_method(func):
         If ``True``, modify the InferenceData object inplace,
         otherwise, return the modified copy.
     """
-    see_also = """
+
+    if not isinstance(see_also, str):
+        see_also = "\n".join(see_also)
+    see_also_basic = """
     See Also
     --------
     xarray.Dataset.{method_name}
+    {custom_see_also}
     """.format(
-        method_name=func.__name__  # pylint: disable=no-member
+        method_name=func.__name__, custom_see_also=see_also  # pylint: disable=no-member
     )
-    wrapped.__doc__ = description + params + see_also
+    wrapped.__doc__ = (
+        description_default + params + examples + see_also_basic if doc is None else doc
+    )
 
     return wrapped
 
