@@ -560,6 +560,11 @@ class InferenceData:
                ...: print(idata_subset.posterior_predictive.coords)
                ...: print(idata_subset.observed_data.coords)
 
+        See Also
+        --------
+        xarray.Dataset.sel : Returns a new dataset with each array indexed by tick labels along
+            the specified dimension(s).
+        isel : Returns a new dataset with each array indexed along the specified dimension(s).
         """
         if chain_prior is not None:
             warnings.warn(
@@ -622,6 +627,35 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in-place and return `None`
 
+        Examples
+        --------
+        Use ``isel`` to discard one chain of the InferenceData object. We first check the
+        dimensions of the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("centered_eight")
+               ...: del idata.prior  # prior group only has 1 chain currently
+               ...: print(idata.posterior.coords)
+               ...: print(idata.posterior_predictive.coords)
+               ...: print(idata.observed_data.coords)
+
+        In order to remove the third chain:
+
+        .. ipython::
+
+            In [1]: idata_subset = idata.isel(chain=[0, 1, 3])
+               ...: print(idata_subset.posterior.coords)
+               ...: print(idata_subset.posterior_predictive.coords)
+               ...: print(idata_subset.observed_data.coords)
+
+        See Also
+        --------
+        xarray.Dataset.isel : Returns a new dataset with each array indexed along the specified
+            dimension(s).
+        sel : Returns a new dataset with each array indexed by tick labels along the specified
+            dimension(s).
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -677,6 +711,57 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in-place and return `None`
 
+        Examples
+        --------
+        Use ``stack`` to stack any number of existing dimensions into a single new dimension.
+        We first check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: idata
+
+        In order to stack two dimensions ``chain`` and ``draw`` to ``sample``, we can use:
+
+        .. ipython::
+
+            In [1]: idata.stack(sample=["chain", "draw"], inplace=True)
+               ...: idata
+
+        We can also take the example of custom InferenceData object and perform stacking. We first
+        check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: datadict = {
+                    "a": np.random.randn(100),
+                    "b": np.random.randn(1, 100, 10),
+                    "c": np.random.randn(1, 100, 3, 4),
+                    }
+               ...: coords = {
+                        "c1": np.arange(3),
+                        "c99": np.arange(4),
+                        "b1": np.arange(10),
+                    }
+               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
+               ...: idata = az.from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
+               ...: idata
+
+        In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
+
+        .. ipython::
+
+            In [1]: idata.stack(z=["c1", "c99"], inplace=True)
+               ...: idata
+
+        See Also
+        --------
+        xarray.Dataset.stack : Stack any number of existing dimensions into a single new dimension.
+        unstack : Perform an xarray unstacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -727,6 +812,43 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in place and return `None`
 
+        Examples
+        --------
+        Use ``unstack`` to unstack existing dimensions corresponding to MultiIndexes into
+        multiple new dimensions. We first stack two dimensions ``c1`` and ``c99`` to ``z``:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: datadict = {
+                    "a": np.random.randn(100),
+                    "b": np.random.randn(1, 100, 10),
+                    "c": np.random.randn(1, 100, 3, 4),
+                    }
+               ...: coords = {
+                        "c1": np.arange(3),
+                        "c99": np.arange(4),
+                        "b1": np.arange(10),
+                    }
+               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
+               ...: dataset = from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
+               ...: dataset.stack(z=["c1", "c99"], inplace=True)
+               ...: dataset
+
+        In order to unstack the dimension ``z``, we use:
+
+        .. ipython::
+
+            In [1]: dataset.unstack(inplace=True)
+               ...: dataset
+
+        See Also
+        --------
+        xarray.Dataset.unstack : Unstack existing dimensions corresponding to MultiIndexes into
+            multiple new dimensions.
+        stack : Perform an xarray stacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if isinstance(dim, str):
@@ -769,13 +891,36 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
-
         Returns
         -------
         InferenceData
             A new InferenceData object by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename`` to renaming of variable and dimensions on all groups of the InferenceData
+        object. We first check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: idata
+
+        In order to rename the dimensions and variable, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename({"team": "team_new", "match":"match_new"}, inplace=True)
+               ...: idata
+
+        See Also
+        --------
+        xarray.Dataset.rename : Returns a new object with renamed variables and dimensions.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of
+            an InferenceData object.
+        rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
@@ -826,6 +971,33 @@ class InferenceData:
             A new InferenceData object with renamed variables including coordinates by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename_vars`` to renaming of variable and coordinates on all groups of the
+        InferenceData object. We first check the data variables of original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: print(list(idata.posterior.data_vars)
+               ...: print(list(idata.prior.data_vars)
+
+        In order to rename the data variables, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename_vars({"home": "home_new"}, inplace=True)
+               ...: print(list(idata.posterior.data_vars)
+               ...: print(list(idata.prior.data_vars)
+
+        See Also
+        --------
+        xarray.Dataset.rename_vars : Returns a new object with renamed variables including
+            coordinates.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
+        rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -866,13 +1038,39 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
-
         Returns
         -------
         InferenceData
             A new InferenceData object with renamed dimension by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename_dims`` to renaming of dimensions on all groups of the InferenceData
+        object. We first check the dimensions of original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: print(list(idata.posterior.dims)
+               ...: print(list(idata.prior.dims)
+
+        In order to rename the dimensions, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename_dims({"team": "team_new"}, inplace=True)
+               ...: print(list(idata.posterior.dims)
+               ...: print(list(idata.prior.dims)
+
+        See Also
+        --------
+        xarray.Dataset.rename_dims : Returns a new object with renamed dimensions only.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups
+            of an InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
@@ -988,11 +1186,11 @@ class InferenceData:
             else:
                 self._groups.append(group)
 
-    set_index = _extend_xr_method(xr.Dataset.set_index)
+    set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)
-    reset_index = _extend_xr_method(xr.Dataset.reset_index)
-    set_coords = _extend_xr_method(xr.Dataset.set_coords)
-    reset_coords = _extend_xr_method(xr.Dataset.reset_coords)
+    reset_index = _extend_xr_method(xr.Dataset.reset_index, see_also="set_index")
+    set_coords = _extend_xr_method(xr.Dataset.set_coords, see_also="reset_coords")
+    reset_coords = _extend_xr_method(xr.Dataset.reset_coords, see_also="set_coords")
     assign = _extend_xr_method(xr.Dataset.assign)
     assign_coords = _extend_xr_method(xr.Dataset.assign_coords)
     sortby = _extend_xr_method(xr.Dataset.sortby)
@@ -1002,12 +1200,12 @@ class InferenceData:
     compute = _extend_xr_method(xr.Dataset.compute)
     persist = _extend_xr_method(xr.Dataset.persist)
 
-    mean = _extend_xr_method(xr.Dataset.mean)
-    median = _extend_xr_method(xr.Dataset.median)
-    min = _extend_xr_method(xr.Dataset.min)
-    max = _extend_xr_method(xr.Dataset.max)
-    cumsum = _extend_xr_method(xr.Dataset.cumsum)
-    sum = _extend_xr_method(xr.Dataset.sum)
+    mean = _extend_xr_method(xr.Dataset.mean, see_also="median")
+    median = _extend_xr_method(xr.Dataset.median, see_also="mean")
+    min = _extend_xr_method(xr.Dataset.min, see_also=["max", "sum"])
+    max = _extend_xr_method(xr.Dataset.max, see_also=["min", "sum"])
+    cumsum = _extend_xr_method(xr.Dataset.cumsum, see_also="sum")
+    sum = _extend_xr_method(xr.Dataset.sum, see_also="cumsum")
     quantile = _extend_xr_method(xr.Dataset.quantile)
 
     def _group_names(self, groups, filter_groups=None):
