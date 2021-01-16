@@ -2,9 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-from scipy.interpolate import CubicSpline
 
 from ....stats.density_utils import kde
+from ....stats.stats_utils import smooth_data
 from ...kdeplot import plot_kde
 from ...plot_utils import (
     _scale_fig_size,
@@ -89,13 +89,7 @@ def plot_bpv(
         pp_vals = pp_vals.reshape(total_pp_samples, -1)
 
         if obs_vals.dtype.kind == "i" or pp_vals.dtype.kind == "i":
-            x = np.linspace(0, 1, len(obs_vals))
-            csi = CubicSpline(x, obs_vals)
-            obs_vals = csi(np.linspace(0.001, 0.999, len(obs_vals)))
-
-            x = np.linspace(0, 1, pp_vals.shape[1])
-            csi = CubicSpline(x, pp_vals, axis=1)
-            pp_vals = csi(np.linspace(0.001, 0.999, pp_vals.shape[1]))
+            obs_vals, pp_vals = smooth_data(obs_vals, pp_vals)
 
         if kind == "p_value":
             tstat_pit = np.mean(pp_vals <= obs_vals, axis=-1)
