@@ -45,6 +45,7 @@
   for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 * Add documentation pages about experimental `SamplingWrapper`s usage ([1373](https://github.com/arviz-devs/arviz/pull/1373))
+* Add `sample_stats` naming convention to the InferenceData schema ([1063](https://github.com/arviz-devs/arviz/pull/1063))
 * Extend api documentation about `InferenceData` methods ([1338](https://github.com/arviz-devs/arviz/pull/1338))
 
 ### Experimental
