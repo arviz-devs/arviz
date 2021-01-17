@@ -834,27 +834,27 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             In [1]: import arviz as az
                ...: datadict = {
-                    "a": np.random.randn(100),
-                    "b": np.random.randn(1, 100, 10),
-                    "c": np.random.randn(1, 100, 3, 4),
-                    }
+               ...:     "a": np.random.randn(100),
+               ...:     "b": np.random.randn(1, 100, 10),
+               ...:     "c": np.random.randn(1, 100, 3, 4),
+               ...: }
                ...: coords = {
-                        "c1": np.arange(3),
-                        "c99": np.arange(4),
-                        "b1": np.arange(10),
-                    }
+               ...:     "c1": np.arange(3),
+               ...:     "c99": np.arange(4),
+               ...:     "b1": np.arange(10),
+               ...: }
                ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
                ...: idata = az.from_dict(
                ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
                ...: )
-               ...: idata
+               ...: idata.posterior
 
         In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
 
         .. ipython::
 
             In [1]: idata.stack(z=["c1", "c99"], inplace=True)
-               ...: idata
+               ...: idata.posterior
 
         See Also
         --------
@@ -919,28 +919,28 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             In [1]: import arviz as az
                ...: datadict = {
-                    "a": np.random.randn(100),
-                    "b": np.random.randn(1, 100, 10),
-                    "c": np.random.randn(1, 100, 3, 4),
-                    }
+               ...:     "a": np.random.randn(100),
+               ...:     "b": np.random.randn(1, 100, 10),
+               ...:     "c": np.random.randn(1, 100, 3, 4),
+               ...: }
                ...: coords = {
-                        "c1": np.arange(3),
-                        "c99": np.arange(4),
-                        "b1": np.arange(10),
-                    }
+               ...:     "c1": np.arange(3),
+               ...:     "c99": np.arange(4),
+               ...:     "b1": np.arange(10),
+               ...: }
                ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
-               ...: dataset = from_dict(
+               ...: idata = az.from_dict(
                ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
                ...: )
-               ...: dataset.stack(z=["c1", "c99"], inplace=True)
-               ...: dataset
+               ...: idata.stack(z=["c1", "c99"], inplace=True)
+               ...: idata
 
         In order to unstack the dimension ``z``, we use:
 
         .. ipython::
 
-            In [1]: dataset.unstack(inplace=True)
-               ...: dataset
+            In [1]: idata.unstack(inplace=True)
+               ...: idata
 
         See Also
         --------
@@ -1078,16 +1078,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             In [1]: import arviz as az
                ...: idata = az.load_arviz_data("rugby")
-               ...: print(list(idata.posterior.data_vars)
-               ...: print(list(idata.prior.data_vars)
+               ...: print(list(idata.posterior.data_vars))
+               ...: print(list(idata.prior.data_vars))
 
         In order to rename the data variables, we use:
 
         .. ipython::
 
             In [1]: idata.rename_vars({"home": "home_new"}, inplace=True)
-               ...: print(list(idata.posterior.data_vars)
-               ...: print(list(idata.prior.data_vars)
+               ...: print(list(idata.posterior.data_vars))
+               ...: print(list(idata.prior.data_vars))
 
         See Also
         --------
@@ -1151,16 +1151,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
             In [1]: import arviz as az
                ...: idata = az.load_arviz_data("rugby")
-               ...: print(list(idata.posterior.dims)
-               ...: print(list(idata.prior.dims)
+               ...: print(list(idata.posterior.dims))
+               ...: print(list(idata.prior.dims))
 
         In order to rename the dimensions, we use:
 
         .. ipython::
 
             In [1]: idata.rename_dims({"team": "team_new"}, inplace=True)
-               ...: print(list(idata.posterior.dims)
-               ...: print(list(idata.prior.dims)
+               ...: print(list(idata.posterior.dims))
+               ...: print(list(idata.prior.dims))
 
         See Also
         --------
