@@ -1297,14 +1297,16 @@ class InferenceData(Mapping[str, xr.Dataset]):
     load = _extend_xr_method(xr.Dataset.load)
     compute = _extend_xr_method(xr.Dataset.compute)
     persist = _extend_xr_method(xr.Dataset.persist)
-
-    mean = _extend_xr_method(xr.Dataset.mean, see_also="median")
-    median = _extend_xr_method(xr.Dataset.median, see_also="mean")
-    min = _extend_xr_method(xr.Dataset.min, see_also=["max", "sum"])
-    max = _extend_xr_method(xr.Dataset.max, see_also=["min", "sum"])
-    cumsum = _extend_xr_method(xr.Dataset.cumsum, see_also="sum")
-    sum = _extend_xr_method(xr.Dataset.sum, see_also="cumsum")
     quantile = _extend_xr_method(xr.Dataset.quantile)
+
+    # The following lines use methods on xr.Dataset that are dynamically defined and attached.
+    # As a result mypy cannot see them, so we have to suppress the resulting mypy errors.
+    mean = _extend_xr_method(xr.Dataset.mean, see_also="median")  # type: ignore[attr-defined]
+    median = _extend_xr_method(xr.Dataset.median, see_also="mean")  # type: ignore[attr-defined]
+    min = _extend_xr_method(xr.Dataset.min, see_also=["max", "sum"])  # type: ignore[attr-defined]
+    max = _extend_xr_method(xr.Dataset.max, see_also=["min", "sum"])  # type: ignore[attr-defined]
+    cumsum = _extend_xr_method(xr.Dataset.cumsum, see_also="sum")  # type: ignore[attr-defined]
+    sum = _extend_xr_method(xr.Dataset.sum, see_also="cumsum")  # type: ignore[attr-defined]
 
     def _group_names(
         self,
