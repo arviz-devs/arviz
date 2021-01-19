@@ -25,7 +25,7 @@ class PyJAGSConverter:
         ] = None,
         coords=None,
         dims=None,
-        save_warmup: bool = None,
+        save_warmup: tp.Optional[bool] = None,
         warmup_iterations: int = 0,
     ) -> None:
         self.posterior: tp.Optional[tp.Mapping[str, np.ndarray]]
