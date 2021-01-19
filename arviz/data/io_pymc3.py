@@ -65,6 +65,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         dims: Optional[Dims] = None,
         model=None,
         save_warmup: Optional[bool] = None,
+        density_dist_obs: bool = True,
     ):
         import pymc3
         import theano
@@ -158,6 +159,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
             model_dims = {k: list(v) for k, v in self.model.RV_dims.items()}
             self.dims = {**model_dims, **self.dims}
 
+        self.density_dist_obs = density_dist_obs
         self.observations, self.multi_observations = self.find_observations()
 
     def find_observations(self) -> Tuple[Optional[Dict[str, Var]], Optional[Dict[str, Var]]]:
@@ -169,7 +171,7 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         for obs in self.model.observed_RVs:
             if hasattr(obs, "observations"):
                 observations[obs.name] = obs.observations
-            elif hasattr(obs, "data"):
+            elif hasattr(obs, "data") and self.density_dist_obs:
                 for key, val in obs.data.items():
                     multi_observations[key] = val.eval() if hasattr(val, "eval") else val
         return observations, multi_observations
@@ -418,7 +420,11 @@ class PyMC3Converter:  # pylint: disable=too-many-instance-attributes
         # The constant data vars must be either pm.Data (TensorSharedVariable) or pm.Deterministic
         constant_data_vars = {}  # type: Dict[str, Var]
         for var in self.model.deterministics:
-            ancestors = self.theano.tensor.gof.graph.ancestors(var.owner.inputs)
+            if hasattr(self.theano, "gof"):
+                ancestors_func = self.theano.gof.graph.ancestors  # pylint: disable=no-member
+            else:
+                ancestors_func = self.theano.graph.basic.ancestors  # pylint: disable=no-member
+            ancestors = ancestors_func(var.owner.inputs)
             # no dependency on a random variable
             if not any((isinstance(a, self.pymc3.model.PyMC3Variable) for a in ancestors)):
                 constant_data_vars[var.name] = var
@@ -500,6 +506,7 @@ def from_pymc3(
     dims: Optional[DimSpec] = None,
     model: Optional[Model] = None,
     save_warmup: Optional[bool] = None,
+    density_dist_obs: bool = True,
 ) -> InferenceData:
     """Convert pymc3 data into an InferenceData object.
 
@@ -532,6 +539,9 @@ def from_pymc3(
     save_warmup : bool, optional
         Save warmup iterations InferenceData object. If not defined, use default
         defined by the rcParams.
+    density_dist_obs : bool, default True
+        Store variables passed with ``observed`` arg to
+        :class:`pymc3:pymc.distributions.DensityDist` in the generated InferenceData.
 
     Returns
     -------
@@ -546,6 +556,7 @@ def from_pymc3(
         dims=dims,
         model=model,
         save_warmup=save_warmup,
+        density_dist_obs=density_dist_obs,
     ).to_inference_data()
 
 

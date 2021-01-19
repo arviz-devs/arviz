@@ -3,6 +3,7 @@ Posterior Predictive Check Cumulative Plot
 ==========================================
 
 _thumb: .6, .5
+_example_title: PPC Cumulative distribution plot
 """
 import matplotlib.pyplot as plt
 

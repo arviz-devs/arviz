@@ -3,6 +3,7 @@ Traceplot rank_vlines
 =====================
 
 _thumb: .1, .8
+_example_title: Trace plot with vertical lines for ranks
 """
 import matplotlib.pyplot as plt
 

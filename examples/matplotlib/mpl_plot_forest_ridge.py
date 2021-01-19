@@ -3,6 +3,7 @@ Ridgeplot
 =========
 
 _thumb: .8, .5
+_example_title: Forest plot with individual ridges
 """
 import matplotlib.pyplot as plt
 

@@ -3,6 +3,7 @@ Forest Plot
 ===========
 
 _thumb: .5, .8
+_example_title: Forest plot
 """
 import matplotlib.pyplot as plt
 

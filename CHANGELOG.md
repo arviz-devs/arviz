@@ -2,15 +2,26 @@
 
 ## v0.x.x Unreleased
 ### New features
+
+### Maintenance and fixes
+
+### Deprecation
+
+### Documentation
+
+## v0.11.0 (2021 Dec 17)
+### New features
 * Added `to_dataframe` method to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 * Added `__getitem__` magic to InferenceData ([1395](https://github.com/arviz-devs/arviz/pull/1395))
 * Added group argument to summary ([1408](https://github.com/arviz-devs/arviz/pull/1408))
 * Add `ref_line`, `bar`, `vlines` and `marker_vlines` kwargs to `plot_rank` ([1419](https://github.com/arviz-devs/arviz/pull/1419))
 * Add observed argument to (un)plot observed data in `plot_ppc` ([1422](https://github.com/arviz-devs/arviz/pull/1422))
 * Add support for named dims and coordinates with multivariate observations ([1429](https://github.com/arviz-devs/arviz/pull/1429))
-* Add support for discrete variables in rank plots ([1433](https://github.com/arviz-devs/arviz/pull/1433))
-* Add skipna argument to `plot_posterior` ([1432](https://github.com/arviz-devs/arviz/pull/1432))
+* Add support for discrete variables in rank plots ([1433](https://github.com/arviz-devs/arviz/pull/1433)) and
+  `loo_pit` ([1500](https://github.com/arviz-devs/arviz/pull/1500))
+* Add `skipna` argument to `plot_posterior` ([1432](https://github.com/arviz-devs/arviz/pull/1432))
 * Make stacking the default method to compute weights in `compare` ([1438](https://github.com/arviz-devs/arviz/pull/1438))
+* Add `copy()` method to `InferenceData` class. ([1501](https://github.com/arviz-devs/arviz/pull/1501)).
 
 
 ### Maintenance and fixes
@@ -32,6 +43,11 @@
 * Switch to `compact=True` by default in our plots ([1468](https://github.com/arviz-devs/arviz/issues/1468))
 * `plot_elpd`, avoid modifying the input dict ([1477](https://github.com/arviz-devs/arviz/issues/1477))
 * Do not plot divergences in `plot_trace` when `kind=rank_vlines` or `kind=rank_bars` ([1476](https://github.com/arviz-devs/arviz/issues/1476))
+* Allow ignoring `observed` argument of `pymc3.DensityDist` in `from_pymc3` ([1495](https://github.com/arviz-devs/arviz/pull/1495))
+* Make `from_pymc3` compatible with theano-pymc 1.1.0 ([1495](https://github.com/arviz-devs/arviz/pull/1495))
+* Improve typing hints ([1491](https://github.com/arviz-devs/arviz/pull/1491), ([1492](https://github.com/arviz-devs/arviz/pull/1492),
+  ([1493](https://github.com/arviz-devs/arviz/pull/1493), ([1494](https://github.com/arviz-devs/arviz/pull/1494) and
+  ([1497](https://github.com/arviz-devs/arviz/pull/1497))
 
 
 ### Deprecation
@@ -43,6 +59,9 @@
   for markdown/notebook parsing in docs ([1406](https://github.com/arviz-devs/arviz/pull/1406))
 * Incorporated `input_core_dims` in `hdi` and `plot_hdi` docstrings ([1410](https://github.com/arviz-devs/arviz/pull/1410))
 * Add documentation pages about experimental `SamplingWrapper`s usage ([1373](https://github.com/arviz-devs/arviz/pull/1373))
+* Show example titles in gallery page ([1484](https://github.com/arviz-devs/arviz/pull/1484))
+* Add `sample_stats` naming convention to the InferenceData schema ([1063](https://github.com/arviz-devs/arviz/pull/1063))
+* Extend api documentation about `InferenceData` methods ([1338](https://github.com/arviz-devs/arviz/pull/1338))
 
 ### Experimental
 * Modified `SamplingWrapper` base API ([1373](https://github.com/arviz-devs/arviz/pull/1373))

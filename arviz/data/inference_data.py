@@ -8,6 +8,20 @@ from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
 from html import escape
+import sys
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import netCDF4 as nc
 import numpy as np
@@ -17,12 +31,23 @@ from ..rcparams import rcParams
 from ..utils import HtmlTemplate, _subset_list, either_dict_or_kwargs
 from .base import _extend_xr_method, _make_json_serializable, dict_to_dataset
 
+if sys.version_info[:2] >= (3, 9):
+    # As of 3.9, collections.abc types support generic parameters themselves.
+    from collections.abc import ItemsView, ValuesView
+else:
+    # These typing imports are deprecated in 3.9, and moved to collections.abc instead.
+    from typing import ItemsView, ValuesView
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
 try:
     import ujson as json
 except ImportError:
     # mypy struggles with conditional imports expressed as catching ImportError:
     # https://github.com/python/mypy/issues/1153
     import json  # type: ignore
+
 
 SUPPORTED_GROUPS = [
     "posterior",
@@ -50,8 +75,10 @@ SUPPORTED_GROUPS_WARMUP = [
 
 SUPPORTED_GROUPS_ALL = SUPPORTED_GROUPS + SUPPORTED_GROUPS_WARMUP
 
+InferenceDataT = TypeVar("InferenceDataT", bound="InferenceData")
 
-class InferenceData:
+
+class InferenceData(Mapping[str, xr.Dataset]):
     """Container for inference data storage using xarray.
 
     For a detailed introduction to ``InferenceData`` objects and their usage, see
@@ -59,7 +86,9 @@ class InferenceData:
     on ``InferenceData`` methods and their low level implementation.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self, **kwargs: Union[xr.Dataset, List[xr.Dataset], Tuple[xr.Dataset, xr.Dataset]]
+    ) -> None:
         """Initialize InferenceData object from keyword xarray datasets.
 
         Parameters
@@ -100,8 +129,8 @@ class InferenceData:
             In [1]: idata.posterior
 
         """
-        self._groups = []
-        self._groups_warmup = []
+        self._groups: List[str] = []
+        self._groups_warmup: List[str] = []
         save_warmup = kwargs.pop("save_warmup", False)
         key_list = [key for key in SUPPORTED_GROUPS_ALL if key in kwargs]
         for key in kwargs:
@@ -116,7 +145,7 @@ class InferenceData:
             if dataset is None:
                 continue
             elif isinstance(dataset, (list, tuple)):
-                dataset, dataset_warmup = kwargs[key]
+                dataset, dataset_warmup = dataset
             elif not isinstance(dataset, xr.Dataset):
                 raise ValueError(
                     "Arguments to InferenceData must be xarray Datasets "
@@ -136,7 +165,7 @@ class InferenceData:
                     setattr(self, key, dataset_warmup)
                     self._groups_warmup.append(key)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Make string representation of InferenceData object."""
         msg = "Inference data with groups:\n\t> {options}".format(
             options="\n\t> ".join(self._groups)
@@ -145,7 +174,7 @@ class InferenceData:
             msg += "\n\nWarmup iterations saved ({}*).".format(WARMUP_TAG)
         return msg
 
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         """Make html representation of InferenceData object."""
         try:
             from xarray.core.options import OPTIONS
@@ -175,7 +204,7 @@ class InferenceData:
             html_repr = f"<pre>{escape(repr(self))}</pre>"
         return html_repr
 
-    def __delattr__(self, group):
+    def __delattr__(self, group: str) -> None:
         """Delete a group from the InferenceData object."""
         if group in self._groups:
             self._groups.remove(group)
@@ -184,36 +213,103 @@ class InferenceData:
         object.__delattr__(self, group)
 
     @property
-    def _groups_all(self):
+    def _groups_all(self) -> List[str]:
         return self._groups + self._groups_warmup
 
-    def __iter__(self):
+    def __len__(self) -> int:
+        """Return the number of groups in this InferenceData object."""
+        return len(self._groups_all)
+
+    def __iter__(self) -> Iterator[str]:
         """Iterate over groups in InferenceData object."""
         for group in self._groups_all:
             yield group
 
-    def __getitem__(self, key):
+    def __contains__(self, key: object) -> bool:
+        """Return True if the named item is present, and False otherwise."""
+        return key in self._groups_all
+
+    def __getitem__(self, key: str) -> xr.Dataset:
         """Get item by key."""
         if key not in self._groups_all:
             raise KeyError(key)
         return getattr(self, key)
 
-    def groups(self):
+    def groups(self) -> List[str]:
         """Return all groups present in InferenceData object."""
         return self._groups_all
 
-    def values(self):
-        """Xarray Datasets present in InferenceData object."""
-        for group in self._groups_all:
-            yield getattr(self, group)
+    class InferenceDataValuesView(ValuesView[xr.Dataset]):
+        """ValuesView implementation for InferenceData, to allow it to implement Mapping."""
 
-    def items(self):
-        """Yield groups and corresponding datasets present in InferenceData object."""
-        for group in self._groups_all:
-            yield (group, getattr(self, group))
+        def __init__(self, parent: "InferenceData") -> None:
+            """Create a new InferenceDataValuesView from an InferenceData object."""
+            self.parent = parent
+
+        def __len__(self) -> int:
+            """Return the number of groups in the parent InferenceData."""
+            return len(self.parent._groups_all)
+
+        def __iter__(self) -> Iterator[xr.Dataset]:
+            """Iterate through the Xarray datasets present in the InferenceData object."""
+            parent = self.parent
+            for group in parent._groups_all:
+                yield getattr(parent, group)
+
+        def __contains__(self, key: object) -> bool:
+            """Return True if the given Xarray dataset is one of the values, and False otherwise."""
+            if not isinstance(key, xr.Dataset):
+                return False
+
+            for dataset in self:
+                if dataset.equals(key):
+                    return True
+
+            return False
+
+    def values(self) -> "InferenceData.InferenceDataValuesView":
+        """Return a view over the Xarray Datasets present in the InferenceData object."""
+        return InferenceData.InferenceDataValuesView(self)
+
+    class InferenceDataItemsView(ItemsView[str, xr.Dataset]):
+        """ItemsView implementation for InferenceData, to allow it to implement Mapping."""
+
+        def __init__(self, parent: "InferenceData") -> None:
+            """Create a new InferenceDataItemsView from an InferenceData object."""
+            self.parent = parent
+
+        def __len__(self) -> int:
+            """Return the number of groups in the parent InferenceData."""
+            return len(self.parent._groups_all)
+
+        def __iter__(self) -> Iterator[Tuple[str, xr.Dataset]]:
+            """Iterate through the groups and corresponding Xarray datasets in the InferenceData."""
+            parent = self.parent
+            for group in parent._groups_all:
+                yield group, getattr(parent, group)
+
+        def __contains__(self, key: object) -> bool:
+            """Return True if the (group, dataset) tuple is present, and False otherwise."""
+            parent = self.parent
+            if not isinstance(key, tuple) or len(key) != 2:
+                return False
+
+            group, dataset = key
+            if group not in parent._groups_all:
+                return False
+
+            if not isinstance(dataset, xr.Dataset):
+                return False
+
+            existing_dataset = getattr(parent, group)
+            return existing_dataset.equals(dataset)
+
+    def items(self) -> "InferenceData.InferenceDataItemsView":
+        """Return a view over the groups and datasets present in the InferenceData object."""
+        return InferenceData.InferenceDataItemsView(self)
 
     @staticmethod
-    def from_netcdf(filename):
+    def from_netcdf(filename: str) -> "InferenceData":
         """Initialize object from a netcdf file.
 
         Expects that the file will have groups, each of which can be loaded by xarray.
@@ -242,7 +338,9 @@ class InferenceData:
                     groups[group] = data
         return InferenceData(**groups)
 
-    def to_netcdf(self, filename, compress=True, groups=None):
+    def to_netcdf(
+        self, filename: str, compress: bool = True, groups: Optional[List[str]] = None
+    ) -> str:
         """Write InferenceData to file using netcdf4.
 
         Parameters
@@ -491,18 +589,18 @@ class InferenceData:
             (dfs,) = dfs.values()
         return dfs
 
-    def __add__(self, other):
+    def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
         return concat(self, other, copy=True, inplace=False)
 
     def sel(
-        self,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        chain_prior=None,
-        **kwargs,
-    ):
+        self: InferenceDataT,
+        groups: Optional[Union[str, List[str]]] = None,
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
+        inplace: bool = False,
+        chain_prior: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> Optional[InferenceDataT]:
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.sel(key=item)
@@ -560,6 +658,11 @@ class InferenceData:
                ...: print(idata_subset.posterior_predictive.coords)
                ...: print(idata_subset.observed_data.coords)
 
+        See Also
+        --------
+        xarray.Dataset.sel : Returns a new dataset with each array indexed by tick labels along
+            the specified dimension(s).
+        isel : Returns a new dataset with each array indexed along the specified dimension(s).
         """
         if chain_prior is not None:
             warnings.warn(
@@ -569,10 +672,10 @@ class InferenceData:
             )
         else:
             chain_prior = False
-        groups = self._group_names(groups, filter_groups)
+        group_names = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
-        for group in groups:
+        for group in group_names:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             if not chain_prior and "prior" in group:
@@ -585,12 +688,12 @@ class InferenceData:
             return out
 
     def isel(
-        self,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        **kwargs,
-    ):
+        self: InferenceDataT,
+        groups: Optional[Union[str, List[str]]] = None,
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
+        inplace: bool = False,
+        **kwargs: Any,
+    ) -> Optional[InferenceDataT]:
         """Perform an xarray selection on all groups.
 
         Loops groups to perform Dataset.isel(key=item)
@@ -622,11 +725,40 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in-place and return `None`
 
+        Examples
+        --------
+        Use ``isel`` to discard one chain of the InferenceData object. We first check the
+        dimensions of the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("centered_eight")
+               ...: del idata.prior  # prior group only has 1 chain currently
+               ...: print(idata.posterior.coords)
+               ...: print(idata.posterior_predictive.coords)
+               ...: print(idata.observed_data.coords)
+
+        In order to remove the third chain:
+
+        .. ipython::
+
+            In [1]: idata_subset = idata.isel(chain=[0, 1, 3])
+               ...: print(idata_subset.posterior.coords)
+               ...: print(idata_subset.posterior_predictive.coords)
+               ...: print(idata_subset.observed_data.coords)
+
+        See Also
+        --------
+        xarray.Dataset.isel : Returns a new dataset with each array indexed along the specified
+            dimension(s).
+        sel : Returns a new dataset with each array indexed by tick labels along the specified
+            dimension(s).
         """
-        groups = self._group_names(groups, filter_groups)
+        group_names = self._group_names(groups, filter_groups)
 
         out = self if inplace else deepcopy(self)
-        for group in groups:
+        for group in group_names:
             dataset = getattr(self, group)
             valid_keys = set(kwargs.keys()).intersection(dataset.dims)
             dataset = dataset.isel(**{key: kwargs[key] for key in valid_keys})
@@ -677,6 +809,57 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in-place and return `None`
 
+        Examples
+        --------
+        Use ``stack`` to stack any number of existing dimensions into a single new dimension.
+        We first check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: idata
+
+        In order to stack two dimensions ``chain`` and ``draw`` to ``sample``, we can use:
+
+        .. ipython::
+
+            In [1]: idata.stack(sample=["chain", "draw"], inplace=True)
+               ...: idata
+
+        We can also take the example of custom InferenceData object and perform stacking. We first
+        check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: datadict = {
+               ...:     "a": np.random.randn(100),
+               ...:     "b": np.random.randn(1, 100, 10),
+               ...:     "c": np.random.randn(1, 100, 3, 4),
+               ...: }
+               ...: coords = {
+               ...:     "c1": np.arange(3),
+               ...:     "c99": np.arange(4),
+               ...:     "b1": np.arange(10),
+               ...: }
+               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
+               ...: idata = az.from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
+               ...: idata.posterior
+
+        In order to stack two dimensions ``c1`` and ``c99`` to ``z``, we can use:
+
+        .. ipython::
+
+            In [1]: idata.stack(z=["c1", "c99"], inplace=True)
+               ...: idata.posterior
+
+        See Also
+        --------
+        xarray.Dataset.stack : Stack any number of existing dimensions into a single new dimension.
+        unstack : Perform an xarray unstacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -727,6 +910,43 @@ class InferenceData:
             A new InferenceData object by default.
             When `inplace==True` perform selection in place and return `None`
 
+        Examples
+        --------
+        Use ``unstack`` to unstack existing dimensions corresponding to MultiIndexes into
+        multiple new dimensions. We first stack two dimensions ``c1`` and ``c99`` to ``z``:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: datadict = {
+               ...:     "a": np.random.randn(100),
+               ...:     "b": np.random.randn(1, 100, 10),
+               ...:     "c": np.random.randn(1, 100, 3, 4),
+               ...: }
+               ...: coords = {
+               ...:     "c1": np.arange(3),
+               ...:     "c99": np.arange(4),
+               ...:     "b1": np.arange(10),
+               ...: }
+               ...: dims = {"c": ["c1", "c99"], "b": ["b1"]}
+               ...: idata = az.from_dict(
+               ...:     posterior=datadict, posterior_predictive=datadict, coords=coords, dims=dims
+               ...: )
+               ...: idata.stack(z=["c1", "c99"], inplace=True)
+               ...: idata
+
+        In order to unstack the dimension ``z``, we use:
+
+        .. ipython::
+
+            In [1]: idata.unstack(inplace=True)
+               ...: idata
+
+        See Also
+        --------
+        xarray.Dataset.unstack : Unstack existing dimensions corresponding to MultiIndexes into
+            multiple new dimensions.
+        stack : Perform an xarray stacking on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if isinstance(dim, str):
@@ -769,13 +989,36 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
-
         Returns
         -------
         InferenceData
             A new InferenceData object by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename`` to renaming of variable and dimensions on all groups of the InferenceData
+        object. We first check the original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: idata
+
+        In order to rename the dimensions and variable, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename({"team": "team_new", "match":"match_new"}, inplace=True)
+               ...: idata
+
+        See Also
+        --------
+        xarray.Dataset.rename : Returns a new object with renamed variables and dimensions.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups of
+            an InferenceData object.
+        rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
@@ -826,6 +1069,33 @@ class InferenceData:
             A new InferenceData object with renamed variables including coordinates by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename_vars`` to renaming of variable and coordinates on all groups of the
+        InferenceData object. We first check the data variables of original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: print(list(idata.posterior.data_vars))
+               ...: print(list(idata.prior.data_vars))
+
+        In order to rename the data variables, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename_vars({"home": "home_new"}, inplace=True)
+               ...: print(list(idata.posterior.data_vars))
+               ...: print(list(idata.prior.data_vars))
+
+        See Also
+        --------
+        xarray.Dataset.rename_vars : Returns a new object with renamed variables including
+            coordinates.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
+        rename_dims : Perform xarray renaming of dimensions on all groups of InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
 
@@ -866,13 +1136,39 @@ class InferenceData:
             If ``True``, modify the InferenceData object inplace,
             otherwise, return the modified copy.
 
-
         Returns
         -------
         InferenceData
             A new InferenceData object with renamed dimension by default.
             When `inplace==True` perform renaming in-place and return `None`
 
+        Examples
+        --------
+        Use ``rename_dims`` to renaming of dimensions on all groups of the InferenceData
+        object. We first check the dimensions of original object:
+
+        .. ipython::
+
+            In [1]: import arviz as az
+               ...: idata = az.load_arviz_data("rugby")
+               ...: print(list(idata.posterior.dims))
+               ...: print(list(idata.prior.dims))
+
+        In order to rename the dimensions, we use:
+
+        .. ipython::
+
+            In [1]: idata.rename_dims({"team": "team_new"}, inplace=True)
+               ...: print(list(idata.posterior.dims))
+               ...: print(list(idata.prior.dims))
+
+        See Also
+        --------
+        xarray.Dataset.rename_dims : Returns a new object with renamed dimensions only.
+        rename : Perform xarray renaming of variable and dimensions on all groups of
+            an InferenceData object.
+        rename_vars : Perform xarray renaming of variable or coordinate names on all groups
+            of an InferenceData object.
         """
         groups = self._group_names(groups, filter_groups)
         if "chain" in name_dict.keys() or "draw" in name_dict.keys():
@@ -988,11 +1284,11 @@ class InferenceData:
             else:
                 self._groups.append(group)
 
-    set_index = _extend_xr_method(xr.Dataset.set_index)
+    set_index = _extend_xr_method(xr.Dataset.set_index, see_also="reset_index")
     get_index = _extend_xr_method(xr.Dataset.get_index)
-    reset_index = _extend_xr_method(xr.Dataset.reset_index)
-    set_coords = _extend_xr_method(xr.Dataset.set_coords)
-    reset_coords = _extend_xr_method(xr.Dataset.reset_coords)
+    reset_index = _extend_xr_method(xr.Dataset.reset_index, see_also="set_index")
+    set_coords = _extend_xr_method(xr.Dataset.set_coords, see_also="reset_coords")
+    reset_coords = _extend_xr_method(xr.Dataset.reset_coords, see_also="set_coords")
     assign = _extend_xr_method(xr.Dataset.assign)
     assign_coords = _extend_xr_method(xr.Dataset.assign_coords)
     sortby = _extend_xr_method(xr.Dataset.sortby)
@@ -1002,15 +1298,19 @@ class InferenceData:
     compute = _extend_xr_method(xr.Dataset.compute)
     persist = _extend_xr_method(xr.Dataset.persist)
 
-    mean = _extend_xr_method(xr.Dataset.mean)
-    median = _extend_xr_method(xr.Dataset.median)
-    min = _extend_xr_method(xr.Dataset.min)
-    max = _extend_xr_method(xr.Dataset.max)
-    cumsum = _extend_xr_method(xr.Dataset.cumsum)
-    sum = _extend_xr_method(xr.Dataset.sum)
+    mean = _extend_xr_method(xr.Dataset.mean, see_also="median")
+    median = _extend_xr_method(xr.Dataset.median, see_also="mean")
+    min = _extend_xr_method(xr.Dataset.min, see_also=["max", "sum"])
+    max = _extend_xr_method(xr.Dataset.max, see_also=["min", "sum"])
+    cumsum = _extend_xr_method(xr.Dataset.cumsum, see_also="sum")
+    sum = _extend_xr_method(xr.Dataset.sum, see_also="cumsum")
     quantile = _extend_xr_method(xr.Dataset.quantile)
 
-    def _group_names(self, groups, filter_groups=None):
+    def _group_names(
+        self,
+        groups: Optional[Union[str, List[str]]],
+        filter_groups: Optional["Literal['like', 'regex']"] = None,
+    ) -> List[str]:
         """Handle expansion of group names input across arviz.
 
         Parameters
@@ -1210,6 +1510,73 @@ class InferenceData:
             return None
         else:
             return out
+
+    def copy(self) -> "InferenceData":
+        """Return a fresh copy of the ``InferenceData`` object."""
+        return deepcopy(self)
+
+
+@overload
+def concat(
+    *args,
+    dim: Optional[str] = None,
+    copy: bool = True,
+    inplace: "Literal[True]",
+    reset_dim: bool = True,
+) -> None:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    *args,
+    dim: Optional[str] = None,
+    copy: bool = True,
+    inplace: "Literal[False]",
+    reset_dim: bool = True,
+) -> InferenceData:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: "Literal[False]",
+    reset_dim: bool = True,
+) -> InferenceData:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: "Literal[True]",
+    reset_dim: bool = True,
+) -> None:
+    """Overload definition, see below for docstring."""
+    ...
+
+
+@overload
+def concat(
+    ids: Iterable[InferenceData],
+    dim: Optional[str] = None,
+    *,
+    copy: bool = True,
+    inplace: bool = False,
+    reset_dim: bool = True,
+) -> Optional[InferenceData]:
+    """Overload definition, see below for docstring."""
+    ...
 
 
 # pylint: disable=protected-access, inconsistent-return-statements

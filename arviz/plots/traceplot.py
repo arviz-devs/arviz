@@ -20,7 +20,7 @@ def plot_trace(
     rug: bool = False,
     lines: Optional[List[Tuple[str, CoordSpec, Any]]] = None,
     circ_var_names: Optional[List[str]] = None,
-    circ_var_units: bool = "radians",
+    circ_var_units: str = "radians",
     compact: bool = True,
     compact_prop: Optional[Union[str, Mapping[str, Any]]] = None,
     combined: bool = False,
@@ -160,7 +160,7 @@ def plot_trace(
         try:
             divergence_data = convert_to_dataset(data, group="sample_stats").diverging
         except (ValueError, AttributeError):  # No sample_stats, or no `.diverging`
-            divergences = False
+            divergences = None
 
     if coords is None:
         coords = {}
