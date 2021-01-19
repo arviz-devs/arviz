@@ -9,7 +9,7 @@ import xarray
 from arviz.data.inference_data import InferenceData
 
 from ..rcparams import rcParams
-from .base import dict_to_dataset, requires
+from .base import dict_to_dataset
 
 
 class PyJAGSConverter:
@@ -20,14 +20,16 @@ class PyJAGSConverter:
         *,
         posterior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
         prior: tp.Optional[tp.Mapping[str, np.ndarray]] = None,
-        log_likelihood: tp.Optional[tp.Mapping[str, str]] = None,
+        log_likelihood: tp.Optional[
+            tp.Union[str, tp.List[str], tp.Tuple[str, ...], tp.Mapping[str, str]]
+        ] = None,
         coords=None,
         dims=None,
         save_warmup: bool = None,
-        warmup_iterations: int = 0
-    ):
+        warmup_iterations: int = 0,
+    ) -> None:
         self.posterior: tp.Optional[tp.Mapping[str, np.ndarray]]
-        self.log_likelihood: tp.Optional[tp.Dict[str, str]]
+        self.log_likelihood: tp.Optional[tp.Dict[str, np.ndarray]]
         if log_likelihood is not None and posterior is not None:
             posterior_copy = dict(posterior)  # create a shallow copy of the dictionary
 
@@ -73,30 +75,24 @@ class PyJAGSConverter:
             ),
         )
 
-    @requires("posterior")
-    def posterior_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
+    def posterior_to_xarray(self) -> tp.Optional[tp.Tuple[xarray.Dataset, xarray.Dataset]]:
         """Extract posterior samples from fit."""
         if self.posterior is None:
-            # This should be impossible because of @requires above.
-            raise AssertionError("self.posterior was unexpectedly None. This is a bug.")
+            return None
 
         return self._pyjags_samples_to_xarray(self.posterior)
 
-    @requires("prior")
-    def prior_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
+    def prior_to_xarray(self) -> tp.Optional[tp.Tuple[xarray.Dataset, xarray.Dataset]]:
         """Extract posterior samples from fit."""
         if self.prior is None:
-            # This should be impossible because of @requires above.
-            raise AssertionError("self.prior was unexpectedly None. This is a bug.")
+            return None
 
         return self._pyjags_samples_to_xarray(self.prior)
 
-    @requires("log_likelihood")
-    def log_likelihood_to_xarray(self) -> tp.Tuple[xarray.Dataset, xarray.Dataset]:
+    def log_likelihood_to_xarray(self) -> tp.Optional[tp.Tuple[xarray.Dataset, xarray.Dataset]]:
         """Extract log likelihood samples from fit."""
         if self.log_likelihood is None:
-            # This should be impossible because of @requires above.
-            raise AssertionError("self.log_likelihood was unexpectedly None. This is a bug.")
+            return None
 
         return self._pyjags_samples_to_xarray(self.log_likelihood)
 
