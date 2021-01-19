@@ -172,19 +172,21 @@ def plot_trace(
     else:
         divergence_data = False
 
-    data = get_coords(convert_to_dataset(data, group="posterior"), coords)
+    coords_data = get_coords(convert_to_dataset(data, group="posterior"), coords)
 
     if transform is not None:
-        data = transform(data)
+        coords_data = transform(coords_data)
 
-    var_names = _var_names(var_names, data, filter_vars)
+    var_names = _var_names(var_names, coords_data, filter_vars)
 
     if compact:
-        skip_dims = set(data.dims) - {"chain", "draw"}
+        skip_dims = set(coords_data.dims) - {"chain", "draw"}
     else:
         skip_dims = set()
 
-    plotters = list(xarray_var_iter(data, var_names=var_names, combined=True, skip_dims=skip_dims))
+    plotters = list(
+        xarray_var_iter(coords_data, var_names=var_names, combined=True, skip_dims=skip_dims)
+    )
     max_plots = rcParams["plot.max_subplots"]
     max_plots = len(plotters) if max_plots is None else max(max_plots // 2, 1)
     if len(plotters) > max_plots:
@@ -199,7 +201,7 @@ def plot_trace(
     # TODO: Check if this can be further simplified
     trace_plot_args = dict(
         # User Kwargs
-        data=data,
+        data=coords_data,
         var_names=var_names,
         # coords = coords,
         divergences=divergences,
