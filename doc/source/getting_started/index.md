@@ -5,5 +5,6 @@
 ```{toctree}
 Introduction
 XarrayforArviZ
-InferenceDataCookbook
+InferenceDataIO
+InferenceDataCookBook
 ```
