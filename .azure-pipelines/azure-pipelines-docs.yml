@@ -55,7 +55,11 @@ jobs:
       python -m pip install .
       conda install -y geckodriver firefox --channel conda-forge
     displayName: 'Install requirements'
-
+    
+  - script: |
+      python -m pip freeze
+    displayName: 'Print packages'
+    
   - script: |
       python -msphinx -M clean doc/source doc/build
       sphinx-build doc/source doc/build -b html
