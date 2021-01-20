@@ -67,7 +67,7 @@ def plot_trace(
     figsize: tuple of (float, float), optional
         If None, size is (12, variables * 2)
     rug: bool, optional
-        If True adds a rugplot. Defaults to False. Ignored for 2D KDE.
+        If True adds a rugplot of samples. Defaults to False. Ignored for 2D KDE.
         Only affects continuous variables.
     lines: list of tuple of (str, dict, array_like), optional
         List of (var_name, {'coord': selection}, [line, positions]) to be overplotted as
@@ -92,6 +92,10 @@ def plot_trace(
         Extra keyword arguments passed to `arviz.plot_dist`. Only affects continuous variables.
     trace_kwargs: dict, optional
         Extra keyword arguments passed to `plt.plot`
+    rank_kwargs : dict, optional
+        Extra keyword arguments passed to `arviz.plot_rank`
+    axes: axes, optional
+        Matplotlib axes or bokeh figures.
     backend: {"matplotlib", "bokeh"}, optional
         Select plotting backend.
     backend_config: dict, optional
