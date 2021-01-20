@@ -5,6 +5,6 @@ pydocstyle
 Sphinx>=1.8.3
 pydata_sphinx_theme
 selenium
-myst-parser
+myst-parser==0.13.1
 myst-nb
 sphinx-notfound-page
