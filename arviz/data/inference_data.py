@@ -3,7 +3,7 @@
 import uuid
 import warnings
 from collections import OrderedDict, defaultdict
-from collections.abc import Sequence, MutableMapping
+from collections.abc import Sequence
 from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
@@ -610,12 +610,13 @@ class InferenceData(Mapping[str, xr.Dataset]):
             A zarr hierarchy group containing the InferenceData.
         """
         import zarr
+        from collection.abc import MutableMapping
 
         # Check store type and create store if necessary
         if store is None:
             store = zarr.storage.MemoryStore()
         elif type(store) == str:
-            store = zarr.storage.DirectoryStore(store=store)
+            store = zarr.storage.DirectoryStore(path=store)
         elif type(store) != MutableMapping:
             raise TypeError(f"No valid store found: {store}")
 
@@ -635,6 +636,45 @@ class InferenceData(Mapping[str, xr.Dataset]):
             getattr(self, group).to_zarr(store=store, group=group)
 
         return zarr.open(store)  # Open store to get overarching group
+
+    @staticmethod
+    def from_zarr(store) -> "InferenceData":
+        """Initialize object from a zarr store .
+
+        Expects that the zarr store will have groups, each of which can be loaded by xarray.
+        By default, the datasets of the InferenceData object will be lazily loaded instead
+        of being loaded into memory. This
+        behaviour is regulated by the value of ``az.rcParams["data.load"]``.
+
+        Parameters
+        ----------
+        store: zarr.storage i.e MutableMapping or str.
+            Zarr storage class or path to desired Store.
+
+        Returns
+        -------
+        InferenceData object
+        """
+        import zarr
+        from collection.abc import MutableMapping
+
+        # Check store type and create store if necessary
+        if store is None:
+            store = zarr.storage.MemoryStore()
+        elif type(store) == str:
+            store = zarr.storage.DirectoryStore(path=store)
+        elif type(store) != MutableMapping:
+            raise TypeError(f"No valid store found: {store}")
+
+        g = zarr.open(store, mode="r")
+
+        for group in g.groups():
+            with xr.open_zarr(store, group=group) as data:
+                if rcParams["data.load"] == "eager":
+                    groups[group] = data.load()
+                else:
+                    groups[group] = data
+        return InferenceData(**groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
