@@ -648,7 +648,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
 
         Parameters
         ----------
-        store: zarr.storage i.e MutableMapping or str.
+        store: zarr.storage i.e MutableMapping or zarr.hierarchy.Group or str.
             Zarr storage class or path to desired Store.
 
         Returns
@@ -663,6 +663,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
             store = zarr.storage.MemoryStore()
         elif type(store) == str:
             store = zarr.storage.DirectoryStore(path=store)
+        elif type(store) == zarr.hierarchy.Group:
+            store = store.store
         elif type(store) != MutableMapping:
             raise TypeError(f"No valid store found: {store}")
 
