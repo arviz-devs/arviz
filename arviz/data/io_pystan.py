@@ -868,7 +868,7 @@ def from_pystan(
     """Convert PyStan data into an InferenceData object.
 
     For a usage example read the
-    :ref:`Cookbook section on from_pystan <cookbook>`
+    :ref:`Creating InferenceData section on from_pystan <creating_InferenceData>`
 
     Parameters
     ----------

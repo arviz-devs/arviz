@@ -801,7 +801,7 @@ def from_cmdstan(
     """Convert CmdStan data into an InferenceData object.
 
     For a usage example read the
-    :ref:`Cookbook section on from_cmdstan <cookbook>`
+    :ref:`Creating InferenceData section on from_cmdstan <creating_InferenceData>`
 
     Parameters
     ----------
