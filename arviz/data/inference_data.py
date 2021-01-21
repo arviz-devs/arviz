@@ -668,14 +668,14 @@ class InferenceData(Mapping[str, xr.Dataset]):
         elif type(store) != MutableMapping:
             raise TypeError(f"No valid store found: {store}")
 
+        groups = {}
         g = zarr.open(store, mode="r")
-
         for key_group, _ in g.groups():
-            with xr.open_zarr(store, group=group) as data:
+            with xr.open_zarr(store, group=key_group) as data:
                 if rcParams["data.load"] == "eager":
-                    groups[group] = data.load()
+                    groups[key_group] = data.load()
                 else:
-                    groups[group] = data
+                    groups[key_group] = data
         return InferenceData(**groups)
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
