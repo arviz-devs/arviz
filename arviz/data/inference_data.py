@@ -610,7 +610,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             A zarr hierarchy group containing the InferenceData.
         """
         import zarr
-        from collection.abc import MutableMapping
+        from collections.abc import MutableMapping
 
         # Check store type and create store if necessary
         if store is None:
@@ -656,7 +656,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
         InferenceData object
         """
         import zarr
-        from collection.abc import MutableMapping
+        from collections.abc import MutableMapping
 
         # Check store type and create store if necessary
         if store is None:
