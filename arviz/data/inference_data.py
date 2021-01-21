@@ -3,7 +3,7 @@
 import uuid
 import warnings
 from collections import OrderedDict, defaultdict
-from collections.abc import Sequence
+from collections.abc import Sequence, MutableMapping
 from copy import copy as ccopy
 from copy import deepcopy
 from datetime import datetime
@@ -195,8 +195,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         for group in self._groups_all
                     ]
                 )
-                formatted_html_template = (  # pylint: disable=possibly-unused-variable
-                    HtmlTemplate.html_template.format(elements)
+                formatted_html_template = HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                    elements
                 )
                 css_template = HtmlTemplate.css_template  # pylint: disable=possibly-unused-variable
                 html_repr = "%(formatted_html_template)s%(css_template)s" % locals()
@@ -419,10 +419,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
                             dims.append(coord_name)
                             ret["coords"][coord_name] = coord_values.values
 
-                    if group in (
-                        "predictions",
-                        "predictions_constant_data",
-                    ):
+                    if group in ("predictions", "predictions_constant_data",):
                         dims_key = "pred_dims"
                     else:
                         dims_key = "dims"
@@ -588,6 +585,56 @@ class InferenceData(Mapping[str, xr.Dataset]):
         else:
             (dfs,) = dfs.values()
         return dfs
+
+    def to_zarr(self, store=None, overwrite=False):
+        """
+        Convert InferenceData to a :class:`zarr.hierarchy.group` using the same groups names
+        as in InferenceData.
+
+        Data groups ("observed_data", "constant_data", "predictions_constant_data") are
+        skipped.
+
+        Raises TypeError if no valid store is found.
+
+        Parameters
+        ----------
+        store: zarr.storage i.e MutableMapping or str, optional
+            Zarr storage class or path to desired DirectoryStore.
+
+        overwrite: bool, optional,
+            If True, delete any pre-existing data in store at path before creating the groups.
+
+        Returns
+        -------
+        zarr.hierarchy.group
+            A zarr hierarchy group containing the InferenceData.
+        """
+        import zarr
+
+        # Check store type and create store if necessary
+        if store is None:
+            store = zarr.storage.MemoryStore()
+        elif type(store) == str:
+            store = zarr.storage.DirectoryStore(store=store)
+        elif type(store) != MutableMapping:
+            raise TypeError(f"No valid store found: {store}")
+
+        groups = self.groups()
+        if "observed_data" in groups:
+            groups.remove("observed_data")
+        if "constant_data" in groups:
+            groups.remove("constant_data")
+        if "predictions_constant_data" in groups:
+            groups.remove("predictions_constant_data")
+
+        if len(groups) == 0:
+            raise TypeError("No valid groups found!")
+
+        for group in groups:
+            # Create zarr group in store with same group name
+            getattr(self, group).to_zarr(store=store, group=group)
+
+        return zarr.open(store)  # Open store to get overarching group
 
     def __add__(self, other: "InferenceData") -> "InferenceData":
         """Concatenate two InferenceData objects."""
@@ -769,12 +816,7 @@ class InferenceData(Mapping[str, xr.Dataset]):
             return out
 
     def stack(
-        self,
-        dimensions=None,
-        groups=None,
-        filter_groups=None,
-        inplace=False,
-        **kwargs,
+        self, dimensions=None, groups=None, filter_groups=None, inplace=False, **kwargs,
     ):
         """Perform an xarray stacking on all groups.
 
