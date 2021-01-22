@@ -197,8 +197,8 @@ class InferenceData(Mapping[str, xr.Dataset]):
                         for group in self._groups_all
                     ]
                 )
-                formatted_html_template = (
-                    HtmlTemplate.html_template.format(  # pylint: disable=possibly-unused-variable
+                formatted_html_template = (    # pylint: disable=possibly-unused-variable
+                    HtmlTemplate.html_template.format(
                         elements
                     )
                 )
